@@ -2,12 +2,12 @@
 
 ## How to Fill Out Feature User Stories
 
-**Template:** `@~/.claude/user-stories-template.md`
+**Template:** `@~/.agents/coding/templates/user-stories-template.md`
 
 **When user asks:** "Create user stories for issue #N" or "Create user stories for [feature]"
 
 **What you do:**
-1. Read `@~/.claude/user-stories-template.md`
+1. Read `@~/.agents/coding/templates/user-stories-template.md`
 2. Fill in feature name, issue number, status
 3. Create numbered stories (Story 1, Story 2, etc.)
 4. Add acceptance criteria with ✅/❌ checkboxes for tracking
@@ -148,7 +148,7 @@ After filling out story, mentally check:
 
 **Core principle:** User stories are instructions that LLMs read and follow. Apply LLM instruction design best practices.
 
-**See:** `@~/.claude/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
+**See:** `@~/.agents/coding/guides/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
 
 **When filling templates:**
 - Use specific, concrete language (not vague)

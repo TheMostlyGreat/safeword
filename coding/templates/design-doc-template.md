@@ -1,7 +1,7 @@
 # Design: [Feature Name]
 
-**Guide**: `@~/.claude/design-doc-guide.md` - Principles, structure guidelines, and avoiding bloat
-**Template**: `@~/.claude/design-doc-template.md`
+**Guide**: `@~/.agents/coding/guides/design-doc-guide.md` - Principles, structure guidelines, and avoiding bloat
+**Template**: `@~/.agents/coding/templates/design-doc-template.md`
 
 **Related**: User Stories: `[path]` | Test Definitions: `[path]`
 

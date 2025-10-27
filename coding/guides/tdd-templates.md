@@ -2,35 +2,35 @@
 
 Concrete templates for user stories and test definitions following TDD best practices.
 
-**LLM Instruction Design:** These templates create documentation that LLMs read and follow. For comprehensive framework on writing clear, actionable LLM-consumable documentation, see `@~/.claude/llm-instruction-design.md`.
+**LLM Instruction Design:** These templates create documentation that LLMs read and follow. For comprehensive framework on writing clear, actionable LLM-consumable documentation, see `@~/.agents/coding/guides/llm-instruction-design.md`.
 
 ---
 
 ## Fillable Template Files (When to Use Each)
 
-**User Stories** (`@~/.claude/user-stories-template.md`) - **For features/issues**
+**User Stories** (`@~/.agents/coding/templates/user-stories-template.md`) - **For features/issues**
 - Multiple related stories in one file
 - Status tracking (✅/❌ per story and AC)
 - Test file references and implementation notes
 - Completion % and phase tracking
 - Use for GitHub issues with multiple user stories
-- Guidance: `@~/.claude/user-story-guide.md`
+- Guidance: `@~/.agents/coding/guides/user-story-guide.md`
 
-**Test Definitions** (`@~/.claude/test-definitions-feature.md`) - **For feature test suites**
+**Test Definitions** (`@~/.agents/coding/templates/test-definitions-feature.md`) - **For feature test suites**
 - Organized by test suites and individual tests
 - Status tracking (✅ Passing / ⏭️ Skipped / ❌ Not Implemented / 🔴 Failing)
 - Detailed steps and expected outcomes
 - Coverage summary with percentages
 - Test execution commands
-- Guidance: `@~/.claude/test-definitions-guide.md`
+- Guidance: `@~/.agents/coding/guides/test-definitions-guide.md`
 
-**Design Doc** (`@~/.claude/design-doc-template.md`) - **For feature/system implementation**
+**Design Doc** (`@~/.agents/coding/templates/design-doc-template.md`) - **For feature/system implementation**
 - Implementation-focused (architecture, components, data model, user flow, component interaction)
 - Key technical decisions with rationale (includes "why")
 - Full [N] and [N+1] examples (matches user stories/test definitions pattern)
 - ~121 lines, optimized for LLM filling and consumption
 - No duplication (references user stories, test definitions)
-- Guidance: `@~/.claude/architecture-guide.md`
+- Guidance: `@~/.agents/coding/guides/architecture-guide.md`
 
 **Architecture Document** (no template) - **For project/package-wide architecture decisions**
 - One `ARCHITECTURE.md` per project or package (in monorepos)
@@ -38,7 +38,7 @@ Concrete templates for user stories and test definitions following TDD best prac
 - Living document (updated as architecture evolves)
 - Include version, status, table of contents
 - All architectural decisions in one place (not separate ADRs)
-- Guidance: `@~/.claude/architecture-guide.md`
+- Guidance: `@~/.agents/coding/guides/architecture-guide.md`
 
 **Example prompts:**
 - "Create user stories for issue #N" → Uses user stories template
@@ -46,7 +46,7 @@ Concrete templates for user stories and test definitions following TDD best prac
 - "Create a design doc for [feature]" → Uses design doc template (2-3 pages)
 - "Update the project architecture doc" → Adds to existing ARCHITECTURE.md
 
-**TDD Workflow:** See `@~/.claude/testing-methodology.md` for comprehensive RED → GREEN → REFACTOR workflow with latest best practices
+**TDD Workflow:** See `@~/.agents/coding/guides/testing-methodology.md` for comprehensive RED → GREEN → REFACTOR workflow with latest best practices
 
 ---
 

@@ -2,7 +2,7 @@
 
 Extract reusable knowledge from debugging sessions and implementation discoveries. Ensures insights compound across sessions.
 
-**LLM Instruction Design:** Learnings are documentation that LLMs read and follow. Apply best practices from `@~/.claude/llm-instruction-design.md` when writing learning files (concrete examples, explicit definitions, MECE principles).
+**LLM Instruction Design:** Learnings are documentation that LLMs read and follow. Apply best practices from `@~/.agents/coding/guides/llm-instruction-design.md` when writing learning files (concrete examples, explicit definitions, MECE principles).
 
 ---
 

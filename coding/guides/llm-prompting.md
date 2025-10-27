@@ -74,7 +74,7 @@ systemPrompt: `Rules + Character: ${dynamicState}`
 
 ## Part 2: Writing Instructions for LLMs
 
-**Comprehensive framework:** See @~/.claude/llm-instruction-design.md
+**Comprehensive framework:** See @~/.agents/coding/guides/llm-instruction-design.md
 
 **Quick summary:** When creating documentation that LLMs will read and follow (CLAUDE.md, testing guides, coding standards), apply 13 core principles:
 

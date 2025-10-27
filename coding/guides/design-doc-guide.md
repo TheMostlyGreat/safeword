@@ -2,7 +2,7 @@
 
 ## How to Fill Out Design Doc
 
-**Template:** `@~/.claude/design-doc-template.md`
+**Template:** `@~/.agents/coding/templates/design-doc-template.md`
 
 **When user asks:** "Create design doc for [feature]" or "Design [system/component]"
 
@@ -16,7 +16,7 @@
    - Reference both in the design doc
 
 2. **Read Template**
-   - Read `@~/.claude/design-doc-template.md`
+   - Read `@~/.agents/coding/templates/design-doc-template.md`
    - Use it as the structure for the design doc
 
 3. **Fill In Sections**
@@ -100,7 +100,7 @@
 - Principles and patterns for the whole project
 - Comprehensive (10+ pages)
 
-**Reference:** `@~/.claude/architecture-guide.md` for detailed comparison
+**Reference:** `@~/.agents/coding/guides/architecture-guide.md` for detailed comparison
 
 ---
 
@@ -136,4 +136,4 @@ Before saving, verify:
 
 **Important:** Design docs are instructions that LLMs read and follow.
 
-**See:** `@~/.claude/llm-instruction-design.md` for comprehensive framework on writing clear, actionable documentation that LLMs can reliably follow.
+**See:** `@~/.agents/coding/guides/llm-instruction-design.md` for comprehensive framework on writing clear, actionable documentation that LLMs can reliably follow.

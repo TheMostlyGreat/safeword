@@ -772,7 +772,7 @@ When user says **"yes"**, **"proceed"**, **"implement"**, or similar:
 
 **Test pyramid**: 70% unit, 20% integration, 10% e2e
 
-**For test writing**: See `@~/.claude/testing-methodology.md` for comprehensive TDD workflow.
+**For test writing**: See `@~/.agents/coding/guides/testing-methodology.md` for comprehensive TDD workflow.
 
 ---
 

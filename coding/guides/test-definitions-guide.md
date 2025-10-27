@@ -2,12 +2,12 @@
 
 ## How to Fill Out Feature Test Definitions
 
-**Template:** `@~/.claude/test-definitions-feature.md`
+**Template:** `@~/.agents/coding/templates/test-definitions-feature.md`
 
 **When user asks:** "Create test definitions for issue #N" or "Create test definitions for [feature]"
 
 **What you do:**
-1. Read `@~/.claude/test-definitions-feature.md`
+1. Read `@~/.agents/coding/templates/test-definitions-feature.md`
 2. Fill in feature name, issue number, test file path
 3. Organize tests into logical suites (e.g., "Layout Structure", "User Interactions", "State Management")
 4. Create numbered tests (Test 1.1, Test 1.2, etc.)
@@ -235,7 +235,7 @@ npm run test:e2e -- tests/feature-name.spec.ts --grep "specific test name"
 
 **Important:** Test definitions are instructions that LLMs read and follow. Apply best practices for clarity.
 
-**See:** `@~/.claude/llm-instruction-design.md` for comprehensive framework including:
+**See:** `@~/.agents/coding/guides/llm-instruction-design.md` for comprehensive framework including:
 - MECE decision trees (mutually exclusive, collectively exhaustive)
 - Explicit definitions (never assume LLMs know what you mean)
 - Concrete examples over abstract rules

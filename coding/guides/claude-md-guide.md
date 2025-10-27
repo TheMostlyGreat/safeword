@@ -155,7 +155,7 @@ See @README for project overview and @package.json for available npm commands.
 @docs/architecture.md
 
 ## Coding Standards
-@~/.claude/llm-prompting.md
+@~/.agents/coding/guides/llm-prompting.md
 
 ## Git Workflow
 Details in @docs/git-workflow.md
@@ -164,7 +164,7 @@ Details in @docs/git-workflow.md
 **Import features:**
 - **Relative paths:** `@docs/file.md` (relative to CLAUDE.md location)
 - **Absolute paths:** `@/path/to/file.md`
-- **Home directory:** `@~/.claude/file.md` (personal conventions across all projects)
+- **Home directory:** `@~/.agents/coding/guides/file.md` (personal conventions across all projects)
 - **Recursive imports:** Imported files can import others (max depth: 5 hops)
 - **Inline usage:** Can reference imports in text, not just standalone lines
 - **Code blocks:** Imports ignored inside `` `code spans` `` and code blocks
@@ -210,7 +210,7 @@ Brief description. Current status.
 
 **Critical:** CLAUDE.md files are instructions consumed by LLMs.
 
-**See:** `@~/.claude/llm-instruction-design.md` for 13 core principles for writing LLM-consumable documentation.
+**See:** `@~/.agents/coding/guides/llm-instruction-design.md` for 13 core principles for writing LLM-consumable documentation.
 
 ### Quality Checklist for CLAUDE.md
 

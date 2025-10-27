@@ -2,7 +2,7 @@
 
 **Context:** How to document data architecture decisions, models, and flows for software projects. Applies LLM instruction design principles for clarity and reliability.
 
-**See:** `@~/.claude/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
+**See:** `@~/.agents/coding/guides/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
 
 ---
 
@@ -137,7 +137,7 @@
 
 ## Integration with TDD Workflow
 
-**See:** `@~/.claude/architecture-guide.md` for full TDD workflow integration.
+**See:** `@~/.agents/coding/guides/architecture-guide.md` for full TDD workflow integration.
 
 **Data-specific triggers for updating architecture doc:**
 - Adding new data entities
