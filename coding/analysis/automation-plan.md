@@ -6,7 +6,7 @@
 
 **Key Pattern Identified**: 7% of soulless-monorepo and 4% of bitd prompts are quality control rituals that can be automated
 
-**Updated**: 2025-10-26 - Added analysis of Subagents, Skills, Hooks, and MCP Servers
+**Updated**: 2025-10-30 - Integrated Anthropic 2025 best practices: Explore→Plan→Code workflow, context management, split Quality Reviewer into 3 focused Skills, replaced UserPromptSubmit Hook with Stop Hook
 
 ---
 
@@ -26,22 +26,30 @@ After comprehensive analysis of all automation mechanisms (Hooks, Skills, Subage
 
 ### Quick Reference: Top Automation Opportunities
 
+**Updated based on Anthropic 2025 best practices**
+
 | Mechanism | Name | Priority | Impact | Effort | ROI | Source Guide |
 |-----------|------|----------|--------|--------|-----|--------------|
-| **Skill** | Quality Reviewer | ⭐⭐⭐⭐⭐ | Eliminates 347+ prompts (4% of messages) | 1-2 hrs | Very High | code-philosophy.md, testing-methodology.md |
+| **Skill** | Explore-First Enforcer | ⭐⭐⭐⭐⭐ | Prevents jumping to code (Anthropic #1 best practice) | 30 min | Very High | Anthropic 2025 best practices |
+| **Skill** | Docs Verifier | ⭐⭐⭐⭐⭐ | Check latest docs (was part of Quality Reviewer) | 45 min | Very High | code-philosophy.md |
+| **Skill** | Standards Checker | ⭐⭐⭐⭐⭐ | Validate conventions (was part of Quality Reviewer) | 30 min | Very High | code-philosophy.md |
+| **Skill** | Quality Gates | ⭐⭐⭐⭐⭐ | Final review before Write/Edit (was part of Quality Reviewer) | 45 min | Very High | code-philosophy.md |
+| **Hook** | Stop - Context Management | ⭐⭐⭐⭐ | Prevent "dumber after compaction" issue | 10 min | High | Anthropic 2025 best practices |
 | **Hook** | PostToolUse - Test Runner | ⭐⭐⭐⭐ | Auto-run tests after every edit | 30 min | High | testing-methodology.md |
+| **Skill** | Context Manager | ⭐⭐⭐⭐ | Suggest /clear between tasks | 20 min | High | Anthropic 2025 best practices |
 | **Skill** | Feature Kickoff | ⭐⭐⭐⭐ | Auto-find user stories/tests/design docs | 1 hr | High | CLAUDE.md |
-| **Skill** | Architecture Monitor | ⭐⭐⭐⭐ | Suggest arch doc updates | 1 hr | High | architecture-guide.md, data-architecture-guide.md |
-| **Skill** | Learning Extraction Monitor | ⭐⭐⭐⭐ | Auto-suggest learnings extraction | 1 hr | High | learning-extraction.md |
-| **Skill** | TDD Reminder | ⭐⭐⭐ | Remind to write tests BEFORE implementation | 45 min | Medium | testing-methodology.md |
-| **Skill** | Test Type Advisor | ⭐⭐⭐ | Suggest unit/integration/E2E/LLM eval | 45 min | Medium | testing-methodology.md |
+| **Skill** | TDD Enforcer | ⭐⭐⭐ | Enforce tests BEFORE implementation | 30 min | Medium | testing-methodology.md, Anthropic 2025 |
 | **Slash Cmd** | /critique | ⭐⭐⭐ | Manual quality check shortcut | 15 min | Medium | Phase 1 plan |
-| **Slash Cmd** | /feature-start | ⭐⭐⭐ | Quick feature kickoff workflow | 15 min | Medium | CLAUDE.md |
-| **Slash Cmd** | /user-stories, /test-defs, /design-doc | ⭐⭐⭐ | Quick doc creation shortcuts | 30 min | Medium | CLAUDE.md |
 
-**Total identified**: 13 Skills, 3 Hooks, 5 Slash Commands (21 automation opportunities)
+**Total identified**: 17 Skills, 4 Hooks, 5 Slash Commands (26 automation opportunities)
 
-**Implementation recommendation**: Start with Quality Reviewer Skill + PostToolUse Hook (Phase 2), then add Feature Kickoff + Architecture Monitor (Phase 3).
+**Key changes from original plan**:
+- Split Quality Reviewer into 3 focused Skills (Anthropic: "keep Skills lean")
+- Added Explore-First Enforcer (Anthropic #1 best practice)
+- Replaced UserPromptSubmit Hook with Stop Hook (prevents context bloat)
+- Added Context Manager Skill (addresses "dumber after compaction" issue)
+
+**Implementation recommendation**: Start with Explore-First + Stop Hook (Phase 1), then Docs Verifier + Quality Gates (Phase 2).
 
 ---
 
@@ -94,24 +102,26 @@ Claude Code provides **7 automation mechanisms**. After testing all approaches a
 | **Subagents** | ⭐⭐⭐⭐ | High | Long analysis | ❌ Too slow, no context |
 | **MCP Servers** | ⭐⭐⭐⭐ | High | External integrations | ❌ External API costs |
 
-### Approach 1: UserPromptSubmit Hook (LEAST RECOMMENDED)
+### Approach 1: Stop Hook for Context Management ⭐ RECOMMENDED
 
-**Power Level**: ⭐⭐⭐⭐⭐
-**Effort**: Medium (30 min)
-**Impact**: Eliminates 80% of repetitive prompts
+**Power Level**: ⭐⭐⭐⭐
+**Effort**: Low (10 min)
+**Impact**: Prevents "dumber after compaction" issue
 
-**What it does**: Automatically enriches EVERY prompt with quality criteria
+**What it does**: Reminds to `/clear` context after completing tasks
+
+**Why not UserPromptSubmit Hook**: Text manipulation adds to context bloat, accelerating compaction issues. Stop event is cleaner.
 
 **Configuration**: Add to `~/.claude/settings.json`
 
 ```json
 {
   "hooks": {
-    "UserPromptSubmit": [{
+    "Stop": [{
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "bash -c 'if echo \"$CLAUDE_USER_PROMPT\" | grep -qiE \"^(yes|proceed|implement)$\"; then echo \"$CLAUDE_USER_PROMPT\n\nBefore implementing, double check: Is it correct? Elegant? Latest docs verified?\"; else echo \"$CLAUDE_USER_PROMPT\"; fi'"
+        "command": "echo '💡 Task complete. Consider: /clear before next task (prevents context pollution)'"
       }]
     }]
   }
@@ -119,23 +129,22 @@ Claude Code provides **7 automation mechanisms**. After testing all approaches a
 ```
 
 **How it works**:
-- User types: `yes`
-- Hook checks if prompt matches approval pattern
-- If match: Appends quality checklist
-- Claude receives: `yes\n\nBefore implementing, double check...`
+- Claude finishes responding (Stop event fires)
+- Hook outputs suggestion to use `/clear`
+- User decides whether to clear context
+- No text manipulation, no false positives
 
 **Pros**:
-- Zero typing - automatic every time
-- Consistent quality standards
+- Non-invasive (suggestion, not manipulation)
+- Addresses "dumber after compaction" issue
+- No context bloat
 - Works across all projects
 
 **Cons**:
-- ⚠️ **Too invasive** - Modifies every prompt system-wide
-- False positives on conversational "yes"
-- Dumb text manipulation (no context awareness)
-- Skills provide better intelligence
+- User must manually type `/clear`
+- May be repetitive if working on single task
 
-**Decision**: Phase 3 OPTIONAL - Only if Skills insufficient
+**Decision**: Phase 2 RECOMMENDED - Pair with Skills for complete automation
 
 ---
 
@@ -435,9 +444,54 @@ Recommendation, Escalation Rules, Quality Gates]
 **File**: `~/.claude/CLAUDE.md` (add new section)
 
 ```markdown
-## Quality Standards (CRITICAL - Always Apply)
+## Workflow Standards (CRITICAL - Always Follow)
 
-**Before proposing ANY code changes, you MUST:**
+### 0. Explore → Plan → Code Workflow (ALWAYS USE)
+
+**Critical Best Practice** (Anthropic 2025): Claude tends to jump straight to coding without this.
+
+**Before ANY code changes:**
+
+**EXPLORE FIRST:**
+1. Read relevant existing files (do NOT write code yet)
+2. Understand current patterns and architecture
+3. Identify what needs to change
+
+**THEN PLAN:**
+4. Use "think hard" or "ultrathink" for complex problems
+5. Create implementation plan
+6. Get user approval on plan
+
+**THEN CODE:**
+7. Implement with explicit verification steps
+8. Run tests
+9. Commit results
+
+**Example:**
+```
+User: "Add dark mode toggle"
+
+❌ BAD: Immediately propose component code
+✅ GOOD:
+"Let me explore first:
+1. Reading existing theme system...
+2. Checking current state management...
+3. Understanding toggle patterns in codebase...
+
+[After exploration]
+Now I'll think hard about the implementation plan:
+- Option A: CSS variables + context
+- Option B: Tailwind dark mode classes
+- Recommend A because [reasoning]
+
+Should I proceed with detailed plan?"
+```
+
+**When to skip exploration:**
+- Trivial changes (typos, formatting)
+- User explicitly says "just do it"
+
+---
 
 ### 1. Latest Documentation Check
 
@@ -548,6 +602,40 @@ When user says **"yes"**, **"proceed"**, **"implement"**, or similar:
 - Config for things that don't need config
 
 **Principle**: Simplest solution that solves the problem. No more, no less.
+
+### 7. Context Management (Prevent "Dumber After Compaction")
+
+**Critical Issue** (Community 2025): "Claude is definitely dumber after compaction, doesn't know what files it was looking at."
+
+**Solution**: Use `/clear` frequently to reset context between tasks.
+
+**When to use /clear:**
+- ✓ After completing a task (before starting next)
+- ✓ When switching topics/features
+- ✓ After fixing a bug (before new work)
+- ✓ When conversation feels unfocused
+
+**When NOT to use /clear:**
+- ✗ In middle of multi-step task
+- ✗ During active debugging
+- ✗ When building on previous work
+
+**Proactive suggestion:**
+After completing tasks, say: "Task complete. Should I /clear context before moving to next task? (Maintains performance and prevents context pollution)"
+
+### 8. CLAUDE.md as Living Document
+
+**Critical Principle** (Anthropic 2025): "Treat CLAUDE.md files as living documents. Iterate on their effectiveness rather than simply accumulating content."
+
+**Iteration Strategy:**
+1. **Start minimal** (50-100 lines for baseline)
+2. **Use `#` key during sessions** - Claude auto-incorporates effective instructions into CLAUDE.md
+3. **Review weekly** - Remove instructions that don't work
+4. **Add emphasis** - Use "IMPORTANT" or "YOU MUST" for critical rules
+5. **Test effectiveness** - Try same task with/without instruction to verify impact
+6. **Refine continuously** - Like tuning a prompt, CLAUDE.md requires iteration
+
+**Anti-pattern:** Accumulating content without testing if it improves Claude's behavior.
 
 ---
 
@@ -1401,31 +1489,38 @@ Quality check includes:
 
 **Implementation Note**: Detailed specs for Skills/Hooks/Commands have been condensed. Create full implementations when ready to use.
 
-#### Skills (13 Total)
+#### Skills (17 Total)
+
+**Note**: Quality Reviewer split into 3 focused Skills per Anthropic best practices (keep Skills lean).
 
 | # | Name | Priority | Automates | Source Guides | File Path |
 |---|------|----------|-----------|---------------|-----------|
-| 1 | Quality Reviewer | ⭐⭐⭐⭐⭐ | "Double check and critique" ritual (347+ prompts) | code-philosophy, testing-methodology | `~/.claude/skills/quality-reviewer/SKILL.md` |
-| 2 | Feature Kickoff | ⭐⭐⭐⭐ | Auto-find user stories/test defs/design docs | CLAUDE.md | `~/.claude/skills/feature-kickoff/SKILL.md` |
-| 3 | Architecture Monitor | ⭐⭐⭐⭐ | Suggest ARCHITECTURE.md updates | architecture-guide, data-architecture-guide | `~/.claude/skills/architecture-monitor/SKILL.md` |
-| 4 | Learning Extraction Monitor | ⭐⭐⭐⭐ | Auto-suggest extracting learnings | learning-extraction | `~/.claude/skills/learning-monitor/SKILL.md` |
-| 5 | TDD Reminder | ⭐⭐⭐ | Remind to write tests BEFORE implementation | testing-methodology | `~/.claude/skills/tdd-reminder/SKILL.md` |
-| 6 | Test Type Advisor | ⭐⭐⭐ | Suggest unit/integration/E2E/LLM eval | testing-methodology | `~/.claude/skills/test-advisor/SKILL.md` |
-| 7 | User Story Validator | ⭐⭐ | Validate against INVEST criteria | tdd-templates, user-story-guide | `~/.claude/skills/user-story-validator/SKILL.md` |
-| 8 | Test Definitions Validator | ⭐⭐ | Validate test definition quality | test-definitions-guide | `~/.claude/skills/test-defs-validator/SKILL.md` |
-| 9 | Design Doc Validator | ⭐⭐ | Check prerequisites, avoid duplication | design-doc-guide | `~/.claude/skills/design-doc-validator/SKILL.md` |
-| 10 | Architecture Doc Validator | ⭐⭐ | Validate required sections | architecture-guide | `~/.claude/skills/arch-doc-validator/SKILL.md` |
-| 11 | Data Architecture Validator | ⭐⭐ | Check data architecture quality | data-architecture-guide | `~/.claude/skills/data-arch-validator/SKILL.md` |
-| 12 | CLAUDE.md Quality Checker | ⭐⭐ | Detect anti-patterns in CLAUDE.md | claude-md-guide | `~/.claude/skills/claude-md-checker/SKILL.md` |
-| 13 | Documentation Quality Validator | ⭐⭐ | Validate LLM-consumable docs | llm-instruction-design | `~/.claude/skills/doc-validator/SKILL.md` |
+| 1 | **Explore-First Enforcer** | ⭐⭐⭐⭐⭐ | Enforce Explore → Plan → Code workflow | Anthropic 2025 best practices | `~/.claude/skills/explore-first/SKILL.md` |
+| 2 | **Docs Verifier** | ⭐⭐⭐⭐⭐ | Check latest documentation (was part of Quality Reviewer) | code-philosophy, llm-prompting | `~/.claude/skills/docs-verifier/SKILL.md` |
+| 3 | **Standards Checker** | ⭐⭐⭐⭐⭐ | Validate project conventions (was part of Quality Reviewer) | code-philosophy, CLAUDE.md | `~/.claude/skills/standards-checker/SKILL.md` |
+| 4 | **Quality Gates** | ⭐⭐⭐⭐⭐ | Final review before Write/Edit (was part of Quality Reviewer) | code-philosophy, testing-methodology | `~/.claude/skills/quality-gates/SKILL.md` |
+| 5 | Context Manager | ⭐⭐⭐⭐ | Suggest /clear between tasks | Anthropic 2025 best practices | `~/.claude/skills/context-manager/SKILL.md` |
+| 6 | Feature Kickoff | ⭐⭐⭐⭐ | Auto-find user stories/test defs/design docs | CLAUDE.md | `~/.claude/skills/feature-kickoff/SKILL.md` |
+| 7 | Architecture Monitor | ⭐⭐⭐⭐ | Suggest ARCHITECTURE.md updates | architecture-guide, data-architecture-guide | `~/.claude/skills/architecture-monitor/SKILL.md` |
+| 8 | Learning Extraction Monitor | ⭐⭐⭐⭐ | Auto-suggest extracting learnings | learning-extraction | `~/.claude/skills/learning-monitor/SKILL.md` |
+| 9 | TDD Enforcer | ⭐⭐⭐ | Enforce tests BEFORE implementation | testing-methodology, Anthropic 2025 | `~/.claude/skills/tdd-enforcer/SKILL.md` |
+| 10 | Test Type Advisor | ⭐⭐⭐ | Suggest unit/integration/E2E/LLM eval | testing-methodology | `~/.claude/skills/test-advisor/SKILL.md` |
+| 11 | User Story Validator | ⭐⭐ | Validate against INVEST criteria | tdd-templates, user-story-guide | `~/.claude/skills/user-story-validator/SKILL.md` |
+| 12 | Test Definitions Validator | ⭐⭐ | Validate test definition quality | test-definitions-guide | `~/.claude/skills/test-defs-validator/SKILL.md` |
+| 13 | Design Doc Validator | ⭐⭐ | Check prerequisites, avoid duplication | design-doc-guide | `~/.claude/skills/design-doc-validator/SKILL.md` |
+| 14 | Architecture Doc Validator | ⭐⭐ | Validate required sections | architecture-guide | `~/.claude/skills/arch-doc-validator/SKILL.md` |
+| 15 | Data Architecture Validator | ⭐⭐ | Check data architecture quality | data-architecture-guide | `~/.claude/skills/data-arch-validator/SKILL.md` |
+| 16 | CLAUDE.md Quality Checker | ⭐⭐ | Detect anti-patterns in CLAUDE.md | claude-md-guide | `~/.claude/skills/claude-md-checker/SKILL.md` |
+| 17 | Documentation Quality Validator | ⭐⭐ | Validate LLM-consumable docs | llm-instruction-design | `~/.claude/skills/doc-validator/SKILL.md` |
 
-#### Hooks (3 Total)
+#### Hooks (4 Total)
 
 | # | Name | Priority | Automates | Configuration |
 |---|------|----------|-----------|---------------|
-| 1 | PostToolUse - Test Runner | ⭐⭐⭐⭐ | Auto-run linters/tests after Write/Edit | `settings.json` → PostToolUse → Write/Edit matchers |
-| 2 | PostToolUse - Coverage Check | ⭐ | Check test coverage after running tests | `settings.json` → PostToolUse (optional) |
-| 3 | PostToolUse - Learning Reminder | ⭐ | Remind to extract learnings after bug fixes | `settings.json` → PostToolUse (optional) |
+| 1 | **Stop - Context Management** | ⭐⭐⭐⭐ | Suggest /clear after task completion | `settings.json` → Stop event → Outputs reminder |
+| 2 | PostToolUse - Test Runner | ⭐⭐⭐⭐ | Auto-run linters/tests after Write/Edit | `settings.json` → PostToolUse → Write/Edit matchers |
+| 3 | PostToolUse - Coverage Check | ⭐ | Check test coverage after running tests | `settings.json` → PostToolUse (optional) |
+| 4 | PostToolUse - Learning Reminder | ⭐ | Remind to extract learnings after bug fixes | `settings.json` → PostToolUse (optional) |
 
 #### Slash Commands (5 Total)
 
