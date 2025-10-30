@@ -34,14 +34,24 @@ After comprehensive analysis of all automation mechanisms (Hooks, Skills, Subage
 | **Skill** | Docs Verifier | ⭐⭐⭐⭐⭐ | Check latest docs (was part of Quality Reviewer) | 45 min | Very High | code-philosophy.md |
 | **Skill** | Standards Checker | ⭐⭐⭐⭐⭐ | Validate conventions (was part of Quality Reviewer) | 30 min | Very High | code-philosophy.md |
 | **Skill** | Quality Gates | ⭐⭐⭐⭐⭐ | Final review before Write/Edit (was part of Quality Reviewer) | 45 min | Very High | code-philosophy.md |
+| **Hook** | SessionStart - Load Context | ⭐⭐⭐⭐ | Load quality standards at session start | 20 min | High | Official docs |
 | **Hook** | Stop - Context Management | ⭐⭐⭐⭐ | Prevent "dumber after compaction" issue | 10 min | High | Anthropic 2025 best practices |
 | **Hook** | PostToolUse - Test Runner | ⭐⭐⭐⭐ | Auto-run tests after every edit | 30 min | High | testing-methodology.md |
+| **Hook** | PreToolUse - Format Code | ⭐⭐⭐ | Auto-format before Write/Edit | 1-2 hrs | Medium | Official docs v2.0.10+ |
 | **Skill** | Context Manager | ⭐⭐⭐⭐ | Suggest /clear between tasks | 20 min | High | Anthropic 2025 best practices |
 | **Skill** | Feature Kickoff | ⭐⭐⭐⭐ | Auto-find user stories/tests/design docs | 1 hr | High | CLAUDE.md |
+| **Hook** | SessionEnd - Log Stats | ⭐⭐ | Log session statistics | 15 min | Low | Official docs |
 | **Skill** | TDD Enforcer | ⭐⭐⭐ | Enforce tests BEFORE implementation | 30 min | Medium | testing-methodology.md, Anthropic 2025 |
 | **Slash Cmd** | /critique | ⭐⭐⭐ | Manual quality check shortcut | 15 min | Medium | Phase 1 plan |
 
-**Total identified**: 17 Skills, 4 Hooks, 5 Slash Commands (26 automation opportunities)
+**Total identified**: 17 Skills, 7 Hooks, 5 Slash Commands (29 automation opportunities)
+
+**Hook types available**:
+- **Tool-related**: PreToolUse, PostToolUse
+- **User interaction**: UserPromptSubmit, Notification, Stop
+- **Session**: SessionStart, SessionEnd
+- **Subagent**: SubagentStop
+- **Maintenance**: PreCompact
 
 **Key changes from original plan**:
 - Split Quality Reviewer into 3 focused Skills (Anthropic: "keep Skills lean")
@@ -145,6 +155,421 @@ Claude Code provides **7 automation mechanisms**. After testing all approaches a
 - May be repetitive if working on single task
 
 **Decision**: Phase 2 RECOMMENDED - Pair with Skills for complete automation
+
+---
+
+### Approach 1a: SessionStart Hook (LOAD CONTEXT AT STARTUP) ⭐⭐⭐⭐
+
+**Power Level**: ⭐⭐⭐⭐
+**Effort**: Low (20 min)
+**Impact**: Loads development context and environment at session start
+
+**What it does**: Runs when Claude Code starts a new session or resumes an existing session
+
+**Use Cases**:
+- Load quality standards from CLAUDE.md into context
+- Install dependencies automatically
+- Set up environment variables
+- Display project-specific reminders
+
+**Configuration**: Add to `~/.claude/settings.json`
+
+```json
+{
+  "hooks": {
+    "SessionStart": [{
+      "matcher": "*",
+      "hooks": [{
+        "type": "command",
+        "command": "echo '🎯 Loading project quality standards...' && cat ~/.claude/CLAUDE.md | head -50"
+      }]
+    }]
+  }
+}
+```
+
+**Special Features**:
+
+**1. Add Context to Session**
+
+Output from SessionStart hook is automatically added to Claude's context:
+
+```bash
+#!/bin/bash
+echo "Project: My App"
+echo "Quality Standards:"
+echo "- Always check latest docs"
+echo "- Run tests before committing"
+echo "- Avoid bloat"
+```
+
+This text appears in Claude's initial context window.
+
+**2. Persist Environment Variables**
+
+Use `CLAUDE_ENV_FILE` to persist env vars for subsequent bash commands:
+
+```bash
+#!/bin/bash
+# Write to env file for later bash commands
+echo "export PROJECT_ROOT=/Users/alex/project" >> "$CLAUDE_ENV_FILE"
+echo "export DEBUG=1" >> "$CLAUDE_ENV_FILE"
+```
+
+**3. Structured Output for Additional Context**
+
+Return JSON to add formatted context:
+
+```json
+{
+  "hookSpecificOutput": {
+    "additionalContext": "Quality Standards:\n- Check docs\n- Run tests\n- Avoid bloat"
+  }
+}
+```
+
+**Available Environment Variables**:
+- `CLAUDE_ENV_FILE` - File path where you can persist environment variables (SessionStart only)
+- `CLAUDE_PROJECT_DIR` - Absolute path to project root
+- `CLAUDE_CODE_REMOTE` - "true" if remote, empty if local
+
+**Example: Load Project Context**
+
+Create `~/.claude/hooks/session-start.sh`:
+
+```bash
+#!/bin/bash
+
+echo "🚀 Session started for: $CLAUDE_PROJECT_DIR"
+echo ""
+
+# Check if project has CLAUDE.md
+if [ -f "$CLAUDE_PROJECT_DIR/.claude/CLAUDE.md" ]; then
+  echo "📋 Project Guidelines (first 30 lines):"
+  head -30 "$CLAUDE_PROJECT_DIR/.claude/CLAUDE.md"
+  echo ""
+fi
+
+# Set project env vars
+echo "export PROJECT_ROOT=$CLAUDE_PROJECT_DIR" >> "$CLAUDE_ENV_FILE"
+
+# Check for uncommitted changes
+cd "$CLAUDE_PROJECT_DIR"
+if ! git diff --quiet 2>/dev/null; then
+  echo "⚠️ Warning: Uncommitted changes detected"
+fi
+```
+
+Register in settings.json:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [{
+      "matcher": "*",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/session-start.sh"
+      }]
+    }]
+  }
+}
+```
+
+**Pros**:
+- Loads context automatically (no manual reminders)
+- Sets up environment consistently
+- Displays project-specific warnings
+- Runs only once per session (not repeatedly)
+
+**Cons**:
+- Adds to initial context window (uses tokens)
+- Can't be canceled once session starts
+- Errors may prevent session from starting
+
+**Decision**: Phase 2 RECOMMENDED - Load quality standards and environment setup
+
+---
+
+### Approach 1c: SessionEnd Hook (CLEANUP AND LOGGING)
+
+**Power Level**: ⭐⭐⭐
+**Effort**: Low (15 min)
+**Impact**: Cleanup tasks, session statistics logging
+
+**What it does**: Runs when Claude Code session ends
+
+**Use Cases**:
+- Log session statistics (commands run, files modified, errors)
+- Save session state for resume
+- Clean up temporary files
+- Export metrics for analysis
+
+**⚠️ Important**: SessionEnd hooks **cannot block session termination**. They run in background for cleanup only.
+
+**Configuration**: Add to `~/.claude/settings.json`
+
+```json
+{
+  "hooks": {
+    "SessionEnd": [{
+      "matcher": "*",
+      "hooks": [{
+        "type": "command",
+        "command": "echo \"Session ended: $(date)\" >> ~/.claude/session-log.txt && echo \"Project: $CLAUDE_PROJECT_DIR\" >> ~/.claude/session-log.txt"
+      }]
+    }]
+  }
+}
+```
+
+**Example: Session Statistics**
+
+Create `~/.claude/hooks/session-end.sh`:
+
+```bash
+#!/bin/bash
+
+LOG_FILE=~/.claude/quality-sessions.log
+
+{
+  echo "=================="
+  echo "Session ended: $(date)"
+  echo "Project: $CLAUDE_PROJECT_DIR"
+  echo "Duration: [tracked elsewhere]"
+
+  # Count files in project
+  file_count=$(find "$CLAUDE_PROJECT_DIR" -type f | wc -l)
+  echo "Files in project: $file_count"
+
+  # Check if tests were run
+  if [ -f "$CLAUDE_PROJECT_DIR/.test-results" ]; then
+    echo "Tests run: Yes"
+  else
+    echo "Tests run: No"
+  fi
+
+  echo ""
+} >> "$LOG_FILE"
+```
+
+Register in settings.json:
+
+```json
+{
+  "hooks": {
+    "SessionEnd": [{
+      "matcher": "*",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/session-end.sh"
+      }]
+    }]
+  }
+}
+```
+
+**Special Feature: System Messages**
+
+SessionEnd hooks support `systemMessage` in output to display final messages:
+
+```json
+{
+  "hookSpecificOutput": {
+    "systemMessage": "✅ Session statistics saved to ~/.claude/quality-sessions.log"
+  }
+}
+```
+
+**Pros**:
+- Automatic logging (no manual tracking)
+- Preserves session history
+- Can trigger external tools (backups, notifications)
+
+**Cons**:
+- Can't block session end (always runs in background)
+- No user interaction possible
+- May not complete if system shuts down abruptly
+
+**Decision**: Phase 3 OPTIONAL - Useful for tracking metrics over time
+
+---
+
+### Approach 1b: PreToolUse Hook (PROACTIVE MODIFICATION) ⭐ NEW v2.0.10+
+
+**Power Level**: ⭐⭐⭐⭐⭐
+**Effort**: High (1-2 hours - complex JSON handling, testing required)
+**Impact**: Modifies tool inputs BEFORE execution (cleaner than PostToolUse validation)
+
+**What's New**: Starting in Claude Code v2.0.10+, PreToolUse hooks can **modify tool inputs** before execution using the `updatedInput` field.
+
+**From official docs**:
+> "hooks can modify tool inputs before execution using `updatedInput`"
+
+**Use Cases**:
+- Auto-format code BEFORE Write/Edit executes (cleaner than PostToolUse fixing)
+- Inject environment variables or credentials
+- Add required headers/imports automatically
+- Sanitize or validate file paths
+
+---
+
+**⚠️ CRITICAL: How PreToolUse Hooks Work**
+
+**Input**: Hooks receive JSON via **stdin** (not environment variables)
+**Output**: Hooks must output JSON to **stdout** with specific structure
+
+**Input JSON structure**:
+```json
+{
+  "session_id": "abc123",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "/path/to/file.ts",
+    "content": "unformatted code"
+  }
+}
+```
+
+**Output JSON structure** (to modify inputs):
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "updatedInput": {
+      "content": "formatted code"
+    }
+  }
+}
+```
+
+**Key points**:
+- Only include fields you want to **change** in `updatedInput`
+- Unchanged fields are preserved automatically
+- Must set `"permissionDecision": "allow"` to proceed
+- Use `"permissionDecision": "deny"` to block tool execution
+
+---
+
+**Configuration**: Add to `~/.claude/settings.json`
+
+**Example 1: Simple text modification**
+
+Create hook script `~/.claude/hooks/format-code.sh`:
+
+```bash
+#!/bin/bash
+
+# Read JSON from stdin
+input=$(cat)
+
+# Extract fields
+tool_name=$(echo "$input" | jq -r '.tool_name')
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // empty')
+content=$(echo "$input" | jq -r '.tool_input.content // empty')
+
+# Only format if it's a Write tool with .ts/.js file
+if [[ "$tool_name" == "Write" ]] && [[ "$file_path" =~ \.(ts|js)$ ]]; then
+  # Format with prettier (fallback to original on error)
+  formatted=$(echo "$content" | prettier --stdin-filepath "$file_path" 2>/dev/null || echo "$content")
+
+  # Output modified JSON
+  jq -n \
+    --arg content "$formatted" \
+    '{
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "allow",
+        updatedInput: {
+          content: $content
+        }
+      }
+    }'
+else
+  # No modification, just approve
+  jq -n '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "allow"
+    }
+  }'
+fi
+```
+
+**Make executable**:
+```bash
+chmod +x ~/.claude/hooks/format-code.sh
+```
+
+**Register in settings.json**:
+```json
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Write",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/format-code.sh"
+      }]
+    }]
+  }
+}
+```
+
+---
+
+**Example 2: Inline jq transformation**
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "jq '{hookSpecificOutput: {hookEventName: \"PreToolUse\", permissionDecision: \"allow\", updatedInput: {command: (\"export DEBUG=1; \" + .tool_input.command)}}}'"
+      }]
+    }]
+  }
+}
+```
+
+This prepends `export DEBUG=1;` to all Bash commands.
+
+---
+
+**Available Environment Variables**:
+- `CLAUDE_PROJECT_DIR` - Absolute path to project root
+- `CLAUDE_CODE_REMOTE` - "true" if remote, empty if local
+- `CLAUDE_FILE_PATHS` - Space-separated files (PostToolUse only, not PreToolUse)
+
+**Important**: Tool input JSON comes via **stdin**, not via environment variables.
+
+---
+
+**How it works**:
+1. Claude decides to use Write/Edit/Bash tool
+2. Hook receives JSON via stdin
+3. Hook script processes JSON, modifies `updatedInput` fields
+4. Hook outputs modified JSON to stdout
+5. Tool executes with modified input
+6. No post-validation needed (input pre-corrected)
+
+**Pros**:
+- Proactive correction (not reactive validation)
+- Cleaner than PostToolUse → Read → Edit cycle
+- No second round-trip (input corrected before execution)
+- Transparent to Claude (sees final result)
+
+**Cons**:
+- Complex JSON manipulation required
+- Must output valid JSON structure exactly
+- Debugging harder (input/output via pipes)
+- Formatting errors can break tool execution
+
+**Decision**: Phase 2 OPTIONAL - Use if proactive input modification needed, otherwise PostToolUse is simpler and more debuggable
 
 ---
 
@@ -433,6 +858,405 @@ Recommendation, Escalation Rules, Quality Gates]
 
 ---
 
+### Skills: Activation Reliability (CRITICAL FOR SUCCESS)
+
+**Problem**: Skills with vague descriptions don't activate reliably. Claude uses the description to decide when to invoke your Skill.
+
+**⚠️ Common Anti-Patterns That Prevent Activation**:
+
+#### ❌ Anti-Pattern 1: Too Vague
+
+```yaml
+---
+name: document-helper
+description: |
+  Helps with documents and files. Use when working with documents.
+---
+```
+
+**Why it fails**:
+- "Helps with" is not actionable
+- "documents" is too broad (code? markdown? PDFs?)
+- No specific trigger terms
+
+#### ✅ GOOD: Specific and Actionable
+
+```yaml
+---
+name: pdf-processor
+description: |
+  Extract text and tables from PDF files, fill forms, merge documents.
+
+  Use PROACTIVELY when:
+  - User mentions "PDF", "extract", "form", or "merge"
+  - File path ends with .pdf
+  - Task involves document manipulation
+
+  Returns: Extracted text, table data, or confirmation of merge/fill
+
+allowed-tools: Read, Bash
+---
+```
+
+**Why it works**:
+- Specific actions (extract, fill, merge)
+- Clear trigger terms (PDF, extract, form, merge)
+- File pattern (.pdf)
+- States what it returns
+
+---
+
+#### ❌ Anti-Pattern 2: Too Broad Scope
+
+```yaml
+---
+name: code-reviewer
+description: |
+  Reviews all code for any issues. Use whenever writing code.
+---
+```
+
+**Why it fails**:
+- "all code" → fires on every Write/Edit (false positives)
+- "any issues" → unclear what to check
+- No prioritization
+
+#### ✅ GOOD: Narrow, Focused Scope
+
+```yaml
+---
+name: quality-gates
+description: |
+  Final review before Write/Edit tools for TypeScript/JavaScript files.
+
+  Use when Claude is ABOUT TO:
+  - Write new .ts/.tsx/.js/.jsx files
+  - Edit existing source files (not config/markdown)
+
+  Checks:
+  - Latest docs verified (WebFetch package.json versions)
+  - Edge cases handled (null, undefined, empty)
+  - Avoids bloat (simplest solution)
+
+  Returns: PROCEED / REVISE / USER INPUT
+
+allowed-tools: Read, Grep, WebFetch, WebSearch
+---
+```
+
+**Why it works**:
+- Specific timing ("ABOUT TO Write/Edit")
+- File type restrictions (.ts/.tsx/.js/.jsx)
+- Concrete checks (docs, edge cases, bloat)
+- Structured output (PROCEED/REVISE/USER INPUT)
+
+---
+
+#### ❌ Anti-Pattern 3: No Trigger Keywords
+
+```yaml
+---
+name: architecture-helper
+description: |
+  Assists with design and structure decisions.
+---
+```
+
+**Why it fails**:
+- No keywords for Claude to match
+- Passive voice ("assists")
+- No examples of when to use
+
+#### ✅ GOOD: Explicit Trigger Keywords
+
+```yaml
+---
+name: architecture-monitor
+description: |
+  Suggest ARCHITECTURE.md updates when making architectural decisions.
+
+  Use when user discusses:
+  - Technology choices (state management, database, frameworks)
+  - Data model design (entities, relationships, schema)
+  - Project-wide patterns (error handling, API structure)
+  - "Why" decisions (trade-offs, alternatives considered)
+
+  Prompt: "Should I document this decision in ARCHITECTURE.md?"
+
+allowed-tools: Read, Grep
+---
+```
+
+**Why it works**:
+- Specific keywords (technology, database, frameworks, data model, schema)
+- Clear action ("Suggest updates", "Prompt")
+- Examples of trigger phrases
+
+---
+
+#### ❌ Anti-Pattern 4: Description Too Long
+
+```yaml
+---
+name: quality-reviewer
+description: |
+  [650 lines of detailed checking logic, edge cases, examples,
+  comprehensive documentation about every possible scenario,
+  full decision trees, extensive examples...]
+---
+```
+
+**Why it fails**:
+- >1024 chars reduces activation reliability (documented limit)
+- Claude can't parse quickly during activation decision
+- Should use progressive disclosure (supporting files)
+
+#### ✅ GOOD: Concise Core, Progressive Disclosure
+
+```yaml
+---
+name: quality-reviewer
+description: |
+  Review code before Write/Edit for correctness, elegance, standards.
+
+  Use when:
+  - About to propose code changes
+  - User approves implementation ("yes", "proceed")
+
+  Checks latest docs, edge cases, bloat avoidance, project conventions.
+
+  Returns: PROCEED / REVISE / USER INPUT
+
+  (See examples.md for full review protocol)
+
+allowed-tools: Read, Grep, WebFetch, WebSearch
+---
+```
+
+**Why it works**:
+- Core description <1024 chars
+- Supporting details in examples.md (loaded only when Skill runs)
+- Clear, scannable structure
+
+---
+
+### Skill Naming Constraints (CRITICAL)
+
+**`name` field requirements**:
+- **Max 64 characters**
+- **Lowercase letters, numbers, and hyphens only**
+- No uppercase, no underscores, no spaces
+- Must be unique across all Skills
+
+**Examples**:
+
+✅ **VALID**:
+```yaml
+name: quality-reviewer       # ✅ Lowercase, hyphens
+name: docs-verifier-v2       # ✅ Numbers allowed
+name: test-advisor           # ✅ Max 64 chars
+```
+
+❌ **INVALID**:
+```yaml
+name: QualityReviewer                    # ❌ Uppercase not allowed
+name: quality_reviewer                   # ❌ Underscores not allowed
+name: quality reviewer                   # ❌ Spaces not allowed
+name: my-very-long-skill-name-that-exceeds-sixty-four-character-maximum  # ❌ >64 chars
+```
+
+**What happens if invalid**: Skill won't load, Claude can't use it, no error message shown
+
+**Verify before creating**:
+```bash
+# Check name length
+echo -n "quality-reviewer" | wc -c   # Should be ≤64
+
+# Check format (should only show letters, numbers, hyphens)
+echo "quality-reviewer" | grep -E '^[a-z0-9-]+$' && echo "Valid" || echo "Invalid"
+```
+
+---
+
+### Best Practices for Skill Descriptions
+
+**✅ DO**:
+- Use specific technical terms ("TypeScript", "React hooks", "Electron IPC")
+- List exact trigger keywords Claude should look for
+- State what the Skill returns (structured output)
+- Include file patterns if relevant (.ts, .test.js, package.json)
+- Use active voice ("Check", "Verify", "Suggest")
+- Keep <1024 chars for core description
+- Use allowed-tools to restrict capabilities
+- **Verify name field follows constraints** (see above)
+
+**❌ DON'T**:
+- Use vague terms ("helps", "assists", "works with")
+- Say "Use when needed" (Claude can't determine "needed")
+- Omit trigger keywords
+- Write >1024 char descriptions (reduces reliability)
+- Use passive voice ("can be used for")
+- Leave scope unbounded ("all code", "any files")
+- **Use invalid characters in name field** (uppercase, underscores, spaces)
+
+---
+
+### Testing Skill Activation
+
+**After creating a Skill, test it:**
+
+1. **Positive test** (should activate):
+   ```
+   You: [Say phrase with trigger keywords]
+   Claude: [Should invoke Skill as tool]
+   ```
+
+2. **Negative test** (should NOT activate):
+   ```
+   You: [Say unrelated phrase]
+   Claude: [Should NOT invoke Skill]
+   ```
+
+3. **Edge case test**:
+   ```
+   You: [Ambiguous phrase - could trigger or not]
+   Claude: [Document behavior for refinement]
+   ```
+
+**Refinement loop**:
+- False positive (activated when shouldn't) → Narrow scope, add exclusions
+- False negative (didn't activate when should) → Add trigger keywords, broaden slightly
+- Iterate description based on real usage patterns
+
+---
+
+### Skills Activation Reality Check (CRITICAL)
+
+**⚠️ SET REALISTIC EXPECTATIONS: Skills Don't Auto-Activate Reliably**
+
+**Plan assumption**: Skills will auto-activate reliably when trigger conditions are met, eliminating need for manual prompts.
+
+**Actual behavior reported by users**:
+
+> "The #1 problem with Claude Code skills is that they don't activate on their own. Claude Code skills just sit there and you have to remember to use them."
+
+**Reality**:
+- ⚠️ **Skills may not activate** even with well-written descriptions
+- ⚠️ **Activation rate varies** significantly (users report 30-70% success rate)
+- ⚠️ **No way to force activation** - Claude decides autonomously
+- ⚠️ **Description tuning is trial-and-error** - no guaranteed formula
+- ⚠️ **Unpredictable** - May activate perfectly for days, then stop
+
+**Impact on automation plan**:
+
+**Original expectation**: Phase 2-3 will "eliminate all 347 quality check prompts" (100% automation)
+
+**Realistic expectation**: Skills will reduce prompts by 50-70% (175-245 still manual)
+
+---
+
+### Mitigation Strategies
+
+**1. Always Provide Slash Command Alternatives**
+
+For every Skill, create equivalent slash command:
+
+| Skill | Slash Command Alternative | Use When |
+|-------|--------------------------|----------|
+| Quality Reviewer Skill | `/critique` | Skill doesn't activate |
+| Docs Verifier Skill | `/latest-docs [library]` | Need to force docs check |
+| Feature Kickoff Skill | `/feature-start` | Starting new feature |
+
+**2. Track Activation Rate**
+
+Monitor how often Skills activate vs. expected:
+
+```bash
+# Create activation log
+~/.claude/skills/activation-log.txt
+
+# Format: Date | Skill Name | Activated (Y/N) | Expected (Y/N)
+2025-10-30 | quality-reviewer | N | Y
+2025-10-30 | docs-verifier | Y | Y
+2025-10-30 | quality-reviewer | Y | Y
+```
+
+Calculate success rate:
+```bash
+# After 1 week, check activation rate
+grep quality-reviewer ~/.claude/skills/activation-log.txt | \
+  awk '{total++; if($4=="Y" && $6=="Y") correct++} END {print "Rate:", correct/total*100"%"}'
+```
+
+**3. Iterate Descriptions Based on Real Usage**
+
+**Week 1**: Deploy Skill with initial description
+**Week 2**: Review activation log, identify false negatives
+**Week 3**: Add missed trigger keywords to description
+**Week 4**: Re-test and measure improvement
+
+**Example iteration**:
+```yaml
+# v1 (Week 1) - 40% activation rate
+description: "Review code for quality before Write/Edit"
+
+# v2 (Week 3) - Added trigger keywords - 60% activation rate
+description: "Review code before Write/Edit. Use when proposing changes, user says 'implement', 'fix', 'add', 'create', or 'yes'."
+
+# v3 (Week 5) - Added file patterns - 70% activation rate
+description: "Review TypeScript/JavaScript code (.ts, .tsx, .js, .jsx) before Write/Edit. Use when proposing changes, user says 'implement', 'fix', 'add', 'create', or 'yes'."
+```
+
+**4. Set Realistic Automation Goals**
+
+**❌ Unrealistic**: "Eliminate 100% of quality check prompts"
+**✅ Realistic**: "Reduce quality check prompts by 50-70%"
+
+**Success metrics adjustment**:
+
+| Metric | Original Target | Realistic Target |
+|--------|----------------|------------------|
+| Quality check prompts eliminated | 347 (100%) | 175-245 (50-70%) |
+| Prompt length reduction | 80% | 40-60% |
+| Manual invocation still needed | 0 | 30-50% |
+
+**5. Document Manual Fallback Procedures**
+
+**When Skill doesn't activate, user should**:
+1. Use slash command alternative (`/critique`)
+2. OR explicitly mention Skill name: "use the quality-reviewer skill"
+3. OR use manual prompt: "double check and critique this"
+
+**Add to project CLAUDE.md**:
+```markdown
+## When Skills Don't Activate
+
+If Quality Reviewer Skill doesn't activate:
+- Type: `/critique [stack]`
+- Or say: "use the quality-reviewer skill"
+- Or manual: "double check: correct? elegant? standards? latest docs?"
+```
+
+---
+
+### Adjusted Success Criteria
+
+**Phase 2 success** (Skills + Hooks):
+
+**Original**:
+- ✓ Quality Reviewer Skill activates before implementations (100%)
+- ✓ Zero manual quality check invocations
+
+**Realistic**:
+- ✓ Quality Reviewer Skill activates 50-70% of the time
+- ✓ Slash commands provide 1-step fallback for missed activations
+- ✓ Overall prompt reduction: 50-70% (not 100%)
+- ✓ Manual quality checks still needed 30-50% of time
+
+**Phase 3 success adjusted accordingly**.
+
+---
+
 ### Approach 5: Enhanced CLAUDE.md (BASELINE BEHAVIOR)
 
 **Power Level**: ⭐⭐⭐
@@ -715,10 +1539,7 @@ name: architecture-reviewer
 description: |
   Reviews design docs for consistency with ARCHITECTURE.md.
   Use for comprehensive architecture audits.
-allowed-tools:
-  - Read
-  - Grep
-  - Glob
+allowed-tools: Read, Grep, Glob
 ---
 
 # Architecture Review Protocol
@@ -971,6 +1792,125 @@ Claude: [Posts review via GitHub MCP]
 
 ---
 
+### Phase 5: Plugin Distribution (FUTURE)
+
+**Goal**: Bundle and distribute your automation for reuse and sharing
+
+**When to implement**: After Phase 2-4 validated and working well
+
+**What**: Package Skills, Hooks, Commands into distributable plugins
+
+**From October 2025 release**:
+- Plugin system released with 227+ community plugins
+- `/plugin install [name]` - Install from marketplace
+- `/plugin marketplace add [url]` - Add custom marketplace
+- Plugins bundle Skills, Hooks, Commands, MCP servers together
+
+**Use cases**:
+
+1. **Personal reuse** - Install same automation on multiple machines
+2. **Team sharing** - Distribute quality standards to team members
+3. **Community contribution** - Share with broader developer community
+4. **Version control** - Track automation evolution with versioning
+
+**Example plugin structure**:
+
+```
+~/.claude/plugins/quality-automation/
+├── plugin.yaml                    # Metadata and version info
+├── skills/
+│   ├── docs-verifier/
+│   │   └── SKILL.md
+│   ├── standards-checker/
+│   │   └── SKILL.md
+│   └── quality-gates/
+│       └── SKILL.md
+├── hooks/
+│   └── stop-context-manager/
+│       └── hook.json
+└── commands/
+    ├── critique.md
+    └── feature-start.md
+```
+
+**plugin.yaml example**:
+
+```yaml
+name: quality-automation
+version: 1.0.0
+description: |
+  Automated quality control workflow for Claude Code.
+  Eliminates repetitive "double check and critique" prompts.
+
+author: Your Name
+repository: https://github.com/yourusername/claude-quality-automation
+
+skills:
+  - skills/docs-verifier/
+  - skills/standards-checker/
+  - skills/quality-gates/
+
+hooks:
+  - hooks/stop-context-manager/
+
+commands:
+  - commands/critique.md
+  - commands/feature-start.md
+
+dependencies:
+  - prettier
+  - eslint
+```
+
+**Installation flow**:
+
+```bash
+# User installs your plugin
+/plugin install quality-automation
+
+# Or from custom marketplace
+/plugin marketplace add https://your-marketplace.com/plugins.json
+/plugin install quality-automation
+
+# Updates
+/plugin update quality-automation
+
+# Uninstall
+/plugin uninstall quality-automation
+```
+
+**Benefits**:
+
+✅ **One-command setup** - No manual file creation
+✅ **Version control** - Update automation centrally
+✅ **Dependency management** - Specify required tools
+✅ **Documentation** - README shown during install
+✅ **Discoverability** - Users can browse marketplace
+
+**Distribution options**:
+
+1. **Private** - Share via git repo (team use)
+2. **Public marketplace** - Submit to community marketplace
+3. **Custom marketplace** - Host your own plugin registry
+
+**Publishing steps**:
+
+1. Test plugin locally (install from local path)
+2. Create GitHub repository with plugin structure
+3. Submit to marketplace (if public)
+4. Document usage in README
+5. Version with semver (1.0.0, 1.1.0, 2.0.0)
+
+**When NOT to use plugins**:
+
+- Still iterating on automation (keep as local files)
+- Highly personal/specific to your workflow
+- Experimental features not ready for distribution
+
+**Success criteria**: Team members or community users successfully install and use your automation plugin
+
+---
+
 ## Testing Strategy
 
 ### Phase 1 Testing (Slash Commands)
@@ -1078,27 +2018,465 @@ If any approach causes issues:
 
 ---
 
+### Quick Recovery: Checkpoints (NEW - v2.0.10+)
+
+**Feature**: Press **Esc twice** to rewind conversation to last checkpoint.
+
+**From changelog** (October 2025):
+> "Checkpoints: Rewind conversations without losing context. Press Esc twice to return to checkpoint."
+
+**Use when**:
+- ✅ Skill activated incorrectly → Esc Esc to undo
+- ✅ Hook broke workflow → Esc Esc to revert
+- ✅ Want to retry with different approach → Esc Esc and try again
+- ✅ Automation caused unexpected behavior → Esc Esc back to before
+
+**Benefits**:
+- **Faster than**: Deleting files, restarting session, or manual undo
+- **Safer experimentation**: Can rewind mistakes instantly
+- **Context preserved**: Unlike /clear, checkpoint keeps full conversation history
+- **No commit needed**: Test automation changes without permanent effects
+
+**Example flow**:
+```
+You: "implement feature X"
+Claude: [Quality Reviewer Skill activates incorrectly]
+You: [Press Esc Esc]
+→ Returns to "implement feature X" prompt
+→ Conversation state restored
+→ Can refine Skill description or try different approach
+```
+
+**Limitation**: Can only rewind to last checkpoint (not arbitrary points in history)
+
+---
+
+## 🚨 CRITICAL: Hook System Bug in Current Versions
+
+**⚠️ AS OF OCTOBER 30, 2025: Hooks are broken in Claude Code v2.0.27 and v2.0.29**
+
+**Source**: [GitHub Issue #10399](https://github.com/anthropics/claude-code/issues/10399) (OPEN, actively reported)
+
+### What's Broken
+
+Multiple hook types stopped executing completely:
+- ❌ **Stop hooks** - Don't fire when Claude finishes responding
+- ❌ **SessionEnd hooks** - Don't fire when session ends
+- ❌ **SessionStart hooks** - Don't fire when session starts
+- ❌ **PostToolUse hooks** - Don't fire after tool execution
+
+**Symptom**: Hooks silently fail to execute. No error messages. No output.
+
+**Pattern**: "Hooks worked perfectly until a few days ago" - multiple users across macOS and Windows
+
+### Working Version
+
+✅ **v2.0.25** - Hooks work correctly (confirmed by multiple users downgrading)
+
+### Check Your Version
+
+```bash
+claude --version
+```
+
+If you see v2.0.27 or v2.0.29, your hooks will not work without workaround.
+
+### Workaround: Use `--debug` Flag
+
+**Temporary fix discovered by community**:
+
+```bash
+claude --debug
+```
+
+**Why it works**: Hook initialization appears to be incorrectly gated behind debug-mode-only code paths in v2.0.27+
+
+**Create alias for convenience**:
+
+```bash
+# Add to ~/.zshrc or ~/.bashrc
+alias claude='claude --debug'
+```
+
+**Verify hooks work**:
+
+```bash
+# Create simple test hook
+mkdir -p ~/.claude/hooks
+cat > ~/.claude/hooks/test.sh << 'EOF'
+#!/bin/bash
+echo "🎉 Hook fired successfully!"
+EOF
+chmod +x ~/.claude/hooks/test.sh
+
+# Add to settings.json
+jq '.hooks.Stop = [{matcher: "*", hooks: [{type: "command", command: "~/.claude/hooks/test.sh"}]}]' ~/.claude/settings.json > tmp.json && mv tmp.json ~/.claude/settings.json
+
+# Launch with debug and test
+claude --debug
+# (Ask Claude something, when it finishes you should see "🎉 Hook fired successfully!")
+```
+
+### Downgrade Option (If Workaround Fails)
+
+**Not officially supported, but reported to work**:
+
+```bash
+# Backup current version
+cp $(which claude) ~/claude-backup
+
+# Install specific version (method depends on installation)
+# Homebrew:
+brew uninstall claude-code
+brew install claude-code@2.0.25  # If available
+
+# Or check Claude Code documentation for version pinning
+```
+
+### Impact on This Automation Plan
+
+**Phase 1** (Slash Commands + CLAUDE.md): ✅ **NOT AFFECTED** - No hooks used
+
+**Phase 2** (Skills + Hooks): 🚨 **CRITICALLY AFFECTED**
+- PostToolUse Hook automation **will not work** without workaround
+- Stop Hook context management **will not work** without workaround
+- SessionStart Hook **will not work** without workaround
+
+**Phase 3** (Advanced Hooks): 🚨 **CRITICALLY AFFECTED**
+- All hook-based automation requires `--debug` flag or downgrade
+
+### Recommended Action Plan
+
+**Option A: Wait for fix** (if not urgent)
+- Implement Phase 1 only (Slash Commands)
+- Monitor GitHub issue #10399 for resolution
+- Proceed to Phase 2 when bug is fixed
+
+**Option B: Use workaround** (proceed with automation)
+- Launch Claude Code with `--debug` flag always
+- Create alias: `alias claude='claude --debug'`
+- Proceed with Phase 2 implementation
+- Test hooks immediately to verify they work
+
+**Option C: Downgrade** (if workaround doesn't work)
+- Downgrade to v2.0.25
+- Proceed with full automation plan
+- Pin version to prevent auto-updates
+
+### Testing Checklist Before Phase 2
+
+**BEFORE implementing any hooks, verify they work**:
+
+1. Check version: `claude --version`
+2. If v2.0.27/v2.0.29:
+   - Launch with `--debug` flag
+   - Create test hook (see example above)
+   - Verify hook fires with "🎉" message
+3. If hook still doesn't fire:
+   - Consider downgrading to v2.0.25
+   - Or wait for official fix
+
+**DO NOT PROCEED TO PHASE 2 WITHOUT CONFIRMING HOOKS WORK**
+
+---
+
+## Common Implementation Mistakes
+
+**Context**: Based on community issues and official documentation, these are the most common failure modes when implementing Skills and Hooks.
+
+### Skills Mistakes
+
+**1. YAML Validation Errors**
+
+```yaml
+# ❌ WRONG - Invalid YAML
+---
+name: quality-reviewer
+description: |
+  Reviews code for quality
+  (missing closing quote somewhere in description)
+allowed-tools: Read
+---  # Missing second --- separator
+```
+
+**Fix**: Use online YAML validator (yamllint.com) before testing
+
+**Verify**:
+```bash
+yamllint ~/.claude/skills/*/SKILL.md
+```
+
+---
+
+**2. Description Too Long (>1024 chars)**
+
+**Problem**: Skill activates unreliably or not at all
+
+**Fix**:
+- Count chars in description field only (not entire file)
+- Move detailed instructions to separate .md files
+- Use progressive disclosure pattern (see "Skills Anti-Patterns" section above)
+
+**Check length**:
+```bash
+# Extract description field and count chars
+grep -A 50 "description: |" ~/.claude/skills/quality-reviewer/SKILL.md | wc -c
+```
+
+---
+
+**3. Missing Trigger Keywords**
+
+**Problem**: Skill never activates because Claude doesn't know when to use it
+
+**Fix**: Add explicit keywords from user's vocabulary:
+- "test" → testing skills
+- "implement", "fix", "add" → quality check skills
+- "PDF", "document" → document processing skills
+- File extensions (.ts, .test.js) → file-type-specific skills
+
+**Before**:
+```yaml
+description: |
+  Helps with architecture decisions.
+```
+
+**After**:
+```yaml
+description: |
+  Suggest ARCHITECTURE.md updates when discussing:
+  - Technology choices (keywords: database, state management, framework)
+  - Data model design (keywords: entity, relationship, schema)
+  - Patterns (keywords: error handling, API structure)
+```
+
+---
+
+**4. No Test of Activation**
+
+**Problem**: Skill created but never verified if it actually works
+
+**Fix**: Test immediately after creating:
+```
+# Create Skill
+~/.claude/skills/test-advisor/SKILL.md
+
+# Test activation
+You: "should I write unit tests or integration tests for this?"
+Expected: Test Advisor Skill activates
+Actual: [Document what happens]
+
+# Refine description based on test results
+```
+
+---
+
+### Hooks Mistakes
+
+**1. Hook Script Not Executable**
+
+```bash
+# Problem: Hook file created but no execute permission
+$ ls -la ~/.claude/hooks/quality-check.sh
+-rw-r--r-- ~/.claude/hooks/quality-check.sh
+
+# Symptom: Hook never fires, no error message
+
+# Fix: Make executable
+chmod +x ~/.claude/hooks/quality-check.sh
+
+# Verify
+ls -la ~/.claude/hooks/quality-check.sh
+-rwxr-xr-x ~/.claude/hooks/quality-check.sh
+```
+
+---
+
+**2. Wrong Matcher (Tool Name vs File Pattern)**
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "*.ts",  // ❌ WRONG - matcher is TOOL NAME, not file pattern
+      "hooks": [...]
+    }]
+  }
+}
+```
+
+**Fix**: Matcher is tool name (Write, Edit, Read, Bash, etc.), filter files inside command
+```json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Write",  // ✅ CORRECT - Tool name
+      "hooks": [{
+        "type": "command",
+        "command": "bash -c 'if [[ \"${CLAUDE_FILE_PATHS}\" =~ \\.ts$ ]]; then npm run lint; fi'"
+      }]
+    }]
+  }
+}
+```
+
+---
+
+**3. Exit Code Ignored (Tests Falsely Pass)**
+
+```bash
+# ❌ Problem: Claude reports "tests passed" but command failed
+command: "npm test"
+
+# Why: Hook doesn't check exit code, npm test fails silently
+
+# ✅ Fix: Check exit code explicitly
+command: "bash -c 'npm test 2>&1 | tee /tmp/test-output.txt; exit ${PIPESTATUS[0]}'"
+```
+
+**Key**: Use `${PIPESTATUS[0]}` to preserve npm test's exit code after piping to tee
+
+---
+
+**4. Output Lost / Not Visible**
+
+```bash
+# Problem: Hook runs but Claude doesn't see results
+command: "npm run lint > /dev/null 2>&1"
+
+# Fix: Ensure output goes to stdout/stderr (Claude captures both)
+command: "npm run lint 2>&1"
+
+# Or: Use tee to log AND display
+command: "npm run lint 2>&1 | tee /tmp/lint-output.txt"
+```
+
+---
+
+**5. Environment Variables Not Set**
+
+```bash
+# Problem: $CLAUDE_FILE_PATHS empty when expected
+command: "echo File: $CLAUDE_FILE_PATHS"
+# Output: "File: " (empty)
+
+# Debug: Check which variables are available
+command: "env | grep CLAUDE"
+
+# Available variables (PostToolUse):
+# CLAUDE_TOOL_NAME = "Write" or "Edit"
+# CLAUDE_FILE_PATHS = space-separated list of files
+
+# Available variables (PreToolUse):
+# CLAUDE_TOOL_INPUT = JSON input to tool
+# CLAUDE_TOOL_NAME = tool being called
+```
+
+---
+
+### Testing Checklist
+
+**Before deploying automation:**
+
+**Skills**:
+- [ ] YAML validates (yamllint)
+- [ ] Description <1024 chars
+- [ ] Includes specific trigger keywords
+- [ ] Tested positive case (should activate)
+- [ ] Tested negative case (should NOT activate)
+- [ ] Returns structured output documented
+
+**Hooks**:
+- [ ] Script executable (`chmod +x`)
+- [ ] Matcher is tool name (Write, Edit, etc.)
+- [ ] Exit code checked (`${PIPESTATUS[0]}`)
+- [ ] Output visible (stdout/stderr, not /dev/null)
+- [ ] Environment variables tested (`echo $CLAUDE_*`)
+- [ ] Hook fires on expected events (test manually)
+
+**Debugging Commands**:
+```bash
+# List all Skills
+ls -la ~/.claude/skills/
+
+# Validate YAML
+yamllint ~/.claude/skills/*/SKILL.md
+
+# Check hook permissions
+ls -la ~/.claude/hooks/
+
+# Test hook script manually
+bash -c 'export CLAUDE_FILE_PATHS="test.ts"; ~/.claude/hooks/quality-check.sh'
+
+# View hook configuration
+jq '.hooks' ~/.claude/settings.json
+
+# Check Skill description length
+grep -A 100 "description: |" ~/.claude/skills/quality-reviewer/SKILL.md | head -50 | wc -c
+```
+
+---
+
 ## Success Metrics
+
+**⚠️ UPDATED**: Targets revised based on realistic Skills activation rates (50-70%, not 100%)
 
 Track these before/after metrics:
 
-### Quantitative
+### Quantitative (Revised Targets)
 
 | Metric | Before | Target After Phase 1 | Target After Phase 2 | Target After Phase 3 |
 |--------|--------|---------------------|---------------------|---------------------|
-| Avg prompt length (chars) | 250 | 150 (-40%) | 100 (-60%) | 50 (-80%) |
-| Quality check prompts per session | 15 | 6 (-60%) | 3 (-80%) | 0 (-100%) |
-| Time to implementation (min) | 10 | 7 (-30%) | 5 (-50%) | 4 (-60%) |
-| Docs lookup prompts | 8 | 3 (-62%) | 1 (-87%) | 0 (-100%) |
+| Avg prompt length (chars) | 250 | 150 (-40%) | 125 (-50%) | 100 (-60%) |
+| Quality check prompts per session | 15 | 6 (-60%) | 5-8 (-50-65%) | 4-6 (-60-70%) |
+| Time to implementation (min) | 10 | 7 (-30%) | 6 (-40%) | 5 (-50%) |
+| Docs lookup prompts | 8 | 3 (-62%) | 2-3 (-62-75%) | 1-2 (-75-87%) |
+| **Skills activation rate** | N/A | N/A | **50-70%** | **60-75%** |
+| **Manual fallback usage** | N/A | N/A | **30-50%** | **25-40%** |
+
+**Key changes from original plan**:
+- ❌ Removed "0 (-100%)" targets - unrealistic with current Skills reliability
+- ✅ Added ranges reflecting 50-70% automation success rate
+- ✅ Added Skills activation rate tracking (critical metric)
+- ✅ Added manual fallback usage tracking
+
+**Why targets are conservative**:
+- Skills don't activate 100% of time (30-70% typical)
+- Hooks may fail in v2.0.27/v2.0.29 without workaround
+- Description tuning takes iterative refinement
+- User must remember slash commands when Skills don't fire
+
+### Quantitative Goals by Phase
+
+**Phase 1** (Slash Commands):
+- 60% reduction in prompt length (250 → 100 chars)
+- Baseline behavior established via CLAUDE.md
+- No automation (all manual, but shorter commands)
+
+**Phase 2** (Skills + Hooks):
+- 50-65% reduction in quality check prompts (15 → 5-8 per session)
+- Skills activate 50-70% of time (track weekly)
+- Slash commands provide fallback for 30-50% of cases
+- Hooks automate linting/testing (if working in your version)
+
+**Phase 3** (Advanced Automation):
+- 60-70% reduction in quality check prompts (15 → 4-6 per session)
+- Skills activation improves to 60-75% after description tuning
+- Manual fallback needed 25-40% of time
+- UserPromptSubmit Hook (optional) catches some missed activations
+
+**Target NOT 100% automation** - Accept that 25-40% will remain manual
 
 ### Qualitative
 
 - **Quality maintained**: No increase in bugs or refactoring needs
-- **Developer experience**: Feels faster, less repetitive
+- **Developer experience**: Feels faster, less repetitive *even with 30-50% manual*
 - **False positives**: <5% of hook/skill triggers are wrong
 - **Comprehensiveness**: Automated checks as thorough as manual
+- **Skill activation trending up**: Activation rate improves week-over-week
+- **Fallback workflow smooth**: Slash commands feel natural, not frustrating
 
-**Measure at**: Week 1 (Phase 1), Week 2 (Phase 2), Week 4 (Phase 3)
+**Measure at**: Week 1 (Phase 1), Week 2 (Phase 2), Week 4 (Phase 2 iteration), Week 6 (Phase 3)
 
 ---
 
@@ -1461,118 +2839,6 @@ Quality check includes:
 ✅ **Context-specific** - Only checks what's relevant to task
 
 **Rationale**: Static tables become stale immediately. Process-based discovery scales infinitely and self-updates via WebSearch.
-
----
-
-## Appendix: Additional Automation Opportunities
-
-**Context**: Analysis of all 13 guide files in `~/.claude/` to identify automation opportunities beyond the conversation pattern analysis.
-
-**Files analyzed**:
-1. CLAUDE.md
-2. code-philosophy.md
-3. tdd-templates.md
-4. testing-methodology.md
-5. llm-prompting.md
-6. claude-md-guide.md
-7. learning-extraction.md
-8. user-story-guide.md
-9. test-definitions-guide.md
-10. design-doc-guide.md
-11. architecture-guide.md
-12. data-architecture-guide.md
-13. llm-instruction-design.md
-
----
-
-### Automation Catalog
-
-**Implementation Note**: Detailed specs for Skills/Hooks/Commands have been condensed. Create full implementations when ready to use.
-
-#### Skills (17 Total)
-
-**Note**: Quality Reviewer split into 3 focused Skills per Anthropic best practices (keep Skills lean).
-
-| # | Name | Priority | Automates | Source Guides | File Path |
-|---|------|----------|-----------|---------------|-----------|
-| 1 | **Explore-First Enforcer** | ⭐⭐⭐⭐⭐ | Enforce Explore → Plan → Code workflow | Anthropic 2025 best practices | `~/.claude/skills/explore-first/SKILL.md` |
-| 2 | **Docs Verifier** | ⭐⭐⭐⭐⭐ | Check latest documentation (was part of Quality Reviewer) | code-philosophy, llm-prompting | `~/.claude/skills/docs-verifier/SKILL.md` |
-| 3 | **Standards Checker** | ⭐⭐⭐⭐⭐ | Validate project conventions (was part of Quality Reviewer) | code-philosophy, CLAUDE.md | `~/.claude/skills/standards-checker/SKILL.md` |
-| 4 | **Quality Gates** | ⭐⭐⭐⭐⭐ | Final review before Write/Edit (was part of Quality Reviewer) | code-philosophy, testing-methodology | `~/.claude/skills/quality-gates/SKILL.md` |
-| 5 | Context Manager | ⭐⭐⭐⭐ | Suggest /clear between tasks | Anthropic 2025 best practices | `~/.claude/skills/context-manager/SKILL.md` |
-| 6 | Feature Kickoff | ⭐⭐⭐⭐ | Auto-find user stories/test defs/design docs | CLAUDE.md | `~/.claude/skills/feature-kickoff/SKILL.md` |
-| 7 | Architecture Monitor | ⭐⭐⭐⭐ | Suggest ARCHITECTURE.md updates | architecture-guide, data-architecture-guide | `~/.claude/skills/architecture-monitor/SKILL.md` |
-| 8 | Learning Extraction Monitor | ⭐⭐⭐⭐ | Auto-suggest extracting learnings | learning-extraction | `~/.claude/skills/learning-monitor/SKILL.md` |
-| 9 | TDD Enforcer | ⭐⭐⭐ | Enforce tests BEFORE implementation | testing-methodology, Anthropic 2025 | `~/.claude/skills/tdd-enforcer/SKILL.md` |
-| 10 | Test Type Advisor | ⭐⭐⭐ | Suggest unit/integration/E2E/LLM eval | testing-methodology | `~/.claude/skills/test-advisor/SKILL.md` |
-| 11 | User Story Validator | ⭐⭐ | Validate against INVEST criteria | tdd-templates, user-story-guide | `~/.claude/skills/user-story-validator/SKILL.md` |
-| 12 | Test Definitions Validator | ⭐⭐ | Validate test definition quality | test-definitions-guide | `~/.claude/skills/test-defs-validator/SKILL.md` |
-| 13 | Design Doc Validator | ⭐⭐ | Check prerequisites, avoid duplication | design-doc-guide | `~/.claude/skills/design-doc-validator/SKILL.md` |
-| 14 | Architecture Doc Validator | ⭐⭐ | Validate required sections | architecture-guide | `~/.claude/skills/arch-doc-validator/SKILL.md` |
-| 15 | Data Architecture Validator | ⭐⭐ | Check data architecture quality | data-architecture-guide | `~/.claude/skills/data-arch-validator/SKILL.md` |
-| 16 | CLAUDE.md Quality Checker | ⭐⭐ | Detect anti-patterns in CLAUDE.md | claude-md-guide | `~/.claude/skills/claude-md-checker/SKILL.md` |
-| 17 | Documentation Quality Validator | ⭐⭐ | Validate LLM-consumable docs | llm-instruction-design | `~/.claude/skills/doc-validator/SKILL.md` |
-
-#### Hooks (4 Total)
-
-| # | Name | Priority | Automates | Configuration |
-|---|------|----------|-----------|---------------|
-| 1 | **Stop - Context Management** | ⭐⭐⭐⭐ | Suggest /clear after task completion | `settings.json` → Stop event → Outputs reminder |
-| 2 | PostToolUse - Test Runner | ⭐⭐⭐⭐ | Auto-run linters/tests after Write/Edit | `settings.json` → PostToolUse → Write/Edit matchers |
-| 3 | PostToolUse - Coverage Check | ⭐ | Check test coverage after running tests | `settings.json` → PostToolUse (optional) |
-| 4 | PostToolUse - Learning Reminder | ⭐ | Remind to extract learnings after bug fixes | `settings.json` → PostToolUse (optional) |
-
-#### Slash Commands (5 Total)
-
-| # | Name | Purpose | File Path |
-|---|------|---------|-----------|
-| 1 | /critique | Manual quality check shortcut | `~/.claude/commands/critique.md` |
-| 2 | /feature-start | Quick feature kickoff workflow | `~/.claude/commands/feature-start.md` |
-| 3 | /user-stories | Create user stories using template | `~/.claude/commands/user-stories.md` |
-| 4 | /test-defs | Create test definitions using template | `~/.claude/commands/test-defs.md` |
-| 5 | /design-doc | Create design doc using template | `~/.claude/commands/design-doc.md` |
-
-**Key Points**:
-- **Skills**: Model-invoked (Claude decides when to use based on description)
-- **Hooks**: Event-triggered (deterministic, run on tool use or prompt submission)
-- **Slash Commands**: User-invoked (explicit, manual shortcuts)
-
-**Full implementation details**: Create SKILL.md files following format in Approach 4 section (lines 349-425). Use Decision 8 (lines 1230-1377) for dynamic documentation discovery pattern.
-
----
-
-### Summary: Automation Mechanism Distribution
-
-**By Priority**:
-
-**Phase 2 (RECOMMENDED)**:
-- Quality Reviewer Skill ⭐⭐⭐⭐⭐
-- PostToolUse Hook (test runner) ⭐⭐⭐⭐
-
-**Phase 3 (OPTIONAL)**:
-- Feature Kickoff Skill ⭐⭐⭐⭐
-- Architecture Documentation Monitor Skill ⭐⭐⭐⭐
-- Learning Extraction Monitor Skill ⭐⭐⭐⭐
-- TDD Reminder Skill ⭐⭐⭐
-- Test Type Advisor Skill ⭐⭐⭐
-- Slash commands (/feature-start, /user-stories, /test-defs, /design-doc) ⭐⭐⭐
-
-**Phase 4+ (NICE TO HAVE)**:
-- User Story Validator Skill ⭐⭐
-- Test Definitions Validator Skill ⭐⭐
-- Design Doc Validator Skill ⭐⭐
-- Architecture Doc Validator Skill ⭐⭐
-- Data Architecture Doc Validator Skill ⭐⭐
-- CLAUDE.md Quality Checker Skill ⭐⭐
-- Documentation Quality Validator Skill ⭐⭐
-- PostToolUse Hook (coverage check) ⭐
-- PostToolUse Hook (learning extraction reminder) ⭐
-
-**Reference Material (No Automation Needed)**:
-- Most of tdd-templates.md (templates, examples)
-- Most of llm-prompting.md (prompt engineering principles)
-- Most of claude-md-guide.md (file structure guidance)
-- llm-instruction-design.md (meta-guide, used by Documentation Quality Validator)
 
 ---
 
