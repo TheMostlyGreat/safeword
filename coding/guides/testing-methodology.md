@@ -251,6 +251,46 @@ describe('Agent + State Integration', () => {
 
 ### 3. E2E Tests
 
+**Fail-Fast Configuration (CRITICAL for TDD):**
+
+Playwright must be configured to stop immediately on the first failure. This enables strict TDD workflow where you fix one test at a time.
+
+**Required `playwright.config.ts` settings:**
+```typescript
+export default defineConfig({
+  // Stop after first failure (fail-fast for TDD)
+  maxFailures: 1,
+  
+  // No retries - we want immediate feedback
+  retries: 0,
+  
+  // Sequential execution (one test at a time)
+  workers: 1,
+  fullyParallel: false,
+  
+  // Optional: Global teardown to force immediate exit
+  globalTeardown: './tests/global-teardown.ts',
+})
+```
+
+**Global teardown example (`tests/global-teardown.ts`):**
+```typescript
+async function globalTeardown() {
+  // Force immediate exit on first failure
+  setTimeout(() => {
+    process.exit(0)
+  }, 100)
+}
+
+export default globalTeardown
+```
+
+**Why fail-fast matters for TDD:**
+- **RED phase:** Write failing test → see it fail → commit
+- **GREEN phase:** Fix one test → see it pass → commit
+- **No distractions:** Don't see 10 failures when fixing test #1
+- **Faster feedback:** Know immediately if your fix worked
+
 **Example:**
 ```typescript
 // ✅ GOOD - Tests complete user flow
