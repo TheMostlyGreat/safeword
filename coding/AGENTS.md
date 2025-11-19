@@ -13,6 +13,14 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 - Design docs → `./agents/planning/design/`
 - Issue capture → `./agents/planning/issues/`
 
+**Archive completed work:** When planning docs are completed and no longer actively referenced, move to:
+- `./agents/planning/user-stories/archive/`
+- `./agents/planning/test-definitions/archive/`
+- `./agents/planning/design/archive/`
+- `./agents/planning/issues/archive/`
+
+**Why archive:** Prevents bloat in active planning folders while preserving history for reference.
+
 **Fallback:** If project uses `docs/` structure instead, follow existing convention.
 
 ---
@@ -68,6 +76,21 @@ planning_refs:
 2. Create/reference planning docs in ticket's `planning_refs`
 3. Follow standard Feature Development Workflow (user stories → test definitions → TDD)
 4. Update ticket status and work log as you progress
+5. When complete, **ask user to confirm** completion before archiving
+6. After user confirmation, move ticket to `./agents/tickets/completed/{id}-{feature-slug}.md`
+
+**CRITICAL:** NEVER mark ticket as `done` or archive without explicit user confirmation. User must verify:
+- All acceptance criteria met
+- All tests passing
+- Feature works as expected
+- No regressions introduced
+
+**Archiving:**
+- Completed tickets → `./agents/tickets/completed/`
+- Blocked/cancelled tickets → `./agents/tickets/archived/`
+- Active tickets stay in `./agents/tickets/`
+
+**Why confirm:** Prevents premature closure and ensures quality standards met.
 
 ---
 
