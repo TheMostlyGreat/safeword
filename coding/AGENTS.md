@@ -103,6 +103,18 @@ planning_refs:
 **When user requests a new feature or references an issue number:**
 
 **IN ORDER:**
+
+**0. Check for Ticket** (higher-level feature/epic tracking)
+
+   - Search `./agents/tickets/` for matching ticket file
+   - **If found:**
+     - Read ticket file
+     - Follow `planning_refs` to planning docs (user stories, test definitions, design doc)
+     - Update ticket's work log as you progress
+   - **If not found:**
+     - Assess scope: Multi-story feature or epic? → Offer to create ticket
+     - Simple task/bug fix? → Skip to planning docs (step 1)
+
 1. **User Stories** - Search `./agents/planning/user-stories/` or `docs/user-stories/`
 
    - Not found → Ask user if they exist elsewhere or offer to create
@@ -128,6 +140,12 @@ planning_refs:
    - Refactor while keeping tests green
    - **Workflow:** `@~/.agents/coding/guides/testing-methodology.md` (comprehensive TDD guidance and test type decision tree)
 
+5. **Update Ticket** (if applicable)
+   - Update work log with progress
+   - When work complete, update status to `done`
+   - **Ask user to confirm** completion (see Ticket System section)
+   - After confirmation, move to `./agents/tickets/completed/`
+
 **IMPORTANT:** Do not skip to implementation without user stories and test definitions. Follow TDD strictly.
 
 **Edge cases:**
@@ -135,6 +153,7 @@ planning_refs:
 - User stories exist but test definitions don't → Create test definitions before implementation
 - Test definitions exist but user stories don't → Ask if user stories needed
 - Neither exist → Create both before implementation
+- Ticket references non-existent planning docs → Create them first
 
 ---
 
