@@ -31,20 +31,24 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 
 **Location:** `./agents/tickets/`
 
+**Naming convention:** `{id}-{feature-slug}.md`
+- Example: `001-user-authentication.md`, `002-payment-flow.md`
+- Planning docs share same prefix: `001-user-authentication.md` in each planning subfolder
+
 **Structure:**
 ```markdown
 ---
-id: {number}
+id: 001
 status: todo|in_progress|done|blocked
-created: {ISO timestamp}
+created: 2025-01-19T14:30:00Z
 priority: low|medium|high
 planning_refs:
-  - ./agents/planning/user-stories/{feature}.md
-  - ./agents/planning/test-definitions/{feature}.md
-  - ./agents/planning/design/{feature}.md (if complex)
+  - ./agents/planning/user-stories/001-user-authentication.md
+  - ./agents/planning/test-definitions/001-user-authentication.md
+  - ./agents/planning/design/001-user-authentication.md (if complex)
 ---
 
-# {Feature Title}
+# User Authentication System
 
 ## Description
 {High-level feature description}
@@ -72,12 +76,16 @@ planning_refs:
 - **TodoWrite** = Task-level tracking within current work session
 
 **Workflow:**
-1. Create ticket in `./agents/tickets/{id}-{feature-slug}.md`
-2. Create/reference planning docs in ticket's `planning_refs`
-3. Follow standard Feature Development Workflow (user stories → test definitions → TDD)
-4. Update ticket status and work log as you progress
-5. When complete, **ask user to confirm** completion before archiving
-6. After user confirmation, move ticket to `./agents/tickets/completed/{id}-{feature-slug}.md`
+1. Create ticket: `./agents/tickets/{id}-{feature-slug}.md` (e.g., `001-user-authentication.md`)
+2. Create planning docs **with matching prefix**:
+   - `./agents/planning/user-stories/001-user-authentication.md`
+   - `./agents/planning/test-definitions/001-user-authentication.md`
+   - `./agents/planning/design/001-user-authentication.md` (if complex)
+3. Reference planning docs in ticket's `planning_refs` field
+4. Follow standard Feature Development Workflow (user stories → test definitions → TDD)
+5. Update ticket status and work log as you progress
+6. When complete, **ask user to confirm** completion before archiving
+7. After user confirmation, move ticket to `./agents/tickets/completed/001-user-authentication.md`
 
 **CRITICAL:** NEVER mark ticket as `done` or archive without explicit user confirmation. User must verify:
 - All acceptance criteria met

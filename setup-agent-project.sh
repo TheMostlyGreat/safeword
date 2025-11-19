@@ -165,21 +165,33 @@ Higher-level feature/epic tracking. Each ticket references planning docs.
 - `completed/` - Verified completed tickets (user confirmed)
 - `archived/` - Blocked or cancelled tickets
 
+## Naming Convention
+
+**Tickets:** `{id}-{feature-slug}.md`
+- Example: `001-user-authentication.md`, `002-payment-flow.md`
+
+**Planning docs share same prefix:**
+- User stories: `./agents/planning/user-stories/001-user-authentication.md`
+- Test definitions: `./agents/planning/test-definitions/001-user-authentication.md`
+- Design doc: `./agents/planning/design/001-user-authentication.md`
+
+This makes it easy to find all related docs by prefix.
+
 ## Format
 
 ```markdown
 ---
-id: {number}
+id: 001
 status: todo|in_progress|done|blocked
-created: {ISO timestamp}
+created: 2025-01-19T14:30:00Z
 priority: low|medium|high
 planning_refs:
-  - ./agents/planning/user-stories/{feature}.md
-  - ./agents/planning/test-definitions/{feature}.md
-  - ./agents/planning/design/{feature}.md (if complex)
+  - ./agents/planning/user-stories/001-user-authentication.md
+  - ./agents/planning/test-definitions/001-user-authentication.md
+  - ./agents/planning/design/001-user-authentication.md (if complex)
 ---
 
-# {Feature Title}
+# User Authentication System
 
 ## Description
 {High-level feature description}
