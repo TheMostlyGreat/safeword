@@ -24,7 +24,9 @@ echo "Setting up agent project structure..."
 # Create directory structure with archive folders
 mkdir -p "$AGENTS_DIR"/planning/{user-stories/{,archive},test-definitions/{,archive},design/{,archive},issues/{,archive}}
 mkdir -p "$AGENTS_DIR"/tickets/{,completed,archived}
-mkdir -p "$AGENTS_DIR"/{hooks,skills}
+
+# Create Claude Code directory structure
+mkdir -p "$PROJECT_ROOT/.claude"/{hooks,skills}
 
 # Create AGENTS.md at project root
 if [ "$USE_CLAUDE_CODE" = true ]; then
@@ -97,24 +99,24 @@ This global file contains the core workflow for all development tasks. Read it F
 EOF
 fi
 
-# Link global hooks if they exist
+# Link global hooks to .claude/hooks/ (for Claude Code)
 if [ -d "$GLOBAL_AGENTS_DIR/hooks" ]; then
-  echo "Linking global hooks..."
+  echo "Linking global hooks to .claude/hooks/..."
   for hook in "$GLOBAL_AGENTS_DIR/hooks"/*; do
     if [ -f "$hook" ]; then
-      ln -sf "$hook" "$AGENTS_DIR/hooks/$(basename "$hook")"
+      ln -sf "$hook" "$PROJECT_ROOT/.claude/hooks/$(basename "$hook")"
     fi
   done
 else
   echo "Note: Global hooks directory not found at $GLOBAL_AGENTS_DIR/hooks"
 fi
 
-# Link global skills if they exist
+# Link global skills to .claude/skills/ (for Claude Code)
 if [ -d "$GLOBAL_AGENTS_DIR/skills" ]; then
-  echo "Linking global skills..."
+  echo "Linking global skills to .claude/skills/..."
   for skill in "$GLOBAL_AGENTS_DIR/skills"/*; do
     if [ -d "$skill" ] || [ -f "$skill" ]; then
-      ln -sf "$skill" "$AGENTS_DIR/skills/$(basename "$skill")"
+      ln -sf "$skill" "$PROJECT_ROOT/.claude/skills/$(basename "$skill")"
     fi
   done
 else
@@ -268,8 +270,8 @@ echo "  /.agents/planning/issues/archive/           - Completed issues"
 echo "  /.agents/tickets/                           - Active tickets"
 echo "  /.agents/tickets/completed/                 - Verified completed tickets"
 echo "  /.agents/tickets/archived/                  - Blocked/cancelled tickets"
-echo "  /.agents/hooks/                             - Symlinked from ~/.agents/coding/hooks"
-echo "  /.agents/skills/                            - Symlinked from ~/.agents/coding/skills"
+echo "  /.claude/hooks/                             - Symlinked from ~/.agents/coding/hooks"
+echo "  /.claude/skills/                            - Symlinked from ~/.agents/coding/skills"
 echo "  .gitignore                                  - Updated to exclude .agents/"
 echo ""
 echo "Next steps:"
