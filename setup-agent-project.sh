@@ -136,6 +136,17 @@ cat > "$AGENTS_DIR/planning/README.md" << 'EOF'
 - `issues/` - Issue tracking and requirements
   - `issues/archive/` - Completed/obsolete issues
 
+## Naming Convention
+
+**Planning docs share the same prefix as their ticket:**
+
+Example for ticket `001-user-authentication.md`:
+- `user-stories/001-user-authentication.md`
+- `test-definitions/001-user-authentication.md`
+- `design/001-user-authentication.md`
+
+This makes it easy to find all related docs: `ls **/001-user-authentication.md`
+
 ## Archiving
 
 When planning docs are completed and no longer actively referenced:
