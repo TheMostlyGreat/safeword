@@ -29,7 +29,7 @@ Examples:
 - **Elegant code and architecture** - Prioritize developer experience
 - **AVOID BLOAT** - Simple, focused solutions over complex ones
 - **Self-documenting code** - Minimal inline comments, clear naming and structure
-- **Fail fast** - Explicit error handling, NEVER suppress or swallow errors silently
+- **Explicit error handling** - NEVER suppress or swallow errors silently
 
 ## Documentation Verification (CRITICAL)
 - **Always look up current documentation** for libraries, tools, and frameworks

@@ -1,6 +1,6 @@
 # Writing Instructions for LLMs
 
-**Context:** When creating documentation that LLMs will read and follow (like CLAUDE.md, testing guides, coding standards), different best practices apply than when prompting an LLM directly.
+**Context:** When creating documentation that LLMs will read and follow (like AGENTS.md, CLAUDE.md, testing guides, coding standards), different best practices apply than when prompting an LLM directly.
 
 ## Core Principles
 

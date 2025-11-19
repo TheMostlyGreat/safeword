@@ -1,66 +1,87 @@
-# CLAUDE.md File Structure & Maintenance
+# AGENTS.md File Structure & Maintenance
 
-## When to Create CLAUDE.md Files
+## When to Create AGENTS.md Files
 
-**Root file** (`/CLAUDE.md`) - Always create for projects
+**Root file** (`/AGENTS.md`) - Always create for projects
+- **CRITICAL:** Must link to global AGENTS.md at the top (see Global AGENTS.md Linking below)
 - Architecture decisions with "why" (not just "what")
 - Design philosophy and conventions
 - Common gotchas specific to this codebase
 - Cross-references to subdirectory files
 
 **Subdirectory files** - Create when:
-- Directory has complex, non-obvious conventions (e.g., `tests/AGENTS.md`, `agents/CLAUDE.md`)
+- Directory has complex, non-obvious conventions (e.g., `tests/AGENTS.md`, `agents/AGENTS.md`)
 - >3 unique rules that don't fit in root
 - Working in that directory needs specialized context
 - **Skip if:** Directory is straightforward or already covered in root
 
 **Naming convention:**
-- Use `AGENTS.md` for cross-agent compatibility (tests, docs, etc.)
-- Use `CLAUDE.md` for Claude-specific guidance (agents, skills, etc.)
+- Use `AGENTS.md` for cross-agent compatibility (tests, docs, most projects)
+- Use `CLAUDE.md` for Claude-specific guidance (agents, skills, Claude Code features)
+- Both are valid - choose based on your tool ecosystem
 
-## Claude Code Auto-Loading Behavior
+## Global AGENTS.md Linking
+
+**MANDATORY:** Every project-level AGENTS.md must start with a link to the global AGENTS.md:
+
+```markdown
+# Project Name - Developer Context
+
+**CRITICAL: Before proceeding, ALWAYS read the global agent instructions:**
+**→ `~/.agents/coding/AGENTS.md`**
+
+This global file contains the core workflow for all development tasks. Read it FIRST, then return here for project-specific context.
+
+---
+
+[Rest of project-specific content...]
+```
+
+**Why:** The global AGENTS.md contains universal workflows (TDD, feature development, etc.) that apply across all projects. Project files should only contain project-specific context.
+
+## Agent Context Auto-Loading Behavior
 
 **How Context Loading Works:**
 
-1. **Root CLAUDE.md** - Always loaded for the project
-2. **Subdirectory CLAUDE.md** - Loaded when working in that directory
+1. **Root AGENTS.md** - Always loaded for the project
+2. **Subdirectory AGENTS.md** - Loaded when working in that directory
 3. **Hierarchical loading** - Root + subdirectory both active when in subdirectory
 
 **Example:**
 ```
 Working in: /project/src/agents/rules-narrative-agent.ts
 Loaded context:
-  ✓ /project/CLAUDE.md (architecture decisions)
-  ✓ /project/src/agents/CLAUDE.md (prompt engineering)
+  ✓ /project/AGENTS.md (architecture decisions)
+  ✓ /project/src/agents/AGENTS.md (prompt engineering)
 ```
 
 **Design implication:** Subdirectory files should assume root context is available
-- Use "See root CLAUDE.md for architecture" cross-references
+- Use "See root AGENTS.md for architecture" cross-references
 - Don't duplicate root content in subdirectory files
 - Focus subdirectory files on specialized conventions for that area
 
-**Reliability note:** Auto-loading works best when you explicitly reference CLAUDE.md in conversation ("following the guidelines in CLAUDE.md"). Implicit automatic reference can be less reliable.
+**Reliability note:** Auto-loading works best when you explicitly reference AGENTS.md in conversation ("following the guidelines in AGENTS.md"). Implicit automatic reference can be less reliable.
 
-**Deprecated:** CLAUDE.local.md is no longer recommended - use imports instead for better multi-worktree support
+**Deprecated:** AGENTS.local.md is no longer recommended - use imports instead for better multi-worktree support
 
 ## File Structure Pattern
 
 ```
 project/
-├─ CLAUDE.md                    # 100-200 lines: architecture, design philosophy
-├─ src/agents/CLAUDE.md         # 100-200 lines: prompt engineering (if complex)
+├─ AGENTS.md                    # 100-200 lines: architecture, design philosophy
+├─ src/agents/AGENTS.md         # 100-200 lines: prompt engineering (if complex)
 └─ tests/AGENTS.md              # 60-100 lines: test conventions (cross-agent)
 ```
 
 **Modular Approach (Recommended):**
 ```
 project/
-├─ CLAUDE.md                    # 50 lines: imports + structure
+├─ AGENTS.md                    # 50 lines: imports + structure
 ├─ docs/architecture.md         # 100 lines: architecture decisions
 └─ docs/conventions.md          # 80 lines: coding conventions
 ```
 
-Main CLAUDE.md imports modules:
+Main AGENTS.md imports modules:
 ```markdown
 @docs/architecture.md
 @docs/conventions.md
@@ -71,6 +92,7 @@ Main CLAUDE.md imports modules:
 **Include:**
 - "Why" over "what" - Explain architectural trade-offs, not features
 - Project-specific conventions - Unique to THIS codebase
+- Domain requirements - Specialized knowledge (game mechanics, industry standards, UX patterns)
 - Concrete examples - Good vs bad patterns
 - Gotchas - Common mistakes developers make HERE
 - Cross-references - Link to subdirectories, don't duplicate
@@ -96,7 +118,7 @@ Main CLAUDE.md imports modules:
 ## Anti-Patterns to Avoid
 
 ❌ **Redundancy between root and subdirectory files** (#1 source of bloat)
-- Don't list all stores in root if packages/web/CLAUDE.md covers them
+- Don't list all stores in root if packages/web/AGENTS.md covers them
 - Don't document testing patterns in root if tests/AGENTS.md exists
 - Don't repeat gotchas - reference subdirectory for details
 - Each fact stated exactly once, use cross-references elsewhere
@@ -137,12 +159,12 @@ Main CLAUDE.md imports modules:
 
 **Root file:**
 ```markdown
-**Agents** (`app/src/agents/`) - LLM logic. See `agents/CLAUDE.md`.
+**Agents** (`app/src/agents/`) - LLM logic. See `agents/AGENTS.md`.
 ```
 
 **Subdirectory file:**
 ```markdown
-**Context:** Working with AI agents. See root `CLAUDE.md` for architecture.
+**Context:** Working with AI agents. See root `AGENTS.md` for architecture.
 ```
 
 **Import pattern:**
@@ -162,7 +184,7 @@ Details in @docs/git-workflow.md
 ```
 
 **Import features:**
-- **Relative paths:** `@docs/file.md` (relative to CLAUDE.md location)
+- **Relative paths:** `@docs/file.md` (relative to AGENTS.md location)
 - **Absolute paths:** `@/path/to/file.md`
 - **Home directory:** `@~/.agents/coding/guides/file.md` (personal conventions across all projects)
 - **Recursive imports:** Imported files can import others (max depth: 5 hops)
@@ -172,7 +194,14 @@ Details in @docs/git-workflow.md
 ## Example: Well-Structured Root
 
 ```markdown
-# Project Name - Project Context
+# Project Name - Developer Context
+
+**CRITICAL: Before proceeding, ALWAYS read the global agent instructions:**
+**→ `~/.agents/coding/AGENTS.md`**
+
+This global file contains the core workflow for all development tasks. Read it FIRST, then return here for project-specific context.
+
+---
 
 Brief description. Current status.
 
@@ -188,11 +217,29 @@ Brief description. Current status.
 **Trade-off:** Harder to debug, but worth it for UX
 **Gotcha:** Must do Z or it breaks
 
+## Domain Requirements
+
+### Game Mechanics (Blades in the Dark)
+- Position/effect system (rulebook p.8-12)
+- Fiction-first approach
+
+**Key principles:**
+- Position telegraphed before roll
+- Consequences flow from fiction
+
+### Document Editor UX
+- Performance <16ms per keystroke
+- Standard OS text editing conventions
+
+**Key principles:**
+- Fast is a feature
+- Don't reinvent native behavior
+
 ## Common Gotchas
 1. **Thing:** Why it breaks (see Design Philosophy → Section)
 
 ## File Organization
-**Dir** (`path/`) - Purpose. See `path/CLAUDE.md`.
+**Dir** (`path/`) - Purpose. See `path/AGENTS.md`.
 ```
 
 ## Maintenance
@@ -206,13 +253,98 @@ Brief description. Current status.
 
 ---
 
+## Domain Requirements Section (Optional)
+
+**When to add:**
+- Project has specialized domain knowledge (game mechanics, industry standards, UX patterns)
+- Domain concerns are non-obvious from codebase alone
+- You find yourself repeatedly explaining domain rules to AI
+
+**When to skip:**
+- Domain is obvious from code structure (REST API patterns)
+- Tech stack IS the domain (generic CRUD app)
+- Simple projects without specialized knowledge
+
+**Structure (easy to parse):**
+```markdown
+## Domain Requirements
+
+### [Domain Name 1]
+- [Key principle or rule]
+- [Key principle or rule]
+- [Resource reference if applicable]
+
+**Key principles:**
+- [Specific guideline with rationale]
+- [Specific guideline with rationale]
+
+### [Domain Name 2]
+- [Key principle or rule]
+- [Key principle or rule]
+
+**Key principles:**
+- [Specific guideline with rationale]
+```
+
+**Examples:**
+
+```markdown
+## Domain Requirements
+
+### Blades in the Dark Mechanics
+- Position/effect system (BITD rulebook p.8-12)
+- Stress and harm tracking (p.13-15)
+- Downtime and long-term projects (p.16-20)
+
+**Key principles:**
+- Fiction drives mechanics (not dice → narrative)
+- Position must be telegraphed before roll
+- Effect established collaboratively with player
+- Consequences flow from fiction, not arbitrary
+
+### Document Editor UX
+- Text editing performance (<16ms per keystroke)
+- Undo/redo granularity (word-level, not character)
+- Selection handling (standard OS conventions)
+
+**Key principles:**
+- Performance over features (fast is a feature)
+- Native OS behavior (don't reinvent text editing)
+- Accessibility first (screen readers, keyboard nav)
+
+### Conversational AI Patterns
+- GM tone: Collaborative, not dictatorial
+- Player agency: Always offer meaningful choices
+- Emergent narrative: Build on player ideas
+
+**Key principles:**
+- Ask questions, don't declare outcomes
+- "Yes, and..." over "No, but..."
+- Telegraph consequences before they happen
+```
+
+**Why this structure:**
+- ✅ **Easy to parse** - Simple markdown hierarchy (##, ###, bullets)
+- ✅ **Scannable** - Domain names as headers, principles as bullets
+- ✅ **Rationale included** - Explains "why" not just "what"
+- ✅ **Resource references** - Links to rulebooks, docs, standards
+- ✅ **Concrete** - Specific guidelines, not vague advice
+
+**Integration with auto-quality-review hook:**
+- Hook prompts: "Does it adhere to... domain requirements?"
+- Claude checks AGENTS.md/CLAUDE.md for Domain Requirements section
+- If present → Reviews against documented principles
+- If absent → Infers domain from context as usual
+
+---
+
 ## Writing for LLM Comprehension
 
-**Critical:** CLAUDE.md files are instructions consumed by LLMs.
+**Critical:** AGENTS.md files are instructions consumed by LLMs.
 
 **See:** `@~/.agents/coding/guides/llm-instruction-design.md` for 13 core principles for writing LLM-consumable documentation.
 
-### Quality Checklist for CLAUDE.md
+### Quality Checklist for AGENTS.md
 
 Before committing:
 
@@ -240,10 +372,10 @@ Before committing:
 - Periodically review and refactor for clarity
 - At Anthropic, teams use prompt improver to tune instructions
 - Add emphasis ("IMPORTANT", "YOU MUST") for critical rules
-- Explicitly reference CLAUDE.md in prompts ("following CLAUDE.md guidelines") for better adherence
+- Explicitly reference AGENTS.md in prompts ("following AGENTS.md guidelines") for better adherence
 
 **Token Budget:**
-- CLAUDE.md prepended to every prompt - consumes context with each interaction
+- AGENTS.md prepended to every prompt - consumes context with each interaction
 - Bloated files cost more tokens and introduce noise
 - Keep under 50KB for optimal performance (though no hard limit)
 - Use imports to modularize instead of monolithic files

@@ -127,7 +127,7 @@
 
 ### 3. Data Policies
 
-**Document:** Access control (who reads/writes), validation rules (fail fast), lifecycle (creation, updates, deletion, purging).
+**Document:** Access control (who reads/writes), validation rules, lifecycle (creation, updates, deletion, purging).
 
 ### 4. Data Integration
 
@@ -171,4 +171,4 @@ Before finalizing data architecture doc:
 - [ ] Performance targets use concrete numbers (<Nms, not "fast")
 - [ ] Migration strategy covers both additive and breaking changes
 - [ ] Version and status match codebase (verify with git/deployment)
-- [ ] Cross-referenced from root ARCHITECTURE.md or CLAUDE.md (link exists)
+- [ ] Cross-referenced from root ARCHITECTURE.md or AGENTS.md (link exists)

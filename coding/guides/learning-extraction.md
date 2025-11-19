@@ -48,7 +48,7 @@ Extract after experiencing ANY of these:
 1. Explicit user instruction (highest priority)
 2. Project `./agents/learnings/` (project-specific)
 3. Global `~/.agents/coding/learnings/` (personal defaults)
-4. Project `./CLAUDE.md` → Common Gotchas (inline reference)
+4. Project `./AGENTS.md` → Common Gotchas (inline reference)
 
 ---
 
@@ -168,14 +168,14 @@ Just learned something valuable
 │  └─ THIS PROJECT ONLY
 │     │
 │     ├─ Architectural? (why we chose X over Y)
-│     │  └─ YES → Add to: CLAUDE.md "Architecture Decisions"
+│     │  └─ YES → Add to: AGENTS.md "Architecture Decisions"
 │     │
 │     ├─ Short gotcha? (1-2 sentences + code snippet)
-│     │  └─ YES → Add to: CLAUDE.md "Common Gotchas"
+│     │  └─ YES → Add to: AGENTS.md "Common Gotchas"
 │     │
 │     └─ Needs examples/explanation?
 │        └─ YES → Extract to: ./agents/learnings/[concept].md
-│           Then cross-reference in CLAUDE.md
+│           Then cross-reference in AGENTS.md
 ```
 
 ---
@@ -250,11 +250,11 @@ Actual: [What happened]
 
 ---
 
-## CLAUDE.md Integration
+## AGENTS.md Integration
 
-**CRITICAL**: ALWAYS cross-reference in CLAUDE.md after creating learning file.
+**CRITICAL**: ALWAYS cross-reference in AGENTS.md after creating learning file.
 
-After extracting to `agents/learnings/`, add cross-reference in CLAUDE.md:
+After extracting to `agents/learnings/`, add cross-reference in AGENTS.md:
 
 ```markdown
 ## Common Gotchas
@@ -285,13 +285,13 @@ Project-specific gotchas in `agents/learnings/`:
 
 ---
 
-### ✅ Project Architecture (CLAUDE.md)
+### ✅ Project Architecture (AGENTS.md)
 
 **Learning:** "Why Zustand over Redux?"
 
-**Why CLAUDE.md:** Architectural decision unique to this project
+**Why AGENTS.md:** Architectural decision unique to this project
 
-**Location:** `CLAUDE.md` → Architecture Decisions section
+**Location:** `AGENTS.md` → Architecture Decisions section
 
 ```markdown
 ### Why Zustand over Redux/MobX?
@@ -318,7 +318,7 @@ Project-specific gotchas in `agents/learnings/`:
 
 **File:** `agents/learnings/persistent-ui.md`
 
-**Cross-ref:** Link from `CLAUDE.md` → Common Gotchas
+**Cross-ref:** Link from `AGENTS.md` → Common Gotchas
 
 ---
 
@@ -330,7 +330,7 @@ Project-specific gotchas in `agents/learnings/`:
 
 **File:** `agents/learnings/archive/electron-build-forgotten.md`
 
-**Note:** Short gotcha goes in CLAUDE.md: "Electron tests use built files - run `npm run build` first"
+**Note:** Short gotcha goes in AGENTS.md: "Electron tests use built files - run `npm run build` first"
 
 ---
 
@@ -392,13 +392,13 @@ Project-specific gotchas in `agents/learnings/`:
 2. **Assess scope** - Forward-looking? (YES) Global or project? (Project)
 3. **Choose location** - Needs examples → `agents/learnings/race-conditions.md`
 4. **Extract** - Use template, write before/after examples
-5. **Cross-reference** - Add to CLAUDE.md Common Gotchas
+5. **Cross-reference** - Add to AGENTS.md Common Gotchas
 
 ### After Completing Feature
 
 1. **Review** - Did we learn anything reusable?
 2. **Extract** - If threshold met (>30min debug, non-obvious pattern)
-3. **Update** - Add CLAUDE.md cross-reference if needed
+3. **Update** - Add AGENTS.md cross-reference if needed
 4. **Commit** - Include learning in commit message
 
 ---
@@ -431,7 +431,7 @@ Project-specific gotchas in `agents/learnings/`:
 ❌ **Keeping obsolete learnings**
 - Remove when technology deprecated or pattern no longer used
 - Archive instead of delete (move to archive/ with "OBSOLETE:" prefix)
-- Update CLAUDE.md references to point to replacement learning
+- Update AGENTS.md references to point to replacement learning
 - Example: "React class components gotchas" → OBSOLETE when project migrates to hooks
 
 ---
@@ -441,9 +441,9 @@ Project-specific gotchas in `agents/learnings/`:
 | Situation | Location | Example |
 |-----------|----------|---------|
 | Universal principle | `~/.agents/coding/learnings/` | React hooks, Electron patterns |
-| Architecture decision | `CLAUDE.md` → Architecture | Why Zustand? Why Electron-only? |
-| Short gotcha | `CLAUDE.md` → Gotchas | "Validate paths before file ops" |
-| Detailed gotcha | `agents/learnings/` + CLAUDE.md ref | Persistent UI, race conditions |
+| Architecture decision | `AGENTS.md` → Architecture | Why Zustand? Why Electron-only? |
+| Short gotcha | `AGENTS.md` → Gotchas | "Validate paths before file ops" |
+| Detailed gotcha | `agents/learnings/` + AGENTS.md ref | Persistent UI, race conditions |
 | One-time bug | `agents/learnings/archive/` | Forgot to build before testing |
 
 ---
@@ -494,8 +494,8 @@ This is a **living process** - iterate and refine based on what works.
 **Decision Framework**:
 1. **Forward-looking?** → Extract (helps future work)
 2. **Global or project?** → Choose directory
-3. **Architectural or gotcha?** → Choose CLAUDE.md or separate file
-4. **ALWAYS cross-reference** → Update CLAUDE.md
+3. **Architectural or gotcha?** → Choose AGENTS.md or separate file
+4. **ALWAYS cross-reference** → Update AGENTS.md
 
 **Continuous Improvement**:
 - Monthly: Review existing learnings for relevance
@@ -512,4 +512,4 @@ This is a **living process** - iterate and refine based on what works.
 - Remove when technology deprecated or pattern no longer used
 - Refactor when multiple learnings cover similar topics (consolidate)
 - Split when learning file >200 lines (focus on single concept)
-- Update CLAUDE.md references when learnings move or merge
+- Update AGENTS.md references when learnings move or merge

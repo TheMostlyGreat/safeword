@@ -4,7 +4,7 @@ This guide covers two related topics:
 
 **Part 1: Prompting LLMs** - How to structure prompts when actively using an LLM (API calls, chat interactions)
 
-**Part 2: Writing Instructions for LLMs** - How to write documentation that LLMs will read and follow (CLAUDE.md, testing guides, coding standards)
+**Part 2: Writing Instructions for LLMs** - How to write documentation that LLMs will read and follow (AGENTS.md, CLAUDE.md, testing guides, coding standards)
 
 ---
 
@@ -76,7 +76,7 @@ systemPrompt: `Rules + Character: ${dynamicState}`
 
 **Comprehensive framework:** See @~/.agents/coding/guides/llm-instruction-design.md
 
-**Quick summary:** When creating documentation that LLMs will read and follow (CLAUDE.md, testing guides, coding standards), apply 13 core principles:
+**Quick summary:** When creating documentation that LLMs will read and follow (AGENTS.md, CLAUDE.md, testing guides, coding standards), apply 13 core principles:
 
 1. **MECE Principle** - Decision trees must be mutually exclusive and collectively exhaustive
 2. **Explicit Over Implicit** - Define all terms, never assume LLMs know what you mean
