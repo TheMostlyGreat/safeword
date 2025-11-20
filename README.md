@@ -10,10 +10,16 @@ Personal knowledge base for AI coding agents (Claude Code, Cursor, etc.)
 
 ```
 ~/.agents/coding/
-├── guides/      (12 files - core methodology)
-├── templates/   (3 files - fillable documents)
-├── learnings/   (extracted knowledge from debugging/implementation)
-└── analysis/    (4 files - automation research & planning)
+├── guides/           Core methodology and best practices
+├── templates/        Fillable document structures
+├── learnings/        Extracted knowledge from experience
+├── planning/         Planning documentation
+│   ├── user-stories/
+│   ├── test-definitions/
+│   ├── design/
+│   └── issues/
+├── hooks/            Automation scripts
+└── skills/           Specialized agent capabilities
 ```
 
 ---
@@ -52,8 +58,9 @@ Personal knowledge base for AI coding agents (Claude Code, Cursor, etc.)
 | Guide | Purpose | When to Read |
 |-------|---------|--------------|
 | **llm-prompting.md** | Prompt engineering, LLM cost optimization, caching | Building AI features |
-| **llm-instruction-design.md** | 13 principles for LLM-consumable docs (MECE, examples) | Creating CLAUDE.md/guides |
-| **claude-md-guide.md** | CLAUDE.md structure, anti-patterns, modular approach | Setting up projects |
+| **llm-instruction-design.md** | 13 principles for LLM-consumable docs (MECE, examples) | Creating AGENTS.md/guides |
+| **agents-md-guide.md** | AGENTS.md structure, anti-patterns, modular approach | Setting up projects |
+| **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation | Managing dev servers |
 
 ---
 
@@ -87,25 +94,48 @@ Personal knowledge base for AI coding agents (Claude Code, Cursor, etc.)
 - React hooks async behavior
 - Electron IPC patterns
 - Browser storage quota quirks
+- E2E test zombie processes
+- ProseMirror fragment traversal
 
 ---
 
-## Analysis
+## Planning
 
-**Purpose**: One-time research documents (reference/planning)
+**Purpose**: Feature planning and design documentation
 
-| Document | Purpose |
-|----------|---------|
-| **automation-plan.md** | Claude Code automation opportunities (Skills, Hooks, Slash Commands) |
-| **mcp-analysis.md** | MCP servers vs Skills for quality automation |
-| **phase2-subagents-vs-skills-analysis.md** | Subagents vs Skills comparison |
-| **settings-improvements.md** | settings.json optimization for auto-approval |
+**Structure**:
+```
+coding/planning/
+├── user-stories/       User story documents
+├── test-definitions/   Test definition documents
+├── design/            Design docs and research
+└── issues/            Issue capture and tracking
+```
+
+Each directory has an `archive/` subfolder for completed work.
+
+**What goes here**:
+- User stories for features
+- Test definitions for TDD workflow
+- Design documents for complex features
+- Research and analysis documents
+- Issue tracking and capture
+
+---
+
+## Hooks & Skills
+
+**Hooks**: Automation scripts triggered by Claude Code events
+- `auto-quality-review.sh` - Automated quality control on responses
+
+**Skills**: Specialized agent capabilities
+- `quality-reviewer/` - Deep code quality review with web research
 
 ---
 
 ## Usage
 
-### Reference Guides in CLAUDE.md
+### Reference Guides in AGENTS.md
 
 ```markdown
 # Import guides
@@ -136,50 +166,25 @@ ls ~/.agents/coding/learnings/*electron*.md
 2. Create `~/.agents/coding/learnings/[concept].md`
 3. Use template: Problem → Gotcha → Examples → Testing Trap
 
+### Create Planning Documentation
+
+```bash
+# User stories
+cd ~/.agents/coding/planning/user-stories
+touch feature-name.md
+
+# Test definitions
+cd ~/.agents/coding/planning/test-definitions
+touch feature-name.md
+
+# Design docs
+cd ~/.agents/coding/planning/design
+touch feature-name.md
+```
+
 ---
 
-## Maintenance
-
-### Adding New Content
-
-**New guide**: Create in `coding/guides/`, reference from CLAUDE.md
-```bash
-cd ~/.agents/coding/guides
-touch new-guide.md
-# Add to CLAUDE.md: @~/.agents/coding/guides/new-guide.md
-```
-
-**New learning**: Create in `coding/learnings/`, update this README
-```bash
-cd ~/.agents/coding/learnings
-touch [concept].md
-# Document pattern, anti-pattern, examples
-```
-
-**New analysis**: Create in `coding/analysis/`
-```bash
-cd ~/.agents/coding/analysis
-touch new-analysis.md
-# Research, planning, evaluation documents
-```
-
-### Reviewing Content
-
-**Monthly**: Review existing learnings for relevance
-- Remove obsolete (technology deprecated, pattern no longer used)
-- Update outdated examples
-- Consolidate similar learnings
-
-**Quarterly**: Archive analysis docs when work complete
-- Move completed automation work to archive/
-- Keep active planning/research in analysis/
-
-**Per feature**: After major features, assess new learnings
-- Did we discover reusable patterns?
-- Should extraction be suggested?
-- Update guides if methodology evolved
-
-### Syncing Across Machines
+## Syncing Across Machines
 
 ```bash
 cd ~/.agents
@@ -191,26 +196,13 @@ git push origin main   # Push to GitHub
 
 ---
 
-## Quick Reference: File Counts
+## Integration with AGENTS.md
 
-| Directory | Files | Purpose |
-|-----------|-------|---------|
-| `guides/` | 12 | Core methodology (all projects) |
-| `templates/` | 3 | Fillable structures (features) |
-| `learnings/` | Variable | Extracted knowledge (debugging) |
-| `analysis/` | 4 | Research & planning (reference) |
-
-**Total size**: ~130 KB (guides) + ~125 KB (analysis) = ~255 KB
-
----
-
-## Integration with CLAUDE.md
-
-**CLAUDE.md location**: `~/.claude/CLAUDE.md` (stays in Claude Code directory)
+**AGENTS.md location**: `~/.claude/AGENTS.md` (symlinked to `coding/AGENTS.md`)
 
 **How it works**:
-1. CLAUDE.md imports 6 core guides via `@~/.agents/coding/guides/`
-2. CLAUDE.md references templates via `@~/.agents/coding/templates/`
+1. AGENTS.md imports core guides via `@~/.agents/coding/guides/`
+2. AGENTS.md references templates via `@~/.agents/coding/templates/`
 3. Guides cross-reference each other via `@~/.agents/coding/guides/`
 4. Learnings referenced via `ls ~/.agents/coding/learnings/`
 
@@ -223,9 +215,10 @@ git push origin main   # Push to GitHub
 1. **Guides** - Reusable methodology (test pyramid, TDD workflow)
 2. **Templates** - Fillable structures (user stories, test definitions)
 3. **Learnings** - Extracted knowledge (gotchas, discoveries)
-4. **Analysis** - One-time research (automation planning, evaluations)
+4. **Planning** - Feature planning and design (user stories, test definitions, design docs)
+5. **Hooks/Skills** - Automation and specialized capabilities
 
-**Living Documentation**: Update frequently, archive obsolete content, consolidate when needed
+**Living Documentation**: Update as you learn, archive completed work, consolidate when needed
 
 **Cross-Agent Compatible**: Works with Claude Code, Cursor, and other AI coding agents
 
@@ -236,8 +229,3 @@ git push origin main   # Push to GitHub
 - **Claude Code docs**: https://docs.claude.com/en/docs/claude-code
 - **Issues**: https://github.com/anthropics/claude-code/issues
 - **This repo**: https://github.com/TheMostlyGreat/agents (private)
-
----
-
-**Last Updated**: 2025-10-26
-**Version**: 1.0

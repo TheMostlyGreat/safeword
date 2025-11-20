@@ -302,18 +302,20 @@ planning_refs:
 
 At the end of EVERY response, include a JSON summary with this exact structure:
 ```json
-{"proposedChanges": boolean, "madeChanges": boolean}
+{"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}
 ```
 
 Where:
 - `proposedChanges`: `true` if you suggested/proposed changes to specific files in your response
 - `madeChanges`: `true` if you actually modified files using Write/Edit tools
+- `askedQuestion`: `true` if you asked the user a question and need their response before proceeding
 
 Examples:
-- Discussed approach only: `{"proposedChanges": false, "madeChanges": false}`
-- Proposed edits but waiting for approval: `{"proposedChanges": true, "madeChanges": false}`
-- Made edits directly: `{"proposedChanges": false, "madeChanges": true}`
-- Proposed AND made edits: `{"proposedChanges": true, "madeChanges": true}`
+- Discussed approach only: `{"proposedChanges": false, "madeChanges": false, "askedQuestion": false}`
+- Proposed edits but waiting for approval: `{"proposedChanges": true, "madeChanges": false, "askedQuestion": false}`
+- Made edits directly: `{"proposedChanges": false, "madeChanges": true, "askedQuestion": false}`
+- Proposed AND made edits: `{"proposedChanges": true, "madeChanges": true, "askedQuestion": false}`
+- Asked user a question: `{"proposedChanges": false, "madeChanges": false, "askedQuestion": true}`
 
 ---
 

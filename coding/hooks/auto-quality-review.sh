@@ -101,13 +101,24 @@ if [ -z "$msg_text" ]; then
 fi
 
 # Extract the JSON blob from the end of the message
-# Pattern: {"proposedChanges": boolean, "madeChanges": boolean}
-json_blob=$(echo "$msg_text" | grep -oE '\{"proposedChanges":\s*(true|false)\s*,\s*"madeChanges":\s*(true|false)\s*\}' | tail -1)
+# Pattern: {"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}
+json_blob=$(echo "$msg_text" | grep -oE '\{"proposedChanges":\s*(true|false)\s*,\s*"madeChanges":\s*(true|false)\s*,\s*"askedQuestion":\s*(true|false)\s*\}' | tail -1)
 
 echo "JSON blob: $json_blob" >> "$DEBUG_LOG"
 if [ -z "$json_blob" ]; then
-  # Normal case: No JSON blob found (informational response, no changes)
-  echo "No JSON blob found, exiting" >> "$DEBUG_LOG"
+  # Check if this looks like a substantive response (>100 chars)
+  # If so, remind agent to include JSON payload
+  msg_length=${#msg_text}
+  echo "No JSON blob found, message length: $msg_length" >> "$DEBUG_LOG"
+
+  if [ "$msg_length" -gt 100 ]; then
+    echo "Substantive response without JSON payload, sending reminder" >> "$DEBUG_LOG"
+    echo "Missing required JSON response format. Please include: {\"proposedChanges\": bool, \"madeChanges\": bool, \"askedQuestion\": bool}" >&2
+    exit 2
+  fi
+
+  # Short message without JSON is fine (acknowledgments, etc)
+  echo "Short message without JSON, exiting" >> "$DEBUG_LOG"
   exit 0
 fi
 
@@ -122,8 +133,19 @@ if ! made_changes=$(echo "$json_blob" | jq -r '.madeChanges // false' 2>/dev/nul
   exit 2
 fi
 
-# If either is true, trigger quality review
-echo "proposedChanges=$proposed_changes, madeChanges=$made_changes" >> "$DEBUG_LOG"
+if ! asked_question=$(echo "$json_blob" | jq -r '.askedQuestion // false' 2>/dev/null); then
+  echo "ERROR: jq failed to parse askedQuestion field from JSON blob." >&2
+  exit 2
+fi
+
+# If asked question, skip quality review (waiting for user response)
+echo "proposedChanges=$proposed_changes, madeChanges=$made_changes, askedQuestion=$asked_question" >> "$DEBUG_LOG"
+if [ "$asked_question" = "true" ]; then
+  echo "Agent asked question, skipping quality review" >> "$DEBUG_LOG"
+  exit 0
+fi
+
+# If either proposed or made changes, trigger quality review
 if [ "$proposed_changes" = "true" ] || [ "$made_changes" = "true" ]; then
   # Block and request quality review
   echo "TRIGGERING QUALITY REVIEW" >> "$DEBUG_LOG"

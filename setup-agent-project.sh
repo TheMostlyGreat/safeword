@@ -1,6 +1,7 @@
 #!/bin/bash
 # setup-agent-project.sh
 # Sets up standardized agent project structure
+# Also handles first-time user setup (~/.claude/skills/) automatically
 
 set -e
 
@@ -21,12 +22,34 @@ done
 
 echo "Setting up agent project structure..."
 
+# First-time user setup: Configure ~/.claude/skills/ (idempotent)
+CLAUDE_USER_DIR="$HOME/.claude"
+mkdir -p "$CLAUDE_USER_DIR/skills"
+
+# Check if skills need to be symlinked
+if [ -d "$GLOBAL_AGENTS_DIR/skills" ]; then
+  echo "Checking user-level skills setup..."
+  for skill in "$GLOBAL_AGENTS_DIR/skills"/*; do
+    if [ -d "$skill" ]; then
+      skill_name=$(basename "$skill")
+      target="$CLAUDE_USER_DIR/skills/$skill_name"
+
+      # Only create symlink if it doesn't exist or is broken
+      if [ ! -L "$target" ] || [ ! -e "$target" ]; then
+        echo "  Linking $skill_name to ~/.claude/skills/"
+        rm -f "$target" 2>/dev/null || true
+        ln -s "$skill" "$target"
+      fi
+    fi
+  done
+fi
+
 # Create directory structure with archive folders
 mkdir -p "$AGENTS_DIR"/planning/{user-stories/{,archive},test-definitions/{,archive},design/{,archive},issues/{,archive}}
 mkdir -p "$AGENTS_DIR"/tickets/{,completed,archived}
 
 # Create Claude Code directory structure
-mkdir -p "$PROJECT_ROOT/.claude"/{hooks,skills}
+mkdir -p "$PROJECT_ROOT/.claude"
 
 # Create AGENTS.md at project root
 if [ "$USE_CLAUDE_CODE" = true ]; then
@@ -99,28 +122,28 @@ This global file contains the core workflow for all development tasks. Read it F
 EOF
 fi
 
-# Link global hooks to .claude/hooks/ (for Claude Code)
-if [ -d "$GLOBAL_AGENTS_DIR/hooks" ]; then
-  echo "Linking global hooks to .claude/hooks/..."
-  for hook in "$GLOBAL_AGENTS_DIR/hooks"/*; do
-    if [ -f "$hook" ]; then
-      ln -sf "$hook" "$PROJECT_ROOT/.claude/hooks/$(basename "$hook")"
-    fi
-  done
+# Create .claude/settings.json with global hook reference
+if [ ! -f "$PROJECT_ROOT/.claude/settings.json" ]; then
+  echo "Creating .claude/settings.json with global hook reference..."
+  cat > "$PROJECT_ROOT/.claude/settings.json" << 'EOF'
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.agents/coding/hooks/auto-quality-review.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+EOF
 else
-  echo "Note: Global hooks directory not found at $GLOBAL_AGENTS_DIR/hooks"
-fi
-
-# Link global skills to .claude/skills/ (for Claude Code)
-if [ -d "$GLOBAL_AGENTS_DIR/skills" ]; then
-  echo "Linking global skills to .claude/skills/..."
-  for skill in "$GLOBAL_AGENTS_DIR/skills"/*; do
-    if [ -d "$skill" ] || [ -f "$skill" ]; then
-      ln -sf "$skill" "$PROJECT_ROOT/.claude/skills/$(basename "$skill")"
-    fi
-  done
-else
-  echo "Note: Global skills directory not found at $GLOBAL_AGENTS_DIR/skills"
+  echo "Note: .claude/settings.json already exists, skipping..."
 fi
 
 # Create README for planning
@@ -245,13 +268,44 @@ EOF
 
 # Create .gitignore if it doesn't exist
 if [ ! -f "$PROJECT_ROOT/.gitignore" ]; then
-  touch "$PROJECT_ROOT/.gitignore"
-fi
+  echo "Creating .gitignore..."
+  cat > "$PROJECT_ROOT/.gitignore" << 'EOF'
+# Claude Code - Personal settings
+.claude/settings.local.json
+.claude/todos/
+.claude/shell-snapshots/
 
-# Add .agents to gitignore (prevents accidentally committing agent-specific state)
-if ! grep -q "^\.agents/$" "$PROJECT_ROOT/.gitignore"; then
-  echo ".agents/" >> "$PROJECT_ROOT/.gitignore"
-  echo "Added .agents/ to .gitignore"
+# Agent planning (local state)
+.agents/
+
+# Node
+node_modules/
+dist/
+*.log
+.env
+.env.local
+
+# OS
+.DS_Store
+EOF
+else
+  # Add .agents to existing gitignore if not present
+  if ! grep -q "^\.agents/$" "$PROJECT_ROOT/.gitignore"; then
+    echo "" >> "$PROJECT_ROOT/.gitignore"
+    echo "# Agent planning (local state)" >> "$PROJECT_ROOT/.gitignore"
+    echo ".agents/" >> "$PROJECT_ROOT/.gitignore"
+    echo "Added .agents/ to .gitignore"
+  fi
+
+  # Add Claude Code ignores if not present
+  if ! grep -q "^\.claude/settings\.local\.json$" "$PROJECT_ROOT/.gitignore"; then
+    echo "" >> "$PROJECT_ROOT/.gitignore"
+    echo "# Claude Code - Personal settings" >> "$PROJECT_ROOT/.gitignore"
+    echo ".claude/settings.local.json" >> "$PROJECT_ROOT/.gitignore"
+    echo ".claude/todos/" >> "$PROJECT_ROOT/.gitignore"
+    echo ".claude/shell-snapshots/" >> "$PROJECT_ROOT/.gitignore"
+    echo "Added Claude Code ignores to .gitignore"
+  fi
 fi
 
 echo ""
@@ -270,9 +324,8 @@ echo "  /.agents/planning/issues/archive/           - Completed issues"
 echo "  /.agents/tickets/                           - Active tickets"
 echo "  /.agents/tickets/completed/                 - Verified completed tickets"
 echo "  /.agents/tickets/archived/                  - Blocked/cancelled tickets"
-echo "  /.claude/hooks/                             - Symlinked from ~/.agents/coding/hooks"
-echo "  /.claude/skills/                            - Symlinked from ~/.agents/coding/skills"
-echo "  .gitignore                                  - Updated to exclude .agents/"
+echo "  /.claude/settings.json                      - Team-wide config (hooks reference global)"
+echo "  .gitignore                                  - Updated to exclude .agents/ and .claude/settings.local.json"
 echo ""
 echo "Next steps:"
 if [ "$USE_CLAUDE_CODE" = true ]; then
@@ -289,6 +342,13 @@ fi
 echo ""
 echo "Workflow:"
 echo "  Ticket → User stories → Test definitions → TDD → User confirms → Archive"
+echo ""
+echo "Notes:"
+echo "  - User-level setup: ~/.claude/skills/ automatically configured (first-time or if missing)"
+echo "  - Hooks: .claude/settings.json references ~/.agents/coding/hooks/ directly (no duplication)"
+echo "  - Skills: Auto-discovered from ~/.claude/skills/ (symlinked to ~/.agents/coding/skills/)"
+echo "  - .claude/settings.json = team-wide (tracked in git)"
+echo "  - .claude/settings.local.json = personal overrides (gitignored, create manually if needed)"
 echo ""
 echo "Usage:"
 echo "  ./setup-agent-project.sh                  # Standard template"

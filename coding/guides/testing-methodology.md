@@ -268,6 +268,61 @@ test('user creates account and first item', async ({ page }) => {
 })
 ```
 
+### E2E Testing with Persistent Dev Servers
+
+When using Playwright for E2E tests, isolate persistent dev instances from test instances to avoid port conflicts and zombie processes.
+
+**Port Isolation Strategy:**
+- **Dev instance**: Project's configured port (e.g., 3000, 8080) - runs persistently for manual testing
+- **Test instances**: `devPort + 1000` (e.g., 4000, 9080) - managed by Playwright
+- **Fallback**: Ephemeral OS-assigned port if offset port is busy
+
+**Process Management:**
+- Dev instance runs persistently (started manually, survives test runs)
+- Test instances spawn/cleanup per test run (Playwright manages lifecycle)
+- Never kill processes on dev port range
+
+**Playwright Configuration:**
+```typescript
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  webServer: {
+    command: 'npm run dev:test',           // Test script with isolated port
+    port: 4000,                            // devPort + 1000
+    reuseExistingServer: !process.env.CI, // Reuse locally, fresh in CI
+    timeout: 120000,
+  },
+  use: {
+    baseURL: 'http://localhost:4000',      // Test against test instance
+  }
+});
+```
+
+**Package.json Scripts:**
+```json
+{
+  "scripts": {
+    "dev": "vite --port 3000",        // Dev instance (manual testing)
+    "dev:test": "vite --port 4000",   // Test instance (Playwright managed)
+    "test:e2e": "playwright test"
+  }
+}
+```
+
+**Why this pattern:**
+- ✅ Manual testing on stable URL (dev instance always 3000)
+- ✅ Automated tests isolated (Playwright controls lifecycle)
+- ✅ No zombie processes (Playwright cleanup automatic)
+- ✅ No port conflicts (predictable offset)
+- ✅ Works in CI (fresh test instance every run)
+
+**Alternative patterns:**
+- Different projects use different ports (Next.js: 3000, Laravel: 8000, Rails: 3000)
+- Dynamic offset adapts: `8000` → `9000`, `5173` → `6173`
+- If offset port busy, Playwright can use ephemeral port (49152-65535)
+
 ### 4. LLM Evaluations
 
 **Cost:** ~$0.01-0.30 per test run (depends on prompt size, caching)
