@@ -6,18 +6,18 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 
 ## Planning Documentation Location
 
-**All planning markdown files go in `./agents/planning/` at project root:**
+**All planning markdown files go in `.agents/planning/` at project root:**
 
-- User stories → `./agents/planning/user-stories/`
-- Test definitions → `./agents/planning/test-definitions/`
-- Design docs → `./agents/planning/design/`
-- Issue capture → `./agents/planning/issues/`
+- User stories → `.agents/planning/user-stories/`
+- Test definitions → `.agents/planning/test-definitions/`
+- Design docs → `.agents/planning/design/`
+- Issue capture → `.agents/planning/issues/`
 
 **Archive completed work:** When planning docs are completed and no longer actively referenced, move to:
-- `./agents/planning/user-stories/archive/`
-- `./agents/planning/test-definitions/archive/`
-- `./agents/planning/design/archive/`
-- `./agents/planning/issues/archive/`
+- `.agents/planning/user-stories/archive/`
+- `.agents/planning/test-definitions/archive/`
+- `.agents/planning/design/archive/`
+- `.agents/planning/issues/archive/`
 
 **Why archive:** Prevents bloat in active planning folders while preserving history for reference.
 
@@ -29,7 +29,7 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 
 **Purpose:** Tickets encapsulate higher-level features/epics that contain multiple planning docs and implementation tasks.
 
-**Location:** `./agents/tickets/`
+**Location:** `.agents/tickets/`
 
 **Naming convention:** `{id}-{feature-slug}.md`
 - Example: `001-user-authentication.md`, `002-payment-flow.md`
@@ -43,9 +43,9 @@ status: todo|in_progress|done|blocked
 created: 2025-01-19T14:30:00Z
 priority: low|medium|high
 planning_refs:
-  - ./agents/planning/user-stories/001-user-authentication.md
-  - ./agents/planning/test-definitions/001-user-authentication.md
-  - ./agents/planning/design/001-user-authentication.md (if complex)
+  - .agents/planning/user-stories/001-user-authentication.md
+  - .agents/planning/test-definitions/001-user-authentication.md
+  - .agents/planning/design/001-user-authentication.md (if complex)
 ---
 
 # User Authentication System
@@ -76,16 +76,16 @@ planning_refs:
 - **TodoWrite** = Task-level tracking within current work session
 
 **Workflow:**
-1. Create ticket: `./agents/tickets/{id}-{feature-slug}.md` (e.g., `001-user-authentication.md`)
+1. Create ticket: `.agents/tickets/{id}-{feature-slug}.md` (e.g., `001-user-authentication.md`)
 2. Create planning docs **with matching prefix**:
-   - `./agents/planning/user-stories/001-user-authentication.md`
-   - `./agents/planning/test-definitions/001-user-authentication.md`
-   - `./agents/planning/design/001-user-authentication.md` (if complex)
+   - `.agents/planning/user-stories/001-user-authentication.md`
+   - `.agents/planning/test-definitions/001-user-authentication.md`
+   - `.agents/planning/design/001-user-authentication.md` (if complex)
 3. Reference planning docs in ticket's `planning_refs` field
 4. Follow standard Feature Development Workflow (user stories → test definitions → TDD)
 5. Update ticket status and work log as you progress
 6. When complete, **ask user to confirm** completion before archiving
-7. After user confirmation, move ticket to `./agents/tickets/completed/001-user-authentication.md`
+7. After user confirmation, move ticket to `.agents/tickets/completed/001-user-authentication.md`
 
 **CRITICAL:** NEVER mark ticket as `done` or archive without explicit user confirmation. User must verify:
 - All acceptance criteria met
@@ -94,9 +94,9 @@ planning_refs:
 - No regressions introduced
 
 **Archiving:**
-- Completed tickets → `./agents/tickets/completed/`
-- Blocked/cancelled tickets → `./agents/tickets/archived/`
-- Active tickets stay in `./agents/tickets/`
+- Completed tickets → `.agents/tickets/completed/`
+- Blocked/cancelled tickets → `.agents/tickets/archived/`
+- Active tickets stay in `.agents/tickets/`
 
 **Why confirm:** Prevents premature closure and ensures quality standards met.
 
@@ -114,7 +114,7 @@ planning_refs:
 
 **0. Check for Ticket** (higher-level feature/epic tracking)
 
-   - Search `./agents/tickets/` for matching ticket file
+   - Search `.agents/tickets/` for matching ticket file
    - **If found:**
      - Read ticket file
      - Follow `planning_refs` to planning docs (user stories, test definitions, design doc)
@@ -123,19 +123,19 @@ planning_refs:
      - Assess scope: Multi-story feature or epic? → Offer to create ticket
      - Simple task/bug fix? → Skip to planning docs (step 1)
 
-1. **User Stories** - Search `./agents/planning/user-stories/` or `docs/user-stories/`
+1. **User Stories** - Search `.agents/planning/user-stories/` or `docs/user-stories/`
 
    - Not found → Ask user if they exist elsewhere or offer to create
    - Found → Read them
    - **Guide:** `@~/.agents/coding/guides/user-story-guide.md`
 
-2. **Test Definitions** - Search `./agents/planning/test-definitions/` or `docs/test-definitions/`
+2. **Test Definitions** - Search `.agents/planning/test-definitions/` or `docs/test-definitions/`
 
    - Not found → Ask user if they exist elsewhere or offer to create
    - Found → Read them
    - **Guide:** `@~/.agents/coding/guides/test-definitions-guide.md`
 
-3. **Design Doc** (complex features only) - Search `./agents/planning/design/` or `docs/design/`
+3. **Design Doc** (complex features only) - Search `.agents/planning/design/` or `docs/design/`
 
    - Complex = >3 components, new data model, or architectural decisions
    - Not found → Ask if needed, create if yes
@@ -152,7 +152,7 @@ planning_refs:
    - Update work log with progress
    - When work complete, update status to `done`
    - **Ask user to confirm** completion (see Ticket System section)
-   - After confirmation, move to `./agents/tickets/completed/`
+   - After confirmation, move to `.agents/tickets/completed/`
 
 **IMPORTANT:** Do not skip to implementation without user stories and test definitions. Follow TDD strictly.
 
@@ -481,6 +481,6 @@ Port-based cleanup strategies, project-specific scripts, and multi-project isola
 
 **Where to extract:**
 - `~/.agents/coding/learnings/[concept].md` - Global (applies to ALL projects: React patterns, Git workflows)
-- `./agents/learnings/[concept].md` - Project-specific (custom architecture, unique patterns)
+- `.agents/learnings/[concept].md` - Project-specific (custom architecture, unique patterns)
 
 **Full workflow, templates, decision trees, and examples:** @~/.agents/coding/guides/learning-extraction.md
