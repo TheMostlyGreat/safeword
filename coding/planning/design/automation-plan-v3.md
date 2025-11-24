@@ -788,7 +788,7 @@ TOOL_NAME="$CLAUDE_TOOL_NAME"
 FILE_PATHS="$CLAUDE_FILE_PATHS"  # Comma-separated
 
 # Only trigger on file modification tools
-if [[ ! "$TOOL_NAME" =~ ^(Write|Edit|NotebookEdit)$ ]]; then
+if [[ ! "$TOOL_NAME" =~ ^(Write|Edit|MultiEdit|NotebookEdit)$ ]]; then
   exit 0
 fi
 
@@ -867,7 +867,7 @@ chmod +x ~/.claude/hooks/PostToolUse.sh
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Write|Edit|NotebookEdit",
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
         "hooks": [{
           "type": "command",
           "command": "~/.claude/hooks/PostToolUse.sh"

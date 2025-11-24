@@ -1,35 +1,93 @@
 # Claude Code Linting Hook Setup
 
-Automatically run ESLint and Prettier when Claude Code modifies your files.
+Automatically run linting and formatting when Claude Code modifies your files.
 
-**Updated for 2025:** Uses ESLint 9.22.0+ with `defineConfig()` and `globalIgnores()` helpers, Prettier 3.x modern defaults, and Claude Code PostToolUse hooks.
+**Updated for 2025:** Choose between ESLint + Prettier (flexible, many plugins) or Biome (10-25x faster, all-in-one). Uses ESLint 9.22.0+ with `defineConfig()` and `globalIgnores()`, Prettier 3.x modern defaults, Biome v2.0+, and Claude Code PostToolUse hooks.
 
 ## Requirements
 
-- Node.js and npm installed
-- ESLint 9.22.0 or later (for `defineConfig` support)
-- Prettier 3.x or later
-- Claude Code with hooks support
+- **Node.js and npm** - Required for running ESLint and Prettier
+- **jq** - JSON processor required for PostToolUse hooks
+  - macOS: `brew install jq`
+  - Ubuntu/Debian: `sudo apt-get install jq`
+  - Other: https://jqlang.github.io/jq/download/
+- **ESLint 9.22.0 or later** - For `defineConfig` support
+- **Prettier 3.x or later** - Modern formatting defaults
+- **Claude Code with hooks support** - PostToolUse hooks
 
 ## Quick Start
 
+The setup script is fully self-contained - all hooks and configs are generated inline, no global dependencies.
+
 ```bash
-# Download and run the setup script
-curl -O https://raw.githubusercontent.com/YOUR_REPO/setup-linting.sh
+# Clone the agents repo (one-time setup)
+git clone <YOUR_PRIVATE_REPO> /tmp/agents
+
+# Run setup from your project directory
+cd /path/to/your/project
 
 # TypeScript mode (default - recommended)
-bash setup-linting.sh
+bash /tmp/agents/coding/setup-linting.sh
 
-# Or choose a framework-specific mode:
-bash setup-linting.sh --react      # React + TypeScript + Hooks
-bash setup-linting.sh --electron   # Electron + TypeScript
-bash setup-linting.sh --astro      # Astro + TypeScript
-bash setup-linting.sh --minimal    # JavaScript only (no TypeScript)
+# Or choose a different mode:
+bash /tmp/agents/coding/setup-linting.sh --biome      # Biome (10-25x faster, single tool)
+bash /tmp/agents/coding/setup-linting.sh --react      # React + TypeScript + Hooks
+bash /tmp/agents/coding/setup-linting.sh --electron   # Electron + TypeScript
+bash /tmp/agents/coding/setup-linting.sh --astro      # Astro + TypeScript
+bash /tmp/agents/coding/setup-linting.sh --minimal    # JavaScript only (no TypeScript)
+
+# Cleanup (optional - scripts are standalone)
+rm -rf /tmp/agents
 ```
+
+**What gets created:**
+- `.claude/hooks/` - Local hook scripts (with version comments)
+- `.claude/commands/lint.md` - `/lint` slash command
+- `.claude/settings.json` - Hook configuration (appends to existing, preserves other hooks)
+- Config files (if not present): `eslint.config.mjs`, `.prettierrc`, `biome.jsonc`
+
+**Idempotent:** Safe to run multiple times - won't duplicate hooks if already installed.
+
+**Note:** For full standalone operation (AGENTS.md + guides), also run `setup-quality-review.sh`.
 
 ## Setup Modes
 
 The script supports different modes for different project types:
+
+### Biome Mode (~15MB) **⚡ FASTEST**
+```bash
+bash setup-linting.sh --biome
+```
+**Includes:** Biome only (linter + formatter combined)
+**Best for:** TypeScript/JavaScript/React projects where speed matters, simple projects, new projects
+**Speed:** 10-25x faster than ESLint + Prettier
+**Catches:** Type errors (85% coverage), syntax errors, basic code issues, formatting
+
+**Pros:**
+- ⚡ **Extremely fast** - Written in Rust, much faster than Node-based tools
+- 🎯 **All-in-one** - Single tool for linting and formatting
+- ⚙️ **Simple config** - One `biome.jsonc` file instead of two
+- 🔋 **Zero dependencies** - No plugin conflicts
+
+**Cons:**
+- ❌ **Limited plugin ecosystem** - No third-party plugins (yet)
+- ❌ **No framework-specific rules** - No Vue, Svelte, Astro support (planned)
+- ❌ **Missing specialized plugins** - No security, accessibility, testing plugins
+- ⚠️ **85% TypeScript coverage** - Catches less than typescript-eslint
+
+**When to choose Biome:**
+- Speed is critical (large codebases, frequent linting)
+- Simple TypeScript/React project
+- Don't need specialized ESLint plugins
+- Want minimal configuration
+
+**When to choose ESLint instead:**
+- Need security/accessibility/testing plugins
+- Working with Vue, Svelte, or Astro
+- Need 100% TypeScript coverage
+- Require custom linting rules
+
+---
 
 ### Minimal Mode (~10MB)
 ```bash
@@ -85,7 +143,10 @@ bash setup-linting.sh --astro
 
 The setup script configures your project to automatically lint and format code whenever Claude Code uses the `Write` or `Edit` tools.
 
-**Base packages (all modes):**
+**For Biome mode:**
+- `@biomejs/biome` - All-in-one linter + formatter (v2.0+)
+
+**For ESLint modes - Base packages:**
 - `eslint` - JavaScript/TypeScript linter (v9.22.0+)
 - `@eslint/js` - ESLint recommended configs
 - `prettier` - Code formatter (v3.x)
@@ -99,30 +160,54 @@ The setup script configures your project to automatically lint and format code w
 - React: `@eslint-react/eslint-plugin`, `eslint-plugin-react-hooks`
 - Astro: `eslint-plugin-astro`
 
-**Created files:**
-- `.claude/settings.json` - Hook configuration
-- `.claude/hooks/prettier.sh` - Prettier formatting script
-- `.claude/hooks/eslint.sh` - ESLint linting script
-- `eslint.config.js` - ESLint flat config with 2025 best practices (if not present)
+**Created files (all modes):**
+- `.claude/settings.json` - Hook configuration (appends to existing, preserves other hooks)
+- `.claude/hooks/run-linters.sh` - **Shared linting script** with version comments (used by both hooks and `/lint` command)
+- `.claude/hooks/auto-lint.sh` - PostToolUse hook wrapper with version comments
+- `.claude/commands/lint.md` - `/lint` slash command for manual linting
+
+**Version tracking:**
+All generated files include version comments:
+```bash
+# Generated by .safeword/setup-linting.sh v1.0.0
+# To upgrade: Re-run this script from your .agents repo
+```
+
+**Idempotency:**
+- Running the script multiple times is safe
+- Won't duplicate hooks if already installed
+- Preserves other existing hooks (custom PostToolUse hooks won't be lost)
+
+**For Biome mode:**
+- `biome.jsonc` - Biome configuration (if not present)
+
+**For ESLint modes:**
+- `eslint.config.mjs` - ESLint flat config with 2025 best practices (if not present)
 - `.prettierrc` - Prettier formatting options with modern defaults (if not present)
 - `.prettierignore` - Files to exclude from formatting
 
 **Added npm scripts:**
-- `npm run lint` - Manually run ESLint
-- `npm run format` - Manually run Prettier
+- `npm run lint` - Manually run linter (Biome or ESLint)
+- `npm run format` - Manually run formatter (Biome or Prettier)
 
 ## How It Works
 
+### Biome Mode
+The script configures `PostToolUse` hooks that trigger after Claude writes or edits files:
+
+1. **Biome runs** - Lints and formats in one pass (faster)
+
+### ESLint Modes
 The script configures `PostToolUse` hooks that trigger after Claude writes or edits files:
 
 1. **Prettier runs first** - Formats the file (spacing, quotes, etc.)
 2. **ESLint runs second** - Lints the formatted code (catches errors, enforces rules)
 
-Both tools run with `--fix`/`--write` flags to automatically fix issues.
+All tools run with auto-fix flags (`--write`, `--fix`) to automatically fix issues.
 
 ### Hook Configuration
 
-The setup script creates two hook scripts and registers them in `.claude/settings.json`:
+The setup script creates a **shared linting architecture** for consistency between hooks and manual commands:
 
 **`.claude/settings.json`:**
 ```json
@@ -130,16 +215,11 @@ The setup script creates two hook scripts and registers them in `.claude/setting
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/prettier.sh",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/eslint.sh",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/auto-lint.sh",
             "timeout": 15
           }
         ]
@@ -149,46 +229,90 @@ The setup script creates two hook scripts and registers them in `.claude/setting
 }
 ```
 
-**`.claude/hooks/prettier.sh`:**
+**`.claude/hooks/auto-lint.sh`** (PostToolUse hook wrapper):
 ```bash
 #!/bin/bash
-# Auto-format with Prettier after Write/Edit
-file_path=$(jq -r '.tool_input.file_path // empty')
+# PostToolUse hook wrapper - extracts file path from stdin
+input=$(cat)
+
+# Try file_path first (Write/Edit), fall back to notebook_path (NotebookEdit)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // .tool_input.notebook_path // empty')
 
 if [ -n "$file_path" ] && [ -f "$file_path" ]; then
-  cd "$CLAUDE_PROJECT_DIR" || exit 0
-  npx prettier --write "$file_path" 2>&1 || true
+  # Delegate to shared linting script
+  "$CLAUDE_PROJECT_DIR/.claude/hooks/run-linters.sh" "$file_path"
 fi
+
+exit 0  # Non-blocking
 ```
 
-**`.claude/hooks/eslint.sh`:**
+**`.claude/hooks/run-linters.sh`** (shared core logic):
 ```bash
 #!/bin/bash
-# Auto-lint with ESLint after Write/Edit
-file_path=$(jq -r '.tool_input.file_path // empty')
+# Shared linting script - used by both hooks and /lint command
+# Usage: run-linters.sh file.js  (single file)
+#        run-linters.sh .        (all files)
 
-if [ -n "$file_path" ] && [ -f "$file_path" ]; then
-  cd "$CLAUDE_PROJECT_DIR" || exit 0
-  npx eslint --fix "$file_path" 2>&1 || true
+if [ -n "$CLAUDE_PROJECT_DIR" ]; then
+  cd "$CLAUDE_PROJECT_DIR" || exit 1
 fi
+
+# Check if npx is available (once, before the loop)
+if ! command -v npx >/dev/null 2>&1; then
+  echo "Error: npx not found. Please install Node.js and npm." >&2
+  exit 1
+fi
+
+for target in "$@"; do
+  if [ ! -e "$target" ]; then
+    echo "Warning: $target does not exist, skipping" >&2
+    continue
+  fi
+
+  # Run Prettier (formatting)
+  echo "Formatting: $target"
+  npx prettier --write "$target" 2>&1 || true
+
+  # Run ESLint (linting)
+  echo "Linting: $target"
+  npx eslint --fix "$target" 2>&1 || true
+done
 ```
 
 **Key features:**
-- `Write|Edit` - Single matcher for both Write and Edit tools (efficient)
-- `jq -r '.tool_input.file_path'` - Extracts file path from JSON input (stdin)
-- `[ -n "$file_path" ] && [ -f "$file_path" ]` - Validates file path exists
-- `|| true` - Non-blocking: shows warnings but don't stop Claude
-- `timeout: 10` and `timeout: 15` - Reasonable timeouts for fast tools
+- ✅ **File-write tools only** - Matcher `Write|Edit|MultiEdit|NotebookEdit` triggers ONLY on file modifications
+- ✅ **Handles all file tools** - Supports both `file_path` (Write/Edit/MultiEdit) and `notebook_path` (NotebookEdit)
+- ✅ **Shared code** - Same linting logic for hooks and manual `/lint` command
+- ✅ **DRY principle** - Single source of truth for linting behavior
+- ✅ **Explicit stdin pattern** - `input=$(cat)` follows official Claude Code docs
+- ✅ **Dependency checks** - Validates npx availability before running
+- ✅ **Separation of concerns** - Hook wrapper handles stdin, core script handles linting
+- ✅ **Easy to extend** - Add new linters by editing one file
+- ✅ **Non-blocking** - `|| true` and `exit 0` ensure Claude continues on errors
 
 **How it works:**
-PostToolUse hooks receive JSON via stdin containing `tool_input.file_path`. The hook scripts use `jq` to extract the file path, validate it exists, then run the formatter/linter on that specific file.
+1. PostToolUse hook receives JSON via stdin with `tool_input.file_path`
+2. `auto-lint.sh` extracts the file path using `jq`
+3. Calls shared `run-linters.sh` with the file path
+4. `run-linters.sh` runs Prettier and ESLint on the file
 
-**Why scripts instead of inline commands?**
-- Easier to read and maintain
-- Simpler to customize (just edit the `.sh` files)
-- No complex JSON escaping
-- Better error handling
-- Follows official Claude Code best practices
+**Which tools trigger the hook:**
+- ✅ **Write** - Creating or overwriting files
+- ✅ **Edit** - Making targeted edits to existing files
+- ✅ **MultiEdit** - Making multiple edits to a single file (shows as "Update" in UI)
+- ✅ **NotebookEdit** - Modifying Jupyter notebook cells
+- ❌ **Read** - Only reads, doesn't modify (no linting needed)
+- ❌ **Bash** - Shell commands (could modify files but not a "file tool")
+- ❌ **Grep/Glob** - Search operations (no file modifications)
+- ❌ **TodoWrite** - Todo list updates (not code files)
+
+The matcher `Write|Edit|MultiEdit|NotebookEdit` ensures the hook **ONLY** triggers on actual file write/edit operations.
+
+**Why shared scripts?**
+- **Consistency** - Hooks and `/lint` command behave identically
+- **Maintainability** - Change linting logic in one place
+- **Reusability** - Same script works for single files or entire project
+- **Testability** - Can test linting logic independently
 
 ## Configuration Decisions
 
@@ -202,14 +326,23 @@ PostToolUse hooks receive JSON via stdin containing `tool_input.file_path`. The 
 - Consistent style across the codebase
 
 **To change to report-only:**
-Edit `.claude/hooks/eslint.sh` and `.claude/hooks/prettier.sh` to remove the `--fix` and `--write` flags:
+Edit `.claude/hooks/run-linters.sh` to remove the `--fix` and `--write` flags:
 
 ```bash
-# In .claude/hooks/eslint.sh - remove --fix
-npx eslint "$file_path" 2>&1 || true
+# In .claude/hooks/run-linters.sh
+# Change --write to --check and remove --fix
+for target in "$@"; do
+  if [ ! -e "$target" ]; then
+    echo "Warning: $target does not exist, skipping" >&2
+    continue
+  fi
 
-# In .claude/hooks/prettier.sh - remove --write (use --check instead)
-npx prettier --check "$file_path" 2>&1 || true
+  # Check formatting (don't fix)
+  npx prettier --check "$target" 2>&1 || true
+
+  # Lint only (don't fix)
+  npx eslint "$target" 2>&1 || true
+done
 ```
 
 ### Blocking vs. Non-Blocking
@@ -222,19 +355,31 @@ npx prettier --check "$file_path" 2>&1 || true
 - Useful for experimental/incomplete code
 
 **To make blocking (stop on errors):**
-Edit the hook scripts to remove `|| true` and use `exit 2` on errors:
+Edit `.claude/hooks/auto-lint.sh` to exit with code 2 on errors:
 
 ```bash
-# In .claude/hooks/eslint.sh - exit 2 on lint errors
-file_path=$(jq -r '.tool_input.file_path // empty')
+#!/bin/bash
+# PostToolUse hook wrapper - BLOCKING version
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // empty')
 
 if [ -n "$file_path" ] && [ -f "$file_path" ]; then
-  cd "$CLAUDE_PROJECT_DIR" || exit 0
-  if ! npx eslint --fix "$file_path" 2>&1; then
-    echo "ESLint errors found" >&2
+  # Call shared linting script WITHOUT || true
+  if ! "$CLAUDE_PROJECT_DIR/.claude/hooks/run-linters.sh" "$file_path"; then
+    echo "Linting errors found" >&2
     exit 2  # Block Claude from continuing
   fi
 fi
+
+exit 0
+```
+
+And update `.claude/hooks/run-linters.sh` to fail on errors:
+
+```bash
+# Remove || true from linting commands
+npx prettier --write "$target" 2>&1
+npx eslint --fix "$target" 2>&1
 ```
 
 ### File Scope
@@ -257,7 +402,7 @@ This ignores the file path from stdin and lints everything.
 
 ## Customizing Linting Rules
 
-### ESLint (eslint.config.js)
+### ESLint (eslint.config.mjs)
 
 **Note:** The setup script creates an ESLint 9.22.0+ flat config using the latest 2025 best practices with `defineConfig()` and `globalIgnores()` helpers.
 
@@ -274,7 +419,7 @@ This setup focuses on fast, objective checks that help Claude Code iterate quick
 - ❌ Accessibility rules (can be noisy during development)
 - ❌ Security scanning (better for commit-time/CI)
 
-**Default config (eslint.config.js):**
+**Default config (eslint.config.mjs):**
 ```javascript
 import { defineConfig, globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
@@ -338,7 +483,7 @@ The setup script handles framework configurations automatically. See the [Setup 
 - **Astro**: Use `--astro` mode (includes Astro component linting)
 
 **Manual customization:**
-If you need to further customize the generated config, edit `eslint.config.js`. For example:
+If you need to further customize the generated config, edit `eslint.config.mjs`. For example:
 
 ```javascript
 // Adding custom rules
@@ -471,6 +616,46 @@ export default defineConfig([
 ]);
 ```
 
+## Quality Review Setup
+
+In addition to linting, you can set up automatic quality review hooks that trigger when Claude proposes or makes changes:
+
+```bash
+# Run from your project directory
+bash /tmp/agents/coding/setup-quality-review.sh
+```
+
+**What it does:**
+- Creates `.claude/hooks/auto-quality-review.sh` - Stop hook that detects changes
+- Creates `.claude/hooks/run-quality-review.sh` - Quality review prompt
+- Creates `.claude/commands/quality-review.md` - `/quality-review` slash command
+- Adds Stop hook to `.claude/settings.json` (appends to existing, preserves other hooks)
+
+**Hook behavior:**
+- Only runs in projects with `AGENTS.md` or `CLAUDE.md` (searches upward for monorepos)
+- Triggers when Claude proposes or makes changes
+- Skips if Claude asks a question (waits for your answer)
+- Can be disabled per-project: create `.auto-quality-review.config`
+
+**Quality review prompt:**
+When triggered, Claude is prompted to:
+- Verify correctness
+- Check elegance
+- Validate against latest docs and best practices
+- Consider asking clarifying questions
+- Think deeply and avoid bloat
+
+**Combining linting and quality review:**
+Both setup scripts use jq to merge hooks, so you can run both:
+```bash
+bash /tmp/agents/coding/setup-linting.sh --typescript
+bash /tmp/agents/coding/setup-quality-review.sh
+```
+
+This creates a comprehensive review system:
+- **Linting** (PostToolUse) - Immediate feedback on code style/errors
+- **Quality review** (Stop) - Deeper review of correctness and design
+
 ## Advanced: Per-Project Configuration
 
 For monorepos or projects with different linting needs, use project-level settings:
@@ -483,27 +668,16 @@ For monorepos or projects with different linting needs, use project-level settin
 .claude/settings.local.json
 ```
 
-Example `.claude/settings.local.json` (disable Prettier, keep only ESLint):
+Example `.claude/settings.local.json` (disable hooks locally):
 ```json
 {
   "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/eslint.sh",
-            "timeout": 15
-          }
-        ]
-      }
-    ]
+    "PostToolUse": []
   }
 }
 ```
 
-Or create a custom local hook script in `.claude/hooks/` and reference it.
+Or create a custom version of `run-linters.sh` with different behavior and reference it from `auto-lint.sh`.
 
 ## Alternative: Pre-commit Hooks
 
