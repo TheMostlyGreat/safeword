@@ -1,12 +1,58 @@
 # SAFEWORD - Claude Code Framework
 
-Portable patterns and guides for Claude Code that deploy to any project.
+**Problem**: AI agents write code without tests, skip design validation, and lack consistency across projects.
+
+**Solution**: Portable patterns and guides that enforce TDD workflow, quality standards, and best practices across all your projects.
 
 **Repository**: https://github.com/TheMostlyGreat/safeword (private)
 
 ---
 
-## Structure
+## Quick Start (30 seconds)
+
+**1. Clone this repo:**
+```bash
+git clone https://github.com/TheMostlyGreat/safeword ~/.agents
+```
+
+**2. Install in your project:**
+```bash
+cd /path/to/your/project
+bash ~/.agents/setup-project.sh
+```
+
+**3. Verify installation:**
+```bash
+# Check that AGENTS.md references .safeword/SAFEWORD.md
+cat AGENTS.md | grep "safeword"
+
+# Or check CLAUDE.md if that's what exists
+cat CLAUDE.md | grep "safeword" 2>/dev/null || echo "Using AGENTS.md"
+```
+
+**Result**: Your project now has:
+- `.safeword/SAFEWORD.md` - Global patterns and workflows
+- `.safeword/guides/` - TDD methodology, testing, code philosophy
+- `.claude/hooks/` - Auto-linting and quality review
+- `AGENTS.md` or `CLAUDE.md` - Project context with framework reference
+
+**Commit these to your repo** for team consistency.
+
+---
+
+## How It Works
+
+**Global framework**: `~/.agents/` is a git repo synced across your machines (guides, templates, learnings)
+
+**Per-project deployment**: `setup-project.sh` copies framework to `.safeword/` and `.claude/` in your project
+
+**Team consistency**: Teammates get the framework from your project repo (no global install needed)
+
+**Living documentation**: Update guides as you learn, extract learnings from debugging, archive completed work
+
+---
+
+## What's Inside
 
 ```
 ~/.agents/
@@ -133,18 +179,42 @@ Each directory has an `archive/` subfolder for completed work.
 
 ---
 
-## Usage
+## Advanced Setup
 
-### Reference Guides in AGENTS.md
+### Custom Installation Options
+
+```bash
+cd /path/to/your/project
+
+# Auto-detect project type + quality review
+bash ~/.agents/setup-project.sh
+
+# Force Biome mode + quality review
+bash ~/.agents/setup-project.sh --linting-mode biome
+
+# Quality review only (skip linting)
+bash ~/.agents/setup-project.sh --skip-linting
+```
+
+**Auto-detection**: Automatically detects project type from `package.json`:
+- Biome → if `@biomejs/biome` installed
+- Next.js → if `next` in dependencies
+- Electron → if `electron` in dependencies
+- Astro → if `astro` in dependencies
+- React → if `react` in dependencies
+- TypeScript → if `typescript` in dependencies or `tsconfig.json` exists
+- Minimal → otherwise
+
+### Reference Guides in Project AGENTS.md
 
 ```markdown
-# Import guides
-@~/.agents/guides/testing-methodology.md
-@~/.agents/guides/code-philosophy.md
+# Import guides from .safeword
+@./.safeword/guides/testing-methodology.md
+@./.safeword/guides/code-philosophy.md
 
 # Reference templates
-- **Template:** `@~/.agents/templates/user-stories-template.md`
-- **Guide:** `@~/.agents/guides/user-story-guide.md`
+- **Template:** `@./.safeword/templates/user-stories-template.md`
+- **Guide:** `@./.safeword/guides/user-story-guide.md`
 ```
 
 Claude Code will auto-load these guides as context.
@@ -182,24 +252,6 @@ cd ~/.agents/planning/design
 touch feature-name.md
 ```
 
----
-
-## Setup Scripts
-
-**One-command installer**: `setup-project.sh` deploys SAFEWORD framework to any project
-
-```bash
-cd /path/to/your/project
-bash /path/to/.agents/setup-project.sh
-```
-
-**What it creates**:
-- `.safeword/SAFEWORD.md` - Global patterns (copy of AGENTS.md)
-- `.safeword/guides/` - Reference documentation
-- `.claude/hooks/` - Quality review and linting automation
-- `AGENTS.md` or `CLAUDE.md` - Project context with @./.safeword/SAFEWORD.md reference
-
-**Result**: Fully portable - commit `.safeword/` and `.claude/` for team consistency
 
 ---
 
@@ -215,15 +267,15 @@ git push origin main   # Push to GitHub
 
 ---
 
-## Integration with AGENTS.md
+## Integration with Project Context
 
-**AGENTS.md location**: `~/.claude/AGENTS.md` (symlinked to `~/.agents/AGENTS.md`)
+**Project AGENTS.md/CLAUDE.md**: Created by `setup-project.sh`, references `.safeword/SAFEWORD.md`
 
 **How it works**:
-1. AGENTS.md imports core guides via `@~/.agents/guides/`
-2. AGENTS.md references templates via `@~/.agents/templates/`
-3. Guides cross-reference each other via `@~/.agents/guides/`
-4. Learnings referenced via `ls ~/.agents/learnings/`
+1. Project AGENTS.md imports core guides via `@./.safeword/guides/`
+2. Guides reference templates via `@./.safeword/templates/`
+3. Guides cross-reference each other via `@./.safeword/guides/`
+4. Global learnings referenced via `ls ~/.agents/learnings/`
 
 **Result**: Modular, maintainable documentation with clear separation of concerns
 
