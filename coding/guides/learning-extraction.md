@@ -2,7 +2,7 @@
 
 Extract reusable knowledge from debugging sessions and implementation discoveries. Ensures insights compound across sessions.
 
-**LLM Instruction Design:** Learnings are documentation that LLMs read and follow. Apply best practices from `@~/.agents/coding/guides/llm-instruction-design.md` when writing learning files (concrete examples, explicit definitions, MECE principles).
+**LLM Instruction Design:** Learnings are documentation that LLMs read and follow. Apply best practices from `@.safeword/guides/llm-instruction-design.md` when writing learning files (concrete examples, explicit definitions, MECE principles).
 
 ---
 
@@ -29,7 +29,7 @@ Extract after experiencing ANY of these:
 
 ## File Locations
 
-**Global learnings** (`~/.agents/coding/learnings/[concept].md`):
+**Global learnings** (`.safeword/learnings/[concept].md`):
 - **Why**: Applies to ALL your projects (React patterns, Git workflows)
 - **Scope**: Personal directory (not shared)
 - **Use case**: Generic programming knowledge
@@ -47,7 +47,7 @@ Extract after experiencing ANY of these:
 **Cascading Precedence** (both Claude Code and AGENTS.md):
 1. Explicit user instruction (highest priority)
 2. Project `./agents/learnings/` (project-specific)
-3. Global `~/.agents/coding/learnings/` (personal defaults)
+3. Global `.safeword/learnings/` (personal defaults)
 4. Project `./AGENTS.md` → Common Gotchas (inline reference)
 
 ---
@@ -62,7 +62,7 @@ Extract after experiencing ANY of these:
 
 1. **Before debugging** - Check if similar issue has learning already
    ```bash
-   ls ~/.agents/coding/learnings/*[technology]*.md
+   ls .safeword/learnings/*[technology]*.md
    ls ./agents/learnings/*[pattern]*.md
    ```
 
@@ -82,10 +82,10 @@ Extract after experiencing ANY of these:
 
 ```bash
 # Global learnings (all projects)
-ls ~/.agents/coding/learnings/
+ls .safeword/learnings/
 
 # Search global learnings by keyword
-ls ~/.agents/coding/learnings/*keyword*.md
+ls .safeword/learnings/*keyword*.md
 
 # Project learnings (current project)
 ls ./agents/learnings/
@@ -116,7 +116,7 @@ The existing learning covers [X], but your case involves [Y]."
 **Scenario 1: Found relevant learning**
 ```
 User: "I'm getting an async state update error with React hooks"
-→ Check: ls ~/.agents/coding/learnings/*react*.md *hooks*.md *async*.md
+→ Check: ls .safeword/learnings/*react*.md *hooks*.md *async*.md
 → Found: react-hooks-async.md
 → Read: [file contents]
 → Apply: "I found a learning about async React hooks. It mentions you should use useEffect
@@ -126,7 +126,7 @@ User: "I'm getting an async state update error with React hooks"
 **Scenario 2: No existing learning**
 ```
 User: "IndexedDB quota is behaving strangely in Safari"
-→ Check: ls ~/.agents/coding/learnings/*indexeddb*.md *safari*.md *quota*.md
+→ Check: ls .safeword/learnings/*indexeddb*.md *safari*.md *quota*.md
 → Not found
 → Proceed: Continue debugging normally, suggest extraction if triggers match
 ```
@@ -135,7 +135,7 @@ User: "IndexedDB quota is behaving strangely in Safari"
 ```
 User: Debugging for 6 cycles, discovers new IndexedDB quirk
 → Suggest extraction
-→ Check: ls ~/.agents/coding/learnings/*indexeddb*.md
+→ Check: ls .safeword/learnings/*indexeddb*.md
 → Found: indexeddb-quota-api.md
 → Suggest: "I found an existing learning about IndexedDB quota. Should I update it with
            this new discovery instead of creating a separate learning?"
@@ -162,7 +162,7 @@ Just learned something valuable
 ├─ Applies to ALL projects or just THIS one?
 │  │
 │  ├─ ALL PROJECTS
-│  │  └─ Extract to: ~/.agents/coding/learnings/[concept].md
+│  │  └─ Extract to: .safeword/learnings/[concept].md
 │  │     Examples: "React hooks gotchas", "Electron IPC patterns"
 │  │
 │  └─ THIS PROJECT ONLY
@@ -275,13 +275,13 @@ Project-specific gotchas in `agents/learnings/`:
 
 ## Examples: What Goes Where
 
-### ✅ Global (~/.agents/coding/learnings/)
+### ✅ Global (.safeword/learnings/)
 
 **Learning:** "React useState updates are async - use useEffect for side effects"
 
 **Why global:** Applies to ANY React project
 
-**File:** `~/.agents/coding/learnings/react-state-async.md`
+**File:** `.safeword/learnings/react-state-async.md`
 
 ---
 
@@ -440,7 +440,7 @@ Project-specific gotchas in `agents/learnings/`:
 
 | Situation | Location | Example |
 |-----------|----------|---------|
-| Universal principle | `~/.agents/coding/learnings/` | React hooks, Electron patterns |
+| Universal principle | `.safeword/learnings/` | React hooks, Electron patterns |
 | Architecture decision | `AGENTS.md` → Architecture | Why Zustand? Why Electron-only? |
 | Short gotcha | `AGENTS.md` → Gotchas | "Validate paths before file ops" |
 | Detailed gotcha | `agents/learnings/` + AGENTS.md ref | Persistent UI, race conditions |
@@ -452,7 +452,7 @@ Project-specific gotchas in `agents/learnings/`:
 
 ```
 # Global learnings (all projects)
-~/.agents/coding/learnings/
+.safeword/learnings/
 ├── react-state-async.md
 ├── electron-ipc-patterns.md
 └── typescript-strict-mode.md

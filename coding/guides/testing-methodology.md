@@ -202,7 +202,9 @@ Understanding which test type catches which bugs helps you choose the fastest ef
 | CSS layout broken | ❌ NO | ❌ NO | ✅ YES | E2E (only option) |
 | Multi-page navigation broken | ❌ NO | ❌ NO | ✅ YES | E2E (only option) |
 | Browser-specific rendering | ❌ NO | ❌ NO | ✅ YES | E2E (only option) |
-| Form validation UX (full flow) | ❌ NO | ⚠️ Partial | ✅ YES | E2E (tests full UX) |
+| Form validation logic (isValidEmail) | ✅ YES | ✅ YES | ✅ YES | Unit (fastest, test pure logic) |
+| Form validation UI (shows error message) | ❌ NO | ✅ YES | ✅ YES | Integration (faster than E2E) |
+| Form validation UX (multi-field flow) | ❌ NO | ❌ NO | ✅ YES | E2E (only option for full flow) |
 | AI prompt quality degradation | ❌ NO | ❌ NO | ❌ NO | LLM Eval (only option) |
 | AI reasoning accuracy | ❌ NO | ❌ NO | ❌ NO | LLM Eval (only option) |
 

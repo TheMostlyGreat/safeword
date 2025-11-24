@@ -2,7 +2,7 @@
 
 **Important:** Architecture and design docs are instructions that LLMs read and follow. Apply LLM instruction design best practices for clarity and reliability.
 
-**See:** `@~/.agents/coding/guides/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
+**See:** `@.safeword/guides/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
 
 ---
 
@@ -160,7 +160,7 @@ Reference actual implementations with file paths:
 - Show component interactions
 - Map to test definitions
 
-**See:** `@~/.agents/coding/guides/design-doc-guide.md` for detailed guidance
+**See:** `@.safeword/guides/design-doc-guide.md` for detailed guidance
 
 ---
 
@@ -217,7 +217,7 @@ project/
 
 ## Data Architecture Documentation
 
-**For data-heavy projects**, see `@~/.agents/coding/guides/data-architecture-guide.md` for comprehensive guidance on:
+**For data-heavy projects**, see `@.safeword/guides/data-architecture-guide.md` for comprehensive guidance on:
 - When to document data architecture (vs design docs)
 - Core principles (data quality, governance, accessibility, living documentation)
 - What to document (conceptual/logical/physical models, flows, policies)

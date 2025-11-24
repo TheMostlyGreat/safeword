@@ -28,7 +28,7 @@
 # Project Name - Developer Context
 
 **CRITICAL: Before proceeding, ALWAYS read the global agent instructions:**
-**→ `~/.agents/coding/AGENTS.md`**
+**→ `.safeword/AGENTS.md`**
 
 This global file contains the core workflow for all development tasks. Read it FIRST, then return here for project-specific context.
 
@@ -177,7 +177,7 @@ See @README for project overview and @package.json for available npm commands.
 @docs/architecture.md
 
 ## Coding Standards
-@~/.agents/coding/guides/llm-prompting.md
+@.safeword/guides/llm-prompting.md
 
 ## Git Workflow
 Details in @docs/git-workflow.md
@@ -186,7 +186,7 @@ Details in @docs/git-workflow.md
 **Import features:**
 - **Relative paths:** `@docs/file.md` (relative to AGENTS.md location)
 - **Absolute paths:** `@/path/to/file.md`
-- **Home directory:** `@~/.agents/coding/guides/file.md` (personal conventions across all projects)
+- **Home directory:** `@.safeword/guides/file.md` (personal conventions across all projects)
 - **Recursive imports:** Imported files can import others (max depth: 5 hops)
 - **Inline usage:** Can reference imports in text, not just standalone lines
 - **Code blocks:** Imports ignored inside `` `code spans` `` and code blocks
@@ -197,7 +197,7 @@ Details in @docs/git-workflow.md
 # Project Name - Developer Context
 
 **CRITICAL: Before proceeding, ALWAYS read the global agent instructions:**
-**→ `~/.agents/coding/AGENTS.md`**
+**→ `.safeword/AGENTS.md`**
 
 This global file contains the core workflow for all development tasks. Read it FIRST, then return here for project-specific context.
 
@@ -342,7 +342,7 @@ Brief description. Current status.
 
 **Critical:** AGENTS.md files are instructions consumed by LLMs.
 
-**See:** `@~/.agents/coding/guides/llm-instruction-design.md` for 13 core principles for writing LLM-consumable documentation.
+**See:** `@.safeword/guides/llm-instruction-design.md` for 13 core principles for writing LLM-consumable documentation.
 
 ### Quality Checklist for AGENTS.md
 

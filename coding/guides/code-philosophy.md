@@ -1,6 +1,6 @@
 # Code Philosophy & Practices
 
-**Note:** This file provides instructions for LLM-based coding agents. For comprehensive framework on writing clear, actionable LLM-consumable instructions, see `@~/.agents/coding/guides/llm-instruction-design.md`.
+**Note:** This file provides instructions for LLM-based coding agents. For comprehensive framework on writing clear, actionable LLM-consumable instructions, see `@.safeword/guides/llm-instruction-design.md`.
 
 ---
 
@@ -50,7 +50,7 @@ Examples:
 
 **Always test what you build** - Run tests yourself before completion. Don't ask the user to verify.
 
-**Workflow:** See `@~/.agents/coding/guides/testing-methodology.md` for comprehensive TDD workflow (RED → GREEN → REFACTOR phases)
+**Workflow:** See `@.safeword/guides/testing-methodology.md` for comprehensive TDD workflow (RED → GREEN → REFACTOR phases)
 
 ## Debugging & Troubleshooting
 

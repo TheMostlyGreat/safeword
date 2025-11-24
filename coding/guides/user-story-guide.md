@@ -2,12 +2,12 @@
 
 ## How to Fill Out Feature User Stories
 
-**Template:** `@~/.agents/coding/templates/user-stories-template.md`
+**Template:** `@.safeword/templates/user-stories-template.md`
 
 **When user asks:** "Create user stories for issue #N" or "Create user stories for [feature]"
 
 **What you do:**
-1. Read `@~/.agents/coding/templates/user-stories-template.md`
+1. Read `@.safeword/templates/user-stories-template.md`
 2. Fill in feature name, issue number, status
 3. Create numbered stories (Story 1, Story 2, etc.)
 4. Add acceptance criteria with ✅/❌ checkboxes for tracking
@@ -59,21 +59,22 @@ After filling out story, mentally check:
 ## Size Guidelines
 
 **TOO BIG - Split into multiple stories:**
-- More than 3-5 acceptance criteria
+- 6+ acceptance criteria
 - Touches multiple user personas
 - Requires multiple UI screens
-- Takes more than one sprint
+- Takes 6+ days
 
 **TOO SMALL - Combine with related work:**
+- 0 acceptance criteria
 - Single line of code change
 - Trivial config update
-- No user-facing value
+- Takes <1 hour
 
 **JUST RIGHT - One story:**
-- 3 acceptance criteria
-- One user persona
+- 1-5 acceptance criteria
+- 1-2 personas/screens
 - One main user flow
-- 1-5 days of work
+- Can complete in 1-5 days
 
 ---
 
@@ -148,7 +149,7 @@ After filling out story, mentally check:
 
 **Core principle:** User stories are instructions that LLMs read and follow. Apply LLM instruction design best practices.
 
-**See:** `@~/.agents/coding/guides/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
+**See:** `@.safeword/guides/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
 
 **When filling templates:**
 - Use specific, concrete language (not vague)

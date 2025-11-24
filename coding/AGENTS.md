@@ -25,6 +25,83 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 
 ---
 
+## Setup Scripts (Project Initialization)
+
+**Purpose:** Self-contained setup scripts for installing Claude Code hooks and configurations in your projects.
+
+**Available scripts:**
+- `setup-project.sh` - **One-command installer** (runs both linting + quality review)
+- `setup-linting.sh` - Auto-linting on file changes (ESLint + Prettier or Biome)
+- `setup-quality-review.sh` - Quality review prompts + global patterns
+
+**Usage:**
+
+**One-command setup (recommended):**
+```bash
+cd /path/to/your/project
+bash /path/to/setup-project.sh                       # Auto-detect project type + quality review
+bash /path/to/setup-project.sh --linting-mode biome  # Force Biome mode + quality review
+bash /path/to/setup-project.sh --skip-linting        # Quality review only
+```
+
+**Auto-detection:** Automatically detects project type from package.json and config files:
+- Biome → if @biomejs/biome installed (Biome ONLY, no ESLint)
+- Next.js → if next in dependencies (ESLint + React plugins)
+- Electron → if electron in dependencies
+- Astro → if astro in dependencies
+- React → if react in dependencies
+- TypeScript → if typescript in dependencies or tsconfig.json exists
+- Minimal → otherwise
+
+**Individual scripts (advanced):**
+```bash
+cd /path/to/your/project
+bash /path/to/setup-linting.sh --typescript          # Linting only
+bash /path/to/setup-quality-review.sh                # Quality review only
+```
+
+**Linting modes:** minimal, typescript, react, electron, astro, biome
+
+**What they create:**
+- `.safeword/SAFEWORD.md` - Global patterns and workflows (copied from this file)
+- `.safeword/guides/` - Reference documentation
+- `.claude/hooks/` - Hook scripts (with version comments)
+- `.claude/commands/` - Slash commands (`/lint`, `/quality-review`)
+- `.claude/settings.json` - Hook configuration (appends to existing)
+- `AGENTS.md` or `CLAUDE.md` - Project context file with ALWAYS trigger for @./.safeword/SAFEWORD.md
+  - If CLAUDE.md exists → prepends trigger
+  - If AGENTS.md exists → prepends trigger
+  - If neither exists → creates AGENTS.md with trigger
+- Config files if needed (`eslint.config.mjs`, `.prettierrc`, `biome.jsonc`)
+
+**Key features:**
+- ✅ **Fully standalone** - All files copied to project, no external dependencies
+- ✅ **Version tracking** - Generated files include version comments
+- ✅ **Idempotent** - Safe to run multiple times, won't duplicate hooks
+- ✅ **Append-only** - Preserves existing custom hooks
+- ✅ **Order-independent** - Can run scripts in any order
+
+**Documentation:**
+- Linting setup: `guides/linting-hook-setup.md`
+- Quality review setup: `guides/quality-review-hook-setup.md`
+
+**For teams:**
+1. Get setup scripts (clone repo temporarily or download scripts)
+2. In each project, run one command:
+   ```bash
+   cd /path/to/project
+   bash /path/to/setup-project.sh  # One command, full setup
+   ```
+3. **Result**: Project becomes standalone with:
+   - `.safeword/SAFEWORD.md` - Global patterns (copy of this file)
+   - `.safeword/guides/` - Reference documentation
+   - `.claude/` - Hooks and commands
+   - `AGENTS.md` or `CLAUDE.md` - Project context with @./.safeword/SAFEWORD.md reference
+4. **COMMIT to repo**: Commit `.safeword/` and `.claude/` for team consistency
+5. **Delete source**: Can delete setup scripts/repo after running - project is fully portable
+
+---
+
 ## Ticket System (Higher-Level Work Tracking)
 
 **Purpose:** Tickets encapsulate higher-level features/epics that contain multiple planning docs and implementation tasks.
@@ -127,26 +204,26 @@ planning_refs:
 
    - Not found → Ask user if they exist elsewhere or offer to create
    - Found → Read them
-   - **Guide:** `@~/.agents/coding/guides/user-story-guide.md`
+   - **Guide:** `@./.safeword/guides/user-story-guide.md`
 
 2. **Test Definitions** - Search `.agents/planning/test-definitions/` or `docs/test-definitions/`
 
    - Not found → Ask user if they exist elsewhere or offer to create
    - Found → Read them
-   - **Guide:** `@~/.agents/coding/guides/test-definitions-guide.md`
+   - **Guide:** `@./.safeword/guides/test-definitions-guide.md`
 
 3. **Design Doc** (complex features only) - Search `.agents/planning/design/` or `docs/design/`
 
    - Complex = >3 components, new data model, or architectural decisions
    - Not found → Ask if needed, create if yes
    - Found → Read it
-   - **Guide:** `@~/.agents/coding/guides/design-doc-guide.md`
+   - **Guide:** `@./.safeword/guides/design-doc-guide.md`
 
 4. **Follow STRICT TDD Workflow** (RED → GREEN → REFACTOR)
    - Write failing tests first (RED phase)
    - Implement minimum code to pass (GREEN phase)
    - Refactor while keeping tests green
-   - **Workflow:** `@~/.agents/coding/guides/testing-methodology.md` (comprehensive TDD guidance and test type decision tree)
+   - **Workflow:** `@./.safeword/guides/testing-methodology.md` (comprehensive TDD guidance and test type decision tree)
 
 5. **Update Ticket** (if applicable)
    - Update work log with progress
@@ -199,7 +276,7 @@ planning_refs:
 
 **Tie-breaking rule:** If decision affects 2+ features or multiple developers → Architecture doc. If feature-specific only → Design doc.
 
-**Reference:** `@~/.agents/coding/guides/architecture-guide.md`
+**Reference:** `@./.safeword/guides/architecture-guide.md`
 
 ---
 
@@ -211,22 +288,22 @@ planning_refs:
 
 - **Trigger:** User says "Create user stories for issue #N" or "Create user stories for [feature]"
 - Skip the "Do user stories exist?" question (user is explicitly requesting creation)
-- **Template:** `@~/.agents/coding/templates/user-stories-template.md`
-- **Guide:** `@~/.agents/coding/guides/user-story-guide.md`
+- **Template:** `@./.safeword/templates/user-stories-template.md`
+- **Guide:** `@./.safeword/guides/user-story-guide.md`
 
 **Test Definitions:**
 
 - **Trigger:** User says "Create test definitions for issue #N" or "Create test definitions for [feature]"
 - Skip the "Do test definitions exist?" question (user is explicitly requesting creation)
-- **Template:** `@~/.agents/coding/templates/test-definitions-feature.md`
-- **Guide:** `@~/.agents/coding/guides/test-definitions-guide.md`
+- **Template:** `@./.safeword/templates/test-definitions-feature.md`
+- **Guide:** `@./.safeword/guides/test-definitions-guide.md`
 
 **Design Doc:**
 
 - **Trigger:** User says "Create design doc for [feature]" or "Design [system/component]"
 - Skip the "Does design doc exist?" question (user is explicitly requesting creation)
-- **Template:** `@~/.agents/coding/templates/design-doc-template.md`
-- **Guide:** `@~/.agents/coding/guides/design-doc-guide.md`
+- **Template:** `@./.safeword/templates/design-doc-template.md`
+- **Guide:** `@./.safeword/guides/design-doc-guide.md`
 
 **Architecture Doc:**
 
@@ -237,7 +314,7 @@ planning_refs:
   - Data model design
   - Project-wide patterns/conventions
 - **No template** - Create comprehensive `ARCHITECTURE.md` in project root
-- **Guide:** `@~/.agents/coding/guides/architecture-guide.md`
+- **Guide:** `@./.safeword/guides/architecture-guide.md`
 
 **Data Architecture Doc:**
 
@@ -249,7 +326,7 @@ planning_refs:
   - Data validation rules, access policies, lifecycle
   - Data flows (sources, transformations, destinations)
 - **Section in ARCHITECTURE.md or separate file** - Depends on project complexity
-- **Guide:** `@~/.agents/coding/guides/data-architecture-guide.md`
+- **Guide:** `@./.safeword/guides/data-architecture-guide.md`
 
 ---
 
@@ -269,7 +346,7 @@ planning_refs:
 **When NOT to use:**
 
 - Single straightforward task
-- Trivial operations (<3 steps)
+- Trivial operations (1-2 simple steps)
 - Purely conversational requests
 
 **Example:**
@@ -379,7 +456,7 @@ Examples:
 
 Core coding principles, testing philosophy (TDD), communication style, and best practices.
 
-@~/.agents/coding/guides/code-philosophy.md
+@./.safeword/guides/code-philosophy.md
 
 ---
 
@@ -389,7 +466,7 @@ Core coding principles, testing philosophy (TDD), communication style, and best 
 
 User story templates (As a X / Given-When-Then), test definition patterns, and concrete examples.
 
-@~/.agents/coding/guides/tdd-templates.md
+@./.safeword/guides/tdd-templates.md
 
 ---
 
@@ -399,7 +476,7 @@ User story templates (As a X / Given-When-Then), test definition patterns, and c
 
 Comprehensive TDD workflow (RED → GREEN → REFACTOR), test pyramid, decision trees, async testing, project-specific docs guidance.
 
-@~/.agents/coding/guides/testing-methodology.md
+@./.safeword/guides/testing-methodology.md
 
 ---
 
@@ -409,7 +486,7 @@ Comprehensive TDD workflow (RED → GREEN → REFACTOR), test pyramid, decision 
 
 Prompt engineering, cost optimization (caching strategies), and testing AI outputs (LLM-as-judge).
 
-@~/.agents/coding/guides/llm-prompting.md
+@./.safeword/guides/llm-prompting.md
 
 ---
 
@@ -419,7 +496,7 @@ Prompt engineering, cost optimization (caching strategies), and testing AI outpu
 
 13 core principles for LLM-consumable documentation: MECE decision trees, explicit definitions, concrete examples, no contradictions, edge cases explicit, actionable language, sequential decision trees, tie-breaking rules, lookup tables, no caveats in tables, percentages with context, specific technical terms, and re-evaluation paths.
 
-@~/.agents/coding/guides/llm-instruction-design.md
+@./.safeword/guides/llm-instruction-design.md
 
 ---
 
@@ -429,7 +506,7 @@ Prompt engineering, cost optimization (caching strategies), and testing AI outpu
 
 How to write, organize, and maintain AGENTS.md/CLAUDE.md files across projects. Anti-patterns, examples, and modular approaches.
 
-@~/.agents/coding/guides/agents-md-guide.md
+@./.safeword/guides/agents-md-guide.md
 
 ---
 
@@ -453,13 +530,13 @@ How to write, organize, and maintain AGENTS.md/CLAUDE.md files across projects. 
 
 Port-based cleanup strategies, project-specific scripts, and multi-project isolation techniques.
 
-@~/.agents/coding/guides/zombie-process-cleanup.md
+@./.safeword/guides/zombie-process-cleanup.md
 
 ---
 
 ## Learning Extraction
 
-**When to read:** When experiencing debugging complexity (5+ debug cycles, user says "stuck"), discovering gotchas, trying multiple approaches, or after completing features. Use to determine if/where to extract learnings and check for existing learnings.
+**When to read:** When experiencing debugging complexity (5+ debug cycles, user says "stuck"), discovering gotchas, trying multiple approaches, or during significant implementation work. Use to determine if/where to extract learnings and check for existing learnings.
 
 **Suggest extraction when you observe:**
 1. **Observable debugging complexity** - User says "stuck", 5+ debug cycles, 3+ error states, or 3+ files modified
@@ -470,7 +547,7 @@ Port-based cleanup strategies, project-specific scripts, and multi-project isola
 6. **Architectural insight** - Discovered during implementation, not planned upfront
 
 **CRITICAL: Before extracting, ALWAYS check for existing learnings** to prevent duplication:
-- **Before debugging** - Check if similar issue has learning: `ls ~/.agents/coding/learnings/*[technology]*.md`
+- **Before debugging** - Check if similar issue has learning: `ls .safeword/learnings/*[technology]*.md`
 - **When user mentions technology/pattern** - Check for `*hooks*.md`, `*electron*.md`, etc.
 - **During architectural discussions** - Check for `*pattern*.md`, `*architecture*.md`
 - **After suggesting extraction** - Check if learning already exists, update instead of duplicate
@@ -480,7 +557,7 @@ Port-based cleanup strategies, project-specific scripts, and multi-project isola
 - Similar but different → Reference and note difference
 
 **Where to extract:**
-- `~/.agents/coding/learnings/[concept].md` - Global (applies to ALL projects: React patterns, Git workflows)
-- `.agents/learnings/[concept].md` - Project-specific (custom architecture, unique patterns)
+- `.safeword/learnings/[concept].md` - General patterns and best practices (React patterns, Git workflows, testing)
+- `.agents/learnings/[concept].md` - Project-specific (custom architecture, unique patterns for this codebase)
 
-**Full workflow, templates, decision trees, and examples:** @~/.agents/coding/guides/learning-extraction.md
+**Full workflow, templates, decision trees, and examples:** @./.safeword/guides/learning-extraction.md
