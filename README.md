@@ -1,8 +1,8 @@
-# AI Agent Guides
+# SAFEWORD - Claude Code Framework
 
-Personal knowledge base for AI coding agents (Claude Code, Cursor, etc.)
+Portable patterns and guides for Claude Code that deploy to any project.
 
-**Repository**: https://github.com/TheMostlyGreat/agents (private)
+**Repository**: https://github.com/TheMostlyGreat/safeword (private)
 
 ---
 
@@ -184,6 +184,25 @@ touch feature-name.md
 
 ---
 
+## Setup Scripts
+
+**One-command installer**: `setup-project.sh` deploys SAFEWORD framework to any project
+
+```bash
+cd /path/to/your/project
+bash /path/to/.agents/coding/setup-project.sh
+```
+
+**What it creates**:
+- `.safeword/SAFEWORD.md` - Global patterns (copy of AGENTS.md)
+- `.safeword/guides/` - Reference documentation
+- `.claude/hooks/` - Quality review and linting automation
+- `AGENTS.md` or `CLAUDE.md` - Project context with @./.safeword/SAFEWORD.md reference
+
+**Result**: Fully portable - commit `.safeword/` and `.claude/` for team consistency
+
+---
+
 ## Syncing Across Machines
 
 ```bash
@@ -228,4 +247,4 @@ git push origin main   # Push to GitHub
 
 - **Claude Code docs**: https://docs.claude.com/en/docs/claude-code
 - **Issues**: https://github.com/anthropics/claude-code/issues
-- **This repo**: https://github.com/TheMostlyGreat/agents (private)
+- **This repo**: https://github.com/TheMostlyGreat/safeword (private)
