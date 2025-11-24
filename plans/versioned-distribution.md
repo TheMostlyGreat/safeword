@@ -10,7 +10,7 @@
 ## Problem Statement
 
 **Current state:**
-- Quality review hooks are global: `~/.agents/coding/hooks/*`
+- Quality review hooks are global: `~/.agents/hooks/*`
 - Projects reference absolute paths: `/Users/alex/.agents/...`
 - External users can't use this (no `~/.agents/`)
 - No versioning system
@@ -32,14 +32,13 @@
 ### Development (You)
 ```
 ~/.agents/                           # Your git repo (just scripts)
-├── coding/
-│   ├── setup-linting.sh             # ✅ Self-contained (all code inline via heredocs)
-│   ├── setup-quality-review.sh      # ❌ NEEDS TO BE CREATED (all code inline)
-│   ├── hooks/                       # ⚠️ Reference implementations only (never referenced by projects)
-│   │   ├── auto-quality-review.sh   # Copy this code INTO setup-quality-review.sh as heredoc
-│   │   └── run-quality-review.sh    # Copy this code INTO setup-quality-review.sh as heredoc
-│   └── guides/
-│       └── linting-hook-setup.md    # ✅ Already exists
+├── setup-linting.sh             # ✅ Self-contained (all code inline via heredocs)
+├── setup-quality-review.sh      # ❌ NEEDS TO BE CREATED (all code inline)
+├── hooks/                       # ⚠️ Reference implementations only (never referenced by projects)
+│   ├── auto-quality-review.sh   # Copy this code INTO setup-quality-review.sh as heredoc
+│   └── run-quality-review.sh    # Copy this code INTO setup-quality-review.sh as heredoc
+├── guides/
+│   └── linting-hook-setup.md    # ✅ Already exists
 └── plans/
     └── versioned-distribution.md    # This document
 ```
@@ -49,8 +48,8 @@
 ### Distribution (External Users)
 ```bash
 # Users run ONE command per feature (NO global ~/.agents folder needed):
-curl https://raw.githubusercontent.com/YOU/agents/v1.0.0/coding/setup-linting.sh | bash -s -- --biome
-curl https://raw.githubusercontent.com/YOU/agents/v1.0.0/coding/setup-quality-review.sh | bash
+curl https://raw.githubusercontent.com/YOU/agents/v1.0.0/setup-linting.sh | bash -s -- --biome
+curl https://raw.githubusercontent.com/YOU/agents/v1.0.0/setup-quality-review.sh | bash
 
 # Creates in their project (100% self-contained):
 project/.claude/
@@ -89,9 +88,9 @@ project/.claude/
 7. Adds version comment to all generated files
 
 **Source of code:**
-- Read current `~/.agents/coding/hooks/auto-quality-review.sh`
+- Read current `~/.agents/hooks/auto-quality-review.sh`
 - Copy its contents INTO `setup-quality-review.sh` as heredoc
-- Read current `~/.agents/coding/hooks/run-quality-review.sh`
+- Read current `~/.agents/hooks/run-quality-review.sh`
 - Copy its contents INTO `setup-quality-review.sh` as heredoc
 - Add `chmod +x` for generated hooks
 - Result: setup-quality-review.sh is 100% self-contained
@@ -170,7 +169,7 @@ echo "================================="
 
 ### Task 2: Fix setup-linting.sh to Create Slash Command
 **Status:** Not started
-**Modify:** `/Users/alex/.agents/coding/setup-linting.sh`
+**Modify:** `/Users/alex/.agents/setup-linting.sh`
 
 **Problem:** setup-linting.sh doesn't create `.claude/commands/lint.md` (currently manual)
 
@@ -197,7 +196,7 @@ EOF
 
 ### Task 3: Add Version Comments to `setup-linting.sh`
 **Status:** Not started
-**Modify:** `/Users/alex/.agents/coding/setup-linting.sh`
+**Modify:** `/Users/alex/.agents/setup-linting.sh`
 
 **Changes:**
 1. Add VERSION variable at top (hardcoded, updated manually before each release)
@@ -316,8 +315,8 @@ vim coding/setup-quality-review.sh   # Change VERSION="v1.1.0"
 
 # 2. Test scripts
 cd /tmp/test-project
-bash ~/.agents/coding/setup-linting.sh --biome
-bash ~/.agents/coding/setup-quality-review.sh
+bash ~/.agents/setup-linting.sh --biome
+bash ~/.agents/setup-quality-review.sh
 # Verify generated files have correct version
 
 # 3. Commit, tag, push
@@ -338,7 +337,7 @@ git push origin main --tags
 Both have:
 - ✅ `.claude/hooks/auto-lint.sh` (project-local, good)
 - ✅ `.claude/hooks/run-linters.sh` (project-local, good)
-- ❌ `.claude/settings.json` referencing `/Users/alex/.agents/coding/hooks/auto-quality-review.sh` (global, bad)
+- ❌ `.claude/settings.json` referencing `/Users/alex/.agents/hooks/auto-quality-review.sh` (global, bad)
 
 **Migration steps:**
 1. Run `setup-quality-review.sh` in each project
@@ -350,7 +349,7 @@ Both have:
 
 ### Task 7: Delete hooks/ Directory (After Migration)
 **Status:** Not started
-**Decision:** Delete `~/.agents/coding/hooks/` after creating setup-quality-review.sh
+**Decision:** Delete `~/.agents/hooks/` after creating setup-quality-review.sh
 
 **Reasoning:**
 - ✅ Single source of truth (setup scripts with inline heredocs)
@@ -361,10 +360,10 @@ Both have:
 **Steps:**
 1. Create setup-quality-review.sh with inline heredocs (Task 1)
 2. Migrate existing projects to local hooks (Task 6)
-3. Verify no projects reference `~/.agents/coding/hooks/`
+3. Verify no projects reference `~/.agents/hooks/`
 4. Delete directory:
    ```bash
-   rm -rf ~/.agents/coding/hooks/
+   rm -rf ~/.agents/hooks/
    ```
 
 **Alternative:** Keep as deprecated examples
@@ -426,7 +425,7 @@ Both have:
    # Compare versions and notify
    if [ -n "$LATEST" ] && [ "$LATEST" != "$INSTALLED_VERSION" ]; then
      echo "📦 Agents update available: $INSTALLED_VERSION → $LATEST"
-     echo "   Upgrade linting: curl https://raw.githubusercontent.com/USER/agents/$LATEST/coding/setup-linting.sh | bash -s -- --biome"
+     echo "   Upgrade linting: curl https://raw.githubusercontent.com/USER/agents/$LATEST/setup-linting.sh | bash -s -- --biome"
      echo "   Upgrade quality: curl https://raw.githubusercontent.com/USER/agents/$LATEST/coding/setup-quality-review.sh | bash"
      echo ""
    fi
@@ -463,7 +462,7 @@ Both have:
 
 **Create/Update:**
 
-1. **README.md** (create in `~/.agents/coding/`)
+1. **README.md** (create in `~/.agents/`)
    ```markdown
    # Claude Code Agents
 
@@ -473,12 +472,12 @@ Both have:
 
    ### Linting Setup
    ```bash
-   curl https://raw.githubusercontent.com/YOU/agents/v1.0.0/coding/setup-linting.sh | bash -s -- --biome
+   curl https://raw.githubusercontent.com/YOU/agents/v1.0.0/setup-linting.sh | bash -s -- --biome
    ```
 
    ### Quality Review Setup
    ```bash
-   curl https://raw.githubusercontent.com/YOU/agents/v1.0.0/coding/setup-quality-review.sh | bash
+   curl https://raw.githubusercontent.com/YOU/agents/v1.0.0/setup-quality-review.sh | bash
    ```
 
    ## Versioning
@@ -491,7 +490,7 @@ Both have:
 
    Re-run setup scripts with new version:
    ```bash
-   curl https://raw.githubusercontent.com/YOU/agents/v1.1.0/coding/setup-linting.sh | bash -s -- --biome
+   curl https://raw.githubusercontent.com/YOU/agents/v1.1.0/setup-linting.sh | bash -s -- --biome
    ```
    ```
 
@@ -534,7 +533,7 @@ Both have:
 **Migration:**
 - [ ] `soulless-monorepo` and `chat` migrated to project-local hooks
 - [ ] No projects reference `/Users/alex/.agents/` paths
-- [ ] `~/.agents/coding/hooks/` directory deleted (single source of truth)
+- [ ] `~/.agents/hooks/` directory deleted (single source of truth)
 
 **Documentation:**
 - [ ] README explains installation and upgrading
@@ -589,8 +588,8 @@ Both have:
 1. **Settings.json merging:** ~~Use jq or document script order?~~
    - **RESOLVED:** Use jq for order-independent merging, make jq REQUIRED
 
-2. **Global hooks directory:** ~~Keep `~/.agents/coding/hooks/` or delete?~~
-   - **RESOLVED:** Delete after migration (Task 7)
+2. **Global hooks directory:** ~~Keep `~/.agents/hooks/` or delete?~~
+   - **RESOLVED:** Delete after migration (Task 7) - DONE
    - Setup scripts (with inline heredocs) are the ONLY source of truth
    - Simpler, no drift, cleaner architecture
 

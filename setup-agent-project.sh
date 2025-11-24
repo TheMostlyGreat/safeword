@@ -7,7 +7,7 @@ set -e
 
 PROJECT_ROOT=$(pwd)
 AGENTS_DIR="$PROJECT_ROOT/.agents"
-GLOBAL_AGENTS_DIR="$HOME/.agents/coding"
+GLOBAL_AGENTS_DIR="$HOME/.agents"
 TEMPLATE_PATH="$GLOBAL_AGENTS_DIR/templates/agents-template.md"
 USE_CLAUDE_CODE=false
 
@@ -58,7 +58,7 @@ if [ "$USE_CLAUDE_CODE" = true ]; then
 # [Project Name] - Developer Context
 
 **CRITICAL: Before proceeding, ALWAYS read the global agent instructions:**
-**→ `~/.agents/coding/AGENTS.md`**
+**→ `~/.agents/AGENTS.md`**
 
 This global file contains the core workflow for all development tasks. Read it FIRST, then return here for project-specific context.
 
@@ -79,7 +79,7 @@ EOF
   echo ""
   echo "⚠️  AGENTS.md created with stub. Next step:"
   echo "   Open AGENTS.md in Claude Code and ask it to fill in project-specific context"
-  echo "   It will read ~/.agents/coding/AGENTS.md and populate appropriate sections"
+  echo "   It will read ~/.agents/AGENTS.md and populate appropriate sections"
 elif [ -f "$TEMPLATE_PATH" ]; then
   echo "Creating AGENTS.md from template..."
   cp "$TEMPLATE_PATH" "$PROJECT_ROOT/AGENTS.md"
@@ -89,7 +89,7 @@ else
 # [Project Name] - Developer Context
 
 **CRITICAL: Before proceeding, ALWAYS read the global agent instructions:**
-**→ `~/.agents/coding/AGENTS.md`**
+**→ `~/.agents/AGENTS.md`**
 
 This global file contains the core workflow for all development tasks. Read it FIRST, then return here for project-specific context.
 
@@ -134,7 +134,7 @@ if [ ! -f "$PROJECT_ROOT/.claude/settings.json" ]; then
         "hooks": [
           {
             "type": "command",
-            "command": "~/.agents/coding/hooks/auto-quality-review.sh"
+            "command": "~/.agents/hooks/auto-quality-review.sh"
           }
         ]
       }
@@ -186,7 +186,7 @@ When planning docs are completed and no longer actively referenced:
 4. **Implementation (TDD)** → RED → GREEN → REFACTOR
 5. **Archive** → Move completed docs to archive/
 
-See `~/.agents/coding/AGENTS.md` for full workflow.
+See `~/.agents/AGENTS.md` for full workflow.
 EOF
 
 # Create README for tickets
@@ -263,7 +263,7 @@ planning_refs:
 - **Planning docs** = Detailed specs (user stories, test definitions, design)
 - **TodoWrite** = Task-level tracking in current session
 
-See `~/.agents/coding/AGENTS.md` → Ticket System for details.
+See `~/.agents/AGENTS.md` → Ticket System for details.
 EOF
 
 # Create .gitignore if it doesn't exist
@@ -345,8 +345,8 @@ echo "  Ticket → User stories → Test definitions → TDD → User confirms �
 echo ""
 echo "Notes:"
 echo "  - User-level setup: ~/.claude/skills/ automatically configured (first-time or if missing)"
-echo "  - Hooks: .claude/settings.json references ~/.agents/coding/hooks/ directly (no duplication)"
-echo "  - Skills: Auto-discovered from ~/.claude/skills/ (symlinked to ~/.agents/coding/skills/)"
+echo "  - Hooks: .claude/settings.json references ~/.agents/hooks/ directly (no duplication)"
+echo "  - Skills: Auto-discovered from ~/.claude/skills/ (symlinked to ~/.agents/skills/)"
 echo "  - .claude/settings.json = team-wide (tracked in git)"
 echo "  - .claude/settings.local.json = personal overrides (gitignored, create manually if needed)"
 echo ""

@@ -1,7 +1,7 @@
 # User Stories: [Feature Name] (Issue #[number])
 
-**Guide**: `@~/.agents/coding/guides/user-story-guide.md` - Best practices, INVEST criteria, and examples
-**Template**: `@~/.agents/coding/templates/user-stories-template.md`
+**Guide**: `@~/.agents/guides/user-story-guide.md` - Best practices, INVEST criteria, and examples
+**Template**: `@~/.agents/templates/user-stories-template.md`
 
 **Feature**: [Brief description of the feature]
 

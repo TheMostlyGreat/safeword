@@ -38,7 +38,7 @@ ls CLAUDE.md AGENTS.md ARCHITECTURE.md .claude/
 Read relevant standards:
 - `CLAUDE.md` or `AGENTS.md` - Project-specific guidelines
 - `ARCHITECTURE.md` - Architectural principles
-- `@~/.agents/coding/guides/code-philosophy.md` - Core coding principles
+- `@~/.agents/guides/code-philosophy.md` - Core coding principles
 
 ### 3. Evaluate Correctness
 
@@ -185,5 +185,5 @@ Use structured format for "double check"/"critique". Use brief format for specif
 - Note: "Couldn't verify latest versions/docs, skipping that check"
 
 **Project has no CLAUDE.md/AGENTS.md:**
-- Use `@~/.agents/coding/guides/code-philosophy.md` as fallback
+- Use `@~/.agents/guides/code-philosophy.md` as fallback
 - Note: "No project-specific standards found, using general best practices"

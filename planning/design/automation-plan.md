@@ -1472,7 +1472,7 @@ After completing tasks, say: "Task complete. Should I /clear context before movi
 
 **Test pyramid**: 70% unit, 20% integration, 10% e2e
 
-**For test writing**: See `@~/.agents/coding/guides/testing-methodology.md` for comprehensive TDD workflow.
+**For test writing**: See `@~/.agents/guides/testing-methodology.md` for comprehensive TDD workflow.
 
 ---
 

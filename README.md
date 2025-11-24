@@ -9,7 +9,7 @@ Portable patterns and guides for Claude Code that deploy to any project.
 ## Structure
 
 ```
-~/.agents/coding/
+~/.agents/
 ├── guides/           Core methodology and best practices
 ├── templates/        Fillable document structures
 ├── learnings/        Extracted knowledge from experience
@@ -80,7 +80,7 @@ Portable patterns and guides for Claude Code that deploy to any project.
 
 **Purpose**: Extracted knowledge that compounds across sessions
 
-**Location**: `~/.agents/coding/learnings/[concept].md`
+**Location**: `~/.agents/learnings/[concept].md`
 
 **What goes here**:
 - Debugging discoveries (non-obvious gotchas, integration struggles)
@@ -105,7 +105,7 @@ Portable patterns and guides for Claude Code that deploy to any project.
 
 **Structure**:
 ```
-coding/planning/
+planning/
 ├── user-stories/       User story documents
 ├── test-definitions/   Test definition documents
 ├── design/            Design docs and research
@@ -139,12 +139,12 @@ Each directory has an `archive/` subfolder for completed work.
 
 ```markdown
 # Import guides
-@~/.agents/coding/guides/testing-methodology.md
-@~/.agents/coding/guides/code-philosophy.md
+@~/.agents/guides/testing-methodology.md
+@~/.agents/guides/code-philosophy.md
 
 # Reference templates
-- **Template:** `@~/.agents/coding/templates/user-stories-template.md`
-- **Guide:** `@~/.agents/coding/guides/user-story-guide.md`
+- **Template:** `@~/.agents/templates/user-stories-template.md`
+- **Guide:** `@~/.agents/guides/user-story-guide.md`
 ```
 
 Claude Code will auto-load these guides as context.
@@ -153,32 +153,32 @@ Claude Code will auto-load these guides as context.
 
 ```bash
 # Global learnings (all projects)
-ls ~/.agents/coding/learnings/
+ls ~/.agents/learnings/
 
 # Search by keyword
-ls ~/.agents/coding/learnings/*react*.md
-ls ~/.agents/coding/learnings/*electron*.md
+ls ~/.agents/learnings/*react*.md
+ls ~/.agents/learnings/*electron*.md
 ```
 
 ### Extract New Learning
 
 1. Follow recognition triggers in `learning-extraction.md`
-2. Create `~/.agents/coding/learnings/[concept].md`
+2. Create `~/.agents/learnings/[concept].md`
 3. Use template: Problem → Gotcha → Examples → Testing Trap
 
 ### Create Planning Documentation
 
 ```bash
 # User stories
-cd ~/.agents/coding/planning/user-stories
+cd ~/.agents/planning/user-stories
 touch feature-name.md
 
 # Test definitions
-cd ~/.agents/coding/planning/test-definitions
+cd ~/.agents/planning/test-definitions
 touch feature-name.md
 
 # Design docs
-cd ~/.agents/coding/planning/design
+cd ~/.agents/planning/design
 touch feature-name.md
 ```
 
@@ -190,7 +190,7 @@ touch feature-name.md
 
 ```bash
 cd /path/to/your/project
-bash /path/to/.agents/coding/setup-project.sh
+bash /path/to/.agents/setup-project.sh
 ```
 
 **What it creates**:
@@ -217,13 +217,13 @@ git push origin main   # Push to GitHub
 
 ## Integration with AGENTS.md
 
-**AGENTS.md location**: `~/.claude/AGENTS.md` (symlinked to `coding/AGENTS.md`)
+**AGENTS.md location**: `~/.claude/AGENTS.md` (symlinked to `~/.agents/AGENTS.md`)
 
 **How it works**:
-1. AGENTS.md imports core guides via `@~/.agents/coding/guides/`
-2. AGENTS.md references templates via `@~/.agents/coding/templates/`
-3. Guides cross-reference each other via `@~/.agents/coding/guides/`
-4. Learnings referenced via `ls ~/.agents/coding/learnings/`
+1. AGENTS.md imports core guides via `@~/.agents/guides/`
+2. AGENTS.md references templates via `@~/.agents/templates/`
+3. Guides cross-reference each other via `@~/.agents/guides/`
+4. Learnings referenced via `ls ~/.agents/learnings/`
 
 **Result**: Modular, maintainable documentation with clear separation of concerns
 

@@ -15,24 +15,24 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 1. **User Stories** - Search `planning/user-stories/` or `docs/user-stories/`
    - Not found → Ask user if they exist elsewhere or offer to create
    - Found → Read them
-   - **Guide:** `@~/.agents/coding/guides/user-story-guide.md`
+   - **Guide:** `@~/.agents/guides/user-story-guide.md`
 
 2. **Test Definitions** - Search `planning/test-definitions/` or `docs/test-definitions/`
    - Not found → Ask user if they exist elsewhere or offer to create
    - Found → Read them
-   - **Guide:** `@~/.agents/coding/guides/test-definitions-guide.md`
+   - **Guide:** `@~/.agents/guides/test-definitions-guide.md`
 
 3. **Design Doc** (complex features only) - Search `planning/design/` or `docs/design/`
    - Complex = >3 components, new data model, or architectural decisions
    - Not found → Ask if needed, create if yes
    - Found → Read it
-   - **Guide:** `@~/.agents/coding/guides/design-doc-guide.md`
+   - **Guide:** `@~/.agents/guides/design-doc-guide.md`
 
 4. **Follow TDD Workflow** (RED → GREEN → REFACTOR)
    - Write failing tests first (RED phase)
    - Implement minimum code to pass (GREEN phase)
    - Refactor while keeping tests green
-   - **Workflow:** `@~/.agents/coding/guides/testing-methodology.md` (comprehensive TDD guidance and test type decision tree)
+   - **Workflow:** `@~/.agents/guides/testing-methodology.md` (comprehensive TDD guidance and test type decision tree)
 
 **IMPORTANT:** Do not skip to implementation without user stories and test definitions. Follow TDD strictly.
 
@@ -60,7 +60,7 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 
 **Tie-breaking rule:** If decision affects 2+ features or multiple developers → Architecture doc. If feature-specific only → Design doc.
 
-**Reference:** `@~/.agents/coding/guides/architecture-guide.md`
+**Reference:** `@~/.agents/guides/architecture-guide.md`
 
 ---
 
@@ -71,20 +71,20 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 **User Stories:**
 - **Trigger:** User says "Create user stories for issue #N" or "Create user stories for [feature]"
 - Skip the "Do user stories exist?" question (user is explicitly requesting creation)
-- **Template:** `@~/.agents/coding/templates/user-stories-template.md`
-- **Guide:** `@~/.agents/coding/guides/user-story-guide.md`
+- **Template:** `@~/.agents/templates/user-stories-template.md`
+- **Guide:** `@~/.agents/guides/user-story-guide.md`
 
 **Test Definitions:**
 - **Trigger:** User says "Create test definitions for issue #N" or "Create test definitions for [feature]"
 - Skip the "Do test definitions exist?" question (user is explicitly requesting creation)
-- **Template:** `@~/.agents/coding/templates/test-definitions-feature.md`
-- **Guide:** `@~/.agents/coding/guides/test-definitions-guide.md`
+- **Template:** `@~/.agents/templates/test-definitions-feature.md`
+- **Guide:** `@~/.agents/guides/test-definitions-guide.md`
 
 **Design Doc:**
 - **Trigger:** User says "Create design doc for [feature]" or "Design [system/component]"
 - Skip the "Does design doc exist?" question (user is explicitly requesting creation)
-- **Template:** `@~/.agents/coding/templates/design-doc-template.md`
-- **Guide:** `@~/.agents/coding/guides/design-doc-guide.md`
+- **Template:** `@~/.agents/templates/design-doc-template.md`
+- **Guide:** `@~/.agents/guides/design-doc-guide.md`
 
 **Architecture Doc:**
 - **Trigger (Explicit):** User says "Update architecture doc" or "Document [architectural decision]"
@@ -94,7 +94,7 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
   - Data model design
   - Project-wide patterns/conventions
 - **No template** - Create comprehensive `ARCHITECTURE.md` in project root
-- **Guide:** `@~/.agents/coding/guides/architecture-guide.md`
+- **Guide:** `@~/.agents/guides/architecture-guide.md`
 
 **Data Architecture Doc:**
 - **Trigger (Explicit):** User says "Document data architecture" or "Design data model"
@@ -105,7 +105,7 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
   - Data validation rules, access policies, lifecycle
   - Data flows (sources, transformations, destinations)
 - **Section in ARCHITECTURE.md or separate file** - Depends on project complexity
-- **Guide:** `@~/.agents/coding/guides/data-architecture-guide.md`
+- **Guide:** `@~/.agents/guides/data-architecture-guide.md`
 
 ---
 
@@ -145,7 +145,7 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 
 Core coding principles, testing philosophy (TDD), communication style, and best practices.
 
-@~/.agents/coding/guides/code-philosophy.md
+@~/.agents/guides/code-philosophy.md
 
 ---
 
@@ -155,7 +155,7 @@ Core coding principles, testing philosophy (TDD), communication style, and best 
 
 User story templates (As a X / Given-When-Then), test definition patterns, and concrete examples.
 
-@~/.agents/coding/guides/tdd-templates.md
+@~/.agents/guides/tdd-templates.md
 
 ---
 
@@ -165,7 +165,7 @@ User story templates (As a X / Given-When-Then), test definition patterns, and c
 
 Comprehensive TDD workflow (RED → GREEN → REFACTOR), test pyramid, decision trees, async testing, project-specific docs guidance.
 
-@~/.agents/coding/guides/testing-methodology.md
+@~/.agents/guides/testing-methodology.md
 
 ---
 
@@ -175,7 +175,7 @@ Comprehensive TDD workflow (RED → GREEN → REFACTOR), test pyramid, decision 
 
 Prompt engineering, cost optimization (caching strategies), and testing AI outputs (LLM-as-judge).
 
-@~/.agents/coding/guides/llm-prompting.md
+@~/.agents/guides/llm-prompting.md
 
 ---
 
@@ -185,7 +185,7 @@ Prompt engineering, cost optimization (caching strategies), and testing AI outpu
 
 13 core principles for LLM-consumable documentation: MECE decision trees, explicit definitions, concrete examples, no contradictions, edge cases explicit, actionable language, sequential decision trees, tie-breaking rules, lookup tables, no caveats in tables, percentages with context, specific technical terms, and re-evaluation paths.
 
-@~/.agents/coding/guides/llm-instruction-design.md
+@~/.agents/guides/llm-instruction-design.md
 
 ---
 
@@ -195,7 +195,7 @@ Prompt engineering, cost optimization (caching strategies), and testing AI outpu
 
 How to write, organize, and maintain CLAUDE.md/AGENTS.md files across projects. Anti-patterns, examples, and modular approaches.
 
-@~/.agents/coding/guides/claude-md-guide.md
+@~/.agents/guides/claude-md-guide.md
 
 ---
 
@@ -281,7 +281,7 @@ Action: Don't suggest extraction
 **Re-evaluation path:** If none of the triggers match but debugging was complex/valuable, ask: "This was a complex fix - would you like me to document it as a learning anyway?"
 
 **Where to extract:**
-- `~/.agents/coding/learnings/[concept].md` - Global (applies to ALL projects: React patterns, Git workflows)
+- `~/.agents/learnings/[concept].md` - Global (applies to ALL projects: React patterns, Git workflows)
 - `./agents/learnings/[concept].md` - Project-specific (custom architecture, unique patterns)
 
 ### Using Existing Learnings
@@ -295,7 +295,7 @@ Action: Don't suggest extraction
 **How to check:**
 ```bash
 # Global learnings (all projects)
-ls ~/.agents/coding/learnings/
+ls ~/.agents/learnings/
 
 # Project learnings (current project)
 ls ./agents/learnings/
@@ -309,9 +309,9 @@ ls ./agents/learnings/
 **Example:**
 ```
 User: "I'm working with React hooks"
-→ Check: ls ~/.agents/coding/learnings/*hooks*.md
+→ Check: ls ~/.agents/learnings/*hooks*.md
 → Found: react-hooks-async.md
 → Read and reference: "I found a learning about async React hooks. It mentions [key points]. Applying this to your case..."
 ```
 
-**Full workflow and templates:** @~/.agents/coding/guides/learning-extraction.md
+**Full workflow and templates:** @~/.agents/guides/learning-extraction.md

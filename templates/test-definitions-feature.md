@@ -1,7 +1,7 @@
 # Test Definitions: [Feature Name] (Issue #[number])
 
-**Guide**: `@~/.agents/coding/guides/test-definitions-guide.md` - Structure, status tracking, and TDD workflow
-**Template**: `@~/.agents/coding/templates/test-definitions-feature.md`
+**Guide**: `@~/.agents/guides/test-definitions-guide.md` - Structure, status tracking, and TDD workflow
+**Template**: `@~/.agents/templates/test-definitions-feature.md`
 
 **Feature**: [Brief description of the feature]
 

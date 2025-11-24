@@ -422,7 +422,7 @@ DON'T ask: Questions in docs, implementation details, preferences in CLAUDE.md, 
 - Report results before completion
 - If tests fail: fix them (don't ask user)
 
-For TDD workflow: See `@~/.agents/coding/guides/testing-methodology.md`
+For TDD workflow: See `@~/.agents/guides/testing-methodology.md`
 ```
 
 **Pro tip**: During coding, press **#** and type an instruction. Claude will automatically add it to the relevant CLAUDE.md file for you.

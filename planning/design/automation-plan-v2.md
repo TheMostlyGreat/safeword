@@ -378,7 +378,7 @@ Do not ask for approval again or skip tests.
 - Report results before completion
 - If tests fail: fix them (don't ask user)
 
-For TDD workflow: See `@~/.agents/coding/guides/testing-methodology.md`
+For TDD workflow: See `@~/.agents/guides/testing-methodology.md`
 ```
 
 ---
