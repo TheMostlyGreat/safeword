@@ -1,0 +1,7 @@
+node_modules/
+package-lock.json
+.claude/
+.safeword/
+.prettierignore
+.prettierrc
+eslint.config.mjs
