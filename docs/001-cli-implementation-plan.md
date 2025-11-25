@@ -51,7 +51,7 @@ npm install -D typescript @types/node @types/fs-extra tsx vitest
 
 **1.2.1 `safeword init` (CRITICAL PATH)**
 
-**Purpose:** Replace `setup-project.sh` with interactive setup
+**Purpose:** Replace `setup-safeword.sh` with interactive setup
 
 **Features:**
 ```bash
@@ -69,7 +69,7 @@ safeword init --quality-only     # Skip linting
 4. Install linting dependencies (biome or eslint+prettier)
 5. Update `package.json` (add scripts, optionally add CLI to devDeps)
 6. Register hooks in `.claude/settings.json`
-7. Create/update `AGENTS.md` with SAFEWORD.md reference
+7. Create/update `SAFEWORD.md` with .safeword/SAFEWORD.md reference
 8. Run automatic verification (see 1.2.2)
 9. Print success summary with next steps
 
@@ -124,7 +124,7 @@ $ safeword init
    ✓ .safeword/guides/ (12 guides)
    ✓ .claude/hooks/ (3 hooks)
    ✓ .claude/settings.json
-   ✓ AGENTS.md
+   ✓ SAFEWORD.md
 
    Hooks:
    ✓ PostToolUse → auto-lint.sh
@@ -138,7 +138,7 @@ $ safeword init
 
 ○  Next steps
 
-   git add .safeword .claude AGENTS.md package.json
+   git add .safeword .claude SAFEWORD.md package.json
    git commit -m "Add safeword config"
    
    Try it: Ask Claude to create a file
@@ -164,7 +164,7 @@ safeword verify --ci             # CI mode (minimal output)
 3. `.claude/hooks/` exists (verify scripts executable)
 4. `.claude/settings.json` exists and valid JSON
 5. Hooks registered (PostToolUse, Stop)
-6. `AGENTS.md` or `CLAUDE.md` references `.safeword/SAFEWORD.md`
+6. `SAFEWORD.md` or `CLAUDE.md` references `.safeword/SAFEWORD.md`
 7. Linting configured (biome.jsonc or eslint.config.mjs exists)
 8. npm scripts exist (`lint`, `format`)
 
@@ -180,7 +180,7 @@ async function repair() {
   await fs.chmod('.claude/hooks/auto-lint.sh', 0o755);
   await fs.chmod('.claude/hooks/auto-quality-review.sh', 0o755);
   
-  // Re-add AGENTS.md reference if missing
+  // Re-add SAFEWORD.md reference if missing
   if (!agentsHasReference()) {
     await addSafewordReference();
   }
@@ -273,7 +273,7 @@ To update: safeword upgrade
 **Structure:**
 ```
 packages/cli/src/templates/
-├── SAFEWORD.md                 # Core patterns (copy of AGENTS.md)
+├── SAFEWORD.md                 # Core patterns (copied from framework/SAFEWORD.md)
 ├── guides/                     # All guides
 │   ├── testing-methodology.md
 │   ├── code-philosophy.md
@@ -428,7 +428,7 @@ export function getConfigDir(): string {
 **Structure:**
 ```
 ~/.local/share/safeword/
-└── learnings/           # Global learnings (--global flag)
+└── .safeword/learnings/ # Project learnings
 
 ~/.config/safeword/
 └── config.json          # CLI preferences (future)
@@ -501,7 +501,7 @@ safeword status
 - [ ] Copy templates to `.safeword/` and `.claude/`
 - [ ] Install linting dependencies
 - [ ] Register hooks in `.claude/settings.json`
-- [ ] Create/update AGENTS.md reference
+- [ ] Create/update SAFEWORD.md reference
 - [ ] Automatic verification after init
 - [ ] Package manager detection (npm/yarn/pnpm)
 - [ ] Non-TTY detection (auto-enable --ci mode)
@@ -573,9 +573,9 @@ safeword init                 # Run globally
 ## Migration from Bash Scripts
 
 **Current state:**
-- `setup-project.sh` (270 lines)
+- `setup-safeword.sh` (270 lines)
 - `setup-linting.sh` (738 lines)
-- `setup-quality-review.sh` (531 lines)
+- `setup-quality.sh` (531 lines)
 
 **Total:** ~1500 lines of bash
 
@@ -615,7 +615,7 @@ npx @safeword/cli verify
 
 **3. Commit:**
 ```bash
-git add .safeword .claude AGENTS.md package.json
+git add .safeword .claude SAFEWORD.md package.json
 git commit -m "Add safeword config"
 ```
 ```
@@ -768,7 +768,7 @@ Show CLI version
 
 2. **Copy templates:**
    ```bash
-   cp ../AGENTS.md src/templates/SAFEWORD.md
+   cp ../SAFEWORD.md src/templates/SAFEWORD.md
    cp -r ../guides src/templates/guides
    cp -r ../.claude/hooks src/templates/hooks
    ```

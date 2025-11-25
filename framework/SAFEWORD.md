@@ -6,18 +6,18 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 
 ## Planning Documentation Location
 
-**All planning markdown files go in `.agents/planning/` at project root:**
+**All planning markdown files go in `.safeword/planning/` at project root:**
 
-- User stories → `.agents/planning/user-stories/`
-- Test definitions → `.agents/planning/test-definitions/`
-- Design docs → `.agents/planning/design/`
-- Issue capture → `.agents/planning/issues/`
+- User stories → `.safeword/planning/user-stories/`
+- Test definitions → `.safeword/planning/test-definitions/`
+- Design docs → `.safeword/planning/design/`
+- Issue capture → `.safeword/planning/issues/`
 
 **Archive completed work:** When planning docs are completed and no longer actively referenced, move to:
-- `.agents/planning/user-stories/archive/`
-- `.agents/planning/test-definitions/archive/`
-- `.agents/planning/design/archive/`
-- `.agents/planning/issues/archive/`
+- `.safeword/planning/user-stories/archive/`
+- `.safeword/planning/test-definitions/archive/`
+- `.safeword/planning/design/archive/`
+- `.safeword/planning/issues/archive/`
 
 **Why archive:** Prevents bloat in active planning folders while preserving history for reference.
 
@@ -31,17 +31,17 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 
 **Available scripts:**
 - `setup-safeword.sh` - **One-command installer** (copies guides/templates, planning/tickets/learnings, adds triggers)
+- `setup-claude.sh` - Sets up Claude hooks, Arcade MCP gateway, CLAUDE.md trigger
 - `setup-linting.sh` - Auto-linting on file changes (ESLint + Prettier or Biome)
-- `setup-quality.sh` - Quality review prompts + global patterns
+- `setup-quality.sh` - Quality review prompts (Stop hook) and settings
 
 **Usage:**
 
-**Recommended setup:**
+**One-command setup (recommended):**
 ```bash
 cd /path/to/your/project
-bash /path/to/setup-safeword.sh                      # Install SAFEWORD structure + docs
-bash /path/to/setup-claude.sh --linting-mode biome   # Force Biome mode + quality review
-bash /path/to/setup-claude.sh --skip-linting         # Quality review only
+bash ./framework/scripts/setup-safeword.sh            # Install SAFEWORD structure + docs
+bash ./framework/scripts/setup-claude.sh              # Install Claude hooks (+ MCP gateway)
 ```
 
 **Auto-detection:** Automatically detects project type from package.json and config files:
@@ -56,8 +56,8 @@ bash /path/to/setup-claude.sh --skip-linting         # Quality review only
 **Individual scripts (advanced):**
 ```bash
 cd /path/to/your/project
-bash /path/to/setup-linting.sh --typescript          # Linting only
-bash /path/to/setup-quality.sh                       # Quality review only
+bash ./framework/scripts/setup-linting.sh --typescript  # Linting only
+bash ./framework/scripts/setup-quality.sh               # Quality review only
 ```
 
 **Linting modes:** minimal, typescript, react, electron, astro, biome
@@ -68,10 +68,10 @@ bash /path/to/setup-quality.sh                       # Quality review only
 - `.claude/hooks/` - Hook scripts (with version comments)
 - `.claude/commands/` - Slash commands (`/lint`, `/quality-review`)
 - `.claude/settings.json` - Hook configuration (appends to existing)
-- `AGENTS.md` or `CLAUDE.md` - Project context file with ALWAYS trigger for @./.safeword/SAFEWORD.md
+- `SAFEWORD.md` or `CLAUDE.md` - Project context file with ALWAYS trigger for @./.safeword/SAFEWORD.md
   - If CLAUDE.md exists → prepends trigger
-  - If AGENTS.md exists → prepends trigger
-  - If neither exists → creates AGENTS.md with trigger
+  - If SAFEWORD.md exists → ensure it references @./.safeword/SAFEWORD.md
+  - If neither exists → creates SAFEWORD.md with trigger
 - Config files if needed (`eslint.config.mjs`, `.prettierrc`, `biome.jsonc`)
 
 **Key features:**
@@ -82,86 +82,111 @@ bash /path/to/setup-quality.sh                       # Quality review only
 - ✅ **Order-independent** - Can run scripts in any order
 
 **Documentation:**
-- Consolidated setup: `framework/README.md`
+- Consolidated setup guide: `README.md` (this folder)
 
 **For teams:**
 1. Get setup scripts (clone repo temporarily or download scripts)
 2. In each project, run one command:
    ```bash
    cd /path/to/project
-   bash /path/to/setup-safeword.sh  # One command, full setup
+   bash ./framework/scripts/setup-safeword.sh  # One command, full setup
    ```
 3. **Result**: Project becomes standalone with:
    - `.safeword/SAFEWORD.md` - Global patterns (copy of this file)
    - `.safeword/guides/` - Reference documentation
    - `.claude/` - Hooks and commands
-   - `AGENTS.md` or `CLAUDE.md` - Project context with @./.safeword/SAFEWORD.md reference
+- `SAFEWORD.md` or `CLAUDE.md` - Project context with @./.safeword/SAFEWORD.md reference
 4. **COMMIT to repo**: Commit `.safeword/` and `.claude/` for team consistency
 5. **Delete source**: Can delete setup scripts/repo after running - project is fully portable
 
 ---
 
-## Ticket System (Higher-Level Work Tracking)
+## Ticket System (Context Anchor for Non-Trivial Work)
 
-**Purpose:** Tickets encapsulate higher-level features/epics that contain multiple planning docs and implementation tasks.
+**Purpose:** Tickets serve as persistent memory to prevent context loss when work becomes complex, requires multiple attempts, or might spiral.
 
-**Location:** `.agents/tickets/`
+**Not for archival** - Tickets are session anchors to prevent LLM loops and confusion.
 
-**Naming convention:** `{id}-{feature-slug}.md`
-- Example: `001-user-authentication.md`, `002-payment-flow.md`
-- Planning docs share same prefix: `001-user-authentication.md` in each planning subfolder
+**Location:** `.safeword/tickets/`
 
-**Structure:**
+**Naming convention:** `{id}-{slug}.md`
+- Example: `001-fix-login-bug.md`, `002-add-oauth.md`, `003-debug-slow-query.md`
+- Planning docs (if needed) share same prefix: `002-add-oauth.md` in planning subfolders
+
+**Minimal structure:**
 ```markdown
 ---
 id: 001
-status: todo|in_progress|done|blocked
-created: 2025-01-19T14:30:00Z
-priority: low|medium|high
-planning_refs:
-  - .agents/planning/user-stories/001-user-authentication.md
-  - .agents/planning/test-definitions/001-user-authentication.md
-  - .agents/planning/design/001-user-authentication.md (if complex)
+status: in_progress
 ---
 
-# User Authentication System
+# Fix Login Button Not Responding
 
-## Description
-{High-level feature description}
+**Goal:** Make login button respond to clicks
 
-## Scope
-{What's included in this ticket}
-
-## Acceptance Criteria
-- [ ] All user stories completed
-- [ ] All tests passing
-- [ ] Documentation updated
+**Why:** Users can't log in - button does nothing on click
 
 ## Work Log
-{Progress notes, decisions, blockers}
+- 2025-11-24T19:00:15Z Started: Investigating button click issue
+- 2025-11-24T19:02:30Z Found: onClick handler missing in Button component
+- 2025-11-24T19:05:00Z RED: Added test for button click (refs: tests/button.test.ts)
+- 2025-11-24T19:08:15Z GREEN: Added onClick handler; test passing (refs: 7f3e2a9)
+- 2025-11-24T19:09:00Z Complete: Button fixed, verified with test
 ```
 
-**When to create tickets:**
-- User requests a feature/epic that spans multiple user stories
-- Work involves multiple planning docs (user stories + test definitions + design doc)
-- Need to track progress on larger initiatives
+**For complex features, add optional sections:**
+```markdown
+### Planning Docs
+- .safeword/planning/user-stories/002-oauth-login.md
+- .safeword/planning/test-definitions/002-oauth-login.md
+
+### Scope
+**In scope:** Google OAuth, account linking, token refresh
+**Out of scope:** Other providers (separate ticket)
+
+### Acceptance Criteria
+- [ ] All user stories completed
+- [ ] Security review passed
+```
+
+**Template:** Use `.safeword/templates/ticket-template.md` when creating a ticket.
+
+**Work Log is critical:** Log immediately after each action. Re-read ticket frequently to prevent loops.
+
+**When to create tickets (context-loss risk assessment):**
+
+**Create ticket if ANY of these apply:**
+- Work might require multiple attempts/approaches (styling bugs, performance issues)
+- Work has multiple steps with dependencies (A must work before B)
+- Investigation/debugging required (unknown cause, non-obvious solution)
+- Anything that might cause you to lose context or loop mid-session
+
+**Skip ticket if:**
+- Obvious one-shot change (fix typo, update constant, change text label)
+- Takes <2 minutes with zero risk of confusion or cascading issues
+- No investigation needed, solution is clear
+
+**Examples:**
+- "Fix typo in README" → No ticket (obvious, one-shot)
+- "Make button red" → Ticket (might break mobile, cascade issues)
+- "Debug slow login" → Ticket (investigation needed, multiple hypotheses)
+- "Add OAuth" → Ticket (complex, multi-step, planning docs needed)
 
 **Relationship to planning docs:**
-- **Ticket** = Higher-level feature/epic (e.g., "User Authentication System")
-- **Planning docs** = Detailed specs referenced by ticket (user stories, test definitions, design docs)
+- **Ticket** = Context anchor (prevents loops, tracks attempts)
+- **Planning docs** = Detailed specs for complex features (user stories, test definitions)
 - **TodoWrite** = Task-level tracking within current work session
 
 **Workflow:**
-1. Create ticket: `.agents/tickets/{id}-{feature-slug}.md` (e.g., `001-user-authentication.md`)
-2. Create planning docs **with matching prefix**:
-   - `.agents/planning/user-stories/001-user-authentication.md`
-   - `.agents/planning/test-definitions/001-user-authentication.md`
-   - `.agents/planning/design/001-user-authentication.md` (if complex)
-3. Reference planning docs in ticket's `planning_refs` field
-4. Follow standard Feature Development Workflow (user stories → test definitions → TDD)
-5. Update ticket status and work log as you progress
-6. When complete, **ask user to confirm** completion before archiving
-7. After user confirmation, move ticket to `.agents/tickets/completed/001-user-authentication.md`
+1. **Create ticket:** `.safeword/tickets/{id}-{slug}.md`
+2. **Fill in Goal + Why** (one sentence each) - This is your anchor
+3. **Add initial work log entry:** "Started: [task]"
+4. **Re-read ticket before EVERY significant action** - Check what you're trying to do
+5. **Log immediately** after each attempt, finding, commit, or blocker
+6. **For complex features:** Add planning docs, reference them in optional sections
+7. **When stuck:** Re-read work log - what have you tried? What's the goal?
+8. **When complete:** Log final entry, update status to `done`, ask user to confirm
+9. **After confirmation:** Move to `.safeword/tickets/completed/{id}-{slug}.md`
 
 **CRITICAL:** NEVER mark ticket as `done` or archive without explicit user confirmation. User must verify:
 - All acceptance criteria met
@@ -170,9 +195,9 @@ planning_refs:
 - No regressions introduced
 
 **Archiving:**
-- Completed tickets → `.agents/tickets/completed/`
-- Blocked/cancelled tickets → `.agents/tickets/archived/`
-- Active tickets stay in `.agents/tickets/`
+- Completed tickets → `.safeword/tickets/completed/`
+- Blocked/cancelled tickets → `.safeword/tickets/archived/`
+- Active tickets stay in `.safeword/tickets/`
 
 **Why confirm:** Prevents premature closure and ensures quality standards met.
 
@@ -188,30 +213,35 @@ planning_refs:
 
 **IN ORDER:**
 
-**0. Check for Ticket** (higher-level feature/epic tracking)
+**0. Check for Ticket / Create If Needed** (context-loss prevention)
 
-   - Search `.agents/tickets/` for matching ticket file
+   - Search `.safeword/tickets/` for matching ticket file
    - **If found:**
-     - Read ticket file
-     - Follow `planning_refs` to planning docs (user stories, test definitions, design doc)
-     - Update ticket's work log as you progress
+     - **Read ticket first** - What's the goal? What have I tried?
+     - Check work log for previous attempts/findings
+     - Log: "Resumed work on [task]"
+     - **Re-read ticket before each significant action**
+     - For complex features: Follow planning docs if referenced
    - **If not found:**
-     - Assess scope: Multi-story feature or epic? → Offer to create ticket
-     - Simple task/bug fix? → Skip to planning docs (step 1)
+     - **Assess context-loss risk:**
+       - Obvious one-shot (<2 min, no investigation)? → Skip ticket, skip to TDD (step 4)
+       - Might require multiple attempts? → Create ticket, skip to TDD (step 4)
+       - Investigation/debugging needed? → Create ticket, skip to TDD (step 4)
+       - Complex feature (multi-story)? → Create ticket, continue to planning docs (step 1)
 
-1. **User Stories** - Search `.agents/planning/user-stories/` or `docs/user-stories/`
+1. **User Stories** - Search `.safeword/planning/user-stories/` or `docs/user-stories/`
 
    - Not found → Ask user if they exist elsewhere or offer to create
    - Found → Read them
    - **Guide:** `@./.safeword/guides/user-story-guide.md`
 
-2. **Test Definitions** - Search `.agents/planning/test-definitions/` or `docs/test-definitions/`
+2. **Test Definitions** - Search `.safeword/planning/test-definitions/` or `docs/test-definitions/`
 
    - Not found → Ask user if they exist elsewhere or offer to create
    - Found → Read them
    - **Guide:** `@./.safeword/guides/test-definitions-guide.md`
 
-3. **Design Doc** (complex features only) - Search `.agents/planning/design/` or `docs/design/`
+3. **Design Doc** (complex features only) - Search `.safeword/planning/design/` or `docs/design/`
 
    - Complex = >3 components, new data model, or architectural decisions
    - Not found → Ask if needed, create if yes
@@ -225,10 +255,12 @@ planning_refs:
    - **Workflow:** `@./.safeword/guides/testing-methodology.md` (comprehensive TDD guidance and test type decision tree)
 
 5. **Update Ticket** (if applicable)
-   - Update work log with progress
-   - When work complete, update status to `done`
-   - **Ask user to confirm** completion (see Ticket System section)
-   - After confirmation, move to `.agents/tickets/completed/`
+   - **Re-read ticket frequently** - Before each action, check: What's the goal? What have I tried?
+   - **Log immediately** after each action - Don't batch; log as you go
+   - Log: attempts (tried X, result Y), findings (found Z), commits, blockers, decisions
+   - When work complete: Log final entry, update status to `done`
+   - **Ask user to confirm** completion before archiving
+   - After confirmation: Move to `.safeword/tickets/completed/`
 
 **IMPORTANT:** Do not skip to implementation without user stories and test definitions. Follow TDD strictly.
 

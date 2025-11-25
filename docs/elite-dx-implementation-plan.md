@@ -157,7 +157,7 @@ safeword changelog              # Print CHANGELOG.md or open in browser
 
 ### Current Flow (Silent)
 ```bash
-bash setup-project.sh
+bash ./framework/scripts/setup-safeword.sh
 # ... tons of output ...
 # Done
 ```
@@ -192,10 +192,10 @@ safeword init
 # Installed:
 #   • Auto-linting (biome, 15MB)
 #   • Quality review hooks
-#   • AGENTS.md with .safeword/SAFEWORD.md reference
+#   • SAFEWORD.md with .safeword/SAFEWORD.md reference
 # 
 # Next steps:
-#   1. git add .safeword .claude AGENTS.md
+#   1. git add .safeword .claude SAFEWORD.md
 #   2. git commit -m "Add safeword config"
 #   3. Ask Claude to create a file (test hooks)
 # 
@@ -223,14 +223,14 @@ safeword init --linting-only # Skip quality review
    - ✓ `.safeword/guides/` exists (12 files)
    - ✓ `.claude/hooks/` exists (auto-lint.sh, auto-quality-review.sh, run-*.sh)
    - ✓ `.claude/settings.json` exists
-   - ✓ `AGENTS.md` or `CLAUDE.md` exists
+   - ✓ `SAFEWORD.md` or `CLAUDE.md` exists
 
 2. **Hooks registered:**
    - ✓ PostToolUse hook → auto-lint.sh
    - ✓ Stop hook → auto-quality-review.sh
    - ✓ SessionStart hook → version-check.sh
 
-3. **AGENTS.md reference:**
+3. **SAFEWORD.md reference:**
    - ✓ Contains `@./.safeword/SAFEWORD.md`
 
 4. **Linting configured:**
@@ -258,7 +258,7 @@ Files:
   ✓ .safeword/guides/ (12 guides)
   ✓ .claude/hooks/ (5 hooks)
   ✓ .claude/settings.json
-  ✓ AGENTS.md
+  ✓ SAFEWORD.md
 
 Hooks:
   ✓ PostToolUse → auto-lint.sh
@@ -272,7 +272,7 @@ Linting:
 
 ✓ All checks passed!
 
-Next: git add .safeword .claude AGENTS.md
+Next: git add .safeword .claude SAFEWORD.md
 ```
 
 **If verification fails:**
@@ -289,17 +289,17 @@ Fix: Re-run setup with --force
 
 ---
 
-## 6. Global Config: No ~/.agents Folder
+## 6. Global Config: No Global Folder
 
 ### Current Problem
 
 README says:
 ```bash
-git clone https://github.com/TheMostlyGreat/safeword ~/.agents
+# (Deprecated) global clone — prefer project-local scripts
 ```
 
 This creates **global state** that devs must manage:
-- `cd ~/.agents && git pull` to update
+# Use project-local scripts in ./framework/scripts/, no global update step
 - Manual git operations
 - Confusing mental model (is safeword global or per-project?)
 
@@ -317,10 +317,10 @@ my-project/
 ├── .claude/
 │   ├── hooks/
 │   └── settings.json
-└── AGENTS.md                # References @./.safeword/SAFEWORD.md
+└── SAFEWORD.md              # References @./.safeword/SAFEWORD.md
 ```
 
-**No ~/.agents folder. No global state. Fully portable.**
+**No global folder required. Fully portable and project-local.**
 
 ### How Updates Work
 
@@ -352,7 +352,7 @@ safeword upgrade-project
 
 **Option B: Hidden cache for faster installs**
 
-CLI caches guides in `~/.cache/safeword/` (not ~/.agents):
+CLI caches guides in `~/.cache/safeword/` (no global folder):
 
 ```
 ~/.cache/safeword/
@@ -388,7 +388,7 @@ safeword cache clear --older-than 1.2.0  # Remove old versions
 
 **Problem:** Where do custom learnings go?
 
-**Current:** `~/.agents/learnings/[concept].md` (global, shared across projects)
+**Current:** `.safeword/learnings/[concept].md` (project-local, shared via repo)
 
 **Elite approach:** Both!
 
@@ -426,7 +426,7 @@ safeword learning list
 ### The Problem
 
 **Current flow:**
-1. Dev sets up safeword: `bash setup-project.sh`
+1. Dev sets up safeword: `bash ./framework/scripts/setup-safeword.sh`
 2. Commits `.safeword/` and `.claude/` to git
 3. Teammate clones project
 4. Teammate has safeword files but **hooks don't work** (no CLI installed)
@@ -460,7 +460,7 @@ npx @safeword/cli init
 
 **Step 2: Dev commits**
 ```bash
-git add .safeword/ .claude/ AGENTS.md package.json
+git add .safeword/ .claude/ SAFEWORD.md package.json
 git commit -m "Add safeword config"
 git push
 ```
@@ -480,7 +480,7 @@ npm install    # or pnpm install, yarn install
 4. CLI checks:
    - ✓ `.safeword/` exists (from git)
    - ✓ `.claude/` exists (from git)
-   - ✓ AGENTS.md exists (from git)
+   - ✓ SAFEWORD.md exists (from git)
    - ✓ Hooks registered in `.claude/settings.json`
 5. Output:
    ```
@@ -873,7 +873,7 @@ Installed:
   • Quality review hooks
   • 12 guides in .safeword/
 
-Next: git add .safeword .claude AGENTS.md
+Next: git add .safeword .claude SAFEWORD.md
 ```
 
 ---
@@ -919,7 +919,7 @@ export async function install(options: InstallOptions) {
   console.log('  • Auto-linting (biome)');
   console.log('  • Quality review hooks');
   console.log('  • 12 guides in .safeword/');
-  console.log('\nNext: git add .safeword .claude AGENTS.md');
+  console.log('\nNext: git add .safeword .claude SAFEWORD.md');
 }
 ```
 
@@ -962,12 +962,12 @@ export async function install(options: InstallOptions) {
    ```
 
 2. **Port bash scripts to TypeScript:**
-   - `setup-project.sh` → `src/commands/init.ts`
+   - `setup-safeword.sh` → `src/commands/init.ts`
    - `setup-linting.sh` → `src/lib/linting.ts`
-   - `setup-quality-review.sh` → `src/lib/quality-review.ts`
+   - `setup-quality.sh` → `src/lib/quality-review.ts`
 
 3. **Embed templates:**
-   - Copy `AGENTS.md`, `guides/`, `hooks/` to `src/templates/`
+   - Copy `SAFEWORD.md`, `guides/`, `hooks/` to `src/templates/`
 
 4. **Test locally:**
    ```bash

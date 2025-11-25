@@ -44,7 +44,7 @@ pnpm test
 
 ### 1. Document Sequential Execution Requirement
 
-In your testing docs (e.g., `tests/AGENTS.md`), add prominent warning:
+In your testing docs (e.g., `tests/SAFEWORD.md`), add prominent warning:
 
 ```markdown
 ### Zombie processes / Port already in use

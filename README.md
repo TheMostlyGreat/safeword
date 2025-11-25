@@ -10,31 +10,24 @@
 
 ## Quick Start (30 seconds)
 
-**1. Clone this repo:**
-```bash
-git clone https://github.com/TheMostlyGreat/safeword ~/.agents
-```
-
-**2. Install in your project:**
+**1. Install in your project:**
 ```bash
 cd /path/to/your/project
-bash ~/.agents/setup-project.sh
+bash ./framework/scripts/setup-safeword.sh
 ```
 
-**3. Verify installation:**
+**2. Verify installation:**
 ```bash
-# Check that AGENTS.md references .safeword/SAFEWORD.md
-cat AGENTS.md | grep "safeword"
-
-# Or check CLAUDE.md if that's what exists
-cat CLAUDE.md | grep "safeword" 2>/dev/null || echo "Using AGENTS.md"
+# Check for SAFEWORD files and hooks
+test -f .safeword/SAFEWORD.md && echo ".safeword/SAFEWORD.md ✓"
+test -f .claude/settings.json && echo ".claude/settings.json ✓"
 ```
 
 **Result**: Your project now has:
 - `.safeword/SAFEWORD.md` - Global patterns and workflows
 - `.safeword/guides/` - TDD methodology, testing, code philosophy
 - `.claude/hooks/` - Auto-linting and quality review
-- `AGENTS.md` or `CLAUDE.md` - Project context with framework reference
+- `SAFEWORD.md` or `CLAUDE.md` - Project context with framework reference
 
 **Commit these to your repo** for team consistency.
 
@@ -42,9 +35,7 @@ cat CLAUDE.md | grep "safeword" 2>/dev/null || echo "Using AGENTS.md"
 
 ## How It Works
 
-**Global framework**: `~/.agents/` is a git repo synced across your machines (guides, templates, learnings)
-
-**Per-project deployment**: `setup-project.sh` copies framework to `.safeword/` and `.claude/` in your project
+**Project-local framework**: Scripts write to `.safeword/` and `.claude/` in your project (no global install needed)
 
 **Team consistency**: Teammates get the framework from your project repo (no global install needed)
 
@@ -54,19 +45,11 @@ cat CLAUDE.md | grep "safeword" 2>/dev/null || echo "Using AGENTS.md"
 
 ## What's Inside
 
-```
-~/.agents/
-├── guides/           Core methodology and best practices
-├── templates/        Fillable document structures
-├── learnings/        Extracted knowledge from experience
-├── planning/         Planning documentation
-│   ├── user-stories/
-│   ├── test-definitions/
-│   ├── design/
-│   └── issues/
-├── hooks/            Automation scripts
-└── skills/           Specialized agent capabilities
-```
+Key directories created in your project:
+- `.safeword/guides/` - Core methodology and best practices
+- `.safeword/templates/` - Fillable document structures
+- `.safeword/planning/` - Planning documentation (user-stories, test-definitions, design, issues)
+- `.claude/hooks/` - Automation scripts
 
 ---
 
@@ -104,8 +87,8 @@ cat CLAUDE.md | grep "safeword" 2>/dev/null || echo "Using AGENTS.md"
 | Guide | Purpose | When to Read |
 |-------|---------|--------------|
 | **llm-prompting.md** | Prompt engineering, LLM cost optimization, caching | Building AI features |
-| **llm-instruction-design.md** | 13 principles for LLM-consumable docs (MECE, examples) | Creating AGENTS.md/guides |
-| **agents-md-guide.md** | AGENTS.md structure, anti-patterns, modular approach | Setting up projects |
+| **llm-instruction-design.md** | 13 principles for LLM-consumable docs (MECE, examples) | Creating SAFEWORD.md/guides |
+| **context-files-guide.md** | CLAUDE.md/CURSOR.md/AGENTS.md structure, anti-patterns, modular approach | Setting up projects |
 | **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation | Managing dev servers |
 
 ---
@@ -126,7 +109,7 @@ cat CLAUDE.md | grep "safeword" 2>/dev/null || echo "Using AGENTS.md"
 
 **Purpose**: Extracted knowledge that compounds across sessions
 
-**Location**: `~/.agents/learnings/[concept].md`
+**Location**: `.safeword/learnings/[concept].md`
 
 **What goes here**:
 - Debugging discoveries (non-obvious gotchas, integration struggles)
@@ -185,15 +168,11 @@ Each directory has an `archive/` subfolder for completed work.
 
 ```bash
 cd /path/to/your/project
-
-# Auto-detect project type + quality review
-bash ~/.agents/setup-project.sh
-
-# Force Biome mode + quality review
-bash ~/.agents/setup-project.sh --linting-mode biome
-
-# Quality review only (skip linting)
-bash ~/.agents/setup-project.sh --skip-linting
+# SAFEWORD structure + (optionally) Claude Code hooks
+bash ./framework/scripts/setup-safeword.sh
+# Claude Code hooks only (if SAFEWORD already configured)
+bash ./framework/scripts/setup-claude.sh --linting-mode biome
+bash ./framework/scripts/setup-claude.sh --skip-linting
 ```
 
 **Auto-detection**: Automatically detects project type from `package.json`:
@@ -205,16 +184,15 @@ bash ~/.agents/setup-project.sh --skip-linting
 - TypeScript → if `typescript` in dependencies or `tsconfig.json` exists
 - Minimal → otherwise
 
-### Reference Guides in Project AGENTS.md
+### Reference Guides in Project SAFEWORD.md
 
 ```markdown
-# Import guides from .safeword
+# Import guides from .safeword (SAFEWORD.md)
 @./.safeword/guides/testing-methodology.md
 @./.safeword/guides/code-philosophy.md
-
-# Reference templates
-- **Template:** `@./.safeword/templates/user-stories-template.md`
-- **Guide:** `@./.safeword/guides/user-story-guide.md`
+@./.safeword/guides/user-story-guide.md
+@./.safeword/guides/test-definitions-guide.md
+@./.safeword/guides/design-doc-guide.md
 ```
 
 Claude Code will auto-load these guides as context.
@@ -222,34 +200,25 @@ Claude Code will auto-load these guides as context.
 ### Check for Existing Learnings
 
 ```bash
-# Global learnings (all projects)
-ls ~/.agents/learnings/
-
-# Search by keyword
-ls ~/.agents/learnings/*react*.md
-ls ~/.agents/learnings/*electron*.md
+# Project learnings (this repo)
+ls .safeword/learnings/
 ```
 
 ### Extract New Learning
 
 1. Follow recognition triggers in `learning-extraction.md`
-2. Create `~/.agents/learnings/[concept].md`
+2. Create `.safeword/learnings/[concept].md`
 3. Use template: Problem → Gotcha → Examples → Testing Trap
 
 ### Create Planning Documentation
 
 ```bash
 # User stories
-cd ~/.agents/planning/user-stories
-touch feature-name.md
-
+mkdir -p .safeword/planning/user-stories && touch .safeword/planning/user-stories/feature-name.md
 # Test definitions
-cd ~/.agents/planning/test-definitions
-touch feature-name.md
-
+mkdir -p .safeword/planning/test-definitions && touch .safeword/planning/test-definitions/feature-name.md
 # Design docs
-cd ~/.agents/planning/design
-touch feature-name.md
+mkdir -p .safeword/planning/design && touch .safeword/planning/design/feature-name.md
 ```
 
 
@@ -257,25 +226,19 @@ touch feature-name.md
 
 ## Syncing Across Machines
 
-```bash
-cd ~/.agents
-git pull origin main   # Get latest from GitHub
-git add .
-git commit -m "docs: update [guide/learning] with [change]"
-git push origin main   # Push to GitHub
-```
+Commit `.safeword/` and `.claude/` in your project repo for team consistency.
 
 ---
 
 ## Integration with Project Context
 
-**Project AGENTS.md/CLAUDE.md**: Created by `setup-project.sh`, references `.safeword/SAFEWORD.md`
+**Project SAFEWORD.md/CLAUDE.md**: Created by `setup-safeword.sh` or manually, references `.safeword/SAFEWORD.md`
 
 **How it works**:
-1. Project AGENTS.md imports core guides via `@./.safeword/guides/`
+1. Project SAFEWORD.md imports core guides via `@./.safeword/guides/`
 2. Guides reference templates via `@./.safeword/templates/`
 3. Guides cross-reference each other via `@./.safeword/guides/`
-4. Global learnings referenced via `ls ~/.agents/learnings/`
+4. Learnings referenced via `ls .safeword/learnings/`
 
 **Result**: Modular, maintainable documentation with clear separation of concerns
 
