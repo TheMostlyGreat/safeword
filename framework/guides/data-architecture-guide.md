@@ -125,6 +125,15 @@
 
 **Include:** Input validation, business logic transformations, persistence steps, UI updates, error handling for each step.
 
+**Example format:**
+```markdown
+**[Flow Name]** (trigger: [user action/event])
+1. **Input** → Validation (`validateFn()`) | Error: return 400
+2. **Transform** → Business logic | Error: rollback + notify
+3. **Persist** → Database write | Error: retry 3x, then fail
+4. **UI Update** → Optimistic update | Error: revert state
+```
+
 ### 3. Data Policies
 
 **Document:** Access control (who reads/writes), validation rules, lifecycle (creation, updates, deletion, purging).

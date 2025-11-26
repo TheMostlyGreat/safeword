@@ -69,6 +69,18 @@ Loaded context:
 - Don't duplicate root content in subdirectory files
 - Focus subdirectory files on specialized conventions for that area
 
+```markdown
+❌ BAD - tests/AGENTS.md duplicates root TDD workflow:
+## TDD Workflow
+1. Write failing tests first (RED)
+2. Implement minimum code (GREEN)
+3. Refactor while green
+
+✅ GOOD - tests/AGENTS.md references root:
+## Testing Conventions
+See root AGENTS.md for TDD workflow. This file covers test-specific patterns.
+```
+
 **Reliability note:** Auto-loading works best when you explicitly reference your file in conversation (e.g., "following the guidelines in CLAUDE.md"). Implicit automatic reference can be less reliable.
 
 **Deprecated:** `*.local.md` is no longer recommended - use imports instead for better multi-worktree support

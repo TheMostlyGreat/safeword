@@ -375,3 +375,5 @@ echo "4. (Optional) Run framework/scripts/setup-claude.sh to add Claude Code hoo
 
 
 
+
+

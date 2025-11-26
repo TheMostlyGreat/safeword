@@ -15,10 +15,10 @@ At the end of EVERY response, include a JSON summary with this exact structure:
 {"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}
 ```
 
-Where:
-- `proposedChanges`: `true` if you suggested/proposed changes to specific files in your response
-- `madeChanges`: `true` if you actually modified files using Write/Edit tools
-- `askedQuestion`: `true` if you asked the user a question and need their response before your work is ready for quality reviewed
+Where (all fields describe **this response only**, not cumulative):
+- `proposedChanges`: `true` if you suggested/proposed changes to specific files **in this response**
+- `madeChanges`: `true` if you **modified files in this response** using Write/Edit tools
+- `askedQuestion`: `true` if you asked the user a question and need their response before proceeding
 
 Examples:
 - Discussed approach only: `{"proposedChanges": false, "madeChanges": false, "askedQuestion": false}`
@@ -26,6 +26,7 @@ Examples:
 - Made edits directly: `{"proposedChanges": false, "madeChanges": true, "askedQuestion": false}`
 - Proposed AND made edits: `{"proposedChanges": true, "madeChanges": true, "askedQuestion": false}`
 - Asked user a question: `{"proposedChanges": false, "madeChanges": false, "askedQuestion": true}`
+- **Quality review response** (no new changes): `{"proposedChanges": false, "madeChanges": false, "askedQuestion": false}`
 
 ## Code Philosophy
 - **Elegant code and architecture** - Prioritize developer experience
@@ -33,11 +34,48 @@ Examples:
 - **Self-documenting code** - Minimal inline comments, clear naming and structure
 - **Explicit error handling** - NEVER suppress or swallow errors silently
 
+**Error handling examples:**
+| ❌ Bad | ✅ Good |
+|--------|---------|
+| `catch (e) {}` (swallowed) | `catch (e) { throw new Error(\`Failed to read ${filePath}: ${e.message}\`) }` |
+| `catch (e) { console.log(e) }` | `catch (e) { logger.error('Payment failed', { userId, amount, error: e }) }` |
+| Generic "Something went wrong" | "Failed to save user profile: database connection timeout" |
+
+**Naming examples:**
+| ❌ Bad | ✅ Good |
+|--------|---------|
+| `calcTot` | `calculateTotalWithTax` |
+| `d`, `tmp`, `data` | `userProfile`, `pendingOrders` |
+| `handleClick` | `submitPaymentForm` |
+| `process()` | `validateAndSaveUser()` |
+
+**When to comment:**
+- ✅ Non-obvious business logic ("Tax exempt for orders >$500 per policy X")
+- ✅ Workarounds ("Safari requires this delay due to bug #123")
+- ❌ Obvious code (`// increment counter` before `i++`)
+- ❌ Restating the function name
+
+**Bloat examples (avoid these):**
+| ❌ Bloat | ✅ Instead |
+|----------|-----------|
+| Utility class for one function | Single function |
+| Factory pattern for simple object | Direct construction |
+| Abstract base class with one implementation | Concrete class |
+| Config file for 2 options | Hardcode or simple params |
+| "Future-proofing" unused code paths | Delete, add when needed |
+
+**When to push back:** If a feature request would add >50 lines for a "nice to have", ask: "Is this essential now, or can we add it later?"
+
 ## Documentation Verification (CRITICAL)
 - **Always look up current documentation** for libraries, tools, and frameworks
 - Do NOT assume API compatibility - verify the actual version being used
 - Check docs unless they're already loaded in the context window
 - **NEVER assume features exist** - Training data is at least 1 year old; when uncertain, verify first
+
+**How to verify:**
+1. Check `package.json` (or equivalent) for installed version
+2. Use Context7 MCP or official docs for current API
+3. If uncertain, ask user: "Which version of X are you using?"
 
 ## Testing Philosophy
 
@@ -59,16 +97,28 @@ Examples:
 - Use JSON.stringify() for complex objects to see structure
 - Remove debug logging after fixing (keep production code clean)
 
+```javascript
+// ❌ Bad: console.log('here')
+// ✅ Good: console.log('validateUser', { expected: 'admin', actual: user.role })
+```
+
 **Cross-Platform Development:**
 - Test on all target platforms early (macOS, Windows, Linux)
 - Never assume Unix-style paths (`/`) - handle both `/` and `\`
 - Be aware of runtime environment (browser vs Node.js, client vs server)
+
+```javascript
+// ❌ Bad: dir + '/' + filename
+// ✅ Good: path.join(dir, filename)
+```
 
 ## Best Practices (Always Apply)
 Before implementing, research and apply:
 - **Tool-specific best practices** - Use libraries/frameworks as intended
 - **Domain best practices** - Follow conventions for the type of app (CLI, web editor, API, etc.)
 - **UX best practices** - Prioritize user experience in design decisions
+
+**How to research:** Use Context7 MCP or official docs. Check for established patterns before inventing your own.
 
 ## Self-Review Checklist
 Before completing any work, verify:
@@ -78,6 +128,8 @@ Before completing any work, verify:
 - ✓ Are you using the right docs/versions?
 - ✓ Have you tested the user-facing functionality?
 
+**Blockers:** If something can't be fixed now, note it explicitly: "Deferred: [issue] because [reason]"
+
 ## Asking Questions
 - **Be proactive and self-sufficient** - Don't be lazy
 - Only ask questions when you genuinely can't find the answer through:
@@ -85,6 +137,7 @@ Before completing any work, verify:
   - Reading the codebase
   - Running tests or experiments
 - Ask non-obvious questions that require user domain knowledge or preferences
+- **When asking, show what you tried:** "I checked X and Y but couldn't determine Z. What's your preference?"
 
 ## Tools & CLIs
 Keep these updated to latest versions:
@@ -97,3 +150,9 @@ Keep these updated to latest versions:
 - Commit whenever work is completed
 - Commit often to checkpoint progress
 - Use descriptive commit messages
+- Make atomic commits (one logical change per commit)
+
+```
+# ❌ Bad: "misc fixes"
+# ✅ Good: "fix: login button not responding to clicks"
+```

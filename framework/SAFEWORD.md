@@ -243,7 +243,7 @@ status: in_progress
 
 3. **Design Doc** (complex features only) - Search `.safeword/planning/design/` or `docs/design/`
 
-   - Complex = >3 components, new data model, or architectural decisions
+   - Complex = >3 components, spans 2+ user stories, new data model, or architectural decisions
    - Not found → Ask if needed, create if yes
    - Found → Read it
    - **Guide:** `@./.safeword/guides/design-doc-guide.md`
@@ -305,6 +305,15 @@ status: in_progress
 - Feature-specific technical decisions
 - Implementation details (not project-wide principles)
 
+**Quick Decision Matrix:**
+
+| Question | Architecture Doc | Design Doc |
+|----------|------------------|------------|
+| Tech/framework choice? | ✅ | — |
+| Data model design? | ✅ | References it |
+| New feature implementation? | — | ✅ |
+| Component breakdown? | — | ✅ |
+
 **Tie-breaking rule:** If decision affects 2+ features or multiple developers → Architecture doc. If feature-specific only → Design doc.
 
 **Reference:** `@./.safeword/guides/architecture-guide.md`
@@ -333,17 +342,48 @@ status: in_progress
 
 - **Trigger:** User says "Create design doc for [feature]" or "Design [system/component]"
 - Skip the "Does design doc exist?" question (user is explicitly requesting creation)
+- **Prerequisites:** Verify user stories and test definitions exist first (create if not)
+
+**Required sections checklist:**
+- [ ] **Architecture** — 1-2 paragraphs on high-level approach
+- [ ] **Components** — [N] and [N+1] examples with name, responsibility, interface, dependencies
+- [ ] **User Flow** — Step-by-step with concrete examples
+- [ ] **Key Decisions** — What, why, trade-off, alternatives considered
+- [ ] **Data Model** — (if applicable) State shape, relationships
+- [ ] **Component Interaction** — (if applicable) How components communicate
+- [ ] **Implementation Notes** — (if applicable) Constraints, error handling, gotchas
+
 - **Template:** `@./.safeword/templates/design-doc-template.md`
 - **Guide:** `@./.safeword/guides/design-doc-guide.md`
 
 **Architecture Doc:**
 
-- **Trigger (Explicit):** User says "Update architecture doc" or "Document [architectural decision]"
-- **Trigger (Implicit):** After discussing architectural decisions, proactively ask: "Should I document this decision in ARCHITECTURE.md?"
+- **Trigger (Create):** Starting a new project/package, or no `ARCHITECTURE.md` exists yet
+- **Trigger (Update):** User says "Update architecture doc" or "Document [architectural decision]"
+- **Trigger (Implicit):** After discussing architectural decisions, proactively ask: "Should I document this in ARCHITECTURE.md?"
 - **Recognize architectural discussions when user mentions:**
   - Technology choices (state management, database, frameworks)
   - Data model design
   - Project-wide patterns/conventions
+
+**Required sections checklist** (verify all present when creating/reviewing):
+- [ ] **Header** — Version, Last Updated, Status (Production/Design/Proposed)
+- [ ] **Table of Contents** — Section links
+- [ ] **Overview** — Technology choices, data model philosophy, high-level architecture
+- [ ] **Data Architecture Principles** — What, Why, Trade-off for each principle
+- [ ] **Data Model / Schema** — Tables, types, relationships
+- [ ] **Component Design** — Major components and responsibilities
+- [ ] **Data Flow Patterns** — How data moves through the system
+- [ ] **Key Decisions** — What, Why, Trade-off, Alternatives Considered
+- [ ] **Best Practices** — Domain-specific patterns
+- [ ] **Migration Strategy** — How to evolve architecture
+- [ ] **Code References** — Link to implementations (`src/file.ts:line` or function names)
+
+**Anti-patterns to avoid:**
+- ❌ ADR sprawl (many separate files) → consolidate into one doc
+- ❌ Missing rationale → every decision needs "Why" with specifics
+- ❌ Implementation details → keep high-level principles only
+
 - **No template** - Create comprehensive `ARCHITECTURE.md` in project root
 - **Guide:** `@./.safeword/guides/architecture-guide.md`
 
@@ -413,9 +453,9 @@ At the end of EVERY response, include a JSON summary with this exact structure:
 {"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}
 ```
 
-Where:
-- `proposedChanges`: `true` if you suggested/proposed changes to specific files in your response
-- `madeChanges`: `true` if you actually modified files using Write/Edit tools
+Where (all fields describe **this response only**, not cumulative):
+- `proposedChanges`: `true` if you suggested/proposed changes to specific files **in this response**
+- `madeChanges`: `true` if you **modified files in this response** using Write/Edit tools
 - `askedQuestion`: `true` if you asked the user a question and need their response before proceeding
 
 Examples:
@@ -424,6 +464,34 @@ Examples:
 - Made edits directly: `{"proposedChanges": false, "madeChanges": true, "askedQuestion": false}`
 - Proposed AND made edits: `{"proposedChanges": true, "madeChanges": true, "askedQuestion": false}`
 - Asked user a question: `{"proposedChanges": false, "madeChanges": false, "askedQuestion": true}`
+- **Quality review response** (no new changes): `{"proposedChanges": false, "madeChanges": false, "askedQuestion": false}`
+
+---
+
+## Avoid Over-Engineering
+
+**Trigger:** Before adding any abstraction, utility, or "future-proofing" code.
+
+**Decision:** Is this the simplest solution that works?
+
+| ❌ Over-engineering | ✅ Keep it simple |
+|---------------------|-------------------|
+| Utility class for one function | Single function |
+| Factory/builder for simple object | Direct construction |
+| Config file for 2 options | Hardcode or params |
+| Abstract class with one impl | Concrete class |
+
+**When to push back:** If feature adds >50 lines for "nice to have", ask user if essential now.
+
+**Self-documenting code:** Use descriptive names (`calculateTotalWithTax` not `calcTot`). Comment only non-obvious logic.
+
+**Error handling:** Never swallow errors. Include context: `Failed to read ${filePath}: ${e.message}`
+
+**Debug logging:** Log actual vs expected values. Remove debug logs after fixing.
+
+**Cross-platform:** Use `path.join()` not string concat. No hardcoded `/` or `\`.
+
+**Guide:** `@./.safeword/guides/code-philosophy.md`
 
 ---
 
@@ -448,6 +516,22 @@ Examples:
 - Integration tests: `pnpm test:integration`
 - Manual verification: Use curl, check browser console, verify API responses
 - Dev server: Check compilation errors, hot reload, runtime errors
+
+**Capturing test output:**
+
+Don't pipe through `head`/`tail` directly—capture to a timestamped log file first, then analyze:
+
+```bash
+# ✅ GOOD - Capture to file, then analyze
+mkdir -p /tmp/test-logs
+LOG=/tmp/test-logs/$(date +%s)-e2e.log
+pnpm test:e2e 2>&1 | tee $LOG
+tail -100 $LOG  # Check summary
+cat $LOG        # Full output if needed
+
+# ❌ BAD - Can't dig deeper without re-running tests
+pnpm test:e2e 2>&1 | tail -50
+```
 
 **Anti-patterns:**
 
@@ -479,11 +563,15 @@ Examples:
 
 **Remember:** The user should only test when they want to verify the UX/experience themselves, not to confirm your code works. Your code working is YOUR responsibility to verify.
 
+**Before declaring complete:** Run self-review checklist (correctness, elegance, best practices, docs/versions, tests). Note any deferred issues.
+
 ---
 
 ## Code Philosophy & Practices
 
 **When to read:** Before writing code, when making architectural decisions, or when unsure about coding standards and best practices.
+
+**Documentation verification:** Before using any library API, check `package.json` for version and verify with Context7 or official docs. Training data is stale.
 
 Core coding principles, testing philosophy (TDD), communication style, and best practices.
 

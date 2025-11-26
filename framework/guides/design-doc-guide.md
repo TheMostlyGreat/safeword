@@ -104,6 +104,32 @@
 
 ---
 
+## Re-evaluation Path (When Unclear)
+
+**If unsure whether feature needs a design doc:**
+
+1. **Count components** — Does implementation touch >3 components?
+   - Yes → Design doc needed
+   - No → Continue to question 2
+
+2. **Check user story count** — Does feature span 2+ user stories?
+   - Yes → Design doc needed
+   - No → Continue to question 3
+
+3. **Check complexity signals** — Any of these present?
+   - New data model or schema changes
+   - Non-obvious component interactions
+   - Multiple technical decisions with trade-offs
+   - Yes to any → Design doc needed
+   - No to all → Skip design doc, implement directly
+
+**If prerequisites don't exist:**
+1. User stories missing → Create them first (guide: `@.safeword/guides/user-story-guide.md`)
+2. Test definitions missing → Create them after user stories (guide: `@.safeword/guides/test-definitions-guide.md`)
+3. Then create design doc referencing both
+
+---
+
 ## Example Commands
 
 **Creating design doc:**

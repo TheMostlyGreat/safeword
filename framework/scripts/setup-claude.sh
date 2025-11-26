@@ -307,3 +307,5 @@ echo "  3. Start using Claude Code - hooks are active!"
 echo ""
 
 
+
+

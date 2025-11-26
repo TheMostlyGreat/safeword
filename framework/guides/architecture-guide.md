@@ -1,95 +1,112 @@
 # Architecture & Design Documentation Guide
 
-**Important:** Architecture and design docs are instructions that LLMs read and follow. Apply LLM instruction design best practices for clarity and reliability.
-
-**See:** `@.safeword/guides/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
+**See:** `@.safeword/guides/llm-instruction-design.md` for LLM-consumable documentation principles.
 
 ---
 
-## When to Use Each Document Type
+## Document Type Decision Tree (Follow in Order)
 
-### Architecture Document
+Answer **IN ORDER**. Stop at the first "Yes":
 
-**Use when**: Documenting project-wide architecture decisions, data models, and system design
+1. **Technology or library choice?** → **Architecture Doc**
+2. **New data model or schema change?** → **Architecture Doc**
+3. **Project-wide pattern or convention?** → **Architecture Doc**
+4. **Implementing a specific feature?** → **Design Doc**
+
+**Tie-breaker:** If a feature requires a new tech/schema choice, document the tech/schema in Architecture Doc first, then reference it in Design Doc.
+
+| Term | Definition |
+|------|------------|
+| Technology choice | Selecting a library, framework, database, or tool |
+| Schema change | Adding/modifying entities, tables, relationships, or data types |
+| Project-wide pattern | Convention that applies to 2+ features or multiple developers |
+| Major decision | Affects 2+ components, costs >$100/month, or cannot be easily reversed |
+| Living document | Updated in place (not immutable); changes tracked via version/status |
+| ADR | Architecture Decision Record—legacy pattern of separate files per decision |
+
+---
+
+## Quick Decision Matrix
+
+| Scenario | Doc Type | Rationale |
+|----------|----------|-----------|
+| Choosing between technologies | Architecture | Tech choice affects whole project |
+| Data model design | Architecture | Schema is project-wide |
+| Implementing a new feature | Design | Feature-scoped implementation |
+| Recording a trade-off | Architecture | Trade-offs inform future decisions |
+| Project-wide principles | Architecture | Principles apply everywhere |
+| Component breakdown for feature | Design | Implementation detail |
+| Feature needs new schema | Architecture first, then Design | Schema in Arch, feature in Design |
+
+---
+
+## Architecture Document
+
+**Use when**: Project-wide decisions, data models, system design
 
 **Characteristics**:
-- One per project or package (in monorepos)
-- Living document (updated as architecture evolves)
-- Comprehensive (principles, decisions, data model, components)
+- One per project/package (in monorepos)
+- Living document (updated in place—not immutable ADRs)
 - Documents WHY behind all major decisions
 - Includes version, status, table of contents
 
-**Location**: Project root (`ARCHITECTURE.md`, `DATA_MODEL_AND_ARCHITECTURE.md`)
+**Location**: Project root (`ARCHITECTURE.md`)
 
-### Design Doc
+**Edge cases:**
+- Schema change for one feature → Architecture Doc (schema is project-wide)
+- Library for one feature → Architecture Doc if precedent-setting; Design Doc if one-off
+- Performance optimization → Architecture Doc if changes patterns; Design Doc if feature-specific
 
-**Use when**: Designing a specific feature implementation
+### Required Sections
 
-**Characteristics**:
-- Feature-focused (2-3 pages, ~121 lines)
-- Implementation details (components, data flow, user flow)
-- References architecture doc for broader decisions
-- Key technical decisions with rationale
-
-**Location**: Project planning directory (`planning/design/`, `docs/design/`)
-
-### Quick Decision Matrix
-
-| Question | Architecture Doc | Design Doc |
-|----------|------------------|------------|
-| Choosing between technologies? | ✅ | - |
-| Data model design? | ✅ | References it |
-| Designing a new feature? | - | ✅ |
-| Recording a trade-off? | ✅ | ✅ (brief) |
-| Project-wide principles? | ✅ | - |
-| Component breakdown? | - | ✅ |
-
----
-
-## Architecture Document Best Practices
-
-### 1. One Architecture Doc Per Project/Package
-
-**✅ GOOD - Single comprehensive document:**
-```
-project/
-├── ARCHITECTURE.md
-└── docs/design/
-    ├── three-pane-layout.md
-    └── auth-system.md
-```
-
-**❌ BAD - Multiple scattered ADRs:**
-```
-project/docs/adr/
-├── 001-use-typescript.md
-├── 002-adopt-monorepo.md
-└── ... (50+ files)
-```
-**Why bad**: Context fragmentation, hard to understand full architecture
-
-**Monorepos**: Each package has its own `ARCHITECTURE.md`
-
----
-
-### 2. Required Sections
-
-- **Header**: Version, Last Updated, Status (Production/Design/Proposed)
+- **Header**: Version, Last Updated, Status (Production/Design/Proposed/Deprecated)
 - **Table of Contents**: Section links
 - **Overview**: Technology choices, data model philosophy, high-level architecture
-- **Data Architecture Principles**: What, Why, Trade-off for each principle
 - **Data Model / Schema**: Tables, types, relationships
-- **Component Design**: Major components and responsibilities
-- **Data Flow Patterns**: How data moves through the system
 - **Key Decisions**: What, Why, Trade-off, Alternatives Considered
 - **Best Practices**: Domain-specific patterns
 - **Migration Strategy**: How to evolve architecture
 
 ---
 
-### 3. Living Document (Not Immutable)
+## Design Document
 
-Update in place, don't create new documents for changes.
+**Use when**: Designing a specific feature implementation
+
+**Characteristics**:
+- Feature-focused (~121 lines)
+- Implementation details (components, data flow, user flow)
+- References architecture doc (don't duplicate)
+
+**Location**: `planning/design/` or `docs/design/`
+
+**Edge cases:**
+- Feature needs new data model → Schema in Architecture Doc first, then reference
+- Feature spans 3+ components → Still Design Doc (component count doesn't change doc type)
+- Feature establishes pattern others follow → Pattern in Architecture Doc, implementation in Design Doc
+
+**See:** `@.safeword/guides/design-doc-guide.md` for detailed guidance
+
+---
+
+## Best Practices
+
+### 1. One Architecture Doc Per Project/Package
+
+**✅ GOOD:**
+```
+project/
+├── ARCHITECTURE.md
+└── docs/design/
+    ├── feature-a.md
+    └── feature-b.md
+```
+
+**❌ BAD:** `docs/adr/001-use-typescript.md, 002-adopt-monorepo.md...` (50+ files = fragmented context)
+
+### 2. Living Document (Not Immutable)
+
+Update in place with version/status tracking:
 
 ```markdown
 ### Decision: State Management
@@ -99,103 +116,145 @@ Update in place, don't create new documents for changes.
 **Migration**: Completed 2025-01-20, users auto-migrated on load
 ```
 
----
+**Edge cases:**
+- Decision reversed → Update original with "Superseded" status
+- Major shift → Bump version (v1 → v2), add migration section
+- Affects multiple subsystems → Update main Architecture Doc, not separate files
 
-### 4. Document WHY, Not Just WHAT
+### 3. Document WHY, Not Just WHAT
 
-**✅ GOOD - Clear rationale with specifics:**
+**✅ GOOD:**
 ```markdown
 ### Principle: Separation of Concerns
-
-**What**:
-- Static data (config, rules) → [immutable storage]
-- Mutable application state → [persistent storage]
-- Reactive UI state → [state management]
-
-**Why**:
-- Static data doesn't need per-instance storage (saves NKB per instance)
-- Updates to static data affect all instances instantly
-- Type safety: Types derived from static data schema
-
-**Trade-off**:
-- More complex loading (fetch static + query persistent)
-- Nms initial load time vs instant
+**What**: Static data → immutable storage; Mutable state → persistent storage
+**Why**: Static data saves NKB per instance; updates affect all instances instantly
+**Trade-off**: More complex loading (fetch static + query persistent)
+**Alternatives Considered**: All localStorage (rejected: 5MB limit); All IndexedDB (rejected: overkill for config)
 ```
 
-**❌ BAD**: Just listing tech stack without rationale
+**❌ BAD:** `Database: PostgreSQL, State: Zustand, UI: React` (no rationale)
 
----
+**Required fields:**
 
-### 5. Include Examples from Codebase
+| Field | Required | Description |
+|-------|----------|-------------|
+| What | Always | The decision (1-2 sentences) |
+| Why | Always | Rationale with specifics (numbers, metrics) |
+| Trade-off | Always | What we gave up or accepted |
+| Alternatives | Major decisions | Other options and why rejected |
+| Migration | If breaking | How to evolve from previous state |
 
-Reference actual implementations with file paths:
+**Edge cases:**
+- Obvious choice → Still document; future devs may question
+- Inherited decision → Document as "Inherited: [reason]"
+- Temporary decision → Mark "Temporary" with planned review date
 
+### 4. Include Code References
+
+**✅ GOOD:**
 ```markdown
-**Implementation**: See `[module]/[file].[ext]:[line-start]-[line-end]`
+**Implementation**: See `src/stores/gameStore.ts:12-45`
+**Usage example**: See `src/components/GamePanel.tsx`
 ```
 
----
+**❌ BAD:** "We use Zustand for state management" (no reference to actual code)
 
-### 6. Version and Track Status
+- Key patterns → file + line range
+- Simple utilities → file path only (no line numbers)
+- Frequently changing code → file path only (line numbers go stale)
 
-```markdown
-**Version**: 2.0
-**Status**: Production (v1) + Proposed Extensions (v2+)
+### 5. Version and Track Status
 
-## Current Schema (v1 - Production)
-[What's live now]
+| Status | Meaning |
+|--------|---------|
+| Design | Initial draft, not yet implemented |
+| Production | Live in production |
+| Proposed | Planned extension to production |
+| Deprecated | Being phased out |
 
-## Proposed Schema (v2 - Character Creation)
-[What we're building next]
-```
-
----
-
-## Design Doc Best Practices
-
-**Key points**:
-- Feature-focused, ~121 lines
-- Reference architecture doc (don't duplicate)
-- Include user flow step-by-step
-- Show component interactions
-- Map to test definitions
-
-**See:** `@.safeword/guides/design-doc-guide.md` for detailed guidance
+**Version bumps:** Major schema changes → v1 → v2; New sections → v1.0 → v1.1; Clarifications → no bump
 
 ---
 
-## Integration with TDD Workflow
+## TDD Workflow Integration
 
 **Workflow Order**:
 1. User Stories → What we're building
 2. Test Definitions → How we'll verify
 3. Design Doc → How we'll build it
-4. Check Architecture Doc → Does this fit our principles?
+4. Check Architecture Doc → New tech/schema needed?
 5. Implement (RED → GREEN → REFACTOR)
-6. Update Architecture Doc if needed → Record new patterns
+6. Update Architecture Doc if needed
 
-**Update Architecture Doc when**:
-- Adding new data model concepts
-- Making technology choices
-- Establishing new patterns/conventions
-- Discovering architectural insights
+### When to Update Architecture Doc
 
-**Don't update when**: Implementing single feature (use Design Doc), fixing bugs, refactoring without architectural changes
+| Trigger | Example |
+|---------|---------|
+| New data model concept | New "Subscription" entity |
+| Technology choice | "Chose Resend for email" |
+| New pattern/convention | "All forms use react-hook-form" |
+| Architectural insight during implementation | "IndexedDB needed for offline" |
+| Performance bottleneck requiring change | "Migrated to Redis for sessions" |
+
+### When NOT to Update
+
+| Scenario | Where Instead |
+|----------|---------------|
+| Single feature implementation | Design Doc |
+| Bug fix | Code comments if complex |
+| Refactor without pattern change | PR description |
+
+**Edge case:** Bug fix reveals architectural flaw → Document flaw and fix in Architecture Doc.
 
 ---
 
 ## Common Mistakes
 
-**Architecture Docs**:
-❌ Too many separate files (ADR-001, ADR-002...) → Use one comprehensive document
-❌ No decision rationale → Every decision needs "WHY" with specifics
-❌ Missing version/status → Readers need current vs proposed
-❌ Implementation details instead of principles → Keep high-level
+### Architecture Doc Anti-Patterns
 
-**Design Docs**:
-❌ Repeating architecture content → Reference, don't duplicate
-❌ Skipping user flow → Always show step-by-step interaction
-❌ Missing test mapping → Link to test definitions
+| Anti-Pattern | Fix |
+|--------------|-----|
+| ADR sprawl (001, 002...) | One comprehensive `ARCHITECTURE.md` |
+| No decision rationale | Add What/Why/Trade-off |
+| Missing version/status | Add header with Version and Status |
+| Implementation details | Move to Design Doc or code |
+
+**❌ BAD:** `GET /api/users → Returns users from PostgreSQL` (implementation detail)
+
+**✅ GOOD:** `API Design: RESTful routes with input validation at boundary` (principle)
+
+### Design Doc Anti-Patterns
+
+| Anti-Pattern | Fix |
+|--------------|-----|
+| Repeating architecture content | Reference Architecture Doc |
+| Skipping user flow | Include step-by-step interaction |
+| Missing test mapping | Link to test definitions |
+| >200 lines | Split or extract to Architecture |
+
+---
+
+## Re-evaluation Path (When Unclear)
+
+Answer **IN ORDER**:
+
+1. **Affects 2+ features?** → Architecture Doc (stop)
+2. **Technology/data model choice?** → Architecture Doc (stop)
+3. **Future developers need this for whole project?** → Architecture Doc
+4. **Only for this feature?** → Design Doc
+
+**Tie-breaker:** When still unclear, default to Design Doc. Easier to promote later than to split.
+
+### Worked Example: Adding User Notifications
+
+**Scenario:** Add email notifications when users complete a purchase.
+
+1. **Affects 2+ features?** No, only checkout → Continue
+2. **Tech choice?** Yes, need to choose email service (SendGrid vs SES) → **Architecture Doc**
+
+**Result:**
+- `ARCHITECTURE.md` → "Email Service: SendGrid (Why: deliverability, cost, SDK quality)"
+- `planning/design/checkout-notifications.md` → Feature implementation referencing email decision
 
 ---
 
@@ -204,34 +263,46 @@ Reference actual implementations with file paths:
 ```
 project/
 ├── ARCHITECTURE.md              # Single comprehensive doc
-├── planning/
+├── .safeword/planning/
 │   ├── user-stories/
 │   ├── test-definitions/
 │   └── design/                  # Feature-specific design docs
 └── src/
 ```
 
-**Complex projects** may have multiple architecture docs for major subsystems (e.g., `CHARACTER_CREATION_ARCHITECTURE.md`, `TEST_ARCHITECTURE.md`)
+---
+
+## Data Architecture
+
+**For data-heavy projects**, see `@.safeword/guides/data-architecture-guide.md` for:
+- Core principles (data quality, governance, accessibility)
+- What to document (conceptual/logical/physical models, flows, policies)
+- Integration with TDD workflow
 
 ---
 
-## Data Architecture Documentation
+## Quality Checklist
 
-**For data-heavy projects**, see `@.safeword/guides/data-architecture-guide.md` for comprehensive guidance on:
-- When to document data architecture (vs design docs)
-- Core principles (data quality, governance, accessibility, living documentation)
-- What to document (conceptual/logical/physical models, flows, policies)
-- Documentation structure with complete examples
-- Integration with TDD workflow
+**Architecture Doc:**
+- [ ] Sequential decision tree or clear structure
+- [ ] All decisions have What/Why/Trade-off
+- [ ] Version and Status in header
+- [ ] Code references for key patterns
+- [ ] No implementation details
 
-**Key principle**: Single comprehensive document with version tracking, clear principles, decision rationale, and migration strategy is better than many scattered ADR files.
+**Design Doc:**
+- [ ] References Architecture Doc (no duplication)
+- [ ] User flow step-by-step
+- [ ] Test mapping links
+- [ ] ~121 lines target
 
 ---
 
 ## Key Takeaway
 
-**One comprehensive architecture document per project/package** is better than **many scattered ADR files**:
+**One comprehensive architecture document per project** > many scattered ADR files:
 
-✅ Full context in one place, easier to understand holistically
-✅ Living document (update in place), searchable and scannable
-✅ LLMs can consume entire architecture at once
+✅ Full context in one place
+✅ Living document (update in place)
+✅ LLMs consume entire architecture at once
+✅ Sequential decision trees prevent ambiguity
