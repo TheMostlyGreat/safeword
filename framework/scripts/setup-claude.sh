@@ -6,24 +6,17 @@
 #   bash setup-claude.sh [options]
 #
 # Options:
-#   --linting-mode MODE    Linting mode: minimal, typescript, react, electron, astro, biome
-#                          (default: auto-detect from project files)
 #   --skip-linting         Skip linting setup
 #   --skip-quality         Skip quality review setup
 #
 # Examples:
-#   bash setup-claude.sh                        # Auto-detect + quality review
-#   bash setup-claude.sh --linting-mode biome   # Force Biome mode + quality review
-#   bash setup-claude.sh --skip-linting         # Quality review only
+#   bash setup-claude.sh                # Full setup (auto-detects project type)
+#   bash setup-claude.sh --skip-linting # Quality review only
 #
-# Auto-detection logic:
-#   - Biome: If @biomejs/biome already in package.json (ONLY Biome, no ESLint)
-#   - Next.js: If next in package.json (uses React mode with ESLint)
-#   - Electron: If electron in package.json
-#   - Astro: If astro in package.json
-#   - React: If react in package.json
-#   - TypeScript: If typescript in package.json or tsconfig.json exists
-#   - Minimal: Otherwise (or no package.json)
+# Linting auto-detects from package.json:
+#   - TypeScript (tsconfig.json or typescript in deps)
+#   - React (react in deps)
+#   - Astro (astro in deps)
 ################################################################################
 
 set -e  # Exit on error
@@ -40,18 +33,11 @@ echo ""
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Parse arguments
-LINTING_MODE=""
-AUTO_DETECT=true
 SKIP_LINTING=false
 SKIP_QUALITY=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --linting-mode)
-      LINTING_MODE="$2"
-      AUTO_DETECT=false
-      shift 2
-      ;;
     --skip-linting)
       SKIP_LINTING=true
       shift
@@ -62,7 +48,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: bash setup-claude.sh [--linting-mode MODE] [--skip-linting] [--skip-quality]"
+      echo "Usage: bash setup-claude.sh [--skip-linting] [--skip-quality]"
       exit 1
       ;;
   esac
@@ -73,77 +59,6 @@ if ! command -v jq &> /dev/null; then
   echo "⚠️  Warning: 'jq' not found. Using grep fallback for JSON parsing (less robust)."
   echo "   Install jq for better reliability: brew install jq (macOS) or apt-get install jq (Linux)"
   echo ""
-fi
-
-# Auto-detect linting mode if not specified
-if [ "$SKIP_LINTING" = false ] && [ "$AUTO_DETECT" = true ]; then
-  echo "Auto-detecting project type..."
-
-  # Check if package.json exists
-  if [ -f package.json ]; then
-    # Extract dependencies and devDependencies using jq (more robust than grep)
-    if command -v jq &> /dev/null; then
-      DEPS=$(jq -r '.dependencies // {}, .devDependencies // {} | keys[]' package.json 2>/dev/null || echo "")
-    else
-      # Fallback to grep if jq not available (less robust but works for most cases)
-      DEPS=$(cat package.json | grep -E '"(dependencies|devDependencies)"' -A 100 | grep -E '^\s*"[^"]+"\s*:' | cut -d'"' -f2)
-    fi
-
-    # Check for specific frameworks/tools (priority order)
-    if echo "$DEPS" | grep -q "^@biomejs/biome$"; then
-      LINTING_MODE="biome"
-      echo "  ✓ Detected: Biome (already installed)"
-    elif echo "$DEPS" | grep -q "^next$"; then
-      LINTING_MODE="react"
-      echo "  ✓ Detected: Next.js project (using React mode)"
-    elif echo "$DEPS" | grep -q "^electron$"; then
-      LINTING_MODE="electron"
-      echo "  ✓ Detected: Electron project"
-    elif echo "$DEPS" | grep -q "^astro$"; then
-      LINTING_MODE="astro"
-      echo "  ✓ Detected: Astro project"
-    elif echo "$DEPS" | grep -q "^react$"; then
-      LINTING_MODE="react"
-      echo "  ✓ Detected: React project"
-    elif echo "$DEPS" | grep -q "^typescript$"; then
-      LINTING_MODE="typescript"
-      echo "  ✓ Detected: TypeScript project (typescript in package.json)"
-    elif [ -f tsconfig.json ]; then
-      LINTING_MODE="typescript"
-      echo "  ✓ Detected: TypeScript project (tsconfig.json found)"
-    else
-      LINTING_MODE="minimal"
-      echo "  ✓ Detected: Minimal/JavaScript project"
-    fi
-  elif [ -f tsconfig.json ]; then
-    # No package.json but has tsconfig.json
-    LINTING_MODE="typescript"
-    echo "  ✓ Detected: TypeScript project (tsconfig.json found)"
-  else
-    # No package.json and no tsconfig.json - use minimal
-    LINTING_MODE="minimal"
-    echo "  ✓ Detected: Minimal project (no package.json)"
-  fi
-
-  echo ""
-fi
-
-# Default to typescript if still not set
-if [ -z "$LINTING_MODE" ]; then
-  LINTING_MODE="typescript"
-fi
-
-# Validate linting mode
-if [ "$SKIP_LINTING" = false ]; then
-  case "$LINTING_MODE" in
-    minimal|typescript|react|electron|astro|biome)
-      ;;
-    *)
-      echo "ERROR: Invalid linting mode: $LINTING_MODE"
-      echo "Valid modes: minimal, typescript, react, electron, astro, biome"
-      exit 1
-      ;;
-  esac
 fi
 
 # Get project directory (current directory)
@@ -159,9 +74,9 @@ fi
 
 # Run linting setup
 if [ "$SKIP_LINTING" = false ]; then
-  echo "[1/2] Running linting setup (mode: $LINTING_MODE)..."
+  echo "[1/2] Running linting setup (auto-detect)..."
   echo ""
-  bash "$SCRIPT_DIR/setup-linting.sh" "--$LINTING_MODE"
+  bash "$SCRIPT_DIR/setup-linting.sh"
   echo ""
 else
   echo "[1/2] Skipping linting setup"
@@ -189,11 +104,7 @@ echo "================================="
 echo ""
 echo "What was configured:"
 if [ "$SKIP_LINTING" = false ]; then
-  if [ "$AUTO_DETECT" = true ]; then
-    echo "  • Auto-linting (auto-detected: $LINTING_MODE)"
-  else
-    echo "  • Auto-linting (manual mode: $LINTING_MODE)"
-  fi
+  echo "  • Auto-linting (auto-detected project type)"
 fi
 if [ "$SKIP_QUALITY" = false ]; then
   echo "  • Quality review hooks"
@@ -305,6 +216,7 @@ echo "     git push"
 echo ""
 echo "  3. Start using Claude Code - hooks are active!"
 echo ""
+
 
 
 

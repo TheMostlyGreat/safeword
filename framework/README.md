@@ -35,7 +35,6 @@ bash ./framework/scripts/setup-claude.sh
 ```
 
 Options for step 2:
-- Force Biome mode (fastest): `bash ./framework/scripts/setup-claude.sh --linting-mode biome`
 - Skip linting (quality review only): `bash ./framework/scripts/setup-claude.sh --skip-linting`
 - Skip quality review: `bash ./framework/scripts/setup-claude.sh --skip-quality`
 
@@ -60,18 +59,21 @@ Note: Hook binaries are created by the scripts below. Running `setup-claude.sh` 
 - Ensures `CLAUDE.md` references `.safeword/SAFEWORD.md`
 
 ### setup-linting.sh (Auto-linting)
-- Installs either:
-  - Biome (single tool, fastest), or
-  - ESLint + Prettier (+ TypeScript/React/Astro plugins by mode)
+- **Auto-detects** project type from package.json and tsconfig.json
+- Installs ESLint + Prettier + framework-specific plugins as needed
+- All projects include:
+  - `eslint-plugin-boundaries` (architectural boundary enforcement)
+  - `eslint-plugin-sonarjs` (code smell detection)
+  - `@microsoft/eslint-plugin-sdl` (security rules)
 - Creates:
   - `.claude/hooks/run-linters.sh` (shared logic)
   - `.claude/hooks/auto-lint.sh` (PostToolUse wrapper)
   - `.claude/commands/lint.md`
   - `.claude/settings.json` merged with PostToolUse hook
-  - `eslint.config.mjs` or `biome.jsonc` if missing
-  - `.prettierrc` and `.prettierignore` (ESLint modes only)
+  - `eslint.config.mjs` (single config for all detected frameworks)
+  - `.prettierrc` and `.prettierignore`
 
-Modes: `--minimal`, `--typescript` (default), `--react`, `--electron`, `--astro`, `--biome`
+Override detection: `--no-typescript`, `--no-react`, `--no-astro`
 
 ### setup-quality.sh (Quality review)
 - Creates:

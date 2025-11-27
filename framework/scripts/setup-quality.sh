@@ -268,7 +268,7 @@ chmod +x .claude/hooks/auto-quality-review.sh
 #   run-quality-review.sh --no-questions  # Without "ask me" prompt
 #
 # Environment variables:
-#   CLAUDE_PROJECT_DIR - Project root (for finding config)
+#   CLAUDE_PROJECT_DIR - Project root (for finding config and prompts)
 
 # Default: ask questions enabled
 ask_questions=true
@@ -303,19 +303,30 @@ if [ -n "$CLAUDE_PROJECT_DIR" ]; then
   fi
 fi
 
-# Output quality review prompt to stderr (so Claude sees it)
-echo "Double check and critique your work just in case." >&2
-echo "" >&2
-echo "- Is it correct?" >&2
-echo "- Is it elegant?" >&2
-echo "- Does it adhere to the latest documentation and best practices for the relevant stack items, UX principles, domain requirements, and testing practices?" >&2
-
-if [ "$ask_questions" = "true" ]; then
-  echo "- Ask me any non-obvious questions you can't research yourself in the codebase or online." >&2
+# Try to read prompt from .safeword/prompts/quality-review.md
+PROMPT_FILE=""
+if [ -n "$CLAUDE_PROJECT_DIR" ] && [ -f "$CLAUDE_PROJECT_DIR/.safeword/prompts/quality-review.md" ]; then
+  PROMPT_FILE="$CLAUDE_PROJECT_DIR/.safeword/prompts/quality-review.md"
 fi
 
-echo "- Think hard." >&2
-echo "- Avoid bloat." >&2
+if [ -n "$PROMPT_FILE" ]; then
+  # Read prompt from file, skip the header line
+  tail -n +3 "$PROMPT_FILE" >&2
+else
+  # Fallback to hardcoded prompt
+  echo "Double check and critique your work just in case." >&2
+  echo "" >&2
+  echo "- Is it correct?" >&2
+  echo "- Is it elegant?" >&2
+  echo "- Does it adhere to the latest documentation and best practices for the relevant stack items, UX principles, domain requirements, and testing practices?" >&2
+
+  if [ "$ask_questions" = "true" ]; then
+    echo "- Ask me any non-obvious questions you can't research yourself in the codebase or online." >&2
+  fi
+
+  echo "- Think hard." >&2
+  echo "- Avoid bloat." >&2
+fi
 
 # Exit with code 2 to block (Stop hook behavior)
 exit 2
@@ -429,6 +440,7 @@ echo "Test it:"
 echo "  • Ask Claude to create or modify a file"
 echo "  • Watch for quality review prompt after the change"
 echo ""
+
 
 
 

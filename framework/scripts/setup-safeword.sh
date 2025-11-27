@@ -73,6 +73,24 @@ else
   echo "  ⚠ Warning: framework templates not found at $SCRIPT_DIR/../templates (skipping)"
 fi
 
+# Copy prompts into .safeword/prompts/ for LLM review hooks
+if [ -d "$SCRIPT_DIR/../prompts" ]; then
+  cp -R "$SCRIPT_DIR/../prompts" "$SAFEWORD_DIR/" 2>/dev/null || true
+  echo "  ✓ Copied prompts to .safeword/prompts/"
+else
+  echo "  ⚠ Warning: framework prompts not found at $SCRIPT_DIR/../prompts (skipping)"
+fi
+
+# Copy arch-review.sh to .safeword/scripts/
+mkdir -p "$SAFEWORD_DIR/scripts"
+if [ -f "$SCRIPT_DIR/arch-review.sh" ]; then
+  cp "$SCRIPT_DIR/arch-review.sh" "$SAFEWORD_DIR/scripts/" 2>/dev/null || true
+  chmod +x "$SAFEWORD_DIR/scripts/arch-review.sh"
+  echo "  ✓ Copied arch-review.sh to .safeword/scripts/"
+else
+  echo "  ⚠ Warning: arch-review.sh not found at $SCRIPT_DIR/arch-review.sh (skipping)"
+fi
+
 # Create SAFEWORD.md at project root if missing
 if [ ! -f "$PROJECT_ROOT/SAFEWORD.md" ]; then
   echo "Creating SAFEWORD.md with project template..."
@@ -131,6 +149,135 @@ if [ ! -f "$PROJECT_ROOT/.claude/settings.json" ]; then
 EOF
 else
   echo "Note: .claude/settings.json already exists, skipping..."
+fi
+
+# Create git pre-commit hook for architecture enforcement
+if [ -d "$PROJECT_ROOT/.git" ]; then
+  mkdir -p "$PROJECT_ROOT/.git/hooks"
+  
+  # Check if pre-commit hook already exists
+  if [ -f "$PROJECT_ROOT/.git/hooks/pre-commit" ]; then
+    # Check if our section is already there (has our marker)
+    if grep -q "SAFEWORD_ARCH_CHECK_START" "$PROJECT_ROOT/.git/hooks/pre-commit" 2>/dev/null; then
+      echo "  ✓ Architecture checks already in pre-commit hook (skipped)"
+    else
+      # Append our checks to existing hook
+      echo "  Appending architecture checks to existing pre-commit hook..."
+      cat >> "$PROJECT_ROOT/.git/hooks/pre-commit" << 'EOF'
+
+# === SAFEWORD_ARCH_CHECK_START ===
+# Architecture Enforcement (appended by setup-safeword.sh)
+# Get staged JS/TS files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|ts|tsx|jsx)$' || true)
+
+if [ -n "$STAGED_FILES" ]; then
+  echo "Running architecture checks..."
+  
+  # ESLint (if configured)
+  if command -v npx &> /dev/null && [ -f "eslint.config.mjs" ] || [ -f ".eslintrc.json" ] || [ -f ".eslintrc.js" ]; then
+    echo "$STAGED_FILES" | xargs npx eslint --max-warnings 0 || exit 1
+  fi
+  
+  # Architecture review (if configured and API key set)
+  if [ -f ".safeword/scripts/arch-review.sh" ] && [ -n "$ANTHROPIC_API_KEY" ]; then
+    bash .safeword/scripts/arch-review.sh --staged || {
+      if [ $? -eq 1 ]; then exit 1; fi  # Only fail on refactor_needed
+    }
+  fi
+fi
+# === SAFEWORD_ARCH_CHECK_END ===
+EOF
+      echo "  ✓ Appended architecture checks to existing pre-commit hook"
+    fi
+  else
+    # Create new pre-commit hook
+    cat > "$PROJECT_ROOT/.git/hooks/pre-commit" << 'EOF'
+#!/bin/bash
+# === SAFEWORD_ARCH_CHECK_START ===
+################################################################################
+# Pre-commit Hook: Architecture Enforcement
+#
+# Runs:
+# 1. ESLint on staged files (fast, free, deterministic)
+# 2. arch-review.sh on staged files (semantic LLM review, requires ANTHROPIC_API_KEY)
+#
+# Exit codes:
+#   0 - All checks pass, commit allowed
+#   1 - Issues found, commit blocked
+################################################################################
+
+# Get staged JS/TS files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|ts|tsx|jsx)$' || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  # No JS/TS files staged, skip checks
+  exit 0
+fi
+
+echo "Running architecture checks on staged files..."
+echo ""
+
+# Step 1: ESLint (fast, deterministic)
+echo "=== ESLint Check ==="
+if command -v npx &> /dev/null && [ -f "eslint.config.mjs" ] || [ -f ".eslintrc.json" ] || [ -f ".eslintrc.js" ]; then
+  # Run ESLint on staged files
+  echo "$STAGED_FILES" | xargs npx eslint --max-warnings 0
+  ESLINT_EXIT=$?
+  
+  if [ $ESLINT_EXIT -ne 0 ]; then
+    echo ""
+    echo "✗ ESLint found errors. Please fix them before committing."
+    exit 1
+  fi
+  echo "✓ ESLint passed"
+else
+  echo "⚠ ESLint not configured, skipping"
+fi
+echo ""
+
+# Step 2: Architecture Review (semantic, requires API key)
+echo "=== Architecture Review ==="
+ARCH_REVIEW_SCRIPT=""
+
+# Find arch-review.sh (check multiple locations)
+if [ -f ".safeword/scripts/arch-review.sh" ]; then
+  ARCH_REVIEW_SCRIPT=".safeword/scripts/arch-review.sh"
+elif [ -f ".claude/hooks/arch-review.sh" ]; then
+  ARCH_REVIEW_SCRIPT=".claude/hooks/arch-review.sh"
+fi
+
+if [ -n "$ARCH_REVIEW_SCRIPT" ] && [ -n "$ANTHROPIC_API_KEY" ]; then
+  bash "$ARCH_REVIEW_SCRIPT" --staged
+  ARCH_EXIT=$?
+  
+  if [ $ARCH_EXIT -eq 1 ]; then
+    echo ""
+    echo "✗ Architecture review found issues that need refactoring."
+    echo "  Fix them before committing, or use 'git commit --no-verify' to bypass."
+    exit 1
+  elif [ $ARCH_EXIT -eq 2 ]; then
+    echo "⚠ Architecture review encountered an error (continuing anyway)"
+  else
+    echo "✓ Architecture review passed"
+  fi
+elif [ -z "$ANTHROPIC_API_KEY" ]; then
+  echo "⚠ ANTHROPIC_API_KEY not set, skipping LLM architecture review"
+  echo "  Set it to enable: export ANTHROPIC_API_KEY='your-key'"
+else
+  echo "⚠ arch-review.sh not found, skipping LLM architecture review"
+fi
+
+echo ""
+echo "✓ All pre-commit checks passed"
+exit 0
+# === SAFEWORD_ARCH_CHECK_END ===
+EOF
+
+    chmod +x "$PROJECT_ROOT/.git/hooks/pre-commit"
+    echo "  ✓ Created git pre-commit hook for architecture enforcement"
+  fi
+else
+  echo "  ⚠ Not a git repository, skipping pre-commit hook"
 fi
 
 # Ensure learnings directory exists
@@ -372,6 +519,7 @@ echo "1. Review and customize /SAFEWORD.md (add project-specific context)"
 echo "2. Create tickets in /.safeword/tickets/ for major features"
 echo "3. Create planning docs in /.safeword/planning/"
 echo "4. (Optional) Run framework/scripts/setup-claude.sh to add Claude Code hooks"
+
 
 
 
