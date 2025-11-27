@@ -24,7 +24,7 @@ Acceptance Criteria:
  - [x] learning-extraction.md — extracted
 - [x] llm-instruction-design.md — extracted
 - [x] llm-prompting.md — extracted
-- [x] tdd-templates.md — extracted
+- [x] tdd-best-practices.md — extracted (renamed from tdd-templates.md)
 - [x] test-definitions-guide.md — extracted
 - [x] testing-methodology.md — extracted
 - [x] user-story-guide.md — extracted
@@ -676,7 +676,110 @@ Acceptance Criteria:
 - [ ] Clarify React Testing Library is not a real browser
 - [ ] Common confusions documented
 
-### tdd-templates.md
+### tdd-best-practices.md (formerly tdd-templates.md)
+1) Select Correct Template
+As a planner, I want to select the right template (user stories, test definitions, design doc, architecture), so that documentation aligns with TDD workflow.
+Acceptance Criteria:
+- [ ] Feature/issues → user stories template
+- [ ] Feature test suites → test definitions template
+- [ ] Feature implementation → design doc template
+- [ ] Project-wide decisions → architecture doc (no template)
+- [ ] Example prompts guide correct selection
+
+2) Choose Story Format
+As a writer, I want to choose the appropriate story format (standard, Given-When-Then, job story), so that intent is clear.
+Acceptance Criteria:
+- [ ] Standard format (As a / I want / So that) used by default
+- [ ] Given-When-Then for behavior-focused stories
+- [ ] Job story for outcome-focused cases
+- [ ] Each format includes example
+
+3) Write Quality Acceptance Criteria
+As a product owner, I want specific, testable AC with out-of-scope sections, so that delivery is measurable.
+Acceptance Criteria:
+- [ ] AC specify measurable behavior (e.g., "<200ms", "within 5 clicks")
+- [ ] Out-of-scope listed to prevent scope creep
+- [ ] Good examples demonstrate testable conditions
+- [ ] Bad examples show what to avoid
+
+4) Block Story Anti-Patterns
+As a reviewer, I want to reject vague, technical-task, or bundled stories, so that stories remain valuable.
+Acceptance Criteria:
+- [ ] Vague value or missing AC is blocked (example provided)
+- [ ] Technical-only stories redirected to task/spike
+- [ ] Bundled features (3+) split into multiple stories
+- [ ] Missing "So that" flagged
+
+5) Use Unit Test Template
+As a developer, I want unit tests following AAA pattern, so that behavior and edge cases are covered.
+Acceptance Criteria:
+- [ ] Template includes Arrange/Act/Assert structure
+- [ ] Happy path, error path, and edge cases present
+- [ ] describe/it nesting shown with naming examples
+
+6) Use Integration Test Template
+As a developer, I want integration tests with setup/teardown and realistic flows, so that components work together.
+Acceptance Criteria:
+- [ ] beforeEach/afterEach for fixtures
+- [ ] Full workflow with assertions on outcomes
+- [ ] Failure cases test rollback/consistency
+
+7) Use E2E Test Template
+As a QA engineer, I want E2E tests using real browser patterns, so that user journeys are validated.
+Acceptance Criteria:
+- [ ] Playwright/Cypress patterns demonstrated
+- [ ] UI interactions and state assertions included
+- [ ] Multi-step flows shown
+
+8) Apply Test Naming Conventions
+As a reviewer, I want descriptive test names, so that intent is obvious without reading code.
+Acceptance Criteria:
+- [ ] Good examples: behavior + condition ("should return X when Y")
+- [ ] Bad examples: vague or implementation-focused
+- [ ] Rename guidance provided
+
+9) Enforce Test Independence
+As a developer, I want tests isolated with fresh state, so that order doesn't matter.
+Acceptance Criteria:
+- [ ] Good example: beforeEach creates fresh state
+- [ ] Bad example: shared mutable state
+- [ ] No test depends on another test's side effects
+
+10) Know What to Test
+As a developer, I want clear guidance on what to test vs skip, so that effort is focused.
+Acceptance Criteria:
+- [ ] Test: public API, user features, edge cases, error handling, integrations
+- [ ] Don't test: private internals, third-party internals, trivial code
+- [ ] Examples clarify boundaries
+
+11) Use Test Data Builders
+As a developer, I want reusable builders for complex test data, so that tests are concise.
+Acceptance Criteria:
+- [ ] Builder function with override support shown
+- [ ] Example demonstrates customization per test
+- [ ] Reduces duplication across tests
+
+12) Apply LLM Testing Patterns
+As a tester, I want rubric-based LLM evals, so that AI quality is testable.
+Acceptance Criteria:
+- [ ] Promptfoo template with llm-rubric shown
+- [ ] EXCELLENT/ACCEPTABLE/POOR grading criteria defined
+- [ ] Integration test with real LLM call demonstrated
+
+13) INVEST Gate for Stories
+As a product owner, I want every story to pass INVEST, so that it's deliverable and testable.
+Acceptance Criteria:
+- [ ] Independent, Negotiable, Valuable, Estimable, Small, Testable
+- [ ] Failing any criterion triggers refinement or split
+- [ ] Checklist provided for validation
+
+14) Use Red Flags Quick Reference
+As a reviewer, I want quick red flag checklists, so that common mistakes are caught fast.
+Acceptance Criteria:
+- [ ] User story red flags listed (no AC, >3 AC, technical details, no value)
+- [ ] Test red flags listed (vague name, shared state, >50 lines, tests implementation)
+- [ ] E2E vs integration vs unit decision guidance included
+
 ### test-definitions-guide.md
 1) Use the Standard Test Definitions Template
 As a tester, I want to use the provided test definitions template, so that feature tests are consistent and complete.
@@ -873,11 +976,6 @@ Acceptance Criteria:
 - [ ] Red flags checklist applied (long tests, dependencies, vague names)
 - [ ] Ratio baseline 70/20/10 (unit/integration/E2E) with documented adjustments per project
 - [ ] Prefer “as many fast tests as possible” principle with exceptions noted
-### tdd-templates.md
-— pending —
-
-### test-definitions-guide.md
-— pending —
 
 ### testing-methodology.md
 1) Fastest-Effective Test Rule
@@ -970,6 +1068,14 @@ Acceptance Criteria:
 - [ ] File exists with stack, commands, setup, file structure, patterns
 - [ ] TDD expectations, coverage and PR requirements included
 - [ ] If missing, ask where testing docs are and create/update
+
+14) Test Integrity Guardrails
+As a developer, I want explicit rules preventing test modifications without approval, so that tests remain trusted specifications.
+Acceptance Criteria:
+- [ ] Tests not modified/skipped/deleted without human approval
+- [ ] Forbidden actions enforced (changing assertions, .skip(), weakening, deleting)
+- [ ] Implementation fixed when test fails (not the test)
+- [ ] Requirement changes discussed before test updates
 
 ### user-story-guide.md
 1) Use the Standard User Stories Template

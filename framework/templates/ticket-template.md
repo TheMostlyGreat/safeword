@@ -1,6 +1,8 @@
 ---
 id: XXX
 status: in_progress
+created: YYYY-MM-DDTHH:MM:SSZ
+last_modified: YYYY-MM-DDTHH:MM:SSZ
 ---
 
 # Title

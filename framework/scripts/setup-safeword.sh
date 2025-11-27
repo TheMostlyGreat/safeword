@@ -1,7 +1,7 @@
 #!/bin/bash
-# setup-agent-project.sh
-# Sets up standardized agent project structure
-# Also handles first-time user setup (~/.claude/skills/) automatically
+# setup-safeword.sh
+# Sets up standardized agent project structure with SAFEWORD framework
+# Copies skills, guides, templates, and prompts to target project
 
 set -e
 
@@ -10,42 +10,31 @@ SAFEWORD_DIR="$PROJECT_ROOT/.safeword"
 # Locate framework files relative to this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Parse arguments
-while [[ "$#" -gt 0 ]]; do
-  case $1 in
-    --use-claude-code) USE_CLAUDE_CODE=true ;;
-    *) echo "Unknown parameter: $1"; exit 1 ;;
-  esac
-  shift
-done
-
 echo "Setting up agent project structure..."
 
-# First-time user setup: Configure ~/.claude/skills/ (idempotent)
-CLAUDE_USER_DIR="$HOME/.claude"
-mkdir -p "$CLAUDE_USER_DIR/skills"
+# Copy framework skills to project .claude/skills/
+FRAMEWORK_SKILLS_DIR="$SCRIPT_DIR/../skills"
+PROJECT_SKILLS_DIR="$PROJECT_ROOT/.claude/skills"
 
-# Check if skills need to be symlinked
-if [ -d "$GLOBAL_AGENTS_DIR/skills" ]; then
-  echo "Checking user-level skills setup..."
-  for skill in "$GLOBAL_AGENTS_DIR/skills"/*; do
+if [ -d "$FRAMEWORK_SKILLS_DIR" ]; then
+  echo "Copying skills to .claude/skills/..."
+  mkdir -p "$PROJECT_SKILLS_DIR"
+  for skill in "$FRAMEWORK_SKILLS_DIR"/*; do
     if [ -d "$skill" ]; then
       skill_name=$(basename "$skill")
-      target="$CLAUDE_USER_DIR/skills/$skill_name"
-
-      # Only create symlink if it doesn't exist or is broken
-      if [ ! -L "$target" ] || [ ! -e "$target" ]; then
-        echo "  Linking $skill_name to ~/.claude/skills/"
-        rm -f "$target" 2>/dev/null || true
-        ln -s "$skill" "$target"
-      fi
+      target="$PROJECT_SKILLS_DIR/$skill_name"
+      
+      # Copy skill folder (overwrite if exists)
+      rm -rf "$target" 2>/dev/null || true
+      cp -r "$skill" "$target"
+      echo "  ✓ Copied $skill_name"
     fi
   done
 fi
 
 # Create directory structure with archive folders
-mkdir -p "$AGENTS_DIR"/planning/{user-stories/{,archive},test-definitions/{,archive},design/{,archive},issues/{,archive}}
-mkdir -p "$AGENTS_DIR"/tickets/{,completed,archived}
+mkdir -p "$SAFEWORD_DIR"/planning/{user-stories/{,archive},test-definitions/{,archive},design/{,archive},issues/{,archive}}
+mkdir -p "$SAFEWORD_DIR"/tickets/{,completed,archived}
 
 # Create Claude Code directory structure
 mkdir -p "$PROJECT_ROOT/.claude"
@@ -108,6 +97,19 @@ else
   echo "  ⚠ Warning: setup-linting.sh not found (skipping)"
 fi
 
+# Create .claude/hooks directory and add timestamp injection hook
+mkdir -p "$PROJECT_ROOT/.claude/hooks"
+cat > "$PROJECT_ROOT/.claude/hooks/inject-timestamp.sh" << 'EOF'
+#!/bin/bash
+# Inject Timestamp - Notification Hook
+# Outputs current Unix timestamp at session start for Claude's context awareness
+# Helps with accurate ticket timestamps and time-based reasoning
+
+echo "Current time: $(date +%s) ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+EOF
+chmod +x "$PROJECT_ROOT/.claude/hooks/inject-timestamp.sh"
+echo "  ✓ Created inject-timestamp.sh hook"
+
 # Create SAFEWORD.md at project root if missing
 if [ ! -f "$PROJECT_ROOT/SAFEWORD.md" ]; then
   echo "Creating SAFEWORD.md with project template..."
@@ -144,19 +146,19 @@ Use the guides under `@./.safeword/guides/` for core patterns, workflows, and co
 EOF
 fi
 
-# Create .claude/settings.json with global hook reference
+# Create .claude/settings.json with hook references
 if [ ! -f "$PROJECT_ROOT/.claude/settings.json" ]; then
-  echo "Creating .claude/settings.json with local hook reference..."
+  echo "Creating .claude/settings.json with hook references..."
   cat > "$PROJECT_ROOT/.claude/settings.json" << 'EOF'
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
-    "Stop": [
+    "Notification": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/auto-quality-review.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/inject-timestamp.sh"
           }
         ]
       }
@@ -166,6 +168,15 @@ if [ ! -f "$PROJECT_ROOT/.claude/settings.json" ]; then
 EOF
 else
   echo "Note: .claude/settings.json already exists, skipping..."
+  # Check if Notification hook needs to be added
+  if command -v jq &> /dev/null; then
+    if ! jq -e '.hooks.Notification[]?.hooks[]? | select(.command | contains("inject-timestamp"))' "$PROJECT_ROOT/.claude/settings.json" > /dev/null 2>&1; then
+      jq '.hooks.Notification = (.hooks.Notification // []) + [{"hooks": [{"type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/inject-timestamp.sh"}]}]' \
+        "$PROJECT_ROOT/.claude/settings.json" > "$PROJECT_ROOT/.claude/settings.json.tmp"
+      mv "$PROJECT_ROOT/.claude/settings.json.tmp" "$PROJECT_ROOT/.claude/settings.json"
+      echo "  ✓ Added Notification hook for timestamp injection"
+    fi
+  fi
 fi
 
 # Create git pre-commit hook for architecture enforcement
@@ -191,7 +202,7 @@ if [ -n "$STAGED_FILES" ]; then
   echo "Running architecture checks..."
   
   # ESLint (if configured)
-  if command -v npx &> /dev/null && [ -f "eslint.config.mjs" ] || [ -f ".eslintrc.json" ] || [ -f ".eslintrc.js" ]; then
+  if command -v npx &> /dev/null && { [ -f "eslint.config.mjs" ] || [ -f ".eslintrc.json" ] || [ -f ".eslintrc.js" ]; }; then
     echo "$STAGED_FILES" | xargs npx eslint --max-warnings 0 || exit 1
   fi
   
@@ -236,7 +247,7 @@ echo ""
 
 # Step 1: ESLint (fast, deterministic)
 echo "=== ESLint Check ==="
-if command -v npx &> /dev/null && [ -f "eslint.config.mjs" ] || [ -f ".eslintrc.json" ] || [ -f ".eslintrc.js" ]; then
+if command -v npx &> /dev/null && { [ -f "eslint.config.mjs" ] || [ -f ".eslintrc.json" ] || [ -f ".eslintrc.js" ]; }; then
   # Run ESLint on staged files
   echo "$STAGED_FILES" | xargs npx eslint --max-warnings 0
   ESLINT_EXIT=$?
@@ -410,9 +421,9 @@ Higher-level feature/epic tracking. Each ticket references planning docs.
 - Example: `001-user-authentication.md`, `002-payment-flow.md`
 
 **Planning docs share same prefix:**
-- User stories: `./agents/planning/user-stories/001-user-authentication.md`
-- Test definitions: `./agents/planning/test-definitions/001-user-authentication.md`
-- Design doc: `./agents/planning/design/001-user-authentication.md`
+- User stories: `./.safeword/planning/user-stories/001-user-authentication.md`
+- Test definitions: `./.safeword/planning/test-definitions/001-user-authentication.md`
+- Design doc: `./.safeword/planning/design/001-user-authentication.md`
 
 This makes it easy to find all related docs by prefix.
 
@@ -532,13 +543,8 @@ echo "  /.safeword/tickets/archived/                - Blocked/cancelled tickets"
 echo "  .gitignore                                  - Updated to exclude planning folders"
 echo ""
 echo "Next steps:"
-echo "1. Review and customize /SAFEWORD.md (add project-specific context)"
-echo "2. Create tickets in /.safeword/tickets/ for major features"
-echo "3. Create planning docs in /.safeword/planning/"
-echo "4. (Optional) Run framework/scripts/setup-claude.sh to add Claude Code hooks"
-
-
-
-
-
-
+echo "1. Review and customize SAFEWORD.md (add project-specific context)"
+echo "2. Create tickets in .safeword/tickets/ for major features"
+echo "3. Create planning docs in .safeword/planning/"
+echo "4. (Optional) Run setup-quality.sh for auto quality review hooks"
+echo "5. (Optional) Run setup-claude.sh for additional Claude Code configuration"

@@ -20,11 +20,20 @@ When running dev servers and E2E tests across multiple projects, zombie processe
 
 **Prerequisite:** Each project must use a different port (e.g., Project A: 3000, Project B: 3001)
 
-**Recommended cleanup pattern:**
+**Port convention:** Dev and test instances use different ports within the same project:
+- **Dev port**: Project's configured port (e.g., 3000, 5173, 8080) - manual testing
+- **Test port**: Dev port + 1000 (e.g., 4000, 6173, 9080) - Playwright managed
+
+See `testing-methodology.md` → "E2E Testing with Persistent Dev Servers" for full port isolation strategy.
+
+**Decision rule:** If unsure which cleanup method to use → port-based first (safest), then project script, then tmux.
+
+**Recommended cleanup pattern** (replace ports with your project's ports):
 
 ```bash
-# Kill dev server by project-specific port
-lsof -ti:3000 | xargs kill -9 2>/dev/null
+# Kill both dev server AND test server ports
+# Example: Next.js (3000/4000), Vite (5173/6173), or your project's ports
+lsof -ti:3000 -ti:4000 | xargs kill -9 2>/dev/null
 
 # Kill Playwright processes launched from THIS directory
 pkill -f "playwright.*$(pwd)" 2>/dev/null
@@ -34,7 +43,7 @@ sleep 2
 ```
 
 **Why this works:**
-- ✅ Port is unique to this project → safe to kill
+- ✅ Dev + test ports are unique to this project → safe to kill
 - ✅ `$(pwd)` ensures only THIS project's tests are killed
 - ✅ Other projects completely untouched
 
@@ -48,13 +57,14 @@ For frequent cleanup needs, create `scripts/cleanup.sh` in each project:
 #!/bin/bash
 # scripts/cleanup.sh - Kill only THIS project's processes
 
-PROJECT_PORT=3000  # Change per project
+DEV_PORT=3000                    # Dev server port (change per project)
+TEST_PORT=$((DEV_PORT + 1000))   # Test server port (Playwright managed)
 PROJECT_DIR="$(pwd)"
 
-echo "Cleaning up $PROJECT_DIR (port $PROJECT_PORT)..."
+echo "Cleaning up $PROJECT_DIR (dev: $DEV_PORT, test: $TEST_PORT)..."
 
-# Kill dev server by port
-lsof -ti:$PROJECT_PORT | xargs kill -9 2>/dev/null
+# Kill both dev and test servers by port
+lsof -ti:$DEV_PORT -ti:$TEST_PORT | xargs kill -9 2>/dev/null
 
 # Kill Playwright browsers for this project
 ps aux | grep -E "(playwright|chromium)" | grep "$PROJECT_DIR" | grep -v grep | awk '{print $2}' | xargs kill -9 2>/dev/null
@@ -182,7 +192,7 @@ ps aux | grep "/Users/alex/projects/my-project"
 
 | Situation | Command |
 |-----------|---------|
-| Kill dev server (port 3000) | `lsof -ti:3000 \| xargs kill -9 2>/dev/null` |
+| Kill dev + test servers (use your ports) | `lsof -ti:$DEV_PORT -ti:$TEST_PORT \| xargs kill -9 2>/dev/null` |
 | Kill Playwright (this project) | `pkill -f "playwright.*$(pwd)"` |
 | Kill all for this project | `./scripts/cleanup.sh` |
 | Check what's on port | `lsof -i:3000` |

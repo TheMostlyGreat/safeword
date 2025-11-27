@@ -88,6 +88,13 @@ Examples:
 
 **Always test what you build** - Run tests yourself before completion. Don't ask the user to verify.
 
+**NEVER modify or skip tests without approval:**
+- ❌ Changing test expectations to match broken code
+- ❌ Adding `.skip()` or `.todo()` to make failures go away
+- ❌ Deleting tests you can't get passing
+- ✅ If a test fails, fix the implementation—not the test
+- ✅ If a test seems wrong or requirements changed, explain why and ask before changing it
+
 **Workflow:** See `@.safeword/guides/testing-methodology.md` for comprehensive TDD workflow (RED → GREEN → REFACTOR phases)
 
 ## Debugging & Troubleshooting
@@ -140,11 +147,20 @@ Before completing any work, verify:
 - **When asking, show what you tried:** "I checked X and Y but couldn't determine Z. What's your preference?"
 
 ## Tools & CLIs
-Keep these updated to latest versions:
+
+**Keep these updated** (check before starting new projects):
 - GitHub CLI (`gh`)
 - AWS CLI
 - Railway CLI
 - PostHog CLI
+
+**Update workflow:**
+1. Check current version: `gh --version`, `aws --version`, etc.
+2. Check for updates: `brew upgrade gh` or tool-specific update command
+3. Review changelog for breaking changes before major version updates
+4. If breaking changes affect your workflow, pin to current version until migration planned
+
+**When to pin versions:** If a tool is used in CI/automation, pin to specific version in scripts to avoid surprise breakages.
 
 ## Git Workflow
 - Commit whenever work is completed

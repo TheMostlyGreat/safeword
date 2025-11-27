@@ -61,7 +61,7 @@ Key directories created in your project:
 |-------|---------|--------------|
 | **code-philosophy.md** | Core coding principles, TDD philosophy, self-review checklist | Before writing code |
 | **testing-methodology.md** | TDD workflow (RED/GREEN/REFACTOR), test pyramid, decision trees | Starting any feature |
-| **tdd-templates.md** | User story + test definition templates and examples | Creating tests/stories |
+| **tdd-best-practices.md** | User story + test definition patterns and examples | Creating tests/stories |
 | **learning-extraction.md** | Extract learnings from debugging, recognition triggers | After complex debugging |
 
 ---
@@ -255,6 +255,76 @@ Commit `.safeword/` and `.claude/` in your project repo for team consistency.
 **Living Documentation**: Update as you learn, archive completed work, consolidate when needed
 
 **Cross-Agent Compatible**: Works with Claude Code, Cursor, and other AI coding agents
+
+---
+
+## LLM Eval Testing
+
+**Purpose**: Validate that guides are effective for LLM consumption using promptfoo.
+
+### Running Evals
+
+```bash
+# Run all eval tests
+npm run eval
+
+# Run without cache (fresh API calls)
+npm run eval:no-cache
+
+# Open web UI to view results
+npm run eval:view
+```
+
+### What's Tested
+
+The eval suite tests that LLMs correctly follow guide instructions:
+
+| Category | Tests | What's Validated |
+|----------|-------|------------------|
+| Architecture | 13 | Doc type selection, sections, code refs, versioning, workflow |
+| Code Philosophy | 14 | Bloat avoidance, error handling, TDD, self-review, git workflow |
+| Testing Methodology | 13 | Test type selection, TDD phases, test integrity, cost controls |
+| Zombie Process | 7 | Port-based cleanup, scripts, tmux isolation, best practices |
+| User Stories | 10 | INVEST validation, size guidelines, templates, LLM optimization |
+| LLM Instruction Design | 15 | MECE trees, tie-breaking, lookup tables, anti-patterns |
+| TDD Best Practices | 10 | Template selection, story formats, data builders |
+| Design Doc | 10 | Prerequisites, template, components, user flow, decisions |
+| Context Files | 11 | File selection, triggers, imports, size, cross-references |
+| Data Architecture | 7 | Decision tree, principles, flows, policies, checklist |
+| Learning Extraction | 11 | Triggers, templates, precedence, cross-references |
+| LLM Prompting | 10 | Caching, structured outputs, LLM-as-judge, costs |
+| Test Definitions | 12 | Suites, status, naming, mapping, LLM-friendly |
+| **Total** | **143** | |
+
+### Adding New Tests
+
+Edit `promptfoo.yaml` and add a test case:
+
+```yaml
+- description: "test-id: Description"
+  vars:
+    input: "User prompt to test"
+    context: |
+      Relevant excerpt from guide
+  assert:
+    - type: llm-rubric
+      value: |
+        EXCELLENT: Best response criteria
+        ACCEPTABLE: Minimum passing criteria
+        POOR: Failing criteria
+```
+
+### Requirements
+
+- `ANTHROPIC_API_KEY` environment variable set
+- Tests use Claude Sonnet 4 by default
+
+### Interpreting Results
+
+- **PASS**: LLM followed guide correctly
+- **FAIL**: Guide may need improvement (clearer instructions, examples, tie-breakers)
+
+Results saved to `eval-results.json` after each run.
 
 ---
 

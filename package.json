@@ -5,7 +5,10 @@
   "description": "",
   "scripts": {
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "eval": "promptfoo eval -c promptfoo.yaml",
+    "eval:view": "promptfoo view",
+    "eval:no-cache": "promptfoo eval -c promptfoo.yaml --no-cache"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -13,6 +16,7 @@
     "eslint-config-prettier": "^10.1.8",
     "globals": "^16.5.0",
     "prettier": "^3.6.2",
+    "promptfoo": "^0.119.13",
     "typescript-eslint": "^8.47.0"
   }
 }

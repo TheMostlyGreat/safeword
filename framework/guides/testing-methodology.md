@@ -10,6 +10,32 @@
 
 ---
 
+## Test Integrity (CRITICAL)
+
+**NEVER modify, skip, or delete tests without explicit human approval.**
+
+Tests are the specification. When a test fails, the implementation is wrong—not the test.
+
+### Forbidden Actions (Require Approval)
+
+| Action | Why It's Forbidden |
+|--------|-------------------|
+| Changing assertions to match broken code | Hides bugs instead of fixing them |
+| Adding `.skip()`, `.only()`, `xit()`, `.todo()` | Makes failures invisible |
+| Deleting tests you can't get passing | Removes coverage for edge cases |
+| Weakening assertions (`toBe` → `toBeTruthy`) | Reduces test precision |
+| Commenting out test code | Same as skipping |
+
+### What To Do Instead
+
+1. **Test fails?** → Fix the implementation, not the test
+2. **Test seems wrong?** → Explain why and ask: "This test expects X but I think it should expect Y because [reason]. Can I update it?"
+3. **Requirements changed?** → Explain the change and ask before updating tests to match new requirements
+4. **Test is flaky?** → Fix the flakiness (usually async issues), don't skip it
+5. **Test blocks progress?** → Ask for guidance, don't work around it
+
+---
+
 ## Testing Principles
 
 **Goal:** Catch bugs quickly and cheaply with fast feedback loops.
@@ -284,7 +310,7 @@ When using Playwright for E2E tests, isolate persistent dev instances from test 
 - Test instances spawn/cleanup per test run (Playwright manages lifecycle)
 - Never kill processes on dev port range
 
-**Playwright Configuration:**
+**Playwright Configuration** (example uses 3000/4000 - adjust to your project's ports):
 ```typescript
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
@@ -292,7 +318,7 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   webServer: {
     command: 'npm run dev:test',           // Test script with isolated port
-    port: 4000,                            // devPort + 1000
+    port: 4000,                            // devPort + 1000 (e.g., 5173→6173)
     reuseExistingServer: !process.env.CI, // Reuse locally, fresh in CI
     timeout: 120000,
   },
@@ -302,7 +328,7 @@ export default defineConfig({
 });
 ```
 
-**Package.json Scripts:**
+**Package.json Scripts** (example uses 3000/4000 - adjust to your project's ports):
 ```json
 {
   "scripts": {
@@ -324,6 +350,8 @@ export default defineConfig({
 - Different projects use different ports (Next.js: 3000, Laravel: 8000, Rails: 3000)
 - Dynamic offset adapts: `8000` → `9000`, `5173` → `6173`
 - If offset port busy, Playwright can use ephemeral port (49152-65535)
+
+**Cleanup:** For killing zombie dev/test servers, see `zombie-process-cleanup.md` → "Port-Based Cleanup"
 
 ### 4. LLM Evaluations
 
