@@ -5,8 +5,8 @@
 # Automatically detects project type and configures ESLint + Prettier.
 #
 # Architecture:
-#   .safeword/eslint-base.mjs  ← Auto-generated every run. Don't edit.
-#   eslint.config.mjs          ← Your config. Customize freely.
+#   .safeword/eslint/eslint-base.mjs  ← Auto-generated every run. Don't edit.
+#   eslint.config.mjs                  ← Your config. Customize freely.
 #
 # Usage:
 #   bash setup-linting.sh                    # Setup/update linting
@@ -42,7 +42,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --no-astro        Skip Astro even if detected"
       echo ""
       echo "Files:"
-      echo "  .safeword/eslint-base.mjs  - Auto-generated (updated every run)"
+echo "  $BASE_DIR/eslint-base.mjs  - Auto-generated (updated every run)"
       echo "  eslint.config.mjs          - Your config (created once, never overwritten)"
       exit 0
       ;;
@@ -153,10 +153,12 @@ echo "[4/5] Generating ESLint configs..."
 mkdir -p .safeword
 
 # --- Always generate .safeword/eslint-base.mjs ---
-echo "  Generating .safeword/eslint-base.mjs..."
+BASE_DIR=".safeword/eslint"
+mkdir -p "$BASE_DIR"
+echo "  Generating $BASE_DIR/eslint-base.mjs..."
 
 # Build the file with prominent header
-cat > .safeword/eslint-base.mjs << 'HEADER'
+cat > "$BASE_DIR/eslint-base.mjs" << 'HEADER'
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  ██████╗  ██████╗     ███╗   ██╗ ██████╗ ████████╗    ███████╗██████╗ ██╗████████╗
@@ -180,15 +182,15 @@ import { globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
 HEADER
 
-[ "$HAS_TYPESCRIPT" = true ] && echo "import tseslint from 'typescript-eslint';" >> .safeword/eslint-base.mjs
-[ "$HAS_REACT" = true ] && cat >> .safeword/eslint-base.mjs << 'REACT_IMPORTS'
+[ "$HAS_TYPESCRIPT" = true ] && echo "import tseslint from 'typescript-eslint';" >> "$BASE_DIR/eslint-base.mjs"
+[ "$HAS_REACT" = true ] && cat >> "$BASE_DIR/eslint-base.mjs" << 'REACT_IMPORTS'
 import reactPlugin from '@eslint-react/eslint-plugin';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactPerf from 'eslint-plugin-react-perf';
 REACT_IMPORTS
-[ "$HAS_ASTRO" = true ] && echo "import astroPlugin from 'eslint-plugin-astro';" >> .safeword/eslint-base.mjs
+[ "$HAS_ASTRO" = true ] && echo "import astroPlugin from 'eslint-plugin-astro';" >> "$BASE_DIR/eslint-base.mjs"
 
-cat >> .safeword/eslint-base.mjs << 'COMMON_IMPORTS'
+cat >> "$BASE_DIR/eslint-base.mjs" << 'COMMON_IMPORTS'
 import sonarjs from 'eslint-plugin-sonarjs';
 import sdl from '@microsoft/eslint-plugin-sdl';
 import boundaries from 'eslint-plugin-boundaries';
@@ -215,7 +217,7 @@ export default [
 COMMON_IMPORTS
 
 # TypeScript block
-[ "$HAS_TYPESCRIPT" = true ] && cat >> .safeword/eslint-base.mjs << 'TS_BLOCK'
+[ "$HAS_TYPESCRIPT" = true ] && cat >> "$BASE_DIR/eslint-base.mjs" << 'TS_BLOCK'
 
   // TypeScript
   {
@@ -234,7 +236,7 @@ COMMON_IMPORTS
 TS_BLOCK
 
 # React block
-[ "$HAS_REACT" = true ] && cat >> .safeword/eslint-base.mjs << 'REACT_BLOCK'
+[ "$HAS_REACT" = true ] && cat >> "$BASE_DIR/eslint-base.mjs" << 'REACT_BLOCK'
 
   // React
   {
@@ -258,7 +260,7 @@ TS_BLOCK
 REACT_BLOCK
 
 # Astro block
-[ "$HAS_ASTRO" = true ] && cat >> .safeword/eslint-base.mjs << 'ASTRO_BLOCK'
+[ "$HAS_ASTRO" = true ] && cat >> "$BASE_DIR/eslint-base.mjs" << 'ASTRO_BLOCK'
 
   // Astro
   ...astroPlugin.configs.recommended,
@@ -270,7 +272,7 @@ FILE_PATTERN="**/*.{js,mjs,cjs"
 [ "$HAS_REACT" = true ] && FILE_PATTERN+=",jsx"
 FILE_PATTERN+="}"
 
-cat >> .safeword/eslint-base.mjs << QUALITY_BLOCK
+cat >> "$BASE_DIR/eslint-base.mjs" << QUALITY_BLOCK
 
   // Code quality (SonarJS)
   {
@@ -330,7 +332,7 @@ cat >> .safeword/eslint-base.mjs << QUALITY_BLOCK
 ];
 QUALITY_BLOCK
 
-echo "  ✓ Generated .safeword/eslint-base.mjs"
+echo "  ✓ Generated $BASE_DIR/eslint-base.mjs"
 
 # --- Create eslint.config.mjs only if it doesn't exist ---
 if [ -f eslint.config.mjs ]; then
@@ -347,7 +349,7 @@ else
  *   - TypeScript, React, Astro from package.json
  *   - Regenerated automatically when you run setup-linting.sh
  */
-import base from './.safeword/eslint-base.mjs';
+import base from './.safeword/eslint/eslint-base.mjs';
 
 export default [
   // Include all base configs (TypeScript, React, boundaries, security, etc.)
@@ -492,15 +494,15 @@ fi
 cat > .claude/hooks/check-linting-sync.sh << 'EOF'
 #!/bin/bash
 # SessionStart hook - reminds user to re-run setup if frameworks changed
-[ ! -f ".safeword/eslint-base.mjs" ] || [ ! -f "package.json" ] && exit 0
+[ ! -f ".safeword/eslint/eslint-base.mjs" ] || [ ! -f "package.json" ] && exit 0
 DEPS=$(jq -r '(.dependencies//{}),(.devDependencies//{}) | keys[]' package.json 2>/dev/null || grep -oE '"[^"]+":' package.json | tr -d '":')
 HAS_TS=false; HAS_REACT=false; HAS_ASTRO=false
 { [ -f "tsconfig.json" ] || echo "$DEPS" | grep -qx "typescript"; } && HAS_TS=true
 echo "$DEPS" | grep -qx "react" && HAS_REACT=true
 echo "$DEPS" | grep -qx "astro" && HAS_ASTRO=true
-CFG_TS=$(grep -q "typescript-eslint" .safeword/eslint-base.mjs && echo true || echo false)
-CFG_REACT=$(grep -q "@eslint-react" .safeword/eslint-base.mjs && echo true || echo false)
-CFG_ASTRO=$(grep -q "eslint-plugin-astro" .safeword/eslint-base.mjs && echo true || echo false)
+CFG_TS=$(grep -q "typescript-eslint" .safeword/eslint/eslint-base.mjs && echo true || echo false)
+CFG_REACT=$(grep -q "@eslint-react" .safeword/eslint/eslint-base.mjs && echo true || echo false)
+CFG_ASTRO=$(grep -q "eslint-plugin-astro" .safeword/eslint/eslint-base.mjs && echo true || echo false)
 MSG=""
 [ "$HAS_TS" != "$CFG_TS" ] && MSG+="TypeScript "
 [ "$HAS_REACT" != "$CFG_REACT" ] && MSG+="React "
@@ -517,13 +519,24 @@ if ! jq -e '.hooks.SessionStart[]?.hooks[]? | select(.command == "$CLAUDE_PROJEC
   echo "  ✓ Added SessionStart hook (sync check)"
 fi
 
+# /setup-linting command
+cat > .claude/commands/setup-linting.md << 'EOF'
+Re-run SAFEWORD linting setup (auto-detects frameworks, regenerates base config).
+
+Execute:
+```bash
+bash .safeword/scripts/setup-linting.sh
+```
+EOF
+echo "  ✓ Created /setup-linting command"
+
 echo ""
 echo "================================="
 echo "✓ Setup Complete!"
 echo "================================="
 echo ""
 echo "Files:"
-echo "  .safeword/eslint-base.mjs  - Auto-generated (DO NOT EDIT)"
+echo "  .safeword/eslint/eslint-base.mjs  - Auto-generated (DO NOT EDIT)"
 echo "  eslint.config.mjs          - Your config (customize freely)"
 echo ""
 echo "Detected:"

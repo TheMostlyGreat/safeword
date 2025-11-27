@@ -2,14 +2,14 @@
 ################################################################################
 # ESLint Config Sync Check (SessionStart hook)
 #
-# Checks if .safeword/eslint-base.mjs matches the frameworks in package.json.
+# Checks if .safeword/eslint/eslint-base.mjs matches the frameworks in package.json.
 # Alerts user if out of sync (e.g., React added but not in ESLint config).
 #
 # Usage: Called automatically at Claude Code session start
 ################################################################################
 
 # Quick exit if no eslint config
-[ ! -f ".safeword/eslint-base.mjs" ] && exit 0
+[ ! -f ".safeword/eslint/eslint-base.mjs" ] && exit 0
 [ ! -f "package.json" ] && exit 0
 
 # Read dependencies
@@ -33,9 +33,9 @@ CONFIG_HAS_TS=false
 CONFIG_HAS_REACT=false
 CONFIG_HAS_ASTRO=false
 
-grep -q "typescript-eslint" .safeword/eslint-base.mjs 2>/dev/null && CONFIG_HAS_TS=true
-grep -q "@eslint-react" .safeword/eslint-base.mjs 2>/dev/null && CONFIG_HAS_REACT=true
-grep -q "eslint-plugin-astro" .safeword/eslint-base.mjs 2>/dev/null && CONFIG_HAS_ASTRO=true
+grep -q "typescript-eslint" .safeword/eslint/eslint-base.mjs 2>/dev/null && CONFIG_HAS_TS=true
+grep -q "@eslint-react" .safeword/eslint/eslint-base.mjs 2>/dev/null && CONFIG_HAS_REACT=true
+grep -q "eslint-plugin-astro" .safeword/eslint/eslint-base.mjs 2>/dev/null && CONFIG_HAS_ASTRO=true
 
 # Build mismatch message
 MISMATCHES=""

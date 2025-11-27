@@ -61,7 +61,7 @@ Note: Hook binaries are created by the scripts below. Running `setup-claude.sh` 
 ### setup-linting.sh (Auto-linting)
 - **Auto-detects** project type from package.json and tsconfig.json
 - **Two-file architecture** for safe updates:
-  - `.safeword/eslint-base.mjs` - Auto-generated, updated with `--force`
+  - `.safeword/eslint/eslint-base.mjs` - Auto-generated every run
   - `eslint.config.mjs` - User-owned, never overwritten (customize freely)
 - All projects include:
   - `eslint-plugin-boundaries` (architectural boundary enforcement)
