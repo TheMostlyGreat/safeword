@@ -5,37 +5,31 @@
 # Automatically detects project type and configures ESLint + Prettier.
 #
 # Architecture:
-#   .safeword/eslint-base.mjs  ← Auto-generated. We update this.
-#   eslint.config.mjs          ← User-owned. Created once, never overwritten.
+#   .safeword/eslint-base.mjs  ← Auto-generated every run. Don't edit.
+#   eslint.config.mjs          ← Your config. Customize freely.
 #
 # Usage:
-#   bash setup-linting.sh                    # First-time setup
-#   bash setup-linting.sh --force            # Re-detect and update base config
-#   bash setup-linting.sh --no-typescript    # Skip TypeScript even if detected
+#   bash setup-linting.sh                    # Setup/update linting
+#   bash setup-linting.sh --no-typescript    # Skip TypeScript detection
+#   bash setup-linting.sh --no-react         # Skip React detection
 #
 # Auto-detection:
 #   - TypeScript: tsconfig.json OR typescript in package.json
 #   - React: react in package.json
 #   - Astro: astro in package.json
-#
-# After adding/removing frameworks:
-#   bash setup-linting.sh --force
-#   (Only updates .safeword/eslint-base.mjs, preserves your customizations)
 ################################################################################
 
 set -e
 
-VERSION="v3.0.0"
+VERSION="v3.1.0"
 
 # Parse arguments
 SKIP_TYPESCRIPT=false
 SKIP_REACT=false
 SKIP_ASTRO=false
-FORCE=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --force|-f) FORCE=true; shift ;;
     --no-typescript|--no-ts) SKIP_TYPESCRIPT=true; shift ;;
     --no-react) SKIP_REACT=true; shift ;;
     --no-astro) SKIP_ASTRO=true; shift ;;
@@ -43,13 +37,12 @@ while [[ $# -gt 0 ]]; do
       echo "Usage: bash setup-linting.sh [options]"
       echo ""
       echo "Options:"
-      echo "  --force, -f       Re-detect frameworks and update base config"
       echo "  --no-typescript   Skip TypeScript even if detected"
       echo "  --no-react        Skip React even if detected"
       echo "  --no-astro        Skip Astro even if detected"
       echo ""
       echo "Files:"
-      echo "  .safeword/eslint-base.mjs  - Auto-generated (updated with --force)"
+      echo "  .safeword/eslint-base.mjs  - Auto-generated (updated every run)"
       echo "  eslint.config.mjs          - Your config (created once, never overwritten)"
       exit 0
       ;;
@@ -148,7 +141,7 @@ PACKAGES+=" eslint-plugin-sonarjs @microsoft/eslint-plugin-sdl eslint-plugin-bou
 [ "$HAS_ASTRO" = true ] && PACKAGES+=" eslint-plugin-astro"
 
 echo "  Installing: $PACKAGES"
-npm install --save-dev $PACKAGES --silent 2>&1 | grep -v "npm WARN" || true
+  npm install --save-dev $PACKAGES --silent 2>&1 | grep -v "npm WARN" || true
 echo "  ✓ Packages installed"
 echo ""
 
@@ -159,19 +152,30 @@ echo "[4/5] Generating ESLint configs..."
 
 mkdir -p .safeword
 
-# --- Always generate/update .safeword/eslint-base.mjs ---
+# --- Always generate .safeword/eslint-base.mjs ---
 echo "  Generating .safeword/eslint-base.mjs..."
 
-# Build imports
+# Build the file with prominent header
 cat > .safeword/eslint-base.mjs << 'HEADER'
-/**
- * SAFEWORD ESLint Base Config (auto-generated)
- * 
- * DO NOT EDIT - This file is regenerated when you run:
- *   bash setup-linting.sh --force
- * 
- * Add your customizations to eslint.config.mjs instead.
- */
+////////////////////////////////////////////////////////////////////////////////
+//
+//  ██████╗  ██████╗     ███╗   ██╗ ██████╗ ████████╗    ███████╗██████╗ ██╗████████╗
+//  ██╔══██╗██╔═══██╗    ████╗  ██║██╔═══██╗╚══██╔══╝    ██╔════╝██╔══██╗██║╚══██╔══╝
+//  ██║  ██║██║   ██║    ██╔██╗ ██║██║   ██║   ██║       █████╗  ██║  ██║██║   ██║
+//  ██║  ██║██║   ██║    ██║╚██╗██║██║   ██║   ██║       ██╔══╝  ██║  ██║██║   ██║
+//  ██████╔╝╚██████╔╝    ██║ ╚████║╚██████╔╝   ██║       ███████╗██████╔╝██║   ██║
+//  ╚═════╝  ╚═════╝     ╚═╝  ╚═══╝ ╚═════╝    ╚═╝       ╚══════╝╚═════╝ ╚═╝   ╚═╝
+//
+//  AUTO-GENERATED FILE - DO NOT EDIT
+//
+//  This file is regenerated every time you run:
+//    bash setup-linting.sh
+//
+//  To customize ESLint rules, edit eslint.config.mjs instead.
+//  Your customizations there are preserved across regenerations.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 import { globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
 HEADER
@@ -330,7 +334,7 @@ echo "  ✓ Generated .safeword/eslint-base.mjs"
 
 # --- Create eslint.config.mjs only if it doesn't exist ---
 if [ -f eslint.config.mjs ]; then
-  echo "  ✓ eslint.config.mjs exists (not overwriting - your customizations preserved)"
+  echo "  ✓ eslint.config.mjs exists (your customizations preserved)"
 else
   cat > eslint.config.mjs << 'USER_CONFIG'
 /**
@@ -339,9 +343,9 @@ else
  * This file is YOURS to customize. It imports the auto-generated base config
  * and lets you add your own rules, override defaults, and customize boundaries.
  * 
- * Base config auto-detects: TypeScript, React, Astro
- * To update base after adding/removing frameworks:
- *   bash setup-linting.sh --force
+ * The base config (.safeword/eslint-base.mjs) auto-detects:
+ *   - TypeScript, React, Astro from package.json
+ *   - Regenerated automatically when you run setup-linting.sh
  */
 import base from './.safeword/eslint-base.mjs';
 
@@ -398,7 +402,7 @@ echo "[5/5] Setting up hooks and configs..."
 
 # Prettier config
 if [ ! -f .prettierrc ] && [ ! -f .prettierrc.json ] && [ ! -f prettier.config.js ]; then
-  cat > .prettierrc << 'EOF'
+    cat > .prettierrc << 'EOF'
 {
   "printWidth": 100,
   "tabWidth": 2,
@@ -412,11 +416,11 @@ if [ ! -f .prettierrc ] && [ ! -f .prettierrc.json ] && [ ! -f prettier.config.j
 }
 EOF
   echo "  ✓ Created .prettierrc"
-fi
+  fi
 
 # Prettier ignore
 if [ ! -f .prettierignore ]; then
-  cat > .prettierignore << 'EOF'
+    cat > .prettierignore << 'EOF'
 node_modules
 dist
 build
@@ -425,7 +429,7 @@ coverage
 *.min.js
 package-lock.json
 EOF
-  echo "  ✓ Created .prettierignore"
+    echo "  ✓ Created .prettierignore"
 fi
 
 # Add npm scripts
@@ -471,39 +475,6 @@ EOF
 
 echo "  ✓ Created Claude Code hooks"
 
-# Create check-linting-sync hook
-cat > .claude/hooks/check-linting-sync.sh << 'EOF'
-#!/bin/bash
-# SessionStart hook - checks if ESLint config matches package.json frameworks
-[ ! -f ".safeword/eslint-base.mjs" ] && exit 0
-[ ! -f "package.json" ] && exit 0
-
-DEPS=$(jq -r '(.dependencies // {}), (.devDependencies // {}) | keys[]' package.json 2>/dev/null || grep -E '"[^"]+"\s*:' package.json | cut -d'"' -f2)
-
-HAS_TS=false; HAS_REACT=false; HAS_ASTRO=false
-{ [ -f "tsconfig.json" ] || echo "$DEPS" | grep -qx "typescript"; } && HAS_TS=true
-echo "$DEPS" | grep -qx "react" && HAS_REACT=true
-echo "$DEPS" | grep -qx "astro" && HAS_ASTRO=true
-
-CFG_TS=false; CFG_REACT=false; CFG_ASTRO=false
-grep -q "typescript-eslint" .safeword/eslint-base.mjs 2>/dev/null && CFG_TS=true
-grep -q "@eslint-react" .safeword/eslint-base.mjs 2>/dev/null && CFG_REACT=true
-grep -q "eslint-plugin-astro" .safeword/eslint-base.mjs 2>/dev/null && CFG_ASTRO=true
-
-MSG=""
-[ "$HAS_TS" = true ] && [ "$CFG_TS" = false ] && MSG+="TypeScript added. "
-[ "$HAS_TS" = false ] && [ "$CFG_TS" = true ] && MSG+="TypeScript removed. "
-[ "$HAS_REACT" = true ] && [ "$CFG_REACT" = false ] && MSG+="React added. "
-[ "$HAS_REACT" = false ] && [ "$CFG_REACT" = true ] && MSG+="React removed. "
-[ "$HAS_ASTRO" = true ] && [ "$CFG_ASTRO" = false ] && MSG+="Astro added. "
-[ "$HAS_ASTRO" = false ] && [ "$CFG_ASTRO" = true ] && MSG+="Astro removed. "
-
-[ -n "$MSG" ] && echo "⚠️  ESLint out of sync: ${MSG}Run: bash .safeword/scripts/setup-linting.sh --force"
-exit 0
-EOF
-chmod +x .claude/hooks/check-linting-sync.sh
-echo "  ✓ Created check-linting-sync hook"
-
 # Update settings.json
 if [ ! -f .claude/settings.json ]; then
   echo '{"hooks": {}}' > .claude/settings.json
@@ -517,7 +488,28 @@ if ! jq -e '.hooks.PostToolUse[]?.hooks[]? | select(.command == "$CLAUDE_PROJECT
   echo "  ✓ Added PostToolUse hook (auto-lint)"
 fi
 
-# Add SessionStart hook for sync check
+# Create and add SessionStart hook to detect framework changes
+cat > .claude/hooks/check-linting-sync.sh << 'EOF'
+#!/bin/bash
+# SessionStart hook - reminds user to re-run setup if frameworks changed
+[ ! -f ".safeword/eslint-base.mjs" ] || [ ! -f "package.json" ] && exit 0
+DEPS=$(jq -r '(.dependencies//{}),(.devDependencies//{}) | keys[]' package.json 2>/dev/null || grep -oE '"[^"]+":' package.json | tr -d '":')
+HAS_TS=false; HAS_REACT=false; HAS_ASTRO=false
+{ [ -f "tsconfig.json" ] || echo "$DEPS" | grep -qx "typescript"; } && HAS_TS=true
+echo "$DEPS" | grep -qx "react" && HAS_REACT=true
+echo "$DEPS" | grep -qx "astro" && HAS_ASTRO=true
+CFG_TS=$(grep -q "typescript-eslint" .safeword/eslint-base.mjs && echo true || echo false)
+CFG_REACT=$(grep -q "@eslint-react" .safeword/eslint-base.mjs && echo true || echo false)
+CFG_ASTRO=$(grep -q "eslint-plugin-astro" .safeword/eslint-base.mjs && echo true || echo false)
+MSG=""
+[ "$HAS_TS" != "$CFG_TS" ] && MSG+="TypeScript "
+[ "$HAS_REACT" != "$CFG_REACT" ] && MSG+="React "
+[ "$HAS_ASTRO" != "$CFG_ASTRO" ] && MSG+="Astro "
+[ -n "$MSG" ] && echo "⚠️ ESLint config out of sync (${MSG% }changed). Run: bash .safeword/scripts/setup-linting.sh"
+exit 0
+EOF
+chmod +x .claude/hooks/check-linting-sync.sh
+
 if ! jq -e '.hooks.SessionStart[]?.hooks[]? | select(.command == "$CLAUDE_PROJECT_DIR/.claude/hooks/check-linting-sync.sh")' .claude/settings.json > /dev/null 2>&1; then
   jq '.hooks.SessionStart = (.hooks.SessionStart // []) + [{"hooks": [{"type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-linting-sync.sh"}]}]' \
     .claude/settings.json > .claude/settings.json.tmp
@@ -530,28 +522,25 @@ echo "================================="
 echo "✓ Setup Complete!"
 echo "================================="
 echo ""
-echo "Files created:"
-echo "  .safeword/eslint-base.mjs  - Auto-generated base config (re-run with --force to update)"
-echo "  eslint.config.mjs          - Your config (customize this, we won't overwrite)"
+echo "Files:"
+echo "  .safeword/eslint-base.mjs  - Auto-generated (DO NOT EDIT)"
+echo "  eslint.config.mjs          - Your config (customize freely)"
 echo ""
-echo "Detected frameworks:"
+echo "Detected:"
 [ "$HAS_TYPESCRIPT" = true ] && echo "  ✓ TypeScript"
 [ "$HAS_REACT" = true ] && echo "  ✓ React"
 [ "$HAS_ASTRO" = true ] && echo "  ✓ Astro"
 [ "$HAS_TYPESCRIPT" = false ] && [ "$HAS_REACT" = false ] && [ "$HAS_ASTRO" = false ] && echo "  → JavaScript only"
 echo ""
-echo "Included in base config:"
+echo "Included:"
 echo "  • eslint-plugin-boundaries (architecture)"
 echo "  • eslint-plugin-sonarjs (code quality)"
 echo "  • @microsoft/eslint-plugin-sdl (security)"
-echo "  • eslint-config-prettier (formatting)"
 echo ""
 echo "Commands:"
-echo "  npm run lint                        # Check all files"
-echo "  npm run format                      # Format all files"
-echo "  bash setup-linting.sh --force       # Re-detect frameworks, update base config"
+echo "  npm run lint      # Check all files"
+echo "  npm run format    # Format all files"
 echo ""
-echo "Customize:"
-echo "  Edit eslint.config.mjs to add rules, override boundaries, etc."
-echo "  Your customizations are preserved when you run --force."
+echo "After adding/removing frameworks, just re-run:"
+echo "  bash setup-linting.sh"
 echo ""

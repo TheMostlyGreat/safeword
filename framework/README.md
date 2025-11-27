@@ -73,9 +73,12 @@ Note: Hook binaries are created by the scripts below. Running `setup-claude.sh` 
   - `.claude/commands/lint.md`
   - `.prettierrc` and `.prettierignore`
 
-Options:
-- `--force` - Re-detect frameworks and update base config (preserves your customizations)
-- `--no-typescript`, `--no-react`, `--no-astro` - Override detection
+The base config is regenerated every run, so after adding/removing frameworks:
+```bash
+bash setup-linting.sh   # Re-detects and updates
+```
+
+Options: `--no-typescript`, `--no-react`, `--no-astro` - Override auto-detection
 
 ### setup-quality.sh (Quality review)
 - Creates:

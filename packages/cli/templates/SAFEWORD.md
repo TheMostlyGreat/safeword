@@ -61,9 +61,9 @@ bash ./framework/scripts/setup-quality.sh               # Quality review only
 
 **Linting:** Auto-detects TypeScript, React, Astro from package.json.
 - Two-file architecture:
-  - `.safeword/eslint-base.mjs` - Auto-generated (updated with `--force`)
+  - `.safeword/eslint-base.mjs` - Auto-generated every run (DO NOT EDIT)
   - `eslint.config.mjs` - Your config (customize freely, never overwritten)
-- After adding/removing frameworks: `bash setup-linting.sh --force`
+- After adding/removing frameworks: just re-run `bash setup-linting.sh`
 - Override detection: `--no-typescript`, `--no-react`, `--no-astro`
 
 **What they create:**

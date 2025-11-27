@@ -50,7 +50,7 @@ MISMATCHES=""
 # Alert if mismatched
 if [ -n "$MISMATCHES" ]; then
   echo "⚠️  ESLint config out of sync: $MISMATCHES"
-  echo "   Run: bash .safeword/scripts/setup-linting.sh --force"
+  echo "   Run: bash .safeword/scripts/setup-linting.sh"
   echo ""
 fi
 
