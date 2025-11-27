@@ -5,7 +5,8 @@
 # Automatically detects project type and configures ESLint + Prettier.
 #
 # Usage:
-#   bash setup-linting.sh                    # Auto-detect everything
+#   bash setup-linting.sh                    # Auto-detect (skip if config exists)
+#   bash setup-linting.sh --force            # Regenerate config even if exists
 #   bash setup-linting.sh --no-typescript    # Skip TypeScript even if detected
 #   bash setup-linting.sh --no-react         # Skip React even if detected
 #
@@ -19,23 +20,38 @@
 #   - eslint-plugin-sonarjs (code smells)
 #   - @microsoft/eslint-plugin-sdl (security)
 #   - eslint-config-prettier (formatting)
+#
+# After adding/removing frameworks:
+#   bash setup-linting.sh --force    # Re-detect and regenerate config
 ################################################################################
 
 set -e
 
 VERSION="v2.0.0"
 
-# Parse arguments (overrides for auto-detection)
+# Parse arguments
 SKIP_TYPESCRIPT=false
 SKIP_REACT=false
 SKIP_ASTRO=false
+FORCE=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
+    --force|-f) FORCE=true; shift ;;
     --no-typescript|--no-ts) SKIP_TYPESCRIPT=true; shift ;;
     --no-react) SKIP_REACT=true; shift ;;
     --no-astro) SKIP_ASTRO=true; shift ;;
-    *) echo "Unknown option: $1"; exit 1 ;;
+    --help|-h)
+      echo "Usage: bash setup-linting.sh [options]"
+      echo ""
+      echo "Options:"
+      echo "  --force, -f       Regenerate eslint.config.mjs even if exists"
+      echo "  --no-typescript   Skip TypeScript even if detected"
+      echo "  --no-react        Skip React even if detected"
+      echo "  --no-astro        Skip Astro even if detected"
+      exit 0
+      ;;
+    *) echo "Unknown option: $1 (use --help for usage)"; exit 1 ;;
   esac
 done
 
@@ -140,10 +156,20 @@ echo ""
 # ============================================================================
 echo "[4/5] Generating eslint.config.mjs..."
 
-# Skip if config already exists
-if [ -f eslint.config.mjs ] || [ -f eslint.config.js ] || [ -f .eslintrc.json ] || [ -f .eslintrc.js ]; then
-  echo "  ✓ ESLint config already exists (skipped)"
-else
+# Check if config already exists
+CONFIG_EXISTS=false
+[ -f eslint.config.mjs ] || [ -f eslint.config.js ] || [ -f .eslintrc.json ] || [ -f .eslintrc.js ] && CONFIG_EXISTS=true
+
+if [ "$CONFIG_EXISTS" = true ] && [ "$FORCE" = false ]; then
+  echo "  ✓ ESLint config already exists (use --force to regenerate)"
+elif [ "$CONFIG_EXISTS" = true ] && [ "$FORCE" = true ]; then
+  echo "  → Regenerating eslint.config.mjs (--force)"
+  rm -f eslint.config.mjs eslint.config.js  # Remove old configs
+  
+  # Fall through to generation below
+fi
+
+if [ "$CONFIG_EXISTS" = false ] || [ "$FORCE" = true ]; then
   # Build the config by appending blocks
   
   # --- IMPORTS ---

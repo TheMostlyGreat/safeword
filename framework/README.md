@@ -73,7 +73,9 @@ Note: Hook binaries are created by the scripts below. Running `setup-claude.sh` 
   - `eslint.config.mjs` (single config for all detected frameworks)
   - `.prettierrc` and `.prettierignore`
 
-Override detection: `--no-typescript`, `--no-react`, `--no-astro`
+Options:
+- `--force` - Regenerate config after adding/removing frameworks
+- `--no-typescript`, `--no-react`, `--no-astro` - Override detection
 
 ### setup-quality.sh (Quality review)
 - Creates:

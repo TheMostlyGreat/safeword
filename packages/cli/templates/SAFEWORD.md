@@ -59,7 +59,9 @@ bash ./framework/scripts/setup-linting.sh --typescript  # Linting only
 bash ./framework/scripts/setup-quality.sh               # Quality review only
 ```
 
-**Linting:** Auto-detects TypeScript, React, Astro from package.json. Override with `--no-typescript`, `--no-react`, etc.
+**Linting:** Auto-detects TypeScript, React, Astro from package.json.
+- After adding/removing frameworks: `bash setup-linting.sh --force`
+- Override detection: `--no-typescript`, `--no-react`, `--no-astro`
 
 **What they create:**
 - `.safeword/SAFEWORD.md` - Global patterns and workflows (copied from this file)
