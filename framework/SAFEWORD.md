@@ -328,6 +328,36 @@ last_modified: 2025-11-24T19:09:00Z
 
 ---
 
+### Layers & Boundaries
+
+**When to read:**
+- Setting up code organization for a new project
+- Questions about layer structure (app, domain, infra, shared)
+- Dependency rules between layers
+- Setting up `eslint-plugin-boundaries` for enforcement
+- Architectural boundary violations in code review
+
+4-layer architecture (app, domain, infra, shared), allowed dependency matrix, and static enforcement via ESLint.
+
+**Guide:** `@./.safeword/guides/architecture-guide.md` → Layers & Boundaries section
+
+---
+
+### Architecture Review (LLM)
+
+**When to read:**
+- Running semantic architecture review on code changes
+- Setting up pre-commit hook for architecture enforcement
+- Setting up CI workflow for PR architecture checks
+- Understanding arch-review verdicts (clean/minor/refactor_needed)
+- Checking for: god modules, leaky abstractions, misplaced logic, tight coupling
+
+**Script:** `.safeword/scripts/arch-review.sh`
+**Prompt:** `.safeword/prompts/arch-review.md`
+**CI Template:** `.safeword/templates/ci/architecture-check.yml`
+
+---
+
 ### Creating Documentation (Explicit User Requests)
 
 **Note**: When user explicitly requests documentation, skip the workflow questions and create directly.
@@ -336,6 +366,7 @@ last_modified: 2025-11-24T19:09:00Z
 
 - **Trigger (Create):** User says "Create user stories for issue #N" or "Create user stories for [feature]"
 - **Trigger (Review):** User asks "Is this story good?" or "Review my user story"
+- **Trigger (Constraint Review):** User asks "Is this constraint good?" or "Review my constraints"
 - Skip the "Do user stories exist?" question (user is explicitly requesting creation)
 - **Include Technical Constraints:** Fill in performance, security, compatibility, data, dependencies, infrastructure constraints that will inform test definitions
 - **Template:** `@./.safeword/templates/user-stories-template.md`
@@ -394,7 +425,7 @@ last_modified: 2025-11-24T19:09:00Z
 - ❌ Missing rationale → every decision needs "Why" with specifics
 - ❌ Implementation details → keep high-level principles only
 
-- **No template** - Create comprehensive `ARCHITECTURE.md` in project root
+- **Template:** `@./.safeword/templates/architecture-template.md`
 - **Guide:** `@./.safeword/guides/architecture-guide.md`
 
 **Data Architecture Doc:**

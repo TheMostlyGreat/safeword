@@ -281,11 +281,11 @@ The eval suite tests that LLMs correctly follow guide instructions:
 
 | Category | Tests | What's Validated |
 |----------|-------|------------------|
-| Architecture | 13 | Doc type selection, sections, code refs, versioning, workflow |
+| Architecture | 21 | Doc type selection, layers, dependencies, ESLint, LLM review, pre-commit, CI, template |
 | Code Philosophy | 14 | Bloat avoidance, error handling, TDD, self-review, git workflow |
 | Testing Methodology | 13 | Test type selection, TDD phases, test integrity, cost controls |
 | Zombie Process | 7 | Port-based cleanup, scripts, tmux isolation, best practices |
-| User Stories | 10 | INVEST validation, size guidelines, templates, LLM optimization |
+| User Stories | 13 | INVEST validation, size guidelines, templates, technical constraints |
 | LLM Instruction Design | 15 | MECE trees, tie-breaking, lookup tables, anti-patterns |
 | TDD Best Practices | 10 | Template selection, story formats, data builders |
 | Design Doc | 10 | Prerequisites, template, components, user flow, decisions |
@@ -294,7 +294,7 @@ The eval suite tests that LLMs correctly follow guide instructions:
 | Learning Extraction | 11 | Triggers, templates, precedence, cross-references |
 | LLM Prompting | 10 | Caching, structured outputs, LLM-as-judge, costs |
 | Test Definitions | 12 | Suites, status, naming, mapping, LLM-friendly |
-| **Total** | **143** | |
+| **Total** | **154** | |
 
 ### Adding New Tests
 

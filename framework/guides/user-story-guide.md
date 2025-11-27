@@ -188,6 +188,18 @@ After filling out story, mentally check:
 - It's a project-wide standard already in ARCHITECTURE.md
 - It's obvious (don't document "code must compile")
 
+### Tie-Breaking
+
+**If constraint fits multiple categories:** Choose the most specific one.
+
+| Constraint | Could Fit | Best Category | Why |
+|------------|-----------|---------------|-----|
+| API rate limit 100 req/min | Security, Performance | Security | Rate limiting is access control |
+| Page load < 3s on 3G | Performance, Compatibility | Performance | Speed is primary concern |
+| Must work offline | Infrastructure, Compatibility | Infrastructure | Offline is deployment concern |
+
+**Edge case:** If truly cross-cutting (e.g., "GDPR compliance" spans Data + Security), pick one and add a note: "See also: Security constraints"
+
 ---
 
 ## LLM Optimization Tips

@@ -5,7 +5,7 @@
 description: "SAFEWORD Guide Quality Evals"
 
 providers:
-  - id: anthropic:messages:claude-sonnet-4-20250514
+  - id: anthropic:messages:claude-haiku-4-20250514
     config:
       temperature: 0
 
@@ -299,6 +299,179 @@ tests:
           EXCELLENT: Creates in `.agents/planning/design/` + follows naming convention
           ACCEPTABLE: Creates in a planning/design directory
           POOR: Creates at root or wrong location
+
+  - description: "arch-014: Layer definitions for new project"
+    vars:
+      input: "I'm starting a new TypeScript project. How should I organize my code into layers?"
+      context: |
+        file_path: framework/guides/architecture-guide.md (excerpt)
+        ---
+        ### Layer Definitions
+        
+        | Layer | Directory | Responsibility |
+        |-------|-----------|----------------|
+        | app | `src/app/` | UI, routing, composition |
+        | domain | `src/domain/` | Business rules, pure logic |
+        | infra | `src/infra/` | IO, APIs, DB, external SDKs |
+        | shared | `src/shared/` | Utilities usable by all layers |
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should explain the 4-layer structure.
+          EXCELLENT: Lists all 4 layers (app, domain, infra, shared) with directories and responsibilities
+          ACCEPTABLE: Lists layers with general descriptions
+          POOR: Vague advice or missing layers
+
+  - description: "arch-015: Dependency rules - forbidden import"
+    vars:
+      input: "Can my domain layer import from the app layer?"
+      context: |
+        file_path: framework/guides/architecture-guide.md (excerpt)
+        ---
+        ### Allowed Dependencies
+        
+        | From | To | Allowed | Rationale |
+        |------|-----|---------|-----------|
+        | domain | app | ❌ | Domain must be framework-agnostic |
+        | domain | infra | ❌ | Domain contains pure logic only |
+        | domain | shared | ✅ | Utilities available everywhere |
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should identify this as a forbidden import.
+          EXCELLENT: No - domain cannot import from app, explains rationale (framework-agnostic)
+          ACCEPTABLE: Says it's not allowed
+          POOR: Says it's allowed or gives ambiguous answer
+
+  - description: "arch-016: Edge case - brownfield adoption"
+    vars:
+      input: "I have an existing codebase with lots of boundary violations. How do I adopt layer boundaries without breaking everything?"
+      context: |
+        file_path: framework/guides/architecture-guide.md (excerpt)
+        ---
+        ### Edge Cases
+        
+        | Scenario | Solution |
+        |----------|----------|
+        | Brownfield adoption | Start with warnings-only mode, fix violations incrementally, then enforce |
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should describe incremental adoption.
+          EXCELLENT: 3-step path: warnings-only → fix incrementally → enforce; mentions not breaking existing code
+          ACCEPTABLE: Suggests gradual adoption approach
+          POOR: Suggests immediate enforcement or ignores existing violations
+
+  - description: "arch-017: ESLint boundaries setup"
+    vars:
+      input: "How do I set up eslint-plugin-boundaries to enforce my layer rules?"
+      context: |
+        file_path: framework/guides/architecture-guide.md (excerpt)
+        ---
+        ### Enforcement with eslint-plugin-boundaries
+        
+        **Setup:**
+        1. Install: `npm install --save-dev eslint-plugin-boundaries`
+        2. Add to `eslint.config.mjs` with boundaries/element-types rules
+        3. Define layers in `ARCHITECTURE.md`
+        4. Errors appear in IDE + CI automatically
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should explain ESLint boundaries setup.
+          EXCELLENT: Lists install command, config example with element-types rules, mentions IDE + CI integration
+          ACCEPTABLE: Provides basic setup steps
+          POOR: Vague or missing key configuration
+
+  - description: "arch-018: LLM arch review - detect god module"
+    vars:
+      input: "Review this file for architectural issues: UserService.ts with 800 lines and 15 dependencies"
+      context: |
+        file_path: framework/prompts/arch-review.md (excerpt)
+        ---
+        ## Check for:
+        
+        1. **Misplaced logic** - Business rules in wrong layer?
+        2. **God module** - Too many responsibilities (>10 dependents or >500 lines)?
+        3. **Leaky abstraction** - Implementation details exposed to callers?
+        4. **Tight coupling** - Changes would cascade unnecessarily?
+        5. **Boundary violation** - Import from disallowed layer?
+        
+        ## Response Format
+        
+        Return JSON with verdict: "clean" | "minor" | "refactor_needed"
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should identify god module issue.
+          EXCELLENT: Identifies god module (>500 lines, >10 deps), returns refactor_needed verdict with fix suggestion
+          ACCEPTABLE: Notes the file is too large
+          POOR: Says it's clean or misses the issue
+
+  - description: "arch-019: Pre-commit hook behavior"
+    vars:
+      input: "What happens when I try to commit code with a boundary violation?"
+      context: |
+        file_path: framework/scripts/setup-safeword.sh (excerpt)
+        ---
+        # Pre-commit hook runs:
+        # 1. ESLint on staged files (--max-warnings 0 || exit 1)
+        # 2. arch-review.sh on staged files
+        #    - refactor_needed verdict → exit 1 (blocked)
+        #    - minor verdict → exit 0 (allowed with warning)
+        #    - clean verdict → exit 0 (allowed)
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should explain commit blocking behavior.
+          EXCELLENT: Commit blocked by ESLint errors OR refactor_needed; minor issues warn but allow
+          ACCEPTABLE: Explains that violations block commit
+          POOR: Says commit always succeeds or always fails
+
+  - description: "arch-020: CI architecture check workflow"
+    vars:
+      input: "How do I set up CI to check for architecture violations in PRs?"
+      context: |
+        file_path: framework/templates/ci/architecture-check.yml (excerpt)
+        ---
+        # Architecture Check CI Workflow
+        # Steps:
+        # 1. Type check (tsc --noEmit)
+        # 2. ESLint (includes eslint-plugin-boundaries)
+        # 3. LLM architecture review (optional, non-blocking)
+        #
+        # Usage:
+        # 1. Copy to .github/workflows/architecture-check.yml
+        # 2. Set ANTHROPIC_API_KEY secret (optional, for LLM review)
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should explain CI setup for architecture checks.
+          EXCELLENT: Copy template to .github/workflows/, runs tsc + eslint (blocking) + LLM (non-blocking)
+          ACCEPTABLE: Mentions copying workflow file and running checks
+          POOR: Vague or missing key steps
+
+  - description: "arch-021: Architecture template sections"
+    vars:
+      input: "I'm starting a new project. What sections should my ARCHITECTURE.md have?"
+      context: |
+        file_path: framework/templates/architecture-template.md (excerpt)
+        ---
+        ## Table of Contents
+        
+        - [Overview](#overview)
+        - [Layers & Boundaries](#layers--boundaries)
+        - [Data Model](#data-model)
+        - [Key Decisions](#key-decisions)
+        - [Best Practices](#best-practices)
+        - [Migration Strategy](#migration-strategy)
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should list required ARCHITECTURE.md sections.
+          EXCELLENT: Lists all 6 sections (Overview, Layers, Data Model, Decisions, Best Practices, Migration)
+          ACCEPTABLE: Lists most sections
+          POOR: Missing key sections or vague
 
   # =============================================================================
   # CODE PHILOSOPHY (14 tests)
@@ -1260,6 +1433,83 @@ tests:
           EXCELLENT: This is a technical task/spike, not a user story - no user value
           ACCEPTABLE: Notes it lacks user value
           POOR: Accepts technical task as user story
+
+  - description: "story-011: Technical constraints in user stories"
+    vars:
+      input: "Create user stories for a new payment feature"
+      context: |
+        file_path: framework/templates/user-stories-template.md (excerpt)
+        ---
+        ## Technical Constraints
+        
+        _Non-functional requirements that inform test definitions. Delete sections that don't apply._
+        
+        ### Performance
+        - [ ] [e.g., Response time < 200ms at P95]
+        
+        ### Security
+        - [ ] [e.g., All inputs validated/sanitized]
+        
+        ### Compatibility
+        - [ ] [e.g., Chrome 100+, Safari 16+]
+        
+        ### Data
+        - [ ] [e.g., GDPR: user data deletable within 72h]
+        
+        ### Dependencies
+        - [ ] [e.g., Must use existing AuthService]
+        
+        ### Infrastructure
+        - [ ] [e.g., Memory usage < 512MB]
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should include Technical Constraints section.
+          EXCELLENT: Includes Technical Constraints with specific, testable constraints in relevant categories (Performance, Security, etc.), deletes unused categories
+          ACCEPTABLE: Includes Technical Constraints section with some constraints
+          POOR: Missing Technical Constraints section or only vague constraints
+
+  - description: "story-012: Constraint guidance - good vs bad"
+    vars:
+      input: "I'm adding a constraint 'Should be fast'. Is this good?"
+      context: |
+        file_path: framework/guides/user-story-guide.md (excerpt)
+        ---
+        ### ✅ GOOD Constraints (Specific, Testable)
+        
+        - [ ] API response < 200ms at P95 under 100 concurrent users
+        - [ ] Initial page load < 3s on simulated 3G
+        
+        ### ❌ BAD Constraints (Vague, Untestable)
+        
+        - [ ] Should be fast ← How fast? Under what conditions?
+        - [ ] Good performance ← Not measurable
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should identify this as a BAD constraint.
+          EXCELLENT: Identifies as BAD (vague, untestable), suggests specific alternative like "< 200ms at P95"
+          ACCEPTABLE: Notes it's too vague, suggests adding metrics
+          POOR: Accepts "should be fast" as valid constraint
+
+  - description: "story-013: Workflow prompts for missing constraints"
+    vars:
+      input: "I have user stories but they're missing Technical Constraints. What should I do?"
+      context: |
+        file_path: framework/SAFEWORD.md (excerpt)
+        ---
+        **Edge cases:**
+        
+        - User stories exist but test definitions don't → Create test definitions before implementation
+        - User stories missing Technical Constraints → Add constraints before test definitions
+        - Test definitions exist but user stories don't → Ask if user stories needed
+    assert:
+      - type: llm-rubric
+        value: |
+          The response should follow the edge case guidance.
+          EXCELLENT: Add constraints BEFORE creating test definitions, references the workflow order
+          ACCEPTABLE: Suggests adding constraints
+          POOR: Skips constraints and proceeds to test definitions
 
   # =============================================================================
   # LLM INSTRUCTION DESIGN (15 tests)
