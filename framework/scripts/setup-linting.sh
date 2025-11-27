@@ -471,15 +471,58 @@ EOF
 
 echo "  ✓ Created Claude Code hooks"
 
+# Create check-linting-sync hook
+cat > .claude/hooks/check-linting-sync.sh << 'EOF'
+#!/bin/bash
+# SessionStart hook - checks if ESLint config matches package.json frameworks
+[ ! -f ".safeword/eslint-base.mjs" ] && exit 0
+[ ! -f "package.json" ] && exit 0
+
+DEPS=$(jq -r '(.dependencies // {}), (.devDependencies // {}) | keys[]' package.json 2>/dev/null || grep -E '"[^"]+"\s*:' package.json | cut -d'"' -f2)
+
+HAS_TS=false; HAS_REACT=false; HAS_ASTRO=false
+{ [ -f "tsconfig.json" ] || echo "$DEPS" | grep -qx "typescript"; } && HAS_TS=true
+echo "$DEPS" | grep -qx "react" && HAS_REACT=true
+echo "$DEPS" | grep -qx "astro" && HAS_ASTRO=true
+
+CFG_TS=false; CFG_REACT=false; CFG_ASTRO=false
+grep -q "typescript-eslint" .safeword/eslint-base.mjs 2>/dev/null && CFG_TS=true
+grep -q "@eslint-react" .safeword/eslint-base.mjs 2>/dev/null && CFG_REACT=true
+grep -q "eslint-plugin-astro" .safeword/eslint-base.mjs 2>/dev/null && CFG_ASTRO=true
+
+MSG=""
+[ "$HAS_TS" = true ] && [ "$CFG_TS" = false ] && MSG+="TypeScript added. "
+[ "$HAS_TS" = false ] && [ "$CFG_TS" = true ] && MSG+="TypeScript removed. "
+[ "$HAS_REACT" = true ] && [ "$CFG_REACT" = false ] && MSG+="React added. "
+[ "$HAS_REACT" = false ] && [ "$CFG_REACT" = true ] && MSG+="React removed. "
+[ "$HAS_ASTRO" = true ] && [ "$CFG_ASTRO" = false ] && MSG+="Astro added. "
+[ "$HAS_ASTRO" = false ] && [ "$CFG_ASTRO" = true ] && MSG+="Astro removed. "
+
+[ -n "$MSG" ] && echo "⚠️  ESLint out of sync: ${MSG}Run: bash .safeword/scripts/setup-linting.sh --force"
+exit 0
+EOF
+chmod +x .claude/hooks/check-linting-sync.sh
+echo "  ✓ Created check-linting-sync hook"
+
 # Update settings.json
 if [ ! -f .claude/settings.json ]; then
   echo '{"hooks": {}}' > .claude/settings.json
 fi
+
+# Add PostToolUse hook for auto-linting
 if ! jq -e '.hooks.PostToolUse[]?.hooks[]? | select(.command == "$CLAUDE_PROJECT_DIR/.claude/hooks/auto-lint.sh")' .claude/settings.json > /dev/null 2>&1; then
   jq '.hooks.PostToolUse = (.hooks.PostToolUse // []) + [{"matcher": "Write|Edit|MultiEdit|NotebookEdit", "hooks": [{"type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/auto-lint.sh", "timeout": 15}]}]' \
     .claude/settings.json > .claude/settings.json.tmp
   mv .claude/settings.json.tmp .claude/settings.json
-  echo "  ✓ Added PostToolUse hook"
+  echo "  ✓ Added PostToolUse hook (auto-lint)"
+fi
+
+# Add SessionStart hook for sync check
+if ! jq -e '.hooks.SessionStart[]?.hooks[]? | select(.command == "$CLAUDE_PROJECT_DIR/.claude/hooks/check-linting-sync.sh")' .claude/settings.json > /dev/null 2>&1; then
+  jq '.hooks.SessionStart = (.hooks.SessionStart // []) + [{"hooks": [{"type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-linting-sync.sh"}]}]' \
+    .claude/settings.json > .claude/settings.json.tmp
+  mv .claude/settings.json.tmp .claude/settings.json
+  echo "  ✓ Added SessionStart hook (sync check)"
 fi
 
 echo ""

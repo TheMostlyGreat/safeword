@@ -81,14 +81,31 @@ else
   echo "  ⚠ Warning: framework prompts not found at $SCRIPT_DIR/../prompts (skipping)"
 fi
 
-# Copy arch-review.sh to .safeword/scripts/
+# Copy scripts to .safeword/scripts/
 mkdir -p "$SAFEWORD_DIR/scripts"
+
 if [ -f "$SCRIPT_DIR/arch-review.sh" ]; then
   cp "$SCRIPT_DIR/arch-review.sh" "$SAFEWORD_DIR/scripts/" 2>/dev/null || true
   chmod +x "$SAFEWORD_DIR/scripts/arch-review.sh"
   echo "  ✓ Copied arch-review.sh to .safeword/scripts/"
 else
-  echo "  ⚠ Warning: arch-review.sh not found at $SCRIPT_DIR/arch-review.sh (skipping)"
+  echo "  ⚠ Warning: arch-review.sh not found (skipping)"
+fi
+
+if [ -f "$SCRIPT_DIR/check-linting-sync.sh" ]; then
+  cp "$SCRIPT_DIR/check-linting-sync.sh" "$SAFEWORD_DIR/scripts/" 2>/dev/null || true
+  chmod +x "$SAFEWORD_DIR/scripts/check-linting-sync.sh"
+  echo "  ✓ Copied check-linting-sync.sh to .safeword/scripts/"
+else
+  echo "  ⚠ Warning: check-linting-sync.sh not found (skipping)"
+fi
+
+if [ -f "$SCRIPT_DIR/setup-linting.sh" ]; then
+  cp "$SCRIPT_DIR/setup-linting.sh" "$SAFEWORD_DIR/scripts/" 2>/dev/null || true
+  chmod +x "$SAFEWORD_DIR/scripts/setup-linting.sh"
+  echo "  ✓ Copied setup-linting.sh to .safeword/scripts/"
+else
+  echo "  ⚠ Warning: setup-linting.sh not found (skipping)"
 fi
 
 # Create SAFEWORD.md at project root if missing
