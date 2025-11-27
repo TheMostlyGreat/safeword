@@ -60,7 +60,9 @@ Note: Hook binaries are created by the scripts below. Running `setup-claude.sh` 
 
 ### setup-linting.sh (Auto-linting)
 - **Auto-detects** project type from package.json and tsconfig.json
-- Installs ESLint + Prettier + framework-specific plugins as needed
+- **Two-file architecture** for safe updates:
+  - `.safeword/eslint-base.mjs` - Auto-generated, updated with `--force`
+  - `eslint.config.mjs` - User-owned, never overwritten (customize freely)
 - All projects include:
   - `eslint-plugin-boundaries` (architectural boundary enforcement)
   - `eslint-plugin-sonarjs` (code smell detection)
@@ -69,12 +71,10 @@ Note: Hook binaries are created by the scripts below. Running `setup-claude.sh` 
   - `.claude/hooks/run-linters.sh` (shared logic)
   - `.claude/hooks/auto-lint.sh` (PostToolUse wrapper)
   - `.claude/commands/lint.md`
-  - `.claude/settings.json` merged with PostToolUse hook
-  - `eslint.config.mjs` (single config for all detected frameworks)
   - `.prettierrc` and `.prettierignore`
 
 Options:
-- `--force` - Regenerate config after adding/removing frameworks
+- `--force` - Re-detect frameworks and update base config (preserves your customizations)
 - `--no-typescript`, `--no-react`, `--no-astro` - Override detection
 
 ### setup-quality.sh (Quality review)

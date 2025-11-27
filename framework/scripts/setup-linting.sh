@@ -4,30 +4,28 @@
 #
 # Automatically detects project type and configures ESLint + Prettier.
 #
+# Architecture:
+#   .safeword/eslint-base.mjs  ← Auto-generated. We update this.
+#   eslint.config.mjs          ← User-owned. Created once, never overwritten.
+#
 # Usage:
-#   bash setup-linting.sh                    # Auto-detect (skip if config exists)
-#   bash setup-linting.sh --force            # Regenerate config even if exists
+#   bash setup-linting.sh                    # First-time setup
+#   bash setup-linting.sh --force            # Re-detect and update base config
 #   bash setup-linting.sh --no-typescript    # Skip TypeScript even if detected
-#   bash setup-linting.sh --no-react         # Skip React even if detected
 #
 # Auto-detection:
-#   - TypeScript: tsconfig.json exists OR typescript in package.json
+#   - TypeScript: tsconfig.json OR typescript in package.json
 #   - React: react in package.json
 #   - Astro: astro in package.json
 #
-# All projects get:
-#   - eslint-plugin-boundaries (architecture enforcement)
-#   - eslint-plugin-sonarjs (code smells)
-#   - @microsoft/eslint-plugin-sdl (security)
-#   - eslint-config-prettier (formatting)
-#
 # After adding/removing frameworks:
-#   bash setup-linting.sh --force    # Re-detect and regenerate config
+#   bash setup-linting.sh --force
+#   (Only updates .safeword/eslint-base.mjs, preserves your customizations)
 ################################################################################
 
 set -e
 
-VERSION="v2.0.0"
+VERSION="v3.0.0"
 
 # Parse arguments
 SKIP_TYPESCRIPT=false
@@ -45,10 +43,14 @@ while [[ $# -gt 0 ]]; do
       echo "Usage: bash setup-linting.sh [options]"
       echo ""
       echo "Options:"
-      echo "  --force, -f       Regenerate eslint.config.mjs even if exists"
+      echo "  --force, -f       Re-detect frameworks and update base config"
       echo "  --no-typescript   Skip TypeScript even if detected"
       echo "  --no-react        Skip React even if detected"
       echo "  --no-astro        Skip Astro even if detected"
+      echo ""
+      echo "Files:"
+      echo "  .safeword/eslint-base.mjs  - Auto-generated (updated with --force)"
+      echo "  eslint.config.mjs          - Your config (created once, never overwritten)"
       exit 0
       ;;
     *) echo "Unknown option: $1 (use --help for usage)"; exit 1 ;;
@@ -78,7 +80,6 @@ HAS_ASTRO=false
 if [ -f package.json ] && command -v jq &> /dev/null; then
   DEPS=$(jq -r '(.dependencies // {}), (.devDependencies // {}) | keys[]' package.json 2>/dev/null || echo "")
 elif [ -f package.json ]; then
-  # Fallback without jq
   DEPS=$(grep -E '"[^"]+"\s*:' package.json | cut -d'"' -f2)
 else
   DEPS=""
@@ -152,48 +153,45 @@ echo "  ✓ Packages installed"
 echo ""
 
 # ============================================================================
-# Step 4: Generate ESLint config
+# Step 4: Generate ESLint configs
 # ============================================================================
-echo "[4/5] Generating eslint.config.mjs..."
+echo "[4/5] Generating ESLint configs..."
 
-# Check if config already exists
-CONFIG_EXISTS=false
-[ -f eslint.config.mjs ] || [ -f eslint.config.js ] || [ -f .eslintrc.json ] || [ -f .eslintrc.js ] && CONFIG_EXISTS=true
+mkdir -p .safeword
 
-if [ "$CONFIG_EXISTS" = true ] && [ "$FORCE" = false ]; then
-  echo "  ✓ ESLint config already exists (use --force to regenerate)"
-elif [ "$CONFIG_EXISTS" = true ] && [ "$FORCE" = true ]; then
-  echo "  → Regenerating eslint.config.mjs (--force)"
-  rm -f eslint.config.mjs eslint.config.js  # Remove old configs
-  
-  # Fall through to generation below
-fi
+# --- Always generate/update .safeword/eslint-base.mjs ---
+echo "  Generating .safeword/eslint-base.mjs..."
 
-if [ "$CONFIG_EXISTS" = false ] || [ "$FORCE" = true ]; then
-  # Build the config by appending blocks
-  
-  # --- IMPORTS ---
-  cat > eslint.config.mjs << 'IMPORTS'
-import { defineConfig, globalIgnores } from 'eslint/config';
+# Build imports
+cat > .safeword/eslint-base.mjs << 'HEADER'
+/**
+ * SAFEWORD ESLint Base Config (auto-generated)
+ * 
+ * DO NOT EDIT - This file is regenerated when you run:
+ *   bash setup-linting.sh --force
+ * 
+ * Add your customizations to eslint.config.mjs instead.
+ */
+import { globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
-IMPORTS
+HEADER
 
-  [ "$HAS_TYPESCRIPT" = true ] && echo "import tseslint from 'typescript-eslint';" >> eslint.config.mjs
-  [ "$HAS_REACT" = true ] && cat >> eslint.config.mjs << 'REACT_IMPORTS'
+[ "$HAS_TYPESCRIPT" = true ] && echo "import tseslint from 'typescript-eslint';" >> .safeword/eslint-base.mjs
+[ "$HAS_REACT" = true ] && cat >> .safeword/eslint-base.mjs << 'REACT_IMPORTS'
 import reactPlugin from '@eslint-react/eslint-plugin';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactPerf from 'eslint-plugin-react-perf';
 REACT_IMPORTS
-  [ "$HAS_ASTRO" = true ] && echo "import astroPlugin from 'eslint-plugin-astro';" >> eslint.config.mjs
+[ "$HAS_ASTRO" = true ] && echo "import astroPlugin from 'eslint-plugin-astro';" >> .safeword/eslint-base.mjs
 
-  cat >> eslint.config.mjs << 'COMMON_IMPORTS'
+cat >> .safeword/eslint-base.mjs << 'COMMON_IMPORTS'
 import sonarjs from 'eslint-plugin-sonarjs';
 import sdl from '@microsoft/eslint-plugin-sdl';
 import boundaries from 'eslint-plugin-boundaries';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
 
-export default defineConfig([
+export default [
   globalIgnores([
     '**/node_modules/', '**/dist/', '**/build/', '**/.next/', '**/coverage/',
     '**/*.min.js', '**/package-lock.json', '**/yarn.lock', '**/pnpm-lock.yaml',
@@ -201,9 +199,9 @@ export default defineConfig([
 
   // Base JavaScript
   {
-    name: 'base-js',
+    name: 'safeword/base-js',
     files: ['**/*.{js,mjs,cjs}'],
-    extends: [js.configs.recommended],
+    ...js.configs.recommended,
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -212,26 +210,37 @@ export default defineConfig([
   },
 COMMON_IMPORTS
 
-  # --- TYPESCRIPT BLOCK ---
-  [ "$HAS_TYPESCRIPT" = true ] && cat >> eslint.config.mjs << 'TS_BLOCK'
+# TypeScript block
+[ "$HAS_TYPESCRIPT" = true ] && cat >> .safeword/eslint-base.mjs << 'TS_BLOCK'
 
   // TypeScript
   {
-    name: 'typescript',
+    name: 'safeword/typescript',
     files: ['**/*.{ts,tsx}'],
-    extends: [...tseslint.configs.recommended],
+    languageOptions: {
+      parser: tseslint.parser,
+    },
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+    },
+    rules: {
+      ...tseslint.configs.recommended.rules,
+    },
   },
 TS_BLOCK
 
-  # --- REACT BLOCK ---
-  [ "$HAS_REACT" = true ] && cat >> eslint.config.mjs << 'REACT_BLOCK'
+# React block
+[ "$HAS_REACT" = true ] && cat >> .safeword/eslint-base.mjs << 'REACT_BLOCK'
 
   // React
   {
-    name: 'react',
+    name: 'safeword/react',
     files: ['**/*.{jsx,tsx}'],
-    extends: [reactPlugin.configs['recommended-typescript']],
-    plugins: { 'react-hooks': reactHooks, 'react-perf': reactPerf },
+    ...reactPlugin.configs['recommended-typescript'],
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-perf': reactPerf,
+    },
     languageOptions: {
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
@@ -244,32 +253,32 @@ TS_BLOCK
   },
 REACT_BLOCK
 
-  # --- ASTRO BLOCK ---
-  [ "$HAS_ASTRO" = true ] && cat >> eslint.config.mjs << 'ASTRO_BLOCK'
+# Astro block
+[ "$HAS_ASTRO" = true ] && cat >> .safeword/eslint-base.mjs << 'ASTRO_BLOCK'
 
   // Astro
   ...astroPlugin.configs.recommended,
 ASTRO_BLOCK
 
-  # --- ALWAYS-INCLUDED BLOCKS ---
-  # Determine file pattern based on what's installed
-  FILE_PATTERN="**/*.{js,mjs,cjs"
-  [ "$HAS_TYPESCRIPT" = true ] && FILE_PATTERN+=",ts,tsx"
-  [ "$HAS_REACT" = true ] && FILE_PATTERN+=",jsx"
-  FILE_PATTERN+="}"
+# Determine file pattern for quality/security rules
+FILE_PATTERN="**/*.{js,mjs,cjs"
+[ "$HAS_TYPESCRIPT" = true ] && FILE_PATTERN+=",ts,tsx"
+[ "$HAS_REACT" = true ] && FILE_PATTERN+=",jsx"
+FILE_PATTERN+="}"
 
-  cat >> eslint.config.mjs << QUALITY_BLOCK
+cat >> .safeword/eslint-base.mjs << QUALITY_BLOCK
 
   // Code quality (SonarJS)
   {
-    name: 'sonarjs',
+    name: 'safeword/sonarjs',
     files: ['$FILE_PATTERN'],
-    extends: [sonarjs.configs.recommended],
+    plugins: { sonarjs },
+    rules: sonarjs.configs.recommended.rules,
   },
 
   // Security (Microsoft SDL)
   {
-    name: 'security',
+    name: 'safeword/security',
     files: ['$FILE_PATTERN'],
     plugins: { '@microsoft/sdl': sdl },
     rules: {
@@ -282,10 +291,9 @@ ASTRO_BLOCK
     },
   },
 
-  // Architecture boundaries
-  // Customize layers in ARCHITECTURE.md - see .safeword/guides/architecture-guide.md
+  // Architecture boundaries (default layers - customize in eslint.config.mjs)
   {
-    name: 'boundaries',
+    name: 'safeword/boundaries',
     files: ['src/**/*.{js,mjs,cjs,ts,tsx,jsx}'],
     plugins: { boundaries },
     settings: {
@@ -310,13 +318,77 @@ ASTRO_BLOCK
     },
   },
 
-  // Prettier (must be last)
-  { name: 'prettier', extends: [prettier] },
-]);
+  // Prettier (must be last in base)
+  {
+    name: 'safeword/prettier',
+    ...prettier,
+  },
+];
 QUALITY_BLOCK
 
-  echo "  ✓ Generated eslint.config.mjs"
+echo "  ✓ Generated .safeword/eslint-base.mjs"
+
+# --- Create eslint.config.mjs only if it doesn't exist ---
+if [ -f eslint.config.mjs ]; then
+  echo "  ✓ eslint.config.mjs exists (not overwriting - your customizations preserved)"
+else
+  cat > eslint.config.mjs << 'USER_CONFIG'
+/**
+ * ESLint Configuration
+ * 
+ * This file is YOURS to customize. It imports the auto-generated base config
+ * and lets you add your own rules, override defaults, and customize boundaries.
+ * 
+ * Base config auto-detects: TypeScript, React, Astro
+ * To update base after adding/removing frameworks:
+ *   bash setup-linting.sh --force
+ */
+import base from './.safeword/eslint-base.mjs';
+
+export default [
+  // Include all base configs (TypeScript, React, boundaries, security, etc.)
+  ...base,
+
+  // =========================================================================
+  // YOUR CUSTOMIZATIONS BELOW
+  // =========================================================================
+
+  // Example: Override boundary rules for your project's layer structure
+  // {
+  //   name: 'my-boundaries',
+  //   files: ['src/**/*'],
+  //   settings: {
+  //     'boundaries/elements': [
+  //       { type: 'features', pattern: 'src/features/**/*' },
+  //       { type: 'pages', pattern: 'src/pages/**/*' },
+  //       { type: 'shared', pattern: 'src/shared/**/*' },
+  //     ],
+  //   },
+  //   rules: {
+  //     'boundaries/element-types': ['error', {
+  //       default: 'disallow',
+  //       rules: [
+  //         { from: 'pages', allow: ['features', 'shared'] },
+  //         { from: 'features', allow: ['shared'] },
+  //         { from: 'shared', allow: [] },
+  //       ],
+  //     }],
+  //   },
+  // },
+
+  // Example: Add custom rules
+  // {
+  //   name: 'my-rules',
+  //   rules: {
+  //     'no-console': 'warn',
+  //     '@typescript-eslint/no-explicit-any': 'off',
+  //   },
+  // },
+];
+USER_CONFIG
+  echo "  ✓ Created eslint.config.mjs (customize this file)"
 fi
+
 echo ""
 
 # ============================================================================
@@ -415,23 +487,28 @@ echo "================================="
 echo "✓ Setup Complete!"
 echo "================================="
 echo ""
-echo "Detected:"
-[ "$HAS_TYPESCRIPT" = true ] && echo "  • TypeScript"
-[ "$HAS_REACT" = true ] && echo "  • React"
-[ "$HAS_ASTRO" = true ] && echo "  • Astro"
-[ "$HAS_TYPESCRIPT" = false ] && [ "$HAS_REACT" = false ] && [ "$HAS_ASTRO" = false ] && echo "  • JavaScript only"
+echo "Files created:"
+echo "  .safeword/eslint-base.mjs  - Auto-generated base config (re-run with --force to update)"
+echo "  eslint.config.mjs          - Your config (customize this, we won't overwrite)"
 echo ""
-echo "Installed:"
-echo "  • ESLint + Prettier (auto-formatting)"
+echo "Detected frameworks:"
+[ "$HAS_TYPESCRIPT" = true ] && echo "  ✓ TypeScript"
+[ "$HAS_REACT" = true ] && echo "  ✓ React"
+[ "$HAS_ASTRO" = true ] && echo "  ✓ Astro"
+[ "$HAS_TYPESCRIPT" = false ] && [ "$HAS_REACT" = false ] && [ "$HAS_ASTRO" = false ] && echo "  → JavaScript only"
+echo ""
+echo "Included in base config:"
 echo "  • eslint-plugin-boundaries (architecture)"
 echo "  • eslint-plugin-sonarjs (code quality)"
 echo "  • @microsoft/eslint-plugin-sdl (security)"
+echo "  • eslint-config-prettier (formatting)"
 echo ""
 echo "Commands:"
-echo "  npm run lint      # Check all files"
-echo "  npm run format    # Format all files"
+echo "  npm run lint                        # Check all files"
+echo "  npm run format                      # Format all files"
+echo "  bash setup-linting.sh --force       # Re-detect frameworks, update base config"
 echo ""
-echo "Architecture boundaries:"
-echo "  Default layers: app → domain, infra → domain, shared (no deps)"
-echo "  Customize in eslint.config.mjs or see .safeword/guides/architecture-guide.md"
+echo "Customize:"
+echo "  Edit eslint.config.mjs to add rules, override boundaries, etc."
+echo "  Your customizations are preserved when you run --force."
 echo ""
