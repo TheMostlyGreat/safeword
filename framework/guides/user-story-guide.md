@@ -58,23 +58,14 @@ After filling out story, mentally check:
 
 ## Size Guidelines
 
-**TOO BIG - Split into multiple stories:**
-- 6+ acceptance criteria
-- Touches multiple user personas
-- Requires multiple UI screens
-- Takes 6+ days
+| Indicator | Too Big | Just Right | Too Small |
+|-----------|---------|------------|-----------|
+| Acceptance Criteria | 6+ | 1-5 | 0 |
+| Personas/Screens | 3+ | 1-2 | N/A |
+| Duration | 6+ days | 1-5 days | <1 hour |
+| **Action** | Split | ✅ Ship | Combine |
 
-**TOO SMALL - Combine with related work:**
-- 0 acceptance criteria
-- Single line of code change
-- Trivial config update
-- Takes <1 hour
-
-**JUST RIGHT - One story:**
-- 1-5 acceptance criteria
-- 1-2 personas/screens
-- One main user flow
-- Can complete in 1-5 days
+**Decision rule:** When borderline (e.g., 5 AC but 2 personas), err on the side of splitting. Smaller stories are easier to estimate and complete.
 
 ---
 
@@ -145,6 +136,60 @@ After filling out story, mentally check:
 
 ---
 
+## Technical Constraints Section
+
+**Purpose:** Capture non-functional requirements that inform test definitions. These are NOT user stories but constrain how stories are implemented.
+
+**When to use:** Fill in constraints BEFORE writing test definitions. Delete sections that don't apply—keep it lean.
+
+### Categories
+
+| Category | What It Captures | Examples |
+|----------|-----------------|----------|
+| Performance | Speed, throughput, capacity | Response time < 200ms, 1000 concurrent users |
+| Security | Auth, validation, rate limiting | Sanitized inputs, session required, 100 req/min |
+| Compatibility | Browsers, devices, accessibility | Chrome 100+, iOS 14+, WCAG 2.1 AA |
+| Data | Privacy, retention, compliance | GDPR delete in 72h, 90-day log retention |
+| Dependencies | Existing systems, restrictions | Use AuthService, no new packages |
+| Infrastructure | Resources, offline, deployment | < 512MB memory, offline-capable |
+
+### ✅ GOOD Constraints (Specific, Testable)
+
+```markdown
+### Performance
+- [ ] API response < 200ms at P95 under 100 concurrent users
+- [ ] Initial page load < 3s on simulated 3G
+
+### Security
+- [ ] All user inputs sanitized via DOMPurify
+- [ ] Rate limited: 100 requests/min per IP
+```
+
+### ❌ BAD Constraints (Vague, Untestable)
+
+```markdown
+### Performance
+- [ ] Should be fast ← How fast? Under what conditions?
+- [ ] Good performance ← Not measurable
+
+### Security
+- [ ] Secure ← What does this mean?
+- [ ] Protected from hackers ← Not specific
+```
+
+### Decision Rule
+
+**Include a constraint if:**
+- It affects how you write tests (performance tests, security tests)
+- It limits implementation choices (must use X, can't use Y)
+- Violating it would fail an audit or break SLAs
+
+**Skip if:**
+- It's a project-wide standard already in ARCHITECTURE.md
+- It's obvious (don't document "code must compile")
+
+---
+
 ## LLM Optimization Tips
 
 **Core principle:** User stories are instructions that LLMs read and follow. Apply LLM instruction design best practices.
@@ -168,7 +213,7 @@ After filling out story, mentally check:
 
 ## File Naming Convention
 
-Save stories as: `docs/stories/[slug].md`
+Save stories as: `.safeword/planning/user-stories/[slug].md`
 
 **Good filenames:**
 - `campaign-switching.md`

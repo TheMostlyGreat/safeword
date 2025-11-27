@@ -122,6 +122,8 @@ bash ./framework/scripts/setup-quality.sh               # Quality review only
 ---
 id: 001
 status: in_progress
+created: 2025-11-24T19:00:00Z
+last_modified: 2025-11-24T19:09:00Z
 ---
 
 # Fix Login Button Not Responding
@@ -233,10 +235,11 @@ status: in_progress
        - Investigation/debugging needed? → Create ticket, skip to TDD (step 4)
        - Complex feature (multi-story)? → Create ticket, continue to planning docs (step 1)
 
-1. **User Stories** - Search `.safeword/planning/user-stories/` or `docs/user-stories/`
+1. **User Stories + Technical Constraints** - Search `.safeword/planning/user-stories/` or `docs/user-stories/`
 
    - Not found → Ask user if they exist elsewhere or offer to create
-   - Found → Read them
+   - Found → Read them (including Technical Constraints section)
+   - **Technical Constraints:** Non-functional requirements (performance, security, compatibility) that inform test definitions
    - **Guide:** `@./.safeword/guides/user-story-guide.md`
 
 2. **Test Definitions** - Search `.safeword/planning/test-definitions/` or `docs/test-definitions/`
@@ -271,6 +274,7 @@ status: in_progress
 **Edge cases:**
 
 - User stories exist but test definitions don't → Create test definitions before implementation
+- User stories missing Technical Constraints → Add constraints before test definitions
 - Test definitions exist but user stories don't → Ask if user stories needed
 - Neither exist → Create both before implementation
 - Ticket references non-existent planning docs → Create them first
@@ -333,6 +337,7 @@ status: in_progress
 - **Trigger (Create):** User says "Create user stories for issue #N" or "Create user stories for [feature]"
 - **Trigger (Review):** User asks "Is this story good?" or "Review my user story"
 - Skip the "Do user stories exist?" question (user is explicitly requesting creation)
+- **Include Technical Constraints:** Fill in performance, security, compatibility, data, dependencies, infrastructure constraints that will inform test definitions
 - **Template:** `@./.safeword/templates/user-stories-template.md`
 - **Guide:** `@./.safeword/guides/user-story-guide.md`
 

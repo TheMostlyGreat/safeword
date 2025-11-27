@@ -171,6 +171,29 @@ Acceptance Criteria:
 - Works with all agent types (rules, narrative, character)
 ```
 
+**With Technical Constraints:**
+```
+As a user with multiple campaigns
+I want to switch between campaigns without reloading the page
+So that I can quickly compare game states
+
+Acceptance Criteria:
+- Campaign list shows all saved campaigns with last-played timestamp
+- Clicking a campaign loads its state within 200ms
+- Current campaign is visually highlighted
+
+Technical Constraints:
+Performance:
+- [ ] Campaign switch completes in < 200ms at P95
+- [ ] Works with up to 50 campaigns without UI lag
+
+Compatibility:
+- [ ] Chrome 100+, Safari 16+, Firefox 115+
+
+Data:
+- [ ] Campaign data persists across browser sessions
+```
+
 ### ❌ BAD Examples (Anti-Patterns)
 
 **Too Vague:**
