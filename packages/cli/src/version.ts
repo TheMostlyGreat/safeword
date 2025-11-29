@@ -1,3 +1,3 @@
 // Version is read from package.json at build time
 // This will be replaced by tsup or read dynamically
-export const VERSION = '0.2.0';
+export const VERSION = '0.2.1';
