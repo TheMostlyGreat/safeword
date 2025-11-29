@@ -6,7 +6,7 @@ cat <<'EOF'
 {
   "hookSpecificOutput": {
     "hookEventName": "UserPromptSubmit",
-    "additionalContext": "<question-protocol>Research first. Ask 1-3 questions ONLY about what to build (not how) that only user knows. Skip searchable things. Unsure? Ask.</question-protocol>"
+    "additionalContext": "<question-protocol>Research first. Ask 1-5 questions ONLY about what to build (not how) that only user knows. Skip searchable things. Unsure? Ask.</question-protocol>"
   }
 }
 EOF
