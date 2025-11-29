@@ -2,7 +2,7 @@
  * Setup command - Initialize safeword in a project
  */
 
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
 import { VERSION } from '../version.js';
 import {
   exists,
@@ -49,7 +49,7 @@ export async function setup(options: SetupOptions): Promise<void> {
   const packageJsonPath = join(cwd, 'package.json');
   let packageJsonCreated = false;
   if (!exists(packageJsonPath)) {
-    const dirName = cwd.split('/').pop() || 'project';
+    const dirName = basename(cwd) || 'project';
     const defaultPackageJson: PackageJson = {
       name: dirName,
       version: '0.1.0',
