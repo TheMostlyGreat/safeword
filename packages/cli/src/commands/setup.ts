@@ -45,11 +45,18 @@ export async function setup(options: SetupOptions): Promise<void> {
     process.exit(1);
   }
 
-  // Check for package.json
+  // Check for package.json, create if missing
   const packageJsonPath = join(cwd, 'package.json');
+  let packageJsonCreated = false;
   if (!exists(packageJsonPath)) {
-    error('No package.json found. Run this command in a Node.js project.');
-    process.exit(1);
+    const dirName = cwd.split('/').pop() || 'project';
+    const defaultPackageJson: PackageJson = {
+      name: dirName,
+      version: '0.1.0',
+      scripts: {},
+    };
+    writeJson(packageJsonPath, defaultPackageJson);
+    packageJsonCreated = true;
   }
 
   const isNonInteractive = options.yes || !process.stdin.isTTY;
@@ -57,8 +64,12 @@ export async function setup(options: SetupOptions): Promise<void> {
   header('Safeword Setup');
   info(`Version: ${VERSION}`);
 
+  if (packageJsonCreated) {
+    info('Created package.json (none found)');
+  }
+
   // Track created files for summary
-  const created: string[] = [];
+  const created: string[] = packageJsonCreated ? ['package.json'] : [];
   const modified: string[] = [];
 
   try {
