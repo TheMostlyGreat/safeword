@@ -52,16 +52,15 @@ export function removeAgentsMdLink(cwd: string): boolean {
   // Remove the entire AGENTS_MD_LINK block if present
   let newContent = content.replace(AGENTS_MD_LINK, '');
 
-  // Also handle legacy single-line format
-  const lines = newContent.split('\n');
-  const filteredLines = lines.filter((line) => !line.includes(SAFEWORD_LINK_MARKER));
-  newContent = filteredLines.join('\n');
+  // Also handle legacy single-line format (filter any remaining lines with marker)
+  const lines = newContent.split('\n').filter((line) => !line.includes(SAFEWORD_LINK_MARKER));
 
   // Remove extra blank lines and separators at the start
-  while (filteredLines.length > 0 && (filteredLines[0].trim() === '' || filteredLines[0].trim() === '---')) {
-    filteredLines.shift();
+  while (lines.length > 0 && (lines[0].trim() === '' || lines[0].trim() === '---')) {
+    lines.shift();
   }
-  newContent = filteredLines.join('\n');
+
+  newContent = lines.join('\n');
 
   if (newContent !== content) {
     writeFile(agentsMdPath, newContent);
