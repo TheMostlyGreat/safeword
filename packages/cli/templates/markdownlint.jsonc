@@ -1,0 +1,25 @@
+{
+  // Safeword markdownlint configuration
+  "default": true,
+
+  // Allow inline HTML (needed for some markdown features)
+  "MD033": false,
+
+  // Allow multiple headings with same content
+  "MD024": {
+    "siblings_only": true
+  },
+
+  // Line length - be lenient
+  "MD013": {
+    "line_length": 120,
+    "code_blocks": false,
+    "tables": false
+  },
+
+  // Allow trailing punctuation in headings
+  "MD026": false,
+
+  // Allow emphasis as heading
+  "MD036": false
+}

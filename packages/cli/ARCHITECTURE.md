@@ -260,7 +260,7 @@ function success(msg: string) {
 - [Design Doc](../../.safeword/planning/design/005-cli-implementation.md)
 - [User Stories](../../.safeword/planning/user-stories/005-cli-implementation.md)
 - [Test Definitions](../../.safeword/planning/test-definitions/005-cli-implementation.md)
-- [CLI UX Vision](../../.agents/planning/011-cli-ux-vision.md)
+- [CLI UX Vision](../../.safeword/planning/011-cli-ux-vision.md)
 
 ### Package.json (key fields)
 
