@@ -13,15 +13,18 @@ This guide covers two related topics:
 ### Prompt Engineering Principles
 
 **Concrete Examples Over Abstract Rules:**
+
 - ✅ Good: Show "❌ BAD" vs "✅ GOOD" code examples
 - ❌ Bad: "Follow best practices" (too vague)
 
 **"Why" Over "What":**
+
 - Explain architectural trade-offs and reasoning
 - Include specific numbers (90% cost reduction, 3x faster)
 - Document gotchas with explanations
 
 **Structured Outputs:**
+
 - Use JSON mode for predictable LLM responses
 - Define explicit schemas with validation
 - Return structured data, not prose
@@ -37,6 +40,7 @@ This guide covers two related topics:
 ### Cost Optimization
 
 **Prompt Caching (Critical for AI Agents):**
+
 - Static rules → System prompt with cache_control: ephemeral (caches for ~5 min, auto-expires)
 - Dynamic data (character state, user input) → User message (no caching)
 - Example: 468-line prompt costs $0.10 without caching, $0.01 with (90% reduction)
@@ -44,27 +48,30 @@ This guide covers two related topics:
 - Rule: Change system prompts sparingly; accept one-time cache rebuild cost
 
 **Message Architecture:**
+
 ```typescript
 // ✅ GOOD - Cacheable system prompt
 systemPrompt: [
   { text: STATIC_RULES, cache_control: { type: 'ephemeral' } },
-  { text: STATIC_EXAMPLES, cache_control: { type: 'ephemeral' } }
-]
-userMessage: `Character: ${dynamicState}\nAction: ${userInput}`
+  { text: STATIC_EXAMPLES, cache_control: { type: 'ephemeral' } },
+];
+userMessage: `Character: ${dynamicState}\nAction: ${userInput}`;
 
 // ❌ BAD - Uncacheable (character state in system prompt)
-systemPrompt: `Rules + Character: ${dynamicState}`
+systemPrompt: `Rules + Character: ${dynamicState}`;
 ```
 
 ### Testing AI Outputs
 
 **LLM-as-Judge Pattern:**
+
 - Use LLM to evaluate nuanced qualities (narrative tone, reasoning quality)
 - Avoid brittle keyword matching for creative outputs
 - Define rubrics: EXCELLENT / ACCEPTABLE / POOR with criteria
 - Example: "Does the GM's response show collaborative tone?" vs checking for specific words
 
 **Evaluation Framework:**
+
 - Unit tests: Pure functions (parsing, validation)
 - Integration tests: Agent + real LLM calls (schema compliance)
 - LLM Evals: Judgment quality (position/effect reasoning, atmosphere)

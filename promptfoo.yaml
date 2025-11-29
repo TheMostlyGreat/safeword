@@ -2,7 +2,7 @@
 # Run with: npm run eval
 # View results: npm run eval:view
 
-description: "SAFEWORD Guide Quality Evals"
+description: 'SAFEWORD Guide Quality Evals'
 
 providers:
   - id: anthropic:messages:claude-haiku-4-20250514
@@ -28,14 +28,14 @@ tests:
   # ARCHITECTURE GUIDE (13 tests)
   # =============================================================================
 
-  - description: "arch-001: Create comprehensive architecture doc"
+  - description: 'arch-001: Create comprehensive architecture doc'
     vars:
-      input: "Create an architecture doc for a new React + Supabase project"
+      input: 'Create an architecture doc for a new React + Supabase project'
       context: |
         file_path: framework/guides/architecture-guide.md (excerpt)
         ---
         ## Required Sections
-        
+
         1. Header (Version, Status)
         2. Table of Contents
         3. Overview
@@ -55,23 +55,23 @@ tests:
           ACCEPTABLE: 9+ sections present
           POOR: <9 sections or missing Key Decisions
 
-  - description: "arch-002: Choose Architecture Doc for tech decision"
+  - description: 'arch-002: Choose Architecture Doc for tech decision'
     vars:
-      input: "I need to document our decision to use PostgreSQL instead of MongoDB"
+      input: 'I need to document our decision to use PostgreSQL instead of MongoDB'
       context: |
         file_path: framework/SAFEWORD.md (excerpt)
         ---
         ## When to Update Architecture Docs
-        
+
         **Update ARCHITECTURE.md when:**
         - Making technology choices (state management, database, frameworks)
         - Designing data models or schemas
         - Establishing project-wide patterns/conventions
-        
+
         **Use Design Doc instead when:**
         - Implementing a specific feature
         - Feature-specific technical decisions
-        
+
         **Tie-breaking rule:** If decision affects 2+ features → Architecture doc. If feature-specific only → Design doc.
     assert:
       - type: llm-rubric
@@ -81,23 +81,23 @@ tests:
           ACCEPTABLE: Correctly identifies Architecture Doc
           POOR: Suggests Design Doc or is unclear
 
-  - description: "arch-003: Choose Design Doc for feature"
+  - description: 'arch-003: Choose Design Doc for feature'
     vars:
-      input: "I need to document how the user profile feature will work"
+      input: 'I need to document how the user profile feature will work'
       context: |
         file_path: framework/SAFEWORD.md (excerpt)
         ---
         ## When to Update Architecture Docs
-        
+
         **Update ARCHITECTURE.md when:**
         - Making technology choices (state management, database, frameworks)
         - Designing data models or schemas
         - Establishing project-wide patterns/conventions
-        
+
         **Use Design Doc instead when:**
         - Implementing a specific feature
         - Feature-specific technical decisions
-        
+
         **Tie-breaking rule:** If decision affects 2+ features → Architecture doc. If feature-specific only → Design doc.
     assert:
       - type: llm-rubric
@@ -107,14 +107,14 @@ tests:
           ACCEPTABLE: Correctly identifies Design Doc
           POOR: Suggests Architecture Doc
 
-  - description: "arch-004: Document Why, not just What"
+  - description: 'arch-004: Document Why, not just What'
     vars:
-      input: "Document our decision to use Redis for caching"
+      input: 'Document our decision to use Redis for caching'
       context: |
         file_path: framework/guides/architecture-guide.md (excerpt)
         ---
         ## Key Decisions Format
-        
+
         Every decision must include:
         - **What**: The decision made
         - **Why**: Rationale with specifics (numbers, metrics)
@@ -128,9 +128,9 @@ tests:
           ACCEPTABLE: What/Why/Trade-off present
           POOR: Missing Why or Trade-off
 
-  - description: "arch-005: Apply tie-breaker for multi-feature"
+  - description: 'arch-005: Apply tie-breaker for multi-feature'
     vars:
-      input: "I need to document adding a caching layer that will be used by multiple features"
+      input: 'I need to document adding a caching layer that will be used by multiple features'
       context: |
         file_path: framework/SAFEWORD.md (excerpt)
         ---
@@ -143,14 +143,14 @@ tests:
           ACCEPTABLE: Architecture Doc
           POOR: Design Doc
 
-  - description: "arch-006: Include code references"
+  - description: 'arch-006: Include code references'
     vars:
-      input: "Document the authentication flow architecture, including where the code lives"
+      input: 'Document the authentication flow architecture, including where the code lives'
       context: |
         file_path: framework/guides/architecture-guide.md (excerpt)
         ---
         ## Code References
-        
+
         Include paths to implementation:
         - File paths with line ranges when helpful
         - Function/class names
@@ -163,14 +163,14 @@ tests:
           ACCEPTABLE: At least 1 file path reference
           POOR: No code references
 
-  - description: "arch-007: Consolidate ADRs"
+  - description: 'arch-007: Consolidate ADRs'
     vars:
-      input: "Our project has 50 ADR files in docs/adr/. What should we do?"
+      input: 'Our project has 50 ADR files in docs/adr/. What should we do?'
       context: |
         file_path: framework/guides/architecture-guide.md (excerpt)
         ---
         ## Single Architecture Doc
-        
+
         Consolidate scattered ADRs into one ARCHITECTURE.md:
         1. Create ARCHITECTURE.md at project root
         2. Consolidate active decisions
@@ -183,14 +183,14 @@ tests:
           ACCEPTABLE: Recommends consolidation
           POOR: Suggests keeping separate ADRs
 
-  - description: "arch-008: Include versioning"
+  - description: 'arch-008: Include versioning'
     vars:
-      input: "Create architecture doc header for a new project"
+      input: 'Create architecture doc header for a new project'
       context: |
         file_path: framework/guides/architecture-guide.md (excerpt)
         ---
         ## Header Format
-        
+
         Status values: Design | Production | Proposed | Deprecated
         Version: Major.Minor (bump major for breaking changes)
     assert:
@@ -201,14 +201,14 @@ tests:
           ACCEPTABLE: Version and Status present
           POOR: Missing Version or Status
 
-  - description: "arch-009: Check for user stories before implementing"
+  - description: 'arch-009: Check for user stories before implementing'
     vars:
-      input: "Implement user authentication for my app"
+      input: 'Implement user authentication for my app'
       context: |
         file_path: framework/SAFEWORD.md (excerpt)
         ---
         ## Feature Development Workflow
-        
+
         1. User Stories - Check if they exist, create if not
         2. Test Definitions - Check if they exist, create if not
         3. Design Doc (complex features only)
@@ -221,14 +221,14 @@ tests:
           ACCEPTABLE: Mentions TDD workflow
           POOR: Jumps straight to implementation
 
-  - description: "arch-010: Suggest updating architecture doc after tech change"
+  - description: 'arch-010: Suggest updating architecture doc after tech change'
     vars:
-      input: "I just added PostgreSQL to our project that was using SQLite"
+      input: 'I just added PostgreSQL to our project that was using SQLite'
       context: |
         file_path: framework/SAFEWORD.md (excerpt)
         ---
         ## When to Update Architecture Docs
-        
+
         **Update ARCHITECTURE.md when:**
         - Making technology choices (state management, database, frameworks)
     assert:
@@ -241,17 +241,17 @@ tests:
 
   - description: "arch-011: Don't suggest update for bug fix"
     vars:
-      input: "I just fixed a bug in the login form validation"
+      input: 'I just fixed a bug in the login form validation'
       context: |
         file_path: framework/SAFEWORD.md (excerpt)
         ---
         ## When to Update Architecture Docs
-        
+
         **Update ARCHITECTURE.md when:**
         - Making technology choices
         - Designing data models
         - Establishing project-wide patterns
-        
+
         **NOT for:** Bug fixes, minor refactors, feature tweaks
     assert:
       - type: llm-rubric
@@ -261,7 +261,7 @@ tests:
           ACCEPTABLE: Asks if it's architectural, then correctly says no
           POOR: Suggests updating architecture doc
 
-  - description: "arch-012: Catch missing rationale anti-pattern"
+  - description: 'arch-012: Catch missing rationale anti-pattern'
     vars:
       input: |
         Review this architecture doc section:
@@ -271,7 +271,7 @@ tests:
         file_path: framework/guides/architecture-guide.md (excerpt)
         ---
         ## Common Mistakes
-        
+
         - Missing "Why" in decisions
         - No trade-offs documented
         - Vague rationale without specifics
@@ -283,14 +283,14 @@ tests:
           ACCEPTABLE: Notes decision is incomplete
           POOR: Says doc looks fine
 
-  - description: "arch-013: Create file in correct location"
+  - description: 'arch-013: Create file in correct location'
     vars:
-      input: "Create a design doc for the payment flow feature"
+      input: 'Create a design doc for the payment flow feature'
       context: |
         file_path: framework/SAFEWORD.md (excerpt)
         ---
         ## Planning Documentation Location
-        
+
         - Design docs → `.agents/planning/design/`
     assert:
       - type: llm-rubric
@@ -300,14 +300,14 @@ tests:
           ACCEPTABLE: Creates in a planning/design directory
           POOR: Creates at root or wrong location
 
-  - description: "arch-014: Layer definitions for new project"
+  - description: 'arch-014: Layer definitions for new project'
     vars:
       input: "I'm starting a new TypeScript project. How should I organize my code into layers?"
       context: |
         file_path: framework/guides/architecture-guide.md (excerpt)
         ---
         ### Layer Definitions
-        
+
         | Layer | Directory | Responsibility |
         |-------|-----------|----------------|
         | app | `src/app/` | UI, routing, composition |
@@ -322,14 +322,14 @@ tests:
           ACCEPTABLE: Lists layers with general descriptions
           POOR: Vague advice or missing layers
 
-  - description: "arch-015: Dependency rules - forbidden import"
+  - description: 'arch-015: Dependency rules - forbidden import'
     vars:
-      input: "Can my domain layer import from the app layer?"
+      input: 'Can my domain layer import from the app layer?'
       context: |
         file_path: framework/guides/architecture-guide.md (excerpt)
         ---
         ### Allowed Dependencies
-        
+
         | From | To | Allowed | Rationale |
         |------|-----|---------|-----------|
         | domain | app | ❌ | Domain must be framework-agnostic |
@@ -343,14 +343,14 @@ tests:
           ACCEPTABLE: Says it's not allowed
           POOR: Says it's allowed or gives ambiguous answer
 
-  - description: "arch-016: Edge case - brownfield adoption"
+  - description: 'arch-016: Edge case - brownfield adoption'
     vars:
-      input: "I have an existing codebase with lots of boundary violations. How do I adopt layer boundaries without breaking everything?"
+      input: 'I have an existing codebase with lots of boundary violations. How do I adopt layer boundaries without breaking everything?'
       context: |
         file_path: framework/guides/architecture-guide.md (excerpt)
         ---
         ### Edge Cases
-        
+
         | Scenario | Solution |
         |----------|----------|
         | Brownfield adoption | Start with warnings-only mode, fix violations incrementally, then enforce |
@@ -362,14 +362,14 @@ tests:
           ACCEPTABLE: Suggests gradual adoption approach
           POOR: Suggests immediate enforcement or ignores existing violations
 
-  - description: "arch-017: ESLint boundaries setup"
+  - description: 'arch-017: ESLint boundaries setup'
     vars:
-      input: "How do I set up eslint-plugin-boundaries to enforce my layer rules?"
+      input: 'How do I set up eslint-plugin-boundaries to enforce my layer rules?'
       context: |
         file_path: framework/guides/architecture-guide.md (excerpt)
         ---
         ### Enforcement with eslint-plugin-boundaries
-        
+
         **Setup:**
         1. Install: `npm install --save-dev eslint-plugin-boundaries`
         2. Add to `eslint.config.mjs` with boundaries/element-types rules
@@ -383,22 +383,22 @@ tests:
           ACCEPTABLE: Provides basic setup steps
           POOR: Vague or missing key configuration
 
-  - description: "arch-018: LLM arch review - detect god module"
+  - description: 'arch-018: LLM arch review - detect god module'
     vars:
-      input: "Review this file for architectural issues: UserService.ts with 800 lines and 15 dependencies"
+      input: 'Review this file for architectural issues: UserService.ts with 800 lines and 15 dependencies'
       context: |
         file_path: framework/prompts/arch-review.md (excerpt)
         ---
         ## Check for:
-        
+
         1. **Misplaced logic** - Business rules in wrong layer?
         2. **God module** - Too many responsibilities (>10 dependents or >500 lines)?
         3. **Leaky abstraction** - Implementation details exposed to callers?
         4. **Tight coupling** - Changes would cascade unnecessarily?
         5. **Boundary violation** - Import from disallowed layer?
-        
+
         ## Response Format
-        
+
         Return JSON with verdict: "clean" | "minor" | "refactor_needed"
     assert:
       - type: llm-rubric
@@ -408,9 +408,9 @@ tests:
           ACCEPTABLE: Notes the file is too large
           POOR: Says it's clean or misses the issue
 
-  - description: "arch-019: Pre-commit hook behavior"
+  - description: 'arch-019: Pre-commit hook behavior'
     vars:
-      input: "What happens when I try to commit code with a boundary violation?"
+      input: 'What happens when I try to commit code with a boundary violation?'
       context: |
         file_path: framework/scripts/setup-safeword.sh (excerpt)
         ---
@@ -428,9 +428,9 @@ tests:
           ACCEPTABLE: Explains that violations block commit
           POOR: Says commit always succeeds or always fails
 
-  - description: "arch-020: CI architecture check workflow"
+  - description: 'arch-020: CI architecture check workflow'
     vars:
-      input: "How do I set up CI to check for architecture violations in PRs?"
+      input: 'How do I set up CI to check for architecture violations in PRs?'
       context: |
         file_path: framework/templates/ci/architecture-check.yml (excerpt)
         ---
@@ -451,14 +451,14 @@ tests:
           ACCEPTABLE: Mentions copying workflow file and running checks
           POOR: Vague or missing key steps
 
-  - description: "arch-021: Architecture template sections"
+  - description: 'arch-021: Architecture template sections'
     vars:
       input: "I'm starting a new project. What sections should my ARCHITECTURE.md have?"
       context: |
         file_path: framework/templates/architecture-template.md (excerpt)
         ---
         ## Table of Contents
-        
+
         - [Overview](#overview)
         - [Layers & Boundaries](#layers--boundaries)
         - [Data Model](#data-model)
@@ -477,9 +477,9 @@ tests:
   # CODE PHILOSOPHY (14 tests)
   # =============================================================================
 
-  - description: "phil-001: JSON summary at end of response"
+  - description: 'phil-001: JSON summary at end of response'
     vars:
-      input: "Fix the typo in README.md"
+      input: 'Fix the typo in README.md'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
@@ -496,21 +496,21 @@ tests:
           ACCEPTABLE: JSON present with correct madeChanges value
           POOR: Missing JSON or madeChanges: false when edit was made
 
-  - description: "phil-002: Avoid bloat - push back on unnecessary feature"
+  - description: 'phil-002: Avoid bloat - push back on unnecessary feature'
     vars:
-      input: "Can you add a configuration file system so users can customize the button colors?"
+      input: 'Can you add a configuration file system so users can customize the button colors?'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
         ## Code Philosophy
         - **AVOID BLOAT** - Simple, focused solutions over complex ones
-        
+
         **Bloat examples (avoid these):**
         | ❌ Bloat | ✅ Instead |
         |----------|-----------|
         | Config file for 2 options | Hardcode or simple params |
         | "Future-proofing" unused code paths | Delete, add when needed |
-        
+
         **When to push back:** If a feature request would add >50 lines for a "nice to have", ask: "Is this essential now, or can we add it later?"
     assert:
       - type: llm-rubric
@@ -520,15 +520,15 @@ tests:
           ACCEPTABLE: Expresses concern about complexity or suggests simpler approach
           POOR: Immediately implements config file system without questioning
 
-  - description: "phil-003: Self-documenting code with clear naming"
+  - description: 'phil-003: Self-documenting code with clear naming'
     vars:
-      input: "Write a function that calculates the total price with tax"
+      input: 'Write a function that calculates the total price with tax'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
         ## Code Philosophy
         - **Self-documenting code** - Minimal inline comments, clear naming and structure
-        
+
         **Naming examples:**
         | ❌ Bad | ✅ Good |
         |--------|---------|
@@ -542,7 +542,7 @@ tests:
           ACCEPTABLE: Descriptive name with some redundant comments
           POOR: Abbreviated name (e.g., `calcTot`) or comments explaining obvious code
 
-  - description: "phil-004: Explicit error handling"
+  - description: 'phil-004: Explicit error handling'
     vars:
       input: "Here's my code: try { await saveUser(data) } catch (e) { console.log(e) }. Is this okay?"
       context: |
@@ -550,7 +550,7 @@ tests:
         ---
         ## Code Philosophy
         - **Explicit error handling** - NEVER suppress or swallow errors silently
-        
+
         **Error handling examples:**
         | ❌ Bad | ✅ Good |
         |--------|---------|
@@ -564,16 +564,16 @@ tests:
           ACCEPTABLE: Says error handling needs improvement
           POOR: Says the code is fine or doesn't address error handling
 
-  - description: "phil-005: Verify documentation before using API"
+  - description: 'phil-005: Verify documentation before using API'
     vars:
-      input: "Add a feature using the latest React Server Components API"
+      input: 'Add a feature using the latest React Server Components API'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
         ## Documentation Verification (CRITICAL)
         - **Always look up current documentation** for libraries, tools, and frameworks
         - **NEVER assume features exist** - Training data is at least 1 year old
-        
+
         **How to verify:**
         1. Check `package.json` for installed version
         2. Use Context7 MCP or official docs for current API
@@ -585,14 +585,14 @@ tests:
           ACCEPTABLE: Mentions need to verify version
           POOR: Assumes API exists without verification
 
-  - description: "phil-006: TDD workflow - test first"
+  - description: 'phil-006: TDD workflow - test first'
     vars:
-      input: "Add a function that validates email addresses"
+      input: 'Add a function that validates email addresses'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
         ## Testing Philosophy
-        
+
         **Test-Driven Development (TDD):**
         - Write tests BEFORE implementing features (RED → GREEN → REFACTOR)
         - Tests define expected behavior, code makes them pass
@@ -604,14 +604,14 @@ tests:
           ACCEPTABLE: Mentions TDD approach, writes test
           POOR: Implements function without writing test first
 
-  - description: "phil-007: Self-testing before completion"
+  - description: 'phil-007: Self-testing before completion'
     vars:
-      input: "Fix the login button bug"
+      input: 'Fix the login button bug'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
         ## Testing Philosophy
-        
+
         **Always test what you build** - Run tests yourself before completion. Don't ask the user to verify.
     assert:
       - type: llm-rubric
@@ -621,14 +621,14 @@ tests:
           ACCEPTABLE: Mentions running tests
           POOR: Asks user to test or verify the fix
 
-  - description: "phil-008: Debug logging hygiene"
+  - description: 'phil-008: Debug logging hygiene'
     vars:
-      input: "Debug why this test is failing"
+      input: 'Debug why this test is failing'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
         ## Debugging & Troubleshooting
-        
+
         **Debug Logging:**
         - When debugging, log **actual vs expected** values
         - Remove debug logging after fixing
@@ -640,15 +640,15 @@ tests:
           ACCEPTABLE: Logs something useful for debugging
           POOR: Leaves debug logs in code after fix
 
-  - description: "phil-009: Cross-platform paths"
+  - description: 'phil-009: Cross-platform paths'
     vars:
-      input: "Create a function that builds a file path from directory and filename"
+      input: 'Create a function that builds a file path from directory and filename'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
         ## Cross-Platform Development
         - Never assume Unix-style paths (`/`) - handle both `/` and `\`
-        
+
         ```javascript
         // ❌ Bad: dir + '/' + filename
         // ✅ Good: path.join(dir, filename)
@@ -661,9 +661,9 @@ tests:
           ACCEPTABLE: Mentions cross-platform concerns
           POOR: Uses string concat with hardcoded '/' or '\'
 
-  - description: "phil-010: Follow best practices"
+  - description: 'phil-010: Follow best practices'
     vars:
-      input: "Create a React component for a dropdown menu"
+      input: 'Create a React component for a dropdown menu'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
@@ -678,7 +678,7 @@ tests:
           ACCEPTABLE: Follows conventions without explicit mention
           POOR: Ignores React conventions (e.g., direct DOM manipulation)
 
-  - description: "phil-011: Self-review before completion"
+  - description: 'phil-011: Self-review before completion'
     vars:
       input: "I've implemented the feature"
       context: |
@@ -699,9 +699,9 @@ tests:
           ACCEPTABLE: Mentions verification before completion
           POOR: Declares done without any self-review
 
-  - description: "phil-012: Question-asking protocol"
+  - description: 'phil-012: Question-asking protocol'
     vars:
-      input: "How should I structure the database schema?"
+      input: 'How should I structure the database schema?'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
@@ -716,20 +716,20 @@ tests:
           ACCEPTABLE: Asks relevant question about domain preferences
           POOR: Asks without showing any research attempt
 
-  - description: "phil-013: Tooling currency"
+  - description: 'phil-013: Tooling currency'
     vars:
       input: "I'm about to start a new project. Should I update my CLI tools?"
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
         ## Tools & CLIs
-        
+
         **Keep these updated** (check before starting new projects):
         - GitHub CLI (`gh`)
         - AWS CLI
         - Railway CLI
         - PostHog CLI
-        
+
         **Update workflow:**
         1. Check current version: `gh --version`, `aws --version`, etc.
         2. Check for updates
@@ -743,16 +743,16 @@ tests:
           ACCEPTABLE: Suggests updating tools before starting
           POOR: Ignores tooling currency or says "no need to update"
 
-  - description: "phil-014: Git workflow - atomic commits"
+  - description: 'phil-014: Git workflow - atomic commits'
     vars:
-      input: "Fix the login bug and add a new feature (two separate tasks)"
+      input: 'Fix the login bug and add a new feature (two separate tasks)'
       context: |
         file_path: framework/guides/code-philosophy.md (excerpt)
         ---
         ## Git Workflow
         - Commit often to checkpoint progress
         - Make atomic commits (one logical change per commit)
-        
+
         ```
         # ❌ Bad: "misc fixes"
         # ✅ Good: "fix: login button not responding to clicks"
@@ -769,23 +769,23 @@ tests:
   # TESTING METHODOLOGY (13 tests)
   # =============================================================================
 
-  - description: "test-001: Choose fastest effective test type"
+  - description: 'test-001: Choose fastest effective test type'
     vars:
-      input: "I need to test a pure function that calculates tax. What test type should I use?"
+      input: 'I need to test a pure function that calculates tax. What test type should I use?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## Testing Principles
-        
+
         **Optimization rule:** Test with the fastest test type that can catch the bug.
-        
+
         ### Test Speed Hierarchy (Fast → Slow)
         ```
         Unit (milliseconds)      ← Pure functions, no I/O
         Integration (seconds)    ← Components with dependencies
         E2E (10+ seconds)        ← Full user flows
         ```
-        
+
         **Decision tree:**
         1. Pure function with no I/O? → Unit test
         2. Component with database/API? → Integration test
@@ -798,14 +798,14 @@ tests:
           ACCEPTABLE: Recommends unit test
           POOR: Recommends integration or E2E test
 
-  - description: "test-002: Component vs flow testing"
+  - description: 'test-002: Component vs flow testing'
     vars:
-      input: "I want to test a React header component. Should I use E2E or integration tests?"
+      input: 'I want to test a React header component. Should I use E2E or integration tests?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## Test Type Selection
-        
+
         - **Integration test**: Single component behavior, interactions
         - **E2E test**: Multi-page flows, critical user journeys
     assert:
@@ -816,16 +816,16 @@ tests:
           ACCEPTABLE: Distinguishes component vs flow
           POOR: Suggests E2E for single component
 
-  - description: "test-003: Identify inverted test pyramid"
+  - description: 'test-003: Identify inverted test pyramid'
     vars:
-      input: "I have 50 E2E tests and 20 integration tests. Is this a good ratio?"
+      input: 'I have 50 E2E tests and 20 integration tests. Is this a good ratio?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## Test Distribution
-        
+
         **Red flag:** More E2E than integration/unit tests = slow feedback loop
-        
+
         **Target:** Most tests should be fast (unit/integration)
     assert:
       - type: llm-rubric
@@ -835,14 +835,14 @@ tests:
           ACCEPTABLE: Notes ratio concern
           POOR: Accepts inverted ratio
 
-  - description: "test-004: TDD RED phase - test must fail first"
+  - description: 'test-004: TDD RED phase - test must fail first'
     vars:
       input: "I wrote a test and it's passing. Should I implement the code now?"
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## TDD Phases
-        
+
         **RED:** Write failing test first
         - Test MUST fail before implementation
         - Verify failure message is meaningful
@@ -854,14 +854,14 @@ tests:
           ACCEPTABLE: Notes test should fail first
           POOR: Accepts passing test before implementation
 
-  - description: "test-005: Decision tree for AI quality testing"
+  - description: 'test-005: Decision tree for AI quality testing'
     vars:
-      input: "I need to test narrative quality from my AI. What test type should I use?"
+      input: 'I need to test narrative quality from my AI. What test type should I use?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## Test Type Decision Tree
-        
+
         1. Testing AI content quality? → LLM Evaluation
         2. Pure function? → Unit test
         3. Component with dependencies? → Integration test
@@ -874,14 +874,14 @@ tests:
           ACCEPTABLE: Selects LLM Eval
           POOR: Suggests unit or E2E for AI quality
 
-  - description: "test-006: CSS bug requires E2E"
+  - description: 'test-006: CSS bug requires E2E'
     vars:
-      input: "I have a CSS layout bug. What test type should I use?"
+      input: 'I have a CSS layout bug. What test type should I use?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## Bug-to-Test Mapping
-        
+
         | Bug Type | Test Type |
         |----------|-----------|
         | CSS/Layout | E2E (requires real browser) |
@@ -895,14 +895,14 @@ tests:
           ACCEPTABLE: Selects E2E
           POOR: Suggests unit test for CSS
 
-  - description: "test-007: E2E port isolation"
+  - description: 'test-007: E2E port isolation'
     vars:
-      input: "My E2E tests keep failing because they conflict with my dev server. How do I fix this?"
+      input: 'My E2E tests keep failing because they conflict with my dev server. How do I fix this?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## E2E Dev/Test Server Isolation
-        
+
         - Dev server: stable port (e.g., 3000)
         - Test server: devPort + 1000 (e.g., 4000)
         - Configure Playwright with isolated port
@@ -914,19 +914,19 @@ tests:
           ACCEPTABLE: Suggests separate ports
           POOR: No isolation guidance
 
-  - description: "test-008: LLM-as-judge for creative outputs"
+  - description: 'test-008: LLM-as-judge for creative outputs'
     vars:
       input: "Should I use keyword matching to test if my AI response has a 'collaborative tone'?"
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## LLM Evaluations
-        
+
         For creative/qualitative outputs, use LLM-as-judge with rubric:
         - EXCELLENT: [criteria]
         - ACCEPTABLE: [criteria]
         - POOR: [criteria]
-        
+
         **Avoid:** Brittle keyword matching for creative content
     assert:
       - type: llm-rubric
@@ -936,14 +936,14 @@ tests:
           ACCEPTABLE: Suggests rubric-based evaluation
           POOR: Accepts keyword matching
 
-  - description: "test-009: Cost controls for evals"
+  - description: 'test-009: Cost controls for evals'
     vars:
-      input: "My LLM evals are getting expensive. How can I reduce costs?"
+      input: 'My LLM evals are getting expensive. How can I reduce costs?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## Cost Controls for Evals
-        
+
         - Cache static prompts
         - Batch scenarios
         - Schedule full evals (PR/weekly, not every commit)
@@ -955,14 +955,14 @@ tests:
           ACCEPTABLE: Mentions caching
           POOR: No cost guidance
 
-  - description: "test-010: Coverage goals"
+  - description: 'test-010: Coverage goals'
     vars:
-      input: "What should I aim for in test coverage?"
+      input: 'What should I aim for in test coverage?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## Coverage Goals
-        
+
         - Unit: 80%+ for pure functions
         - E2E: Critical multi-page flows
         - "Critical" = user-facing, revenue-impacting, or data-integrity
@@ -974,14 +974,14 @@ tests:
           ACCEPTABLE: Provides coverage targets
           POOR: Generic "100% coverage" advice
 
-  - description: "test-011: Flaky test diagnosis"
+  - description: 'test-011: Flaky test diagnosis'
     vars:
-      input: "My tests keep failing randomly. What should I check?"
+      input: 'My tests keep failing randomly. What should I check?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## Test Quality Practices
-        
+
         **Flakiness causes:**
         - Async issues (use polling, not arbitrary timeouts)
         - Test interdependence (each test should be independent)
@@ -994,14 +994,14 @@ tests:
           ACCEPTABLE: Mentions async issues
           POOR: Suggests skipping flaky tests
 
-  - description: "test-012: CI/CD testing cadence"
+  - description: 'test-012: CI/CD testing cadence'
     vars:
-      input: "When should I run different test types in CI?"
+      input: 'When should I run different test types in CI?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## CI/CD Testing Cadence
-        
+
         - Unit + integration: every commit
         - E2E: on PR
         - LLM evals: scheduled (weekly or per-PR)
@@ -1013,24 +1013,24 @@ tests:
           ACCEPTABLE: Distinguishes cadence by test type
           POOR: Run all tests on every commit
 
-  - description: "test-014: Refuse to skip failing test"
+  - description: 'test-014: Refuse to skip failing test'
     vars:
-      input: "The test is failing. Can I add .skip() to it so I can continue working?"
+      input: 'The test is failing. Can I add .skip() to it so I can continue working?'
       context: |
         file_path: framework/guides/testing-methodology.md (excerpt)
         ---
         ## Test Integrity (CRITICAL)
-        
+
         **NEVER modify, skip, or delete tests without explicit human approval.**
-        
+
         Tests are the specification. When a test fails, the implementation is wrong—not the test.
-        
+
         ### Forbidden Actions (Require Approval)
         | Action | Why It's Forbidden |
         |--------|-------------------|
         | Adding `.skip()`, `.only()`, `xit()`, `.todo()` | Makes failures invisible |
         | Deleting tests you can't get passing | Removes coverage for edge cases |
-        
+
         ### What To Do Instead
         1. **Test fails?** → Fix the implementation, not the test
         2. **Test seems wrong?** → Explain why and ask before changing
@@ -1046,22 +1046,22 @@ tests:
   # ZOMBIE PROCESS CLEANUP (7 tests)
   # =============================================================================
 
-  - description: "zombie-001: Port-based cleanup for EADDRINUSE"
+  - description: 'zombie-001: Port-based cleanup for EADDRINUSE'
     vars:
       input: "I'm getting 'Error: listen EADDRINUSE: address already in use :::3000'. How do I fix it?"
       context: |
         file_path: framework/guides/zombie-process-cleanup.md (excerpt)
         ---
         ## Port-Based Cleanup (Safest for Multi-Project)
-        
+
         **When to use:** `EADDRINUSE`, `address already in use`, dev server won't start
-        
+
         **Port convention:** Dev and test instances use different ports:
         - **Dev port**: Project's configured port (e.g., 3000)
         - **Test port**: Dev port + 1000 (e.g., 4000)
-        
+
         **Decision rule:** If unsure which cleanup method to use → port-based first (safest), then project script, then tmux.
-        
+
         ```bash
         # Kill both dev server AND test server ports
         lsof -ti:3000 -ti:4000 | xargs kill -9 2>/dev/null
@@ -1074,20 +1074,20 @@ tests:
           ACCEPTABLE: Provides kill command for at least dev port
           POOR: Suggests `killall node` or restarting computer
 
-  - description: "zombie-002: Create cleanup script"
+  - description: 'zombie-002: Create cleanup script'
     vars:
-      input: "I need to clean up processes frequently. Should I create a script?"
+      input: 'I need to clean up processes frequently. Should I create a script?'
       context: |
         file_path: framework/guides/zombie-process-cleanup.md (excerpt)
         ---
         ## Project-Specific Cleanup Script
-        
+
         Create `scripts/cleanup.sh`:
         ```bash
         DEV_PORT=3000
         TEST_PORT=$((DEV_PORT + 1000))
         PROJECT_DIR="$(pwd)"
-        
+
         lsof -ti:$DEV_PORT -ti:$TEST_PORT | xargs kill -9 2>/dev/null
         ```
     assert:
@@ -1098,14 +1098,14 @@ tests:
           ACCEPTABLE: Suggests creating script
           POOR: No script guidance
 
-  - description: "zombie-003: Unique port assignment"
+  - description: 'zombie-003: Unique port assignment'
     vars:
       input: "I'm working on multiple projects. How do I avoid port conflicts?"
       context: |
         file_path: framework/guides/zombie-process-cleanup.md (excerpt)
         ---
         ## Best Practices
-        
+
         1. **Assign unique ports** - Set `PORT=3000` in one project, `PORT=3001` in another
     assert:
       - type: llm-rubric
@@ -1115,19 +1115,19 @@ tests:
           ACCEPTABLE: Suggests unique ports
           POOR: No port guidance
 
-  - description: "zombie-004: tmux isolation"
+  - description: 'zombie-004: tmux isolation'
     vars:
-      input: "Is there a way to isolate terminal sessions per project?"
+      input: 'Is there a way to isolate terminal sessions per project?'
       context: |
         file_path: framework/guides/zombie-process-cleanup.md (excerpt)
         ---
         ## Alternative: tmux/Screen Sessions
-        
+
         ```bash
         tmux new -s project-name
         tmux kill-session -t project-name
         ```
-        
+
         **Pros:** Complete isolation, one command kills everything
         **Cons:** Requires learning tmux
     assert:
@@ -1138,19 +1138,19 @@ tests:
           ACCEPTABLE: Suggests terminal isolation
           POOR: No isolation guidance
 
-  - description: "zombie-005: Debugging zombie processes"
+  - description: 'zombie-005: Debugging zombie processes'
     vars:
-      input: "How do I find which processes are stuck?"
+      input: 'How do I find which processes are stuck?'
       context: |
         file_path: framework/guides/zombie-process-cleanup.md (excerpt)
         ---
         ## Debugging Zombie Processes
-        
+
         ### Find What's Using a Port
         ```bash
         lsof -i:3000
         ```
-        
+
         ### Find Processes by Project Directory
         ```bash
         ps aux | grep "/Users/alex/projects/my-project"
@@ -1163,14 +1163,14 @@ tests:
           ACCEPTABLE: Provides find commands
           POOR: Generic advice
 
-  - description: "zombie-006: Best practices"
+  - description: 'zombie-006: Best practices'
     vars:
-      input: "What are the best practices for avoiding cross-project process kills?"
+      input: 'What are the best practices for avoiding cross-project process kills?'
       context: |
         file_path: framework/guides/zombie-process-cleanup.md (excerpt)
         ---
         ## Best Practices
-        
+
         1. **Assign unique ports** - Set `PORT=3000` in one project, `PORT=3001` in another
         2. **Use port-based cleanup first** - Simplest and safest
         3. **Create project cleanup scripts** - Reusable, documented
@@ -1184,22 +1184,22 @@ tests:
           ACCEPTABLE: Lists some practices
           POOR: No best practices
 
-  - description: "zombie-007: Quick reference"
+  - description: 'zombie-007: Quick reference'
     vars:
-      input: "Give me a quick reference for safe cleanup commands."
+      input: 'Give me a quick reference for safe cleanup commands.'
       context: |
         file_path: framework/guides/zombie-process-cleanup.md (excerpt)
         ---
         ## Quick Reference
-        
+
         | Situation | Command |
         |-----------|---------|
         | Kill dev + test servers | `lsof -ti:$DEV_PORT -ti:$TEST_PORT \| xargs kill -9` |
         | Kill Playwright (this project) | `pkill -f "playwright.*$(pwd)"` |
         | Kill all for this project | `./scripts/cleanup.sh` |
-        
+
         ## What NOT to Do
-        
+
         ❌ `killall node` (kills all projects)
         ❌ `pkill -9 node` (kills all projects)
     assert:
@@ -1214,16 +1214,16 @@ tests:
   # USER STORY GUIDE (10 tests)
   # =============================================================================
 
-  - description: "story-001: Use standard template"
+  - description: 'story-001: Use standard template'
     vars:
-      input: "I need to create user stories for a new feature. Where do I start?"
+      input: 'I need to create user stories for a new feature. Where do I start?'
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ## Template Location
-        
+
         Use `user-stories-template.md` from `.safeword/templates/`
-        
+
         ## Workflow
         1. Fill in feature name
         2. Create numbered stories
@@ -1237,14 +1237,14 @@ tests:
           ACCEPTABLE: Points to template
           POOR: No template reference
 
-  - description: "story-002: Include tracking metadata"
+  - description: 'story-002: Include tracking metadata'
     vars:
-      input: "What metadata should I include in my user stories?"
+      input: 'What metadata should I include in my user stories?'
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ## Tracking Metadata
-        
+
         - Status (✅/❌)
         - Test file references
         - Completion percentage
@@ -1258,16 +1258,16 @@ tests:
           ACCEPTABLE: Lists most metadata
           POOR: No metadata guidance
 
-  - description: "story-003: INVEST validation"
+  - description: 'story-003: INVEST validation'
     vars:
       input: "Is this a good user story? 'As a user, I want the system to be fast'"
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ## INVEST Validation
-        
+
         Every story must pass INVEST:
-        
+
         | Criterion | Question | Red Flag |
         |-----------|----------|----------|
         | Independent | Can it be built alone? | "After X is done..." |
@@ -1276,7 +1276,7 @@ tests:
         | Estimable | Can we size it? | "Make it fast" |
         | Small | 1-3 days work? | Epic-sized |
         | Testable | Can we verify done? | "Improve UX" |
-        
+
         **Red flag phrases:** "fast", "better", "improved", "enhanced" without metrics
     assert:
       - type: llm-rubric
@@ -1286,14 +1286,14 @@ tests:
           ACCEPTABLE: Says story needs work, mentions vagueness
           POOR: Says the story is fine
 
-  - description: "story-004: Good acceptance criteria"
+  - description: 'story-004: Good acceptance criteria'
     vars:
       input: "My acceptance criterion says 'Campaign switching works'. Is this good?"
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ## Acceptance Criteria
-        
+
         **BAD:** "Campaign switching works" (too vague)
         **GOOD:** "Response time <200ms when switching campaigns"
     assert:
@@ -1304,20 +1304,20 @@ tests:
           ACCEPTABLE: Notes it's too vague
           POOR: Accepts vague AC
 
-  - description: "story-005: Size guidelines - split large story"
+  - description: 'story-005: Size guidelines - split large story'
     vars:
-      input: "I have a user story with 8 acceptance criteria and touches 3 different user personas. Is this okay?"
+      input: 'I have a user story with 8 acceptance criteria and touches 3 different user personas. Is this okay?'
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ## Size Guidelines
-        
+
         | Indicator | Small (Good) | Medium (Consider Split) | Large (Must Split) |
         |-----------|--------------|------------------------|-------------------|
         | Acceptance Criteria | 3-5 | 6-8 | 9+ |
         | Personas Affected | 1 | 2 | 3+ |
         | Estimated Days | 1-3 | 4-5 | 6+ |
-        
+
         **Decision rule:** When borderline, err on the side of splitting.
     assert:
       - type: llm-rubric
@@ -1327,23 +1327,23 @@ tests:
           ACCEPTABLE: Recommends splitting or expresses concern about size
           POOR: Says the story size is fine
 
-  - description: "story-006: Good story example"
+  - description: 'story-006: Good story example'
     vars:
-      input: "Can you show me what a good user story looks like?"
+      input: 'Can you show me what a good user story looks like?'
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ## Good Story Example
-        
+
         **As a** campaign manager
         **I want** to switch between campaigns with keyboard shortcuts
         **So that** I can work faster without using the mouse
-        
+
         **Acceptance Criteria:**
         - [ ] Cmd+1/2/3 switches to campaign 1/2/3
         - [ ] Response time <200ms
         - [ ] Visual feedback on switch
-        
+
         **Out of Scope:**
         - Customizable shortcuts (future)
     assert:
@@ -1354,14 +1354,14 @@ tests:
           ACCEPTABLE: Shows basic structure
           POOR: Vague or incomplete example
 
-  - description: "story-007: Conversation not contract"
+  - description: 'story-007: Conversation not contract'
     vars:
-      input: "Should I include all implementation details in my user story?"
+      input: 'Should I include all implementation details in my user story?'
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ## Conversation, Not Contract
-        
+
         Stories are conversation starters, not rigid specs.
         - Avoid implementation details
         - Link to mockups/designs instead
@@ -1374,14 +1374,14 @@ tests:
           ACCEPTABLE: Advises against implementation details
           POOR: Suggests including implementation details
 
-  - description: "story-008: LLM-optimized wording"
+  - description: 'story-008: LLM-optimized wording'
     vars:
-      input: "How do I write user stories that AI agents can follow?"
+      input: 'How do I write user stories that AI agents can follow?'
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ## LLM-Optimized Wording
-        
+
         - Specific concrete language
         - Numbers over vague words
         - Explicit definitions
@@ -1394,14 +1394,14 @@ tests:
           ACCEPTABLE: Mentions clarity principles
           POOR: No LLM-specific guidance
 
-  - description: "story-009: Token efficiency"
+  - description: 'story-009: Token efficiency'
     vars:
-      input: "How long should my user story template be?"
+      input: 'How long should my user story template be?'
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ## Token Efficiency
-        
+
         Keep stories lean (~9 lines) to minimize prompting cost.
     assert:
       - type: llm-rubric
@@ -1411,20 +1411,20 @@ tests:
           ACCEPTABLE: Suggests keeping it concise
           POOR: No size guidance
 
-  - description: "story-010: Technical task vs user story"
+  - description: 'story-010: Technical task vs user story'
     vars:
       input: "I want to write a user story: 'As a developer, I want to refactor the database layer'"
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ## Technical Tasks vs User Stories
-        
+
         User stories must deliver user value.
-        
+
         **NOT a user story:**
         - "As a developer, I want to refactor..."
         - "As a developer, I want to upgrade..."
-        
+
         **Instead:** Create a spike or technical task.
     assert:
       - type: llm-rubric
@@ -1434,31 +1434,31 @@ tests:
           ACCEPTABLE: Notes it lacks user value
           POOR: Accepts technical task as user story
 
-  - description: "story-011: Technical constraints in user stories"
+  - description: 'story-011: Technical constraints in user stories'
     vars:
-      input: "Create user stories for a new payment feature"
+      input: 'Create user stories for a new payment feature'
       context: |
         file_path: framework/templates/user-stories-template.md (excerpt)
         ---
         ## Technical Constraints
-        
+
         _Non-functional requirements that inform test definitions. Delete sections that don't apply._
-        
+
         ### Performance
         - [ ] [e.g., Response time < 200ms at P95]
-        
+
         ### Security
         - [ ] [e.g., All inputs validated/sanitized]
-        
+
         ### Compatibility
         - [ ] [e.g., Chrome 100+, Safari 16+]
-        
+
         ### Data
         - [ ] [e.g., GDPR: user data deletable within 72h]
-        
+
         ### Dependencies
         - [ ] [e.g., Must use existing AuthService]
-        
+
         ### Infrastructure
         - [ ] [e.g., Memory usage < 512MB]
     assert:
@@ -1469,19 +1469,19 @@ tests:
           ACCEPTABLE: Includes Technical Constraints section with some constraints
           POOR: Missing Technical Constraints section or only vague constraints
 
-  - description: "story-012: Constraint guidance - good vs bad"
+  - description: 'story-012: Constraint guidance - good vs bad'
     vars:
       input: "I'm adding a constraint 'Should be fast'. Is this good?"
       context: |
         file_path: framework/guides/user-story-guide.md (excerpt)
         ---
         ### ✅ GOOD Constraints (Specific, Testable)
-        
+
         - [ ] API response < 200ms at P95 under 100 concurrent users
         - [ ] Initial page load < 3s on simulated 3G
-        
+
         ### ❌ BAD Constraints (Vague, Untestable)
-        
+
         - [ ] Should be fast ← How fast? Under what conditions?
         - [ ] Good performance ← Not measurable
     assert:
@@ -1492,14 +1492,14 @@ tests:
           ACCEPTABLE: Notes it's too vague, suggests adding metrics
           POOR: Accepts "should be fast" as valid constraint
 
-  - description: "story-013: Workflow prompts for missing constraints"
+  - description: 'story-013: Workflow prompts for missing constraints'
     vars:
       input: "I have user stories but they're missing Technical Constraints. What should I do?"
       context: |
         file_path: framework/SAFEWORD.md (excerpt)
         ---
         **Edge cases:**
-        
+
         - User stories exist but test definitions don't → Create test definitions before implementation
         - User stories missing Technical Constraints → Add constraints before test definitions
         - Test definitions exist but user stories don't → Ask if user stories needed
@@ -1515,7 +1515,7 @@ tests:
   # LLM INSTRUCTION DESIGN (15 tests)
   # =============================================================================
 
-  - description: "llm-001: MECE decision trees"
+  - description: 'llm-001: MECE decision trees'
     vars:
       input: |
         I'm writing a decision tree for choosing between unit, integration, and E2E tests. Here's my draft:
@@ -1526,7 +1526,7 @@ tests:
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 1: MECE Decision Trees
-        
+
         Branches must be Mutually Exclusive and Collectively Exhaustive.
         - No overlapping conditions
         - Use sequential ordering with first-match stop
@@ -1538,16 +1538,16 @@ tests:
           ACCEPTABLE: Notes ambiguity, suggests improvement
           POOR: Accepts overlapping branches without comment
 
-  - description: "llm-002: Explicit definitions"
+  - description: 'llm-002: Explicit definitions'
     vars:
       input: "I'm writing documentation that says 'Test critical paths at the lowest level possible'"
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 2: Explicit Definitions
-        
+
         Define all terms that could be interpreted differently.
-        
+
         **Vague:** "critical paths"
         **Explicit:** "user-facing, revenue-impacting, or data-integrity paths"
     assert:
@@ -1558,16 +1558,16 @@ tests:
           ACCEPTABLE: Identifies at least one vague term
           POOR: Accepts vague phrasing without comment
 
-  - description: "llm-003: No contradictions"
+  - description: 'llm-003: No contradictions'
     vars:
       input: "I'm updating our testing guide. Section A says 'Write E2E tests for all user-facing features' but Section B says 'E2E tests only for critical paths'. Should I keep both?"
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 3: No Contradictions
-        
+
         Conflicting rules cause LLMs to pick randomly or ask unnecessary questions.
-        
+
         **Fix:** Reconcile into single rule with explicit definition.
     assert:
       - type: llm-rubric
@@ -1577,16 +1577,16 @@ tests:
           ACCEPTABLE: Identifies contradiction, suggests removing one
           POOR: Accepts both statements without noting conflict
 
-  - description: "llm-004: Concrete examples"
+  - description: 'llm-004: Concrete examples'
     vars:
       input: "I'm writing a rule that says 'Use meaningful variable names'. Is this good enough?"
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 4: Concrete Examples
-        
+
         Abstract rules need BAD/GOOD examples.
-        
+
         **Rule:** "Use meaningful variable names"
         **Example:** `x` → BAD, `userCount` → GOOD
     assert:
@@ -1597,16 +1597,16 @@ tests:
           ACCEPTABLE: Suggests adding at least one example
           POOR: Accepts abstract rule without examples
 
-  - description: "llm-005: Edge cases explicit"
+  - description: 'llm-005: Edge cases explicit'
     vars:
       input: "I'm writing a rule: 'Unit test all pure functions'. Is this complete?"
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 5: Edge Cases Explicit
-        
+
         Document exceptions and boundary conditions.
-        
+
         **Rule:** "Unit test all pure functions"
         **Edge cases:** Date.now(), process.env, mixed pure+I/O
     assert:
@@ -1617,14 +1617,14 @@ tests:
           ACCEPTABLE: Suggests adding at least one edge case
           POOR: Accepts rule without edge cases
 
-  - description: "llm-006: Actionable not vague"
+  - description: 'llm-006: Actionable not vague'
     vars:
       input: "I'm writing guidance: 'Most of your tests should be fast, some can be slow'. Is this clear enough?"
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 6: Actionable, Not Vague
-        
+
         **Vague:** "Most of your tests should be fast"
         **Actionable:** "Unit tests: <100ms. Integration: <5s. E2E: <30s."
     assert:
@@ -1635,7 +1635,7 @@ tests:
           ACCEPTABLE: Identifies vagueness, suggests improvement
           POOR: Accepts vague guidance without comment
 
-  - description: "llm-007: Sequential decision trees"
+  - description: 'llm-007: Sequential decision trees'
     vars:
       input: |
         I have a decision tree with three parallel branches:
@@ -1646,7 +1646,7 @@ tests:
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 7: Sequential Decision Trees
-        
+
         Use numbered steps with explicit "stop at first match" instruction.
     assert:
       - type: llm-rubric
@@ -1656,21 +1656,21 @@ tests:
           ACCEPTABLE: Suggests ordering the questions
           POOR: Accepts parallel structure without comment
 
-  - description: "llm-008: Tie-breaking rules"
+  - description: 'llm-008: Tie-breaking rules'
     vars:
-      input: "I have a decision tree but sometimes both options seem valid. What should I add?"
+      input: 'I have a decision tree but sometimes both options seem valid. What should I add?'
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 8: Tie-Breaking Rules
-        
+
         **Every decision point needs a default.**
-        
+
         Without tie-breakers, LLMs may:
         - Pick randomly
         - Ask unnecessary clarifying questions
         - Get stuck in analysis paralysis
-        
+
         **Pattern:** "When X and Y both apply, prefer X because [reason]"
     assert:
       - type: llm-rubric
@@ -1680,14 +1680,14 @@ tests:
           ACCEPTABLE: Suggests adding a default or priority
           POOR: Doesn't mention tie-breaking or suggests asking user every time
 
-  - description: "llm-009: Lookup tables for complex logic"
+  - description: 'llm-009: Lookup tables for complex logic'
     vars:
-      input: "I have 5 different scenarios for choosing between unit, integration, and E2E tests. Should I write them as prose paragraphs?"
+      input: 'I have 5 different scenarios for choosing between unit, integration, and E2E tests. Should I write them as prose paragraphs?'
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 9: Lookup Tables for Complex Logic
-        
+
         When you have 3+ scenarios, use a table instead of prose.
     assert:
       - type: llm-rubric
@@ -1697,16 +1697,16 @@ tests:
           ACCEPTABLE: Suggests table format
           POOR: Accepts prose paragraphs for 5 scenarios
 
-  - description: "llm-010: No caveats in tables"
+  - description: 'llm-010: No caveats in tables'
     vars:
       input: "I have a table cell that says 'Unit test ✅ (unless it uses external APIs)'. Is this okay?"
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 10: No Caveats in Tables
-        
+
         Parenthetical conditions in cells cause parsing errors.
-        
+
         **Fix:** Create separate row for the exception case.
     assert:
       - type: llm-rubric
@@ -1716,16 +1716,16 @@ tests:
           ACCEPTABLE: Identifies parenthetical as problem
           POOR: Accepts caveat in cell
 
-  - description: "llm-011: Percentages with context"
+  - description: 'llm-011: Percentages with context'
     vars:
       input: "I'm writing guidance: 'Aim for 80% unit tests, 15% integration tests, 5% E2E tests'. Is this clear?"
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 11: Percentages with Context
-        
+
         Raw percentages without context are misleading.
-        
+
         **Better:** Add adjustments for different project types OR use principles-based alternative.
     assert:
       - type: llm-rubric
@@ -1735,14 +1735,14 @@ tests:
           ACCEPTABLE: Notes percentages need context
           POOR: Accepts standalone percentages without comment
 
-  - description: "llm-012: Specific questions"
+  - description: 'llm-012: Specific questions'
     vars:
       input: "I'm writing a decision tree question: 'Does this test need to see the UI?' Is this specific enough?"
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 12: Specific Questions
-        
+
         **Vague:** "Does this test need to see the UI?"
         **Specific:** "Does this test require a real browser (Playwright/Cypress)?"
     assert:
@@ -1753,14 +1753,14 @@ tests:
           ACCEPTABLE: Suggests more specific wording
           POOR: Accepts vague "see the UI" phrasing
 
-  - description: "llm-013: Re-evaluation paths"
+  - description: 'llm-013: Re-evaluation paths'
     vars:
       input: "I have a feature that doesn't fit any of my testing categories. What should I do?"
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Principle 13: Re-evaluation Paths
-        
+
         When nothing fits, provide decomposition strategy:
         1. Separate concerns
         2. Test each concern with appropriate type
@@ -1773,14 +1773,14 @@ tests:
           ACCEPTABLE: Suggests breaking down the feature
           POOR: Says "re-evaluate your approach" without concrete steps
 
-  - description: "llm-014: Anti-patterns guard"
+  - description: 'llm-014: Anti-patterns guard'
     vars:
       input: "I'm writing documentation that says 'Follow the test pyramid - lots of unit tests at the base, integration in the middle, E2E at the top'"
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Anti-Patterns
-        
+
         **Visual metaphors:** LLMs can't see pyramids. Convert to actionable rules.
     assert:
       - type: llm-rubric
@@ -1790,14 +1790,14 @@ tests:
           ACCEPTABLE: Notes visual metaphor issue
           POOR: Accepts visual metaphor without comment
 
-  - description: "llm-015: Quality checklist"
+  - description: 'llm-015: Quality checklist'
     vars:
-      input: "I just finished writing an LLM instruction document. What should I check before committing?"
+      input: 'I just finished writing an LLM instruction document. What should I check before committing?'
       context: |
         file_path: framework/guides/llm-instruction-design.md (excerpt)
         ---
         ## Quality Checklist
-        
+
         - [ ] MECE decision trees
         - [ ] All terms defined
         - [ ] No contradictions
@@ -1818,21 +1818,21 @@ tests:
   # TDD BEST PRACTICES (16 tests)
   # =============================================================================
 
-  - description: "tdd-001: Select correct template for feature"
+  - description: 'tdd-001: Select correct template for feature'
     vars:
-      input: "I need to document a new payment flow feature. Which template should I use?"
+      input: 'I need to document a new payment flow feature. Which template should I use?'
       context: |
         file_path: framework/guides/tdd-best-practices.md (excerpt)
         ---
         ## Template Selection
-        
+
         | Need | Template | Location |
         |------|----------|----------|
         | Feature/issue user stories | `user-stories-template.md` | `.safeword/planning/user-stories/` |
         | Feature test suites | `test-definitions-feature.md` | `.safeword/planning/test-definitions/` |
         | Feature implementation design | `design-doc-template.md` | `.safeword/planning/design/` |
         | Project-wide architecture | No template | `ARCHITECTURE.md` at root |
-        
+
         **Decision rule:** If unclear, ask: "Does this affect the whole project or just one feature?" Project-wide → architecture doc. Single feature → design doc.
     assert:
       - type: llm-rubric
@@ -1842,20 +1842,20 @@ tests:
           ACCEPTABLE: Recommends appropriate template(s) for feature documentation
           POOR: Recommends architecture doc for a single feature
 
-  - description: "tdd-002: Story format selection"
+  - description: 'tdd-002: Story format selection'
     vars:
       input: "I'm writing a user story for a login feature. Should I use 'As a user...' or 'Given I am...'?"
       context: |
         file_path: framework/guides/tdd-best-practices.md (excerpt)
         ---
         ## Story Format Selection
-        
+
         | Format | Best For |
         |--------|----------|
         | Standard (As a/I want/So that) | User-facing features, UI flows |
         | Given-When-Then | API behavior, state transitions, edge cases |
         | Job Story | Problem-solving, user motivation unclear |
-        
+
         **Decision rule:** Default to Standard. Use Given-When-Then for APIs or complex state.
     assert:
       - type: llm-rubric
@@ -1865,14 +1865,14 @@ tests:
           ACCEPTABLE: Explains both formats
           POOR: No guidance on format selection
 
-  - description: "tdd-003: Acceptance criteria count"
+  - description: 'tdd-003: Acceptance criteria count'
     vars:
-      input: "My user story has 8 acceptance criteria and no out-of-scope section. Is this okay?"
+      input: 'My user story has 8 acceptance criteria and no out-of-scope section. Is this okay?'
       context: |
         file_path: framework/guides/tdd-best-practices.md (excerpt)
         ---
         ## Story Scope
-        
+
         - Target 2-5 acceptance criteria per story
         - Include out-of-scope section to prevent creep
     assert:
@@ -1883,14 +1883,14 @@ tests:
           ACCEPTABLE: Notes AC count is high
           POOR: Accepts 8 AC without comment
 
-  - description: "tdd-005: Test definition sections"
+  - description: 'tdd-005: Test definition sections'
     vars:
       input: "I'm creating test definitions. What sections should I include?"
       context: |
         file_path: framework/guides/tdd-best-practices.md (excerpt)
         ---
         ## Test Definition Sections
-        
+
         Required sections:
         - Suites (grouped by concern)
         - Individual tests (numbered)
@@ -1905,14 +1905,14 @@ tests:
           ACCEPTABLE: Lists most sections
           POOR: Vague or incomplete list
 
-  - description: "tdd-007: Bad story example"
+  - description: 'tdd-007: Bad story example'
     vars:
       input: "Is this a good story? 'As a user, I want the app to work better so that I'm happy'"
       context: |
         file_path: framework/guides/tdd-best-practices.md (excerpt)
         ---
         ## Bad Story Examples
-        
+
         **BAD:** "As a user, I want the app to work better"
         - Vague role
         - Unmeasurable "work better"
@@ -1925,14 +1925,14 @@ tests:
           ACCEPTABLE: Identifies at least 2 issues
           POOR: Accepts vague story
 
-  - description: "tdd-008: INVEST criteria"
+  - description: 'tdd-008: INVEST criteria'
     vars:
-      input: "How do I know if my user story is good enough?"
+      input: 'How do I know if my user story is good enough?'
       context: |
         file_path: framework/guides/tdd-best-practices.md (excerpt)
         ---
         ## INVEST Criteria
-        
+
         - **I**ndependent - Can be built alone
         - **N**egotiable - Scope is flexible
         - **V**aluable - User cares
@@ -1947,14 +1947,14 @@ tests:
           ACCEPTABLE: Mentions several INVEST criteria
           POOR: No structured validation criteria
 
-  - description: "tdd-009: Test definition format"
+  - description: 'tdd-009: Test definition format'
     vars:
-      input: "How should I format individual tests in my test definitions?"
+      input: 'How should I format individual tests in my test definitions?'
       context: |
         file_path: framework/guides/tdd-best-practices.md (excerpt)
         ---
         ## Test Format
-        
+
         Each test should have:
         1. Numbered ID
         2. Description
@@ -1969,14 +1969,14 @@ tests:
           ACCEPTABLE: Shows basic format
           POOR: Vague or no format guidance
 
-  - description: "tdd-012: Test data builders"
+  - description: 'tdd-012: Test data builders'
     vars:
       input: "I'm writing tests that need complex test data. How should I structure this?"
       context: |
         file_path: framework/guides/tdd-best-practices.md (excerpt)
         ---
         ## Test Data Builders
-        
+
         Use builder pattern with sensible defaults:
         ```typescript
         const user = createTestUser({ name: 'Alice' });
@@ -1989,14 +1989,14 @@ tests:
           ACCEPTABLE: Suggests organizing test data
           POOR: No guidance on test data
 
-  - description: "tdd-014: Real LLM integration"
+  - description: 'tdd-014: Real LLM integration'
     vars:
-      input: "Should my integration tests use a real LLM or mock it?"
+      input: 'Should my integration tests use a real LLM or mock it?'
       context: |
         file_path: framework/guides/tdd-best-practices.md (excerpt)
         ---
         ## Real vs Mock LLM
-        
+
         - Real LLM: Schema compliance, integration behavior
         - Mock: Unit tests, cost control
         - Consider: API costs, test speed, flakiness
@@ -2008,14 +2008,14 @@ tests:
           ACCEPTABLE: Distinguishes use cases
           POOR: No guidance on when to use real vs mock
 
-  - description: "tdd-015: INVEST gate - story too big"
+  - description: 'tdd-015: INVEST gate - story too big'
     vars:
-      input: "My story is too big to estimate. What should I do?"
+      input: 'My story is too big to estimate. What should I do?'
       context: |
         file_path: framework/guides/tdd-best-practices.md (excerpt)
         ---
         ## INVEST Gate
-        
+
         If story fails INVEST (e.g., not Estimable, not Small):
         → Split into smaller stories
     assert:
@@ -2030,18 +2030,18 @@ tests:
   # DESIGN DOC GUIDE (10 tests)
   # =============================================================================
 
-  - description: "design-001: Check prerequisites before design doc"
+  - description: 'design-001: Check prerequisites before design doc'
     vars:
-      input: "Create a design doc for a new search feature"
+      input: 'Create a design doc for a new search feature'
       context: |
         file_path: framework/guides/design-doc-guide.md (excerpt)
         ---
         ## Prerequisites
-        
+
         Before creating a design doc:
         1. User stories must exist
         2. Test definitions must exist
-        
+
         If missing, create them first or offer to create.
     assert:
       - type: llm-rubric
@@ -2051,14 +2051,14 @@ tests:
           ACCEPTABLE: Mentions prerequisites exist/needed
           POOR: Creates design doc without checking prerequisites
 
-  - description: "design-002: Use standard template"
+  - description: 'design-002: Use standard template'
     vars:
-      input: "Create a design doc for a notification system feature"
+      input: 'Create a design doc for a notification system feature'
       context: |
         file_path: framework/guides/design-doc-guide.md (excerpt)
         ---
         ## Template Structure
-        
+
         Required sections:
         - Architecture
         - Components (with [N]/[N+1] pattern)
@@ -2074,19 +2074,19 @@ tests:
           ACCEPTABLE: Uses template structure with most sections
           POOR: Creates ad-hoc structure without following template
 
-  - description: "design-003: Assess complexity threshold"
+  - description: 'design-003: Assess complexity threshold'
     vars:
-      input: "Do I need a design doc for adding a logout button?"
+      input: 'Do I need a design doc for adding a logout button?'
       context: |
         file_path: framework/guides/design-doc-guide.md (excerpt)
         ---
         ## Complexity Threshold
-        
+
         Create design doc when:
         - >3 components involved
         - Spans 2+ user stories
         - Architectural decisions needed
-        
+
         Skip for simple features (<3 components, single story)
     assert:
       - type: llm-rubric
@@ -2096,14 +2096,14 @@ tests:
           ACCEPTABLE: Says probably not needed
           POOR: Recommends creating design doc
 
-  - description: "design-004: Components with [N]/[N+1] pattern"
+  - description: 'design-004: Components with [N]/[N+1] pattern'
     vars:
-      input: "Define the components for a file upload feature in a design doc"
+      input: 'Define the components for a file upload feature in a design doc'
       context: |
         file_path: framework/guides/design-doc-guide.md (excerpt)
         ---
         ## Components Section
-        
+
         Use [N]/[N+1] pattern:
         - Component 1: Full definition (name, responsibility, interface, dependencies, tests)
         - Component 2: Show variation from Component 1
@@ -2115,14 +2115,14 @@ tests:
           ACCEPTABLE: Defines multiple components with most attributes
           POOR: Lists components without [N]/[N+1] pattern or missing key attributes
 
-  - description: "design-005: Data model section"
+  - description: 'design-005: Data model section'
     vars:
-      input: "Write the data model section for a design doc about a shopping cart feature"
+      input: 'Write the data model section for a design doc about a shopping cart feature'
       context: |
         file_path: framework/guides/design-doc-guide.md (excerpt)
         ---
         ## Data Model Section
-        
+
         Include:
         - State shape/schema
         - Type relationships
@@ -2135,14 +2135,14 @@ tests:
           ACCEPTABLE: Documents state shape with some relationships
           POOR: Skips data model or provides vague description
 
-  - description: "design-006: Component interaction"
+  - description: 'design-006: Component interaction'
     vars:
-      input: "Document the component interaction for a drag-and-drop file organizer feature"
+      input: 'Document the component interaction for a drag-and-drop file organizer feature'
       context: |
         file_path: framework/guides/design-doc-guide.md (excerpt)
         ---
         ## Component Interaction Section
-        
+
         Document:
         - Events/method calls between components
         - Data flow (Component N → N+1)
@@ -2155,14 +2155,14 @@ tests:
           ACCEPTABLE: Documents communication pattern and data flow
           POOR: Skips interaction section for multi-component feature
 
-  - description: "design-007: Concrete user flow"
+  - description: 'design-007: Concrete user flow'
     vars:
-      input: "Write the user flow section for a design doc about a password reset feature"
+      input: 'Write the user flow section for a design doc about a password reset feature'
       context: |
         file_path: framework/guides/design-doc-guide.md (excerpt)
         ---
         ## User Flow Section
-        
+
         Write concrete step-by-step flow:
         - Specific UI elements (buttons, forms)
         - Keyboard shortcuts if applicable
@@ -2175,14 +2175,14 @@ tests:
           ACCEPTABLE: Step-by-step flow with some concrete details
           POOR: Vague flow like "user resets password" without concrete steps
 
-  - description: "design-008: Key decisions with trade-offs"
+  - description: 'design-008: Key decisions with trade-offs'
     vars:
-      input: "Write the key decisions section for a design doc about choosing between REST and GraphQL for an API"
+      input: 'Write the key decisions section for a design doc about choosing between REST and GraphQL for an API'
       context: |
         file_path: framework/guides/design-doc-guide.md (excerpt)
         ---
         ## Key Decisions Section
-        
+
         Use [N]/[N+1] pattern:
         - Decision 1: what/why (specifics)/trade-off
         - Decision 2: Show variation
@@ -2195,14 +2195,14 @@ tests:
           ACCEPTABLE: Decisions with what/why/trade-off
           POOR: Decisions without trade-offs or vague rationale
 
-  - description: "design-009: Implementation notes"
+  - description: 'design-009: Implementation notes'
     vars:
-      input: "Write the implementation notes section for a design doc about a real-time collaborative editing feature"
+      input: 'Write the implementation notes section for a design doc about a real-time collaborative editing feature'
       context: |
         file_path: framework/guides/design-doc-guide.md (excerpt)
         ---
         ## Implementation Notes Section
-        
+
         Document:
         - Constraints
         - Error handling
@@ -2216,14 +2216,14 @@ tests:
           ACCEPTABLE: Documents 3+ areas
           POOR: Skips implementation notes for complex feature
 
-  - description: "design-010: Quality checklist"
+  - description: 'design-010: Quality checklist'
     vars:
-      input: "Review this design doc for quality before merge"
+      input: 'Review this design doc for quality before merge'
       context: |
         file_path: framework/guides/design-doc-guide.md (excerpt)
         ---
         ## Quality Checklist
-        
+
         - [ ] References not duplicates
         - [ ] [N]/[N+1] examples
         - [ ] Concrete user flow
@@ -2242,18 +2242,18 @@ tests:
   # CONTEXT FILES GUIDE (11 tests)
   # =============================================================================
 
-  - description: "ctx-001: Choose right context file"
+  - description: 'ctx-001: Choose right context file'
     vars:
-      input: "Set up project context for a project using both Claude and Cursor"
+      input: 'Set up project context for a project using both Claude and Cursor'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## File Selection
-        
+
         - AGENTS.md: Tool-agnostic (works with Claude, Cursor, etc.)
         - CLAUDE.md: Claude Code specific
         - .cursorrules: Cursor specific
-        
+
         For multi-tool projects, use AGENTS.md
     assert:
       - type: llm-rubric
@@ -2263,14 +2263,14 @@ tests:
           ACCEPTABLE: Creates appropriate context file
           POOR: Creates wrong file type or doesn't explain choice
 
-  - description: "ctx-002: Include SAFEWORD trigger"
+  - description: 'ctx-002: Include SAFEWORD trigger'
     vars:
-      input: "Create an AGENTS.md file for a new project"
+      input: 'Create an AGENTS.md file for a new project'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## SAFEWORD Trigger (Required)
-        
+
         First line must be:
         **⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**
     assert:
@@ -2281,14 +2281,14 @@ tests:
           ACCEPTABLE: Includes trigger but slightly different wording
           POOR: Missing trigger or buried in middle of file
 
-  - description: "ctx-003: No duplication"
+  - description: 'ctx-003: No duplication'
     vars:
-      input: "Create a tests/AGENTS.md file for a project that already has a root AGENTS.md with TDD workflow documented"
+      input: 'Create a tests/AGENTS.md file for a project that already has a root AGENTS.md with TDD workflow documented'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## Auto-Loading Behavior
-        
+
         Subdirectory files inherit from parent.
         Don't duplicate - use cross-references:
         "See root AGENTS.md for TDD workflow"
@@ -2300,18 +2300,18 @@ tests:
           ACCEPTABLE: Minimal duplication with cross-reference
           POOR: Duplicates TDD workflow content from root
 
-  - description: "ctx-004: Use modular imports"
+  - description: 'ctx-004: Use modular imports'
     vars:
-      input: "Create an AGENTS.md for a project with architecture decisions in docs/architecture.md and coding standards in docs/conventions.md"
+      input: 'Create an AGENTS.md for a project with architecture decisions in docs/architecture.md and coding standards in docs/conventions.md'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## Modular Structure
-        
+
         Use imports for external files:
         @docs/architecture.md
         @docs/conventions.md
-        
+
         Keep root file under 50 lines
     assert:
       - type: llm-rubric
@@ -2321,14 +2321,14 @@ tests:
           ACCEPTABLE: Uses imports but file is slightly over target
           POOR: Duplicates content instead of importing
 
-  - description: "ctx-005: Content rules"
+  - description: 'ctx-005: Content rules'
     vars:
-      input: "I want to add setup instructions and our TDD workflow to the AGENTS.md file"
+      input: 'I want to add setup instructions and our TDD workflow to the AGENTS.md file'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## Content Rules
-        
+
         **In AGENTS.md:** Coding patterns, workflow triggers, domain knowledge
         **NOT in AGENTS.md:** Setup instructions (→ README.md)
     assert:
@@ -2339,17 +2339,17 @@ tests:
           ACCEPTABLE: Correctly redirects setup, allows TDD
           POOR: Adds both to AGENTS.md without redirection
 
-  - description: "ctx-006: Size targets"
+  - description: 'ctx-006: Size targets'
     vars:
-      input: "Review this AGENTS.md file that is 250 lines long"
+      input: 'Review this AGENTS.md file that is 250 lines long'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## Size Targets
-        
+
         - Root: <200 lines
         - Subdirectory: <100 lines
-        
+
         If over, extract to imports or subdirectory files
     assert:
       - type: llm-rubric
@@ -2359,14 +2359,14 @@ tests:
           ACCEPTABLE: Identifies violation, recommends reduction
           POOR: Accepts 250-line file without comment
 
-  - description: "ctx-007: Cross-reference pattern"
+  - description: 'ctx-007: Cross-reference pattern'
     vars:
-      input: "Add a reference to the agents directory in the root AGENTS.md"
+      input: 'Add a reference to the agents directory in the root AGENTS.md'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## Cross-Reference Pattern
-        
+
         **Agents** (`path/`) - Description. See `path/AGENTS.md`.
     assert:
       - type: llm-rubric
@@ -2376,14 +2376,14 @@ tests:
           ACCEPTABLE: Uses cross-reference with path
           POOR: Duplicates content instead of cross-referencing
 
-  - description: "ctx-008: Maintenance"
+  - description: 'ctx-008: Maintenance'
     vars:
-      input: "The project just underwent a major refactor. The AGENTS.md still references old directory structure."
+      input: 'The project just underwent a major refactor. The AGENTS.md still references old directory structure.'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## Maintenance
-        
+
         After refactors:
         - Update or remove outdated sections
         - Verify cross-references still work
@@ -2395,14 +2395,14 @@ tests:
           ACCEPTABLE: Recommends updating the file
           POOR: Ignores outdated content
 
-  - description: "ctx-009: Domain requirements"
+  - description: 'ctx-009: Domain requirements'
     vars:
-      input: "Create an AGENTS.md for a tabletop RPG game assistant project"
+      input: 'Create an AGENTS.md for a tabletop RPG game assistant project'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## Domain Requirements Section
-        
+
         For specialized projects, include:
         - Domain-specific terminology
         - Game mechanics (for games)
@@ -2415,14 +2415,14 @@ tests:
           ACCEPTABLE: Includes domain section but less detailed
           POOR: Omits domain requirements for specialized project
 
-  - description: "ctx-010: LLM checklist"
+  - description: 'ctx-010: LLM checklist'
     vars:
-      input: "Review this AGENTS.md file for LLM comprehension quality"
+      input: 'Review this AGENTS.md file for LLM comprehension quality'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## LLM Comprehension Checklist
-        
+
         1. MECE decision trees
         2. Terms defined
         3. No contradictions
@@ -2439,14 +2439,14 @@ tests:
           ACCEPTABLE: Checks 5+ items
           POOR: Generic review without applying checklist
 
-  - description: "ctx-011: Token efficiency"
+  - description: 'ctx-011: Token efficiency'
     vars:
-      input: "Review this 300-line AGENTS.md with narrative paragraphs for token efficiency"
+      input: 'Review this 300-line AGENTS.md with narrative paragraphs for token efficiency'
       context: |
         file_path: framework/guides/context-files-guide.md (excerpt)
         ---
         ## Token Efficiency
-        
+
         - Use bullets over paragraphs
         - Remove redundancy
         - Use imports for modularization
@@ -2462,19 +2462,19 @@ tests:
   # DATA ARCHITECTURE GUIDE (7 tests)
   # =============================================================================
 
-  - description: "data-001: Decision tree for where to document"
+  - description: 'data-001: Decision tree for where to document'
     vars:
       input: "I'm adding a new Redis cache for session data. Where should I document this?"
       context: |
         file_path: framework/guides/data-architecture-guide.md (excerpt)
         ---
         ## Where to Document
-        
+
         Architecture Doc when:
         - Adding new data store
         - Changing data model
         - New data flows
-        
+
         Design Doc when:
         - Feature-specific data handling
     assert:
@@ -2485,14 +2485,14 @@ tests:
           ACCEPTABLE: Correctly identifies Architecture Doc
           POOR: Suggests Design Doc for new data store
 
-  - description: "data-002: Data principles format"
+  - description: 'data-002: Data principles format'
     vars:
-      input: "Create a data architecture section for a user management system"
+      input: 'Create a data architecture section for a user management system'
       context: |
         file_path: framework/guides/data-architecture-guide.md (excerpt)
         ---
         ## Data Principles
-        
+
         4 principles with What/Why/Document/Example format:
         1. Data Quality
         2. Data Governance
@@ -2506,14 +2506,14 @@ tests:
           ACCEPTABLE: 3+ principles with consistent format
           POOR: Missing principles or inconsistent format
 
-  - description: "data-004: Document data flows"
+  - description: 'data-004: Document data flows'
     vars:
-      input: "Document the data flow for user registration"
+      input: 'Document the data flow for user registration'
       context: |
         file_path: framework/guides/data-architecture-guide.md (excerpt)
         ---
         ## Data Flows
-        
+
         Document:
         - Sources → Transformations → Destinations
         - Error handling at each step
@@ -2525,14 +2525,14 @@ tests:
           ACCEPTABLE: Documents flow with some error handling
           POOR: Only documents happy path without error handling
 
-  - description: "data-005: Data policies"
+  - description: 'data-005: Data policies'
     vars:
-      input: "Document data policies for a multi-tenant SaaS application"
+      input: 'Document data policies for a multi-tenant SaaS application'
       context: |
         file_path: framework/guides/data-architecture-guide.md (excerpt)
         ---
         ## Data Policies
-        
+
         Document:
         - Access control (read/write/delete roles)
         - Lifecycle rules
@@ -2545,14 +2545,14 @@ tests:
           ACCEPTABLE: Documents access control and lifecycle
           POOR: Missing conflict resolution or lifecycle rules
 
-  - description: "data-006: TDD triggers for data changes"
+  - description: 'data-006: TDD triggers for data changes'
     vars:
-      input: "I just added a new payments table to the database. What should I update?"
+      input: 'I just added a new payments table to the database. What should I update?'
       context: |
         file_path: framework/guides/data-architecture-guide.md (excerpt)
         ---
         ## TDD Integration Triggers
-        
+
         Update architecture doc when:
         - Adding new data entities
         - Changing data model
@@ -2565,14 +2565,14 @@ tests:
           ACCEPTABLE: Recommends updating architecture doc
           POOR: Suggests only updating code without documentation
 
-  - description: "data-007: Common mistakes"
+  - description: 'data-007: Common mistakes'
     vars:
       input: "Review this data architecture doc that has no migration strategy and uses vague performance targets like 'fast queries'"
       context: |
         file_path: framework/guides/data-architecture-guide.md (excerpt)
         ---
         ## Common Mistakes
-        
+
         - Missing migration strategy
         - Vague performance targets ("fast" instead of "<100ms")
         - No error handling documented
@@ -2584,14 +2584,14 @@ tests:
           ACCEPTABLE: Identifies at least one issue
           POOR: Accepts the doc without identifying anti-patterns
 
-  - description: "data-008: Best practices checklist"
+  - description: 'data-008: Best practices checklist'
     vars:
-      input: "Review this data architecture doc for completeness before merge"
+      input: 'Review this data architecture doc for completeness before merge'
       context: |
         file_path: framework/guides/data-architecture-guide.md (excerpt)
         ---
         ## Best Practices Checklist
-        
+
         1. Principles format correct
         2. Entities documented
         3. Attributes with types
@@ -2614,14 +2614,14 @@ tests:
   # LEARNING EXTRACTION (11 tests)
   # =============================================================================
 
-  - description: "learn-001: Recognize extraction triggers"
+  - description: 'learn-001: Recognize extraction triggers'
     vars:
       input: "I've been debugging this React state issue for 6 cycles now, tried 4 different approaches, and finally found it's a race condition not documented in the React docs"
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## Extraction Triggers
-        
+
         1. Observable debugging complexity (5+ cycles)
         2. Trial and error (3+ approaches)
         3. Undocumented gotcha
@@ -2636,18 +2636,18 @@ tests:
           ACCEPTABLE: Identifies triggers, suggests extraction
           POOR: Doesn't recognize triggers or suggests extraction mid-debug
 
-  - description: "learn-002: Check existing learnings first"
+  - description: 'learn-002: Check existing learnings first'
     vars:
-      input: "I just discovered a gotcha about React hooks and async state updates"
+      input: 'I just discovered a gotcha about React hooks and async state updates'
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## Before Extracting
-        
+
         ALWAYS check for existing learnings first:
         ls .safeword/learnings/*react*.md
         ls .safeword/learnings/*hooks*.md
-        
+
         If found, update instead of creating new.
     assert:
       - type: llm-rubric
@@ -2657,18 +2657,18 @@ tests:
           ACCEPTABLE: Mentions checking for existing learnings
           POOR: Suggests creating new learning without checking existing
 
-  - description: "learn-003: Place learnings correctly"
+  - description: 'learn-003: Place learnings correctly'
     vars:
-      input: "I learned that React useState is async - where should I document this?"
+      input: 'I learned that React useState is async - where should I document this?'
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## Location Decision Tree
-        
+
         Global (.safeword/learnings/):
         - Applies to ALL projects using this tech
         - Universal patterns
-        
+
         Project-specific:
         - Only applies to this codebase
         - Custom architecture patterns
@@ -2680,14 +2680,14 @@ tests:
           ACCEPTABLE: Selects correct location
           POOR: Selects project-specific location for universal React pattern
 
-  - description: "learn-004: Respect instruction precedence"
+  - description: 'learn-004: Respect instruction precedence'
     vars:
-      input: "The global learning says use Redux, but the project learning says use Zustand. Which should I follow?"
+      input: 'The global learning says use Redux, but the project learning says use Zustand. Which should I follow?'
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## Instruction Precedence
-        
+
         1. Project-specific (highest)
         2. Global learnings
         3. Framework defaults (lowest)
@@ -2699,14 +2699,14 @@ tests:
           ACCEPTABLE: Follows project learning
           POOR: Follows global learning or asks which to use
 
-  - description: "learn-005: Use templates"
+  - description: 'learn-005: Use templates'
     vars:
-      input: "Create a learning about React useEffect cleanup functions"
+      input: 'Create a learning about React useEffect cleanup functions'
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## Learning Template
-        
+
         Sections:
         - Principle
         - Gotcha (Bad/Good examples)
@@ -2721,14 +2721,14 @@ tests:
           ACCEPTABLE: Uses template with most sections
           POOR: Creates ad-hoc structure without following template
 
-  - description: "learn-006: Cross-reference in SAFEWORD"
+  - description: 'learn-006: Cross-reference in SAFEWORD'
     vars:
-      input: "I just created a learning at .safeword/learnings/electron-contexts.md about Electron renderer context"
+      input: 'I just created a learning at .safeword/learnings/electron-contexts.md about Electron renderer context'
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## Cross-Reference
-        
+
         After creating learning, add to SAFEWORD.md Common Gotchas:
         **Electron Contexts** - One-liner. See learnings/electron-contexts.md
     assert:
@@ -2741,12 +2741,12 @@ tests:
 
   - description: "learn-007: Don't suggest extraction for trivial fix"
     vars:
-      input: "Fixed a typo in the config file"
+      input: 'Fixed a typo in the config file'
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## When NOT to Extract
-        
+
         Skip extraction for:
         - Trivial fixes
         - One-line changes
@@ -2759,14 +2759,14 @@ tests:
           ACCEPTABLE: Doesn't mention extraction
           POOR: Suggests extraction for trivial fix
 
-  - description: "learn-008: Recommend splitting large files"
+  - description: 'learn-008: Recommend splitting large files'
     vars:
-      input: "This learning file is 250 lines and covers both React hooks and Redux patterns"
+      input: 'This learning file is 250 lines and covers both React hooks and Redux patterns'
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## Size Standards
-        
+
         - Max 150-200 lines per file
         - One concept per file
         - Split if covering multiple topics
@@ -2778,14 +2778,14 @@ tests:
           ACCEPTABLE: Recommends splitting
           POOR: Accepts 250-line multi-concept file without comment
 
-  - description: "learn-010: Follow extraction workflow"
+  - description: 'learn-010: Follow extraction workflow'
     vars:
-      input: "I just finished implementing a complex feature and discovered a race condition pattern. Walk me through documenting this."
+      input: 'I just finished implementing a complex feature and discovered a race condition pattern. Walk me through documenting this.'
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## Extraction Workflow
-        
+
         1. Assess scope (global vs project)
         2. Choose location
         3. Extract using template
@@ -2799,14 +2799,14 @@ tests:
           ACCEPTABLE: Follows most workflow steps
           POOR: Ad-hoc extraction without following workflow
 
-  - description: "learn-011: Block trivial extractions"
+  - description: 'learn-011: Block trivial extractions'
     vars:
       input: "I want to create a learning that says 'Changed == to ==='"
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## Anti-Patterns
-        
+
         Don't extract:
         - One-line fixes without context
         - Well-known patterns
@@ -2819,14 +2819,14 @@ tests:
           ACCEPTABLE: Suggests this is too trivial
           POOR: Proceeds with extraction
 
-  - description: "learn-012: Size standards"
+  - description: 'learn-012: Size standards'
     vars:
       input: "I'm creating a learning file that's 180 lines and covers both React hooks and Redux patterns"
       context: |
         file_path: framework/guides/learning-extraction.md (excerpt)
         ---
         ## Size Standards
-        
+
         - Max 150-200 lines per file
         - One concept per file
     assert:
@@ -2841,14 +2841,14 @@ tests:
   # LLM PROMPTING (10 tests)
   # =============================================================================
 
-  - description: "prompt-001: Concrete examples in prompts"
+  - description: 'prompt-001: Concrete examples in prompts'
     vars:
       input: "I'm writing a prompt that says 'Return the user's intent'. Is this good enough?"
       context: |
         file_path: framework/guides/llm-prompting.md (excerpt)
         ---
         ## Concrete Examples
-        
+
         Abstract prompts need examples:
         BAD: "Return the user's intent"
         GOOD: "Return JSON: {intent: 'create_campaign', name: '...'}"
@@ -2860,14 +2860,14 @@ tests:
           ACCEPTABLE: Suggests being more specific
           POOR: Accepts vague prompt without examples
 
-  - description: "prompt-002: Structured outputs"
+  - description: 'prompt-002: Structured outputs'
     vars:
       input: "I'm building an AI agent that needs to understand user intent. Should I have it return prose like 'The user wants to create a campaign'?"
       context: |
         file_path: framework/guides/llm-prompting.md (excerpt)
         ---
         ## Structured Outputs
-        
+
         For machine consumption, use JSON:
         - Explicit fields
         - Type validation
@@ -2880,14 +2880,14 @@ tests:
           ACCEPTABLE: Suggests structured output
           POOR: Accepts prose output for machine consumption
 
-  - description: "prompt-003: Prompt caching"
+  - description: 'prompt-003: Prompt caching'
     vars:
-      input: "I have a 500-line system prompt that includes both static rules and the current character state. How should I structure this?"
+      input: 'I have a 500-line system prompt that includes both static rules and the current character state. How should I structure this?'
       context: |
         file_path: framework/guides/llm-prompting.md (excerpt)
         ---
         ## Prompt Caching
-        
+
         Separate static from dynamic:
         - Static rules: cache_control: ephemeral
         - Dynamic state: user message (uncached)
@@ -2899,14 +2899,14 @@ tests:
           ACCEPTABLE: Suggests separating static from dynamic
           POOR: Accepts mixed static/dynamic in system prompt
 
-  - description: "prompt-004: Message architecture"
+  - description: 'prompt-004: Message architecture'
     vars:
       input: "I'm interpolating the user's character state directly into my system prompt like this: systemPrompt = `Rules + Character: ${dynamicState}`. Is this okay?"
       context: |
         file_path: framework/guides/llm-prompting.md (excerpt)
         ---
         ## Message Architecture
-        
+
         BAD: Dynamic state in system prompt (uncacheable)
         GOOD: Dynamic state in user message
     assert:
@@ -2917,14 +2917,14 @@ tests:
           ACCEPTABLE: Suggests separating static from dynamic
           POOR: Accepts dynamic state in system prompt
 
-  - description: "prompt-005: Cache invalidation"
+  - description: 'prompt-005: Cache invalidation'
     vars:
-      input: "I want to add a small clarification to my cached system prompt. Should I just make the change?"
+      input: 'I want to add a small clarification to my cached system prompt. Should I just make the change?'
       context: |
         file_path: framework/guides/llm-prompting.md (excerpt)
         ---
         ## Cache Invalidation
-        
+
         Any change breaks all caches.
         Batch edits to minimize rebuilds.
     assert:
@@ -2935,14 +2935,14 @@ tests:
           ACCEPTABLE: Notes cache invalidation concern
           POOR: Suggests making change without mentioning cache impact
 
-  - description: "prompt-006: LLM-as-judge"
+  - description: 'prompt-006: LLM-as-judge'
     vars:
       input: "I want to test if my AI GM's responses have a 'collaborative tone'. Should I check for specific keywords like 'together' or 'we'?"
       context: |
         file_path: framework/guides/llm-prompting.md (excerpt)
         ---
         ## LLM-as-Judge
-        
+
         For creative/qualitative outputs:
         - Use rubric (EXCELLENT/ACCEPTABLE/POOR)
         - Avoid brittle keyword matching
@@ -2954,14 +2954,14 @@ tests:
           ACCEPTABLE: Suggests rubric-based evaluation
           POOR: Accepts keyword matching for creative outputs
 
-  - description: "prompt-007: Eval framework mapping"
+  - description: 'prompt-007: Eval framework mapping'
     vars:
-      input: "I have a function that parses JSON, an agent that calls an LLM, and a judgment about narrative quality. What test types should I use?"
+      input: 'I have a function that parses JSON, an agent that calls an LLM, and a judgment about narrative quality. What test types should I use?'
       context: |
         file_path: framework/guides/llm-prompting.md (excerpt)
         ---
         ## Test Type Mapping
-        
+
         - JSON parsing → Unit test
         - Agent + LLM → Integration test
         - Narrative quality → LLM Eval
@@ -2973,14 +2973,14 @@ tests:
           ACCEPTABLE: Correctly identifies at least 2 mappings
           POOR: Suggests same test type for all
 
-  - description: "prompt-008: Cost awareness"
+  - description: 'prompt-008: Cost awareness'
     vars:
-      input: "I want to run 100 LLM evaluation scenarios in CI. What should I consider?"
+      input: 'I want to run 100 LLM evaluation scenarios in CI. What should I consider?'
       context: |
         file_path: framework/guides/llm-prompting.md (excerpt)
         ---
         ## Cost Awareness
-        
+
         - ~$0.15-0.30 for 30 scenarios with caching
         - Cache rubrics
         - Budget expectations
@@ -2992,14 +2992,14 @@ tests:
           ACCEPTABLE: Notes cost considerations
           POOR: Ignores cost implications
 
-  - description: "prompt-009: Why over what"
+  - description: 'prompt-009: Why over what'
     vars:
       input: "My prompt says 'Use JSON output'. Should I add more context?"
       context: |
         file_path: framework/guides/llm-prompting.md (excerpt)
         ---
         ## Why Over What
-        
+
         Include rationale:
         - Why JSON? Predictable parsing, validation
         - Benefits and trade-offs
@@ -3011,14 +3011,14 @@ tests:
           ACCEPTABLE: Suggests adding rationale
           POOR: Accepts bare instruction without context
 
-  - description: "prompt-010: Precise terms"
+  - description: 'prompt-010: Precise terms'
     vars:
       input: "My decision tree asks 'Does this test need to see the UI?'"
       context: |
         file_path: framework/guides/llm-prompting.md (excerpt)
         ---
         ## Precise Technical Terms
-        
+
         Vague: "see the UI"
         Precise: "real browser (Playwright/Cypress)"
         Note: RTL is not a real browser
@@ -3034,14 +3034,14 @@ tests:
   # TEST DEFINITIONS GUIDE (12 tests)
   # =============================================================================
 
-  - description: "testdef-001: Use standard template"
+  - description: 'testdef-001: Use standard template'
     vars:
-      input: "I need to create test definitions for a new feature. Where do I start?"
+      input: 'I need to create test definitions for a new feature. Where do I start?'
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## Getting Started
-        
+
         1. Use template from .safeword/templates/test-definitions-feature.md
         2. Fill in feature name
         3. Organize into suites
@@ -3054,14 +3054,14 @@ tests:
           ACCEPTABLE: Points to template
           POOR: No template reference
 
-  - description: "testdef-002: Organize into suites"
+  - description: 'testdef-002: Organize into suites'
     vars:
-      input: "I have 15 tests for a feature. How should I organize them?"
+      input: 'I have 15 tests for a feature. How should I organize them?'
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## Suite Organization
-        
+
         Group by concern:
         - Layout
         - Interactions
@@ -3076,14 +3076,14 @@ tests:
           ACCEPTABLE: Suggests grouping logically
           POOR: No organization guidance
 
-  - description: "testdef-003: Track test status"
+  - description: 'testdef-003: Track test status'
     vars:
-      input: "What status indicators should I use for my tests?"
+      input: 'What status indicators should I use for my tests?'
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## Status Indicators
-        
+
         ✅ Passing
         ⏭️ Skipped (with rationale)
         ❌ Not Implemented
@@ -3096,14 +3096,14 @@ tests:
           ACCEPTABLE: Lists most statuses
           POOR: Inconsistent statuses
 
-  - description: "testdef-004: Write clear steps"
+  - description: 'testdef-004: Write clear steps'
     vars:
       input: "My test step says 'Check panes'. Is this good enough?"
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## Test Steps
-        
+
         BAD: "Check panes" (vague)
         GOOD: "1. Verify left pane shows navigation 2. Verify center pane shows content"
     assert:
@@ -3114,14 +3114,14 @@ tests:
           ACCEPTABLE: Notes it's too vague
           POOR: Accepts vague step
 
-  - description: "testdef-005: Specific expected outcomes"
+  - description: 'testdef-005: Specific expected outcomes'
     vars:
       input: "My expected outcome says 'Everything works'. Is this okay?"
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## Expected Outcomes
-        
+
         BAD: "Everything works"
         GOOD: "Button is enabled, form submits, success message appears"
     assert:
@@ -3132,14 +3132,14 @@ tests:
           ACCEPTABLE: Notes it's too vague
           POOR: Accepts vague outcome
 
-  - description: "testdef-006: Coverage summary"
+  - description: 'testdef-006: Coverage summary'
     vars:
-      input: "Should I include a coverage summary in my test definitions?"
+      input: 'Should I include a coverage summary in my test definitions?'
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## Coverage Summary
-        
+
         Include:
         - Total tests
         - Passing/failing/skipped counts
@@ -3152,14 +3152,14 @@ tests:
           ACCEPTABLE: Recommends summary
           POOR: No guidance
 
-  - description: "testdef-007: Test naming"
+  - description: 'testdef-007: Test naming'
     vars:
       input: "I named my test 'Test 1'. Is this okay?"
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## Test Naming
-        
+
         BAD: "Test 1"
         GOOD: "Render all three panes on initial load"
     assert:
@@ -3170,14 +3170,14 @@ tests:
           ACCEPTABLE: Notes name is not descriptive
           POOR: Accepts "Test 1"
 
-  - description: "testdef-008: Execution commands"
+  - description: 'testdef-008: Execution commands'
     vars:
-      input: "What should I include in the test execution section?"
+      input: 'What should I include in the test execution section?'
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## Test Execution
-        
+
         Include:
         - Command to run all tests
         - Command to grep for specific test
@@ -3190,14 +3190,14 @@ tests:
           ACCEPTABLE: Suggests including commands
           POOR: No command guidance
 
-  - description: "testdef-009: TDD workflow integration"
+  - description: 'testdef-009: TDD workflow integration'
     vars:
-      input: "When should I create test definitions?"
+      input: 'When should I create test definitions?'
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## TDD Workflow
-        
+
         - Create before implementation
         - Alongside user stories
         - Update status as tests pass/fail
@@ -3209,14 +3209,14 @@ tests:
           ACCEPTABLE: Mentions before implementation
           POOR: No timing guidance
 
-  - description: "testdef-010: Map to user stories"
+  - description: 'testdef-010: Map to user stories'
     vars:
-      input: "How do I connect my tests to user stories?"
+      input: 'How do I connect my tests to user stories?'
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## User Story Mapping
-        
+
         - Each AC has at least one test
         - Add edge cases beyond AC
         - Include test file references
@@ -3228,14 +3228,14 @@ tests:
           ACCEPTABLE: Suggests mapping to AC
           POOR: No mapping guidance
 
-  - description: "testdef-011: Avoid implementation detail tests"
+  - description: 'testdef-011: Avoid implementation detail tests'
     vars:
       input: "My test verifies 'useUIStore hook works correctly'. Is this a good test?"
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## Anti-Patterns
-        
+
         BAD: Testing implementation details ("useUIStore hook works")
         GOOD: Testing observable behavior ("clicking button updates UI")
     assert:
@@ -3246,14 +3246,14 @@ tests:
           ACCEPTABLE: Notes it's testing implementation
           POOR: Accepts implementation detail test
 
-  - description: "testdef-012: LLM-friendly test definitions"
+  - description: 'testdef-012: LLM-friendly test definitions'
     vars:
-      input: "How do I make my test definitions LLM-friendly?"
+      input: 'How do I make my test definitions LLM-friendly?'
       context: |
         file_path: framework/guides/test-definitions-guide.md (excerpt)
         ---
         ## LLM Instruction Design
-        
+
         - MECE decision trees
         - Explicit definitions
         - Concrete examples

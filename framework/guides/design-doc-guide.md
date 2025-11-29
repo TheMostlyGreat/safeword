@@ -89,12 +89,14 @@
 ## When to Use Design Doc vs Architecture Doc
 
 **Use Design Doc when:**
+
 - Designing a specific feature implementation
 - Need component breakdown and interactions
 - Feature-specific technical decisions
 - 2-3 pages (~121 lines)
 
 **Use Architecture Doc when:**
+
 - Project-wide technology choices
 - Data model for entire system
 - Principles and patterns for the whole project
@@ -124,6 +126,7 @@
    - No to all → Skip design doc, implement directly
 
 **If prerequisites don't exist:**
+
 1. User stories missing → Create them first (guide: `@.safeword/guides/user-story-guide.md`)
 2. Test definitions missing → Create them after user stories (guide: `@.safeword/guides/test-definitions-guide.md`)
 3. Then create design doc referencing both
@@ -133,12 +136,14 @@
 ## Example Commands
 
 **Creating design doc:**
+
 ```
 User: "Create design doc for three-pane layout"
 You: [Read user stories and test definitions, then create design doc]
 ```
 
 **Updating design doc:**
+
 ```
 User: "Update design doc to add error handling section"
 You: [Read existing design doc, add Implementation Notes section with error handling]
@@ -149,6 +154,7 @@ You: [Read existing design doc, add Implementation Notes section with error hand
 ## Quality Checklist
 
 Before saving, verify:
+
 - ✓ References user stories and test definitions (not duplicates them)
 - ✓ Has Component [N] and Component [N+1] examples
 - ✓ User flow has concrete examples

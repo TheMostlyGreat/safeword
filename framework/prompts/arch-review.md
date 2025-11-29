@@ -13,6 +13,7 @@ Review the following code changes for architectural issues.
 ## Context
 
 Read the project's ARCHITECTURE.md for:
+
 - Defined layers and their responsibilities
 - Allowed dependencies between layers
 - Project-specific patterns and conventions
@@ -40,4 +41,3 @@ Return JSON:
 - **clean**: No issues found
 - **minor**: Small issues that should be noted but don't block commit
 - **refactor_needed**: Significant issues that should be addressed before commit
-

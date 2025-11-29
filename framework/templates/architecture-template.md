@@ -23,12 +23,12 @@
 
 ### Tech Stack
 
-| Category | Choice | Rationale |
-|----------|--------|-----------|
-| Language | | |
-| Framework | | |
-| Database | | |
-| State Management | | |
+| Category         | Choice | Rationale |
+| ---------------- | ------ | --------- |
+| Language         |        |           |
+| Framework        |        |           |
+| Database         |        |           |
+| State Management |        |           |
 
 ---
 
@@ -36,27 +36,27 @@
 
 ### Layer Definitions
 
-| Layer | Directory | Responsibility |
-|-------|-----------|----------------|
-| app | `src/app/` | UI, routing, composition |
-| domain | `src/domain/` | Business rules, pure logic |
-| infra | `src/infra/` | IO, APIs, DB, external SDKs |
+| Layer  | Directory     | Responsibility                 |
+| ------ | ------------- | ------------------------------ |
+| app    | `src/app/`    | UI, routing, composition       |
+| domain | `src/domain/` | Business rules, pure logic     |
+| infra  | `src/infra/`  | IO, APIs, DB, external SDKs    |
 | shared | `src/shared/` | Utilities usable by all layers |
 
 ### Allowed Dependencies
 
-| From | To | Allowed | Rationale |
-|------|-----|---------|-----------|
-| app | domain | ✅ | UI composes business logic |
-| app | infra | ✅ | UI triggers side effects |
-| app | shared | ✅ | Utilities available everywhere |
-| domain | app | ❌ | Domain must be framework-agnostic |
-| domain | infra | ❌ | Domain contains pure logic only |
-| domain | shared | ✅ | Utilities available everywhere |
-| infra | domain | ✅ | Adapters may use domain types |
-| infra | app | ❌ | Infra should not depend on UI |
-| infra | shared | ✅ | Utilities available everywhere |
-| shared | * | ❌ | Shared has no dependencies (except external libs) |
+| From   | To     | Allowed | Rationale                                         |
+| ------ | ------ | ------- | ------------------------------------------------- |
+| app    | domain | ✅      | UI composes business logic                        |
+| app    | infra  | ✅      | UI triggers side effects                          |
+| app    | shared | ✅      | Utilities available everywhere                    |
+| domain | app    | ❌      | Domain must be framework-agnostic                 |
+| domain | infra  | ❌      | Domain contains pure logic only                   |
+| domain | shared | ✅      | Utilities available everywhere                    |
+| infra  | domain | ✅      | Adapters may use domain types                     |
+| infra  | app    | ❌      | Infra should not depend on UI                     |
+| infra  | shared | ✅      | Utilities available everywhere                    |
+| shared | \*     | ❌      | Shared has no dependencies (except external libs) |
 
 **Note:** This template allows direct app→infra. Alternative: force app→domain→infra for stricter separation (hexagonal/ports-adapters pattern).
 
@@ -71,8 +71,8 @@ Boundaries enforced via `eslint-plugin-boundaries`. See `.safeword/guides/archit
 ### Entities
 
 | Entity | Table/Collection | Description |
-|--------|-----------------|-------------|
-| | | |
+| ------ | ---------------- | ----------- |
+|        |                  |             |
 
 ### Relationships
 
@@ -94,13 +94,13 @@ Boundaries enforced via `eslint-plugin-boundaries`. See `.safeword/guides/archit
 **Status:** Active | Superseded | Deprecated  
 **Date:** YYYY-MM-DD
 
-| Field | Value |
-|-------|-------|
-| What | [The decision in 1-2 sentences] |
-| Why | [Rationale with specifics - numbers, metrics] |
-| Trade-off | [What we gave up or accepted] |
-| Alternatives | [Other options considered and why rejected] |
-| Implementation | [File references: `src/path/file.ts:12-45`] |
+| Field          | Value                                         |
+| -------------- | --------------------------------------------- |
+| What           | [The decision in 1-2 sentences]               |
+| Why            | [Rationale with specifics - numbers, metrics] |
+| Trade-off      | [What we gave up or accepted]                 |
+| Alternatives   | [Other options considered and why rejected]   |
+| Implementation | [File references: `src/path/file.ts:12-45`]   |
 
 ---
 
@@ -120,6 +120,7 @@ Boundaries enforced via `eslint-plugin-boundaries`. See `.safeword/guides/archit
 
 **Trigger:** [When to migrate]  
 **Steps:**
+
 1. [Step 1]
 2. [Step 2]
 
@@ -133,4 +134,3 @@ Boundaries enforced via `eslint-plugin-boundaries`. See `.safeword/guides/archit
 
 - [Link to relevant docs]
 - [Link to ADRs if migrating from ADR system]
-

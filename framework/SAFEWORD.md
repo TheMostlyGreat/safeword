@@ -14,6 +14,7 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 - Issue capture → `.safeword/planning/issues/`
 
 **Archive completed work:** When planning docs are completed and no longer actively referenced, move to:
+
 - `.safeword/planning/user-stories/archive/`
 - `.safeword/planning/test-definitions/archive/`
 - `.safeword/planning/design/archive/`
@@ -30,6 +31,7 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 **Purpose:** Self-contained setup scripts for installing Claude Code hooks and configurations in your projects.
 
 **Available scripts:**
+
 - `setup-safeword.sh` - **One-command installer** (copies guides/templates, planning/tickets/learnings, adds triggers)
 - `setup-claude.sh` - Sets up Claude hooks, Arcade MCP gateway, CLAUDE.md trigger
 - `setup-linting.sh` - Auto-linting on file changes (ESLint + Prettier)
@@ -38,6 +40,7 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 **Usage:**
 
 **One-command setup (recommended):**
+
 ```bash
 cd /path/to/your/project
 bash ./framework/scripts/setup-safeword.sh            # Install SAFEWORD structure + docs
@@ -45,6 +48,7 @@ bash ./framework/scripts/setup-claude.sh              # Install Claude hooks (+ 
 ```
 
 **Auto-detection:** Automatically detects project type from package.json and config files:
+
 - Next.js → if next in dependencies (ESLint + React plugins)
 - Electron → if electron in dependencies
 - Astro → if astro in dependencies
@@ -53,6 +57,7 @@ bash ./framework/scripts/setup-claude.sh              # Install Claude hooks (+ 
 - Minimal → otherwise
 
 **Individual scripts (advanced):**
+
 ```bash
 cd /path/to/your/project
 bash ./framework/scripts/setup-linting.sh --typescript  # Linting only
@@ -60,6 +65,7 @@ bash ./framework/scripts/setup-quality.sh               # Quality review only
 ```
 
 **Linting:** Auto-detects TypeScript, React, Astro from package.json.
+
 - Two-file architecture:
   - `.safeword/eslint/eslint-base.mjs` - Auto-generated every run (DO NOT EDIT)
   - `eslint.config.mjs` - Your config (customize freely, never overwritten)
@@ -67,6 +73,7 @@ bash ./framework/scripts/setup-quality.sh               # Quality review only
 - Override detection: `--no-typescript`, `--no-react`, `--no-astro`
 
 **What they create:**
+
 - `.safeword/SAFEWORD.md` - Global patterns and workflows (copied from this file)
 - `.safeword/guides/` - Reference documentation
 - `.claude/hooks/` - Hook scripts (with version comments)
@@ -79,6 +86,7 @@ bash ./framework/scripts/setup-quality.sh               # Quality review only
 - Config files if needed (`eslint.config.mjs`, `.prettierrc`)
 
 **Key features:**
+
 - ✅ **Fully standalone** - All files copied to project, no external dependencies
 - ✅ **Version tracking** - Generated files include version comments
 - ✅ **Idempotent** - Safe to run multiple times, won't duplicate hooks
@@ -86,9 +94,11 @@ bash ./framework/scripts/setup-quality.sh               # Quality review only
 - ✅ **Order-independent** - Can run scripts in any order
 
 **Documentation:**
+
 - Consolidated setup guide: `README.md` (this folder)
 
 **For teams:**
+
 1. Get setup scripts (clone repo temporarily or download scripts)
 2. In each project, run one command:
    ```bash
@@ -99,7 +109,9 @@ bash ./framework/scripts/setup-quality.sh               # Quality review only
    - `.safeword/SAFEWORD.md` - Global patterns (copy of this file)
    - `.safeword/guides/` - Reference documentation
    - `.claude/` - Hooks and commands
+
 - `SAFEWORD.md` or `CLAUDE.md` - Project context with @./.safeword/SAFEWORD.md reference
+
 4. **COMMIT to repo**: Commit `.safeword/` and `.claude/` for team consistency
 5. **Delete source**: Can delete setup scripts/repo after running - project is fully portable
 
@@ -114,10 +126,12 @@ bash ./framework/scripts/setup-quality.sh               # Quality review only
 **Location:** `.safeword/tickets/`
 
 **Naming convention:** `{id}-{slug}.md`
+
 - Example: `001-fix-login-bug.md`, `002-add-oauth.md`, `003-debug-slow-query.md`
 - Planning docs (if needed) share same prefix: `002-add-oauth.md` in planning subfolders
 
 **Minimal structure:**
+
 ```markdown
 ---
 id: 001
@@ -133,6 +147,7 @@ last_modified: 2025-11-24T19:09:00Z
 **Why:** Users can't log in - button does nothing on click
 
 ## Work Log
+
 - 2025-11-24T19:00:15Z Started: Investigating button click issue
 - 2025-11-24T19:02:30Z Found: onClick handler missing in Button component
 - 2025-11-24T19:05:00Z RED: Added test for button click (refs: tests/button.test.ts)
@@ -141,16 +156,20 @@ last_modified: 2025-11-24T19:09:00Z
 ```
 
 **For complex features, add optional sections:**
+
 ```markdown
 ### Planning Docs
+
 - .safeword/planning/user-stories/002-oauth-login.md
 - .safeword/planning/test-definitions/002-oauth-login.md
 
 ### Scope
+
 **In scope:** Google OAuth, account linking, token refresh
 **Out of scope:** Other providers (separate ticket)
 
 ### Acceptance Criteria
+
 - [ ] All user stories completed
 - [ ] Security review passed
 ```
@@ -162,28 +181,33 @@ last_modified: 2025-11-24T19:09:00Z
 **When to create tickets (context-loss risk assessment):**
 
 **Create ticket if ANY of these apply:**
+
 - Work might require multiple attempts/approaches (styling bugs, performance issues)
 - Work has multiple steps with dependencies (A must work before B)
 - Investigation/debugging required (unknown cause, non-obvious solution)
 - Anything that might cause you to lose context or loop mid-session
 
 **Skip ticket if:**
+
 - Obvious one-shot change (fix typo, update constant, change text label)
 - Takes <2 minutes with zero risk of confusion or cascading issues
 - No investigation needed, solution is clear
 
 **Examples:**
+
 - "Fix typo in README" → No ticket (obvious, one-shot)
 - "Make button red" → Ticket (might break mobile, cascade issues)
 - "Debug slow login" → Ticket (investigation needed, multiple hypotheses)
 - "Add OAuth" → Ticket (complex, multi-step, planning docs needed)
 
 **Relationship to planning docs:**
+
 - **Ticket** = Context anchor (prevents loops, tracks attempts)
 - **Planning docs** = Detailed specs for complex features (user stories, test definitions)
 - **TodoWrite** = Task-level tracking within current work session
 
 **Workflow:**
+
 1. **Create ticket:** `.safeword/tickets/{id}-{slug}.md`
 2. **Fill in Goal + Why** (one sentence each) - This is your anchor
 3. **Add initial work log entry:** "Started: [task]"
@@ -195,12 +219,14 @@ last_modified: 2025-11-24T19:09:00Z
 9. **After confirmation:** Move to `.safeword/tickets/completed/{id}-{slug}.md`
 
 **CRITICAL:** NEVER mark ticket as `done` or archive without explicit user confirmation. User must verify:
+
 - All acceptance criteria met
 - All tests passing
 - Feature works as expected
 - No regressions introduced
 
 **Archiving:**
+
 - Completed tickets → `.safeword/tickets/completed/`
 - Blocked/cancelled tickets → `.safeword/tickets/archived/`
 - Active tickets stay in `.safeword/tickets/`
@@ -221,35 +247,32 @@ last_modified: 2025-11-24T19:09:00Z
 
 **0. Check for Ticket / Create If Needed** (context-loss prevention)
 
-   - Search `.safeword/tickets/` for matching ticket file
-   - **If found:**
-     - **Read ticket first** - What's the goal? What have I tried?
-     - Check work log for previous attempts/findings
-     - Log: "Resumed work on [task]"
-     - **Re-read ticket before each significant action**
-     - For complex features: Follow planning docs if referenced
-   - **If not found:**
-     - **Assess context-loss risk:**
-       - Obvious one-shot (<2 min, no investigation)? → Skip ticket, skip to TDD (step 4)
-       - Might require multiple attempts? → Create ticket, skip to TDD (step 4)
-       - Investigation/debugging needed? → Create ticket, skip to TDD (step 4)
-       - Complex feature (multi-story)? → Create ticket, continue to planning docs (step 1)
+- Search `.safeword/tickets/` for matching ticket file
+- **If found:**
+  - **Read ticket first** - What's the goal? What have I tried?
+  - Check work log for previous attempts/findings
+  - Log: "Resumed work on [task]"
+  - **Re-read ticket before each significant action**
+  - For complex features: Follow planning docs if referenced
+- **If not found:**
+  - **Assess context-loss risk:**
+    - Obvious one-shot (<2 min, no investigation)? → Skip ticket, skip to TDD (step 4)
+    - Might require multiple attempts? → Create ticket, skip to TDD (step 4)
+    - Investigation/debugging needed? → Create ticket, skip to TDD (step 4)
+    - Complex feature (multi-story)? → Create ticket, continue to planning docs (step 1)
 
 1. **User Stories + Technical Constraints** - Search `.safeword/planning/user-stories/` or `docs/user-stories/`
-
    - Not found → Ask user if they exist elsewhere or offer to create
    - Found → Read them (including Technical Constraints section)
    - **Technical Constraints:** Non-functional requirements (performance, security, compatibility) that inform test definitions
    - **Guide:** `@./.safeword/guides/user-story-guide.md`
 
 2. **Test Definitions** - Search `.safeword/planning/test-definitions/` or `docs/test-definitions/`
-
    - Not found → Ask user if they exist elsewhere or offer to create
    - Found → Read them
    - **Guide:** `@./.safeword/guides/test-definitions-guide.md`
 
 3. **Design Doc** (complex features only) - Search `.safeword/planning/design/` or `docs/design/`
-
    - Complex = >3 components, spans 2+ user stories, new data model, or architectural decisions
    - Not found → Ask if needed, create if yes
    - Found → Read it
@@ -286,6 +309,7 @@ last_modified: 2025-11-24T19:09:00Z
 **Commit early, commit often:** Small, atomic commits after each meaningful change.
 
 **When to commit:**
+
 - After each test passes (GREEN phase)
 - Before refactoring (safe point to revert)
 - After successful refactor
@@ -315,12 +339,12 @@ last_modified: 2025-11-24T19:09:00Z
 
 **Quick Decision Matrix:**
 
-| Question | Architecture Doc | Design Doc |
-|----------|------------------|------------|
-| Tech/framework choice? | ✅ | — |
-| Data model design? | ✅ | References it |
-| New feature implementation? | — | ✅ |
-| Component breakdown? | — | ✅ |
+| Question                    | Architecture Doc | Design Doc    |
+| --------------------------- | ---------------- | ------------- |
+| Tech/framework choice?      | ✅               | —             |
+| Data model design?          | ✅               | References it |
+| New feature implementation? | —                | ✅            |
+| Component breakdown?        | —                | ✅            |
 
 **Tie-breaking rule:** If decision affects 2+ features or multiple developers → Architecture doc. If feature-specific only → Design doc.
 
@@ -331,6 +355,7 @@ last_modified: 2025-11-24T19:09:00Z
 ### Layers & Boundaries
 
 **When to read:**
+
 - Setting up code organization for a new project
 - Questions about layer structure (app, domain, infra, shared)
 - Dependency rules between layers
@@ -346,6 +371,7 @@ last_modified: 2025-11-24T19:09:00Z
 ### Architecture Review (LLM)
 
 **When to read:**
+
 - Running semantic architecture review on code changes
 - Setting up pre-commit hook for architecture enforcement
 - Setting up CI workflow for PR architecture checks
@@ -386,6 +412,7 @@ last_modified: 2025-11-24T19:09:00Z
 - **Prerequisites:** Verify user stories and test definitions exist first (create if not)
 
 **Required sections checklist:**
+
 - [ ] **Architecture** — 1-2 paragraphs on high-level approach
 - [ ] **Components** — [N] and [N+1] examples with name, responsibility, interface, dependencies
 - [ ] **User Flow** — Step-by-step with concrete examples
@@ -408,6 +435,7 @@ last_modified: 2025-11-24T19:09:00Z
   - Project-wide patterns/conventions
 
 **Required sections checklist** (verify all present when creating/reviewing):
+
 - [ ] **Header** — Version, Last Updated, Status (Production/Design/Proposed)
 - [ ] **Table of Contents** — Section links
 - [ ] **Overview** — Technology choices, data model philosophy, high-level architecture
@@ -421,6 +449,7 @@ last_modified: 2025-11-24T19:09:00Z
 - [ ] **Code References** — Link to implementations (`src/file.ts:line` or function names)
 
 **Anti-patterns to avoid:**
+
 - ❌ ADR sprawl (many separate files) → consolidate into one doc
 - ❌ Missing rationale → every decision needs "Why" with specifics
 - ❌ Implementation details → keep high-level principles only
@@ -490,16 +519,19 @@ last_modified: 2025-11-24T19:09:00Z
 ## Response Format (CRITICAL - Always Include)
 
 At the end of EVERY response, include a JSON summary with this exact structure:
+
 ```json
 {"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}
 ```
 
 Where (all fields describe **this response only**, not cumulative):
+
 - `proposedChanges`: `true` if you suggested/proposed changes to specific files **in this response**
 - `madeChanges`: `true` if you **modified files in this response** using Write/Edit tools
 - `askedQuestion`: `true` if you asked the user a question and need their response before proceeding
 
 Examples:
+
 - Discussed approach only: `{"proposedChanges": false, "madeChanges": false, "askedQuestion": false}`
 - Proposed edits but waiting for approval: `{"proposedChanges": true, "madeChanges": false, "askedQuestion": false}`
 - Made edits directly: `{"proposedChanges": false, "madeChanges": true, "askedQuestion": false}`
@@ -515,12 +547,12 @@ Examples:
 
 **Decision:** Is this the simplest solution that works?
 
-| ❌ Over-engineering | ✅ Keep it simple |
-|---------------------|-------------------|
-| Utility class for one function | Single function |
+| ❌ Over-engineering               | ✅ Keep it simple   |
+| --------------------------------- | ------------------- |
+| Utility class for one function    | Single function     |
 | Factory/builder for simple object | Direct construction |
-| Config file for 2 options | Hardcode or params |
-| Abstract class with one impl | Concrete class |
+| Config file for 2 options         | Hardcode or params  |
+| Abstract class with one impl      | Concrete class      |
 
 **When to push back:** If feature adds >50 lines for "nice to have", ask user if essential now.
 
@@ -625,6 +657,7 @@ Core coding principles, testing philosophy (TDD), communication style, best prac
 **When to read:** When creating user stories, test definitions, design docs, or evaluations. Provides templates and examples of good vs bad practices.
 
 **Triggers:**
+
 - Creating user stories, test definitions, or design docs
 - User asks "Which template should I use?" or "What doc type for X?"
 - Need examples of good vs bad user stories or tests
@@ -692,6 +725,7 @@ How to write, organize, and maintain AGENTS.md/CLAUDE.md files across projects. 
 ## Zombie Process Cleanup
 
 **When to read:**
+
 - Working on multiple projects simultaneously
 - Port already in use errors (`EADDRINUSE`, `address already in use`)
 - Stuck processes (dev server won't start, tests hang)
@@ -708,6 +742,7 @@ Port-based cleanup strategies, project-specific scripts, and multi-project isola
 **When to read:** When experiencing debugging complexity (5+ debug cycles, user says "stuck"), discovering gotchas, trying multiple approaches, or during significant implementation work. Use to determine if/where to extract learnings and check for existing learnings.
 
 **Suggest extraction when you observe:**
+
 1. **Observable debugging complexity** - User says "stuck", 5+ debug cycles, 3+ error states, or 3+ files modified
 2. **Trial and error** - Tried 3+ different approaches
 3. **Undocumented gotcha** - Not in official library/framework docs
@@ -716,20 +751,24 @@ Port-based cleanup strategies, project-specific scripts, and multi-project isola
 6. **Architectural insight** - Discovered during implementation, not planned upfront
 
 **CRITICAL: Before extracting, ALWAYS check for existing learnings** to prevent duplication:
+
 - **Before debugging** - Check if similar issue has learning: `ls .safeword/learnings/*[technology]*.md`
 - **When user mentions technology/pattern** - Check for `*hooks*.md`, `*electron*.md`, etc.
 - **During architectural discussions** - Check for `*pattern*.md`, `*architecture*.md`
 - **After suggesting extraction** - Check if learning already exists, update instead of duplicate
 
 **When to reference existing learnings:**
+
 - Found → Read and apply: "I found an existing learning about [concept] at [path]. Applying it now."
 - Similar but different → Reference and note difference
 
 **Where to extract:**
+
 - `.safeword/learnings/[concept].md` - General patterns and best practices (React patterns, Git workflows, testing)
 - `.safeword/learnings/[concept].md` - Project-specific (custom architecture, unique patterns for this codebase)
 
 **Maintenance triggers:**
+
 - Learning file >200 lines → Split into focused files
 - Multiple learnings cover similar topic → Consolidate
 - Technology deprecated → Archive with "OBSOLETE:" prefix

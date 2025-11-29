@@ -7,11 +7,13 @@ Implementation roadmap for upgrading Safeword to elite developer experience stan
 ## 1. One-Command Installation: Debate & Decision
 
 ### Option A: curl Installer
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/TheMostlyGreat/safeword/main/install.sh | bash
 ```
 
 **Pros:**
+
 - Universal (works on any Unix system without Node.js)
 - Fast (no npm registry delays)
 - Direct from source (GitHub)
@@ -19,6 +21,7 @@ curl -fsSL https://raw.githubusercontent.com/TheMostlyGreat/safeword/main/instal
 - Standard pattern (Rust, Homebrew, Docker use this)
 
 **Cons:**
+
 - Scary for security-conscious devs ("piping to bash")
 - No built-in version management (must handle manually)
 - Harder to distribute updates (users must re-curl)
@@ -29,6 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/TheMostlyGreat/safeword/main/instal
 ---
 
 ### Option B: npx/npm
+
 ```bash
 npx @safeword/cli init
 # or
@@ -37,6 +41,7 @@ safeword init
 ```
 
 **Pros:**
+
 - Instant run (npx downloads + executes, no install)
 - Automatic updates (npm handles versions)
 - Works cross-platform (Windows, macOS, Linux)
@@ -45,6 +50,7 @@ safeword init
 - npm registry handles distribution
 
 **Cons:**
+
 - Requires Node.js (not universal)
 - npm registry can be slow
 - Global installs can conflict between projects
@@ -55,18 +61,21 @@ safeword init
 ---
 
 ### Option C: brew tap (macOS only)
+
 ```bash
 brew install safeword/tap/safeword
 safeword init
 ```
 
 **Pros:**
+
 - Native package manager (trusted by macOS devs)
 - Automatic updates (brew upgrade)
 - Clean uninstall (brew uninstall)
 - Version pinning (brew pin)
 
 **Cons:**
+
 - macOS only (70%+ of devs, but not universal)
 - Requires maintaining Homebrew formula
 - Slower adoption (must discover tap)
@@ -89,6 +98,7 @@ safeword init
    - Dependencies (no manual installs)
 
 3. **Team onboarding magic** - Can add to `package.json`:
+
    ```json
    {
      "devDependencies": {
@@ -99,9 +109,11 @@ safeword init
      }
    }
    ```
+
    Teammates run `npm install` → Safeword auto-configures. **Zero manual steps.**
 
 4. **npx is instant** - No global install needed:
+
    ```bash
    npx @safeword/cli init    # Downloads, runs, caches
    npx @safeword/cli status  # Uses cached version
@@ -122,6 +134,7 @@ safeword init
 ### Implementation
 
 **In CLI:**
+
 ```bash
 safeword --version              # 1.2.3
 safeword update                 # Update to latest (npm update -g @safeword/cli)
@@ -130,24 +143,28 @@ safeword changelog              # Print CHANGELOG.md or open in browser
 ```
 
 **Version in project:**
+
 - Store in `.safeword/version` file: `1.2.3`
 - CLI checks on `safeword status`:
+
   ```
   Project safeword version: 1.2.3
   Latest available: 1.3.0
-  
+
   Update? safeword upgrade-project
   ```
 
 **Breaking changes:**
+
 - Semantic versioning (semver): `MAJOR.MINOR.PATCH`
 - Major bumps = breaking changes (require migration)
 - CLI detects version mismatch and offers migration:
+
   ```bash
   safeword status
-  
+
   ⚠ Project safeword version (1.x) is outdated (latest: 2.0.0)
-  
+
   Run migration: safeword migrate --from 1.x --to 2.x
   ```
 
@@ -156,6 +173,7 @@ safeword changelog              # Print CHANGELOG.md or open in browser
 ## 3. Interactive Mode with Defaults
 
 ### Current Flow (Silent)
+
 ```bash
 bash ./framework/scripts/setup-safeword.sh
 # ... tons of output ...
@@ -163,47 +181,49 @@ bash ./framework/scripts/setup-safeword.sh
 ```
 
 ### Elite Flow (Interactive)
+
 ```bash
 safeword init
 
 # Detecting project...
 # ✓ Found: Next.js with TypeScript
-# 
+#
 # Install options:
 #   [1] Recommended (auto-linting + quality review)
 #   [2] Auto-linting only
 #   [3] Quality review only
 #   [4] Custom (choose components)
-# 
-# Choice [1]: 
-# 
+#
+# Choice [1]:
+#
 # Linting mode:
 #   [1] Auto-detect (recommended: biome)
 #   [2] ESLint + Prettier
 #   [3] Biome
 #   [4] Skip linting
-# 
+#
 # Choice [1]:
-# 
+#
 # Installing... ███████████████████████░ 90%
-# 
+#
 # ✓ Configured in 4.2s
-# 
+#
 # Installed:
 #   • Auto-linting (biome, 15MB)
 #   • Quality review hooks
 #   • SAFEWORD.md with .safeword/SAFEWORD.md reference
-# 
+#
 # Next steps:
 #   1. git add .safeword .claude SAFEWORD.md
 #   2. git commit -m "Add safeword config"
 #   3. Ask Claude to create a file (test hooks)
-# 
+#
 # Verification:
 #   safeword status
 ```
 
 ### Non-interactive (CI mode)
+
 ```bash
 safeword init --yes          # Accept all defaults
 safeword init --ci           # Non-interactive, uses defaults, no colors
@@ -221,7 +241,7 @@ safeword init --linting-only # Skip quality review
 1. **Files created:**
    - ✓ `.safeword/SAFEWORD.md` exists
    - ✓ `.safeword/guides/` exists (12 files)
-   - ✓ `.claude/hooks/` exists (auto-lint.sh, auto-quality-review.sh, run-*.sh)
+   - ✓ `.claude/hooks/` exists (auto-lint.sh, auto-quality-review.sh, run-\*.sh)
    - ✓ `.claude/settings.json` exists
    - ✓ `SAFEWORD.md` or `CLAUDE.md` exists
 
@@ -276,6 +296,7 @@ Next: git add .safeword .claude SAFEWORD.md
 ```
 
 **If verification fails:**
+
 ```bash
 Running verification...
 
@@ -294,12 +315,15 @@ Fix: Re-run setup with --force
 ### Current Problem
 
 README says:
+
 ```bash
 # (Deprecated) global clone — prefer project-local scripts
 ```
 
 This creates **global state** that devs must manage:
+
 # Use project-local scripts in ./framework/scripts/, no global update step
+
 - Manual git operations
 - Confusing mental model (is safeword global or per-project?)
 
@@ -333,16 +357,17 @@ When you run `npx @safeword/cli init`:
 3. Project is now **standalone** (no external dependencies)
 
 To update project:
+
 ```bash
 safeword upgrade-project
 
 # Fetching latest from npm...
 # Upgrading .safeword/ from 1.2.3 → 1.3.0
-# 
+#
 # Changed files:
 #   • guides/testing-methodology.md (updated)
 #   • guides/llm-prompting.md (new)
-# 
+#
 # ✓ Upgraded to 1.3.0
 ```
 
@@ -370,11 +395,13 @@ CLI caches guides in `~/.cache/safeword/` (no global folder):
 4. Project is standalone (cache only speeds up future installs)
 
 **Benefits:**
+
 - Faster installs (no repeated npm downloads)
 - Offline support (cached versions work without network)
 - Multiple projects share cache (save disk space)
 
 **Clear cache:**
+
 ```bash
 safeword cache clear         # Remove all cached versions
 safeword cache clear --older-than 1.2.0  # Remove old versions
@@ -401,6 +428,7 @@ my-project/.safeword/learnings/custom-auth-flow.md
 ```
 
 **CLI behavior:**
+
 ```bash
 # In project directory
 safeword learning add react-hooks-gotchas --global
@@ -414,6 +442,7 @@ safeword learning list
 ```
 
 **Agent behavior:** When agent needs learnings, check both:
+
 1. `.safeword/learnings/*` (project-specific)
 2. `~/.config/safeword/learnings/*` (global, cross-project)
 
@@ -426,6 +455,7 @@ safeword learning list
 ### The Problem
 
 **Current flow:**
+
 1. Dev sets up safeword: `bash ./framework/scripts/setup-safeword.sh`
 2. Commits `.safeword/` and `.claude/` to git
 3. Teammate clones project
@@ -439,6 +469,7 @@ safeword learning list
 ### Elite Solution: Automatic Onboarding
 
 **Step 1: Dev sets up project**
+
 ```bash
 cd my-project
 npx @safeword/cli init
@@ -447,6 +478,7 @@ npx @safeword/cli init
 ```
 
 **package.json after setup:**
+
 ```json
 {
   "devDependencies": {
@@ -459,6 +491,7 @@ npx @safeword/cli init
 ```
 
 **Step 2: Dev commits**
+
 ```bash
 git add .safeword/ .claude/ SAFEWORD.md package.json
 git commit -m "Add safeword config"
@@ -466,6 +499,7 @@ git push
 ```
 
 **Step 3: Teammate clones and installs**
+
 ```bash
 git clone my-project
 cd my-project
@@ -483,11 +517,12 @@ npm install    # or pnpm install, yarn install
    - ✓ SAFEWORD.md exists (from git)
    - ✓ Hooks registered in `.claude/settings.json`
 5. Output:
+
    ```
    Safeword detected in project
    ✓ Configuration valid
    ✓ Hooks active
-   
+
    Ready to use Claude Code!
    ```
 
@@ -504,7 +539,7 @@ safeword verify --auto-init
 if [ -d .safeword ] && [ -d .claude ]; then
   # Project already configured
   echo "✓ Safeword configured"
-  
+
   # Verify hooks are valid
   if [ hooks_valid ]; then
     echo "✓ Hooks active"
@@ -533,6 +568,7 @@ fi
 Some teams don't want `postinstall` scripts (security concerns).
 
 **Alternative:** Add to `.git/hooks/post-checkout`:
+
 ```bash
 #!/bin/bash
 # Auto-verify safeword on branch checkout
@@ -549,11 +585,13 @@ Teammate checks out branch → Hooks auto-verify.
 ### Why This is Elite
 
 **Zero documentation needed.** Teammate workflow:
+
 1. `git clone`
 2. `npm install`
 3. Done
 
 Compare to current:
+
 1. `git clone`
 2. Read README
 3. Install safeword manually
@@ -569,11 +607,13 @@ Compare to current:
 ### The Problem
 
 **CI/CD pipelines are non-interactive:**
+
 - No human to answer prompts
 - No TTY (no colors, no progress bars)
 - Failure = block deployment
 
 **Current safeword setup:**
+
 - Prompts for input (breaks CI)
 - Verbose output (clutters logs)
 - No way to verify success programmatically
@@ -634,15 +674,19 @@ safeword verify --ci
 **Use cases:**
 
 1. **Enforce safeword in PRs:**
+
    ```yaml
    - run: npx @safeword/cli verify --ci
    ```
+
    PR fails if safeword not configured → Forces devs to set it up.
 
 2. **Auto-setup in Docker:**
+
    ```dockerfile
    RUN npx @safeword/cli init --ci
    ```
+
    No prompts, works in non-interactive Docker build.
 
 3. **Monorepo setup script:**
@@ -660,18 +704,18 @@ safeword verify --ci
 
 ### Debate
 
-| Criteria | TypeScript | Bash |
-|----------|-----------|------|
-| **npm distribution** | ✓ Native (npm packages) | ⚠ Requires bundling |
-| **Cross-platform** | ✓ Node.js everywhere | ⚠ Windows needs WSL/Git Bash |
-| **Version management** | ✓ package.json | ✗ Manual versioning |
-| **Testing** | ✓ Jest/Vitest | ⚠ bats or manual |
-| **Maintainability** | ✓ Type safety, refactorable | ⚠ Brittle, hard to refactor |
-| **Speed** | ⚠ 100-200ms Node.js startup | ✓ Instant (native) |
-| **Dependencies** | ✓ npm ecosystem | ⚠ Limited (jq, curl, grep) |
-| **File operations** | ✓ fs module | ✓ Native |
-| **JSON parsing** | ✓ Native | ⚠ Requires jq |
-| **Error handling** | ✓ Try/catch | ⚠ set -e (brittle) |
+| Criteria               | TypeScript                  | Bash                         |
+| ---------------------- | --------------------------- | ---------------------------- |
+| **npm distribution**   | ✓ Native (npm packages)     | ⚠ Requires bundling          |
+| **Cross-platform**     | ✓ Node.js everywhere        | ⚠ Windows needs WSL/Git Bash |
+| **Version management** | ✓ package.json              | ✗ Manual versioning          |
+| **Testing**            | ✓ Jest/Vitest               | ⚠ bats or manual             |
+| **Maintainability**    | ✓ Type safety, refactorable | ⚠ Brittle, hard to refactor  |
+| **Speed**              | ⚠ 100-200ms Node.js startup | ✓ Instant (native)           |
+| **Dependencies**       | ✓ npm ecosystem             | ⚠ Limited (jq, curl, grep)   |
+| **File operations**    | ✓ fs module                 | ✓ Native                     |
+| **JSON parsing**       | ✓ Native                    | ⚠ Requires jq                |
+| **Error handling**     | ✓ Try/catch                 | ⚠ set -e (brittle)           |
 
 ---
 
@@ -734,6 +778,7 @@ safeword verify --ci
 ```
 
 **Entry point (`cli.ts`):**
+
 ```typescript
 #!/usr/bin/env node
 import { Command } from 'commander';
@@ -743,10 +788,7 @@ import { verify } from './commands/verify';
 
 const program = new Command();
 
-program
-  .name('safeword')
-  .description('Elite DX for Claude Code patterns')
-  .version('1.0.0');
+program.name('safeword').description('Elite DX for Claude Code patterns').version('1.0.0');
 
 program
   .command('init')
@@ -756,10 +798,7 @@ program
   .option('--linting-only', 'Skip quality review setup')
   .action(init);
 
-program
-  .command('status')
-  .description('Show project status and health')
-  .action(status);
+program.command('status').description('Show project status and health').action(status);
 
 program
   .command('verify')
@@ -776,6 +815,7 @@ program.parse();
 ### Embedding Templates
 
 **Templates live in npm package:**
+
 ```
 @safeword/cli/src/templates/
 ├── SAFEWORD.md
@@ -794,6 +834,7 @@ program.parse();
 ```
 
 **On `safeword init`:**
+
 ```typescript
 import fs from 'fs-extra';
 import path from 'path';
@@ -801,10 +842,10 @@ import path from 'path';
 export async function copyTemplates(projectDir: string) {
   const templatesDir = path.join(__dirname, '../templates');
   const targetDir = path.join(projectDir, '.safeword');
-  
+
   // Copy all templates to project
   await fs.copy(templatesDir, targetDir);
-  
+
   console.log('✓ Copied guides and patterns to .safeword/');
 }
 ```
@@ -816,6 +857,7 @@ export async function copyTemplates(projectDir: string) {
 ## 10. Progress Bar + Summary Output
 
 ### Current (Verbose)
+
 ```
 ================================
 Claude Code Project Setup
@@ -848,6 +890,7 @@ Mode: biome
 ---
 
 ### Elite (Concise)
+
 ```bash
 safeword init
 
@@ -858,7 +901,7 @@ Install options:
   [2] Auto-linting only
   [3] Quality review only
 
-Choice [1]: 
+Choice [1]:
 
 Installing...
 
@@ -886,10 +929,10 @@ import chalk from 'chalk';
 
 export async function install(options: InstallOptions) {
   const spinner = ora('Detecting project...').start();
-  
+
   const projectType = await detectProjectType();
   spinner.succeed(`Detected: ${projectType}`);
-  
+
   // Interactive prompts
   const answers = await prompt([
     {
@@ -904,16 +947,16 @@ export async function install(options: InstallOptions) {
       initial: 0,
     },
   ]);
-  
+
   // Install with progress
   spinner.start('Installing...');
-  
-  await installLinting({ onProgress: (pct) => spinner.text = `Linting ${pct}%` });
-  await installQualityReview({ onProgress: (pct) => spinner.text = `Quality review ${pct}%` });
-  await copyGuides({ onProgress: (pct) => spinner.text = `Guides ${pct}%` });
-  
+
+  await installLinting({ onProgress: pct => (spinner.text = `Linting ${pct}%`) });
+  await installQualityReview({ onProgress: pct => (spinner.text = `Quality review ${pct}%`) });
+  await copyGuides({ onProgress: pct => (spinner.text = `Guides ${pct}%`) });
+
   spinner.succeed('Configured in 4.2s');
-  
+
   // Summary
   console.log('\nInstalled:');
   console.log('  • Auto-linting (biome)');
@@ -928,6 +971,7 @@ export async function install(options: InstallOptions) {
 ## Implementation Phases
 
 ### Phase 1: Core CLI (v1.0.0)
+
 - ✓ TypeScript CLI with commander
 - ✓ `safeword init` (interactive + --ci mode)
 - ✓ Automatic verification after init
@@ -937,12 +981,14 @@ export async function install(options: InstallOptions) {
 - ✓ Publish to npm as `@safeword/cli`
 
 ### Phase 2: Advanced Features (v1.1.0)
+
 - ✓ `safeword status` (health check)
 - ✓ `safeword upgrade-project` (update guides)
 - ✓ `safeword learning add/list` (manage learnings)
 - ✓ `safeword verify --auto-init` (teammate onboarding)
 
 ### Phase 3: Ecosystem (v1.2.0)
+
 - ✓ `safeword cache clear` (manage cache)
 - ✓ `safeword migrate --from 1.x --to 2.x` (version migrations)
 - ✓ curl installer (for non-Node projects)
@@ -953,6 +999,7 @@ export async function install(options: InstallOptions) {
 ## Next Steps
 
 1. **Create TypeScript CLI scaffold:**
+
    ```bash
    mkdir packages/cli
    cd packages/cli
@@ -970,6 +1017,7 @@ export async function install(options: InstallOptions) {
    - Copy `SAFEWORD.md`, `guides/`, `hooks/` to `src/templates/`
 
 4. **Test locally:**
+
    ```bash
    npm link
    cd ~/test-project
@@ -977,6 +1025,7 @@ export async function install(options: InstallOptions) {
    ```
 
 5. **Publish to npm:**
+
    ```bash
    npm publish --access public
    ```

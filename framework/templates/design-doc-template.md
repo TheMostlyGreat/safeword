@@ -21,6 +21,7 @@
 **What**: [Responsibility in 1 sentence]
 **Where** (if applicable): `[file/path/component.ts]`
 **Interface**:
+
 ```typescript
 // Key types/interfaces
 interface Example {
@@ -40,6 +41,7 @@ function doSomething(input: Example): Result;
 **What**: [Different responsibility than Component N]
 **Where** (if applicable): `[different/file/path.ts]`
 **Interface**:
+
 ```typescript
 // Different example
 interface AnotherExample {
@@ -78,6 +80,7 @@ interface Item {
 Component [N] → Component [N+1]
 
 **Events/Calls:**
+
 - Component [N] triggers [event/method] in Component [N+1]
 - Component [N+1] updates [state/data] consumed by [other components/system]
 
@@ -104,19 +107,23 @@ Component [N] → Component [N+1]
 ## Implementation Notes (if applicable)
 
 **Constraints**:
+
 - [Technical limitation, e.g., "Must support Safari 14+", "No Node.js dependencies"]
 - [Performance requirement, e.g., "< 200ms response time", "Bundle size < 100KB"]
 
 **Error Handling**:
+
 - [How errors are caught and handled]
 - [User-facing vs internal errors]
 - [Retry/fallback strategies]
 
 **Gotchas**:
+
 - [Edge case or common mistake]
 - [Thing to watch out for]
 
 **Open Questions**:
+
 - [ ] [Blocking question]
 - [ ] [Needs research]
 

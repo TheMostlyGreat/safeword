@@ -8,4 +8,3 @@ Double check and critique your work just in case.
 - Ask me any non-obvious questions you can't research yourself in the codebase or online.
 - Think hard.
 - Avoid bloat.
-

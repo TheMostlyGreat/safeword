@@ -1,7 +1,7 @@
 ---
 name: quality-reviewer
 description: Deep code quality review with web research. Use when user explicitly requests verification against latest docs ('double check against latest', 'verify versions', 'check security'), needs deeper analysis beyond automatic hook, or is working on projects without SAFEWORD.md/CLAUDE.md. Fetches current documentation (WebFetch), checks latest versions (WebSearch), and provides deep analysis (performance, security, alternatives).
-allowed-tools: "*"
+allowed-tools: '*'
 ---
 
 # Quality Reviewer
@@ -11,6 +11,7 @@ Deep quality review with web research to verify code against the latest ecosyste
 **Primary differentiator**: Web research (WebSearch, WebFetch) to verify against current versions, documentation, and best practices.
 
 **Triggers**:
+
 - **Explicit web research request**: "double check against latest docs", "verify we're using latest version", "check for security issues"
 - **Deep dive needed**: User wants analysis beyond automatic hook (performance, architecture alternatives, trade-offs)
 - **No SAFEWORD.md/CLAUDE.md**: Projects without context files (automatic hook won't run, manual review needed)
@@ -18,6 +19,7 @@ Deep quality review with web research to verify code against the latest ecosyste
 - **Model-invoked**: Claude determines web research would be valuable
 
 **Relationship to automatic quality hook**:
+
 - **Automatic hook**: Fast quality check using existing knowledge + project context (guaranteed, runs on every change)
 - **This skill**: Deep review with web research when verification against current ecosystem is needed (on-demand, 2-3 min)
 
@@ -26,6 +28,7 @@ Deep quality review with web research to verify code against the latest ecosyste
 ### 1. Identify What Changed
 
 Understand context:
+
 - What files were just modified?
 - What problem is being solved?
 - What was the implementation approach?
@@ -37,6 +40,7 @@ ls CLAUDE.md SAFEWORD.md ARCHITECTURE.md .claude/
 ```
 
 Read relevant standards:
+
 - `CLAUDE.md` or `SAFEWORD.md` - Project-specific guidelines
 - `ARCHITECTURE.md` - Architectural principles
 - `@./.safeword/guides/code-philosophy.md` - Core coding principles
@@ -44,19 +48,23 @@ Read relevant standards:
 ### 3. Evaluate Correctness
 
 **Will it work?**
+
 - Does the logic make sense?
 - Are there obvious bugs?
 
 **Edge cases:**
+
 - Empty inputs, null/undefined, boundary conditions (0, -1, max)?
 - Concurrent access, network failures?
 
 **Error handling:**
+
 - Are errors caught appropriately?
 - Helpful error messages?
 - Cleanup handled (resources, connections)?
 
 **Logic errors:**
+
 - Off-by-one errors, race conditions, wrong assumptions?
 
 ### 4. Evaluate Anti-Bloat
@@ -75,10 +83,12 @@ Read relevant standards:
 ### 6. Check Standards Compliance
 
 **Project standards** (from CLAUDE.md/SAFEWORD.md/ARCHITECTURE.md):
+
 - Does it follow established patterns?
 - Does it violate any documented principles?
 
 **Library best practices:**
+
 - Are we using libraries correctly?
 - Are we following official documentation?
 
@@ -92,6 +102,7 @@ WebSearch: "[library name] security vulnerabilities"
 ```
 
 **Flag if outdated:**
+
 - Major versions behind → WARN (e.g., React 17 when 19 is stable)
 - Minor versions behind → NOTE (e.g., React 19.0.0 when 19.1.0 is stable)
 - Security vulnerabilities → CRITICAL (must upgrade)
@@ -112,6 +123,7 @@ WebFetch: https://www.electronjs.org/docs (for Electron)
 ```
 
 **Look for:**
+
 - Are we using deprecated APIs?
 - Are there newer, better patterns?
 - Did the library's recommendations change since training data?
@@ -121,11 +133,13 @@ WebFetch: https://www.electronjs.org/docs (for Electron)
 ## Output Format
 
 **Simple question** ("is it correct?"):
+
 ```
 **Correctness:** ✓ Logic is sound, edge cases handled, no obvious errors.
 ```
 
 **Full review** ("double check and critique"):
+
 ```markdown
 ## Quality Review
 
@@ -178,13 +192,16 @@ Use structured format for "double check"/"critique". Use brief format for specif
 ## Non-Obvious Edge Cases
 
 **User requests review after automatic hook ran:**
+
 - Acknowledge hook ran: "The automatic quality hook already did a fast check. I'll now do deeper analysis with web research..."
 - Focus on what automatic hook doesn't do: fetch latest docs, verify versions, security checks, performance analysis
 
 **WebSearch/WebFetch fails:**
+
 - Continue review without version/docs checks
 - Note: "Couldn't verify latest versions/docs, skipping that check"
 
 **Project has no CLAUDE.md/SAFEWORD.md:**
+
 - Use `@./.safeword/guides/code-philosophy.md` as fallback
 - Note: "No project-specific standards found, using general best practices"

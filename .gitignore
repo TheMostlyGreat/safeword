@@ -1,7 +1,16 @@
 node_modules/
 package-lock.json
-.claude/
-.safeword/
+examples/
 .prettierignore
 .prettierrc
 eslint.config.mjs
+.env
+.env.local
+
+# Test artifacts
+eval-results.json
+
+# Claude Code - Personal settings
+.claude/settings.local.json
+.claude/todos/
+.claude/shell-snapshots/

@@ -14571,9 +14571,7 @@
     ],
     "scenarios": [],
     "env": {},
-    "outputPath": [
-      "./eval-results.json"
-    ],
+    "outputPath": ["./eval-results.json"],
     "extensions": [],
     "metadata": {},
     "evaluateOptions": {}

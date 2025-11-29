@@ -1,9 +1,8 @@
 {
   "name": "arcade",
   "transport": "http",
-  "url": "${ARCADE_MCP_GATEWAY_URL}",
+  "url": "https://mcp.arcade.dev",
   "headers": {
-    "Authorization": "Bearer ${ARCADE_API_KEY}"
+    "Authorization": "Bearer YOUR_ARCADE_API_KEY"
   }
 }
-

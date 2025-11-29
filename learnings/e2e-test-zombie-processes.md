@@ -12,6 +12,7 @@ When E2E test frameworks (Playwright, Cypress) start dev servers via `webServer`
 - Accumulating zombie processes across multiple test runs
 
 ❌ **Bad:** Running multiple test commands simultaneously
+
 ```bash
 # Terminal 1
 pnpm test &
@@ -24,6 +25,7 @@ pnpm test &
 ```
 
 ✅ **Good:** Enforce sequential execution
+
 ```bash
 # Terminal 1
 pnpm test
@@ -35,6 +37,7 @@ pnpm test
 ```
 
 **Why it matters:**
+
 - Users don't realize background processes are still running
 - Each retry attempt doubles the problem (retry #1 spawns another webServer)
 - Can accumulate 8+ zombie processes across a debugging session
@@ -50,6 +53,7 @@ In your testing docs (e.g., `tests/SAFEWORD.md`), add prominent warning:
 ### Zombie processes / Port already in use
 
 **NEVER run multiple `pnpm test` commands simultaneously**
+
 - Only run ONE test command at a time
 - Wait for previous test run to complete before starting another
 
@@ -73,10 +77,11 @@ export default defineConfig({
     stdout: 'pipe', // Capture output for debugging hangs
     stderr: 'pipe', // Capture errors
   },
-})
+});
 ```
 
 **Key settings:**
+
 - `reuseExistingServer: !process.env.CI` - Reuse server locally (faster), fresh in CI (reliable)
 - `stdout: 'pipe'` / `stderr: 'pipe'` - Capture output to debug when webServer hangs
 - `workers: 1` in CI - Forces sequential execution where parallelism is most dangerous
@@ -99,6 +104,7 @@ sleep 5
 ## Debugging Zombie Processes
 
 ### Symptoms
+
 - Error: `Port 3000 is in use`
 - Error: `Timed out waiting 120000ms from config.webServer`
 - Tests hang during retry phase
@@ -120,6 +126,7 @@ pgrep -fl node
 ### Fix
 
 1. **Kill all test-related processes**
+
    ```bash
    pkill -9 -f "pnpm test"
    pkill -9 -f "next dev"
@@ -127,11 +134,13 @@ pgrep -fl node
    ```
 
 2. **Verify ports are clear**
+
    ```bash
    lsof -i:3000  # Should return nothing
    ```
 
 3. **Wait before restarting**
+
    ```bash
    sleep 5  # Give processes time to fully terminate
    ```
@@ -144,11 +153,13 @@ pgrep -fl node
 ## Testing Trap
 
 **Tests pass locally but fail in CI:**
+
 - **Cause:** Local machine has `reuseExistingServer: true`, so dev server stays running across test runs
 - **In CI:** Fresh server every time, exposes timing/startup issues
 - **Fix:** Occasionally test locally with `reuseExistingServer: false` to catch CI-only failures
 
 **Tests hang during retry phase:**
+
 - **Cause:** Retry spawns another webServer while first is still running
 - **Amplification:** Each retry doubles the zombie processes (1 → 2 → 4 → 8)
 - **Fix:**
@@ -160,7 +171,7 @@ pgrep -fl node
 
 ### ✅ Good: Sequential Execution in Documentation
 
-```markdown
+````markdown
 ## Running Tests
 
 ```bash
@@ -172,7 +183,9 @@ pnpm test -- path/to/file.test.ts
 
 # IMPORTANT: Wait for test run to complete before starting another
 ```
-```
+````
+
+````
 
 ### ✅ Good: Clear Warning in CI/CD Setup
 
@@ -182,16 +195,18 @@ pnpm test -- path/to/file.test.ts
   run: pnpm test
   # NOTE: Do not run multiple test commands in parallel
   # Each spawns a webServer competing for ports
-```
+````
 
 ### ❌ Bad: No Warning About Parallel Execution
 
-```markdown
+````markdown
 ## Running Tests
 
 ```bash
 pnpm test  # Run all tests
 ```
+````
+
 ```
 
 **Problem:** Developers don't know that running `pnpm test` in multiple terminals simultaneously will cause zombie processes.
@@ -213,3 +228,4 @@ pnpm test  # Run all tests
 ## Reference
 
 Discovered during demo mode E2E testing implementation (2025-11-01). See project-specific learning for demo mode testing patterns.
+```

@@ -7,6 +7,7 @@
 ## The Problem
 
 When running dev servers and E2E tests across multiple projects, zombie processes accumulate:
+
 - Dev servers holding ports
 - Playwright browser instances
 - Test runners stuck in background
@@ -21,6 +22,7 @@ When running dev servers and E2E tests across multiple projects, zombie processe
 **Prerequisite:** Each project must use a different port (e.g., Project A: 3000, Project B: 3001)
 
 **Port convention:** Dev and test instances use different ports within the same project:
+
 - **Dev port**: Project's configured port (e.g., 3000, 5173, 8080) - manual testing
 - **Test port**: Dev port + 1000 (e.g., 4000, 6173, 9080) - Playwright managed
 
@@ -43,6 +45,7 @@ sleep 2
 ```
 
 **Why this works:**
+
 - ✅ Dev + test ports are unique to this project → safe to kill
 - ✅ `$(pwd)` ensures only THIS project's tests are killed
 - ✅ Other projects completely untouched
@@ -136,11 +139,13 @@ tmux kill-session -t project-name
 ```
 
 **Pros:**
+
 - ✅ Complete isolation between projects
 - ✅ One command kills everything
 - ✅ Can detach/reattach sessions
 
 **Cons:**
+
 - ⚠️ Requires learning tmux
 - ⚠️ Different workflow
 
@@ -190,14 +195,14 @@ ps aux | grep "/Users/alex/projects/my-project"
 
 ## Quick Reference
 
-| Situation | Command |
-|-----------|---------|
+| Situation                                | Command                                                          |
+| ---------------------------------------- | ---------------------------------------------------------------- |
 | Kill dev + test servers (use your ports) | `lsof -ti:$DEV_PORT -ti:$TEST_PORT \| xargs kill -9 2>/dev/null` |
-| Kill Playwright (this project) | `pkill -f "playwright.*$(pwd)"` |
-| Kill all for this project | `./scripts/cleanup.sh` |
-| Check what's on port | `lsof -i:3000` |
-| Find zombie processes | `ps aux \| grep -E "(node\|playwright\|chromium)"` |
-| Kill by process ID | `kill -9 <PID>` |
+| Kill Playwright (this project)           | `pkill -f "playwright.*$(pwd)"`                                  |
+| Kill all for this project                | `./scripts/cleanup.sh`                                           |
+| Check what's on port                     | `lsof -i:3000`                                                   |
+| Find zombie processes                    | `ps aux \| grep -E "(node\|playwright\|chromium)"`               |
+| Kill by process ID                       | `kill -9 <PID>`                                                  |
 
 ---
 

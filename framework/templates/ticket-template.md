@@ -18,6 +18,7 @@ last_modified: YYYY-MM-DDTHH:MM:SSZ
 **CRITICAL: Re-read this ticket before each significant action to stay on track.**
 
 **Log immediately after:**
+
 - Starting work
 - Completing a step
 - Trying an approach (document result: success or failure)
@@ -28,6 +29,7 @@ last_modified: YYYY-MM-DDTHH:MM:SSZ
 **Format:** `YYYY-MM-DDTHH:MM:SSZ Action: Description (refs: commit/file/PR)`
 
 **Examples:**
+
 ```
 - 2025-11-24T18:50:00Z Started: Changing button background to red
 - 2025-11-24T18:51:30Z Tried: Added `background: red` to Button.css
@@ -47,6 +49,7 @@ last_modified: YYYY-MM-DDTHH:MM:SSZ
 ## Optional Sections (Add When Needed)
 
 ### Planning Docs
+
 {Only for complex features that need user stories, test definitions, design docs}
 
 - .safeword/planning/user-stories/XXX-feature-name.md
@@ -54,21 +57,26 @@ last_modified: YYYY-MM-DDTHH:MM:SSZ
 - .safeword/planning/design/XXX-feature-name.md
 
 ### Scope
+
 {Only for complex features with unclear boundaries}
 
 **In scope:**
-- 
+
+-
 
 **Out of scope:**
-- 
+
+-
 
 ### Acceptance Criteria
+
 {Only for features or complex bugs where "done" isn't obvious}
 
-- [ ] 
-- [ ] 
+- [ ]
+- [ ]
 
 ### Root Cause
+
 {Only for bugs that required investigation}
 
 {What caused this issue? Document for future reference.}

@@ -15,6 +15,7 @@
 ### 1.1 Project Setup
 
 **Create CLI package structure:**
+
 ```bash
 mkdir -p packages/cli/src/{commands,lib,templates}
 cd packages/cli
@@ -22,6 +23,7 @@ npm init -y
 ```
 
 **Install dependencies:**
+
 ```bash
 # Core CLI
 npm install commander @clack/prompts
@@ -37,6 +39,7 @@ npm install -D typescript @types/node @types/fs-extra tsx vitest
 ```
 
 **Why these choices:**
+
 - `commander` - Industry standard CLI framework
 - `@clack/prompts` - Modern, beautiful prompts (used by Astro/Vite)
 - `fs-extra` - Promise-based fs with extras (copy, ensureDir)
@@ -54,6 +57,7 @@ npm install -D typescript @types/node @types/fs-extra tsx vitest
 **Purpose:** Replace `setup-safeword.sh` with interactive setup
 
 **Features:**
+
 ```bash
 safeword init                    # Interactive with prompts
 safeword init --yes              # Accept all defaults
@@ -63,6 +67,7 @@ safeword init --quality-only     # Skip linting
 ```
 
 **Flow:**
+
 1. Detect project type (Next.js, React, Electron, TypeScript, etc.)
 2. Prompt for install mode (or use defaults in --yes/--ci)
 3. Copy templates from npm package to `.safeword/` and `.claude/`
@@ -74,26 +79,28 @@ safeword init --quality-only     # Skip linting
 9. Print success summary with next steps
 
 **Auto-detection logic:**
+
 ```typescript
 export async function detectProjectType(): Promise<ProjectType> {
   const hasFile = (path: string) => fs.existsSync(path);
   const pkgJson = await readPackageJson();
-  
+
   // Check dependencies
   const deps = { ...pkgJson.dependencies, ...pkgJson.devDependencies };
-  
+
   if (deps['@biomejs/biome']) return 'biome';
   if (deps['next']) return 'nextjs';
   if (deps['electron']) return 'electron';
   if (deps['astro']) return 'astro';
   if (deps['react']) return 'react';
   if (deps['typescript'] || hasFile('tsconfig.json')) return 'typescript';
-  
+
   return 'minimal';
 }
 ```
 
 **Output (interactive mode):**
+
 ```
 $ safeword init
 
@@ -104,7 +111,7 @@ $ safeword init
    ○ Recommended (auto-linting + quality review)
    ○ Auto-linting only
    ○ Quality review only
-   
+
    ◆ Choice
    │ ● Recommended (auto-linting + quality review)
    └
@@ -140,7 +147,7 @@ $ safeword init
 
    git add .safeword .claude SAFEWORD.md package.json
    git commit -m "Add safeword config"
-   
+
    Try it: Ask Claude to create a file
 ```
 
@@ -151,6 +158,7 @@ $ safeword init
 **Purpose:** Health check + auto-repair
 
 **Features:**
+
 ```bash
 safeword verify                  # Show status, exit 0/1
 safeword verify --auto-init      # Init if not configured (teammate onboarding)
@@ -159,6 +167,7 @@ safeword verify --ci             # CI mode (minimal output)
 ```
 
 **Checks:**
+
 1. `.safeword/SAFEWORD.md` exists
 2. `.safeword/guides/` exists (count files)
 3. `.claude/hooks/` exists (verify scripts executable)
@@ -169,17 +178,18 @@ safeword verify --ci             # CI mode (minimal output)
 8. npm scripts exist (`lint`, `format`)
 
 **Repair logic:**
+
 ```typescript
 async function repair() {
   // Re-register hooks if missing
   if (!hooksRegistered()) {
     await registerHooks();
   }
-  
+
   // Fix executable permissions
   await fs.chmod('.claude/hooks/auto-lint.sh', 0o755);
   await fs.chmod('.claude/hooks/auto-quality-review.sh', 0o755);
-  
+
   // Re-add SAFEWORD.md reference if missing
   if (!agentsHasReference()) {
     await addSafewordReference();
@@ -188,6 +198,7 @@ async function repair() {
 ```
 
 **Use case (teammate onboarding):**
+
 ```json
 // package.json
 {
@@ -213,6 +224,7 @@ safeword --version
 ```
 
 **Implementation:**
+
 ```typescript
 // Read from package.json
 import { readFileSync } from 'fs';
@@ -235,6 +247,7 @@ safeword status
 ```
 
 **Output:**
+
 ```
 Safeword Status
 
@@ -259,6 +272,7 @@ To update: safeword upgrade
 ```
 
 **Data sources:**
+
 - `.safeword/version` file (created by init)
 - `.claude/settings.json` (hook registration)
 - `.auto-quality-review.config` (user preferences)
@@ -271,6 +285,7 @@ To update: safeword upgrade
 **Strategy:** Embed all templates in npm package (no external downloads, no cache complexity)
 
 **Structure:**
+
 ```
 packages/cli/src/templates/
 ├── SAFEWORD.md                 # Core patterns (copied from framework/SAFEWORD.md)
@@ -291,6 +306,7 @@ packages/cli/src/templates/
 ```
 
 **Copy operation:**
+
 ```typescript
 import { copy } from 'fs-extra';
 import { join } from 'path';
@@ -298,10 +314,10 @@ import { join } from 'path';
 export async function copyTemplates(projectDir: string) {
   const templatesDir = join(__dirname, '../templates');
   const targetDir = join(projectDir, '.safeword');
-  
+
   // Copy everything
   await copy(templatesDir, targetDir);
-  
+
   // Write version file
   const version = require('../package.json').version;
   await fs.writeFile(join(targetDir, 'version'), version);
@@ -309,6 +325,7 @@ export async function copyTemplates(projectDir: string) {
 ```
 
 **Why embed vs download:**
+
 - Templates are ~2MB total (tiny for npm)
 - Offline support (no network needed after npx download)
 - Simpler code (no cache management)
@@ -319,10 +336,10 @@ export async function copyTemplates(projectDir: string) {
 ### 1.4 Non-Interactive Mode (CI/CD)
 
 **Auto-detect non-interactive environments:**
+
 ```typescript
-const isCI = !process.stdin.isTTY || 
-             process.env.CI === 'true' ||
-             process.env.GITHUB_ACTIONS === 'true';
+const isCI =
+  !process.stdin.isTTY || process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
 
 if (isCI && !options.yes && !options.ci) {
   console.error('Error: Interactive prompts require TTY');
@@ -332,6 +349,7 @@ if (isCI && !options.yes && !options.ci) {
 ```
 
 **CI mode behavior:**
+
 ```bash
 safeword init --ci
 
@@ -343,6 +361,7 @@ safeword init --ci
 ```
 
 **GitHub Actions example:**
+
 ```yaml
 name: Verify Safeword
 on: [push]
@@ -374,19 +393,20 @@ export async function detectPackageManager(): Promise<'npm' | 'yarn' | 'pnpm'> {
 
 export async function runPackageManagerCommand(
   command: string,
-  pkgManager: 'npm' | 'yarn' | 'pnpm'
+  pkgManager: 'npm' | 'yarn' | 'pnpm',
 ) {
   const cmds = {
     npm: `npm ${command}`,
     yarn: `yarn ${command}`,
     pnpm: `pnpm ${command}`,
   };
-  
+
   await execa(cmds[pkgManager], { shell: true });
 }
 ```
 
 **Ask before mutating package.json:**
+
 ```typescript
 if (!options.yes && !options.ci) {
   const { addToDeps } = await prompts({
@@ -395,7 +415,7 @@ if (!options.yes && !options.ci) {
     message: `Add @safeword/cli to devDependencies? (${pkgManager})`,
     initial: true,
   });
-  
+
   if (addToDeps) {
     await addToPackageJson(pkgManager);
   }
@@ -413,19 +433,18 @@ import { homedir } from 'os';
 import { join } from 'path';
 
 export function getGlobalLearningsDir(): string {
-  const xdgDataHome = process.env.XDG_DATA_HOME || 
-                      join(homedir(), '.local/share');
+  const xdgDataHome = process.env.XDG_DATA_HOME || join(homedir(), '.local/share');
   return join(xdgDataHome, 'safeword/learnings');
 }
 
 export function getConfigDir(): string {
-  const xdgConfigHome = process.env.XDG_CONFIG_HOME || 
-                        join(homedir(), '.config');
+  const xdgConfigHome = process.env.XDG_CONFIG_HOME || join(homedir(), '.config');
   return join(xdgConfigHome, 'safeword');
 }
 ```
 
 **Structure:**
+
 ```
 ~/.local/share/safeword/
 └── .safeword/learnings/ # Project learnings
@@ -441,6 +460,7 @@ export function getConfigDir(): string {
 ### 1.7 Testing Strategy
 
 **Unit tests (vitest):**
+
 ```typescript
 // tests/detect.test.ts
 import { describe, it, expect } from 'vitest';
@@ -456,6 +476,7 @@ describe('detectProjectType', () => {
 ```
 
 **Integration tests (mock fs):**
+
 ```typescript
 import { vol } from 'memfs';
 import { init } from '../src/commands/init';
@@ -467,7 +488,7 @@ describe('safeword init', () => {
       '/project/package.json': JSON.stringify({ name: 'test' }),
     });
   });
-  
+
   it('creates .safeword directory', async () => {
     await init({ yes: true });
     expect(vol.existsSync('/project/.safeword')).toBe(true);
@@ -476,6 +497,7 @@ describe('safeword init', () => {
 ```
 
 **Manual smoke test:**
+
 ```bash
 # In packages/cli
 npm link
@@ -492,6 +514,7 @@ safeword status
 ## Phase 1 Checklist
 
 **Must have (blocking v1.0.0 release):**
+
 - [ ] `safeword init` with interactive prompts
 - [ ] `safeword init --yes` (non-interactive)
 - [ ] `safeword init --ci` (CI mode)
@@ -507,12 +530,14 @@ safeword status
 - [ ] Non-TTY detection (auto-enable --ci mode)
 
 **Nice to have (can ship after v1.0.0):**
+
 - [ ] `safeword status` (detailed health report)
 - [ ] `safeword verify --repair` (auto-fix broken hooks)
 - [ ] Unit tests (70%+ coverage)
 - [ ] Integration tests (smoke tests)
 
 **Defer to Phase 2:**
+
 - [ ] `safeword upgrade` (update templates)
 - [ ] `safeword learning add/list` (manage learnings)
 - [ ] Global learnings directory
@@ -526,6 +551,7 @@ safeword status
 **Package name:** `@safeword/cli`
 
 **package.json:**
+
 ```json
 {
   "name": "@safeword/cli",
@@ -534,10 +560,7 @@ safeword status
   "bin": {
     "safeword": "./dist/cli.js"
   },
-  "files": [
-    "dist/",
-    "templates/"
-  ],
+  "files": ["dist/", "templates/"],
   "keywords": ["claude-code", "tdd", "quality", "linting", "hooks"],
   "repository": "github:TheMostlyGreat/safeword",
   "license": "MIT"
@@ -545,6 +568,7 @@ safeword status
 ```
 
 **Build:**
+
 ```json
 {
   "scripts": {
@@ -556,12 +580,14 @@ safeword status
 ```
 
 **Publish:**
+
 ```bash
 npm run build
 npm publish --access public
 ```
 
 **Usage after publish:**
+
 ```bash
 npx @safeword/cli init        # Download + run (cached)
 npm install -g @safeword/cli  # Global install
@@ -573,6 +599,7 @@ safeword init                 # Run globally
 ## Migration from Bash Scripts
 
 **Current state:**
+
 - `setup-safeword.sh` (270 lines)
 - `setup-linting.sh` (738 lines)
 - `setup-quality.sh` (531 lines)
@@ -582,12 +609,14 @@ safeword init                 # Run globally
 **Target:** ~800 lines of TypeScript (more maintainable, testable, cross-platform)
 
 **Migration path:**
+
 1. Ship CLI alongside bash scripts (backwards compatible)
 2. Update README to recommend CLI
 3. Mark bash scripts as deprecated (add warning banner)
 4. Remove bash scripts in v2.0.0
 
 **Deprecation notice in bash scripts:**
+
 ```bash
 echo "⚠️  WARNING: Bash setup scripts are deprecated"
 echo "   Use the new CLI instead: npx @safeword/cli init"
@@ -600,25 +629,31 @@ echo ""
 ## Documentation Updates
 
 **Update README.md:**
-```markdown
+
+````markdown
 ## Quick Start
 
 **1. Install:**
+
 ```bash
 npx @safeword/cli init
 ```
+````
 
 **2. Verify:**
+
 ```bash
 npx @safeword/cli verify
 ```
 
 **3. Commit:**
+
 ```bash
 git add .safeword .claude SAFEWORD.md package.json
 git commit -m "Add safeword config"
 ```
-```
+
+````
 
 **Add CLI reference docs:**
 ```markdown
@@ -646,28 +681,32 @@ Show detailed project status
 
 ### safeword --version
 Show CLI version
-```
+````
 
 ---
 
 ## Timeline Estimate
 
 **Week 1: Setup + Core Commands**
+
 - Day 1-2: Project setup, dependencies, TypeScript config
 - Day 3-4: `safeword init` command (basic functionality)
 - Day 5: `safeword verify` command
 
 **Week 2: Templates + Auto-Detection**
+
 - Day 1-2: Embed templates in package
 - Day 3-4: Project type detection logic
 - Day 5: Template copying + hook registration
 
 **Week 3: Polish + Testing**
+
 - Day 1-2: Interactive prompts (clack/prompts)
 - Day 3: CI mode, package manager detection
 - Day 4-5: Testing (unit + integration)
 
 **Week 4: Publish + Migrate**
+
 - Day 1: Build system, publish to npm
 - Day 2-3: Update README, add CLI docs
 - Day 4-5: Test in real projects, fix bugs
@@ -711,6 +750,7 @@ Show CLI version
 ## Anti-Patterns to Avoid
 
 **❌ Don't:**
+
 - Build version migration before v2.0.0 exists
 - Add cache management (npm already caches)
 - Convert guides to "skills" (terminology confusion)
@@ -719,6 +759,7 @@ Show CLI version
 - Support every edge case (ship fast, iterate)
 
 **✅ Do:**
+
 - Start with MVP (init + verify)
 - Ship incrementally (don't wait for perfect)
 - Test in real projects early
@@ -731,6 +772,7 @@ Show CLI version
 ## Decision Log
 
 **Decisions made:**
+
 1. ✅ TypeScript CLI (not bash) - Maintainability > speed
 2. ✅ npx distribution (not curl) - Target audience has Node.js
 3. ✅ Project-local (not plugin) - Team consistency + versioning
@@ -740,12 +782,14 @@ Show CLI version
 7. ✅ XDG compliance (for global learnings) - Standards matter
 
 **Decisions deferred:**
+
 1. ⏸ Claude Code plugin wrapper - Wait for v1.0.0 feedback
 2. ⏸ Version migration tooling - Wait for v2.0.0
 3. ⏸ Learning management - Wait for user demand
 4. ⏸ Status command - Nice to have, not blocking
 
 **Questions to answer during implementation:**
+
 1. Should `safeword verify --auto-init` run automatically on `npm install`?
 2. Should we ask before mutating `package.json` in `--yes` mode?
 3. Should `safeword status` check npm registry for updates (network call)?
@@ -758,6 +802,7 @@ Show CLI version
 **Start here:**
 
 1. **Create CLI package:**
+
    ```bash
    mkdir -p packages/cli/src/{commands,lib,templates}
    cd packages/cli
@@ -767,6 +812,7 @@ Show CLI version
    ```
 
 2. **Copy templates:**
+
    ```bash
    cp ../SAFEWORD.md src/templates/SAFEWORD.md
    cp -r ../guides src/templates/guides
@@ -774,28 +820,30 @@ Show CLI version
    ```
 
 3. **Build `safeword init` skeleton:**
+
    ```typescript
    // src/cli.ts
    #!/usr/bin/env node
    import { Command } from 'commander';
    import { init } from './commands/init';
-   
+
    const program = new Command();
-   
+
    program
      .name('safeword')
      .version('1.0.0');
-   
+
    program
      .command('init')
      .option('--yes', 'Accept all defaults')
      .option('--ci', 'Non-interactive mode')
      .action(init);
-   
+
    program.parse();
    ```
 
 4. **Test locally:**
+
    ```bash
    chmod +x src/cli.ts
    npm link

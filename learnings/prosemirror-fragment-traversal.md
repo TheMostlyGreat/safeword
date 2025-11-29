@@ -7,6 +7,7 @@
 When applying marks to typed text in ProseMirror, `Fragment.forEach()` doesn't reach text nodes nested inside block nodes (paragraphs, headings, etc.).
 
 ❌ **Bad:** Iterating fragments without recursion
+
 ```typescript
 // This ONLY sees paragraph nodes, not text inside them
 const markedNodes: Node[] = [];
@@ -19,6 +20,7 @@ fragment.forEach((node: Node) => {
 ```
 
 ✅ **Good:** Recursive traversal
+
 ```typescript
 function markFragmentRecursive(fragment: Fragment, mark: Mark): Fragment {
   const markedNodes: Node[] = [];
@@ -74,11 +76,13 @@ const testFragment = Fragment.from(schema.text('hello'));
 ## When to Use Recursive Traversal
 
 Use recursive traversal when:
+
 - Processing text content across entire document (search, replace, mark application)
 - Transforming node structure at any depth (format conversion, sanitization)
 - Analyzing document content (word count, spell check)
 
 Use simple `forEach()` when:
+
 - Only processing top-level nodes (block-level operations)
 - Explicitly working with known flat structures
 

@@ -11,12 +11,14 @@
 ## Quick Start (30 seconds)
 
 **1. Install in your project:**
+
 ```bash
 cd /path/to/your/project
 bash ./framework/scripts/setup-safeword.sh
 ```
 
 **2. Verify installation:**
+
 ```bash
 # Check for SAFEWORD files and hooks
 test -f .safeword/SAFEWORD.md && echo ".safeword/SAFEWORD.md ✓"
@@ -24,6 +26,7 @@ test -f .claude/settings.json && echo ".claude/settings.json ✓"
 ```
 
 **Result**: Your project now has:
+
 - `.safeword/SAFEWORD.md` - Global patterns and workflows
 - `.safeword/guides/` - TDD methodology, testing, code philosophy
 - `.claude/hooks/` - Auto-linting and quality review
@@ -46,6 +49,7 @@ test -f .claude/settings.json && echo ".claude/settings.json ✓"
 ## What's Inside
 
 Key directories created in your project:
+
 - `.safeword/guides/` - Core methodology and best practices
 - `.safeword/templates/` - Fillable document structures
 - `.safeword/planning/` - Planning documentation (user-stories, test-definitions, design, issues)
@@ -57,12 +61,12 @@ Key directories created in your project:
 
 **Purpose**: Reusable methodology applicable to all projects
 
-| Guide | Purpose | When to Read |
-|-------|---------|--------------|
-| **code-philosophy.md** | Core coding principles, TDD philosophy, self-review checklist | Before writing code |
-| **testing-methodology.md** | TDD workflow (RED/GREEN/REFACTOR), test pyramid, decision trees | Starting any feature |
-| **tdd-best-practices.md** | User story + test definition patterns and examples | Creating tests/stories |
-| **learning-extraction.md** | Extract learnings from debugging, recognition triggers | After complex debugging |
+| Guide                      | Purpose                                                         | When to Read            |
+| -------------------------- | --------------------------------------------------------------- | ----------------------- |
+| **code-philosophy.md**     | Core coding principles, TDD philosophy, self-review checklist   | Before writing code     |
+| **testing-methodology.md** | TDD workflow (RED/GREEN/REFACTOR), test pyramid, decision trees | Starting any feature    |
+| **tdd-best-practices.md**  | User story + test definition patterns and examples              | Creating tests/stories  |
+| **learning-extraction.md** | Extract learnings from debugging, recognition triggers          | After complex debugging |
 
 ---
 
@@ -70,13 +74,13 @@ Key directories created in your project:
 
 **Purpose**: Writing effective feature documentation
 
-| Guide | Purpose | When to Read |
-|-------|---------|--------------|
-| **user-story-guide.md** | Writing effective user stories (INVEST criteria) | Creating user stories |
-| **test-definitions-guide.md** | Writing test definitions (unit/integration/E2E) | Planning test suites |
-| **design-doc-guide.md** | Design doc structure and best practices | Designing complex features |
-| **architecture-guide.md** | Architecture decisions (tech choices, data models) | Making architectural decisions |
-| **data-architecture-guide.md** | Data model design (schemas, validation, flows) | Database/schema design |
+| Guide                          | Purpose                                            | When to Read                   |
+| ------------------------------ | -------------------------------------------------- | ------------------------------ |
+| **user-story-guide.md**        | Writing effective user stories (INVEST criteria)   | Creating user stories          |
+| **test-definitions-guide.md**  | Writing test definitions (unit/integration/E2E)    | Planning test suites           |
+| **design-doc-guide.md**        | Design doc structure and best practices            | Designing complex features     |
+| **architecture-guide.md**      | Architecture decisions (tech choices, data models) | Making architectural decisions |
+| **data-architecture-guide.md** | Data model design (schemas, validation, flows)     | Database/schema design         |
 
 ---
 
@@ -84,12 +88,12 @@ Key directories created in your project:
 
 **Purpose**: Working with LLMs and documentation structure
 
-| Guide | Purpose | When to Read |
-|-------|---------|--------------|
-| **llm-prompting.md** | Prompt engineering, LLM cost optimization, caching | Building AI features |
-| **llm-instruction-design.md** | 13 principles for LLM-consumable docs (MECE, examples) | Creating SAFEWORD.md/guides |
-| **context-files-guide.md** | CLAUDE.md/CURSOR.md/AGENTS.md structure, anti-patterns, modular approach | Setting up projects |
-| **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation | Managing dev servers |
+| Guide                         | Purpose                                                                  | When to Read                |
+| ----------------------------- | ------------------------------------------------------------------------ | --------------------------- |
+| **llm-prompting.md**          | Prompt engineering, LLM cost optimization, caching                       | Building AI features        |
+| **llm-instruction-design.md** | 13 principles for LLM-consumable docs (MECE, examples)                   | Creating SAFEWORD.md/guides |
+| **context-files-guide.md**    | CLAUDE.md/CURSOR.md/AGENTS.md structure, anti-patterns, modular approach | Setting up projects         |
+| **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation                              | Managing dev servers        |
 
 ---
 
@@ -97,11 +101,11 @@ Key directories created in your project:
 
 **Purpose**: Fillable structures for feature documentation
 
-| Template | Purpose | Used By |
-|----------|---------|---------|
-| **user-stories-template.md** | User story structure (As a X / Given-When-Then) | user-story-guide.md |
+| Template                        | Purpose                                          | Used By                   |
+| ------------------------------- | ------------------------------------------------ | ------------------------- |
+| **user-stories-template.md**    | User story structure (As a X / Given-When-Then)  | user-story-guide.md       |
 | **test-definitions-feature.md** | Test definition structure (suites, tests, steps) | test-definitions-guide.md |
-| **design-doc-template.md** | Design doc structure (architecture, components) | design-doc-guide.md |
+| **design-doc-template.md**      | Design doc structure (architecture, components)  | design-doc-guide.md       |
 
 ---
 
@@ -112,6 +116,7 @@ Key directories created in your project:
 **Location**: `.safeword/learnings/[concept].md`
 
 **What goes here**:
+
 - Debugging discoveries (non-obvious gotchas, integration struggles)
 - Trial-and-error findings (tried 3+ approaches before right one)
 - Architecture insights (discovered during implementation)
@@ -120,6 +125,7 @@ Key directories created in your project:
 **How to extract**: Follow `learning-extraction.md` recognition triggers and templates
 
 **Example learnings**:
+
 - React hooks async behavior
 - Electron IPC patterns
 - Browser storage quota quirks
@@ -133,6 +139,7 @@ Key directories created in your project:
 **Purpose**: Feature planning and design documentation
 
 **Structure**:
+
 ```
 planning/
 ├── user-stories/       User story documents
@@ -144,6 +151,7 @@ planning/
 Each directory has an `archive/` subfolder for completed work.
 
 **What goes here**:
+
 - User stories for features
 - Test definitions for TDD workflow
 - Design documents for complex features
@@ -155,9 +163,11 @@ Each directory has an `archive/` subfolder for completed work.
 ## Hooks & Skills
 
 **Hooks**: Automation scripts triggered by Claude Code events
+
 - `auto-quality-review.sh` - Automated quality control on responses
 
 **Skills**: Specialized agent capabilities
+
 - `quality-reviewer/` - Deep code quality review with web research
 
 ---
@@ -176,6 +186,7 @@ bash ./framework/scripts/setup-claude.sh --skip-linting
 ```
 
 **Auto-detection**: Automatically detects project type from `package.json`:
+
 - Biome → if `@biomejs/biome` installed
 - Next.js → if `next` in dependencies
 - Electron → if `electron` in dependencies
@@ -188,6 +199,7 @@ bash ./framework/scripts/setup-claude.sh --skip-linting
 
 ```markdown
 # Import guides from .safeword (SAFEWORD.md)
+
 @./.safeword/guides/testing-methodology.md
 @./.safeword/guides/code-philosophy.md
 @./.safeword/guides/user-story-guide.md
@@ -221,7 +233,6 @@ mkdir -p .safeword/planning/test-definitions && touch .safeword/planning/test-de
 mkdir -p .safeword/planning/design && touch .safeword/planning/design/feature-name.md
 ```
 
-
 ---
 
 ## Syncing Across Machines
@@ -235,6 +246,7 @@ Commit `.safeword/` and `.claude/` in your project repo for team consistency.
 **Project SAFEWORD.md/CLAUDE.md**: Created by `setup-safeword.sh` or manually, references `.safeword/SAFEWORD.md`
 
 **How it works**:
+
 1. Project SAFEWORD.md imports core guides via `@./.safeword/guides/`
 2. Guides reference templates via `@./.safeword/templates/`
 3. Guides cross-reference each other via `@./.safeword/guides/`
@@ -279,31 +291,31 @@ npm run eval:view
 
 The eval suite tests that LLMs correctly follow guide instructions:
 
-| Category | Tests | What's Validated |
-|----------|-------|------------------|
-| Architecture | 21 | Doc type selection, layers, dependencies, ESLint, LLM review, pre-commit, CI, template |
-| Code Philosophy | 14 | Bloat avoidance, error handling, TDD, self-review, git workflow |
-| Testing Methodology | 13 | Test type selection, TDD phases, test integrity, cost controls |
-| Zombie Process | 7 | Port-based cleanup, scripts, tmux isolation, best practices |
-| User Stories | 13 | INVEST validation, size guidelines, templates, technical constraints |
-| LLM Instruction Design | 15 | MECE trees, tie-breaking, lookup tables, anti-patterns |
-| TDD Best Practices | 10 | Template selection, story formats, data builders |
-| Design Doc | 10 | Prerequisites, template, components, user flow, decisions |
-| Context Files | 11 | File selection, triggers, imports, size, cross-references |
-| Data Architecture | 7 | Decision tree, principles, flows, policies, checklist |
-| Learning Extraction | 11 | Triggers, templates, precedence, cross-references |
-| LLM Prompting | 10 | Caching, structured outputs, LLM-as-judge, costs |
-| Test Definitions | 12 | Suites, status, naming, mapping, LLM-friendly |
-| **Total** | **154** | |
+| Category               | Tests   | What's Validated                                                                       |
+| ---------------------- | ------- | -------------------------------------------------------------------------------------- |
+| Architecture           | 21      | Doc type selection, layers, dependencies, ESLint, LLM review, pre-commit, CI, template |
+| Code Philosophy        | 14      | Bloat avoidance, error handling, TDD, self-review, git workflow                        |
+| Testing Methodology    | 13      | Test type selection, TDD phases, test integrity, cost controls                         |
+| Zombie Process         | 7       | Port-based cleanup, scripts, tmux isolation, best practices                            |
+| User Stories           | 13      | INVEST validation, size guidelines, templates, technical constraints                   |
+| LLM Instruction Design | 15      | MECE trees, tie-breaking, lookup tables, anti-patterns                                 |
+| TDD Best Practices     | 10      | Template selection, story formats, data builders                                       |
+| Design Doc             | 10      | Prerequisites, template, components, user flow, decisions                              |
+| Context Files          | 11      | File selection, triggers, imports, size, cross-references                              |
+| Data Architecture      | 7       | Decision tree, principles, flows, policies, checklist                                  |
+| Learning Extraction    | 11      | Triggers, templates, precedence, cross-references                                      |
+| LLM Prompting          | 10      | Caching, structured outputs, LLM-as-judge, costs                                       |
+| Test Definitions       | 12      | Suites, status, naming, mapping, LLM-friendly                                          |
+| **Total**              | **154** |                                                                                        |
 
 ### Adding New Tests
 
 Edit `promptfoo.yaml` and add a test case:
 
 ```yaml
-- description: "test-id: Description"
+- description: 'test-id: Description'
   vars:
-    input: "User prompt to test"
+    input: 'User prompt to test'
     context: |
       Relevant excerpt from guide
   assert:

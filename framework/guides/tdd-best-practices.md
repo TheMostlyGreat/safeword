@@ -10,18 +10,19 @@ Patterns and examples for user stories and test definitions following TDD best p
 
 ### Quick Reference
 
-| Need | Template | Location |
-|------|----------|----------|
-| Feature/issue user stories | `user-stories-template.md` | `.safeword/planning/user-stories/` |
-| Feature test suites | `test-definitions-feature.md` | `.safeword/planning/test-definitions/` |
-| Feature implementation design | `design-doc-template.md` | `.safeword/planning/design/` |
-| Project-wide architecture | No template | `ARCHITECTURE.md` at root |
+| Need                          | Template                      | Location                               |
+| ----------------------------- | ----------------------------- | -------------------------------------- |
+| Feature/issue user stories    | `user-stories-template.md`    | `.safeword/planning/user-stories/`     |
+| Feature test suites           | `test-definitions-feature.md` | `.safeword/planning/test-definitions/` |
+| Feature implementation design | `design-doc-template.md`      | `.safeword/planning/design/`           |
+| Project-wide architecture     | No template                   | `ARCHITECTURE.md` at root              |
 
 **Decision rule:** If unclear, ask: "Does this affect the whole project or just one feature?" Project-wide → architecture doc. Single feature → design doc.
 
 ### Template Details
 
 **User Stories** (`@.safeword/templates/user-stories-template.md`) - **For features/issues**
+
 - Multiple related stories in one file
 - Status tracking (✅/❌ per story and AC)
 - Test file references and implementation notes
@@ -30,6 +31,7 @@ Patterns and examples for user stories and test definitions following TDD best p
 - Guidance: `@.safeword/guides/user-story-guide.md`
 
 **Test Definitions** (`@.safeword/templates/test-definitions-feature.md`) - **For feature test suites**
+
 - Organized by test suites and individual tests
 - Status tracking (✅ Passing / ⏭️ Skipped / ❌ Not Implemented / 🔴 Failing)
 - Detailed steps and expected outcomes
@@ -38,6 +40,7 @@ Patterns and examples for user stories and test definitions following TDD best p
 - Guidance: `@.safeword/guides/test-definitions-guide.md`
 
 **Design Doc** (`@.safeword/templates/design-doc-template.md`) - **For feature/system implementation**
+
 - Implementation-focused (architecture, components, data model, user flow, component interaction)
 - Key technical decisions with rationale (includes "why")
 - Full [N] and [N+1] examples (matches user stories/test definitions pattern)
@@ -46,6 +49,7 @@ Patterns and examples for user stories and test definitions following TDD best p
 - Guidance: `@.safeword/guides/architecture-guide.md`
 
 **Architecture Document** (no template) - **For project/package-wide architecture decisions**
+
 - One `ARCHITECTURE.md` per project or package (in monorepos)
 - Document principles, data model, component design, decision rationale
 - Living document (updated as architecture evolves)
@@ -54,6 +58,7 @@ Patterns and examples for user stories and test definitions following TDD best p
 - Guidance: `@.safeword/guides/architecture-guide.md`
 
 **Example prompts:**
+
 - "Create user stories for issue #N" → Uses user stories template
 - "Create test definitions for issue #N" → Uses test definitions template
 - "Create a design doc for [feature]" → Uses design doc template (2-3 pages)
@@ -67,11 +72,11 @@ Patterns and examples for user stories and test definitions following TDD best p
 
 ### When to Use Each Format
 
-| Format | Best For | Example Trigger |
-|--------|----------|-----------------|
-| Standard (As a/I want/So that) | User-facing features, UI flows | "User can do X" |
-| Given-When-Then | API behavior, state transitions, edge cases | "When X happens, then Y" |
-| Job Story | Problem-solving, user motivation unclear | "User needs to accomplish X" |
+| Format                         | Best For                                    | Example Trigger              |
+| ------------------------------ | ------------------------------------------- | ---------------------------- |
+| Standard (As a/I want/So that) | User-facing features, UI flows              | "User can do X"              |
+| Given-When-Then                | API behavior, state transitions, edge cases | "When X happens, then Y"     |
+| Job Story                      | Problem-solving, user motivation unclear    | "User needs to accomplish X" |
 
 **Decision rule:** Default to Standard. Use Given-When-Then for APIs or complex state. Use Job Story when focusing on the problem, not the solution.
 
@@ -103,6 +108,7 @@ But [exception/edge case]
 ```
 
 **Filled example:**
+
 ```
 Given I am an authenticated API user
 When I POST to /api/campaigns with valid JSON
@@ -120,6 +126,7 @@ So I can [expected outcome]
 ```
 
 **Filled example:**
+
 ```
 When I'm debugging a failing test
 I want to see the exact LLM prompt and response
@@ -133,6 +140,7 @@ So I can identify whether the issue is prompt engineering or code logic
 ### ✅ GOOD Examples
 
 **Web App Feature:**
+
 ```
 As a user with multiple campaigns
 I want to switch between campaigns without reloading the page
@@ -150,6 +158,7 @@ Out of Scope:
 ```
 
 **API Feature:**
+
 ```
 Given I am an authenticated API user
 When I POST to /api/campaigns with valid JSON
@@ -159,6 +168,7 @@ But invalid JSON returns 400 with descriptive error messages
 ```
 
 **CLI Feature:**
+
 ```
 When I'm debugging a failing test
 I want to see the exact LLM prompt and response
@@ -172,6 +182,7 @@ Acceptance Criteria:
 ```
 
 **With Technical Constraints:**
+
 ```
 As a user with multiple campaigns
 I want to switch between campaigns without reloading the page
@@ -197,39 +208,47 @@ Data:
 ### ❌ BAD Examples (Anti-Patterns)
 
 **Too Vague:**
+
 ```
 As a user
 I want the app to work better
 So that I'm happy
 ```
+
 - ❌ No specific role
 - ❌ "Work better" is not measurable
 - ❌ No acceptance criteria
 
 **Too Technical (Implementation Details):**
+
 ```
 As a developer
 I want to refactor the CharacterStore to use Immer
 So that state mutations are prevented
 ```
+
 - ❌ This is a technical task, not a user story
 - ❌ Users don't care about Immer
 - ✅ Better as: Spike ticket or refactoring task
 
 **Missing "So That" (No Value):**
+
 ```
 As a GM
 I want to roll dice
 ```
+
 - ❌ No business value stated
 - ❌ Why does the GM need this?
 
 **Multiple Features in One Story:**
+
 ```
 As a player
 I want to create characters, manage inventory, and track relationships
 So that I can play the game
 ```
+
 - ❌ 3+ separate features bundled together
 - ❌ Cannot be completed in one sprint
 - ✅ Split into 3 stories
@@ -245,8 +264,12 @@ describe('[Unit/Module Name]', () => {
   describe('[function/method name]', () => {
     it('should [expected behavior] when [condition]', () => {
       // Arrange: Set up test data and dependencies
-      const input = { /* test data */ };
-      const expected = { /* expected output */ };
+      const input = {
+        /* test data */
+      };
+      const expected = {
+        /* expected output */
+      };
 
       // Act: Execute the function under test
       const result = functionUnderTest(input);
@@ -256,10 +279,11 @@ describe('[Unit/Module Name]', () => {
     });
 
     it('should throw [error type] when [invalid condition]', () => {
-      const invalidInput = { /* bad data */ };
+      const invalidInput = {
+        /* bad data */
+      };
 
-      expect(() => functionUnderTest(invalidInput))
-        .toThrow('Expected error message');
+      expect(() => functionUnderTest(invalidInput)).toThrow('Expected error message');
     });
 
     it('should handle edge case: [specific edge case]', () => {
@@ -306,12 +330,12 @@ describe('[Feature Name] Integration', () => {
   it('should rollback order when payment fails', async () => {
     const user = await createTestUser();
     const order = await createOrder(user.id, { items: ['sword'] });
-    
+
     // Simulate payment failure
     mockPaymentGateway.mockRejectedValue(new Error('Card declined'));
-    
+
     await expect(processOrder(order.id)).rejects.toThrow('Card declined');
-    
+
     // Verify rollback - order cancelled, inventory restored
     const updatedOrder = await getOrder(order.id);
     expect(updatedOrder.status).toBe('cancelled');
@@ -353,22 +377,25 @@ test.describe('[User Journey Name]', () => {
 ### Test Naming Conventions
 
 **✅ GOOD - Descriptive and Specific:**
+
 ```typescript
-it('should return risky position when outnumbered 3-to-1')
-it('should cache LLM responses for 5 minutes to reduce costs')
-it('should preserve armor state after reducing harm from L2 to L1')
-it('should throw ValidationError when dice pool is negative')
+it('should return risky position when outnumbered 3-to-1');
+it('should cache LLM responses for 5 minutes to reduce costs');
+it('should preserve armor state after reducing harm from L2 to L1');
+it('should throw ValidationError when dice pool is negative');
 ```
 
 **❌ BAD - Vague or Implementation-Focused:**
+
 ```typescript
-it('works correctly')  // What does "correctly" mean?
-it('tests the function')  // Obvious, not descriptive
-it('should call setState')  // Implementation detail
-it('scenario 1')  // No context
+it('works correctly'); // What does "correctly" mean?
+it('tests the function'); // Obvious, not descriptive
+it('should call setState'); // Implementation detail
+it('scenario 1'); // No context
 ```
 
 **How to rename:**
+
 1. Identify the behavior being tested
 2. Identify the condition/input
 3. Use pattern: `'should [behavior] when [condition]'`
@@ -396,26 +423,37 @@ it('should calculate critical success on 6', () => {
 ### Test Independence
 
 **✅ GOOD - Isolated Tests:**
+
 ```typescript
 beforeEach(() => {
   // Each test gets fresh state
   gameState = createFreshGameState();
 });
 
-it('test A', () => { /* uses gameState */ });
-it('test B', () => { /* uses separate gameState */ });
+it('test A', () => {
+  /* uses gameState */
+});
+it('test B', () => {
+  /* uses separate gameState */
+});
 ```
 
 **❌ BAD - Shared State:**
+
 ```typescript
 let sharedState = {}; // Tests modify this
-it('test A', () => { sharedState.foo = 'bar'; });
-it('test B', () => { expect(sharedState.foo).toBe('bar'); }); // Depends on test A!
+it('test A', () => {
+  sharedState.foo = 'bar';
+});
+it('test B', () => {
+  expect(sharedState.foo).toBe('bar');
+}); // Depends on test A!
 ```
 
 ### What to Test
 
 **✅ Test These:**
+
 - Public API behavior (functions, methods, components)
 - User-facing features (can the user do X?)
 - Edge cases (empty, null, boundary values)
@@ -423,15 +461,19 @@ it('test B', () => { expect(sharedState.foo).toBe('bar'); }); // Depends on test
 - Integration points (API calls, database queries)
 
 **❌ Don't Test These:**
+
 - Private implementation details (internal helper functions)
 - Third-party library internals (assume React works)
 - Generated code (unless it's business logic)
 - Trivial getters/setters with no logic
 
 **Boundary example:**
+
 ```typescript
 // ❌ DON'T test this private helper
-function _formatDateInternal(date) { /* internal logic */ }
+function _formatDateInternal(date) {
+  /* internal logic */
+}
 
 // ✅ DO test the public function that uses it
 export function getFormattedTimestamp(event) {
@@ -454,7 +496,7 @@ function buildCharacter(overrides = {}) {
     stress: 0,
     harm: [],
     armor: true,
-    ...overrides  // Easy to customize per test
+    ...overrides, // Easy to customize per test
   };
 }
 
@@ -481,9 +523,9 @@ providers:
       temperature: 1.0
 
 tests:
-  - description: "GM should telegraph position/effect before roll"
+  - description: 'GM should telegraph position/effect before roll'
     vars:
-      action: "I Skirmish with the gang enforcers"
+      action: 'I Skirmish with the gang enforcers'
       character: { /* character JSON */ }
     assert:
       - type: llm-rubric
@@ -515,7 +557,7 @@ describe('Rules Agent Integration', () => {
     // Arrange
     const scenario = {
       action: 'I Skirmish against 5 armed guards while wounded',
-      character: buildCharacter({ harm: [{ level: 2, description: 'Broken Arm' }] })
+      character: buildCharacter({ harm: [{ level: 2, description: 'Broken Arm' }] }),
     };
 
     // Act: Real LLM call (costs ~$0.01)
@@ -550,12 +592,14 @@ Before writing a story, verify it passes all six criteria:
 ## Quick Reference
 
 **User Story Red Flags (INVEST Violations):**
+
 - No acceptance criteria → Too vague
-- >3 acceptance criteria → Split into multiple stories
+- > 3 acceptance criteria → Split into multiple stories
 - Technical implementation details → Wrong audience
 - Missing "So that" → No clear value
 
 **Test Red Flags:**
+
 - Test name doesn't describe behavior → Rename
 - Test depends on another test's state → Isolate
 - Test is >50 lines → Break into smaller tests
@@ -563,6 +607,7 @@ Before writing a story, verify it passes all six criteria:
 - Test never fails → Remove (not testing anything)
 
 **When to Write E2E vs Integration vs Unit:**
+
 - **E2E:** User can complete full workflow (slow, expensive, high confidence)
 - **Integration:** Multiple modules work together (moderate speed, good ROI)
 - **Unit:** Single function/module logic (fast, cheap, low-level confidence)

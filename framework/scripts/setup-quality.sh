@@ -374,6 +374,23 @@ EOF
 chmod +x .claude/hooks/version-check.sh
 
 echo "  ✓ Created version-check SessionStart hook"
+
+# Create inject-timestamp UserPromptSubmit hook
+{
+  echo '#!/bin/bash'
+  echo "$VERSION_HEADER"
+  cat << 'EOF'
+# Inject Timestamp - UserPromptSubmit Hook
+# Outputs current Unix timestamp for Claude's context awareness
+# Helps with accurate ticket timestamps and time-based reasoning
+
+echo "Current time: $(date +%s) ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+EOF
+} > .claude/hooks/inject-timestamp.sh
+
+chmod +x .claude/hooks/inject-timestamp.sh
+
+echo "  ✓ Created inject-timestamp UserPromptSubmit hook"
 echo ""
 
 # ============================================================================
@@ -408,6 +425,17 @@ else
   mv .claude/settings.json.tmp .claude/settings.json
   echo "  ✓ Added SessionStart hook to settings.json"
 fi
+
+# Check if inject-timestamp hook already exists in UserPromptSubmit
+if jq -e '.hooks.UserPromptSubmit[]?.hooks[]? | select(.command == "$CLAUDE_PROJECT_DIR/.claude/hooks/inject-timestamp.sh")' .claude/settings.json > /dev/null 2>&1; then
+  echo "  ✓ UserPromptSubmit hook already exists (skipped)"
+else
+  # Append to UserPromptSubmit array (or create if doesn't exist)
+  jq '.hooks.UserPromptSubmit = (.hooks.UserPromptSubmit // []) + [{"hooks": [{"type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/inject-timestamp.sh"}]}]' \
+    .claude/settings.json > .claude/settings.json.tmp
+  mv .claude/settings.json.tmp .claude/settings.json
+  echo "  ✓ Added UserPromptSubmit hook to settings.json"
+fi
 echo ""
 
 echo "================================="
@@ -417,6 +445,7 @@ echo ""
 echo "What was configured:"
 echo "  • Quality review hooks installed (triggers on changes)"
 echo "  • Version display on session start"
+echo "  • Timestamp injection on every prompt"
 echo "  • /quality-review command available"
 echo "  • All files are project-local and standalone"
 echo ""

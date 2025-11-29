@@ -17,20 +17,20 @@ From `@milkdown/crepe` TypeScript definitions (`node_modules/@milkdown/crepe/lib
 
 ```typescript
 export declare class CrepeBuilder {
-    #private;
-    constructor({ root, defaultValue }?: CrepeBuilderConfig);
-    addFeature: { /* ... */ };
-    create: () => Promise<Editor>;
-    destroy: () => Promise<Editor>;
-    get editor(): Editor;  // ← PUBLIC API GETTER
-    get readonly(): boolean;
-    setReadonly: (value: boolean) => this;
-    getMarkdown: () => string;
-    on: (fn: (api: ListenerManager) => void) => this;
+  #private;
+  constructor({ root, defaultValue }?: CrepeBuilderConfig);
+  addFeature: { /* ... */ };
+  create: () => Promise<Editor>;
+  destroy: () => Promise<Editor>;
+  get editor(): Editor; // ← PUBLIC API GETTER
+  get readonly(): boolean;
+  setReadonly: (value: boolean) => this;
+  getMarkdown: () => string;
+  on: (fn: (api: ListenerManager) => void) => this;
 }
 
 export declare class Crepe extends CrepeBuilder {
-    // Inherits all properties from CrepeBuilder, including .editor getter
+  // Inherits all properties from CrepeBuilder, including .editor getter
 }
 ```
 
@@ -51,6 +51,7 @@ return crepe.editor;
 ## When to Use This Pattern
 
 Use `crepe.editor.use()` when you need to:
+
 - Register custom ProseMirror plugins that Crepe doesn't provide
 - Access the underlying Milkdown Editor instance for direct API calls
 - Configure plugins that aren't available through Crepe's feature system
@@ -63,14 +64,11 @@ You could replace Crepe with core Milkdown:
 // ❌ NOT RECOMMENDED - Loses Crepe's pre-built features
 import { Editor } from '@milkdown/core';
 
-return Editor.make()
-  .use(commonmark)
-  .use(listener)
-  .use(history)
-  .use(trackChangesPlugin);
+return Editor.make().use(commonmark).use(listener).use(history).use(trackChangesPlugin);
 ```
 
 **Why not recommended:**
+
 - Lose Crepe's toolbar, slash commands, block editing UI
 - 2-3 weeks to rebuild features
 - More code to maintain
@@ -93,5 +91,6 @@ When you see `crepe.editor.use(plugin)` in code reviews, **don't flag it as a ha
 ---
 
 **Related Files:**
+
 - `src/components/Editor.tsx` - Uses this pattern to register trackChangesPlugin
 - `planning/design/track-changes-refactoring-plan.md` - Initially flagged as hack, now corrected

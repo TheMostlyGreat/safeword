@@ -30,21 +30,25 @@ Extract after experiencing ANY of these:
 ## File Locations
 
 **Global learnings** (`.safeword/learnings/[concept].md`):
+
 - **Why**: Applies to ALL your projects (React patterns, Git workflows)
 - **Scope**: Personal directory (not shared)
 - **Use case**: Generic programming knowledge
 
 **Project learnings** (`./.safeword/learnings/[concept].md`):
+
 - **Why**: Specific to THIS codebase (custom architecture, unique patterns)
 - **Scope**: Shared via git (team knowledge base)
 - **Use case**: Project-specific gotchas
 
 **Historical archives** (`./.safeword/learnings/archive/[bug-fix].md`):
+
 - **Why**: One-time debugging narratives (not forward-looking)
 - **Scope**: Shared via git (learning history)
 - **Use case**: Reference when similar bugs occur
 
 **Cascading Precedence** (both Claude Code and SAFEWORD.md):
+
 1. Explicit user instruction (highest priority)
 2. Project `./.safeword/learnings/` (project-specific)
 3. Global `.safeword/learnings/` (personal defaults)
@@ -61,6 +65,7 @@ Extract after experiencing ANY of these:
 **Check PROACTIVELY in these situations:**
 
 1. **Before debugging** - Check if similar issue has learning already
+
    ```bash
    ls .safeword/learnings/*[technology]*.md
    ls ./learnings/*[pattern]*.md
@@ -97,6 +102,7 @@ ls ./.safeword/learnings/*keyword*.md
 ### When to Reference Existing Learnings
 
 **Found existing learning** → Read and apply it:
+
 ```
 "I found an existing learning about [concept] at [path]. Let me read it and apply to your case..."
 [Read the file]
@@ -106,6 +112,7 @@ ls ./.safeword/learnings/*keyword*.md
 **No existing learning** → Proceed normally (no message needed)
 
 **Similar but different** → Reference and note difference:
+
 ```
 "This is similar to the [existing learning] at [path], but differs in [specific way].
 The existing learning covers [X], but your case involves [Y]."
@@ -114,6 +121,7 @@ The existing learning covers [X], but your case involves [Y]."
 ### Example Workflow
 
 **Scenario 1: Found relevant learning**
+
 ```
 User: "I'm getting an async state update error with React hooks"
 → Check: ls .safeword/learnings/*react*.md *hooks*.md *async*.md
@@ -124,6 +132,7 @@ User: "I'm getting an async state update error with React hooks"
 ```
 
 **Scenario 2: No existing learning**
+
 ```
 User: "IndexedDB quota is behaving strangely in Safari"
 → Check: ls .safeword/learnings/*indexeddb*.md *safari*.md *quota*.md
@@ -132,6 +141,7 @@ User: "IndexedDB quota is behaving strangely in Safari"
 ```
 
 **Scenario 3: Update existing learning**
+
 ```
 User: Debugging for 6 cycles, discovers new IndexedDB quirk
 → Suggest extraction
@@ -187,6 +197,7 @@ Just learned something valuable
 **Use when:** Pattern applies to 2+ features/files, needs explanation
 
 **Structure:**
+
 ```markdown
 # [Concept Name]
 
@@ -219,7 +230,8 @@ See `.safeword/learnings/archive/[investigation].md` for full debugging narrativ
 **Use when:** One-time bug fix, historical record
 
 **Structure:**
-```markdown
+
+````markdown
 # [Issue Title]
 
 **Date:** YYYY-MM-DD
@@ -242,11 +254,13 @@ Actual: [What happened]
 - Old broken code
 + New fixed code
 ```
+````
 
 ## Lesson
 
 [One-sentence takeaway]
-```
+
+````
 
 ---
 
@@ -267,7 +281,7 @@ Project-specific gotchas in `.safeword/learnings/`:
 **Additional gotchas:**
 - Tab state timing: Add tab first (trigger render), wait 50ms, load content
 - File validation: Whitelist extensions before operations
-```
+````
 
 **Pattern:** Bold name + one-sentence summary + optional link
 
@@ -299,6 +313,7 @@ Project-specific gotchas in `.safeword/learnings/`:
 **Decision:** Zustand for all UI state
 
 **Why:**
+
 - Single-user desktop app = simple state
 - 1KB vs Redux's 10KB+ boilerplate
 - Hooks-based, TypeScript-first
@@ -337,15 +352,18 @@ Project-specific gotchas in `.safeword/learnings/`:
 ## When Claude Should Suggest Extraction
 
 **High confidence - Suggest IMMEDIATELY DURING debugging:**
+
 - Observable debugging complexity (5+ debug cycles, 3+ error states, user says "stuck")
 - Just discovered gotcha not in official docs
 - Just found anti-pattern (violated best practice)
 - Say: "I notice this pattern could save time on future work. Should I extract a learning after we fix this?"
 
 **Medium confidence - Ask AFTER completing task:**
+
 - "I noticed [pattern X] during implementation - should I document this as a learning?"
 
 **Low confidence - Don't suggest:**
+
 - Simple fix (1 debug cycle, typo, user says "quick fix")
 - Well-documented in official library docs
 - One-off implementation detail
@@ -357,27 +375,32 @@ Project-specific gotchas in `.safeword/learnings/`:
 **Living Documentation**: This process evolves with your needs.
 
 **Review Cycle**:
+
 1. **Monthly**: Review existing learnings for relevance
 2. **Quarterly**: Archive obsolete learnings (technology changed, pattern no longer used)
 3. **Per feature**: After major features, assess if new learnings emerged
 
 **Test the Process**:
+
 - Did extracting this learning actually help on the next feature?
 - Are learnings being referenced in future conversations?
 - Are the examples clear and actionable?
 
 **Remove When**:
+
 - Technology deprecated (e.g., "Webpack 4 gotchas" when using Vite)
 - Pattern no longer used (e.g., class components → functional components)
 - Merged into official documentation (library now documents the gotcha)
 
 **Refactor When**:
+
 - Multiple learnings cover similar topics → consolidate
 - Learning file >200 lines → split into focused topics
 - Examples are outdated → update or remove
 - Wording is unclear → simplify
 
 **Feedback Loop**:
+
 - After suggesting extraction: Note if user accepted or declined
 - After user accepts: Monitor if learning is referenced in future sessions
 - Adjust suggestion threshold based on acceptance rate (if <30% accepted, raise the bar)
@@ -406,29 +429,37 @@ Project-specific gotchas in `.safeword/learnings/`:
 ## Anti-Patterns (Don't Extract)
 
 ❌ **Well-documented in official docs**
+
 - "React useState is async" → Already in React docs
 
 ❌ **One-line fixes without context**
+
 - "Changed `==` to `===`" → Trivial
 
 ❌ **Implementation without principle**
+
 - "File X uses pattern Y" → No reusable insight
 
 ❌ **Opinions without justification**
+
 - "Prefer tabs over spaces" → Not a gotcha
 
 ❌ **Debugging steps without lesson**
+
 - "Tried 5 things, #4 worked" → What's the takeaway?
 
 ❌ **Extracting mid-debugging**
+
 - Wait until fix is confirmed and working
 - Premature extraction leads to incorrect learnings
 
 ❌ **Forgetting to delete old code comments after extraction**
+
 - Learning file should REPLACE inline code comments
 - Keep code clean by removing debugging notes after documenting
 
 ❌ **Keeping obsolete learnings**
+
 - Remove when technology deprecated or pattern no longer used
 - Archive instead of delete (move to archive/ with "OBSOLETE:" prefix)
 - Update SAFEWORD.md references to point to replacement learning
@@ -438,13 +469,13 @@ Project-specific gotchas in `.safeword/learnings/`:
 
 ## Quick Reference
 
-| Situation | Location | Example |
-|-----------|----------|---------|
-| Universal principle | `.safeword/learnings/` | React hooks, Electron patterns |
-| Architecture decision | `SAFEWORD.md` → Architecture | Why Zustand? Why Electron-only? |
-| Short gotcha | `SAFEWORD.md` → Gotchas | "Validate paths before file ops" |
-| Detailed gotcha | `.safeword/learnings/` + SAFEWORD.md ref | Persistent UI, race conditions |
-| One-time bug | `.safeword/learnings/archive/` | Forgot to build before testing |
+| Situation             | Location                                 | Example                          |
+| --------------------- | ---------------------------------------- | -------------------------------- |
+| Universal principle   | `.safeword/learnings/`                   | React hooks, Electron patterns   |
+| Architecture decision | `SAFEWORD.md` → Architecture             | Why Zustand? Why Electron-only?  |
+| Short gotcha          | `SAFEWORD.md` → Gotchas                  | "Validate paths before file ops" |
+| Detailed gotcha       | `.safeword/learnings/` + SAFEWORD.md ref | Persistent UI, race conditions   |
+| One-time bug          | `.safeword/learnings/archive/`           | Forgot to build before testing   |
 
 ---
 
@@ -468,11 +499,13 @@ Project-specific gotchas in `.safeword/learnings/`:
 ```
 
 **File Size Guidelines**:
+
 - Forward-looking learning: 50-150 lines (includes 2-3 examples)
 - Debugging narrative: 30-100 lines (problem → investigation → solution)
 - If >200 lines: Split into multiple focused learnings
 
 **When to Split**:
+
 ```
 # TOO BIG (250 lines covering 3 separate concepts)
 .safeword/learnings/electron-gotchas.md
@@ -492,23 +525,27 @@ This is a **living process** - iterate and refine based on what works.
 **Core Principle**: Extract knowledge that **compounds over time**. Each learning should save time on 2+ future features.
 
 **Decision Framework**:
+
 1. **Forward-looking?** → Extract (helps future work)
 2. **Global or project?** → Choose directory
 3. **Architectural or gotcha?** → Choose SAFEWORD.md or separate file
 4. **ALWAYS cross-reference** → Update SAFEWORD.md
 
 **Continuous Improvement**:
+
 - Monthly: Review existing learnings for relevance
 - Quarterly: Archive obsolete learnings
 - Per feature: Assess if new learnings emerged
 - Test: Did extracting this actually help on the next feature?
 
 **When in Doubt**:
+
 - Extract more rather than less (can archive later)
 - Prefer separate file over inline comments (keeps code clean)
 - Update immediately while fresh (don't defer to "later")
 
 **Maintenance**:
+
 - Remove when technology deprecated or pattern no longer used
 - Refactor when multiple learnings cover similar topics (consolidate)
 - Split when learning file >200 lines (focus on single concept)

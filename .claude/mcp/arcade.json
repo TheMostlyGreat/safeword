@@ -1,0 +1,8 @@
+{
+  "name": "arcade",
+  "transport": "http",
+  "url": "",
+  "headers": {
+    "Authorization": "Bearer arc_proj1Jgi1rs7Rt3d3UwnrQVrHxJ9MZvU8VkU4TLUPv6PoJ2Qf2MGHLx"
+  }
+}

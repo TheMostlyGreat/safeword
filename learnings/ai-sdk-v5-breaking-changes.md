@@ -7,6 +7,7 @@
 What breaks when upgrading from AI SDK v4 to v5:
 
 ❌ **Bad (AI SDK v4 pattern):**
+
 ```typescript
 import { useChat } from '@ai-sdk/react'
 
@@ -21,6 +22,7 @@ export function Chat() {
 ```
 
 ✅ **Good (AI SDK v5 pattern):**
+
 ```typescript
 import { useChat } from '@ai-sdk/react'
 import { useState } from 'react'
@@ -38,6 +40,7 @@ export function Chat() {
 ```
 
 **Why it matters:**
+
 - `!undefined` = `true` → buttons stay disabled when checking `!input`
 - `setInput(value)` throws "setInput is not a function"
 - Tests may pass (if using controlled component wrappers) while browser fails
@@ -45,12 +48,14 @@ export function Chat() {
 ## Breaking Changes in AI SDK v5
 
 ### Removed from useChat return value:
+
 - ❌ `input` (string)
 - ❌ `setInput` (function)
 - ❌ `handleSubmit` (function)
 - ❌ `handleInputChange` (function)
 
 ### Still available:
+
 - ✅ `messages`
 - ✅ `setMessages`
 - ✅ `sendMessage`
@@ -60,11 +65,13 @@ export function Chat() {
 - ✅ `data` (for data stream)
 
 ### New architecture:
+
 AI SDK v5 uses **transport-based design**. Input management is now the developer's responsibility.
 
 ## Migration Pattern
 
 **Before (v4):**
+
 ```typescript
 const { input, setInput, handleSubmit } = useChat()
 
@@ -74,6 +81,7 @@ const { input, setInput, handleSubmit } = useChat()
 ```
 
 **After (v5):**
+
 ```typescript
 const [input, setInput] = useState('')
 const { sendMessage } = useChat()
@@ -126,18 +134,21 @@ If you see these symptoms, check if you're destructuring removed properties:
 ## Debug Strategy
 
 1. Add logging to see what useChat returns:
+
 ```typescript
 const chatHelpers = useChat({ ... })
 console.log('useChat returned:', Object.keys(chatHelpers))
 ```
 
 2. Check if input/setInput exist:
+
 ```typescript
-console.log('input:', input, 'setInput:', typeof setInput)
+console.log('input:', input, 'setInput:', typeof setInput);
 // v5: input: undefined setInput: undefined
 ```
 
 3. Verify AI SDK version:
+
 ```bash
 grep '"ai":' package.json
 # "ai": "5.0.87" = v5 (breaking changes)
@@ -160,6 +171,7 @@ grep '"ai":' package.json
 ## Prevention
 
 **When upgrading to AI SDK v5:**
+
 1. Search codebase for `useChat` usage: `grep -r "useChat" --include="*.tsx"`
 2. Check each usage for destructuring `input`, `setInput`, `handleSubmit`, `handleInputChange`
 3. Replace with local state management
