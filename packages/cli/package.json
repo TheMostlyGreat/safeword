@@ -1,6 +1,6 @@
 {
   "name": "safeword",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "description": "CLI for setting up and managing safeword development environments",
   "type": "module",
   "bin": {
@@ -27,7 +27,8 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm audit --audit-level=high && npm run build && npm test"
   },
   "dependencies": {
     "commander": "^12.1.0"
