@@ -40,7 +40,7 @@ export function ensureAgentsMdLink(cwd: string): 'created' | 'modified' | 'uncha
 }
 
 /**
- * Remove safeword link from AGENTS.md.
+ * Remove safeword link block from AGENTS.md.
  * Returns true if link was removed.
  */
 export function removeAgentsMdLink(cwd: string): boolean {
@@ -48,15 +48,21 @@ export function removeAgentsMdLink(cwd: string): boolean {
   if (!exists(agentsMdPath)) return false;
 
   const content = readFile(agentsMdPath);
-  const lines = content.split('\n');
-  const filteredLines = lines.filter((line) => !line.includes(SAFEWORD_LINK_MARKER));
 
-  // Remove extra blank lines at the start
-  while (filteredLines.length > 0 && filteredLines[0].trim() === '') {
+  // Remove the entire AGENTS_MD_LINK block if present
+  let newContent = content.replace(AGENTS_MD_LINK, '');
+
+  // Also handle legacy single-line format
+  const lines = newContent.split('\n');
+  const filteredLines = lines.filter((line) => !line.includes(SAFEWORD_LINK_MARKER));
+  newContent = filteredLines.join('\n');
+
+  // Remove extra blank lines and separators at the start
+  while (filteredLines.length > 0 && (filteredLines[0].trim() === '' || filteredLines[0].trim() === '---')) {
     filteredLines.shift();
   }
+  newContent = filteredLines.join('\n');
 
-  const newContent = filteredLines.join('\n');
   if (newContent !== content) {
     writeFile(agentsMdPath, newContent);
     return true;
