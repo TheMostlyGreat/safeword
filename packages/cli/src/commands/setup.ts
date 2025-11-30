@@ -302,8 +302,11 @@ export async function setup(options: SetupOptions): Promise<void> {
     if (projectType.typescript) {
       listItem('npm install -D typescript-eslint');
     }
-    if (projectType.react) {
+    if (projectType.react && !projectType.nextjs) {
       listItem('npm install -D eslint-plugin-react eslint-plugin-react-hooks');
+    }
+    if (projectType.nextjs) {
+      listItem('npm install -D eslint-plugin-react eslint-plugin-react-hooks @next/eslint-plugin-next');
     }
     if (projectType.astro) {
       listItem('npm install -D eslint-plugin-astro');

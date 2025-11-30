@@ -26,6 +26,11 @@ export function getEslintConfig(options: {
     );
   }
 
+  if (options.nextjs) {
+    imports.push('import nextPlugin from "@next/eslint-plugin-next";');
+    configs.push('{ plugins: { "@next/next": nextPlugin }, rules: nextPlugin.configs.recommended.rules }');
+  }
+
   if (options.astro) {
     imports.push('import eslintPluginAstro from "eslint-plugin-astro";');
     configs.push('...eslintPluginAstro.configs.recommended');
