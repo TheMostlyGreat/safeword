@@ -305,6 +305,9 @@ export async function setup(options: SetupOptions): Promise<void> {
     if (projectType.react) {
       listItem('npm install -D eslint-plugin-react eslint-plugin-react-hooks');
     }
+    if (projectType.astro) {
+      listItem('npm install -D eslint-plugin-astro');
+    }
 
     // Print summary
     header('Setup Complete');

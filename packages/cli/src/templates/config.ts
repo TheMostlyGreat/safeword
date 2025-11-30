@@ -6,6 +6,7 @@ export function getEslintConfig(options: {
   typescript?: boolean;
   react?: boolean;
   nextjs?: boolean;
+  astro?: boolean;
 }): string {
   const imports: string[] = ['import js from "@eslint/js";'];
   const configs: string[] = ['js.configs.recommended'];
@@ -25,12 +26,17 @@ export function getEslintConfig(options: {
     );
   }
 
+  if (options.astro) {
+    imports.push('import eslintPluginAstro from "eslint-plugin-astro";');
+    configs.push('...eslintPluginAstro.configs.recommended');
+  }
+
   return `${imports.join('\n')}
 
 export default [
   ${configs.join(',\n  ')},
   {
-    ignores: ["node_modules/", "dist/", ".next/", "build/"],
+    ignores: ["node_modules/", "dist/", ".next/", ".astro/", "build/"],
   },
 ];
 `;
