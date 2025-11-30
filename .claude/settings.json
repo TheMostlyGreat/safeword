@@ -1,30 +1,55 @@
 {
   "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/inject-timestamp.sh"
-          }
-        ]
-      },
-      {
-        "matcher": ".{20,}",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/question-protocol.sh"
-          }
-        ]
-      }
-    ],
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.safeword/hooks/session-version.sh"
+            "command": "bash .safeword/hooks/session-verify-agents.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .safeword/hooks/session-version.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .safeword/hooks/session-lint-check.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .safeword/hooks/prompt-timestamp.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .safeword/hooks/prompt-questions.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .safeword/hooks/stop-quality.sh"
           }
         ]
       }
@@ -35,7 +60,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.safeword/hooks/post-tool-lint.sh"
+            "command": "bash .safeword/hooks/post-tool-lint.sh"
           }
         ]
       }

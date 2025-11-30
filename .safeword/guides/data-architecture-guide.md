@@ -19,6 +19,7 @@
 **Tie-breaking rule:** If multiple apply, stop at first match (earlier = more general).
 
 **Edge cases:**
+
 - Single feature but adds 3+ entities → Architecture doc (impacts data model)
 - Bug fix changes schema → Architecture doc (schema changes always documented)
 - Feature uses existing data model → Design doc only
@@ -34,16 +35,19 @@
 **Why:** Poor data quality cascades to business logic bugs, corrupted state, and user-facing errors.
 
 **Document:**
+
 - Validation rules (types, constraints, ranges)
 - Data source of truth (which store is canonical)
 - Quality checkpoints (where validation happens)
 
 **Example format:**
+
 ```markdown
 **[Entity] state** (source of truth: [storage type])
+
 - `field1`: constraint (e.g., 0-100 integer)
 - `field2[]`: max N entries, validation rule
-**Validation checkpoint:** `validateFunction()` in `file.ts:line`
+  **Validation checkpoint:** `validateFunction()` in `file.ts:line`
 ```
 
 ### 2. Data Governance
@@ -53,13 +57,16 @@
 **Why:** Prevents unauthorized access, conflicting writes, and data loss.
 
 **Document:**
+
 - Who can read/write each data entity
 - When data is created/updated/deleted
 - Conflict resolution strategies
 
 **Example format:**
+
 ```markdown
 **[Entity] state**:
+
 - Read: [roles with read access]
 - Write: [roles with write access] (via `updateFunction()`)
 - Delete: [strategy] (e.g., soft delete with `deletedAt`)
@@ -73,13 +80,16 @@
 **Why:** Users expect instant feedback; slow queries degrade UX.
 
 **Document:**
+
 - Access patterns (how data is queried)
 - Performance targets (max query time)
 - Caching strategies
 
 **Example format:**
+
 ```markdown
 **[Entity] list** (accessed on [trigger]):
+
 - Target: <Nms load time
 - Strategy: [database index/optimization]
 - Cache: [caching approach] or "No cache needed"
@@ -92,18 +102,22 @@
 **Why:** Outdated docs are worse than no docs (mislead developers).
 
 **Document:**
+
 - Version/status (Production/Proposed)
 - Last updated date
 - Migration strategy when changing
 
 **Example format:**
+
 ```markdown
 **Version:** X.Y
 **Status:** Production (vX) + Proposed (vY)
 **Last Updated:** YYYY-MM-DD
 
 ## Current Schema (vX - Production)
+
 ## Proposed Schema (vY - Feature Name)
+
 ## Migration Strategy
 ```
 
@@ -126,8 +140,10 @@
 **Include:** Input validation, business logic transformations, persistence steps, UI updates, error handling for each step.
 
 **Example format:**
+
 ```markdown
 **[Flow Name]** (trigger: [user action/event])
+
 1. **Input** → Validation (`validateFn()`) | Error: return 400
 2. **Transform** → Business logic | Error: rollback + notify
 3. **Persist** → Database write | Error: retry 3x, then fail
@@ -149,6 +165,7 @@
 **See:** `@.safeword/guides/architecture-guide.md` for full TDD workflow integration.
 
 **Data-specific triggers for updating architecture doc:**
+
 - Adding new data entities
 - Changing schema (new fields, relationships)
 - Changing storage technology

@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { execSync } from 'node:child_process';
+import { execSync, spawnSync } from 'node:child_process';
 import {
   createTempDir,
   removeTempDir,
@@ -308,69 +308,155 @@ describe('E2E: Stop Hook', () => {
     }
   });
 
+  // Helper to create a mock transcript with an assistant message
+  function createMockTranscript(projectDir: string, assistantText: string): string {
+    const transcriptPath = `${projectDir}/.safeword/test-transcript.jsonl`;
+    const message = {
+      role: 'assistant',
+      message: {
+        content: [{ type: 'text', text: assistantText }],
+      },
+    };
+    writeTestFile(projectDir, '.safeword/test-transcript.jsonl', JSON.stringify(message));
+    return transcriptPath;
+  }
+
+  // Helper to run stop hook with mock transcript
+  function runStopHook(
+    projectDir: string,
+    transcriptPath: string,
+  ): { stdout: string; stderr: string; exitCode: number } {
+    const input = JSON.stringify({ transcript_path: transcriptPath });
+    try {
+      const result = spawnSync(
+        'bash',
+        ['-c', `echo '${input}' | bash .safeword/hooks/stop-quality.sh`],
+        {
+          cwd: projectDir,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
+          encoding: 'utf-8',
+        },
+      );
+      return {
+        stdout: result.stdout || '',
+        stderr: result.stderr || '',
+        exitCode: result.status || 0,
+      };
+    } catch (error: unknown) {
+      const execError = error as { stdout?: string; stderr?: string; status?: number };
+      return {
+        stdout: execError.stdout || '',
+        stderr: execError.stderr || '',
+        exitCode: execError.status || 1,
+      };
+    }
+  }
+
   describe('stop-quality.sh', () => {
-    it('returns valid JSON with review message when files are staged', () => {
-      // Create and stage a file
-      writeTestFile(projectDir, 'src/test-file.ts', 'export const test = true;\n');
-      execSync('git add src/test-file.ts', { cwd: projectDir });
+    it('triggers quality review when madeChanges is true', () => {
+      const text =
+        'I made some edits.\n\n{"proposedChanges": false, "madeChanges": true, "askedQuestion": false}';
+      const transcriptPath = createMockTranscript(projectDir, text);
 
-      const output = execSync('bash .safeword/hooks/stop-quality.sh', {
-        cwd: projectDir,
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-        encoding: 'utf-8',
-      });
+      const result = runStopHook(projectDir, transcriptPath);
 
-      // Should return valid JSON
-      const json = JSON.parse(output);
-      expect(json).toHaveProperty('message');
-      expect(json.message).toContain('/quality-review');
+      expect(result.exitCode).toBe(2);
+      expect(result.stderr).toContain('Quality Review');
+      expect(result.stderr).toContain("Assume you've never seen it before");
+      expect(result.stderr).toContain('Is it correct?');
     });
 
-    it('returns JSON without message when no files are modified', () => {
-      // Use a fresh temp directory with committed baseline to ensure clean state
-      const cleanDir = createTempDir();
+    it('triggers quality review when proposedChanges is true', () => {
+      const text =
+        'I propose these changes.\n\n{"proposedChanges": true, "madeChanges": false, "askedQuestion": false}';
+      const transcriptPath = createMockTranscript(projectDir, text);
+
+      const result = runStopHook(projectDir, transcriptPath);
+
+      expect(result.exitCode).toBe(2);
+      expect(result.stderr).toContain('Quality Review');
+    });
+
+    it('skips review when askedQuestion is true', () => {
+      const text =
+        'What approach do you prefer?\n\n{"proposedChanges": true, "madeChanges": true, "askedQuestion": true}';
+      const transcriptPath = createMockTranscript(projectDir, text);
+
+      const result = runStopHook(projectDir, transcriptPath);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).not.toContain('Quality Review');
+    });
+
+    it('handles JSON fields in different order', () => {
+      const text =
+        'Done.\n\n{"madeChanges": true, "askedQuestion": false, "proposedChanges": false}';
+      const transcriptPath = createMockTranscript(projectDir, text);
+
+      const result = runStopHook(projectDir, transcriptPath);
+
+      expect(result.exitCode).toBe(2);
+      expect(result.stderr).toContain('Quality Review');
+    });
+
+    it('warns when JSON blob is missing', () => {
+      const text = 'I made some changes but forgot the JSON summary.';
+      const transcriptPath = createMockTranscript(projectDir, text);
+
+      const result = runStopHook(projectDir, transcriptPath);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toContain('missing required JSON summary');
+    });
+
+    it('warns when JSON blob has missing field', () => {
+      const text = 'Partial JSON.\n\n{"proposedChanges": true, "madeChanges": false}';
+      const transcriptPath = createMockTranscript(projectDir, text);
+
+      const result = runStopHook(projectDir, transcriptPath);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toContain('missing required JSON summary');
+    });
+
+    it('exits silently when no changes made or proposed', () => {
+      const text =
+        'Just answered a question.\n\n{"proposedChanges": false, "madeChanges": false, "askedQuestion": false}';
+      const transcriptPath = createMockTranscript(projectDir, text);
+
+      const result = runStopHook(projectDir, transcriptPath);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toBe('');
+    });
+
+    it('exits silently for non-safeword project', () => {
+      const nonSafewordDir = createTempDir();
       try {
-        // Initialize fresh git repo with initial commit
-        execSync('git init', { cwd: cleanDir, stdio: 'pipe' });
-        execSync('git config user.email "test@test.com"', { cwd: cleanDir, stdio: 'pipe' });
-        execSync('git config user.name "Test User"', { cwd: cleanDir, stdio: 'pipe' });
-        writeTestFile(cleanDir, '.safeword/version', '0.0.0');
-        execSync('git add -A && git commit -m "initial"', { cwd: cleanDir, stdio: 'pipe' });
-
-        // Copy stop hook from projectDir
-        const hookContent = readTestFile(projectDir, '.safeword/hooks/stop-quality.sh');
-        writeTestFile(cleanDir, '.safeword/hooks/stop-quality.sh', hookContent);
-        execSync('chmod +x .safeword/hooks/stop-quality.sh', { cwd: cleanDir });
-
-        // Now run stop hook - should see no modified files
-        const output = execSync('bash .safeword/hooks/stop-quality.sh', {
-          cwd: cleanDir,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: cleanDir },
+        const input = JSON.stringify({ transcript_path: '/tmp/fake.jsonl' });
+        const output = execSync(`echo '${input}' | bash .safeword/hooks/stop-quality.sh`, {
+          cwd: projectDir,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDir },
           encoding: 'utf-8',
         });
 
-        // Should return valid JSON without message
-        const json = JSON.parse(output);
-        expect(json).not.toHaveProperty('message');
+        expect(output.trim()).toBe('');
       } finally {
-        removeTempDir(cleanDir);
+        removeTempDir(nonSafewordDir);
       }
     });
 
-    it('detects unstaged modified files', () => {
-      // Create a modified but unstaged file
-      writeTestFile(projectDir, 'src/unstaged.ts', 'export const unstaged = true;\n');
+    it('uses last valid JSON blob when multiple exist', () => {
+      // First blob says no changes, second says changes made - should use second
+      const text =
+        'First update: {"proposedChanges": false, "madeChanges": false, "askedQuestion": false}\n\n' +
+        'Then I made edits: {"proposedChanges": false, "madeChanges": true, "askedQuestion": false}';
+      const transcriptPath = createMockTranscript(projectDir, text);
 
-      const output = execSync('bash .safeword/hooks/stop-quality.sh', {
-        cwd: projectDir,
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-        encoding: 'utf-8',
-      });
+      const result = runStopHook(projectDir, transcriptPath);
 
-      // Should return valid JSON with message about modified files
-      const json = JSON.parse(output);
-      expect(json).toHaveProperty('message');
-      expect(json.message).toContain('/quality-review');
+      expect(result.exitCode).toBe(2);
+      expect(result.stderr).toContain('Quality Review');
     });
   });
 });

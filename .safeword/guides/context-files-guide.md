@@ -13,6 +13,7 @@ Create the file(s) that best match your tooling. It’s okay to have more than o
   - Generic “project context” consumed by multiple agents/editors
 
 All project context files should:
+
 - **CRITICAL:** Reference `.safeword/SAFEWORD.md` at the top
 - Architecture decisions with "why" (not just "what")
 - Design philosophy and conventions
@@ -20,11 +21,13 @@ All project context files should:
 - Cross-references to subdirectory files
 
 **Subdirectory files** (e.g., `tests/AGENTS.md`, `packages/app/CLAUDE.md`) - Create when:
-- >3 unique rules that don't fit in root
+
+- > 3 unique rules that don't fit in root
 - Working in that directory needs specialized context
 - **Skip if:** Directory is straightforward or already covered in root
 
 **Naming convention summary:**
+
 - `CLAUDE.md` for Claude-specific guidance
 - `CURSOR.md` for Cursor-specific guidance
 - `AGENTS.md` for cross-agent compatibility (tests, docs, most projects)
@@ -57,6 +60,7 @@ Read it BEFORE working on any task in this project.
 3. Hierarchical loading (root + subdirectory) is common
 
 **Example:**
+
 ```
 Working in: /project/src/feature/
 Loaded context:
@@ -65,19 +69,24 @@ Loaded context:
 ```
 
 **Design implication:** Subdirectory files should assume root context is available
+
 - Use "See root SAFEWORD.md or AGENTS.md for architecture" cross-references
 - Don't duplicate root content in subdirectory files
 - Focus subdirectory files on specialized conventions for that area
 
 ```markdown
 ❌ BAD - tests/AGENTS.md duplicates root TDD workflow:
+
 ## TDD Workflow
+
 1. Write failing tests first (RED)
 2. Implement minimum code (GREEN)
 3. Refactor while green
 
 ✅ GOOD - tests/AGENTS.md references root:
+
 ## Testing Conventions
+
 See root AGENTS.md for TDD workflow. This file covers test-specific patterns.
 ```
 
@@ -96,6 +105,7 @@ project/
 ```
 
 **Modular Approach (Recommended):**
+
 ```
 project/
 ├─ AGENTS.md / CLAUDE.md        # 50 lines: imports + structure
@@ -104,6 +114,7 @@ project/
 ```
 
 Main context file imports modules:
+
 ```markdown
 @docs/architecture.md
 @docs/conventions.md
@@ -112,6 +123,7 @@ Main context file imports modules:
 ## Content Guidelines
 
 **Include:**
+
 - "Why" over "what" - Explain architectural trade-offs, not features
 - Project-specific conventions - Unique to THIS codebase
 - Domain requirements - Specialized knowledge (game mechanics, industry standards, UX patterns)
@@ -120,6 +132,7 @@ Main context file imports modules:
 - Cross-references - Link to subdirectories, don't duplicate
 
 **Exclude:**
+
 - Generic advice ("follow best practices")
 - Feature lists (put in README.md)
 - Setup instructions (put in README.md)
@@ -140,39 +153,46 @@ Main context file imports modules:
 ## Anti-Patterns to Avoid
 
 ❌ **Redundancy between root and subdirectory files** (#1 source of bloat)
+
 - Don't list all stores in root if packages/web/AGENTS.md covers them
 - Don't document testing patterns in root if tests/AGENTS.md exists
 - Don't repeat gotchas - reference subdirectory for details
 - Each fact stated exactly once, use cross-references elsewhere
 
 ❌ **Implementation details in root file**
+
 - File paths (store.ts:127-137) belong in subdirectory files
 - Specific line numbers change frequently
 - File trees and directory structures
 - Line counts and feature status lists
 
 ❌ **Testing sections in non-test files**
+
 - Testing philosophy → tests/AGENTS.md (always)
 - Test commands → tests/AGENTS.md or README.md
 - Test patterns → tests/AGENTS.md
 
 ❌ **User-facing documentation**
+
 - Setup instructions → README.md
 - Development commands → README.md
 - Feature lists → ROADMAP.md
 - API documentation → Code comments or separate docs
 
 ❌ **Generic advice**
+
 - "Use TypeScript" (not project-specific)
 - "Follow best practices" (too vague)
 - "Write tests" (duh - say WHICH tests for WHAT)
 
 ❌ **Meta-commentary**
+
 - "Last Updated: 2025-01-19"
 - "This file was reduced from 634 → 152 lines"
 - Commit history (that's what git is for)
 
 ❌ **Outdated information**
+
 - Revisit after major architectural changes
 - Remove sections when they no longer apply
 - Update cross-references when files move
@@ -180,32 +200,39 @@ Main context file imports modules:
 ## Cross-Reference Pattern
 
 **Root file:**
+
 ```markdown
 **Agents** (`app/src/agents/`) - LLM logic. See `/AGENTS.md`.
 ```
 
 **Subdirectory file:**
+
 ```markdown
 **Context:** Working with AI agents. See root `SAFEWORD.md`/`AGENTS.md` for architecture.
 ```
 
 **Import pattern:**
+
 ```markdown
 # Project Context
 
 See @README for project overview and @package.json for available npm commands.
 
 ## Architecture
+
 @docs/architecture.md
 
 ## Coding Standards
+
 @.safeword/guides/llm-prompting.md
 
 ## Git Workflow
+
 Details in @docs/git-workflow.md
 ```
 
 **Import features:**
+
 - **Relative paths:** `@docs/file.md` (relative to AGENTS.md location)
 - **Absolute paths:** `@/path/to/file.md`
 - **Home directory:** `@.safeword/guides/file.md` (personal conventions across all projects)
@@ -228,12 +255,15 @@ Read it BEFORE working on any task in this project.
 Brief description. Current status.
 
 ## Design Philosophy
+
 1. **Test-Driven Development (TDD):** Write tests before implementation
 2. **Core principle:** Why we chose this approach
 3. **Core principle:** Trade-offs we accepted
 
 ## Architecture Decisions
+
 ### Tech Choice 1
+
 **Decision:** What we chose
 **Why:** Reduces X, improves Y (specific numbers)
 **Trade-off:** Harder to debug, but worth it for UX
@@ -242,25 +272,31 @@ Brief description. Current status.
 ## Domain Requirements
 
 ### Game Mechanics (Blades in the Dark)
+
 - Position/effect system (rulebook p.8-12)
 - Fiction-first approach
 
 **Key principles:**
+
 - Position telegraphed before roll
 - Consequences flow from fiction
 
 ### Document Editor UX
+
 - Performance <16ms per keystroke
 - Standard OS text editing conventions
 
 **Key principles:**
+
 - Fast is a feature
 - Don't reinvent native behavior
 
 ## Common Gotchas
+
 1. **Thing:** Why it breaks (see Design Philosophy → Section)
 
 ## File Organization
+
 **Dir** (`path/`) - Purpose. See `path/AGENTS.md`.
 ```
 
@@ -278,33 +314,40 @@ Brief description. Current status.
 ## Domain Requirements Section (Optional)
 
 **When to add:**
+
 - Project has specialized domain knowledge (game mechanics, industry standards, UX patterns)
 - Domain concerns are non-obvious from codebase alone
 - You find yourself repeatedly explaining domain rules to AI
 
 **When to skip:**
+
 - Domain is obvious from code structure (REST API patterns)
 - Tech stack IS the domain (generic CRUD app)
 - Simple projects without specialized knowledge
 
 **Structure (easy to parse):**
+
 ```markdown
 ## Domain Requirements
 
 ### [Domain Name 1]
+
 - [Key principle or rule]
 - [Key principle or rule]
 - [Resource reference if applicable]
 
 **Key principles:**
+
 - [Specific guideline with rationale]
 - [Specific guideline with rationale]
 
 ### [Domain Name 2]
+
 - [Key principle or rule]
 - [Key principle or rule]
 
 **Key principles:**
+
 - [Specific guideline with rationale]
 ```
 
@@ -314,38 +357,45 @@ Brief description. Current status.
 ## Domain Requirements
 
 ### Blades in the Dark Mechanics
+
 - Position/effect system (BITD rulebook p.8-12)
 - Stress and harm tracking (p.13-15)
 - Downtime and long-term projects (p.16-20)
 
 **Key principles:**
+
 - Fiction drives mechanics (not dice → narrative)
 - Position must be telegraphed before roll
 - Effect established collaboratively with player
 - Consequences flow from fiction, not arbitrary
 
 ### Document Editor UX
+
 - Text editing performance (<16ms per keystroke)
 - Undo/redo granularity (word-level, not character)
 - Selection handling (standard OS conventions)
 
 **Key principles:**
+
 - Performance over features (fast is a feature)
 - Native OS behavior (don't reinvent text editing)
 - Accessibility first (screen readers, keyboard nav)
 
 ### Conversational AI Patterns
+
 - GM tone: Collaborative, not dictatorial
 - Player agency: Always offer meaningful choices
 - Emergent narrative: Build on player ideas
 
 **Key principles:**
+
 - Ask questions, don't declare outcomes
 - "Yes, and..." over "No, but..."
 - Telegraph consequences before they happen
 ```
 
 **Why this structure:**
+
 - ✅ **Easy to parse** - Simple markdown hierarchy (##, ###, bullets)
 - ✅ **Scannable** - Domain names as headers, principles as bullets
 - ✅ **Rationale included** - Explains "why" not just "what"
@@ -353,6 +403,7 @@ Brief description. Current status.
 - ✅ **Concrete** - Specific guidelines, not vague advice
 
 **Integration with auto-quality-review hook:**
+
 - Hook prompts: "Does it adhere to... domain requirements?"
 - Claude checks CLAUDE.md/AGENTS.md for Domain Requirements section
 - If present → Reviews against documented principles
@@ -384,12 +435,14 @@ Before committing:
 ## Best Practices from Anthropic
 
 **Conciseness:**
+
 - Use short, declarative bullet points (not narrative paragraphs)
 - Trim redundancy (don't explain obvious folder names like "components folder contains components")
 - Don't include commentary or nice-to-have information
 - Files are loaded with every request - keep lean
 
 **Effectiveness:**
+
 - **Treat as living document** - Constantly refine based on what works
 - Periodically review and refactor for clarity
 - At Anthropic, teams use prompt improver to tune instructions
@@ -397,9 +450,8 @@ Before committing:
 - Explicitly reference your context file in prompts ("following CLAUDE.md guidelines") for better adherence
 
 **Token Budget:**
+
 - Context files are often prepended to prompts - they consume context with each interaction
 - Bloated files cost more tokens and introduce noise
 - Keep under 50KB for optimal performance (though no hard limit)
 - Use imports to modularize instead of monolithic files
-
-

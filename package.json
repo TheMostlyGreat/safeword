@@ -8,7 +8,11 @@
     "format": "prettier --write .",
     "eval": "dotenv -e .env -- promptfoo eval -c promptfoo.yaml",
     "eval:view": "promptfoo view",
-    "eval:no-cache": "dotenv -e .env -- promptfoo eval -c promptfoo.yaml --no-cache"
+    "eval:no-cache": "dotenv -e .env -- promptfoo eval -c promptfoo.yaml --no-cache",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "format:check": "prettier --check .",
+    "knip": "knip",
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -17,10 +21,36 @@
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-boundaries": "^5.3.0",
+    "eslint-plugin-import-x": "^4.16.1",
+    "eslint-plugin-playwright": "^2.4.0",
     "eslint-plugin-sonarjs": "^3.0.5",
     "globals": "^16.5.0",
-    "prettier": "^3.7.1",
+    "husky": "^9.1.7",
+    "knip": "^5.70.2",
+    "lint-staged": "^16.2.7",
+    "markdownlint-cli2": "^0.19.1",
+    "prettier": "^3.7.3",
     "promptfoo": "^0.119.5",
     "typescript-eslint": "^8.47.0"
+  },
+  "dependencies": {
+    "safeword": "^0.6.1"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{vue,svelte,astro}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,scss,html,yaml,yml,graphql}": [
+      "prettier --write"
+    ],
+    "*.md": [
+      "markdownlint-cli2 --fix",
+      "prettier --write"
+    ]
   }
 }

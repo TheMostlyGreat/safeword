@@ -1,13 +1,30 @@
-Trigger a quality review to double-check your work.
+---
+description: Deep code review with web research against latest docs and versions
+---
 
-Execute:
-```bash
-bash .claude/hooks/run-quality-review.sh
+# Quality Review
+
+Perform a deep code review with web research to verify against latest documentation.
+
+## Instructions
+
+When the user invokes this command:
+
+1. **Identify the scope** - Ask what code to review if not specified
+2. **Fetch current docs** - Use WebFetch/WebSearch for libraries being used
+3. **Check versions** - Verify dependencies are current and secure
+4. **Analyze deeply** - Look for:
+   - Performance issues
+   - Security vulnerabilities
+   - Deprecated APIs
+   - Better alternatives
+   - Missing error handling
+5. **Report findings** - Provide actionable recommendations
+
+## Example Usage
+
+```
+/quality-review
 ```
 
-This will prompt you to:
-- Verify correctness
-- Check elegance
-- Validate against latest docs and best practices
-- Consider asking clarifying questions
-- Think deeply and avoid bloat
+Then: "Review the authentication implementation" or "Check if my React hooks are following best practices"

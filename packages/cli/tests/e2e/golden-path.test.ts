@@ -90,24 +90,6 @@ describe('E2E: Golden Path', () => {
     expect(result.trim()).toBe('const x = 1;');
   });
 
-  it('stop-quality hook returns valid JSON with message', () => {
-    // Create a modified file
-    writeTestFile(projectDir, 'src/modified.ts', 'export const modified = true;\n');
-    execSync('git add src/modified.ts', { cwd: projectDir });
-
-    // Run stop hook
-    const output = execSync('bash .safeword/hooks/stop-quality.sh', {
-      cwd: projectDir,
-      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-      encoding: 'utf-8',
-    });
-
-    // Should return valid JSON
-    const json = JSON.parse(output);
-    expect(json).toHaveProperty('message');
-    expect(json.message).toContain('/quality-review');
-  });
-
   it('git commit succeeds with husky pre-commit hook', () => {
     // Create a valid file
     writeTestFile(projectDir, 'src/commit-test.ts', 'export const commitTest = 1;\n');

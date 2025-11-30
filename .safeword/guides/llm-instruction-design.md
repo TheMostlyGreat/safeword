@@ -17,6 +17,7 @@ Decision trees and categorization must have no overlap and cover all cases. Rese
 Problem: A function with database calls could match both
 
 ✅ GOOD - Sequential, mutually exclusive:
+
 1. AI content quality? → LLM Eval
 2. Requires real browser? → E2E test
 3. Multiple components? → Integration test
@@ -34,6 +35,7 @@ Never assume LLMs know what you mean. Define all terms, even "obvious" ones.
 ✅ GOOD: "Test with the fastest test type that can catch the bug"
 
 Examples needing definition:
+
 - "Critical paths" → Always critical: auth, payment. Rarely: UI polish, admin
 - "Browser" → Real browser (Playwright/Cypress), not jsdom
 - "Pure function" → Input → output, no I/O (define edge cases like Date.now())
@@ -51,7 +53,8 @@ Section B: "All user-facing features have at least one E2E test"
 ✅ GOOD:
 Section A: "Write E2E tests only for critical user paths"
 Section B: "All critical multi-page user flows have at least one E2E test"
-+ Definition of "critical" with examples
+
+- Definition of "critical" with examples
 ```
 
 **4. Concrete Examples Over Abstract Rules**
@@ -64,14 +67,14 @@ Show, don't just tell. LLMs learn patterns from examples. For every rule, includ
 ✅ GOOD:
 // ❌ BAD - Testing business logic with E2E
 test('discount calculation', async ({ page }) => {
-  await page.goto('/checkout')
-  await page.fill('[name="price"]', '100')
-  await expect(page.locator('.total')).toContainText('80')
+await page.goto('/checkout')
+await page.fill('[name="price"]', '100')
+await expect(page.locator('.total')).toContainText('80')
 })
 
 // ✅ GOOD - Unit test (runs in milliseconds)
 it('applies 20% discount', () => {
-  expect(calculateDiscount(100, 0.20)).toBe(80)
+expect(calculateDiscount(100, 0.20)).toBe(80)
 })
 ```
 
@@ -85,6 +88,7 @@ What seems obvious to humans often isn't to LLMs. After stating a rule, add "Edg
 ✅ GOOD: "Unit test pure functions"
 
 Edge cases:
+
 - Non-deterministic functions (Math.random(), Date.now()) → Unit test with mocked randomness/time
 - Environment dependencies (process.env) → Integration test
 - Mixed pure + I/O → Extract pure part, unit test separately
@@ -98,6 +102,7 @@ Give LLMs concrete actions, not subjective guidance. Replace subjective terms (m
 ❌ BAD: "Most tests: Fast, Some tests: Slow"
 
 ✅ GOOD:
+
 - Write as many fast tests as possible
 - Write E2E tests only for critical paths requiring a browser
 - Red flag: If you have more E2E tests than integration tests, suite is too slow
@@ -134,11 +139,11 @@ Reference in decision trees:
 When decision logic has 3+ branches, nested conditions, or multiple variables to consider, provide a reference table.
 
 ```markdown
-| Bug Type | Unit? | Integration? | E2E? | Best Choice |
-|----------|-------|--------------|------|-------------|
-| Calculation error | ✅ | ✅ | ✅ | Unit (fastest) |
-| Database query bug | ❌ | ✅ | ✅ | Integration |
-| CSS layout broken | ❌ | ❌ | ✅ | E2E (only option) |
+| Bug Type           | Unit? | Integration? | E2E? | Best Choice       |
+| ------------------ | ----- | ------------ | ---- | ----------------- |
+| Calculation error  | ✅    | ✅           | ✅   | Unit (fastest)    |
+| Database query bug | ❌    | ✅           | ✅   | Integration       |
+| CSS layout broken  | ❌    | ❌           | ✅   | E2E (only option) |
 ```
 
 **10. Avoid Caveats in Tables**
@@ -181,6 +186,7 @@ When LLMs hit dead ends, provide concrete next steps.
 ❌ BAD: "If none of the above apply, re-evaluate your approach"
 
 ✅ GOOD: "If testing behavior that doesn't fit the categories:
+
 1. Break it down: Separate pure logic from I/O/UI concerns
 2. Test each piece: Pure → Unit, I/O → Integration, Multi-page → E2E
 3. Example: Login validation
@@ -219,11 +225,13 @@ Before saving/committing LLM-consumable documentation:
 ## Example: Before and After
 
 **Before (ambiguous):**
+
 ```markdown
 Follow the test pyramid: lots of unit tests, some integration tests, few E2E tests.
 ```
 
 **After (LLM-optimized):**
+
 ```markdown
 Answer these questions IN ORDER to choose test type:
 
@@ -234,6 +242,7 @@ Answer these questions IN ORDER to choose test type:
 If multiple apply: choose the faster one.
 
 Edge cases:
+
 - React components with React Testing Library → Integration (not E2E, no real browser)
 - Non-deterministic functions (Date.now()) → Unit test with mocked time
 ```

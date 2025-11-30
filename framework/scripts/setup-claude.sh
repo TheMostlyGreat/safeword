@@ -167,50 +167,44 @@ EOF
   echo "  • Wrote .env.arcade.example (sample env for Arcade MCP Gateway)"
 fi
 
-# Ensure CLAUDE.md references SAFEWORD.md (prepend trigger or create file)
+# Ensure CLAUDE.md imports SAFEWORD.md (prepend import or create file)
+# The @ syntax is an explicit file inclusion - Claude Code automatically loads referenced files
 if [ -f "CLAUDE.md" ]; then
-  if grep -q "@./.safeword/SAFEWORD.md" "CLAUDE.md"; then
-    echo "  • CLAUDE.md already includes SAFEWORD trigger"
+  if grep -q "^@./.safeword/SAFEWORD.md" "CLAUDE.md" || grep -q "^@.safeword/SAFEWORD.md" "CLAUDE.md"; then
+    echo "  • CLAUDE.md already imports SAFEWORD.md"
   else
     tmp_file=$(mktemp)
     cat > "$tmp_file" << 'EOF'
-**⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**
-
-The SAFEWORD.md file contains core development patterns, workflows, and conventions.
-Read it BEFORE working on any task in this project.
+@.safeword/SAFEWORD.md
 
 ---
 
 EOF
     cat "CLAUDE.md" >> "$tmp_file"
     mv "$tmp_file" "CLAUDE.md"
-    echo "  • Added SAFEWORD trigger to existing CLAUDE.md"
+    echo "  • Added SAFEWORD.md import to existing CLAUDE.md"
   fi
 else
   cat > "CLAUDE.md" << 'EOF'
-# Project Claude Context
-
-**⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**
-
-The SAFEWORD.md file contains core development patterns, workflows, and conventions.
-Read it BEFORE working on any task in this project.
+@.safeword/SAFEWORD.md
 
 ---
 
 ## Project-Specific Guidance
-- Add Claude-specific context, commands, or workflow notes here
+
+Add Claude-specific context, commands, or workflow notes here.
 EOF
-  echo "  • Created CLAUDE.md with SAFEWORD trigger"
+  echo "  • Created CLAUDE.md with SAFEWORD.md import"
 fi
 
 echo "Next steps:"
 echo "  1. Review generated files:"
 echo "     • .safeword/        (global patterns and guides)"
 echo "     • .claude/          (hooks and commands)"
-echo "     • SAFEWORD.md (project context) or CLAUDE.md"
+echo "     • CLAUDE.md         (imports .safeword/SAFEWORD.md)"
 echo ""
 echo "  2. Commit to git:"
-echo "     git add .safeword/ .claude/ SAFEWORD.md"
+echo "     git add .safeword/ .claude/ CLAUDE.md"
 echo "     git commit -m 'Add Claude Code hooks and patterns'"
 echo "     git push"
 echo ""

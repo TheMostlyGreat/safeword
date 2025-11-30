@@ -1,0 +1,2 @@
+npx safeword sync --quiet --stage
+npx lint-staged
