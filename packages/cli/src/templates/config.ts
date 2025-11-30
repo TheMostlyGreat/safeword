@@ -62,8 +62,9 @@ export const SETTINGS_HOOKS = {
   ],
   PostToolUse: [
     {
-      command: 'bash .safeword/hooks/post-tool.sh 2>/dev/null || true',
-      description: 'Safeword: Post-tool validation',
+      matcher: 'Write|Edit|MultiEdit|NotebookEdit',
+      command: 'bash .safeword/hooks/post-tool.sh',
+      description: 'Safeword: Auto-lint changed files',
     },
   ],
 };
