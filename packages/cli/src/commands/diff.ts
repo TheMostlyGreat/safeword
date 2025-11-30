@@ -72,10 +72,13 @@ function getFileDiffs(cwd: string): FileDiff[] {
   // Define files to check (template source -> install destination)
   const files: Array<{ templatePath: string; installPath: string }> = [
     { templatePath: 'SAFEWORD.md', installPath: '.safeword/SAFEWORD.md' },
-    { templatePath: 'hooks/agents-md-check.sh', installPath: '.safeword/hooks/agents-md-check.sh' },
-    { templatePath: 'hooks/pre-commit.sh', installPath: '.safeword/hooks/pre-commit.sh' },
-    { templatePath: 'hooks/post-tool.sh', installPath: '.safeword/hooks/post-tool.sh' },
-    { templatePath: 'hooks/inject-timestamp.sh', installPath: '.safeword/hooks/inject-timestamp.sh' },
+    { templatePath: 'hooks/session-verify-agents.sh', installPath: '.safeword/hooks/session-verify-agents.sh' },
+    { templatePath: 'hooks/session-version.sh', installPath: '.safeword/hooks/session-version.sh' },
+    { templatePath: 'hooks/session-lint-check.sh', installPath: '.safeword/hooks/session-lint-check.sh' },
+    { templatePath: 'hooks/prompt-timestamp.sh', installPath: '.safeword/hooks/prompt-timestamp.sh' },
+    { templatePath: 'hooks/prompt-questions.sh', installPath: '.safeword/hooks/prompt-questions.sh' },
+    { templatePath: 'hooks/post-tool-lint.sh', installPath: '.safeword/hooks/post-tool-lint.sh' },
+    { templatePath: 'hooks/stop-quality.sh', installPath: '.safeword/hooks/stop-quality.sh' },
     { templatePath: 'skills/safeword-quality-reviewer/SKILL.md', installPath: '.claude/skills/safeword-quality-reviewer/SKILL.md' },
   ];
 

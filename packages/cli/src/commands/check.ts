@@ -68,7 +68,7 @@ function checkHealth(cwd: string): HealthStatus {
   const projectVersion = readFileSafe(versionPath)?.trim() ?? null;
 
   // Check for required files
-  const requiredFiles = ['SAFEWORD.md', 'version', 'hooks/agents-md-check.sh'];
+  const requiredFiles = ['SAFEWORD.md', 'version', 'hooks/session-verify-agents.sh'];
 
   for (const file of requiredFiles) {
     if (!exists(join(safewordDir, file))) {
