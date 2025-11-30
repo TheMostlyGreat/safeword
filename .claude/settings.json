@@ -2,29 +2,19 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "matcher": ".{20,}",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/question-protocol.sh"
-          }
-        ]
-      },
-      {
         "hooks": [
           {
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/inject-timestamp.sh"
           }
         ]
-      }
-    ],
-    "Stop": [
+      },
       {
+        "matcher": ".{20,}",
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/auto-quality-review.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/question-protocol.sh"
           }
         ]
       }
@@ -34,15 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.safeword/hooks/agents-md-check.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/version-check.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.safeword/hooks/session-version.sh"
           }
         ]
       }
@@ -53,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.safeword/hooks/post-tool.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.safeword/hooks/post-tool-lint.sh"
           }
         ]
       }

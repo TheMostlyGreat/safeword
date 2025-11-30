@@ -29,10 +29,10 @@ export function initGitRepo(cwd: string): void {
 function getHookContent(): string {
   return `
 ${MARKER_START}
-# Safeword architecture check
+# Safeword pre-commit linting
 # This section is managed by safeword - do not edit manually
-if [ -f ".safeword/hooks/pre-commit.sh" ]; then
-  bash .safeword/hooks/pre-commit.sh
+if [ -f ".safeword/hooks/git-pre-commit.sh" ]; then
+  bash .safeword/hooks/git-pre-commit.sh
 fi
 ${MARKER_END}
 `;

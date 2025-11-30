@@ -1,23 +1,30 @@
+---
+description: Deep code review with web research against latest docs and versions
+---
+
 # Quality Review
 
-Deep code quality review with web research.
+Perform a deep code review with web research to verify against latest documentation.
 
-## When to Use
+## Instructions
 
-- User explicitly requests verification against latest docs
-- Need deeper analysis beyond automatic hook
-- Working on projects without SAFEWORD.md/CLAUDE.md
+When the user invokes this command:
 
-## What It Does
+1. **Identify the scope** - Ask what code to review if not specified
+2. **Fetch current docs** - Use WebFetch/WebSearch for libraries being used
+3. **Check versions** - Verify dependencies are current and secure
+4. **Analyze deeply** - Look for:
+   - Performance issues
+   - Security vulnerabilities
+   - Deprecated APIs
+   - Better alternatives
+   - Missing error handling
+5. **Report findings** - Provide actionable recommendations
 
-1. Fetches current documentation (WebFetch)
-2. Checks latest versions (WebSearch)
-3. Provides deep analysis (performance, security, alternatives)
-
-## Usage
+## Example Usage
 
 ```
 /quality-review
 ```
 
-Then describe what you want reviewed.
+Then: "Review the authentication implementation" or "Check if my React hooks are following best practices"

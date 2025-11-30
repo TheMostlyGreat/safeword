@@ -1,11 +1,14 @@
 #!/bin/bash
-# Safeword AGENTS.md self-healing hook
-# Ensures the AGENTS.md link is always present
+# Safeword: Verify AGENTS.md link (SessionStart)
+# Self-heals by restoring the link if removed
 
 LINK='**⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**'
 
+# Change to project directory if set
+[ -n "$CLAUDE_PROJECT_DIR" ] && cd "$CLAUDE_PROJECT_DIR"
+
 if [ ! -d ".safeword" ]; then
-  # Not a safeword project, skip
+  # Not a safeword project, skip silently
   exit 0
 fi
 

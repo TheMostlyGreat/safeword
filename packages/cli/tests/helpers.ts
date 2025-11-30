@@ -113,7 +113,8 @@ export async function runCli(
     timeout?: number;
   } = {},
 ): Promise<CliResult> {
-  const { cwd = process.cwd(), input, env = {}, timeout = 30000 } = options;
+  // Increased timeout for setup command which now runs npm install
+  const { cwd = process.cwd(), input, env = {}, timeout = 120000 } = options;
 
   const command = `node ${CLI_PATH} ${args.join(' ')}`;
 

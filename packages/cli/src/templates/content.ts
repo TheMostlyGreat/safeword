@@ -18,6 +18,21 @@ export const PRETTIERRC = `{
   "singleQuote": true,
   "tabWidth": 2,
   "trailingComma": "es5",
-  "printWidth": 100
+  "printWidth": 100,
+  "endOfLine": "lf"
 }
 `;
+
+/**
+ * lint-staged configuration for pre-commit hooks
+ * Runs linters only on staged files for fast commits
+ *
+ * SYNC: Keep file patterns in sync with post-tool-lint.sh in:
+ *   packages/cli/templates/hooks/post-tool-lint.sh
+ */
+export const LINT_STAGED_CONFIG = {
+  '*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}': ['eslint --fix', 'prettier --write'],
+  '*.{vue,svelte,astro}': ['eslint --fix', 'prettier --write'],
+  '*.{json,css,scss,html,yaml,yml,graphql}': ['prettier --write'],
+  '*.md': ['markdownlint-cli2 --fix', 'prettier --write'],
+};

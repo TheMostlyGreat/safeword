@@ -1,7 +1,7 @@
 /**
  * Test Suite 7: Git Repository Handling
  *
- * Tests for git detection and hook installation.
+ * Tests for git detection and Husky/lint-staged setup.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -11,7 +11,6 @@ import {
   createTypeScriptPackageJson,
   runCli,
   readTestFile,
-  writeTestFile,
   fileExists,
   initGitRepo,
 } from '../helpers';
@@ -27,25 +26,21 @@ describe('Test Suite 7: Git Repository Handling', () => {
     removeTempDir(tempDir);
   });
 
-  describe('Test 7.1: Prompts for git init when no .git', () => {
-    it('should mention git initialization in output', async () => {
+  describe('Test 7.1: Warns when no .git directory', () => {
+    it('should warn about skipped Husky setup', async () => {
       createTypeScriptPackageJson(tempDir);
       // No git init
 
-      // In non-interactive mode with --yes, we expect it to skip
-      // The prompt behavior is tested via TTY simulation
       const result = await runCli(['setup', '--yes'], { cwd: tempDir });
 
-      // Output should mention git
+      // Output should mention skipped Husky
       const output = result.stdout + result.stderr;
-      expect(output.toLowerCase()).toMatch(/git/i);
+      expect(output.toLowerCase()).toMatch(/skip.*husky|husky.*skip|no.*git/i);
     });
   });
 
-  describe('Test 7.2: Runs git init when user confirms', () => {
-    // This test would require TTY simulation for interactive input
-    // For now, we test that git hooks work when .git exists
-    it('should work with existing git repository', async () => {
+  describe('Test 7.2: Works with existing git repository', () => {
+    it('should complete setup with existing git repository', async () => {
       createTypeScriptPackageJson(tempDir);
       initGitRepo(tempDir);
 
@@ -56,8 +51,7 @@ describe('Test Suite 7: Git Repository Handling', () => {
     });
   });
 
-  describe('Test 7.3: Skips git init when user declines', () => {
-    // In --yes mode, git init is skipped by default
+  describe('Test 7.3: Skips git init in non-interactive mode', () => {
     it('should skip git init in non-interactive mode', async () => {
       createTypeScriptPackageJson(tempDir);
       // No git init
@@ -74,66 +68,70 @@ describe('Test Suite 7: Git Repository Handling', () => {
     });
   });
 
-  describe('Test 7.4: Installs git hooks when .git present', () => {
-    it('should create pre-commit hook with safeword markers', async () => {
+  describe('Test 7.4: Sets up Husky and lint-staged', () => {
+    it('should create .husky/pre-commit with lint-staged', async () => {
       createTypeScriptPackageJson(tempDir);
       initGitRepo(tempDir);
 
       await runCli(['setup', '--yes'], { cwd: tempDir });
 
-      expect(fileExists(tempDir, '.git/hooks/pre-commit')).toBe(true);
+      expect(fileExists(tempDir, '.husky/pre-commit')).toBe(true);
 
-      const content = readTestFile(tempDir, '.git/hooks/pre-commit');
-      expect(content).toContain('SAFEWORD_ARCH_CHECK_START');
-      expect(content).toContain('SAFEWORD_ARCH_CHECK_END');
+      const content = readTestFile(tempDir, '.husky/pre-commit');
+      expect(content).toContain('lint-staged');
+    });
+
+    it('should add lint-staged config to package.json', async () => {
+      createTypeScriptPackageJson(tempDir);
+      initGitRepo(tempDir);
+
+      await runCli(['setup', '--yes'], { cwd: tempDir });
+
+      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
+      expect(packageJson['lint-staged']).toBeDefined();
+      expect(packageJson['lint-staged']['*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}']).toBeDefined();
+    });
+
+    it('should add prepare script for Husky', async () => {
+      createTypeScriptPackageJson(tempDir);
+      initGitRepo(tempDir);
+
+      await runCli(['setup', '--yes'], { cwd: tempDir });
+
+      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
+      expect(packageJson.scripts?.prepare).toBe('husky || true');
     });
   });
 
-  describe('Test 7.5: Preserves existing pre-commit hooks', () => {
-    it('should preserve custom hook content', async () => {
-      createTypeScriptPackageJson(tempDir);
+  describe('Test 7.5: Preserves existing scripts and config', () => {
+    it('should not overwrite existing prepare script', async () => {
+      createTypeScriptPackageJson(tempDir, {
+        scripts: {
+          prepare: 'npm run build',
+        },
+      });
       initGitRepo(tempDir);
-
-      // Create existing pre-commit hook
-      const customHook = `#!/bin/bash
-# Custom hook for running tests
-echo "Running custom tests..."
-npm test
-`;
-      writeTestFile(tempDir, '.git/hooks/pre-commit', customHook);
 
       await runCli(['setup', '--yes'], { cwd: tempDir });
 
-      const content = readTestFile(tempDir, '.git/hooks/pre-commit');
-
-      // Original content preserved
-      expect(content).toContain('Running custom tests');
-      expect(content).toContain('npm test');
-
-      // Safeword markers added
-      expect(content).toContain('SAFEWORD_ARCH_CHECK_START');
-      expect(content).toContain('SAFEWORD_ARCH_CHECK_END');
+      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
+      // Original prepare script should be preserved
+      expect(packageJson.scripts?.prepare).toBe('npm run build');
     });
 
-    it('should not duplicate markers on repeated setup', async () => {
-      createTypeScriptPackageJson(tempDir);
+    it('should not overwrite existing lint-staged config', async () => {
+      createTypeScriptPackageJson(tempDir, {
+        'lint-staged': {
+          '*.ts': ['custom-linter'],
+        },
+      });
       initGitRepo(tempDir);
 
-      // Run setup twice
       await runCli(['setup', '--yes'], { cwd: tempDir });
 
-      // For second run, we need to remove .safeword to allow setup
-      // Or use upgrade. Let's test via upgrade path
-      await runCli(['upgrade'], { cwd: tempDir });
-
-      const content = readTestFile(tempDir, '.git/hooks/pre-commit');
-
-      // Markers should appear exactly once
-      const startCount = (content.match(/SAFEWORD_ARCH_CHECK_START/g) || []).length;
-      const endCount = (content.match(/SAFEWORD_ARCH_CHECK_END/g) || []).length;
-
-      expect(startCount).toBe(1);
-      expect(endCount).toBe(1);
+      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
+      // Original lint-staged config should be preserved
+      expect(packageJson['lint-staged']['*.ts']).toEqual(['custom-linter']);
     });
   });
 });

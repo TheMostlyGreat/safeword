@@ -132,41 +132,20 @@ describe('Test Suite 11: Reset', () => {
     });
   });
 
-  describe('Test 11.7: Removes git hook markers', () => {
-    it('should remove safeword markers from pre-commit', async () => {
+  describe('Test 11.7: Removes Husky hooks', () => {
+    it('should remove .husky directory on reset', async () => {
       createTypeScriptPackageJson(tempDir);
       initGitRepo(tempDir);
 
-      // Create custom pre-commit content
-      writeTestFile(
-        tempDir,
-        '.git/hooks/pre-commit',
-        `#!/bin/bash
-# Custom content before
-echo "Before safeword"
-
-# SAFEWORD_ARCH_CHECK_START
-echo "Safeword check"
-# SAFEWORD_ARCH_CHECK_END
-
-# Custom content after
-echo "After safeword"
-`,
-      );
-
       await runCli(['setup', '--yes'], { cwd: tempDir });
+
+      // Verify Husky was created
+      expect(fileExists(tempDir, '.husky/pre-commit')).toBe(true);
+
       await runCli(['reset', '--yes'], { cwd: tempDir });
 
-      const content = readTestFile(tempDir, '.git/hooks/pre-commit');
-
-      // Markers and content between them removed
-      expect(content).not.toContain('SAFEWORD_ARCH_CHECK_START');
-      expect(content).not.toContain('SAFEWORD_ARCH_CHECK_END');
-      expect(content).not.toContain('Safeword check');
-
-      // Custom content preserved
-      expect(content).toContain('Before safeword');
-      expect(content).toContain('After safeword');
+      // Husky directory should be removed
+      expect(fileExists(tempDir, '.husky')).toBe(false);
     });
   });
 
@@ -248,8 +227,8 @@ echo "After safeword"
       const customContent = readTestFile(tempDir, '.claude/commands/my-custom-command.md');
       expect(customContent).toContain('My Custom Command');
 
-      // Safeword commands should be removed (quality-review, arch-review, lint)
-      expect(fileExists(tempDir, '.claude/commands/quality-review.md')).toBe(false);
+      // Safeword commands should be removed (review, architecture, lint)
+      expect(fileExists(tempDir, '.claude/commands/review.md')).toBe(false);
     });
   });
 

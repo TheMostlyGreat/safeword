@@ -16,7 +16,8 @@ import {
   makeScriptsExecutable,
 } from '../utils/fs.js';
 import { info, success, error, header, listItem } from '../utils/output.js';
-import { isGitRepo, installGitHook } from '../utils/git.js';
+import { isGitRepo } from '../utils/git.js';
+import { execSync } from 'node:child_process';
 import { compareVersions } from '../utils/version.js';
 import { filterOutSafewordHooks } from '../utils/hooks.js';
 import { ensureAgentsMdLink } from '../utils/agents-md.js';
@@ -128,12 +129,28 @@ export async function upgrade(): Promise<void> {
     updated.push('.claude/commands/');
     success('Updated skills and commands');
 
-    // 5. Update git hooks if repo exists
+    // 5. Update Husky hooks if repo exists
     if (isGitRepo(cwd)) {
-      info('\nUpdating git hooks...');
-      installGitHook(cwd);
-      updated.push('.git/hooks/pre-commit');
-      success('Updated git pre-commit hook');
+      const huskyDir = join(cwd, '.husky');
+      if (exists(huskyDir)) {
+        info('\nUpdating Husky pre-commit hook...');
+        const huskyPreCommit = join(huskyDir, 'pre-commit');
+        writeFile(huskyPreCommit, 'npx lint-staged\n');
+        updated.push('.husky/pre-commit');
+        success('Updated Husky pre-commit hook');
+      } else {
+        // Initialize Husky if not present
+        info('\nInitializing Husky...');
+        try {
+          execSync('npx husky init', { cwd, stdio: 'pipe' });
+          const huskyPreCommit = join(cwd, '.husky', 'pre-commit');
+          writeFile(huskyPreCommit, 'npx lint-staged\n');
+          updated.push('.husky/pre-commit');
+          success('Initialized Husky with lint-staged');
+        } catch {
+          info('Husky not initialized (run: npx husky init)');
+        }
+      }
     }
 
     // Print summary

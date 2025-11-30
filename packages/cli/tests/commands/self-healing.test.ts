@@ -34,11 +34,10 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
    * Helper to run the self-healing hook script
    */
   function runSelfHealingHook(dir: string): { stdout: string; exitCode: number } {
-    // The hook script location depends on implementation
-    // Typically: .safeword/hooks/agents-md-check.sh
-    const hookPath = join(dir, '.safeword/hooks/agents-md-check.sh');
+    // The hook script location: .safeword/hooks/session-verify-agents.sh
+    const hookPath = join(dir, '.safeword/hooks/session-verify-agents.sh');
 
-    if (!fileExists(dir, '.safeword/hooks/agents-md-check.sh')) {
+    if (!fileExists(dir, '.safeword/hooks/session-verify-agents.sh')) {
       // Hook may have different name - check for any agents-related hook
       // For now, return a placeholder
       return { stdout: '', exitCode: 0 };

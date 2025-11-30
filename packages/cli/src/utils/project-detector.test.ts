@@ -131,6 +131,60 @@ describe('detectProjectType', () => {
       expect(result.astro).toBe(true);
     });
 
+    it('should detect Vue project', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        dependencies: {
+          vue: '^3.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.vue).toBe(true);
+    });
+
+    it('should detect Nuxt project and imply Vue', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        dependencies: {
+          nuxt: '^3.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.nuxt).toBe(true);
+      expect(result.vue).toBe(true); // Nuxt implies Vue
+    });
+
+    it('should detect Svelte project', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        devDependencies: {
+          svelte: '^4.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.svelte).toBe(true);
+    });
+
+    it('should detect SvelteKit project and imply Svelte', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        devDependencies: {
+          '@sveltejs/kit': '^2.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.sveltekit).toBe(true);
+      expect(result.svelte).toBe(true); // SvelteKit implies Svelte
+    });
+
     it('should detect Electron project', () => {
       const packageJson: PackageJson = {
         name: 'test',
@@ -145,6 +199,96 @@ describe('detectProjectType', () => {
     });
   });
 
+  describe('Detects Tailwind', () => {
+    it('should detect tailwindcss from dependencies', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        dependencies: {
+          tailwindcss: '^3.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.tailwind).toBe(true);
+    });
+
+    it('should detect tailwindcss from devDependencies', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        devDependencies: {
+          tailwindcss: '^3.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.tailwind).toBe(true);
+    });
+  });
+
+  describe('Detects publishable library', () => {
+    it('should detect library with main field', () => {
+      const packageJson: PackageJson = {
+        name: 'my-lib',
+        version: '1.0.0',
+        main: './dist/index.js',
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.publishableLibrary).toBe(true);
+    });
+
+    it('should detect library with module field', () => {
+      const packageJson: PackageJson = {
+        name: 'my-lib',
+        version: '1.0.0',
+        module: './dist/index.mjs',
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.publishableLibrary).toBe(true);
+    });
+
+    it('should detect library with exports field', () => {
+      const packageJson: PackageJson = {
+        name: 'my-lib',
+        version: '1.0.0',
+        exports: {
+          '.': './dist/index.js',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.publishableLibrary).toBe(true);
+    });
+
+    it('should NOT detect private packages as publishable', () => {
+      const packageJson: PackageJson = {
+        name: 'my-app',
+        version: '1.0.0',
+        private: true,
+        main: './dist/index.js',
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.publishableLibrary).toBe(false);
+    });
+
+    it('should NOT detect apps without entry points as publishable', () => {
+      const packageJson: PackageJson = {
+        name: 'my-app',
+        version: '1.0.0',
+        dependencies: {
+          next: '^14.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.publishableLibrary).toBe(false);
+    });
+  });
+
   describe('Handles edge cases', () => {
     it('should handle empty package.json', () => {
       const packageJson: PackageJson = {};
@@ -155,7 +299,13 @@ describe('detectProjectType', () => {
       expect(result.react).toBe(false);
       expect(result.nextjs).toBe(false);
       expect(result.astro).toBe(false);
+      expect(result.vue).toBe(false);
+      expect(result.nuxt).toBe(false);
+      expect(result.svelte).toBe(false);
+      expect(result.sveltekit).toBe(false);
       expect(result.electron).toBe(false);
+      expect(result.tailwind).toBe(false);
+      expect(result.publishableLibrary).toBe(false);
     });
 
     it('should handle complex project with multiple frameworks', () => {

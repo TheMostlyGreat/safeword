@@ -5,7 +5,6 @@
 import { join } from 'node:path';
 import { exists, remove, readJson, writeJson, listDir } from '../utils/fs.js';
 import { info, success, error, header, listItem } from '../utils/output.js';
-import { isGitRepo, removeGitHook } from '../utils/git.js';
 import { filterOutSafewordHooks } from '../utils/hooks.js';
 import { removeAgentsMdLink } from '../utils/agents-md.js';
 
@@ -99,7 +98,7 @@ export async function reset(options: ResetOptions): Promise<void> {
 
     // 3.5. Remove safeword slash commands
     const commandsDir = join(cwd, '.claude', 'commands');
-    const safewordCommands = ['quality-review.md', 'arch-review.md', 'lint.md'];
+    const safewordCommands = ['review.md', 'architecture.md', 'lint.md'];
 
     if (exists(commandsDir)) {
       info('\nRemoving safeword commands...');
@@ -150,12 +149,13 @@ export async function reset(options: ResetOptions): Promise<void> {
       }
     }
 
-    // 4. Remove git hook markers
-    if (isGitRepo(cwd)) {
-      info('\nRemoving git hook markers...');
-      removeGitHook(cwd);
-      removed.push('.git/hooks/pre-commit (markers)');
-      success('Removed git hook markers');
+    // 4. Remove Husky directory
+    const huskyDir = join(cwd, '.husky');
+    if (exists(huskyDir)) {
+      info('\nRemoving Husky hooks...');
+      remove(huskyDir);
+      removed.push('.husky/');
+      success('Removed Husky hooks');
     }
 
     // 5. Remove link from AGENTS.md
@@ -179,8 +179,9 @@ export async function reset(options: ResetOptions): Promise<void> {
     info('\nPreserved (remove manually if desired):');
     listItem('eslint.config.mjs');
     listItem('.prettierrc');
-    listItem('package.json lint/format scripts');
-    listItem('ESLint/Prettier devDependencies');
+    listItem('.markdownlint-cli2.jsonc');
+    listItem('package.json (scripts, lint-staged config)');
+    listItem('devDependencies (eslint, prettier, husky, lint-staged, etc.)');
 
     success('\nSafeword configuration removed');
   } catch (err) {

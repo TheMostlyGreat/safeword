@@ -17,11 +17,13 @@ import {
   makeScriptsExecutable,
 } from '../utils/fs.js';
 import { info, success, warn, error, header, listItem } from '../utils/output.js';
-import { isGitRepo, installGitHook } from '../utils/git.js';
+import { isGitRepo } from '../utils/git.js';
 import { detectProjectType } from '../utils/project-detector.js';
 import { filterOutSafewordHooks } from '../utils/hooks.js';
 import { ensureAgentsMdLink } from '../utils/agents-md.js';
-import { PRETTIERRC, getEslintConfig, SETTINGS_HOOKS } from '../templates/index.js';
+import { PRETTIERRC, LINT_STAGED_CONFIG, getEslintConfig, SETTINGS_HOOKS } from '../templates/index.js';
+import { detectArchitecture, generateBoundariesConfig } from '../utils/boundaries.js';
+import { execSync } from 'node:child_process';
 
 export interface SetupOptions {
   yes?: boolean;
@@ -33,6 +35,7 @@ interface PackageJson {
   scripts?: Record<string, string>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  'lint-staged'?: Record<string, string[]>;
 }
 
 export async function setup(options: SetupOptions): Promise<void> {
@@ -211,15 +214,34 @@ export async function setup(options: SetupOptions): Promise<void> {
 
     const projectType = detectProjectType(packageJson);
 
-    // Create ESLint config
+    // Detect architecture boundaries (always configured, rules depend on detected dirs)
+    const architecture = detectArchitecture(cwd);
+
+    // Create ESLint config (always includes boundaries)
     const eslintConfigPath = join(cwd, 'eslint.config.mjs');
     if (!exists(eslintConfigPath)) {
-      writeFile(eslintConfigPath, getEslintConfig(projectType));
+      writeFile(
+        eslintConfigPath,
+        getEslintConfig({
+          ...projectType,
+          boundaries: true, // Always enabled
+        }),
+      );
       created.push('eslint.config.mjs');
       success('Created eslint.config.mjs');
     } else {
       info('eslint.config.mjs already exists');
     }
+
+    // Always create boundaries config (rules depend on detected architecture dirs)
+    const boundariesConfigPath = join(safewordDir, 'eslint-boundaries.config.mjs');
+    writeFile(boundariesConfigPath, generateBoundariesConfig(architecture));
+    if (architecture.directories.length > 0) {
+      info(`Detected architecture: ${architecture.directories.join(', ')} (${architecture.inSrc ? 'in src/' : 'at root'})`);
+    } else {
+      info('No architecture directories detected yet (boundaries ready when you add them)');
+    }
+    success('Created .safeword/eslint-boundaries.config.mjs');
 
     // Create Prettier config
     const prettierrcPath = join(cwd, '.prettierrc');
@@ -231,46 +253,71 @@ export async function setup(options: SetupOptions): Promise<void> {
       info('.prettierrc already exists');
     }
 
-    // Create markdownlint config
-    const markdownlintPath = join(cwd, '.markdownlint.jsonc');
+    // Create markdownlint config (using cli2 preferred filename)
+    const markdownlintPath = join(cwd, '.markdownlint-cli2.jsonc');
     if (!exists(markdownlintPath)) {
-      copyFile(join(templatesDir, 'markdownlint.jsonc'), markdownlintPath);
-      created.push('.markdownlint.jsonc');
-      success('Created .markdownlint.jsonc');
+      copyFile(join(templatesDir, 'markdownlint-cli2.jsonc'), markdownlintPath);
+      created.push('.markdownlint-cli2.jsonc');
+      success('Created .markdownlint-cli2.jsonc');
     } else {
-      info('.markdownlint.jsonc already exists');
+      info('.markdownlint-cli2.jsonc already exists');
     }
 
-    // Add scripts to package.json
+    // Add scripts and lint-staged config to package.json
     try {
       const scripts = packageJson.scripts ?? {};
-      let scriptsModified = false;
+      let packageJsonModified = false;
 
       if (!scripts.lint) {
         scripts.lint = 'eslint .';
-        scriptsModified = true;
+        packageJsonModified = true;
       }
 
       if (!scripts['lint:md']) {
         scripts['lint:md'] = 'markdownlint-cli2 "**/*.md" "#node_modules"';
-        scriptsModified = true;
+        packageJsonModified = true;
       }
 
       if (!scripts.format) {
         scripts.format = 'prettier --write .';
-        scriptsModified = true;
+        packageJsonModified = true;
       }
 
       if (!scripts['format:check']) {
         scripts['format:check'] = 'prettier --check .';
-        scriptsModified = true;
+        packageJsonModified = true;
       }
 
-      if (scriptsModified) {
+      if (!scripts.knip) {
+        scripts.knip = 'knip';
+        packageJsonModified = true;
+      }
+
+      // Add publint script for publishable libraries
+      if (projectType.publishableLibrary && !scripts.publint) {
+        scripts.publint = 'publint';
+        packageJsonModified = true;
+      }
+
+      // Add prepare script for Husky (runs on npm install)
+      // The || true fallback prevents npm install --production from failing
+      // when husky (a devDependency) isn't installed
+      if (!scripts.prepare) {
+        scripts.prepare = 'husky || true';
+        packageJsonModified = true;
+      }
+
+      // Add lint-staged config
+      if (!packageJson['lint-staged']) {
+        packageJson['lint-staged'] = LINT_STAGED_CONFIG;
+        packageJsonModified = true;
+      }
+
+      if (packageJsonModified) {
         packageJson.scripts = scripts;
         writeJson(packageJsonPath, packageJson);
         modified.push('package.json');
-        success('Added lint and format scripts');
+        success('Added lint scripts and lint-staged config');
       }
     } catch (err) {
       error(
@@ -279,37 +326,102 @@ export async function setup(options: SetupOptions): Promise<void> {
       process.exit(1);
     }
 
-    // 8. Handle git repository
-    info('\nConfiguring git...');
+    // 8. Install dependencies
+    info('\nInstalling linting dependencies...');
 
-    if (isGitRepo(cwd)) {
-      installGitHook(cwd);
-      modified.push('.git/hooks/pre-commit');
-      success('Installed git pre-commit hook');
-    } else if (isNonInteractive) {
-      warn('Skipped git initialization (non-interactive mode)');
-      warn('Git hooks not installed (no repository)');
-    } else {
-      // Interactive mode - would prompt here
-      // For now, skip in all cases
-      warn('Skipped git initialization (no .git directory)');
-      warn('Git hooks not installed (no repository)');
-    }
+    // Build the list of packages to install
+    const devDeps: string[] = [
+      'eslint',
+      'prettier',
+      '@eslint/js',
+      'eslint-plugin-import-x',
+      'eslint-plugin-sonarjs',
+      '@microsoft/eslint-plugin-sdl',
+      'eslint-config-prettier',
+      'markdownlint-cli2',
+      'knip',
+      'husky',
+      'lint-staged',
+    ];
 
-    // 9. Note about dependencies
-    info('\nNote: Install linting dependencies manually:');
-    listItem('npm install -D eslint prettier @eslint/js');
     if (projectType.typescript) {
-      listItem('npm install -D typescript-eslint');
+      devDeps.push('typescript-eslint');
     }
-    if (projectType.react && !projectType.nextjs) {
-      listItem('npm install -D eslint-plugin-react eslint-plugin-react-hooks');
+    if (projectType.react || projectType.nextjs) {
+      devDeps.push('eslint-plugin-react', 'eslint-plugin-react-hooks', 'eslint-plugin-jsx-a11y');
     }
     if (projectType.nextjs) {
-      listItem('npm install -D eslint-plugin-react eslint-plugin-react-hooks @next/eslint-plugin-next');
+      devDeps.push('@next/eslint-plugin-next');
     }
     if (projectType.astro) {
-      listItem('npm install -D eslint-plugin-astro');
+      devDeps.push('eslint-plugin-astro');
+    }
+    if (projectType.vue) {
+      devDeps.push('eslint-plugin-vue');
+    }
+    if (projectType.svelte) {
+      devDeps.push('eslint-plugin-svelte');
+    }
+    // Always install boundaries - configured only when 3+ architecture directories exist
+    devDeps.push('eslint-plugin-boundaries');
+    if (projectType.electron) {
+      devDeps.push('@electron-toolkit/eslint-config');
+    }
+    if (projectType.vitest) {
+      devDeps.push('@vitest/eslint-plugin');
+    }
+    // Always include Playwright - safeword sets up e2e testing with Playwright
+    devDeps.push('eslint-plugin-playwright');
+
+    // Tailwind: use official Prettier plugin for class sorting
+    if (projectType.tailwind) {
+      devDeps.push('prettier-plugin-tailwindcss');
+    }
+
+    // Publishable libraries: validate package.json for npm publishing
+    if (projectType.publishableLibrary) {
+      devDeps.push('publint');
+    }
+
+    try {
+      const installCmd = `npm install -D ${devDeps.join(' ')}`;
+      info(`Running: ${installCmd}`);
+      execSync(installCmd, { cwd, stdio: 'inherit' });
+      success('Installed linting dependencies');
+    } catch {
+      warn('Failed to install dependencies. Run manually:');
+      listItem(`npm install -D ${devDeps.join(' ')}`);
+    }
+
+    // 9. Setup Husky for git hooks (manually, not using husky init which overwrites prepare script)
+    info('\nConfiguring git hooks with Husky...');
+
+    if (isGitRepo(cwd)) {
+      try {
+        // Create .husky directory and pre-commit hook manually
+        // (husky init unconditionally sets prepare script, which we don't want)
+        const huskyDir = join(cwd, '.husky');
+        ensureDir(huskyDir);
+
+        // Create pre-commit hook that runs lint-staged
+        const huskyPreCommit = join(huskyDir, 'pre-commit');
+        writeFile(huskyPreCommit, 'npx lint-staged\n');
+
+        // Make hook executable (required for git hooks on Unix)
+        makeScriptsExecutable(huskyDir);
+
+        created.push('.husky/pre-commit');
+        success('Configured Husky with lint-staged pre-commit hook');
+      } catch {
+        warn('Failed to setup Husky. Run manually:');
+        listItem('mkdir -p .husky');
+        listItem('echo "npx lint-staged" > .husky/pre-commit');
+      }
+    } else if (isNonInteractive) {
+      warn('Skipped Husky setup (no git repository)');
+    } else {
+      warn('Skipped Husky setup (no .git directory)');
+      info('Initialize git and run: mkdir -p .husky && echo "npx lint-staged" > .husky/pre-commit');
     }
 
     // Print summary
@@ -330,7 +442,6 @@ export async function setup(options: SetupOptions): Promise<void> {
     }
 
     info('\nNext steps:');
-    listItem('Install linting dependencies (see above)');
     listItem('Run `safeword check` to verify setup');
     listItem('Commit the new files to git');
 

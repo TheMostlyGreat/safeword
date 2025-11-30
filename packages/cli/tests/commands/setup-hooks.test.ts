@@ -129,18 +129,21 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
 
       const settings = JSON.parse(readTestFile(tempDir, '.claude/settings.json'));
 
-      // Find hook that references AGENTS.md check
-      const agentsHook = settings.hooks.SessionStart.find(
-        (hook: { command?: string }) =>
-          hook.command && (hook.command.includes('AGENTS') || hook.command.includes('agents')),
+      // Find hook entry that references AGENTS.md check (new nested format)
+      const agentsHookEntry = settings.hooks.SessionStart.find(
+        (entry: { hooks?: Array<{ command?: string }> }) =>
+          entry.hooks?.some(
+            (h) => h.command && (h.command.includes('AGENTS') || h.command.includes('agents')),
+          ),
       );
 
-      expect(agentsHook).toBeDefined();
+      expect(agentsHookEntry).toBeDefined();
 
       // Hook script should exist
-      if (agentsHook?.command) {
+      const agentsCommand = agentsHookEntry?.hooks?.[0]?.command;
+      if (agentsCommand) {
         // Extract script path from command if it's a bash script
-        const scriptMatch = agentsHook.command.match(/bash\s+([^\s]+)/);
+        const scriptMatch = agentsCommand.match(/bash\s+([^\s]+)/);
         if (scriptMatch) {
           expect(fileExists(tempDir, scriptMatch[1])).toBe(true);
         }
@@ -157,19 +160,19 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
 
       const settings = JSON.parse(readTestFile(tempDir, '.claude/settings.json'));
 
-      // Find hook that references timestamp injection
-      const timestampHook = settings.hooks.UserPromptSubmit.find(
-        (hook: { command?: string }) =>
-          hook.command && hook.command.includes('inject-timestamp'),
+      // Find hook entry that references timestamp injection (new nested format)
+      const timestampHookEntry = settings.hooks.UserPromptSubmit.find(
+        (entry: { hooks?: Array<{ command?: string }> }) =>
+          entry.hooks?.some((h) => h.command && h.command.includes('prompt-timestamp')),
       );
 
-      expect(timestampHook).toBeDefined();
+      expect(timestampHookEntry).toBeDefined();
 
       // Hook script should exist
-      expect(fileExists(tempDir, '.safeword/hooks/inject-timestamp.sh')).toBe(true);
+      expect(fileExists(tempDir, '.safeword/hooks/prompt-timestamp.sh')).toBe(true);
 
       // Script should contain timestamp output
-      const scriptContent = readTestFile(tempDir, '.safeword/hooks/inject-timestamp.sh');
+      const scriptContent = readTestFile(tempDir, '.safeword/hooks/prompt-timestamp.sh');
       expect(scriptContent).toContain('date');
     });
   });

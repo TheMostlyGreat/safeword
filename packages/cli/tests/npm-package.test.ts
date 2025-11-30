@@ -42,10 +42,22 @@ describe('NPM Package Structure', () => {
     const hooksPath = join(cliRoot, 'templates', 'hooks');
     const files = readdirSync(hooksPath);
 
-    expect(files).toContain('agents-md-check.sh');
-    expect(files).toContain('pre-commit.sh');
-    expect(files).toContain('post-tool.sh');
-    expect(files).toContain('inject-timestamp.sh');
+    // Session hooks
+    expect(files).toContain('session-verify-agents.sh');
+    expect(files).toContain('session-version.sh');
+    expect(files).toContain('session-lint-check.sh');
+
+    // Prompt hooks
+    expect(files).toContain('prompt-timestamp.sh');
+    expect(files).toContain('prompt-questions.sh');
+
+    // Stop hook
+    expect(files).toContain('stop-quality.sh');
+
+    // Post-tool hook
+    expect(files).toContain('post-tool-lint.sh');
+
+    // Note: git pre-commit hook is created by Husky at setup time, not from templates
   });
 
   it('should have templates/guides with methodology files', () => {
@@ -68,7 +80,7 @@ describe('NPM Package Structure', () => {
     const files = readdirSync(commandsPath);
 
     expect(files).toContain('quality-review.md');
-    expect(files).toContain('arch-review.md');
+    expect(files).toContain('architecture.md');
     expect(files).toContain('lint.md');
   });
 

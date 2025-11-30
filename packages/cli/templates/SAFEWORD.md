@@ -77,7 +77,7 @@ bash ./framework/scripts/setup-quality.sh               # Quality review only
 - `.safeword/SAFEWORD.md` - Global patterns and workflows (copied from this file)
 - `.safeword/guides/` - Reference documentation
 - `.claude/hooks/` - Hook scripts (with version comments)
-- `.claude/commands/` - Slash commands (`/lint`, `/quality-review`)
+- `.claude/commands/` - Slash commands (`/lint`, `/review`, `/architecture`)
 - `.claude/settings.json` - Hook configuration (appends to existing)
 - `SAFEWORD.md` or `CLAUDE.md` - Project context file with ALWAYS trigger for @./.safeword/SAFEWORD.md
   - If CLAUDE.md exists → prepends trigger
@@ -375,11 +375,11 @@ last_modified: 2025-11-24T19:09:00Z
 - Running semantic architecture review on code changes
 - Setting up pre-commit hook for architecture enforcement
 - Setting up CI workflow for PR architecture checks
-- Understanding arch-review verdicts (clean/minor/refactor_needed)
+- Understanding architecture review verdicts (clean/minor/refactor_needed)
 - Checking for: god modules, leaky abstractions, misplaced logic, tight coupling
 
-**Script:** `.safeword/scripts/arch-review.sh`
-**Prompt:** `.safeword/prompts/arch-review.md`
+**Command:** `/architecture`
+**Prompt:** `.safeword/prompts/architecture.md`
 **CI Template:** `.safeword/templates/ci/architecture-check.yml`
 
 ---

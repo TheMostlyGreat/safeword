@@ -145,18 +145,14 @@ describe('Test Suite 4: Setup - Linting (Integration)', () => {
   });
 
   describe('Test 4.9: Creates markdownlint config', () => {
-    it('should create .markdownlint.jsonc', async () => {
+    it('should create .markdownlint-cli2.jsonc', async () => {
       createTypeScriptPackageJson(tempDir);
       initGitRepo(tempDir);
 
       await runCli(['setup', '--yes'], { cwd: tempDir });
 
-      // Implementation may place in .safeword/ or root
-      const hasMarkdownlintConfig =
-        fileExists(tempDir, '.markdownlint.jsonc') ||
-        fileExists(tempDir, '.safeword/.markdownlint.jsonc');
-
-      expect(hasMarkdownlintConfig).toBe(true);
+      // Using markdownlint-cli2's preferred config filename
+      expect(fileExists(tempDir, '.markdownlint-cli2.jsonc')).toBe(true);
     });
   });
 

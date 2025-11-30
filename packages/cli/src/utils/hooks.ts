@@ -2,27 +2,40 @@
  * Hook utilities for Claude Code settings
  */
 
+interface HookCommand {
+  type: string;
+  command: string;
+}
+
+interface HookEntry {
+  matcher?: string;
+  hooks: HookCommand[];
+}
+
 /**
- * Type guard to check if a value is a hook object with a command property
+ * Type guard to check if a value is a hook entry with hooks array
  */
-export function isHookObject(h: unknown): h is { command: string } {
+export function isHookEntry(h: unknown): h is HookEntry {
   return (
     typeof h === 'object' &&
     h !== null &&
-    'command' in h &&
-    typeof (h as { command: string }).command === 'string'
+    'hooks' in h &&
+    Array.isArray((h as HookEntry).hooks)
   );
 }
 
 /**
- * Check if a hook is a safeword hook (command contains '.safeword')
+ * Check if a hook entry contains a safeword hook (command contains '.safeword')
  */
 export function isSafewordHook(h: unknown): boolean {
-  return isHookObject(h) && h.command.includes('.safeword');
+  if (!isHookEntry(h)) return false;
+  return h.hooks.some(
+    (cmd) => typeof cmd.command === 'string' && cmd.command.includes('.safeword'),
+  );
 }
 
 /**
- * Filter out safeword hooks from an array of hooks
+ * Filter out safeword hooks from an array of hook entries
  */
 export function filterOutSafewordHooks(hooks: unknown[]): unknown[] {
   return hooks.filter((h) => !isSafewordHook(h));
