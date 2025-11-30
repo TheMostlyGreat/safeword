@@ -2,134 +2,139 @@
  * Configuration templates - ESLint config generation and hook settings
  *
  * ESLint flat config (v9+) with:
+ * - Dynamic framework detection from package.json at runtime
+ * - Static imports for base plugins (always installed by safeword)
+ * - Dynamic imports for framework plugins (loaded only if framework detected)
  * - defineConfig helper for validation and type checking
- * - Global ignores as first config object (no other properties)
- * - SonarJS for code quality and bug detection
- * - Microsoft SDL for security rules
  * - eslint-config-prettier last to avoid conflicts
  *
  * See: https://eslint.org/docs/latest/use/configure/configuration-files
  */
 
-export function getEslintConfig(options: {
-  typescript?: boolean;
-  react?: boolean;
-  nextjs?: boolean;
-  astro?: boolean;
-  vue?: boolean;
-  svelte?: boolean;
-  electron?: boolean;
-  vitest?: boolean;
-  boundaries?: boolean;
-}): string {
-  const imports: string[] = [
-    'import { defineConfig } from "eslint/config";',
-    'import js from "@eslint/js";',
-    'import { importX } from "eslint-plugin-import-x";',
-    'import sonarjs from "eslint-plugin-sonarjs";',
-    'import sdl from "@microsoft/eslint-plugin-sdl";',
-    'import eslintConfigPrettier from "eslint-config-prettier";',
-  ];
-  const configs: string[] = [];
-  const ignores: string[] = ['node_modules/', 'dist/', 'build/', 'coverage/'];
+/**
+ * Generates a dynamic ESLint config that adapts to project frameworks at runtime.
+ *
+ * The generated config reads package.json to detect frameworks and dynamically
+ * imports the corresponding ESLint plugins. This allows the config to be generated
+ * once at setup and automatically adapt when frameworks are added or removed.
+ *
+ * @param options.boundaries - Whether to include architecture boundaries config
+ * @returns ESLint config file content as a string
+ */
+export function getEslintConfig(options: { boundaries?: boolean }): string {
+  return `import { readFileSync } from "fs";
+import { defineConfig } from "eslint/config";
+import js from "@eslint/js";
+import { importX } from "eslint-plugin-import-x";
+import sonarjs from "eslint-plugin-sonarjs";
+import sdl from "@microsoft/eslint-plugin-sdl";
+import playwright from "eslint-plugin-playwright";
+import eslintConfigPrettier from "eslint-config-prettier";
+${options.boundaries ? 'import boundariesConfig from "./.safeword/eslint-boundaries.config.mjs";' : ''}
 
-  // Base JS config
-  configs.push('js.configs.recommended');
+// Read package.json to detect frameworks at runtime
+const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
+const deps = { ...pkg.dependencies, ...pkg.devDependencies };
 
-  // Import/export linting (module best practices)
-  configs.push('importX.flatConfigs.recommended');
-  if (options.typescript) {
-    configs.push('importX.flatConfigs.typescript');
-  }
+// Build dynamic ignores based on detected frameworks
+const ignores = ["node_modules/", "dist/", "build/", "coverage/"];
+if (deps["next"]) ignores.push(".next/");
+if (deps["astro"]) ignores.push(".astro/");
+if (deps["vue"] || deps["nuxt"]) ignores.push(".nuxt/");
+if (deps["svelte"] || deps["@sveltejs/kit"]) ignores.push(".svelte-kit/");
 
-  // SonarJS for code quality (cognitive complexity, bugs, code smells)
-  configs.push('sonarjs.configs.recommended');
+// Start with base configs (always loaded)
+const configs = [
+  { ignores },
+  js.configs.recommended,
+  importX.flatConfigs.recommended,
+  sonarjs.configs.recommended,
+  ...sdl.configs.recommended,
+];
 
-  // Microsoft SDL for security rules
-  configs.push('...sdl.configs.recommended');
+// TypeScript support (detected from package.json)
+if (deps["typescript"]) {
+  const tseslint = await import("typescript-eslint");
+  configs.push(importX.flatConfigs.typescript);
+  configs.push(...tseslint.default.configs.recommended);
+}
 
-  if (options.typescript) {
-    imports.push('import tseslint from "typescript-eslint";');
-    configs.push('...tseslint.configs.recommended');
-  }
+// React/Next.js support
+if (deps["react"] || deps["next"]) {
+  const react = await import("eslint-plugin-react");
+  const reactHooks = await import("eslint-plugin-react-hooks");
+  const jsxA11y = await import("eslint-plugin-jsx-a11y");
+  configs.push(react.default.configs.flat.recommended);
+  configs.push(react.default.configs.flat["jsx-runtime"]);
+  configs.push({
+    name: "react-hooks",
+    plugins: { "react-hooks": reactHooks.default },
+    rules: reactHooks.default.configs.recommended.rules,
+  });
+  configs.push(jsxA11y.default.flatConfigs.recommended);
+}
 
-  if (options.react || options.nextjs) {
-    imports.push('import react from "eslint-plugin-react";');
-    imports.push('import reactHooks from "eslint-plugin-react-hooks";');
-    imports.push('import jsxA11y from "eslint-plugin-jsx-a11y";');
-    configs.push('react.configs.flat.recommended');
-    configs.push('react.configs.flat["jsx-runtime"]');
-    configs.push(
-      '{\n    name: "react-hooks",\n    plugins: { "react-hooks": reactHooks },\n    rules: reactHooks.configs.recommended.rules,\n  }',
-    );
-    // Accessibility rules for JSX
-    configs.push('jsxA11y.flatConfigs.recommended');
-  }
+// Next.js plugin
+if (deps["next"]) {
+  const nextPlugin = await import("@next/eslint-plugin-next");
+  configs.push({
+    name: "nextjs",
+    plugins: { "@next/next": nextPlugin.default },
+    rules: nextPlugin.default.configs.recommended.rules,
+  });
+}
 
-  if (options.nextjs) {
-    imports.push('import nextPlugin from "@next/eslint-plugin-next";');
-    configs.push(
-      '{\n    name: "nextjs",\n    plugins: { "@next/next": nextPlugin },\n    rules: nextPlugin.configs.recommended.rules,\n  }',
-    );
-    ignores.push('.next/');
-  }
+// Astro support
+if (deps["astro"]) {
+  const astro = await import("eslint-plugin-astro");
+  configs.push(...astro.default.configs.recommended);
+}
 
-  if (options.astro) {
-    imports.push('import eslintPluginAstro from "eslint-plugin-astro";');
-    configs.push('...eslintPluginAstro.configs.recommended');
-    ignores.push('.astro/');
-  }
+// Vue support
+if (deps["vue"] || deps["nuxt"]) {
+  const vue = await import("eslint-plugin-vue");
+  configs.push(...vue.default.configs["flat/recommended"]);
+}
 
-  if (options.vue) {
-    imports.push('import pluginVue from "eslint-plugin-vue";');
-    configs.push("...pluginVue.configs['flat/recommended']");
-    ignores.push('.nuxt/');
-  }
+// Svelte support
+if (deps["svelte"] || deps["@sveltejs/kit"]) {
+  const svelte = await import("eslint-plugin-svelte");
+  configs.push(...svelte.default.configs.recommended);
+}
 
-  if (options.svelte) {
-    imports.push('import eslintPluginSvelte from "eslint-plugin-svelte";');
-    configs.push('...eslintPluginSvelte.configs.recommended');
-    ignores.push('.svelte-kit/');
-  }
+// Electron support
+if (deps["electron"]) {
+  const electron = await import("@electron-toolkit/eslint-config");
+  configs.push(electron.default);
+}
 
-  if (options.electron) {
-    imports.push('import electronConfig from "@electron-toolkit/eslint-config";');
-    configs.push('electronConfig');
-  }
+// Vitest support (scoped to test files)
+if (deps["vitest"]) {
+  const vitest = await import("@vitest/eslint-plugin");
+  configs.push({
+    name: "vitest",
+    files: ["**/*.test.{js,ts,jsx,tsx}", "**/*.spec.{js,ts,jsx,tsx}", "**/tests/**"],
+    plugins: { vitest: vitest.default },
+    languageOptions: {
+      globals: { ...vitest.default.environments.env.globals },
+    },
+    rules: { ...vitest.default.configs.recommended.rules },
+  });
+}
 
-  // Testing plugins with file patterns (scoped to test files only)
-  if (options.vitest) {
-    imports.push('import vitest from "@vitest/eslint-plugin";');
-    configs.push(
-      '{\n    name: "vitest",\n    files: ["**/*.test.{js,ts,jsx,tsx}", "**/*.spec.{js,ts,jsx,tsx}", "**/tests/**"],\n    plugins: { vitest },\n    languageOptions: {\n      globals: { ...vitest.environments.env.globals },\n    },\n    rules: { ...vitest.configs.recommended.rules },\n  }',
-    );
-  }
+// Playwright for e2e tests (always included - safeword sets up Playwright)
+configs.push({
+  name: "playwright",
+  files: ["**/e2e/**", "**/*.e2e.{js,ts,jsx,tsx}", "**/playwright/**"],
+  ...playwright.configs["flat/recommended"],
+});
 
-  // Always include Playwright - safeword sets up e2e testing with Playwright
-  imports.push('import playwright from "eslint-plugin-playwright";');
-  configs.push(
-    '{\n    name: "playwright",\n    files: ["**/e2e/**", "**/*.e2e.{js,ts,jsx,tsx}", "**/playwright/**"],\n    ...playwright.configs["flat/recommended"],\n  }',
-  );
+// Architecture boundaries${options.boundaries ? '\nconfigs.push(boundariesConfig);' : ''}
 
-  // Architecture boundaries (auto-generated config in .safeword/)
-  if (options.boundaries) {
-    imports.push('import boundariesConfig from "./.safeword/eslint-boundaries.config.mjs";');
-    configs.push('boundariesConfig');
-  }
+// eslint-config-prettier must be last to disable conflicting rules
+configs.push(eslintConfigPrettier);
 
-  // eslint-config-prettier must be last to disable conflicting rules
-  configs.push('eslintConfigPrettier');
-
-  // Build the ignores string with proper formatting
-  const ignoresStr = ignores.map((i) => `"${i}"`).join(', ');
-
-  return `${imports.join('\n')}
-
-export default defineConfig([
-  // Global ignores (must have only ignores property to apply globally)
-  { ignores: [${ignoresStr}] },
-  ${configs.join(',\n  ')},
-]);
+export default defineConfig(configs);
 `;
 }
 
@@ -156,14 +161,6 @@ export const SETTINGS_HOOKS = {
         {
           type: 'command',
           command: 'bash .safeword/hooks/session-lint-check.sh',
-        },
-      ],
-    },
-    {
-      hooks: [
-        {
-          type: 'command',
-          command: 'bash .safeword/hooks/session-sync-linters.sh',
         },
       ],
     },

@@ -53,19 +53,19 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
     expect(pkg.devDependencies).toHaveProperty('typescript-eslint');
   }, 180000);
 
-  it('detects JavaScript-only project (no TypeScript plugins)', async () => {
+  it('detects JavaScript-only project (no TypeScript plugins installed)', async () => {
     projectDir = createTempDir();
     createPackageJson(projectDir); // No TypeScript
     initGitRepo(projectDir);
 
     await runCli(['setup', '--yes'], { cwd: projectDir });
 
-    // Check ESLint config does NOT include TypeScript
+    // ESLint config is dynamic - contains conditional code but doesn't execute it for JS projects
     const eslintConfig = readTestFile(projectDir, 'eslint.config.mjs');
-    expect(eslintConfig).not.toContain('typescript-eslint');
-    expect(eslintConfig).not.toContain('tseslint');
+    expect(eslintConfig).toContain('readFileSync'); // Dynamic config
+    expect(eslintConfig).toContain('deps["typescript"]'); // Contains conditional
 
-    // Check package.json doesn't have typescript-eslint
+    // Key check: typescript-eslint package is NOT installed in devDependencies
     const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
     expect(pkg.devDependencies).not.toHaveProperty('typescript-eslint');
   }, 180000);

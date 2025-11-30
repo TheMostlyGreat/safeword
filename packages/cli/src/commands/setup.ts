@@ -217,18 +217,12 @@ export async function setup(options: SetupOptions): Promise<void> {
     // Detect architecture boundaries (always configured, rules depend on detected dirs)
     const architecture = detectArchitecture(cwd);
 
-    // Create ESLint config (always includes boundaries)
+    // Create dynamic ESLint config (detects frameworks from package.json at runtime)
     const eslintConfigPath = join(cwd, 'eslint.config.mjs');
     if (!exists(eslintConfigPath)) {
-      writeFile(
-        eslintConfigPath,
-        getEslintConfig({
-          ...projectType,
-          boundaries: true, // Always enabled
-        }),
-      );
+      writeFile(eslintConfigPath, getEslintConfig({ boundaries: true }));
       created.push('eslint.config.mjs');
-      success('Created eslint.config.mjs');
+      success('Created eslint.config.mjs (dynamic - adapts to framework changes)');
     } else {
       info('eslint.config.mjs already exists');
     }
@@ -403,9 +397,9 @@ export async function setup(options: SetupOptions): Promise<void> {
         const huskyDir = join(cwd, '.husky');
         ensureDir(huskyDir);
 
-        // Create pre-commit hook that runs lint-staged
+        // Create pre-commit hook that syncs linting plugins and runs lint-staged
         const huskyPreCommit = join(huskyDir, 'pre-commit');
-        writeFile(huskyPreCommit, 'npx lint-staged\n');
+        writeFile(huskyPreCommit, 'npx safeword sync --quiet --stage\nnpx lint-staged\n');
 
         // Make hook executable (required for git hooks on Unix)
         makeScriptsExecutable(huskyDir);
@@ -421,7 +415,7 @@ export async function setup(options: SetupOptions): Promise<void> {
       warn('Skipped Husky setup (no git repository)');
     } else {
       warn('Skipped Husky setup (no .git directory)');
-      info('Initialize git and run: mkdir -p .husky && echo "npx lint-staged" > .husky/pre-commit');
+      info('Initialize git and run safeword setup again to enable pre-commit hooks');
     }
 
     // Print summary
