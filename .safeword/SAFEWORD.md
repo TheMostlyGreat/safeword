@@ -39,12 +39,11 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 
 **Usage:**
 
-**One-command setup (recommended):**
-
 ```bash
 cd /path/to/your/project
-bash ./framework/scripts/setup-safeword.sh            # Install SAFEWORD structure + docs
-bash ./framework/scripts/setup-claude.sh              # Install Claude hooks (+ MCP gateway)
+npx safeword setup    # Full installation
+npx safeword check    # Preview what would change
+npx safeword upgrade  # Update existing installation
 ```
 
 **Auto-detection:** Automatically detects project type from package.json and config files:
@@ -55,22 +54,6 @@ bash ./framework/scripts/setup-claude.sh              # Install Claude hooks (+ 
 - React → if react in dependencies
 - TypeScript → if typescript in dependencies or tsconfig.json exists
 - Minimal → otherwise
-
-**Individual scripts (advanced):**
-
-```bash
-cd /path/to/your/project
-bash ./framework/scripts/setup-linting.sh --typescript  # Linting only
-bash ./framework/scripts/setup-quality.sh               # Quality review only
-```
-
-**Linting:** Auto-detects TypeScript, React, Astro from package.json.
-
-- Two-file architecture:
-  - `.safeword/eslint/eslint-base.mjs` - Auto-generated every run (DO NOT EDIT)
-  - `eslint.config.mjs` - Your config (customize freely, never overwritten)
-- After adding/removing frameworks: just re-run `bash setup-linting.sh`
-- Override detection: `--no-typescript`, `--no-react`, `--no-astro`
 
 **What they create:**
 
@@ -99,21 +82,18 @@ bash ./framework/scripts/setup-quality.sh               # Quality review only
 
 **For teams:**
 
-1. Get setup scripts (clone repo temporarily or download scripts)
-2. In each project, run one command:
+1. In each project, run:
    ```bash
    cd /path/to/project
-   bash ./framework/scripts/setup-safeword.sh  # One command, full setup
+   npx safeword setup
    ```
-3. **Result**: Project becomes standalone with:
+2. **Result**: Project becomes standalone with:
    - `.safeword/SAFEWORD.md` - Global patterns (copy of this file)
    - `.safeword/guides/` - Reference documentation
    - `.claude/` - Hooks and commands
+   - `CLAUDE.md` - Project context that imports @./.safeword/SAFEWORD.md
 
-- `SAFEWORD.md` or `CLAUDE.md` - Project context with @./.safeword/SAFEWORD.md reference
-
-4. **COMMIT to repo**: Commit `.safeword/` and `.claude/` for team consistency
-5. **Delete source**: Can delete setup scripts/repo after running - project is fully portable
+3. **COMMIT to repo**: Commit `.safeword/` and `.claude/` for team consistency
 
 ---
 

@@ -1,15 +1,35 @@
 /**
  * Reset command - Remove safeword configuration from project
+ *
+ * By default, preserves linting configuration (eslint, prettier, etc.)
+ * Use --full to also remove linting config and uninstall npm packages
  */
 
 import { join } from 'node:path';
+import { execSync } from 'node:child_process';
 import { exists, remove, readJson, writeJson, listDir } from '../utils/fs.js';
-import { info, success, error, header, listItem } from '../utils/output.js';
+import { info, success, warn, error, header, listItem } from '../utils/output.js';
 import { filterOutSafewordHooks } from '../utils/hooks.js';
 import { removeAgentsMdLink } from '../utils/agents-md.js';
+import {
+  SAFEWORD_COMMANDS,
+  SAFEWORD_SCRIPTS,
+  LINTING_CONFIG_FILES,
+  BASE_DEV_DEPS,
+  OPTIONAL_DEV_DEPS,
+} from '../utils/install.js';
 
 export interface ResetOptions {
   yes?: boolean;
+  full?: boolean;
+}
+
+interface PackageJson {
+  name?: string;
+  scripts?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  'lint-staged'?: Record<string, string[]>;
+  [key: string]: unknown;
 }
 
 export async function reset(options: ResetOptions): Promise<void> {
@@ -23,6 +43,7 @@ export async function reset(options: ResetOptions): Promise<void> {
   }
 
   const isNonInteractive = options.yes || !process.stdin.isTTY;
+  const fullReset = options.full ?? false;
 
   // Confirmation (in interactive mode without --yes)
   if (!isNonInteractive) {
@@ -31,7 +52,11 @@ export async function reset(options: ResetOptions): Promise<void> {
   }
 
   header('Safeword Reset');
-  info('Removing safeword configuration...');
+  if (fullReset) {
+    info('Performing full reset (including linting configuration)...');
+  } else {
+    info('Removing safeword configuration...');
+  }
 
   const removed: string[] = [];
 
@@ -98,13 +123,12 @@ export async function reset(options: ResetOptions): Promise<void> {
 
     // 3.5. Remove safeword slash commands
     const commandsDir = join(cwd, '.claude', 'commands');
-    const safewordCommands = ['review.md', 'architecture.md', 'lint.md'];
 
     if (exists(commandsDir)) {
       info('\nRemoving safeword commands...');
 
       let commandsRemoved = false;
-      for (const cmd of safewordCommands) {
+      for (const cmd of SAFEWORD_COMMANDS) {
         const cmdPath = join(commandsDir, cmd);
         if (exists(cmdPath)) {
           remove(cmdPath);
@@ -165,6 +189,76 @@ export async function reset(options: ResetOptions): Promise<void> {
       success('Removed safeword link from AGENTS.md');
     }
 
+    // 6. Full reset: Remove linting configuration and uninstall packages
+    if (fullReset) {
+      info('\nRemoving linting configuration...');
+
+      // Remove linting config files
+      for (const configFile of LINTING_CONFIG_FILES) {
+        const configPath = join(cwd, configFile);
+        if (exists(configPath)) {
+          remove(configPath);
+          removed.push(configFile);
+        }
+      }
+      success('Removed linting config files');
+
+      // Remove scripts and lint-staged from package.json
+      const packageJsonPath = join(cwd, 'package.json');
+      if (exists(packageJsonPath)) {
+        info('\nCleaning package.json...');
+
+        const packageJson = readJson<PackageJson>(packageJsonPath);
+        if (packageJson) {
+          let modified = false;
+
+          // Remove safeword scripts
+          if (packageJson.scripts) {
+            for (const script of SAFEWORD_SCRIPTS) {
+              if (script in packageJson.scripts) {
+                delete packageJson.scripts[script];
+                modified = true;
+              }
+            }
+          }
+
+          // Remove lint-staged config
+          if (packageJson['lint-staged']) {
+            delete packageJson['lint-staged'];
+            modified = true;
+          }
+
+          if (modified) {
+            writeJson(packageJsonPath, packageJson);
+            removed.push('package.json (scripts, lint-staged)');
+            success('Cleaned package.json');
+          }
+        }
+      }
+
+      // Uninstall npm packages
+      info('\nUninstalling devDependencies...');
+
+      // Collect all packages to uninstall
+      const packagesToUninstall: string[] = [...BASE_DEV_DEPS];
+
+      // Add all optional deps too (they might have been installed)
+      for (const deps of Object.values(OPTIONAL_DEV_DEPS)) {
+        packagesToUninstall.push(...deps);
+      }
+
+      try {
+        const uninstallCmd = `npm uninstall ${packagesToUninstall.join(' ')}`;
+        info(`Running: ${uninstallCmd}`);
+        execSync(uninstallCmd, { cwd, stdio: 'inherit' });
+        removed.push('devDependencies (safeword packages)');
+        success('Uninstalled safeword devDependencies');
+      } catch {
+        warn('Failed to uninstall some packages. Run manually:');
+        listItem(`npm uninstall ${packagesToUninstall.join(' ')}`);
+      }
+    }
+
     // Print summary
     header('Reset Complete');
 
@@ -175,13 +269,15 @@ export async function reset(options: ResetOptions): Promise<void> {
       }
     }
 
-    // Note about preserved linting
-    info('\nPreserved (remove manually if desired):');
-    listItem('eslint.config.mjs');
-    listItem('.prettierrc');
-    listItem('.markdownlint-cli2.jsonc');
-    listItem('package.json (scripts, lint-staged config)');
-    listItem('devDependencies (eslint, prettier, husky, lint-staged, etc.)');
+    // Note about preserved linting (only shown if not full reset)
+    if (!fullReset) {
+      info('\nPreserved (use --full to remove):');
+      listItem('eslint.config.mjs');
+      listItem('.prettierrc');
+      listItem('.markdownlint-cli2.jsonc');
+      listItem('package.json (scripts, lint-staged config)');
+      listItem('devDependencies (eslint, prettier, husky, lint-staged, etc.)');
+    }
 
     success('\nSafeword configuration removed');
   } catch (err) {

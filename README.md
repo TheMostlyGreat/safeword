@@ -14,7 +14,7 @@
 
 ```bash
 cd /path/to/your/project
-bash ./framework/scripts/setup-safeword.sh
+npx safeword setup
 ```
 
 **2. Verify installation:**
@@ -178,11 +178,14 @@ Each directory has an `archive/` subfolder for completed work.
 
 ```bash
 cd /path/to/your/project
-# SAFEWORD structure + (optionally) Claude Code hooks
-bash ./framework/scripts/setup-safeword.sh
-# Claude Code hooks only (if SAFEWORD already configured)
-bash ./framework/scripts/setup-claude.sh --linting-mode biome
-bash ./framework/scripts/setup-claude.sh --skip-linting
+# Full setup
+npx safeword setup
+
+# Check what would change
+npx safeword check
+
+# Upgrade existing installation
+npx safeword upgrade
 ```
 
 **Auto-detection**: Automatically detects project type from `package.json`:

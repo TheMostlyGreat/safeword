@@ -346,8 +346,8 @@ describe('E2E: Conditional Setup - Existing Config Preservation', () => {
 
     // Safeword hooks should be present
     const commands = sessionStartHooks.map((h: { hooks: { command: string }[] }) => h.hooks[0].command);
-    expect(commands).toContain('bash .safeword/hooks/session-verify-agents.sh');
-    expect(commands).toContain('bash .safeword/hooks/session-version.sh');
+    expect(commands).toContain('"$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-verify-agents.sh');
+    expect(commands).toContain('"$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-version.sh');
   }, 180000);
 });
 

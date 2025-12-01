@@ -144,7 +144,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: 'bash .safeword/hooks/session-verify-agents.sh',
+          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-verify-agents.sh',
         },
       ],
     },
@@ -152,7 +152,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: 'bash .safeword/hooks/session-version.sh',
+          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-version.sh',
         },
       ],
     },
@@ -160,7 +160,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: 'bash .safeword/hooks/session-lint-check.sh',
+          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-lint-check.sh',
         },
       ],
     },
@@ -170,7 +170,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: 'bash .safeword/hooks/prompt-timestamp.sh',
+          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/prompt-timestamp.sh',
         },
       ],
     },
@@ -178,7 +178,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: 'bash .safeword/hooks/prompt-questions.sh',
+          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/prompt-questions.sh',
         },
       ],
     },
@@ -188,7 +188,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: 'bash .safeword/hooks/stop-quality.sh',
+          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/stop-quality.sh',
         },
       ],
     },
@@ -199,7 +199,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: 'bash .safeword/hooks/post-tool-lint.sh',
+          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/post-tool-lint.sh',
         },
       ],
     },

@@ -4,26 +4,21 @@
 
 import { join, basename } from 'node:path';
 import { VERSION } from '../version.js';
-import {
-  exists,
-  ensureDir,
-  writeFile,
-  readJson,
-  writeJson,
-  updateJson,
-  copyDir,
-  copyFile,
-  getTemplatesDir,
-  makeScriptsExecutable,
-} from '../utils/fs.js';
+import { exists, writeFile, readJson, writeJson, copyFile, getTemplatesDir } from '../utils/fs.js';
 import { info, success, warn, error, header, listItem } from '../utils/output.js';
 import { isGitRepo } from '../utils/git.js';
 import { detectProjectType } from '../utils/project-detector.js';
-import { filterOutSafewordHooks } from '../utils/hooks.js';
 import { ensureAgentsMdLink } from '../utils/agents-md.js';
-import { PRETTIERRC, LINT_STAGED_CONFIG, getEslintConfig, SETTINGS_HOOKS } from '../templates/index.js';
+import { PRETTIERRC, LINT_STAGED_CONFIG, getEslintConfig } from '../templates/index.js';
 import { detectArchitecture, generateBoundariesConfig } from '../utils/boundaries.js';
 import { execSync } from 'node:child_process';
+import {
+  installTemplates,
+  updateSettingsHooks,
+  updateMcpConfig,
+  setupHuskyPreCommit,
+  BASE_DEV_DEPS,
+} from '../utils/install.js';
 
 export interface SetupOptions {
   yes?: boolean;
@@ -81,34 +76,12 @@ export async function setup(options: SetupOptions): Promise<void> {
     // 1. Create .safeword directory structure and copy templates
     info('\nCreating .safeword directory...');
 
-    ensureDir(safewordDir);
-    ensureDir(join(safewordDir, 'learnings'));
-    ensureDir(join(safewordDir, 'planning', 'user-stories'));
-    ensureDir(join(safewordDir, 'planning', 'design'));
-    ensureDir(join(safewordDir, 'tickets', 'completed'));
+    const templateResult = installTemplates(cwd, { isSetup: true });
+    created.push(...templateResult.created);
 
-    // Copy full SAFEWORD.md from templates
-    copyFile(join(templatesDir, 'SAFEWORD.md'), join(safewordDir, 'SAFEWORD.md'));
+    // Write version file
     writeFile(join(safewordDir, 'version'), VERSION);
 
-    // Copy methodology guides
-    copyDir(join(templatesDir, 'guides'), join(safewordDir, 'guides'));
-
-    // Copy document templates (to 'templates' to match links in SAFEWORD.md)
-    copyDir(join(templatesDir, 'doc-templates'), join(safewordDir, 'templates'));
-
-    // Copy review prompts
-    copyDir(join(templatesDir, 'prompts'), join(safewordDir, 'prompts'));
-
-    // Copy lib scripts and make executable
-    copyDir(join(templatesDir, 'lib'), join(safewordDir, 'lib'));
-    makeScriptsExecutable(join(safewordDir, 'lib'));
-
-    // Copy hook scripts and make executable
-    copyDir(join(templatesDir, 'hooks'), join(safewordDir, 'hooks'));
-    makeScriptsExecutable(join(safewordDir, 'hooks'));
-
-    created.push('.safeword/');
     success('Created .safeword directory');
 
     // 2. Handle AGENTS.md
@@ -124,29 +97,16 @@ export async function setup(options: SetupOptions): Promise<void> {
       info('AGENTS.md already has safeword link');
     }
 
-    // 3. Register Claude Code hooks
+    // 3. Register Claude Code hooks (skills and commands already copied by installTemplates)
     info('\nRegistering Claude Code hooks...');
 
-    const claudeDir = join(cwd, '.claude');
-    const settingsPath = join(claudeDir, 'settings.json');
-
-    ensureDir(claudeDir);
+    const settingsPath = join(cwd, '.claude', 'settings.json');
+    const settingsExisted = exists(settingsPath);
 
     try {
-      updateJson<{ hooks?: Record<string, unknown[]> }>(settingsPath, existing => {
-        const hooks = existing?.hooks ?? {};
+      updateSettingsHooks(cwd);
 
-        // Merge hooks, preserving existing non-safeword hooks
-        for (const [event, newHooks] of Object.entries(SETTINGS_HOOKS)) {
-          const existingHooks = (hooks[event] as unknown[]) ?? [];
-          const nonSafewordHooks = filterOutSafewordHooks(existingHooks);
-          hooks[event] = [...nonSafewordHooks, ...newHooks];
-        }
-
-        return { ...existing, hooks };
-      });
-
-      if (exists(settingsPath)) {
+      if (settingsExisted) {
         modified.push('.claude/settings.json');
       } else {
         created.push('.claude/settings.json');
@@ -157,53 +117,22 @@ export async function setup(options: SetupOptions): Promise<void> {
       process.exit(1);
     }
 
-    // 4. Copy skills
-    info('\nInstalling skills...');
-
-    const skillsDir = join(claudeDir, 'skills');
-    copyDir(join(templatesDir, 'skills'), skillsDir);
-
-    created.push('.claude/skills/safeword-quality-reviewer/');
-    success('Installed skills');
-
-    // 5. Copy slash commands
-    info('\nInstalling slash commands...');
-
-    const commandsDir = join(claudeDir, 'commands');
-    copyDir(join(templatesDir, 'commands'), commandsDir);
-
-    created.push('.claude/commands/');
-    success('Installed slash commands');
-
-    // 6. Setup MCP servers
+    // 4. Setup MCP servers
     info('\nConfiguring MCP servers...');
 
     const mcpConfigPath = join(cwd, '.mcp.json');
+    const mcpExisted = exists(mcpConfigPath);
 
-    updateJson<{ mcpServers?: Record<string, unknown> }>(mcpConfigPath, existing => {
-      const mcpServers = existing?.mcpServers ?? {};
+    updateMcpConfig(cwd);
 
-      // Add safeword MCP servers (context7 and playwright)
-      mcpServers.context7 = {
-        command: 'npx',
-        args: ['-y', '@upstash/context7-mcp@latest'],
-      };
-      mcpServers.playwright = {
-        command: 'npx',
-        args: ['@playwright/mcp@latest'],
-      };
-
-      return { ...existing, mcpServers };
-    });
-
-    if (exists(mcpConfigPath)) {
+    if (mcpExisted) {
       modified.push('.mcp.json');
     } else {
       created.push('.mcp.json');
     }
     success('Configured MCP servers');
 
-    // 7. Setup linting
+    // 5. Setup linting
     info('\nConfiguring linting...');
 
     const packageJson = readJson<PackageJson>(packageJsonPath);
@@ -231,7 +160,9 @@ export async function setup(options: SetupOptions): Promise<void> {
     const boundariesConfigPath = join(safewordDir, 'eslint-boundaries.config.mjs');
     writeFile(boundariesConfigPath, generateBoundariesConfig(architecture));
     if (architecture.directories.length > 0) {
-      info(`Detected architecture: ${architecture.directories.join(', ')} (${architecture.inSrc ? 'in src/' : 'at root'})`);
+      info(
+        `Detected architecture: ${architecture.directories.join(', ')} (${architecture.inSrc ? 'in src/' : 'at root'})`,
+      );
     } else {
       info('No architecture directories detected yet (boundaries ready when you add them)');
     }
@@ -320,24 +251,13 @@ export async function setup(options: SetupOptions): Promise<void> {
       process.exit(1);
     }
 
-    // 8. Install dependencies
+    // 6. Install dependencies
     info('\nInstalling linting dependencies...');
 
-    // Build the list of packages to install
-    const devDeps: string[] = [
-      'eslint',
-      'prettier',
-      '@eslint/js',
-      'eslint-plugin-import-x',
-      'eslint-plugin-sonarjs',
-      '@microsoft/eslint-plugin-sdl',
-      'eslint-config-prettier',
-      'markdownlint-cli2',
-      'knip',
-      'husky',
-      'lint-staged',
-    ];
+    // Build the list of packages to install (start with base deps from shared constants)
+    const devDeps: string[] = [...BASE_DEV_DEPS];
 
+    // Add framework-specific dependencies
     if (projectType.typescript) {
       devDeps.push('typescript-eslint');
     }
@@ -356,23 +276,15 @@ export async function setup(options: SetupOptions): Promise<void> {
     if (projectType.svelte) {
       devDeps.push('eslint-plugin-svelte');
     }
-    // Always install boundaries - configured only when 3+ architecture directories exist
-    devDeps.push('eslint-plugin-boundaries');
     if (projectType.electron) {
       devDeps.push('@electron-toolkit/eslint-config');
     }
     if (projectType.vitest) {
       devDeps.push('@vitest/eslint-plugin');
     }
-    // Always include Playwright - safeword sets up e2e testing with Playwright
-    devDeps.push('eslint-plugin-playwright');
-
-    // Tailwind: use official Prettier plugin for class sorting
     if (projectType.tailwind) {
       devDeps.push('prettier-plugin-tailwindcss');
     }
-
-    // Publishable libraries: validate package.json for npm publishing
     if (projectType.publishableLibrary) {
       devDeps.push('publint');
     }
@@ -387,29 +299,18 @@ export async function setup(options: SetupOptions): Promise<void> {
       listItem(`npm install -D ${devDeps.join(' ')}`);
     }
 
-    // 9. Setup Husky for git hooks (manually, not using husky init which overwrites prepare script)
+    // 7. Setup Husky for git hooks
     info('\nConfiguring git hooks with Husky...');
 
     if (isGitRepo(cwd)) {
       try {
-        // Create .husky directory and pre-commit hook manually
-        // (husky init unconditionally sets prepare script, which we don't want)
-        const huskyDir = join(cwd, '.husky');
-        ensureDir(huskyDir);
-
-        // Create pre-commit hook that syncs linting plugins and runs lint-staged
-        const huskyPreCommit = join(huskyDir, 'pre-commit');
-        writeFile(huskyPreCommit, 'npx safeword sync --quiet --stage\nnpx lint-staged\n');
-
-        // Make hook executable (required for git hooks on Unix)
-        makeScriptsExecutable(huskyDir);
-
+        setupHuskyPreCommit(cwd);
         created.push('.husky/pre-commit');
         success('Configured Husky with lint-staged pre-commit hook');
       } catch {
         warn('Failed to setup Husky. Run manually:');
         listItem('mkdir -p .husky');
-        listItem('echo "npx lint-staged" > .husky/pre-commit');
+        listItem('echo "npx safeword sync --quiet --stage && npx lint-staged" > .husky/pre-commit');
       }
     } else if (isNonInteractive) {
       warn('Skipped Husky setup (no git repository)');

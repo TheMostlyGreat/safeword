@@ -31,8 +31,10 @@ function getHookContent(): string {
 ${MARKER_START}
 # Safeword pre-commit linting
 # This section is managed by safeword - do not edit manually
-if [ -f ".safeword/hooks/git-pre-commit.sh" ]; then
-  bash .safeword/hooks/git-pre-commit.sh
+if [ -n "$CLAUDE_PROJECT_DIR" ] && [ -f "$CLAUDE_PROJECT_DIR/.safeword/hooks/git-pre-commit.sh" ]; then
+  "$CLAUDE_PROJECT_DIR"/.safeword/hooks/git-pre-commit.sh
+elif [ -f ".safeword/hooks/git-pre-commit.sh" ]; then
+  ./.safeword/hooks/git-pre-commit.sh
 fi
 ${MARKER_END}
 `;

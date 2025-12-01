@@ -4,24 +4,18 @@
 
 import { join } from 'node:path';
 import { VERSION } from '../version.js';
-import {
-  exists,
-  ensureDir,
-  writeFile,
-  readFileSafe,
-  updateJson,
-  copyDir,
-  copyFile,
-  getTemplatesDir,
-  makeScriptsExecutable,
-} from '../utils/fs.js';
+import { exists, readFileSafe, writeFile } from '../utils/fs.js';
 import { info, success, error, header, listItem } from '../utils/output.js';
 import { isGitRepo } from '../utils/git.js';
-import { execSync } from 'node:child_process';
 import { compareVersions } from '../utils/version.js';
-import { filterOutSafewordHooks } from '../utils/hooks.js';
 import { ensureAgentsMdLink } from '../utils/agents-md.js';
-import { SETTINGS_HOOKS } from '../templates/index.js';
+import { detectArchitecture, generateBoundariesConfig } from '../utils/boundaries.js';
+import {
+  installTemplates,
+  updateSettingsHooks,
+  updateMcpConfig,
+  setupHuskyPreCommit,
+} from '../utils/install.js';
 
 export async function upgrade(): Promise<void> {
   const cwd = process.cwd();
@@ -51,34 +45,16 @@ export async function upgrade(): Promise<void> {
   const unchanged: string[] = [];
 
   try {
-    const templatesDir = getTemplatesDir();
+    // 1. Update .safeword directory and .claude directories
+    info('\nUpdating templates...');
 
-    // 1. Update .safeword directory
-    info('\nUpdating .safeword directory...');
+    const templateResult = installTemplates(cwd, { isSetup: false });
+    updated.push(...templateResult.updated);
 
-    // Update core files from templates
-    copyFile(join(templatesDir, 'SAFEWORD.md'), join(safewordDir, 'SAFEWORD.md'));
+    // Update version file
     writeFile(join(safewordDir, 'version'), VERSION);
-    updated.push('.safeword/SAFEWORD.md');
     updated.push('.safeword/version');
 
-    // Update guides, templates, prompts from templates
-    copyDir(join(templatesDir, 'guides'), join(safewordDir, 'guides'));
-    copyDir(join(templatesDir, 'doc-templates'), join(safewordDir, 'templates'));
-    copyDir(join(templatesDir, 'prompts'), join(safewordDir, 'prompts'));
-
-    // Update lib scripts and make executable
-    copyDir(join(templatesDir, 'lib'), join(safewordDir, 'lib'));
-    makeScriptsExecutable(join(safewordDir, 'lib'));
-
-    // Update hook scripts and make executable
-    copyDir(join(templatesDir, 'hooks'), join(safewordDir, 'hooks'));
-    makeScriptsExecutable(join(safewordDir, 'hooks'));
-
-    updated.push('.safeword/guides/');
-    updated.push('.safeword/templates/');
-    updated.push('.safeword/prompts/');
-    updated.push('.safeword/hooks/');
     success('Updated .safeword directory');
 
     // 2. Verify AGENTS.md link
@@ -98,58 +74,47 @@ export async function upgrade(): Promise<void> {
     // 3. Update Claude Code hooks
     info('\nUpdating Claude Code hooks...');
 
-    const claudeDir = join(cwd, '.claude');
-    const settingsPath = join(claudeDir, 'settings.json');
-
-    ensureDir(claudeDir);
-
-    updateJson<{ hooks?: Record<string, unknown[]> }>(settingsPath, existing => {
-      const hooks = existing?.hooks ?? {};
-
-      // Merge hooks, preserving existing non-safeword hooks
-      for (const [event, newHooks] of Object.entries(SETTINGS_HOOKS)) {
-        const existingHooks = (hooks[event] as unknown[]) ?? [];
-        const nonSafewordHooks = filterOutSafewordHooks(existingHooks);
-        hooks[event] = [...nonSafewordHooks, ...newHooks];
-      }
-
-      return { ...existing, hooks };
-    });
-
+    updateSettingsHooks(cwd);
     updated.push('.claude/settings.json');
     success('Updated hooks in .claude/settings.json');
 
-    // 4. Update skills and commands
-    info('\nUpdating skills and commands...');
+    // 4. Update MCP servers
+    info('\nUpdating MCP servers...');
 
-    copyDir(join(templatesDir, 'skills'), join(claudeDir, 'skills'));
-    copyDir(join(templatesDir, 'commands'), join(claudeDir, 'commands'));
+    const mcpResult = updateMcpConfig(cwd);
+    if (mcpResult === 'created') {
+      updated.push('.mcp.json');
+    } else {
+      updated.push('.mcp.json');
+    }
+    success('Updated MCP servers');
 
-    updated.push('.claude/skills/');
-    updated.push('.claude/commands/');
-    success('Updated skills and commands');
+    // 5. Update boundaries config (regenerate based on current framework detection)
+    info('\nUpdating boundaries config...');
 
-    // 5. Update Husky hooks if repo exists
+    const architecture = detectArchitecture(cwd);
+    const boundariesConfigPath = join(safewordDir, 'eslint-boundaries.config.mjs');
+    writeFile(boundariesConfigPath, generateBoundariesConfig(architecture));
+
+    if (architecture.directories.length > 0) {
+      info(
+        `Detected architecture: ${architecture.directories.join(', ')} (${architecture.inSrc ? 'in src/' : 'at root'})`,
+      );
+    }
+    updated.push('.safeword/eslint-boundaries.config.mjs');
+    success('Updated boundaries config');
+
+    // 6. Update Husky hooks if repo exists
     if (isGitRepo(cwd)) {
-      const huskyDir = join(cwd, '.husky');
-      if (exists(huskyDir)) {
-        info('\nUpdating Husky pre-commit hook...');
-        const huskyPreCommit = join(huskyDir, 'pre-commit');
-        writeFile(huskyPreCommit, 'npx lint-staged\n');
-        updated.push('.husky/pre-commit');
-        success('Updated Husky pre-commit hook');
+      info('\nUpdating Husky pre-commit hook...');
+
+      const huskyResult = setupHuskyPreCommit(cwd);
+      updated.push('.husky/pre-commit');
+
+      if (huskyResult === 'created') {
+        success('Initialized Husky with pre-commit hook');
       } else {
-        // Initialize Husky if not present
-        info('\nInitializing Husky...');
-        try {
-          execSync('npx husky init', { cwd, stdio: 'pipe' });
-          const huskyPreCommit = join(cwd, '.husky', 'pre-commit');
-          writeFile(huskyPreCommit, 'npx lint-staged\n');
-          updated.push('.husky/pre-commit');
-          success('Initialized Husky with lint-staged');
-        } catch {
-          info('Husky not initialized (run: npx husky init)');
-        }
+        success('Updated Husky pre-commit hook');
       }
     }
 
