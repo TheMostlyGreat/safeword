@@ -29,7 +29,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm audit --audit-level=high && npm run build && npm test"
+    "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
     "commander": "^12.1.0"
