@@ -159,7 +159,11 @@ status: in_progress
 
 **Never ask the user to test what you can test yourself.**
 
-Run relevant tests after fixes, features, and before completion.
+| After...          | Do                       |
+| ----------------- | ------------------------ |
+| Fixes             | Run relevant tests       |
+| Features          | Run affected test suites |
+| Before completion | Verify everything passes |
 
 **Anti-patterns:**
 
