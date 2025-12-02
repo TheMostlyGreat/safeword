@@ -234,10 +234,12 @@ describe('E2E: UserPromptSubmit Hooks', () => {
       });
 
       expect(output).toContain('Current time:');
-      // Check for Unix timestamp (10 digits)
-      expect(output).toMatch(/\d{10}/);
+      // Check for natural language format (day of week, month, date, year)
+      expect(output).toMatch(/\w+, \w+ \d{2}, \d{4}/);
       // Check for ISO format
       expect(output).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/);
+      // Check for local time
+      expect(output).toMatch(/Local: \d{2}:\d{2}/);
     });
   });
 
@@ -399,23 +401,23 @@ describe('E2E: Stop Hook', () => {
       expect(result.stderr).toContain('Quality Review');
     });
 
-    it('warns when JSON blob is missing', () => {
+    it('blocks when JSON blob is missing', () => {
       const text = 'I made some changes but forgot the JSON summary.';
       const transcriptPath = createMockTranscript(projectDir, text);
 
       const result = runStopHook(projectDir, transcriptPath);
 
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode).toBe(2);
       expect(result.stderr).toContain('missing required JSON summary');
     });
 
-    it('warns when JSON blob has missing field', () => {
+    it('blocks when JSON blob has missing field', () => {
       const text = 'Partial JSON.\n\n{"proposedChanges": true, "madeChanges": false}';
       const transcriptPath = createMockTranscript(projectDir, text);
 
       const result = runStopHook(projectDir, transcriptPath);
 
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode).toBe(2);
       expect(result.stderr).toContain('missing required JSON summary');
     });
 

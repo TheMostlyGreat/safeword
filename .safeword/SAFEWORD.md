@@ -1,26 +1,78 @@
 # SAFEWORD Agent Instructions
 
-Core guidance for AI coding agents. Uses imports for detailed workflows.
+---
+
+## Code Philosophy
+
+**Optimize for:** Clarity → Simplicity → Correctness (in that order)
+
+| Principle        | Definition                                                       |
+| ---------------- | ---------------------------------------------------------------- |
+| Elegant code     | Readable at a glance; clear naming; minimal cognitive load       |
+| No bloat         | Delete unused code; no premature abstractions; no "just in case" |
+| Explicit errors  | Every catch block re-throws with context OR logs with details    |
+| Self-documenting | Comment only: business rules, workarounds, non-obvious "why"     |
+
+**Tie-breaker:** When in doubt, choose the simpler solution that works today.
 
 ---
 
-## Quick Reference
+## Anti-Patterns
 
-| Task                     | Guide                                          |
-| ------------------------ | ---------------------------------------------- |
-| Feature development      | @./.safeword/guides/development-workflow.md    |
-| User stories             | @./.safeword/guides/user-story-guide.md        |
-| Test definitions         | @./.safeword/guides/test-definitions-guide.md  |
-| TDD patterns / examples  | @./.safeword/guides/tdd-best-practices.md      |
-| Design docs              | @./.safeword/guides/design-doc-guide.md        |
-| Architecture decisions   | @./.safeword/guides/architecture-guide.md      |
-| Data architecture        | @./.safeword/guides/data-architecture-guide.md |
-| LLM integration & docs   | @./.safeword/guides/llm-guide.md               |
-| Context file maintenance | @./.safeword/guides/context-files-guide.md     |
-| Learning extraction      | @./.safeword/guides/learning-extraction.md     |
-| Process cleanup          | @./.safeword/guides/zombie-process-cleanup.md  |
-| Code standards           | @./.safeword/guides/code-philosophy.md         |
-| Safeword CLI             | @./.safeword/guides/cli-reference.md           |
+| Don't                        | Do                                               | Why                       |
+| ---------------------------- | ------------------------------------------------ | ------------------------- |
+| `catch (e) {}`               | `throw new Error(\`Failed to X: ${e.message}\`)` | Silent failures hide bugs |
+| Utility class for 1 function | Single exported function                         | Abstraction without reuse |
+| Factory for simple object    | Direct construction                              | Indirection without value |
+| `data`, `tmp`, `d`           | `userProfile`, `pendingOrder`                    | Names should explain      |
+| Code "for later"             | Delete it; add when needed                       | YAGNI                     |
+| >50 lines for nice-to-have   | Ask user: "Essential now?"                       | Scope creep               |
+
+---
+
+## Before Using Any Library API
+
+Training data is stale. Follow this sequence:
+
+1. Check `package.json` for installed version
+2. Look up docs via Context7 or official site
+3. If uncertain: ask user which version they're using
+
+---
+
+## Guides
+
+**Read the matching guide when ANY trigger fires:**
+
+| Trigger                                                   | Guide                                          |
+| --------------------------------------------------------- | ---------------------------------------------- |
+| Starting ANY feature, bug fix, or enhancement             | @./.safeword/guides/development-workflow.md    |
+| Need to write OR review user stories                      | @./.safeword/guides/user-story-guide.md        |
+| Need to write OR review test definitions                  | @./.safeword/guides/test-definitions-guide.md  |
+| Writing tests, doing TDD, or test is failing              | @./.safeword/guides/tdd-best-practices.md      |
+| Creating OR updating a design doc                         | @./.safeword/guides/design-doc-guide.md        |
+| Making architectural decision OR writing ADR              | @./.safeword/guides/architecture-guide.md      |
+| Designing data models, schemas, or database changes       | @./.safeword/guides/data-architecture-guide.md |
+| Calling LLM APIs OR writing LLM-consumable docs           | @./.safeword/guides/llm-guide.md               |
+| Updating CLAUDE.md, SAFEWORD.md, or any context file      | @./.safeword/guides/context-files-guide.md     |
+| Hit same bug 3+ times OR discovered undocumented gotcha   | @./.safeword/guides/learning-extraction.md     |
+| Process hanging, port in use, or zombie process suspected | @./.safeword/guides/zombie-process-cleanup.md  |
+| Using `safeword` CLI commands                             | @./.safeword/guides/cli-reference.md           |
+| Debugging issues OR need git/cross-platform guidance      | @./.safeword/guides/code-philosophy.md         |
+
+---
+
+## Templates
+
+**Use the matching template when ANY trigger fires:**
+
+| Trigger                                                    | Template                                           |
+| ---------------------------------------------------------- | -------------------------------------------------- |
+| User asks for user story OR planning new feature scope     | @./.safeword/templates/user-stories-template.md    |
+| Need test definitions for a feature OR acceptance criteria | @./.safeword/templates/test-definitions-feature.md |
+| Feature spans 3+ components OR needs technical spec        | @./.safeword/templates/design-doc-template.md      |
+| Making decision with long-term impact OR trade-offs        | @./.safeword/templates/architecture-template.md    |
+| Task needs context anchoring (see Ticket System below)     | @./.safeword/templates/ticket-template.md          |
 
 ---
 
@@ -28,10 +80,12 @@ Core guidance for AI coding agents. Uses imports for detailed workflows.
 
 **Location:** `.safeword/planning/` at project root
 
-- User stories → `.safeword/planning/user-stories/`
-- Test definitions → `.safeword/planning/test-definitions/`
-- Design docs → `.safeword/planning/design/`
-- Issues → `.safeword/planning/issues/`
+| Type             | Path                                   |
+| ---------------- | -------------------------------------- |
+| User stories     | `.safeword/planning/user-stories/`     |
+| Test definitions | `.safeword/planning/test-definitions/` |
+| Design docs      | `.safeword/planning/design/`           |
+| Issues           | `.safeword/planning/issues/`           |
 
 **Archive:** Move completed docs to `archive/` subfolder within each.
 
@@ -76,15 +130,13 @@ status: in_progress
 
 - Log immediately after each action
 - Re-read ticket before significant actions
-- **CRITICAL:** Never mark `done` without user confirmation (prevents premature closure)
-
-**Full template:** `.safeword/templates/ticket-template.md`
+- **CRITICAL:** Never mark `done` without user confirmation
 
 ---
 
-## Feature Development (CRITICAL)
+## Feature Development
 
-**Always follow this order:**
+**Follow this order:**
 
 1. **Check/create ticket** if context-loss risk exists (see decision tree above)
 2. **Read user stories** (`.safeword/planning/user-stories/`)
@@ -101,41 +153,19 @@ status: in_progress
 | Test defs exist, user stories don't | Ask if user stories needed        |
 | Neither exist                       | Create both before implementation |
 
-**Full workflow:** @./.safeword/guides/development-workflow.md
-
 ---
 
-## Self-Testing (CRITICAL)
+## Self-Testing
 
 **Never ask the user to test what you can test yourself.**
 
-- After fixes → run relevant tests
-- After features → run affected tests
-- Before completion → verify everything passes
+Run relevant tests after fixes, features, and before completion.
 
 **Anti-patterns:**
 
 - ❌ "Please refresh and test"
 - ❌ "Can you verify it works?"
-- ✅ "Fixed. Running tests..." → "Tests pass ✓"
-
----
-
-## Code Quality
-
-**Avoid over-engineering:**
-
-| ❌ Over-engineering               | ✅ Keep it simple   |
-| --------------------------------- | ------------------- |
-| Utility class for one function    | Single function     |
-| Factory/builder for simple object | Direct construction |
-| Config file for 2 options         | Hardcode or params  |
-
-**Rules:**
-
-- If feature adds >50 lines for "nice to have", ask user first
-- Never swallow errors—include context: `Failed to X: ${e.message}`
-- Verify library APIs against package.json version + Context7 (training data is stale)
+- ✅ "Fixed. Running tests..." → "Tests pass"
 
 ---
 
@@ -143,11 +173,11 @@ status: in_progress
 
 **Use for:** 3+ step tasks, non-trivial work, multiple user requests.
 
-**Rules:**
-
-- Create as first tool call
-- One task `in_progress` at a time
-- Mark completed immediately (don't batch)
+| Rule                             | Why                     |
+| -------------------------------- | ----------------------- |
+| Create as first tool call        | Plan before acting      |
+| One task `in_progress` at a time | Focus                   |
+| Mark completed immediately       | Don't batch completions |
 
 ---
 
@@ -159,18 +189,17 @@ End every response with:
 {"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}
 ```
 
-- `proposedChanges`: suggested changes to files in this response
-- `madeChanges`: modified files using Write/Edit tools
-- `askedQuestion`: asked question, need response before proceeding
+| Field           | True when...                                    |
+| --------------- | ----------------------------------------------- |
+| proposedChanges | Suggested changes to files in this response     |
+| madeChanges     | Modified files using Write/Edit tools           |
+| askedQuestion   | Asked question, need response before proceeding |
 
 ---
 
 ## Commit Frequently
 
-- After each GREEN phase
-- Before refactoring
-- After successful refactor
-- When switching tasks
+Commit after: GREEN phase, before/after refactoring, when switching tasks.
 
 ---
 
@@ -184,5 +213,3 @@ End every response with:
 - Integration struggle between tools
 
 **Before extracting:** Check `.safeword/learnings/` for existing similar learnings—update, don't duplicate.
-
-**Full workflow:** @./.safeword/guides/learning-extraction.md

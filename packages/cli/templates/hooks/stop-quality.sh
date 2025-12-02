@@ -60,7 +60,7 @@ if [ -z "$json_blob" ]; then
   # No valid JSON blob found - remind about required format
   echo "SAFEWORD: Response missing required JSON summary. Add to end of response:" >&2
   echo '{"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}' >&2
-  exit 0
+  exit 2
 fi
 
 # Parse the boolean values (already validated, safe to extract)
