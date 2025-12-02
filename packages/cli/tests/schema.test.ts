@@ -190,16 +190,23 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('textPatches', () => {
-    it('should have exactly 1 text patch', async () => {
+    it('should have exactly 2 text patches', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.textPatches).length).toBe(1);
+      expect(Object.keys(SAFEWORD_SCHEMA.textPatches).length).toBe(2);
     });
 
-    it('should include AGENTS.md patch', async () => {
+    it('should include AGENTS.md patch (creates if missing)', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty('AGENTS.md');
       expect(SAFEWORD_SCHEMA.textPatches['AGENTS.md'].operation).toBe('prepend');
       expect(SAFEWORD_SCHEMA.textPatches['AGENTS.md'].createIfMissing).toBe(true);
+    });
+
+    it('should include CLAUDE.md patch (only if exists)', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty('CLAUDE.md');
+      expect(SAFEWORD_SCHEMA.textPatches['CLAUDE.md'].operation).toBe('prepend');
+      expect(SAFEWORD_SCHEMA.textPatches['CLAUDE.md'].createIfMissing).toBe(false);
     });
   });
 
