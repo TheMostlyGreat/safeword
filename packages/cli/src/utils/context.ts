@@ -6,6 +6,7 @@
 
 import { join } from 'node:path';
 import { readJson } from './fs.js';
+import { isGitRepo } from './git.js';
 import { detectProjectType, type PackageJson } from './project-detector.js';
 import type { ProjectContext } from '../schema.js';
 
@@ -21,5 +22,6 @@ export function createProjectContext(cwd: string): ProjectContext {
     cwd,
     projectType: detectProjectType(packageJson ?? {}),
     devDeps: packageJson?.devDependencies ?? {},
+    isGitRepo: isGitRepo(cwd),
   };
 }

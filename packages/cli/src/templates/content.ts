@@ -6,6 +6,8 @@
  * string constants that are used inline.
  */
 
+import type { ProjectType } from '../utils/project-detector.js';
+
 export const AGENTS_MD_LINK = `**⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**
 
 The SAFEWORD.md file contains core development patterns, workflows, and conventions.
@@ -13,15 +15,42 @@ Read it BEFORE working on any task in this project.
 
 ---`;
 
-export const PRETTIERRC = `{
-  "semi": true,
-  "singleQuote": true,
-  "tabWidth": 2,
-  "trailingComma": "es5",
-  "printWidth": 100,
-  "endOfLine": "lf"
+interface PrettierConfig {
+  semi: boolean;
+  singleQuote: boolean;
+  tabWidth: number;
+  trailingComma: string;
+  printWidth: number;
+  endOfLine: string;
+  plugins?: string[];
 }
-`;
+
+/**
+ * Generate .prettierrc content based on project type.
+ * Explicitly lists plugins to ensure compatibility with pnpm/Yarn PnP.
+ */
+export function getPrettierConfig(projectType: ProjectType): string {
+  const config: PrettierConfig = {
+    semi: true,
+    singleQuote: true,
+    tabWidth: 2,
+    trailingComma: 'es5',
+    printWidth: 100,
+    endOfLine: 'lf',
+  };
+
+  const plugins: string[] = [];
+
+  if (projectType.astro) plugins.push('prettier-plugin-astro');
+  if (projectType.svelte) plugins.push('prettier-plugin-svelte');
+  if (projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
+
+  if (plugins.length > 0) {
+    config.plugins = plugins;
+  }
+
+  return JSON.stringify(config, null, 2) + '\n';
+}
 
 /**
  * lint-staged configuration for pre-commit hooks

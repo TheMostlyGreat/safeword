@@ -45,7 +45,7 @@ describe('Setup - Template Bundling (Story 1)', () => {
     // Full file is ~31KB, stub is <1KB
     expect(content.length).toBeGreaterThan(1000);
     // Verify it's the full methodology file, not a stub
-    expect(content).toContain('# Global Instructions for AI Coding Agents');
+    expect(content).toContain('# SAFEWORD Agent Instructions');
   });
 
   it('should install methodology guides to .safeword/guides/', async () => {
@@ -57,7 +57,7 @@ describe('Setup - Template Bundling (Story 1)', () => {
     expect(fileExists(tempDir, '.safeword/guides')).toBe(true);
 
     const guidesDir = join(tempDir, '.safeword/guides');
-    const mdFiles = readdirSync(guidesDir).filter((f) => f.endsWith('.md'));
+    const mdFiles = readdirSync(guidesDir).filter(f => f.endsWith('.md'));
 
     expect(mdFiles.length).toBeGreaterThan(0);
   });
@@ -71,7 +71,7 @@ describe('Setup - Template Bundling (Story 1)', () => {
     expect(fileExists(tempDir, '.safeword/templates')).toBe(true);
 
     const templatesDir = join(tempDir, '.safeword/templates');
-    const mdFiles = readdirSync(templatesDir).filter((f) => f.endsWith('.md'));
+    const mdFiles = readdirSync(templatesDir).filter(f => f.endsWith('.md'));
 
     expect(mdFiles.length).toBeGreaterThan(0);
   });
@@ -85,7 +85,7 @@ describe('Setup - Template Bundling (Story 1)', () => {
     expect(fileExists(tempDir, '.safeword/prompts')).toBe(true);
 
     const promptsDir = join(tempDir, '.safeword/prompts');
-    const mdFiles = readdirSync(promptsDir).filter((f) => f.endsWith('.md'));
+    const mdFiles = readdirSync(promptsDir).filter(f => f.endsWith('.md'));
 
     // Should have 2 review prompts
     expect(mdFiles.length).toBeGreaterThan(0);
@@ -169,9 +169,7 @@ describe('Setup - Template Bundling (Story 1)', () => {
 
     // Report all broken links
     if (brokenLinks.length > 0) {
-      const report = brokenLinks
-        .map((b) => `  ${b.file}: ${b.link}`)
-        .join('\n');
+      const report = brokenLinks.map(b => `  ${b.file}: ${b.link}`).join('\n');
       expect.fail(`Found ${brokenLinks.length} broken links:\n${report}`);
     }
 

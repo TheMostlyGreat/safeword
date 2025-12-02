@@ -101,7 +101,10 @@ describe('E2E: Sync Command', () => {
     await runCli(['setup', '--yes'], { cwd: projectDir });
 
     // Make initial commit
-    execSync('git add -A && git commit -m "initial"', { cwd: projectDir, maxBuffer: 10 * 1024 * 1024 });
+    execSync('git add -A && git commit -m "initial"', {
+      cwd: projectDir,
+      maxBuffer: 10 * 1024 * 1024,
+    });
 
     // Add Vue to dependencies
     const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
@@ -179,5 +182,5 @@ describe('E2E: Sync Command', () => {
     const finalPkg = JSON.parse(readTestFile(projectDir, 'package.json'));
     expect(finalPkg.devDependencies).toHaveProperty('eslint-plugin-svelte');
     expect(finalPkg.devDependencies).toHaveProperty('@vitest/eslint-plugin');
-  }, 180000);
+  }, 300000); // Increased timeout - npm installs can be slow
 });

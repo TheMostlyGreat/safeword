@@ -29,6 +29,12 @@ import type {
 import type { ProjectType } from './utils/project-detector.js';
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+const HUSKY_DIR = '.husky';
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -132,9 +138,12 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   const actions: Action[] = [];
   const wouldCreate: string[] = [];
 
-  // 1. Create all directories
+  // 1. Create all directories (skip .husky if not a git repo)
   const allDirs = [...schema.ownedDirs, ...schema.sharedDirs, ...schema.preservedDirs];
   for (const dir of allDirs) {
+    // Skip .husky in non-git repos
+    if (dir.startsWith(HUSKY_DIR) && !ctx.isGitRepo) continue;
+
     const fullPath = join(ctx.cwd, dir);
     if (!exists(fullPath)) {
       actions.push({ type: 'mkdir', path: dir });
@@ -142,8 +151,11 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     }
   }
 
-  // 2. Write all owned files
+  // 2. Write all owned files (skip .husky files if not a git repo)
   for (const [filePath, def] of Object.entries(schema.ownedFiles)) {
+    // Skip .husky files in non-git repos
+    if (filePath.startsWith(HUSKY_DIR) && !ctx.isGitRepo) continue;
+
     const content = resolveFileContent(def, ctx);
     actions.push({ type: 'write', path: filePath, content });
     wouldCreate.push(filePath);
@@ -159,8 +171,9 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     }
   }
 
-  // 4. chmod hook/lib directories
-  const chmodPaths = ['.safeword/hooks', '.safeword/lib', '.husky'];
+  // 4. chmod hook/lib directories (only .husky if git repo)
+  const chmodPaths = ['.safeword/hooks', '.safeword/lib'];
+  if (ctx.isGitRepo) chmodPaths.push(HUSKY_DIR);
   actions.push({ type: 'chmod', paths: chmodPaths });
 
   // 5. JSON merges
@@ -176,8 +189,13 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     }
   }
 
-  // 7. Compute packages to install
-  const packagesToInstall = computePackagesToInstall(schema, ctx.projectType, ctx.devDeps);
+  // 7. Compute packages to install (husky/lint-staged skipped if no git repo)
+  const packagesToInstall = computePackagesToInstall(
+    schema,
+    ctx.projectType,
+    ctx.devDeps,
+    ctx.isGitRepo,
+  );
 
   return {
     actions,
@@ -194,9 +212,12 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   const wouldCreate: string[] = [];
   const wouldUpdate: string[] = [];
 
-  // 1. Ensure directories exist
+  // 1. Ensure directories exist (skip .husky if not a git repo)
   const allDirs = [...schema.ownedDirs, ...schema.sharedDirs, ...schema.preservedDirs];
   for (const dir of allDirs) {
+    // Skip .husky in non-git repos
+    if (dir.startsWith(HUSKY_DIR) && !ctx.isGitRepo) continue;
+
     const fullPath = join(ctx.cwd, dir);
     if (!exists(fullPath)) {
       actions.push({ type: 'mkdir', path: dir });
@@ -204,8 +225,11 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     }
   }
 
-  // 2. Update owned files if content changed
+  // 2. Update owned files if content changed (skip .husky files if not a git repo)
   for (const [filePath, def] of Object.entries(schema.ownedFiles)) {
+    // Skip .husky files in non-git repos
+    if (filePath.startsWith(HUSKY_DIR) && !ctx.isGitRepo) continue;
+
     const fullPath = join(ctx.cwd, filePath);
     const newContent = resolveFileContent(def, ctx);
 
@@ -244,8 +268,9 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     }
   }
 
-  // 4. chmod
-  const chmodPaths = ['.safeword/hooks', '.safeword/lib', '.husky'];
+  // 4. chmod (only .husky if git repo)
+  const chmodPaths = ['.safeword/hooks', '.safeword/lib'];
+  if (ctx.isGitRepo) chmodPaths.push(HUSKY_DIR);
   actions.push({ type: 'chmod', paths: chmodPaths });
 
   // 5. JSON merges (always apply to ensure keys are present)
@@ -262,8 +287,13 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     }
   }
 
-  // 7. Compute packages to install
-  const packagesToInstall = computePackagesToInstall(schema, ctx.projectType, ctx.devDeps);
+  // 7. Compute packages to install (husky/lint-staged skipped if no git repo)
+  const packagesToInstall = computePackagesToInstall(
+    schema,
+    ctx.projectType,
+    ctx.devDeps,
+    ctx.isGitRepo,
+  );
 
   return {
     actions,
@@ -492,12 +522,21 @@ function fileNeedsUpdate(installedPath: string, newContent: string): boolean {
   return currentContent?.trim() !== newContent.trim();
 }
 
+// Packages that require git repo
+const GIT_ONLY_PACKAGES = ['husky', 'lint-staged'];
+
 export function computePackagesToInstall(
   schema: SafewordSchema,
   projectType: ProjectType,
   installedDevDeps: Record<string, string>,
+  isGitRepo = true,
 ): string[] {
-  const needed = [...schema.packages.base];
+  let needed = [...schema.packages.base];
+
+  // Filter out git-only packages when not in a git repo
+  if (!isGitRepo) {
+    needed = needed.filter(pkg => !GIT_ONLY_PACKAGES.includes(pkg));
+  }
 
   for (const [key, deps] of Object.entries(schema.packages.conditional)) {
     if (projectType[key as keyof ProjectType]) {

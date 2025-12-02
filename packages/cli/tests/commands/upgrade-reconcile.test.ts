@@ -90,7 +90,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
       // SAFEWORD.md should be updated
       const newContent = readFileSync(join(tempDir, '.safeword/SAFEWORD.md'), 'utf-8');
       expect(newContent).not.toBe('# Old content');
-      expect(newContent).toContain('Global Instructions');
+      expect(newContent).toContain('SAFEWORD Agent Instructions');
     });
 
     it('should compute missing packages during upgrade', async () => {

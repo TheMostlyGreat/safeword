@@ -24,22 +24,26 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  *
  * Note: We check for SAFEWORD.md to distinguish from src/templates/ which
  * contains TypeScript source files (config.ts, content.ts).
+ *
+ * Path resolution (bundled with tsup):
+ * - From dist/chunk-*.js: __dirname = packages/cli/dist/ → ../templates
  */
 export function getTemplatesDir(): string {
-  // When running from dist/, __dirname is packages/cli/dist/utils/
-  // Templates are at packages/cli/templates/
-  const fromDistUtils = join(__dirname, '..', '..', 'templates');
-
-  // When running from src/, __dirname is packages/cli/src/utils/
-  // Templates are at packages/cli/templates/
-  const fromSrcUtils = join(__dirname, '..', '..', 'templates');
-
-  // Check for SAFEWORD.md to ensure we found the right templates directory
-  // (not src/templates/ which contains TypeScript files)
   const knownTemplateFile = 'SAFEWORD.md';
 
-  if (existsSync(join(fromDistUtils, knownTemplateFile))) return fromDistUtils;
-  if (existsSync(join(fromSrcUtils, knownTemplateFile))) return fromSrcUtils;
+  // Try different relative paths - the bundled code ends up in dist/ directly (flat)
+  // while source is in src/utils/
+  const candidates = [
+    join(__dirname, '..', 'templates'), // From dist/ (flat bundled)
+    join(__dirname, '..', '..', 'templates'), // From src/utils/ or dist/utils/
+    join(__dirname, 'templates'), // Direct sibling (unlikely but safe)
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(join(candidate, knownTemplateFile))) {
+      return candidate;
+    }
+  }
 
   throw new Error('Templates directory not found');
 }

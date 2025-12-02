@@ -56,6 +56,7 @@ describe('Reconcile - Reconciliation Engine', () => {
         ...((overrides.projectType as Record<string, boolean>) ?? {}),
       },
       devDeps: (overrides.devDeps as Record<string, string>) ?? {},
+      isGitRepo: (overrides.isGitRepo as boolean) ?? true, // Default to true so husky tests pass
     };
   }
 
@@ -121,6 +122,24 @@ describe('Reconcile - Reconciliation Engine', () => {
 
       // created should include all owned files
       expect(result.created.length).toBeGreaterThan(0);
+    });
+
+    it('should skip .husky directory and files in non-git repos', async () => {
+      const { reconcile } = await import('../src/reconcile.js');
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      createPackageJson();
+      const ctx = createContext({ isGitRepo: false });
+
+      await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
+
+      // .husky should NOT be created in non-git repos
+      expect(existsSync(join(tempDir, '.husky'))).toBe(false);
+      expect(existsSync(join(tempDir, '.husky/pre-commit'))).toBe(false);
+
+      // But .safeword should still be created
+      expect(existsSync(join(tempDir, '.safeword/SAFEWORD.md'))).toBe(true);
+      expect(existsSync(join(tempDir, '.safeword/hooks'))).toBe(true);
     });
 
     it('should create managed files when missing', async () => {
@@ -339,10 +358,15 @@ describe('Reconcile - Reconciliation Engine', () => {
 
       const pkg = JSON.parse(readFileSync(join(tempDir, 'package.json'), 'utf-8'));
 
-      // Safeword scripts removed
-      expect(pkg.scripts.lint).toBeUndefined();
-      expect(pkg.scripts.format).toBeUndefined();
+      // Safeword-specific scripts removed (but lint/format preserved)
+      expect(pkg.scripts['lint:md']).toBeUndefined();
+      expect(pkg.scripts['format:check']).toBeUndefined();
+      expect(pkg.scripts.knip).toBeUndefined();
       expect(pkg['lint-staged']).toBeUndefined();
+
+      // lint/format preserved (useful standalone)
+      expect(pkg.scripts.lint).toBe('eslint .');
+      expect(pkg.scripts.format).toBe('prettier --write .');
 
       // Original scripts preserved
       expect(pkg.scripts.test).toBe('vitest');
@@ -624,6 +648,58 @@ describe('Reconcile - Reconciliation Engine', () => {
       expect(result).not.toContain('prettier');
       expect(result).not.toContain('husky');
       expect(result).toContain('knip'); // Not installed, should be included
+    });
+
+    it('should exclude husky and lint-staged in non-git repos', async () => {
+      const { computePackagesToInstall } = await import('../src/reconcile.js');
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      const projectType = {
+        typescript: false,
+        react: false,
+        nextjs: false,
+        astro: false,
+        vue: false,
+        svelte: false,
+        electron: false,
+        vitest: false,
+        tailwind: false,
+        publishableLibrary: false,
+      };
+
+      // isGitRepo = false
+      const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {}, false);
+
+      expect(result).not.toContain('husky');
+      expect(result).not.toContain('lint-staged');
+      // Other base packages should still be included
+      expect(result).toContain('eslint');
+      expect(result).toContain('prettier');
+      expect(result).toContain('knip');
+    });
+
+    it('should include husky and lint-staged in git repos', async () => {
+      const { computePackagesToInstall } = await import('../src/reconcile.js');
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      const projectType = {
+        typescript: false,
+        react: false,
+        nextjs: false,
+        astro: false,
+        vue: false,
+        svelte: false,
+        electron: false,
+        vitest: false,
+        tailwind: false,
+        publishableLibrary: false,
+      };
+
+      // isGitRepo = true (default)
+      const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {}, true);
+
+      expect(result).toContain('husky');
+      expect(result).toContain('lint-staged');
     });
   });
 });

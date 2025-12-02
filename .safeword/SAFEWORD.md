@@ -22,8 +22,6 @@ This file provides core guidance for all AI coding agent sessions. Organized mod
 
 **Why archive:** Prevents bloat in active planning folders while preserving history for reference.
 
-**Fallback:** If project uses `docs/` structure instead, follow existing convention.
-
 ---
 
 ## Setup Scripts (Project Initialization)

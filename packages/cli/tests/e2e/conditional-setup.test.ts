@@ -345,7 +345,9 @@ describe('E2E: Conditional Setup - Existing Config Preservation', () => {
     expect(sessionStartHooks[0].hooks[0].command).toBe('echo "My custom hook"');
 
     // Safeword hooks should be present
-    const commands = sessionStartHooks.map((h: { hooks: { command: string }[] }) => h.hooks[0].command);
+    const commands = sessionStartHooks.map(
+      (h: { hooks: { command: string }[] }) => h.hooks[0].command,
+    );
     expect(commands).toContain('"$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-verify-agents.sh');
     expect(commands).toContain('"$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-version.sh');
   }, 180000);
@@ -389,6 +391,13 @@ describe('E2E: Conditional Setup - Git Integration', () => {
 
     // Should NOT have Husky pre-commit hook
     expect(fileExists(projectDir, '.husky/pre-commit')).toBe(false);
+
+    // husky and lint-staged should NOT be installed in non-git projects
+    const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+    expect(pkg.devDependencies?.husky).toBeUndefined();
+    expect(pkg.devDependencies?.['lint-staged']).toBeUndefined();
+    // But other base packages should be installed
+    expect(pkg.devDependencies?.eslint).toBeDefined();
   }, 180000);
 
   it('pre-commit hook runs lint-staged successfully', async () => {
