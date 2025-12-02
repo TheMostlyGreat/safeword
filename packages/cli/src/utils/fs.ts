@@ -8,10 +8,9 @@ import {
   readFileSync,
   writeFileSync,
   rmSync,
+  rmdirSync,
   readdirSync,
-  statSync,
   chmodSync,
-  copyFileSync,
 } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,17 +21,25 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 /**
  * Get path to bundled templates directory.
  * Works in both development (src/) and production (dist/) contexts.
+ *
+ * Note: We check for SAFEWORD.md to distinguish from src/templates/ which
+ * contains TypeScript source files (config.ts, content.ts).
  */
 export function getTemplatesDir(): string {
-  // When running from dist/, __dirname is packages/cli/dist/
-  // Templates are at packages/cli/templates/ (one level up)
-  const fromDist = join(__dirname, '..', 'templates');
+  // When running from dist/, __dirname is packages/cli/dist/utils/
+  // Templates are at packages/cli/templates/
+  const fromDistUtils = join(__dirname, '..', '..', 'templates');
 
-  // Fallback path for edge cases
-  const fallback = join(__dirname, '..', '..', 'templates');
+  // When running from src/, __dirname is packages/cli/src/utils/
+  // Templates are at packages/cli/templates/
+  const fromSrcUtils = join(__dirname, '..', '..', 'templates');
 
-  if (existsSync(fromDist)) return fromDist;
-  if (existsSync(fallback)) return fallback;
+  // Check for SAFEWORD.md to ensure we found the right templates directory
+  // (not src/templates/ which contains TypeScript files)
+  const knownTemplateFile = 'SAFEWORD.md';
+
+  if (existsSync(join(fromDistUtils, knownTemplateFile))) return fromDistUtils;
+  if (existsSync(join(fromSrcUtils, knownTemplateFile))) return fromSrcUtils;
 
   throw new Error('Templates directory not found');
 }
@@ -42,13 +49,6 @@ export function getTemplatesDir(): string {
  */
 export function exists(path: string): boolean {
   return existsSync(path);
-}
-
-/**
- * Check if path is a directory
- */
-export function isDirectory(path: string): boolean {
-  return existsSync(path) && statSync(path).isDirectory();
 }
 
 /**
@@ -93,45 +93,16 @@ export function remove(path: string): void {
 }
 
 /**
- * List files in directory
+ * Remove directory only if empty, returns true if removed
  */
-export function listDir(path: string): string[] {
-  if (!existsSync(path)) return [];
-  return readdirSync(path);
-}
-
-/**
- * Copy a single file
- */
-export function copyFile(src: string, dest: string): void {
-  ensureDir(dirname(dest));
-  copyFileSync(src, dest);
-}
-
-/**
- * Copy directory recursively
- */
-export function copyDir(src: string, dest: string): void {
-  ensureDir(dest);
-  const entries = readdirSync(src, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const srcPath = join(src, entry.name);
-    const destPath = join(dest, entry.name);
-
-    if (entry.isDirectory()) {
-      copyDir(srcPath, destPath);
-    } else {
-      copyFileSync(srcPath, destPath);
-    }
+export function removeIfEmpty(path: string): boolean {
+  if (!existsSync(path)) return false;
+  try {
+    rmdirSync(path); // Non-recursive, throws if not empty
+    return true;
+  } catch {
+    return false;
   }
-}
-
-/**
- * Make file executable
- */
-export function makeExecutable(path: string): void {
-  chmodSync(path, 0o755);
 }
 
 /**
@@ -164,16 +135,4 @@ export function readJson<T = unknown>(path: string): T | null {
  */
 export function writeJson(path: string, data: unknown): void {
   writeFile(path, JSON.stringify(data, null, 2) + '\n');
-}
-
-/**
- * Update JSON file, merging with existing content
- */
-export function updateJson<T extends Record<string, unknown>>(
-  path: string,
-  updater: (existing: T | null) => T,
-): void {
-  const existing = readJson<T>(path);
-  const updated = updater(existing);
-  writeJson(path, updated);
 }

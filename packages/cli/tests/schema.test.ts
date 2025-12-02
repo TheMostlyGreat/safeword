@@ -1,0 +1,254 @@
+/**
+ * Test Suite: Schema Validation
+ *
+ * Tests that SAFEWORD_SCHEMA is the single source of truth.
+ * Every template file must have a schema entry, no orphans.
+ *
+ * TDD RED phase - these tests should FAIL until src/schema.ts is implemented.
+ */
+
+import { describe, it, expect } from 'vitest';
+import { readdirSync, statSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// This import will fail until schema.ts is created (RED phase)
+// import { SAFEWORD_SCHEMA } from '../src/schema.js';
+
+describe('Schema - Single Source of Truth', () => {
+  // Helper to collect all files in templates/ directory
+  function collectTemplateFiles(dir: string, prefix = ''): string[] {
+    const files: string[] = [];
+    const entries = readdirSync(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
+      const fullPath = join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        files.push(...collectTemplateFiles(fullPath, relativePath));
+      } else {
+        files.push(relativePath);
+      }
+    }
+
+    return files;
+  }
+
+  const templatesDir = join(__dirname, '../templates');
+
+  describe('ownedDirs', () => {
+    it('should have exactly 12 owned directories', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.ownedDirs.length).toBe(12);
+    });
+
+    it('should include all required .safeword subdirectories', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      const required = [
+        '.safeword',
+        '.safeword/hooks',
+        '.safeword/lib',
+        '.safeword/guides',
+        '.safeword/templates',
+        '.safeword/prompts',
+        '.safeword/planning',
+        '.safeword/planning/user-stories',
+        '.safeword/planning/test-definitions',
+        '.safeword/planning/design',
+        '.safeword/planning/issues',
+        '.husky',
+      ];
+
+      for (const dir of required) {
+        expect(SAFEWORD_SCHEMA.ownedDirs).toContain(dir);
+      }
+    });
+  });
+
+  describe('sharedDirs', () => {
+    it('should have exactly 3 shared directories', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.sharedDirs.length).toBe(3);
+    });
+
+    it('should include .claude directories', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude');
+      expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude/skills');
+      expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude/commands');
+    });
+  });
+
+  describe('preservedDirs', () => {
+    it('should have exactly 3 preserved directories', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.preservedDirs.length).toBe(3);
+    });
+
+    it('should preserve user content directories', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/learnings');
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/tickets');
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/tickets/completed');
+    });
+  });
+
+  describe('ownedFiles', () => {
+    it('should have exactly 37 owned files', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(37);
+    });
+
+    it('should have entry for every template file', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      const templateFiles = collectTemplateFiles(templatesDir);
+
+      // Exclude markdownlint-cli2.jsonc (it's a managedFile)
+      const ownedTemplateFiles = templateFiles.filter(f => f !== 'markdownlint-cli2.jsonc');
+
+      const schemaFiles = Object.keys(SAFEWORD_SCHEMA.ownedFiles);
+
+      // Check every template file has a schema entry
+      for (const templateFile of ownedTemplateFiles) {
+        const hasEntry = schemaFiles.some(
+          schemaPath =>
+            schemaPath.endsWith(templateFile) ||
+            templateFile.includes(schemaPath.split('/').pop() || ''),
+        );
+
+        if (!hasEntry) {
+          expect.fail(`Template file '${templateFile}' has no schema entry in ownedFiles`);
+        }
+      }
+    });
+
+    it('should not have orphan schema entries (files that do not exist)', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      // Files that are generated (not from templates)
+      const generatedFiles = [
+        '.safeword/version',
+        '.safeword/eslint-boundaries.config.mjs',
+        '.husky/pre-commit',
+      ];
+
+      for (const [path, def] of Object.entries(SAFEWORD_SCHEMA.ownedFiles)) {
+        if (generatedFiles.includes(path)) continue;
+
+        // If it has a template reference, verify template exists
+        if (def.template) {
+          const templatePath = join(templatesDir, def.template);
+          const exists = (() => {
+            try {
+              statSync(templatePath);
+              return true;
+            } catch {
+              return false;
+            }
+          })();
+
+          if (!exists) {
+            expect.fail(
+              `Schema entry '${path}' references template '${def.template}' which does not exist`,
+            );
+          }
+        }
+      }
+    });
+  });
+
+  describe('managedFiles', () => {
+    it('should have exactly 3 managed files', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(Object.keys(SAFEWORD_SCHEMA.managedFiles).length).toBe(3);
+    });
+
+    it('should include eslint.config.mjs, .prettierrc, .markdownlint-cli2.jsonc', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('eslint.config.mjs');
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('.prettierrc');
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('.markdownlint-cli2.jsonc');
+    });
+  });
+
+  describe('jsonMerges', () => {
+    it('should have exactly 3 json merge definitions', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(Object.keys(SAFEWORD_SCHEMA.jsonMerges).length).toBe(3);
+    });
+
+    it('should include package.json, .claude/settings.json, .mcp.json', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('package.json');
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.claude/settings.json');
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.mcp.json');
+    });
+  });
+
+  describe('textPatches', () => {
+    it('should have exactly 1 text patch', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(Object.keys(SAFEWORD_SCHEMA.textPatches).length).toBe(1);
+    });
+
+    it('should include AGENTS.md patch', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty('AGENTS.md');
+      expect(SAFEWORD_SCHEMA.textPatches['AGENTS.md'].operation).toBe('prepend');
+      expect(SAFEWORD_SCHEMA.textPatches['AGENTS.md'].createIfMissing).toBe(true);
+    });
+  });
+
+  describe('packages', () => {
+    it('should have 13 base packages', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(13);
+    });
+
+    it('should include all required base packages', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      const required = [
+        'eslint',
+        'prettier',
+        '@eslint/js',
+        'eslint-plugin-import-x',
+        'eslint-plugin-sonarjs',
+        'eslint-plugin-boundaries',
+        'eslint-plugin-playwright',
+        '@microsoft/eslint-plugin-sdl',
+        'eslint-config-prettier',
+        'markdownlint-cli2',
+        'knip',
+        'husky',
+        'lint-staged',
+      ];
+
+      for (const pkg of required) {
+        expect(SAFEWORD_SCHEMA.packages.base).toContain(pkg);
+      }
+    });
+
+    it('should have conditional packages for all framework types', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      const requiredConditions = [
+        'typescript',
+        'react',
+        'nextjs',
+        'astro',
+        'vue',
+        'svelte',
+        'vitest',
+        'tailwind',
+        'publishableLibrary',
+      ];
+
+      for (const condition of requiredConditions) {
+        expect(SAFEWORD_SCHEMA.packages.conditional).toHaveProperty(condition);
+      }
+    });
+  });
+});

@@ -14,7 +14,12 @@
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
 import { exists, readJson } from '../utils/fs.js';
-import { detectProjectType, type PackageJson, type ProjectType } from '../utils/project-detector.js';
+import {
+  detectProjectType,
+  type PackageJson,
+  type ProjectType,
+} from '../utils/project-detector.js';
+import { SAFEWORD_SCHEMA } from '../schema.js';
 
 export interface SyncOptions {
   quiet?: boolean;
@@ -22,45 +27,58 @@ export interface SyncOptions {
 }
 
 /**
- * Maps project type flags to their required ESLint plugin packages
+ * Base ESLint packages always required for linting.
+ * Explicit list for clarity - sync only cares about ESLint plugins.
+ *
+ * NOTE: This is a subset of SAFEWORD_SCHEMA.packages.base (which includes
+ * prettier, markdownlint-cli2, husky, lint-staged, knip). When adding new
+ * ESLint packages to schema.ts, also add them here if they should be
+ * auto-installed on pre-commit.
+ */
+const BASE_ESLINT_PACKAGES = [
+  'eslint',
+  '@eslint/js',
+  'eslint-plugin-import-x',
+  'eslint-plugin-sonarjs',
+  '@microsoft/eslint-plugin-sdl',
+  'eslint-config-prettier',
+  'eslint-plugin-boundaries',
+  'eslint-plugin-playwright',
+];
+
+/**
+ * Get required ESLint packages based on project type.
+ * Uses explicit base list + SAFEWORD_SCHEMA.packages.conditional for frameworks.
  */
 function getRequiredPlugins(projectType: ProjectType): string[] {
-  const plugins: string[] = [
-    // Always required (base plugins)
-    'eslint',
-    '@eslint/js',
-    'eslint-plugin-import-x',
-    'eslint-plugin-sonarjs',
-    '@microsoft/eslint-plugin-sdl',
-    'eslint-config-prettier',
-    'eslint-plugin-boundaries',
-    'eslint-plugin-playwright',
-  ];
+  const plugins: string[] = [...BASE_ESLINT_PACKAGES];
 
-  // Framework plugins (detected at runtime by dynamic ESLint config)
-  if (projectType.typescript) {
-    plugins.push('typescript-eslint');
+  // Add conditional packages from schema based on detected project type
+  const { conditional } = SAFEWORD_SCHEMA.packages;
+
+  if (projectType.typescript && conditional.typescript) {
+    plugins.push(...conditional.typescript);
   }
-  if (projectType.react || projectType.nextjs) {
-    plugins.push('eslint-plugin-react', 'eslint-plugin-react-hooks', 'eslint-plugin-jsx-a11y');
+  if ((projectType.react || projectType.nextjs) && conditional.react) {
+    plugins.push(...conditional.react);
   }
-  if (projectType.nextjs) {
-    plugins.push('@next/eslint-plugin-next');
+  if (projectType.nextjs && conditional.nextjs) {
+    plugins.push(...conditional.nextjs);
   }
-  if (projectType.astro) {
-    plugins.push('eslint-plugin-astro');
+  if (projectType.astro && conditional.astro) {
+    plugins.push(...conditional.astro);
   }
-  if (projectType.vue) {
-    plugins.push('eslint-plugin-vue');
+  if (projectType.vue && conditional.vue) {
+    plugins.push(...conditional.vue);
   }
-  if (projectType.svelte) {
-    plugins.push('eslint-plugin-svelte');
+  if (projectType.svelte && conditional.svelte) {
+    plugins.push(...conditional.svelte);
   }
-  if (projectType.electron) {
-    plugins.push('@electron-toolkit/eslint-config');
+  if (projectType.electron && conditional.electron) {
+    plugins.push(...conditional.electron);
   }
-  if (projectType.vitest) {
-    plugins.push('@vitest/eslint-plugin');
+  if (projectType.vitest && conditional.vitest) {
+    plugins.push(...conditional.vitest);
   }
 
   return plugins;

@@ -1,12 +1,17 @@
 /**
  * Check command - Verify project health and configuration
+ *
+ * Uses reconcile() with dryRun to detect missing files and configuration issues.
  */
 
 import { join } from 'node:path';
 import { VERSION } from '../version.js';
-import { exists, readFile, readFileSafe } from '../utils/fs.js';
+import { exists, readFileSafe } from '../utils/fs.js';
 import { info, success, warn, header, keyValue } from '../utils/output.js';
 import { isNewerVersion } from '../utils/version.js';
+import { createProjectContext } from '../utils/context.js';
+import { reconcile } from '../reconcile.js';
+import { SAFEWORD_SCHEMA } from '../schema.js';
 
 export interface CheckOptions {
   offline?: boolean;
@@ -19,6 +24,7 @@ interface HealthStatus {
   updateAvailable: boolean;
   latestVersion: string | null;
   issues: string[];
+  missingPackages: string[];
 }
 
 /**
@@ -45,11 +51,10 @@ async function checkLatestVersion(timeout = 3000): Promise<string | null> {
 }
 
 /**
- * Check project configuration health
+ * Check project configuration health using reconcile dryRun
  */
-function checkHealth(cwd: string): HealthStatus {
+async function checkHealth(cwd: string): Promise<HealthStatus> {
   const safewordDir = join(cwd, '.safeword');
-  const issues: string[] = [];
 
   // Check if configured
   if (!exists(safewordDir)) {
@@ -60,6 +65,7 @@ function checkHealth(cwd: string): HealthStatus {
       updateAvailable: false,
       latestVersion: null,
       issues: [],
+      missingPackages: [],
     };
   }
 
@@ -67,27 +73,40 @@ function checkHealth(cwd: string): HealthStatus {
   const versionPath = join(safewordDir, 'version');
   const projectVersion = readFileSafe(versionPath)?.trim() ?? null;
 
-  // Check for required files
-  const requiredFiles = ['SAFEWORD.md', 'version', 'hooks/session-verify-agents.sh'];
+  // Use reconcile with dryRun to detect issues
+  const ctx = createProjectContext(cwd);
+  const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
 
-  for (const file of requiredFiles) {
-    if (!exists(join(safewordDir, file))) {
-      issues.push(`Missing: .safeword/${file}`);
+  const issues: string[] = [];
+
+  // Check for missing owned files (write actions indicate missing/changed files)
+  const writeActions = result.actions.filter(a => a.type === 'write');
+  for (const action of writeActions) {
+    if (action.type === 'write') {
+      const fullPath = join(cwd, action.path);
+      if (!exists(fullPath)) {
+        issues.push(`Missing: ${action.path}`);
+      }
     }
   }
 
-  // Check AGENTS.md link
-  const agentsMdPath = join(cwd, 'AGENTS.md');
-  if (exists(agentsMdPath)) {
-    const content = readFile(agentsMdPath);
-    if (!content.includes('@./.safeword/SAFEWORD.md')) {
-      issues.push('AGENTS.md missing safeword link');
+  // Check for missing text patches (e.g., AGENTS.md link)
+  const textPatchActions = result.actions.filter(a => a.type === 'text-patch');
+  for (const action of textPatchActions) {
+    if (action.type === 'text-patch') {
+      const fullPath = join(cwd, action.path);
+      if (!exists(fullPath)) {
+        issues.push(`${action.path} file missing`);
+      } else {
+        const content = readFileSafe(fullPath) ?? '';
+        if (!content.includes(action.definition.marker)) {
+          issues.push(`${action.path} missing safeword link`);
+        }
+      }
     }
-  } else {
-    issues.push('AGENTS.md file missing');
   }
 
-  // Check .claude/settings.json
+  // Check for missing .claude/settings.json
   const settingsPath = join(cwd, '.claude', 'settings.json');
   if (!exists(settingsPath)) {
     issues.push('Missing: .claude/settings.json');
@@ -100,6 +119,7 @@ function checkHealth(cwd: string): HealthStatus {
     updateAvailable: false,
     latestVersion: null,
     issues,
+    missingPackages: result.packagesToInstall,
   };
 }
 
@@ -108,7 +128,7 @@ export async function check(options: CheckOptions): Promise<void> {
 
   header('Safeword Health Check');
 
-  const health = checkHealth(cwd);
+  const health = await checkHealth(cwd);
 
   // Not configured
   if (!health.configured) {
@@ -160,6 +180,10 @@ export async function check(options: CheckOptions): Promise<void> {
       warn(issue);
     }
     info('\nRun `safeword upgrade` to repair configuration');
+  } else if (health.missingPackages.length > 0) {
+    header('Missing Packages');
+    info(`${health.missingPackages.length} linting packages not installed`);
+    info('Run `safeword sync` to install missing packages');
   } else {
     success('\nConfiguration is healthy');
   }

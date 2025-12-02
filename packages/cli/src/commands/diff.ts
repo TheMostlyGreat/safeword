@@ -1,11 +1,16 @@
 /**
  * Diff command - Preview changes that would be made by upgrade
+ *
+ * Uses reconcile() with dryRun to compute what would change.
  */
 
 import { join } from 'node:path';
 import { VERSION } from '../version.js';
-import { exists, readFileSafe, getTemplatesDir } from '../utils/fs.js';
+import { exists, readFileSafe } from '../utils/fs.js';
 import { info, success, error, header, listItem } from '../utils/output.js';
+import { createProjectContext } from '../utils/context.js';
+import { reconcile, type Action } from '../reconcile.js';
+import { SAFEWORD_SCHEMA } from '../schema.js';
 
 export interface DiffOptions {
   verbose?: boolean;
@@ -15,7 +20,7 @@ interface FileDiff {
   path: string;
   status: 'added' | 'modified' | 'unchanged';
   currentContent?: string;
-  newContent: string;
+  newContent?: string;
 }
 
 /**
@@ -30,7 +35,6 @@ function createUnifiedDiff(oldContent: string, newContent: string, filename: str
   lines.push(`+++ b/${filename}`);
 
   // Simple diff - show all changes
-  // A real implementation would use a proper diff algorithm
   let hasChanges = false;
 
   const maxLines = Math.max(oldLines.length, newLines.length);
@@ -63,65 +67,41 @@ function createUnifiedDiff(oldContent: string, newContent: string, filename: str
 }
 
 /**
- * Get all files that would be changed by upgrade
+ * Convert reconcile actions to file diffs
  */
-function getFileDiffs(cwd: string): FileDiff[] {
-  const templatesDir = getTemplatesDir();
+function actionsToDiffs(actions: Action[], cwd: string): FileDiff[] {
   const diffs: FileDiff[] = [];
+  const seenPaths = new Set<string>();
 
-  // Define files to check (template source -> install destination)
-  const files: Array<{ templatePath: string; installPath: string }> = [
-    { templatePath: 'SAFEWORD.md', installPath: '.safeword/SAFEWORD.md' },
-    { templatePath: 'hooks/session-verify-agents.sh', installPath: '.safeword/hooks/session-verify-agents.sh' },
-    { templatePath: 'hooks/session-version.sh', installPath: '.safeword/hooks/session-version.sh' },
-    { templatePath: 'hooks/session-lint-check.sh', installPath: '.safeword/hooks/session-lint-check.sh' },
-    { templatePath: 'hooks/prompt-timestamp.sh', installPath: '.safeword/hooks/prompt-timestamp.sh' },
-    { templatePath: 'hooks/prompt-questions.sh', installPath: '.safeword/hooks/prompt-questions.sh' },
-    { templatePath: 'hooks/post-tool-lint.sh', installPath: '.safeword/hooks/post-tool-lint.sh' },
-    { templatePath: 'hooks/stop-quality.sh', installPath: '.safeword/hooks/stop-quality.sh' },
-    { templatePath: 'skills/safeword-quality-reviewer/SKILL.md', installPath: '.claude/skills/safeword-quality-reviewer/SKILL.md' },
-  ];
+  for (const action of actions) {
+    if (action.type === 'write') {
+      if (seenPaths.has(action.path)) continue;
+      seenPaths.add(action.path);
 
-  // Add version file (not from templates)
-  const versionPath = join(cwd, '.safeword/version');
-  const currentVersion = readFileSafe(versionPath);
-  if (currentVersion === null) {
-    diffs.push({ path: '.safeword/version', status: 'added', newContent: VERSION });
-  } else if (currentVersion.trim() !== VERSION) {
-    diffs.push({ path: '.safeword/version', status: 'modified', currentContent: currentVersion, newContent: VERSION });
-  } else {
-    diffs.push({ path: '.safeword/version', status: 'unchanged', currentContent: currentVersion, newContent: VERSION });
-  }
+      const fullPath = join(cwd, action.path);
+      const currentContent = readFileSafe(fullPath);
 
-  for (const file of files) {
-    const templateFullPath = join(templatesDir, file.templatePath);
-    const installFullPath = join(cwd, file.installPath);
-
-    const newContent = readFileSafe(templateFullPath);
-    if (newContent === null) continue; // Skip if template doesn't exist
-
-    const currentContent = readFileSafe(installFullPath);
-
-    if (currentContent === null) {
-      diffs.push({
-        path: file.installPath,
-        status: 'added',
-        newContent,
-      });
-    } else if (currentContent.trim() !== newContent.trim()) {
-      diffs.push({
-        path: file.installPath,
-        status: 'modified',
-        currentContent,
-        newContent,
-      });
-    } else {
-      diffs.push({
-        path: file.installPath,
-        status: 'unchanged',
-        currentContent,
-        newContent,
-      });
+      if (currentContent === null) {
+        diffs.push({
+          path: action.path,
+          status: 'added',
+          newContent: action.content,
+        });
+      } else if (currentContent.trim() !== action.content.trim()) {
+        diffs.push({
+          path: action.path,
+          status: 'modified',
+          currentContent,
+          newContent: action.content,
+        });
+      } else {
+        diffs.push({
+          path: action.path,
+          status: 'unchanged',
+          currentContent,
+          newContent: action.content,
+        });
+      }
     }
   }
 
@@ -145,7 +125,12 @@ export async function diff(options: DiffOptions): Promise<void> {
   header('Safeword Diff');
   info(`Changes from v${projectVersion} → v${VERSION}`);
 
-  const diffs = getFileDiffs(cwd);
+  // Use reconcile with dryRun to compute changes
+  const ctx = createProjectContext(cwd);
+  const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
+
+  // Convert actions to file diffs
+  const diffs = actionsToDiffs(result.actions, cwd);
 
   const added = diffs.filter(d => d.status === 'added');
   const modified = diffs.filter(d => d.status === 'modified');
@@ -155,6 +140,11 @@ export async function diff(options: DiffOptions): Promise<void> {
   info(
     `\nSummary: ${added.length} added, ${modified.length} modified, ${unchanged.length} unchanged`,
   );
+
+  // Package changes
+  if (result.packagesToInstall.length > 0) {
+    info(`\nPackages to install: ${result.packagesToInstall.length}`);
+  }
 
   // List by category
   if (added.length > 0) {
@@ -183,7 +173,7 @@ export async function diff(options: DiffOptions): Promise<void> {
     header('Detailed Changes');
 
     for (const file of modified) {
-      if (file.currentContent) {
+      if (file.currentContent && file.newContent) {
         info(`\n${file.path}:`);
         const diffOutput = createUnifiedDiff(file.currentContent, file.newContent, file.path);
         if (diffOutput) {
@@ -193,18 +183,27 @@ export async function diff(options: DiffOptions): Promise<void> {
     }
 
     for (const file of added) {
-      info(`\n${file.path}: (new file)`);
-      const lines = file.newContent.split('\n').slice(0, 10);
-      for (const line of lines) {
-        console.log(`+${line}`);
+      if (file.newContent) {
+        info(`\n${file.path}: (new file)`);
+        const lines = file.newContent.split('\n').slice(0, 10);
+        for (const line of lines) {
+          console.log(`+${line}`);
+        }
+        if (file.newContent.split('\n').length > 10) {
+          console.log('... (truncated)');
+        }
       }
-      if (file.newContent.split('\n').length > 10) {
-        console.log('... (truncated)');
+    }
+
+    if (result.packagesToInstall.length > 0) {
+      info('\nPackages to install:');
+      for (const pkg of result.packagesToInstall) {
+        listItem(pkg);
       }
     }
   }
 
-  if (added.length === 0 && modified.length === 0) {
+  if (added.length === 0 && modified.length === 0 && result.packagesToInstall.length === 0) {
     success('\nNo changes needed - configuration is up to date');
   } else {
     info('\nRun `safeword upgrade` to apply these changes');
