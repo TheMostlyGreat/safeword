@@ -1,10 +1,10 @@
 {
   "name": "safeword",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "description": "CLI for setting up and managing safeword development environments",
   "type": "module",
   "bin": {
-    "safeword": "./dist/cli.js"
+    "safeword": "dist/cli.js"
   },
   "exports": {
     ".": {
