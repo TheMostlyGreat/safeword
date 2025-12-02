@@ -9,7 +9,7 @@
 
 import { VERSION } from './version.js';
 import { type ProjectType } from './utils/project-detector.js';
-import { AGENTS_MD_LINK, PRETTIERRC, LINT_STAGED_CONFIG } from './templates/content.js';
+import { AGENTS_MD_LINK, getPrettierConfig, LINT_STAGED_CONFIG } from './templates/content.js';
 import { getEslintConfig, SETTINGS_HOOKS } from './templates/config.js';
 import { generateBoundariesConfig, detectArchitecture } from './utils/boundaries.js';
 import { HUSKY_PRE_COMMIT_CONTENT, MCP_SERVERS } from './utils/install.js';
@@ -23,6 +23,7 @@ export interface ProjectContext {
   cwd: string;
   projectType: ProjectType;
   devDeps: Record<string, string>;
+  isGitRepo: boolean;
 }
 
 export interface FileDefinition {
@@ -118,18 +119,18 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
     // Guides (13 files)
     '.safeword/guides/architecture-guide.md': { template: 'guides/architecture-guide.md' },
+    '.safeword/guides/cli-reference.md': { template: 'guides/cli-reference.md' },
     '.safeword/guides/code-philosophy.md': { template: 'guides/code-philosophy.md' },
     '.safeword/guides/context-files-guide.md': { template: 'guides/context-files-guide.md' },
     '.safeword/guides/data-architecture-guide.md': {
       template: 'guides/data-architecture-guide.md',
     },
     '.safeword/guides/design-doc-guide.md': { template: 'guides/design-doc-guide.md' },
+    '.safeword/guides/development-workflow.md': { template: 'guides/development-workflow.md' },
     '.safeword/guides/learning-extraction.md': { template: 'guides/learning-extraction.md' },
-    '.safeword/guides/llm-instruction-design.md': { template: 'guides/llm-instruction-design.md' },
-    '.safeword/guides/llm-prompting.md': { template: 'guides/llm-prompting.md' },
+    '.safeword/guides/llm-guide.md': { template: 'guides/llm-guide.md' },
     '.safeword/guides/tdd-best-practices.md': { template: 'guides/tdd-best-practices.md' },
     '.safeword/guides/test-definitions-guide.md': { template: 'guides/test-definitions-guide.md' },
-    '.safeword/guides/testing-methodology.md': { template: 'guides/testing-methodology.md' },
     '.safeword/guides/user-story-guide.md': { template: 'guides/user-story-guide.md' },
     '.safeword/guides/zombie-process-cleanup.md': { template: 'guides/zombie-process-cleanup.md' },
 
@@ -169,7 +170,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     'eslint.config.mjs': {
       generator: () => getEslintConfig({ boundaries: true }),
     },
-    '.prettierrc': { content: PRETTIERRC },
+    '.prettierrc': { generator: ctx => getPrettierConfig(ctx.projectType) },
     '.markdownlint-cli2.jsonc': { template: 'markdownlint-cli2.jsonc' },
   },
 
@@ -218,10 +219,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         const result = { ...existing };
         const scripts = { ...((existing.scripts as Record<string, string>) ?? {}) };
 
-        // Remove safeword scripts
-        delete scripts.lint;
+        // Remove safeword-specific scripts but preserve lint/format (useful standalone)
         delete scripts['lint:md'];
-        delete scripts.format;
         delete scripts['format:check'];
         delete scripts.knip;
         delete scripts.prepare;
@@ -345,9 +344,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       typescript: ['typescript-eslint'],
       react: ['eslint-plugin-react', 'eslint-plugin-react-hooks', 'eslint-plugin-jsx-a11y'],
       nextjs: ['@next/eslint-plugin-next'],
-      astro: ['eslint-plugin-astro'],
+      astro: ['eslint-plugin-astro', 'prettier-plugin-astro'],
       vue: ['eslint-plugin-vue'],
-      svelte: ['eslint-plugin-svelte'],
+      svelte: ['eslint-plugin-svelte', 'prettier-plugin-svelte'],
       electron: ['@electron-toolkit/eslint-config'],
       vitest: ['@vitest/eslint-plugin'],
       tailwind: ['prettier-plugin-tailwindcss'],

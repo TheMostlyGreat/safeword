@@ -221,7 +221,7 @@ After filling out story, mentally check:
 
 **Core principle:** User stories are instructions that LLMs read and follow. Apply LLM instruction design best practices.
 
-**See:** `@.safeword/guides/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
+**See:** `@.safeword/guides/llm-guide.md` for comprehensive framework on writing LLM-consumable documentation.
 
 **When filling templates:**
 

@@ -118,7 +118,7 @@ describe('Setup Command - Reconcile Integration', () => {
 
       // Check guides
       expect(existsSync(join(tempDir, '.safeword/guides/architecture-guide.md'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/guides/testing-methodology.md'))).toBe(true);
+      expect(existsSync(join(tempDir, '.safeword/guides/development-workflow.md'))).toBe(true);
 
       // Check claude files
       expect(existsSync(join(tempDir, '.claude/commands/lint.md'))).toBe(true);

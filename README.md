@@ -4,7 +4,7 @@
 
 **Solution**: Portable patterns and guides that enforce TDD workflow, quality standards, and best practices across all your projects.
 
-**Repository**: https://github.com/TheMostlyGreat/safeword (private)
+**Repository**: <https://github.com/TheMostlyGreat/safeword> (private)
 
 ---
 
@@ -14,7 +14,7 @@
 
 ```bash
 cd /path/to/your/project
-npx safeword setup
+npx safeword@latest setup
 ```
 
 **2. Verify installation:**
@@ -29,8 +29,10 @@ test -f .claude/settings.json && echo ".claude/settings.json ✓"
 
 - `.safeword/SAFEWORD.md` - Global patterns and workflows
 - `.safeword/guides/` - TDD methodology, testing, code philosophy
-- `.claude/hooks/` - Auto-linting and quality review
-- `SAFEWORD.md` or `CLAUDE.md` - Project context with framework reference
+- `.safeword/hooks/` - Claude Code hooks (auto-linting, quality review)
+- `.claude/settings.json` - Hook configuration for Claude Code
+- `.claude/commands/` - Slash commands (`/lint`, `/quality-review`, `/architecture`)
+- `AGENTS.md` - Project context with framework reference (also patches `CLAUDE.md` if it exists)
 
 **Commit these to your repo** for team consistency.
 
@@ -53,7 +55,9 @@ Key directories created in your project:
 - `.safeword/guides/` - Core methodology and best practices
 - `.safeword/templates/` - Fillable document structures
 - `.safeword/planning/` - Planning documentation (user-stories, test-definitions, design, issues)
-- `.claude/hooks/` - Automation scripts
+- `.safeword/hooks/` - Automation scripts for Claude Code
+- `.claude/commands/` - Slash commands
+- `.claude/skills/` - Specialized agent capabilities
 
 ---
 
@@ -61,12 +65,12 @@ Key directories created in your project:
 
 **Purpose**: Reusable methodology applicable to all projects
 
-| Guide                      | Purpose                                                         | When to Read            |
-| -------------------------- | --------------------------------------------------------------- | ----------------------- |
-| **code-philosophy.md**     | Core coding principles, TDD philosophy, self-review checklist   | Before writing code     |
-| **testing-methodology.md** | TDD workflow (RED/GREEN/REFACTOR), test pyramid, decision trees | Starting any feature    |
-| **tdd-best-practices.md**  | User story + test definition patterns and examples              | Creating tests/stories  |
-| **learning-extraction.md** | Extract learnings from debugging, recognition triggers          | After complex debugging |
+| Guide                       | Purpose                                                         | When to Read            |
+| --------------------------- | --------------------------------------------------------------- | ----------------------- |
+| **code-philosophy.md**      | Core coding principles, TDD philosophy, self-review checklist   | Before writing code     |
+| **development-workflow.md** | TDD workflow (RED/GREEN/REFACTOR), test pyramid, decision trees | Starting any feature    |
+| **tdd-best-practices.md**   | User story + test definition patterns and examples              | Creating tests/stories  |
+| **learning-extraction.md**  | Extract learnings from debugging, recognition triggers          | After complex debugging |
 
 ---
 
@@ -88,12 +92,11 @@ Key directories created in your project:
 
 **Purpose**: Working with LLMs and documentation structure
 
-| Guide                         | Purpose                                                                  | When to Read                |
-| ----------------------------- | ------------------------------------------------------------------------ | --------------------------- |
-| **llm-prompting.md**          | Prompt engineering, LLM cost optimization, caching                       | Building AI features        |
-| **llm-instruction-design.md** | 13 principles for LLM-consumable docs (MECE, examples)                   | Creating SAFEWORD.md/guides |
-| **context-files-guide.md**    | CLAUDE.md/CURSOR.md/AGENTS.md structure, anti-patterns, modular approach | Setting up projects         |
-| **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation                              | Managing dev servers        |
+| Guide                         | Purpose                                                                  | When to Read         |
+| ----------------------------- | ------------------------------------------------------------------------ | -------------------- |
+| **llm-guide.md**              | LLM integration (caching, evals) + writing docs for LLMs (13 principles) | Building AI features |
+| **context-files-guide.md**    | CLAUDE.md/CURSOR.md/AGENTS.md structure, anti-patterns, modular approach | Setting up projects  |
+| **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation                              | Managing dev servers |
 
 ---
 
@@ -124,14 +127,6 @@ Key directories created in your project:
 
 **How to extract**: Follow `learning-extraction.md` recognition triggers and templates
 
-**Example learnings**:
-
-- React hooks async behavior
-- Electron IPC patterns
-- Browser storage quota quirks
-- E2E test zombie processes
-- ProseMirror fragment traversal
-
 ---
 
 ## Planning
@@ -160,62 +155,74 @@ Each directory has an `archive/` subfolder for completed work.
 
 ---
 
-## Hooks & Skills
+## Hooks, Commands & Skills
 
-**Hooks**: Automation scripts triggered by Claude Code events
+**Hooks** (in `.safeword/hooks/`): Automation scripts triggered by Claude Code events
 
-- `auto-quality-review.sh` - Automated quality control on responses
+- `session-verify-agents.sh` - Verifies AGENTS.md link on session start
+- `session-version.sh` - Shows safeword version on session start
+- `session-lint-check.sh` - Checks for lint errors on session start
+- `prompt-timestamp.sh` - Injects timestamp into prompts
+- `prompt-questions.sh` - Reminds agent to ask clarifying questions
+- `post-tool-lint.sh` - Auto-lints after file edits
+- `stop-quality.sh` - Quality review prompt on stop
 
-**Skills**: Specialized agent capabilities
+**Skills** (in `.claude/skills/`): Specialized agent capabilities
 
-- `quality-reviewer/` - Deep code quality review with web research
+- `safeword-quality-reviewer/` - Deep code quality review with web research
+
+**Commands** (in `.claude/commands/`): Slash commands
+
+- `/lint` - Run linters and formatters
+- `/architecture` - Review architecture guidelines
+- `/quality-review` - Deep code review with web research
 
 ---
 
-## Advanced Setup
-
-### Custom Installation Options
+## CLI Commands
 
 ```bash
-cd /path/to/your/project
-# Full setup
-npx safeword setup
+# Set up safeword in current project
+npx safeword@latest setup
+npx safeword@latest setup -y   # Non-interactive mode
 
-# Check what would change
-npx safeword check
+# Check project health and versions
+npx safeword@latest check
+npx safeword@latest check --offline   # Skip remote version check
 
-# Upgrade existing installation
-npx safeword upgrade
+# Upgrade to latest version
+npx safeword@latest upgrade
+
+# Preview changes before upgrading
+npx safeword@latest diff
+npx safeword@latest diff -v           # Show full diff output
+
+# Sync linting plugins with project dependencies
+npx safeword sync
+npx safeword sync -q           # Quiet mode
+npx safeword sync -s           # Stage modified files (for pre-commit)
+
+# Remove safeword from project
+npx safeword reset
+npx safeword reset -y          # Skip confirmation
+npx safeword reset --full      # Also remove linting config + packages
 ```
 
-**Auto-detection**: Automatically detects project type from `package.json`:
+**Auto-detection**: Detects project type from `package.json` and installs relevant ESLint/Prettier plugins:
 
-- Biome → if `@biomejs/biome` installed
-- Next.js → if `next` in dependencies
-- Electron → if `electron` in dependencies
-- Astro → if `astro` in dependencies
-- React → if `react` in dependencies
-- TypeScript → if `typescript` in dependencies or `tsconfig.json` exists
-- Minimal → otherwise
+- TypeScript, React, Next.js, Astro, Vue, Svelte, Electron
+- Vitest, Playwright, Tailwind
+- Publishable libraries (adds publint)
 
-### Reference Guides in Project SAFEWORD.md
+### How Guide Imports Work
 
-```markdown
-# Import guides from .safeword (SAFEWORD.md)
+`AGENTS.md` contains a link: `@./.safeword/SAFEWORD.md` (also added to `CLAUDE.md` if present)
 
-@./.safeword/guides/testing-methodology.md
-@./.safeword/guides/code-philosophy.md
-@./.safeword/guides/user-story-guide.md
-@./.safeword/guides/test-definitions-guide.md
-@./.safeword/guides/design-doc-guide.md
-```
-
-Claude Code will auto-load these guides as context.
+SAFEWORD.md then imports guides via the Quick Reference table. Claude Code auto-loads these as context.
 
 ### Check for Existing Learnings
 
 ```bash
-# Project learnings (this repo)
 ls .safeword/learnings/
 ```
 
@@ -224,17 +231,6 @@ ls .safeword/learnings/
 1. Follow recognition triggers in `learning-extraction.md`
 2. Create `.safeword/learnings/[concept].md`
 3. Use template: Problem → Gotcha → Examples → Testing Trap
-
-### Create Planning Documentation
-
-```bash
-# User stories
-mkdir -p .safeword/planning/user-stories && touch .safeword/planning/user-stories/feature-name.md
-# Test definitions
-mkdir -p .safeword/planning/test-definitions && touch .safeword/planning/test-definitions/feature-name.md
-# Design docs
-mkdir -p .safeword/planning/design && touch .safeword/planning/design/feature-name.md
-```
 
 ---
 
@@ -246,14 +242,12 @@ Commit `.safeword/` and `.claude/` in your project repo for team consistency.
 
 ## Integration with Project Context
 
-**Project SAFEWORD.md/CLAUDE.md**: Created by `setup-safeword.sh` or manually, references `.safeword/SAFEWORD.md`
-
 **How it works**:
 
-1. Project SAFEWORD.md imports core guides via `@./.safeword/guides/`
-2. Guides reference templates via `@./.safeword/templates/`
-3. Guides cross-reference each other via `@./.safeword/guides/`
-4. Learnings referenced via `ls .safeword/learnings/`
+1. `AGENTS.md` links to `.safeword/SAFEWORD.md` (also patches `CLAUDE.md` if present)
+2. `SAFEWORD.md` imports guides via Quick Reference table
+3. Guides cross-reference each other and templates
+4. Learnings stored in `.safeword/learnings/`
 
 **Result**: Modular, maintainable documentation with clear separation of concerns
 
@@ -268,8 +262,6 @@ Commit `.safeword/` and `.claude/` in your project repo for team consistency.
 5. **Hooks/Skills** - Automation and specialized capabilities
 
 **Living Documentation**: Update as you learn, archive completed work, consolidate when needed
-
-**Cross-Agent Compatible**: Works with Claude Code, Cursor, and other AI coding agents
 
 ---
 
@@ -345,6 +337,6 @@ Results saved to `eval-results.json` after each run.
 
 ## Getting Help
 
-- **Claude Code docs**: https://docs.claude.com/en/docs/claude-code
-- **Issues**: https://github.com/anthropics/claude-code/issues
-- **This repo**: https://github.com/TheMostlyGreat/safeword (private)
+- **Claude Code docs**: <https://docs.claude.com/en/docs/claude-code>
+- **Issues**: <https://github.com/anthropics/claude-code/issues>
+- **This repo**: <https://github.com/TheMostlyGreat/safeword> (private)

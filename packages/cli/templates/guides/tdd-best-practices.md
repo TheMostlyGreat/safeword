@@ -2,7 +2,7 @@
 
 Patterns and examples for user stories and test definitions following TDD best practices.
 
-**LLM Instruction Design:** These templates create documentation that LLMs read and follow. For comprehensive framework on writing clear, actionable LLM-consumable documentation, see `@.safeword/guides/llm-instruction-design.md`.
+**LLM Instruction Design:** These templates create documentation that LLMs read and follow. For comprehensive framework on writing clear, actionable LLM-consumable documentation, see `@.safeword/guides/llm-guide.md`.
 
 ---
 
@@ -64,7 +64,7 @@ Patterns and examples for user stories and test definitions following TDD best p
 - "Create a design doc for [feature]" → Uses design doc template (2-3 pages)
 - "Update the project architecture doc" → Adds to existing ARCHITECTURE.md
 
-**TDD Workflow:** See `@.safeword/guides/testing-methodology.md` for comprehensive RED → GREEN → REFACTOR workflow with latest best practices
+**TDD Workflow:** See `@.safeword/guides/development-workflow.md` for comprehensive RED → GREEN → REFACTOR workflow with latest best practices
 
 ---
 

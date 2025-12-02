@@ -325,7 +325,7 @@ npm run test:e2e -- tests/feature-name.spec.ts --grep "specific test name"
 
 **Important:** Test definitions are instructions that LLMs read and follow. Apply best practices for clarity.
 
-**See:** `@.safeword/guides/llm-instruction-design.md` for comprehensive framework including:
+**See:** `@.safeword/guides/llm-guide.md` for comprehensive framework including:
 
 - MECE decision trees (mutually exclusive, collectively exhaustive)
 - Explicit definitions (never assume LLMs know what you mean)

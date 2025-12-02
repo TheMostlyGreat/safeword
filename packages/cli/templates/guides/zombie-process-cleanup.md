@@ -26,7 +26,7 @@ When running dev servers and E2E tests across multiple projects, zombie processe
 - **Dev port**: Project's configured port (e.g., 3000, 5173, 8080) - manual testing
 - **Test port**: Dev port + 1000 (e.g., 4000, 6173, 9080) - Playwright managed
 
-See `testing-methodology.md` → "E2E Testing with Persistent Dev Servers" for full port isolation strategy.
+See `development-workflow.md` → "E2E Testing with Persistent Dev Servers" for full port isolation strategy.
 
 **Decision rule:** If unsure which cleanup method to use → port-based first (safest), then project script, then tmux.
 

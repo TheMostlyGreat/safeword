@@ -1,6 +1,6 @@
 # Code Philosophy & Practices
 
-**Note:** This file provides instructions for LLM-based coding agents. For comprehensive framework on writing clear, actionable LLM-consumable instructions, see `@.safeword/guides/llm-instruction-design.md`.
+**Note:** This file provides instructions for LLM-based coding agents. For comprehensive framework on writing clear, actionable LLM-consumable instructions, see `@.safeword/guides/llm-guide.md`.
 
 ---
 
@@ -41,19 +41,21 @@ Examples:
 - **Explicit error handling** - NEVER suppress or swallow errors silently
 
 **Error handling examples:**
-| ❌ Bad | ✅ Good |
-|--------|---------|
-| `catch (e) {}` (swallowed) | `catch (e) { throw new Error(\`Failed to read ${filePath}: ${e.message}\`) }`|
-|`catch (e) { console.log(e) }`|`catch (e) { logger.error('Payment failed', { userId, amount, error: e }) }` |
-| Generic "Something went wrong" | "Failed to save user profile: database connection timeout" |
+
+| ❌ Bad                         | ✅ Good                                                                       |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| `catch (e) {}` (swallowed)     | `catch (e) { throw new Error(\`Failed to read ${filePath}: ${e.message}\`) }` |
+| `catch (e) { console.log(e) }` | `catch (e) { logger.error('Payment failed', { userId, amount, error: e }) }`  |
+| Generic "Something went wrong" | "Failed to save user profile: database connection timeout"                    |
 
 **Naming examples:**
-| ❌ Bad | ✅ Good |
-|--------|---------|
-| `calcTot` | `calculateTotalWithTax` |
+
+| ❌ Bad             | ✅ Good                        |
+| ------------------ | ------------------------------ |
+| `calcTot`          | `calculateTotalWithTax`        |
 | `d`, `tmp`, `data` | `userProfile`, `pendingOrders` |
-| `handleClick` | `submitPaymentForm` |
-| `process()` | `validateAndSaveUser()` |
+| `handleClick`      | `submitPaymentForm`            |
+| `process()`        | `validateAndSaveUser()`        |
 
 **When to comment:**
 
@@ -63,13 +65,14 @@ Examples:
 - ❌ Restating the function name
 
 **Bloat examples (avoid these):**
-| ❌ Bloat | ✅ Instead |
-|----------|-----------|
-| Utility class for one function | Single function |
-| Factory pattern for simple object | Direct construction |
-| Abstract base class with one implementation | Concrete class |
-| Config file for 2 options | Hardcode or simple params |
-| "Future-proofing" unused code paths | Delete, add when needed |
+
+| ❌ Bloat                                    | ✅ Instead                |
+| ------------------------------------------- | ------------------------- |
+| Utility class for one function              | Single function           |
+| Factory pattern for simple object           | Direct construction       |
+| Abstract base class with one implementation | Concrete class            |
+| Config file for 2 options                   | Hardcode or simple params |
+| "Future-proofing" unused code paths         | Delete, add when needed   |
 
 **When to push back:** If a feature request would add >50 lines for a "nice to have", ask: "Is this essential now, or can we add it later?"
 
@@ -106,7 +109,7 @@ Examples:
 - ✅ If a test fails, fix the implementation—not the test
 - ✅ If a test seems wrong or requirements changed, explain why and ask before changing it
 
-**Workflow:** See `@.safeword/guides/testing-methodology.md` for comprehensive TDD workflow (RED → GREEN → REFACTOR phases)
+**Workflow:** See `@.safeword/guides/development-workflow.md` for comprehensive TDD workflow (RED → GREEN → REFACTOR phases)
 
 ## Debugging & Troubleshooting
 
