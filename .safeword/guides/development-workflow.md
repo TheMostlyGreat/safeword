@@ -614,5 +614,5 @@ npm run test:e2e # E2E tests only
 
 **Cascading precedence:**
 
-1. **Global** (`~/.claude/testing-methodology.md`) - Universal methodology (test type selection, TDD workflow)
+1. **Global** (`~/.claude/development-workflow.md`) - Universal methodology (test type selection, TDD workflow)
 2. **Project** (`tests/SAFEWORD.md`) - Specific stack, commands, patterns

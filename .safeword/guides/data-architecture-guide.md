@@ -2,7 +2,7 @@
 
 **Context:** How to document data architecture decisions, models, and flows for software projects. Applies LLM instruction design principles for clarity and reliability.
 
-**See:** `@.safeword/guides/llm-instruction-design.md` for comprehensive framework on writing LLM-consumable documentation.
+**See:** `@.safeword/guides/llm-guide.md` for comprehensive framework on writing LLM-consumable documentation.
 
 ---
 

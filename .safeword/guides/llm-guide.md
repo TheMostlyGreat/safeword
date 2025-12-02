@@ -1,12 +1,76 @@
-# Writing Instructions for LLMs
+# LLM Guide
 
-**Context:** When creating documentation that LLMs will read and follow (like AGENTS.md, CLAUDE.md, testing guides, coding standards), different best practices apply than when prompting an LLM directly.
+This guide covers two related topics:
 
-## Core Principles
+**Part 1: Integration** - How to call LLMs effectively (API calls, structured outputs, caching, testing)
 
-**1. MECE Principle (Mutually Exclusive, Collectively Exhaustive)**
+**Part 2: Writing for LLMs** - How to write documentation that LLMs will read and follow (SAFEWORD.md, CLAUDE.md, guides)
 
-Decision trees and categorization must have no overlap and cover all cases. Research shows LLMs struggle with overlapping categories—McKinsey/BCG MECE framework ensures clear decision paths.
+---
+
+## Part 1: Integration
+
+### Structured Outputs
+
+Use JSON mode for predictable LLM responses. Define explicit schemas with validation. Return structured data, not prose.
+
+```typescript
+// ❌ BAD - Prose output
+"The user wants to create a campaign named 'Shadows' with 4 players"
+
+// ✅ GOOD - Structured JSON
+{ "intent": "create_campaign", "name": "Shadows", "playerCount": 4 }
+```
+
+### Cost Optimization
+
+**Prompt Caching (Critical for AI Agents):**
+
+- Static rules → System prompt with cache_control: ephemeral (caches for ~5 min, auto-expires)
+- Dynamic data (character state, user input) → User message (no caching)
+- Example: 468-line prompt costs $0.10 without caching, $0.01 with (90% reduction)
+- Cache invalidation: ANY change to cached blocks breaks ALL caches
+- Rule: Change system prompts sparingly; accept one-time cache rebuild cost
+
+**Message Architecture:**
+
+```typescript
+// ✅ GOOD - Cacheable system prompt
+systemPrompt: [
+  { text: STATIC_RULES, cache_control: { type: 'ephemeral' } },
+  { text: STATIC_EXAMPLES, cache_control: { type: 'ephemeral' } },
+];
+userMessage: `Character: ${dynamicState}\nAction: ${userInput}`;
+
+// ❌ BAD - Uncacheable (character state in system prompt)
+systemPrompt: `Rules + Character: ${dynamicState}`;
+```
+
+### Testing AI Outputs
+
+**LLM-as-Judge Pattern:**
+
+- Use LLM to evaluate nuanced qualities (narrative tone, reasoning quality)
+- Avoid brittle keyword matching for creative outputs
+- Define rubrics: EXCELLENT / ACCEPTABLE / POOR with criteria
+- Example: "Does the GM's response show collaborative tone?" vs checking for specific words
+
+**Evaluation Framework:**
+
+- Unit tests: Pure functions (parsing, validation)
+- Integration tests: Agent + real LLM calls (schema compliance)
+- LLM Evals: Judgment quality (position/effect reasoning, atmosphere)
+- Cost awareness: 30 scenarios ≈ $0.15-0.30 per run with caching
+
+---
+
+## Part 2: Writing for LLMs
+
+When creating documentation that LLMs will read and follow (AGENTS.md, CLAUDE.md, testing guides, coding standards), apply these principles:
+
+### 1. MECE Principle (Mutually Exclusive, Collectively Exhaustive)
+
+Decision trees must have no overlap and cover all cases. LLMs struggle with overlapping categories.
 
 ```markdown
 ❌ BAD - Not mutually exclusive:
@@ -26,7 +90,7 @@ Problem: A function with database calls could match both
 Stops at first match, no ambiguity.
 ```
 
-**2. Explicit Over Implicit**
+### 2. Explicit Over Implicit
 
 Never assume LLMs know what you mean. Define all terms, even "obvious" ones.
 
@@ -41,7 +105,7 @@ Examples needing definition:
 - "Pure function" → Input → output, no I/O (define edge cases like Date.now())
 ```
 
-**3. No Contradictions**
+### 3. No Contradictions
 
 Different sections must align. LLMs don't reconcile conflicting guidance. When updating, grep for related terms and update all references.
 
@@ -57,7 +121,7 @@ Section B: "All critical multi-page user flows have at least one E2E test"
 - Definition of "critical" with examples
 ```
 
-**4. Concrete Examples Over Abstract Rules**
+### 4. Concrete Examples Over Abstract Rules
 
 Show, don't just tell. LLMs learn patterns from examples. For every rule, include 2-3 concrete examples showing good vs bad.
 
@@ -78,9 +142,9 @@ expect(calculateDiscount(100, 0.20)).toBe(80)
 })
 ```
 
-**5. Edge Cases Must Be Explicit**
+### 5. Edge Cases Must Be Explicit
 
-What seems obvious to humans often isn't to LLMs. After stating a rule, add "Edge cases:" section with common confusing scenarios.
+What seems obvious to humans often isn't to LLMs. After stating a rule, add "Edge cases:" section.
 
 ```markdown
 ❌ BAD: "Unit test pure functions"
@@ -94,9 +158,9 @@ Edge cases:
 - Mixed pure + I/O → Extract pure part, unit test separately
 ```
 
-**6. Actionable Over Vague**
+### 6. Actionable Over Vague
 
-Give LLMs concrete actions, not subjective guidance. Replace subjective terms (most/some/few) with optimization rules + red flags.
+Replace subjective terms with optimization rules + red flags.
 
 ```markdown
 ❌ BAD: "Most tests: Fast, Some tests: Slow"
@@ -108,9 +172,9 @@ Give LLMs concrete actions, not subjective guidance. Replace subjective terms (m
 - Red flag: If you have more E2E tests than integration tests, suite is too slow
 ```
 
-**7. Decision Trees: Sequential Over Parallel**
+### 7. Decision Trees: Sequential Over Parallel
 
-Structure decisions as ordered steps, not simultaneous checks. Sequential questions force the LLM through a deterministic decision path.
+Structure decisions as ordered steps, not simultaneous checks.
 
 ```markdown
 ❌ BAD - Parallel branches:
@@ -118,11 +182,11 @@ Structure decisions as ordered steps, not simultaneous checks. Sequential questi
 ├─ Multiple components?
 └─ Full user flow?
 
-✅ GOOD - Sequential (see Principle 1 example above)
+✅ GOOD - Sequential:
 Answer questions IN ORDER. Stop at the first match.
 ```
 
-**8. Tie-Breaking Rules**
+### 8. Tie-Breaking Rules
 
 When multiple options could apply, tell LLMs how to choose.
 
@@ -134,9 +198,9 @@ Reference in decision trees:
 "If multiple seem to apply, use the tie-breaking rule stated above: choose the faster one."
 ```
 
-**9. Lookup Tables for Complex Decisions**
+### 9. Lookup Tables for Complex Decisions
 
-When decision logic has 3+ branches, nested conditions, or multiple variables to consider, provide a reference table.
+When decision logic has 3+ branches, provide a reference table.
 
 ```markdown
 | Bug Type           | Unit? | Integration? | E2E? | Best Choice       |
@@ -146,16 +210,16 @@ When decision logic has 3+ branches, nested conditions, or multiple variables to
 | CSS layout broken  | ❌    | ❌           | ✅   | E2E (only option) |
 ```
 
-**10. Avoid Caveats in Tables**
+### 10. Avoid Caveats in Tables
 
-Keep patterns clean. Parentheticals break LLM pattern matching. Add separate rows for caveat cases.
+Keep patterns clean. Parentheticals break LLM pattern matching.
 
 ```markdown
 ❌ BAD: | State management bug | ❌ NO (if mocked) | ✅ YES |
 ✅ GOOD: | State management bug (Zustand, Redux) | ❌ NO | ✅ YES |
 ```
 
-**11. Percentages: Context or None**
+### 11. Percentages: Context or None
 
 Don't use percentages without adjustment guidance.
 
@@ -167,7 +231,7 @@ Don't use percentages without adjustment guidance.
 ✅ BEST: "Write as many fast tests as possible. Red flag: More E2E than integration = too slow."
 ```
 
-**12. Specificity in Questions**
+### 12. Specificity in Questions
 
 Use precise technical terms, not general descriptions.
 
@@ -178,7 +242,7 @@ Use precise technical terms, not general descriptions.
 Note: React Testing Library does NOT require a browser - that's integration testing.
 ```
 
-**13. Re-evaluation Paths**
+### 13. Re-evaluation Paths
 
 When LLMs hit dead ends, provide concrete next steps.
 
@@ -195,12 +259,16 @@ When LLMs hit dead ends, provide concrete next steps.
    - Login form → Dashboard → E2E test (multi-page)"
 ```
 
-## Anti-Patterns to Avoid
+---
+
+## Anti-Patterns
 
 ❌ **Visual metaphors** - Pyramids, icebergs—LLMs don't process visual information well
 ❌ **Undefined jargon** - "Technical debt", "code smell" need definitions
 ❌ **Competing guidance** - Multiple decision frameworks that contradict each other
 ❌ **Outdated references** - Remove concepts, but forget to update all mentions
+
+---
 
 ## Quality Checklist
 
@@ -216,11 +284,7 @@ Before saving/committing LLM-consumable documentation:
 - [ ] Complex decisions (3+ branches) have lookup tables
 - [ ] Dead-end paths have re-evaluation steps with examples
 
-## Research-Backed Principles
-
-- **MECE (McKinsey):** Mutually exclusive, collectively exhaustive decision trees for reliable LLM decisions
-- **Prompt ambiguity (2025):** "Ambiguity is one of the most common causes of poor LLM output" (Zero-Shot Decision Tree Construction)
-- **Concrete examples (2025):** Structured approaches with concrete examples consistently improve performance over "act as" or "###" techniques
+---
 
 ## Example: Before and After
 

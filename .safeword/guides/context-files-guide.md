@@ -224,7 +224,7 @@ See @README for project overview and @package.json for available npm commands.
 
 ## Coding Standards
 
-@.safeword/guides/llm-prompting.md
+@.safeword/guides/llm-guide.md
 
 ## Git Workflow
 
@@ -415,7 +415,7 @@ Brief description. Current status.
 
 **Critical:** These files are instructions consumed by LLMs.
 
-**See:** `@.safeword/guides/llm-instruction-design.md` for 13 core principles for writing LLM-consumable documentation.
+**See:** `@.safeword/guides/llm-guide.md` for 13 core principles for writing LLM-consumable documentation.
 
 ### Quality Checklist
 
