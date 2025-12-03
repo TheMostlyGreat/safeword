@@ -1,6 +1,6 @@
 ---
 name: tdd-enforcer
-description: Enforces scoped TDD workflow. Triages work level, ensures spec exists, then enforces RED → GREEN → REFACTOR. Use for any implementation work ('implement', 'add', 'build', 'create', 'fix', 'improve').
+description: Use when implementing features, fixing bugs, or making code changes. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
 allowed-tools: '*'
 ---
 
