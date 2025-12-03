@@ -16,8 +16,21 @@ if [ $# -lt 2 ]; then
   echo "Example: $0 '.git' '*.test.ts'"
   echo ""
   echo "Runs tests one-by-one to find which creates <file_to_check>"
+  echo "Override test command: TEST_CMD='pnpm test' $0 ..."
   exit 1
 fi
+
+# Detect package manager from lockfile
+detect_runner() {
+  if [ -f "pnpm-lock.yaml" ]; then echo "pnpm"
+  elif [ -f "yarn.lock" ]; then echo "yarn"
+  elif [ -f "bun.lockb" ]; then echo "bun"
+  else echo "npm"
+  fi
+}
+
+# Allow override via environment variable
+RUNNER="${TEST_CMD:-$(detect_runner) test}"
 
 POLLUTION_CHECK="$1"
 NAME_PATTERN="$2"
@@ -52,8 +65,8 @@ for TEST_FILE in $TEST_FILES; do
 
   echo "[$COUNT/$TOTAL] Testing: $TEST_FILE"
 
-  # Run the test (adjust command for your test runner)
-  npm test "$TEST_FILE" > /dev/null 2>&1 || true
+  # Run the test
+  $RUNNER "$TEST_FILE" > /dev/null 2>&1 || true
 
   # Check if pollution appeared
   if [ -e "$POLLUTION_CHECK" ]; then

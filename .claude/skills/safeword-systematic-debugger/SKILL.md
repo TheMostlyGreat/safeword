@@ -195,8 +195,7 @@ If you catch yourself thinking:
 
 ## Finding Test Pollution
 
-When tests pass individually but fail together (test isolation problem, tests affect each other,
-tests leave files behind), use bisection:
+When tests pass individually but fail together (test isolation problem, tests affect each other, tests leave files behind), use bisection:
 
 ```bash
 ./.safeword/scripts/bisect-test-pollution.sh '.git' '*.test.ts' src
@@ -231,8 +230,7 @@ Log **expected vs actual**. Remove after fixing.
 
 ## Finding Zombie Process Spawners
 
-When tests leave processes behind (playwright browsers not cleaned up, port stays in use,
-zombie node processes, chromium accumulating), use bisection to find the culprit:
+When tests leave processes behind (playwright browsers not cleaned up, port stays in use, zombie node processes, chromium accumulating), use bisection to find the culprit:
 
 ```bash
 ./.safeword/scripts/bisect-zombie-processes.sh 'chromium' '*.test.ts' tests

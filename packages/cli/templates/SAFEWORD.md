@@ -207,6 +207,25 @@ Commit after: GREEN phase, before/after refactoring, when switching tasks.
 
 ---
 
+## Code Fence Languages (MD040)
+
+When markdown lint reports MD040 (missing language), choose:
+
+| Content Type             | Language Hint                |
+| ------------------------ | ---------------------------- |
+| TypeScript/JavaScript    | `typescript` or `javascript` |
+| Shell commands           | `bash`                       |
+| JSON, YAML, TOML configs | `json`, `yaml`, `toml`       |
+| SQL queries              | `sql`                        |
+| Directory trees          | `plaintext`                  |
+| Templates, pseudocode    | `text`                       |
+| Command output, logs     | `text`                       |
+| Truly ambiguous          | `text`                       |
+
+**Why this matters:** Language hints help LLMs understand code context. Use real languages for real code, `text` for everything else.
+
+---
+
 ## Learning Extraction
 
 **Suggest extraction when ANY apply:**

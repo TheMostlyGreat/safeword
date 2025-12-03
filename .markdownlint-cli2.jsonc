@@ -1,25 +1,24 @@
 {
   // Safeword markdownlint configuration
-  "default": true,
+  // Philosophy: Only enforce rules that affect rendering or LLM comprehension
+  // Cosmetic/stylistic rules disabled - LLMs don't care about line length or bullet style
+  "config": {
+    "default": false,
 
-  // Allow inline HTML (needed for some markdown features)
-  "MD033": false,
+    // RENDERING-CRITICAL (broken markdown if violated)
+    "MD011": true, // Reversed link syntax [text](url) not (text)[url]
+    "MD018": true, // Space required after # in headings
+    "MD037": true, // No spaces inside emphasis markers **like this**
+    "MD038": true, // No spaces inside code spans `like this`
+    "MD042": true, // No empty links [text]()
+    "MD056": true, // Table column count must be consistent
 
-  // Allow multiple headings with same content
-  "MD024": {
-    "siblings_only": true
-  },
-
-  // Line length - be lenient
-  "MD013": {
-    "line_length": 120,
-    "code_blocks": false,
-    "tables": false
-  },
-
-  // Allow trailing punctuation in headings
-  "MD026": false,
-
-  // Allow emphasis as heading
-  "MD036": false
+    // LLM-IMPORTANT (structure clarity for tokenization)
+    "MD001": true, // Heading levels increment by one (h1 -> h2, not h1 -> h3)
+    "MD022": true, // Blank lines around headings
+    "MD031": true, // Blank lines around fenced code blocks
+    "MD032": true, // Blank lines around lists
+    "MD040": true, // Code fence language specified (helps LLM understand code context)
+    "MD058": true  // Blank lines around tables
+  }
 }

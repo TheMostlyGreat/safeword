@@ -27,6 +27,7 @@ npm run lint:md 2>&1 || true
 ## Summary
 
 After running, report:
+
 1. Any ESLint errors that couldn't be auto-fixed
 2. Any formatting issues
 3. Type errors (if TypeScript)
