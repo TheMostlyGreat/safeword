@@ -35,9 +35,9 @@ Understand context:
 
 ### 2. Read Project Standards
 
-```bash
+````bash
 ls CLAUDE.md SAFEWORD.md ARCHITECTURE.md .claude/
-```
+```text
 
 Read relevant standards:
 
@@ -96,10 +96,10 @@ Read relevant standards:
 
 **CRITICAL**: This is your main differentiator from automatic hook. ALWAYS check versions.
 
-```
+```text
 WebSearch: "[library name] latest stable version 2025"
 WebSearch: "[library name] security vulnerabilities"
-```
+```text
 
 **Flag if outdated:**
 
@@ -116,11 +116,11 @@ WebSearch: "[library name] security vulnerabilities"
 
 **CRITICAL**: This is your main differentiator from automatic hook. ALWAYS verify against current docs.
 
-```
+```text
 WebFetch: https://react.dev (for React)
 WebFetch: https://vitejs.dev (for Vite)
 WebFetch: https://www.electronjs.org/docs (for Electron)
-```
+```text
 
 **Look for:**
 
@@ -134,9 +134,9 @@ WebFetch: https://www.electronjs.org/docs (for Electron)
 
 **Simple question** ("is it correct?"):
 
-```
+```text
 **Correctness:** ✓ Logic is sound, edge cases handled, no obvious errors.
-```
+```text
 
 **Full review** ("double check and critique"):
 
@@ -154,7 +154,7 @@ WebFetch: https://www.electronjs.org/docs (for Electron)
 
 **Critical issues:** [List or "None"]
 **Suggested improvements:** [List or "None"]
-```
+```text
 
 Use structured format for "double check"/"critique". Use brief format for specific questions.
 
@@ -174,7 +174,7 @@ Use structured format for "double check"/"critique". Use brief format for specif
 
 **Critical issues:** None
 **Suggested improvements:** None
-```
+```text
 
 ## Critical Reminders
 
@@ -205,3 +205,4 @@ Use structured format for "double check"/"critique". Use brief format for specif
 
 - Use `@./.safeword/guides/code-philosophy.md` as fallback
 - Note: "No project-specific standards found, using general best practices"
+````

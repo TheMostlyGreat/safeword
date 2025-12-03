@@ -23,8 +23,9 @@ When the user invokes this command:
 
 ## Example Usage
 
-```
+````text
 /quality-review
-```
+```text
 
 Then: "Review the authentication implementation" or "Check if my React hooks are following best practices"
+````

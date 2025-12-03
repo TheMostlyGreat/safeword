@@ -30,7 +30,7 @@ last_modified: YYYY-MM-DDTHH:MM:SSZ
 
 **Examples:**
 
-```
+```text
 - 2025-11-24T18:50:00Z Started: Changing button background to red
 - 2025-11-24T18:51:30Z Tried: Added `background: red` to Button.css
 - 2025-11-24T18:52:00Z Found: Button now has white text on red (unreadable)
@@ -62,9 +62,7 @@ last_modified: YYYY-MM-DDTHH:MM:SSZ
 
 **In scope:**
 
--
-
-**Out of scope:**
+- **Out of scope:**
 
 -
 

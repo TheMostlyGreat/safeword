@@ -137,14 +137,14 @@
 
 **Creating design doc:**
 
-```
+```text
 User: "Create design doc for three-pane layout"
 You: [Read user stories and test definitions, then create design doc]
 ```
 
 **Updating design doc:**
 
-```
+```text
 User: "Update design doc to add error handling section"
 You: [Read existing design doc, add Implementation Notes section with error handling]
 ```

@@ -8,9 +8,9 @@ Implementation roadmap for upgrading Safeword to elite developer experience stan
 
 ### Option A: curl Installer
 
-```bash
+````bash
 curl -fsSL https://raw.githubusercontent.com/TheMostlyGreat/safeword/main/install.sh | bash
-```
+```text
 
 **Pros:**
 
@@ -38,7 +38,7 @@ npx @safeword/cli init
 # or
 npm install -g @safeword/cli
 safeword init
-```
+```text
 
 **Pros:**
 
@@ -65,7 +65,7 @@ safeword init
 ```bash
 brew install safeword/tap/safeword
 safeword init
-```
+```text
 
 **Pros:**
 
@@ -108,9 +108,9 @@ safeword init
        "postinstall": "safeword verify --auto-init"
      }
    }
-   ```
+````
 
-   Teammates run `npm install` → Safeword auto-configures. **Zero manual steps.**
+Teammates run `npm install` → Safeword auto-configures. **Zero manual steps.**
 
 4. **npx is instant** - No global install needed:
 
@@ -120,6 +120,7 @@ safeword init
    ```
 
 5. **Escape hatch for non-Node projects** - If someone wants Safeword for Python/Go/Rust, they can:
+
    ```bash
    npm install -g @safeword/cli  # Install once
    safeword init                 # Use anywhere
@@ -135,24 +136,26 @@ safeword init
 
 **In CLI:**
 
-```bash
+````bash
 safeword --version              # 1.2.3
 safeword update                 # Update to latest (npm update -g @safeword/cli)
 safeword update --version 1.2.0 # Install specific version (npm install -g @safeword/cli@1.2.0)
 safeword changelog              # Print CHANGELOG.md or open in browser
-```
+```text
 
 **Version in project:**
 
 - Store in `.safeword/version` file: `1.2.3`
 - CLI checks on `safeword status`:
 
-  ```
-  Project safeword version: 1.2.3
-  Latest available: 1.3.0
+````
 
-  Update? safeword upgrade-project
-  ```
+Project safeword version: 1.2.3
+Latest available: 1.3.0
+
+Update? safeword upgrade-project
+
+````text
 
 **Breaking changes:**
 
@@ -160,13 +163,13 @@ safeword changelog              # Print CHANGELOG.md or open in browser
 - Major bumps = breaking changes (require migration)
 - CLI detects version mismatch and offers migration:
 
-  ```bash
-  safeword status
+```bash
+safeword status
 
-  ⚠ Project safeword version (1.x) is outdated (latest: 2.0.0)
+⚠ Project safeword version (1.x) is outdated (latest: 2.0.0)
 
-  Run migration: safeword migrate --from 1.x --to 2.x
-  ```
+Run migration: safeword migrate --from 1.x --to 2.x
+````
 
 ---
 
@@ -174,11 +177,11 @@ safeword changelog              # Print CHANGELOG.md or open in browser
 
 ### Current Flow (Silent)
 
-```bash
+````bash
 bash ./framework/scripts/setup-safeword.sh
 # ... tons of output ...
 # Done
-```
+```text
 
 ### Elite Flow (Interactive)
 
@@ -220,7 +223,7 @@ safeword init
 #
 # Verification:
 #   safeword status
-```
+```text
 
 ### Non-interactive (CI mode)
 
@@ -228,7 +231,7 @@ safeword init
 safeword init --yes          # Accept all defaults
 safeword init --ci           # Non-interactive, uses defaults, no colors
 safeword init --linting-only # Skip quality review
-```
+```text
 
 ---
 
@@ -293,7 +296,7 @@ Linting:
 ✓ All checks passed!
 
 Next: git add .safeword .claude SAFEWORD.md
-```
+```text
 
 **If verification fails:**
 
@@ -306,7 +309,7 @@ Files:
 
 Fix: Re-run setup with --force
   safeword init --force
-```
+```text
 
 ---
 
@@ -318,7 +321,7 @@ README says:
 
 ```bash
 # (Deprecated) global clone — prefer project-local scripts
-```
+```text
 
 This creates **global state** that devs must manage:
 
@@ -331,7 +334,7 @@ This creates **global state** that devs must manage:
 
 **Core principle:** Everything lives in the project. Zero global folders.
 
-```
+```text
 my-project/
 ├── .safeword/
 │   ├── SAFEWORD.md          # Core patterns
@@ -342,7 +345,7 @@ my-project/
 │   ├── hooks/
 │   └── settings.json
 └── SAFEWORD.md              # References @./.safeword/SAFEWORD.md
-```
+```text
 
 **No global folder required. Fully portable and project-local.**
 
@@ -369,7 +372,7 @@ safeword upgrade-project
 #   • guides/llm-prompting.md (new)
 #
 # ✓ Upgraded to 1.3.0
-```
+```text
 
 **Internal:** CLI compares `.safeword/` files to npm package, only updates changed files.
 
@@ -379,13 +382,13 @@ safeword upgrade-project
 
 CLI caches guides in `~/.cache/safeword/` (no global folder):
 
-```
+```text
 ~/.cache/safeword/
 └── 1.3.0/                   # Version-specific cache
     ├── SAFEWORD.md
     ├── guides/
     └── templates/
-```
+```text
 
 **When you run `safeword init`:**
 
@@ -405,7 +408,7 @@ CLI caches guides in `~/.cache/safeword/` (no global folder):
 ```bash
 safeword cache clear         # Remove all cached versions
 safeword cache clear --older-than 1.2.0  # Remove old versions
-```
+```text
 
 **Important:** Cache is **optional optimization**. Projects don't depend on it. If cache deleted, CLI re-downloads from npm.
 
@@ -419,13 +422,13 @@ safeword cache clear --older-than 1.2.0  # Remove old versions
 
 **Elite approach:** Both!
 
-```
+```text
 # Project-specific learnings (this codebase only)
 my-project/.safeword/learnings/custom-auth-flow.md
 
 # Global learnings (reusable across projects)
 ~/.config/safeword/learnings/react-hooks-gotchas.md
-```
+```text
 
 **CLI behavior:**
 
@@ -439,7 +442,7 @@ safeword learning add custom-auth-flow
 
 safeword learning list
 # Shows both global + project learnings
-```
+```text
 
 **Agent behavior:** When agent needs learnings, check both:
 
@@ -475,7 +478,7 @@ cd my-project
 npx @safeword/cli init
 
 # Installs safeword, adds to package.json
-```
+```text
 
 **package.json after setup:**
 
@@ -488,7 +491,7 @@ npx @safeword/cli init
     "postinstall": "safeword verify --auto-init"
   }
 }
-```
+```text
 
 **Step 2: Dev commits**
 
@@ -496,7 +499,7 @@ npx @safeword/cli init
 git add .safeword/ .claude/ SAFEWORD.md package.json
 git commit -m "Add safeword config"
 git push
-```
+```text
 
 **Step 3: Teammate clones and installs**
 
@@ -504,7 +507,7 @@ git push
 git clone my-project
 cd my-project
 npm install    # or pnpm install, yarn install
-```
+```text
 
 **What happens automatically:**
 
@@ -518,13 +521,15 @@ npm install    # or pnpm install, yarn install
    - ✓ Hooks registered in `.claude/settings.json`
 5. Output:
 
-   ```
-   Safeword detected in project
-   ✓ Configuration valid
-   ✓ Hooks active
+````
 
-   Ready to use Claude Code!
-   ```
+Safeword detected in project
+✓ Configuration valid
+✓ Hooks active
+
+Ready to use Claude Code!
+
+````text
 
 **Teammate is done.** Zero manual steps. Hooks work immediately.
 
@@ -537,29 +542,29 @@ safeword verify --auto-init
 
 # Check if project has safeword files
 if [ -d .safeword ] && [ -d .claude ]; then
-  # Project already configured
-  echo "✓ Safeword configured"
+# Project already configured
+echo "✓ Safeword configured"
 
-  # Verify hooks are valid
-  if [ hooks_valid ]; then
-    echo "✓ Hooks active"
-    exit 0
-  else
-    echo "⚠ Hooks invalid, repairing..."
-    repair_hooks()
-    exit 0
-  fi
+# Verify hooks are valid
+if [ hooks_valid ]; then
+ echo "✓ Hooks active"
+ exit 0
 else
-  # Project not configured (first dev)
-  if [ --auto-init flag ]; then
-    echo "Initializing safeword..."
-    safeword init --yes
-  else
-    echo "Safeword not configured. Run: safeword init"
-    exit 1
-  fi
+ echo "⚠ Hooks invalid, repairing..."
+ repair_hooks()
+ exit 0
 fi
-```
+else
+# Project not configured (first dev)
+if [ --auto-init flag ]; then
+ echo "Initializing safeword..."
+ safeword init --yes
+else
+ echo "Safeword not configured. Run: safeword init"
+ exit 1
+fi
+fi
+```text
 
 ---
 
@@ -574,9 +579,9 @@ Some teams don't want `postinstall` scripts (security concerns).
 # Auto-verify safeword on branch checkout
 
 if command -v safeword &> /dev/null; then
-  safeword verify --silent
+safeword verify --silent
 fi
-```
+```text
 
 Teammate checks out branch → Hooks auto-verify.
 
@@ -629,7 +634,7 @@ safeword init --ci
 # No colors (plain text only)
 # Minimal output (only errors + summary)
 # Exit code 0 = success, 1 = failure
-```
+```text
 
 **Example CI usage (GitHub Actions):**
 
@@ -638,16 +643,16 @@ name: Verify Safeword
 on: [push, pull_request]
 
 jobs:
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-      - run: npm install
-      - run: npx @safeword/cli verify --ci
-        # ✓ Passes if safeword configured correctly
-        # ✗ Fails if hooks missing or invalid
-```
+verify:
+ runs-on: ubuntu-latest
+ steps:
+   - uses: actions/checkout@v3
+   - uses: actions/setup-node@v3
+   - run: npm install
+   - run: npx @safeword/cli verify --ci
+     # ✓ Passes if safeword configured correctly
+     # ✗ Fails if hooks missing or invalid
+```text
 
 ---
 
@@ -665,7 +670,7 @@ safeword init --no-color
 
 safeword verify --ci
 # Verify hooks + exit 0/1 (for CI pass/fail)
-```
+```text
 
 ---
 
@@ -675,11 +680,11 @@ safeword verify --ci
 
 1. **Enforce safeword in PRs:**
 
-   ```yaml
-   - run: npx @safeword/cli verify --ci
-   ```
+```yaml
+- run: npx @safeword/cli verify --ci
+````
 
-   PR fails if safeword not configured → Forces devs to set it up.
+PR fails if safeword not configured → Forces devs to set it up.
 
 2. **Auto-setup in Docker:**
 
@@ -690,12 +695,14 @@ safeword verify --ci
    No prompts, works in non-interactive Docker build.
 
 3. **Monorepo setup script:**
+
    ```bash
    for project in packages/*; do
      cd $project
      npx @safeword/cli init --yes
    done
    ```
+
    Batch setup without manual prompts.
 
 ---
@@ -756,7 +763,7 @@ safeword verify --ci
 
 ### TypeScript CLI Architecture
 
-```
+````text
 @safeword/cli/
 ├── src/
 │   ├── commands/
@@ -775,7 +782,7 @@ safeword verify --ci
 │   └── cli.ts               # Entry point
 ├── package.json
 └── tsconfig.json
-```
+```text
 
 **Entry point (`cli.ts`):**
 
@@ -808,7 +815,7 @@ program
   .action(verify);
 
 program.parse();
-```
+```text
 
 ---
 
@@ -816,7 +823,7 @@ program.parse();
 
 **Templates live in npm package:**
 
-```
+```text
 @safeword/cli/src/templates/
 ├── SAFEWORD.md
 ├── guides/
@@ -831,7 +838,7 @@ program.parse();
     ├── eslint.config.mjs.template
     ├── biome.jsonc.template
     └── .prettierrc.template
-```
+```text
 
 **On `safeword init`:**
 
@@ -848,7 +855,7 @@ export async function copyTemplates(projectDir: string) {
 
   console.log('✓ Copied guides and patterns to .safeword/');
 }
-```
+```text
 
 **Result:** Project is standalone. No external dependencies.
 
@@ -858,7 +865,7 @@ export async function copyTemplates(projectDir: string) {
 
 ### Current (Verbose)
 
-```
+```text
 ================================
 Claude Code Project Setup
 Version: v1.0.0
@@ -885,7 +892,7 @@ Mode: biome
   ✓ Installed packages for biome mode
 
 ... (50 more lines) ...
-```
+```text
 
 ---
 
@@ -917,7 +924,7 @@ Installed:
   • 12 guides in .safeword/
 
 Next: git add .safeword .claude SAFEWORD.md
-```
+```text
 
 ---
 
@@ -964,7 +971,7 @@ export async function install(options: InstallOptions) {
   console.log('  • 12 guides in .safeword/');
   console.log('\nNext: git add .safeword .claude SAFEWORD.md');
 }
-```
+```text
 
 ---
 
@@ -1006,7 +1013,7 @@ export async function install(options: InstallOptions) {
    npm init -y
    npm install commander inquirer ora chalk fs-extra
    npm install -D typescript @types/node
-   ```
+````
 
 2. **Port bash scripts to TypeScript:**
    - `setup-safeword.sh` → `src/commands/init.ts`

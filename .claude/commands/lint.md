@@ -10,7 +10,7 @@ Run the full linting and formatting suite using the npm scripts configured by sa
 
 Run these npm scripts in order. Each script is configured in package.json by `safeword setup`.
 
-```bash
+````bash
 # 1. ESLint - fix code quality issues
 npm run lint 2>&1 || true
 
@@ -22,7 +22,7 @@ npm run lint:md 2>&1 || true
 
 # 4. TypeScript type check (if tsconfig.json exists)
 [ -f tsconfig.json ] && npx tsc --noEmit 2>&1 || true
-```
+```text
 
 ## Summary
 
@@ -33,3 +33,4 @@ After running, report:
 3. Type errors (if TypeScript)
 
 Note: File patterns are defined in the npm scripts (single source of truth), not here.
+````

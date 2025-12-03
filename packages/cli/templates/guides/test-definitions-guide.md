@@ -61,21 +61,21 @@ Use these consistently:
 
 **✅ GOOD - Clear, actionable steps:**
 
-```
+````text
 **Steps**:
 1. Toggle AI pane visible
 2. Get bounding box for AI pane
 3. Get bounding box for Editor pane
 4. Compare X coordinates
-```
+```text
 
 **❌ BAD - Vague or incomplete:**
 
-```
+```text
 **Steps**:
 1. Check panes
 2. Verify order
-```
+```text
 
 ---
 
@@ -83,20 +83,20 @@ Use these consistently:
 
 **✅ GOOD - Specific, testable assertions:**
 
-```
+```text
 **Expected**:
 - AI pane X coordinate < Editor pane X coordinate
 - Explorer pane X coordinate > Editor pane X coordinate
 - All coordinates are positive numbers
-```
+```text
 
 **❌ BAD - Vague expectations:**
 
-```
+```text
 **Expected**:
 - Panes are in correct order
 - Everything works
-```
+```text
 
 ---
 
@@ -131,13 +131,13 @@ Use these consistently:
 
 **Example:**
 
-```
+```text
 **Total**: 20 tests
 **Passing**: 9 tests (45%)
 **Skipped**: 4 tests (20%)
 **Not Implemented**: 7 tests (35%)
 **Failing**: 0 tests
-```
+```text
 
 ---
 
@@ -169,7 +169,7 @@ npm run test:e2e -- tests/feature-name.spec.ts
 
 # Run specific test
 npm run test:e2e -- tests/feature-name.spec.ts --grep "specific test name"
-```
+```text
 
 ---
 
@@ -246,7 +246,7 @@ npm run test:e2e -- tests/feature-name.spec.ts --grep "specific test name"
 - P95 response time < 200ms
 - No requests timeout
 - No 5xx errors under load
-```
+```text
 
 **❌ BAD - Vague, untestable:**
 
@@ -255,7 +255,7 @@ npm run test:e2e -- tests/feature-name.spec.ts --grep "specific test name"
 
 **Steps**: Check if fast
 **Expected**: Good performance
-```
+```text
 
 ### When to Skip Constraint Tests
 
@@ -291,7 +291,7 @@ npm run test:e2e -- tests/feature-name.spec.ts --grep "specific test name"
 - After first toggle: AI pane visible
 - After second toggle: AI pane hidden
 - Toggle action triggers state change in uiStore
-```
+```text
 
 ---
 
@@ -332,3 +332,4 @@ npm run test:e2e -- tests/feature-name.spec.ts --grep "specific test name"
 - Concrete examples over abstract rules
 - Edge cases must be explicit
 - Actionable over vague language
+````

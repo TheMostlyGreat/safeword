@@ -135,7 +135,7 @@ Key directories created in your project:
 
 **Structure**:
 
-```
+```plaintext
 planning/
 ├── user-stories/       User story documents
 ├── test-definitions/   Test definition documents

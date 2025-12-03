@@ -46,7 +46,7 @@ Tests are the specification. When a test fails, the implementation is wrong—no
 
 ### Test Speed Hierarchy (Fast → Slow)
 
-```
+```text
 Unit (milliseconds)      ← Pure functions, no I/O
   ↓
 Integration (seconds)    ← Multiple modules, database, API calls
@@ -186,7 +186,7 @@ function calculateTotal(amount: number, taxRate: number): number {
 
 Answer these questions in order to choose the test type. Questions are mutually exclusive - stop at the first match. If multiple seem to apply, use the tie-breaking rule (line 19): choose the faster one.
 
-```
+```text
 1. Does this test AI-generated content quality (tone, reasoning, creativity)?
    └─ YES → LLM Evaluation
       Examples: Narrative quality, prompt effectiveness, conversational naturalness

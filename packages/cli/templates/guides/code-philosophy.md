@@ -192,7 +192,7 @@ Before completing any work, verify:
 - Use descriptive commit messages
 - Make atomic commits (one logical change per commit)
 
-```
+```text
 # ❌ Bad: "misc fixes"
 # ✅ Good: "fix: login button not responding to clicks"
 ```

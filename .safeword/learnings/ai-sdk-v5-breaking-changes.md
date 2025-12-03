@@ -8,7 +8,7 @@ What breaks when upgrading from AI SDK v4 to v5:
 
 ❌ **Bad (AI SDK v4 pattern):**
 
-```typescript
+````typescript
 import { useChat } from '@ai-sdk/react'
 
 export function Chat() {
@@ -19,7 +19,7 @@ export function Chat() {
   // input = undefined, setInput = undefined in v5!
   return <input value={input} onChange={(e) => setInput(e.target.value)} />
 }
-```
+```text
 
 ✅ **Good (AI SDK v5 pattern):**
 
@@ -37,7 +37,7 @@ export function Chat() {
 
   return <input value={input} onChange={(e) => setInput(e.target.value)} />
 }
-```
+```text
 
 **Why it matters:**
 
@@ -78,7 +78,7 @@ const { input, setInput, handleSubmit } = useChat()
 <form onSubmit={handleSubmit}>
   <input value={input} onChange={handleInputChange} />
 </form>
-```
+```text
 
 **After (v5):**
 
@@ -100,7 +100,7 @@ const handleSubmit = (e: FormEvent) => {
     onChange={(e) => setInput(e.target.value)}
   />
 </form>
-```
+```text
 
 ## Testing Trap
 
@@ -118,7 +118,7 @@ function Chat() {
   const { input, setInput } = useChat()  // undefined in v5!
   return <MultimodalInput input={input} setInput={setInput} />
 }
-```
+```text
 
 **Solution:** Tests should verify the actual integration pattern, not just component behavior. Or add E2E tests that exercise the full Chat → useChat → MultimodalInput chain.
 
@@ -138,21 +138,21 @@ If you see these symptoms, check if you're destructuring removed properties:
 ```typescript
 const chatHelpers = useChat({ ... })
 console.log('useChat returned:', Object.keys(chatHelpers))
-```
+```text
 
 2. Check if input/setInput exist:
 
 ```typescript
 console.log('input:', input, 'setInput:', typeof setInput);
 // v5: input: undefined setInput: undefined
-```
+```text
 
 3. Verify AI SDK version:
 
 ```bash
 grep '"ai":' package.json
 # "ai": "5.0.87" = v5 (breaking changes)
-```
+```text
 
 ## References
 
@@ -176,3 +176,4 @@ grep '"ai":' package.json
 2. Check each usage for destructuring `input`, `setInput`, `handleSubmit`, `handleInputChange`
 3. Replace with local state management
 4. Test in actual browser (integration tests may give false confidence)
+````

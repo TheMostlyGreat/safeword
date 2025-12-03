@@ -20,8 +20,9 @@ When the user invokes this command:
 
 ## Example Usage
 
-```
+````text
 /architecture
-```
+```text
 
 Then: "Review my recent changes" or "Check if the new auth module follows our architecture"
+````

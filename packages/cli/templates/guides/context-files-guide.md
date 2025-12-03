@@ -61,7 +61,7 @@ Read it BEFORE working on any task in this project.
 
 **Example:**
 
-```
+```text
 Working in: /project/src/feature/
 Loaded context:
   ✓ /project/CLAUDE.md (Claude-specific guidance)
@@ -96,7 +96,7 @@ See root AGENTS.md for TDD workflow. This file covers test-specific patterns.
 
 ## File Structure Pattern
 
-```
+```plaintext
 project/
 ├─ SAFEWORD.md                  # Project context (references guides)
 ├─ CLAUDE.md                    # Claude-specific context
@@ -106,7 +106,7 @@ project/
 
 **Modular Approach (Recommended):**
 
-```
+```plaintext
 project/
 ├─ AGENTS.md / CLAUDE.md        # 50 lines: imports + structure
 ├─ docs/architecture.md         # 100 lines: architecture decisions

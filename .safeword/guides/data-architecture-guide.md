@@ -42,13 +42,14 @@
 
 **Example format:**
 
-```markdown
+````markdown
 **[Entity] state** (source of truth: [storage type])
 
 - `field1`: constraint (e.g., 0-100 integer)
 - `field2[]`: max N entries, validation rule
   **Validation checkpoint:** `validateFunction()` in `file.ts:line`
-```
+
+````text
 
 ### 2. Data Governance
 
@@ -71,7 +72,7 @@
 - Write: [roles with write access] (via `updateFunction()`)
 - Delete: [strategy] (e.g., soft delete with `deletedAt`)
 - Conflict: [resolution strategy] (e.g., last-write-wins, CRDT merge)
-```
+```text
 
 ### 3. Data Accessibility
 
@@ -93,7 +94,7 @@
 - Target: <Nms load time
 - Strategy: [database index/optimization]
 - Cache: [caching approach] or "No cache needed"
-```
+```text
 
 ### 4. Living Documentation
 
@@ -119,7 +120,7 @@
 ## Proposed Schema (vY - Feature Name)
 
 ## Migration Strategy
-```
+```text
 
 ---
 
@@ -148,7 +149,7 @@
 2. **Transform** → Business logic | Error: rollback + notify
 3. **Persist** → Database write | Error: retry 3x, then fail
 4. **UI Update** → Optimistic update | Error: revert state
-```
+```text
 
 ### 3. Data Policies
 
@@ -198,3 +199,5 @@ Before finalizing data architecture doc:
 - [ ] Migration strategy covers both additive and breaking changes
 - [ ] Version and status match codebase (verify with git/deployment)
 - [ ] Cross-referenced from root ARCHITECTURE.md or SAFEWORD.md (link exists)
+````
+````

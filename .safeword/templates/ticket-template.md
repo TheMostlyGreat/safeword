@@ -30,14 +30,14 @@ last_modified: YYYY-MM-DDTHH:MM:SSZ
 
 **Examples:**
 
-```
+````text
 - 2025-11-24T18:50:00Z Started: Changing button background to red
 - 2025-11-24T18:51:30Z Tried: Added `background: red` to Button.css
 - 2025-11-24T18:52:00Z Found: Button now has white text on red (unreadable)
 - 2025-11-24T18:53:00Z Tried: Changed text color to white
 - 2025-11-24T18:54:15Z Found: Hover state still blue (conflicts)
 - 2025-11-24T18:55:00Z Complete: Updated all button states to red theme (refs: commit 9a3f2c1)
-```
+```text
 
 ---
 
@@ -80,3 +80,4 @@ last_modified: YYYY-MM-DDTHH:MM:SSZ
 {Only for bugs that required investigation}
 
 {What caused this issue? Document for future reference.}
+````

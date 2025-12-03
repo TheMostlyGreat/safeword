@@ -3,6 +3,7 @@
 ## Problem
 
 Current tests verify files are created but don't verify they **work**:
+
 - ESLint config exists but never runs
 - Hook scripts exist but never execute
 - Pre-commit hook created but never triggers
@@ -10,20 +11,22 @@ Current tests verify files are created but don't verify they **work**:
 ## Approach: Single Golden Path Test
 
 Instead of many small E2E tests, create **one comprehensive test** that:
+
 1. Sets up a project once (expensive: npm install ~10s)
 2. Verifies all critical paths sequentially
 3. Runs in CI and locally
 
 This avoids:
+
 - Test bloat (2300+ lines already exist)
 - Slow execution from repeated setups
 - Over-testing things integration tests cover
 
 ## Test File
 
-```
+````text
 tests/e2e/golden-path.test.ts  (~80 lines)
-```
+```text
 
 ## Test Sequence
 
@@ -50,8 +53,7 @@ describe('E2E: Golden Path', () => {
   // 2. ESLint detects real issues
   it('eslint catches violations', () => {
     writeTestFile(projectDir, 'src/bad.ts', 'var x = 1\nconsole.log(x)\n');
-    expect(() => execSync('npx eslint src/bad.ts', { cwd: projectDir }))
-      .toThrow(); // Should fail on issues
+    expect(() => execSync('npx eslint src/bad.ts', { cwd: projectDir })).toThrow(); // Should fail on issues
   });
 
   // 3. PostToolUse hook works
@@ -62,7 +64,7 @@ describe('E2E: Golden Path', () => {
     const input = JSON.stringify({ tool_input: { file_path: file } });
     execSync(`echo '${input}' | bash .safeword/hooks/post-tool-lint.sh`, {
       cwd: projectDir,
-      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir }
+      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
     });
 
     const fixed = readTestFile(projectDir, 'src/fixme.ts');
@@ -76,7 +78,7 @@ describe('E2E: Golden Path', () => {
 
     const output = execSync('bash .safeword/hooks/stop-quality.sh', {
       cwd: projectDir,
-      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir }
+      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
     }).toString();
 
     const json = JSON.parse(output);
@@ -91,7 +93,7 @@ describe('E2E: Golden Path', () => {
     // If we get here, pre-commit passed
   });
 });
-```
+```text
 
 ## Key Design Decisions
 
@@ -114,11 +116,11 @@ export default defineConfig({
     // E2E tests run sequentially (they share state)
     pool: 'forks',
     poolOptions: {
-      forks: { singleFork: true }
-    }
-  }
+      forks: { singleFork: true },
+    },
+  },
 });
-```
+```text
 
 Already configured correctly.
 
@@ -132,29 +134,30 @@ Already configured correctly.
 - name: Run E2E tests
   run: npm run test:e2e
   if: success() # Only if unit tests pass
-```
+```text
 
 Optional: Add `test:e2e` script:
+
 ```json
 {
   "scripts": {
     "test:e2e": "vitest run tests/e2e/"
   }
 }
-```
+```text
 
 ## What This Tests
 
-| Component | Verified |
-|-----------|----------|
-| ESLint config syntax | ✓ |
-| ESLint catches issues | ✓ |
-| PostToolUse hook JSON parsing | ✓ |
-| PostToolUse hook file fixing | ✓ |
-| Stop hook JSON output | ✓ |
-| Stop hook git status detection | ✓ |
-| Husky pre-commit hook | ✓ |
-| lint-staged execution | ✓ |
+| Component                      | Verified |
+| ------------------------------ | -------- |
+| ESLint config syntax           | ✓        |
+| ESLint catches issues          | ✓        |
+| PostToolUse hook JSON parsing  | ✓        |
+| PostToolUse hook file fixing   | ✓        |
+| Stop hook JSON output          | ✓        |
+| Stop hook git status detection | ✓        |
+| Husky pre-commit hook          | ✓        |
+| lint-staged execution          | ✓        |
 
 ## What This Does NOT Test
 
@@ -172,3 +175,4 @@ Optional: Add `test:e2e` script:
 
 - Implementation: 30 minutes
 - Test execution time: ~20-30 seconds (one npm install)
+````

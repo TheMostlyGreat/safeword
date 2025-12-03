@@ -185,8 +185,6 @@ pnpm test -- path/to/file.test.ts
 ```
 ````
 
-````
-
 ### ✅ Good: Clear Warning in CI/CD Setup
 
 ```yaml
@@ -195,7 +193,7 @@ pnpm test -- path/to/file.test.ts
   run: pnpm test
   # NOTE: Do not run multiple test commands in parallel
   # Each spawns a webServer competing for ports
-````
+```
 
 ### ❌ Bad: No Warning About Parallel Execution
 
@@ -206,8 +204,6 @@ pnpm test -- path/to/file.test.ts
 pnpm test  # Run all tests
 ```
 ````
-
-```
 
 **Problem:** Developers don't know that running `pnpm test` in multiple terminals simultaneously will cause zombie processes.
 
@@ -228,4 +224,3 @@ pnpm test  # Run all tests
 ## Reference
 
 Discovered during demo mode E2E testing implementation (2025-11-01). See project-specific learning for demo mode testing patterns.
-```

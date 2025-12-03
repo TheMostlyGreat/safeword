@@ -20,7 +20,7 @@ When the user invokes this command:
 
 ## Example Usage
 
-```
+```text
 /architecture
 ```
 

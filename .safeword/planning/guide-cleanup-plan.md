@@ -53,7 +53,7 @@ All `@path` import sections (~106 lines total):
 
 ### Add: Lookup Table (~15 lines)
 
-```markdown
+````markdown
 ## Guide Lookup
 
 | Task                             | Guide                        |
@@ -71,7 +71,8 @@ All `@path` import sections (~106 lines total):
 | Port conflicts/zombie processes  | `zombie-process-cleanup.md`  |
 
 **Path:** `.safeword/guides/[filename]`
-```
+
+```text
 
 ---
 
@@ -117,3 +118,5 @@ All `@path` import sections (~106 lines total):
 - Decision trees, not narratives
 - No meta-commentary
 - No redundancy with SAFEWORD.md
+```
+````

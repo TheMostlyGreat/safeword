@@ -103,7 +103,7 @@ ls ./.safeword/learnings/*keyword*.md
 
 **Found existing learning** → Read and apply it:
 
-```
+```text
 "I found an existing learning about [concept] at [path]. Let me read it and apply to your case..."
 [Read the file]
 "Based on the learning, here's how to handle this: [specific guidance from learning]"
@@ -113,7 +113,7 @@ ls ./.safeword/learnings/*keyword*.md
 
 **Similar but different** → Reference and note difference:
 
-```
+```text
 "This is similar to the [existing learning] at [path], but differs in [specific way].
 The existing learning covers [X], but your case involves [Y]."
 ```
@@ -122,7 +122,7 @@ The existing learning covers [X], but your case involves [Y]."
 
 **Scenario 1: Found relevant learning**
 
-```
+```text
 User: "I'm getting an async state update error with React hooks"
 → Check: ls .safeword/learnings/*react*.md *hooks*.md *async*.md
 → Found: react-hooks-async.md
@@ -133,7 +133,7 @@ User: "I'm getting an async state update error with React hooks"
 
 **Scenario 2: No existing learning**
 
-```
+```text
 User: "IndexedDB quota is behaving strangely in Safari"
 → Check: ls .safeword/learnings/*indexeddb*.md *safari*.md *quota*.md
 → Not found
@@ -142,7 +142,7 @@ User: "IndexedDB quota is behaving strangely in Safari"
 
 **Scenario 3: Update existing learning**
 
-```
+```text
 User: Debugging for 6 cycles, discovers new IndexedDB quirk
 → Suggest extraction
 → Check: ls .safeword/learnings/*indexeddb*.md
@@ -162,7 +162,7 @@ User: Debugging for 6 cycles, discovers new IndexedDB quirk
 
 ## Decision Tree
 
-```
+```text
 Just learned something valuable
 │
 ├─ Forward-looking? (useful on FUTURE work, not just this bug)
@@ -254,12 +254,10 @@ Actual: [What happened]
 - Old broken code
 + New fixed code
 ```
-````
 
 ## Lesson
 
 [One-sentence takeaway]
-
 ````
 
 ---
@@ -279,9 +277,10 @@ Project-specific gotchas in `.safeword/learnings/`:
 - **Electron Renderer Context** - Renderer = browser, not Node.js; use `split(/[/\\]/)` for paths → `.safeword/learnings/electron-contexts.md`
 
 **Additional gotchas:**
+
 - Tab state timing: Add tab first (trigger render), wait 50ms, load content
 - File validation: Whitelist extensions before operations
-````
+```
 
 **Pattern:** Bold name + one-sentence summary + optional link
 
@@ -481,7 +480,7 @@ Project-specific gotchas in `.safeword/learnings/`:
 
 ## Directory Structure
 
-```
+```plaintext
 # Global learnings (all projects)
 .safeword/learnings/
 ├── react-state-async.md
@@ -506,7 +505,7 @@ Project-specific gotchas in `.safeword/learnings/`:
 
 **When to Split**:
 
-```
+```text
 # TOO BIG (250 lines covering 3 separate concepts)
 .safeword/learnings/electron-gotchas.md
 

@@ -82,7 +82,7 @@ Patterns and examples for user stories and test definitions following TDD best p
 
 ### Standard Format (Recommended)
 
-```
+````text
 As a [role/persona]
 I want [capability/feature]
 So that [business value/benefit]
@@ -94,44 +94,44 @@ Acceptance Criteria:
 
 Out of Scope:
 - [What this story explicitly does NOT include]
-```
+```text
 
 ### Given-When-Then Format (Behavior-Focused)
 
-```
+```text
 Given [initial context/state]
 When [action/event occurs]
 Then [expected outcome]
 
 And [additional context/outcome]
 But [exception/edge case]
-```
+```text
 
 **Filled example:**
 
-```
+```text
 Given I am an authenticated API user
 When I POST to /api/campaigns with valid JSON
 Then I receive a 201 Created response with campaign ID
 And the campaign appears in my GET /api/campaigns list
 But invalid JSON returns 400 with descriptive error messages
-```
+```text
 
 ### Job Story Format (Outcome-Focused)
 
-```
+```text
 When [situation/context]
 I want to [motivation/job-to-be-done]
 So I can [expected outcome]
-```
+```text
 
 **Filled example:**
 
-```
+```text
 When I'm debugging a failing test
 I want to see the exact LLM prompt and response
 So I can identify whether the issue is prompt engineering or code logic
-```
+```text
 
 ---
 
@@ -141,7 +141,7 @@ So I can identify whether the issue is prompt engineering or code logic
 
 **Web App Feature:**
 
-```
+```text
 As a user with multiple campaigns
 I want to switch between campaigns without reloading the page
 So that I can quickly compare game states
@@ -155,21 +155,21 @@ Acceptance Criteria:
 Out of Scope:
 - Campaign merging/deletion (separate story)
 - Multi-campaign view (future epic)
-```
+```text
 
 **API Feature:**
 
-```
+```text
 Given I am an authenticated API user
 When I POST to /api/campaigns with valid JSON
 Then I receive a 201 Created response with campaign ID
 And the campaign appears in my GET /api/campaigns list
 But invalid JSON returns 400 with descriptive error messages
-```
+```text
 
 **CLI Feature:**
 
-```
+```text
 When I'm debugging a failing test
 I want to see the exact LLM prompt and response
 So I can identify whether the issue is prompt engineering or code logic
@@ -179,11 +179,11 @@ Acceptance Criteria:
 - Response JSON is pretty-printed with syntax highlighting
 - Token count and cost are displayed
 - Works with all agent types (rules, narrative, character)
-```
+```text
 
 **With Technical Constraints:**
 
-```
+```text
 As a user with multiple campaigns
 I want to switch between campaigns without reloading the page
 So that I can quickly compare game states
@@ -203,17 +203,17 @@ Compatibility:
 
 Data:
 - [ ] Campaign data persists across browser sessions
-```
+```text
 
 ### ❌ BAD Examples (Anti-Patterns)
 
 **Too Vague:**
 
-```
+```text
 As a user
 I want the app to work better
 So that I'm happy
-```
+```text
 
 - ❌ No specific role
 - ❌ "Work better" is not measurable
@@ -221,11 +221,11 @@ So that I'm happy
 
 **Too Technical (Implementation Details):**
 
-```
+```text
 As a developer
 I want to refactor the CharacterStore to use Immer
 So that state mutations are prevented
-```
+```text
 
 - ❌ This is a technical task, not a user story
 - ❌ Users don't care about Immer
@@ -233,21 +233,21 @@ So that state mutations are prevented
 
 **Missing "So That" (No Value):**
 
-```
+```text
 As a GM
 I want to roll dice
-```
+```text
 
 - ❌ No business value stated
 - ❌ Why does the GM need this?
 
 **Multiple Features in One Story:**
 
-```
+```text
 As a player
 I want to create characters, manage inventory, and track relationships
 So that I can play the game
-```
+```text
 
 - ❌ 3+ separate features bundled together
 - ❌ Cannot be completed in one sprint
@@ -291,7 +291,7 @@ describe('[Unit/Module Name]', () => {
     });
   });
 });
-```
+```text
 
 ### Integration Test Template
 
@@ -342,7 +342,7 @@ describe('[Feature Name] Integration', () => {
     expect(await getInventory('sword')).toBe(1); // Not decremented
   });
 });
-```
+```text
 
 ### E2E Test Template (Playwright/Cypress)
 
@@ -368,7 +368,7 @@ test.describe('[User Journey Name]', () => {
     await expect(page).toHaveURL(/\/characters\/create/);
   });
 });
-```
+```text
 
 ---
 
@@ -383,7 +383,7 @@ it('should return risky position when outnumbered 3-to-1');
 it('should cache LLM responses for 5 minutes to reduce costs');
 it('should preserve armor state after reducing harm from L2 to L1');
 it('should throw ValidationError when dice pool is negative');
-```
+```text
 
 **❌ BAD - Vague or Implementation-Focused:**
 
@@ -392,7 +392,7 @@ it('works correctly'); // What does "correctly" mean?
 it('tests the function'); // Obvious, not descriptive
 it('should call setState'); // Implementation detail
 it('scenario 1'); // No context
-```
+```text
 
 **How to rename:**
 
@@ -418,7 +418,7 @@ it('should calculate critical success on 6', () => {
   expect(outcome).toBe('critical');
   expect(outcome.highestDie).toBe(6);
 });
-```
+```text
 
 ### Test Independence
 
@@ -436,7 +436,7 @@ it('test A', () => {
 it('test B', () => {
   /* uses separate gameState */
 });
-```
+```text
 
 **❌ BAD - Shared State:**
 
@@ -448,7 +448,7 @@ it('test A', () => {
 it('test B', () => {
   expect(sharedState.foo).toBe('bar');
 }); // Depends on test A!
-```
+```text
 
 ### What to Test
 
@@ -480,7 +480,7 @@ export function getFormattedTimestamp(event) {
   return _formatDateInternal(event.createdAt);
 }
 // Test getFormattedTimestamp, not _formatDateInternal
-```
+```text
 
 ### Test Data Builders
 
@@ -504,7 +504,7 @@ it('should increase stress when resisting', () => {
   const character = buildCharacter({ stress: 3 });
   // Test uses character with stress=3
 });
-```
+```text
 
 ---
 
@@ -547,7 +547,7 @@ tests:
           EXCELLENT: Asks open-ended questions, invites player creativity
           ACCEPTABLE: Acknowledges player action, minimal collaboration
           POOR: Dictates outcomes without player input
-```
+```text
 
 ### Integration Test with Real LLM
 
@@ -570,7 +570,7 @@ describe('Rules Agent Integration', () => {
     expect(response.consequences).toContain('severe harm');
   });
 });
-```
+```text
 
 ---
 
@@ -613,3 +613,4 @@ Before writing a story, verify it passes all six criteria:
 - **Unit:** Single function/module logic (fast, cheap, low-level confidence)
 
 **Ratio guidance:** 70% unit, 20% integration, 10% E2E (adjust based on project)
+````

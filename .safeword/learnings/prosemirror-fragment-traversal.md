@@ -8,7 +8,7 @@ When applying marks to typed text in ProseMirror, `Fragment.forEach()` doesn't r
 
 ❌ **Bad:** Iterating fragments without recursion
 
-```typescript
+````typescript
 // This ONLY sees paragraph nodes, not text inside them
 const markedNodes: Node[] = [];
 fragment.forEach((node: Node) => {
@@ -17,7 +17,7 @@ fragment.forEach((node: Node) => {
   }
   // Paragraph node with text children → mark NOT applied
 });
-```
+```text
 
 ✅ **Good:** Recursive traversal
 
@@ -41,7 +41,7 @@ function markFragmentRecursive(fragment: Fragment, mark: Mark): Fragment {
 
   return Fragment.from(markedNodes);
 }
-```
+```text
 
 **Why it matters:** User types "hello" → ProseMirror wraps it in paragraph → `Fragment → Paragraph → Text("hello")`. Without recursion, `forEach()` only sees the paragraph node, and marks are applied to the wrong level.
 
@@ -49,13 +49,13 @@ function markFragmentRecursive(fragment: Fragment, mark: Mark): Fragment {
 
 ProseMirror documents are tree structures:
 
-```
+```text
 Fragment (from ReplaceStep.slice.content)
 ├─ Paragraph node
 │  └─ Text("hello")  ← forEach() DOESN'T reach this
 └─ Heading node
    └─ Text("world")  ← forEach() DOESN'T reach this
-```
+```text
 
 ## Testing Trap
 
@@ -69,7 +69,7 @@ const testFragment = Fragment.from(schema.text('hello'));
 // ❌ Real app breaks (nested structure)
 // User types "hello" → editor wraps in paragraph
 // Fragment → Paragraph → Text("hello")  ← forEach() DOESN'T reach this
-```
+```text
 
 **Solution:** Test with realistic document structures (paragraphs, headings) that match actual user input, not artificially flat fragments.
 
@@ -106,7 +106,7 @@ function processFragmentRecursive(fragment: Fragment, operation: (node: Node) =>
 
   return Fragment.from(processedNodes);
 }
-```
+```text
 
 ## Additional Resources
 
@@ -117,3 +117,4 @@ function processFragmentRecursive(fragment: Fragment, operation: (node: Node) =>
 ## Summary
 
 **Fragment.forEach() is shallow.** Always use recursive traversal when processing text content, as ProseMirror wraps text in block nodes (paragraphs, headings). Test with realistic nested structures, not flat fragments.
+````

@@ -23,7 +23,7 @@ When the user invokes this command:
 
 ## Example Usage
 
-```
+```text
 /quality-review
 ```
 

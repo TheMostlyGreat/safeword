@@ -164,7 +164,7 @@ After filling out story, mentally check:
 
 ### ✅ GOOD Constraints (Specific, Testable)
 
-```markdown
+````markdown
 ### Performance
 
 - [ ] API response < 200ms at P95 under 100 concurrent users
@@ -174,7 +174,8 @@ After filling out story, mentally check:
 
 - [ ] All user inputs sanitized via DOMPurify
 - [ ] Rate limited: 100 requests/min per IP
-```
+
+````text
 
 ### ❌ BAD Constraints (Vague, Untestable)
 
@@ -188,7 +189,7 @@ After filling out story, mentally check:
 
 - [ ] Secure ← What does this mean?
 - [ ] Protected from hackers ← Not specific
-```
+```text
 
 ### Decision Rule
 
@@ -254,3 +255,5 @@ Save stories as: `.safeword/planning/user-stories/[slug].md`
 
 - `user-story-1.md` ← Not descriptive
 - `STORY_CAMPAIGN_SWITCHING_FINAL_v2.md` ← Bloated
+````
+````

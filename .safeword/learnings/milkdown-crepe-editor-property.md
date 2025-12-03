@@ -15,7 +15,7 @@ When extending Crepe with custom ProseMirror plugins, you might think accessing 
 
 From `@milkdown/crepe` TypeScript definitions (`node_modules/@milkdown/crepe/lib/types/core/builder.d.ts:18`):
 
-```typescript
+````typescript
 export declare class CrepeBuilder {
   #private;
   constructor({ root, defaultValue }?: CrepeBuilderConfig);
@@ -32,7 +32,7 @@ export declare class CrepeBuilder {
 export declare class Crepe extends CrepeBuilder {
   // Inherits all properties from CrepeBuilder, including .editor getter
 }
-```
+```text
 
 ## Correct Usage Pattern
 
@@ -46,7 +46,7 @@ const crepe = new Crepe({ root, defaultValue: '', features: {} });
 crepe.editor.use(trackChangesPlugin);
 
 return crepe.editor;
-```
+```text
 
 ## When to Use This Pattern
 
@@ -65,7 +65,7 @@ You could replace Crepe with core Milkdown:
 import { Editor } from '@milkdown/core';
 
 return Editor.make().use(commonmark).use(listener).use(history).use(trackChangesPlugin);
-```
+```text
 
 **Why not recommended:**
 
@@ -94,3 +94,4 @@ When you see `crepe.editor.use(plugin)` in code reviews, **don't flag it as a ha
 
 - `src/components/Editor.tsx` - Uses this pattern to register trackChangesPlugin
 - `planning/design/track-changes-refactoring-plan.md` - Initially flagged as hack, now corrected
+````

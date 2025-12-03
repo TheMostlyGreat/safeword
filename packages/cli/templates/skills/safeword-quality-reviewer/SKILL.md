@@ -96,7 +96,7 @@ Read relevant standards:
 
 **CRITICAL**: This is your main differentiator from automatic hook. ALWAYS check versions.
 
-```
+```text
 WebSearch: "[library name] latest stable version 2025"
 WebSearch: "[library name] security vulnerabilities"
 ```
@@ -116,7 +116,7 @@ WebSearch: "[library name] security vulnerabilities"
 
 **CRITICAL**: This is your main differentiator from automatic hook. ALWAYS verify against current docs.
 
-```
+```text
 WebFetch: https://react.dev (for React)
 WebFetch: https://vitejs.dev (for Vite)
 WebFetch: https://www.electronjs.org/docs (for Electron)
@@ -134,7 +134,7 @@ WebFetch: https://www.electronjs.org/docs (for Electron)
 
 **Simple question** ("is it correct?"):
 
-```
+```text
 **Correctness:** ✓ Logic is sound, edge cases handled, no obvious errors.
 ```
 

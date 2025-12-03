@@ -36,7 +36,7 @@ All project context files should:
 
 **MANDATORY:** Every project-level context file (CLAUDE.md, CURSOR.md, AGENTS.md) must start with a trigger to SAFEWORD:
 
-```markdown
+````markdown
 # Project Name - Developer Context
 
 **⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**
@@ -47,7 +47,8 @@ Read it BEFORE working on any task in this project.
 ---
 
 [Rest of project-specific content...]
-```
+
+````text
 
 **Why:** `.safeword/SAFEWORD.md` contains universal workflows (TDD, feature development, etc.) that apply across all projects. Project files should only contain project-specific context.
 
@@ -61,12 +62,12 @@ Read it BEFORE working on any task in this project.
 
 **Example:**
 
-```
+```text
 Working in: /project/src/feature/
 Loaded context:
   ✓ /project/CLAUDE.md (Claude-specific guidance)
   ✓ /project/src/feature/AGENTS.md (feature-specific rules)
-```
+```text
 
 **Design implication:** Subdirectory files should assume root context is available
 
@@ -88,7 +89,7 @@ Loaded context:
 ## Testing Conventions
 
 See root AGENTS.md for TDD workflow. This file covers test-specific patterns.
-```
+```text
 
 **Reliability note:** Auto-loading works best when you explicitly reference your file in conversation (e.g., "following the guidelines in CLAUDE.md"). Implicit automatic reference can be less reliable.
 
@@ -96,29 +97,29 @@ See root AGENTS.md for TDD workflow. This file covers test-specific patterns.
 
 ## File Structure Pattern
 
-```
+```text
 project/
 ├─ SAFEWORD.md                  # Project context (references guides)
 ├─ CLAUDE.md                    # Claude-specific context
 ├─ CURSOR.md                    # Cursor-specific context (optional)
 └─ tests/AGENTS.md              # Test conventions (cross-agent)
-```
+```text
 
 **Modular Approach (Recommended):**
 
-```
+```text
 project/
 ├─ AGENTS.md / CLAUDE.md        # 50 lines: imports + structure
 ├─ docs/architecture.md         # 100 lines: architecture decisions
 └─ docs/conventions.md          # 80 lines: coding conventions
-```
+```text
 
 Main context file imports modules:
 
 ```markdown
 @docs/architecture.md
 @docs/conventions.md
-```
+```text
 
 ## Content Guidelines
 
@@ -203,13 +204,13 @@ Main context file imports modules:
 
 ```markdown
 **Agents** (`app/src/agents/`) - LLM logic. See `/AGENTS.md`.
-```
+```text
 
 **Subdirectory file:**
 
 ```markdown
 **Context:** Working with AI agents. See root `SAFEWORD.md`/`AGENTS.md` for architecture.
-```
+```text
 
 **Import pattern:**
 
@@ -229,7 +230,7 @@ See @README for project overview and @package.json for available npm commands.
 ## Git Workflow
 
 Details in @docs/git-workflow.md
-```
+```text
 
 **Import features:**
 
@@ -298,7 +299,7 @@ Brief description. Current status.
 ## File Organization
 
 **Dir** (`path/`) - Purpose. See `path/AGENTS.md`.
-```
+```text
 
 ## Maintenance
 
@@ -349,7 +350,7 @@ Brief description. Current status.
 **Key principles:**
 
 - [Specific guideline with rationale]
-```
+```text
 
 **Examples:**
 
@@ -392,7 +393,7 @@ Brief description. Current status.
 - Ask questions, don't declare outcomes
 - "Yes, and..." over "No, but..."
 - Telegraph consequences before they happen
-```
+```text
 
 **Why this structure:**
 
@@ -455,3 +456,5 @@ Before committing:
 - Bloated files cost more tokens and introduce noise
 - Keep under 50KB for optimal performance (though no hard limit)
 - Use imports to modularize instead of monolithic files
+````
+````

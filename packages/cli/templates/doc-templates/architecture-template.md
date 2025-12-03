@@ -76,7 +76,7 @@ Boundaries enforced via `eslint-plugin-boundaries`. See `.safeword/guides/archit
 
 ### Relationships
 
-```
+```text
 [Entity A] 1──n [Entity B]
 [Entity B] n──n [Entity C]
 ```

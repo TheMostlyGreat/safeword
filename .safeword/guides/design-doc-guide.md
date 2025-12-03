@@ -137,17 +137,17 @@
 
 **Creating design doc:**
 
-```
+````text
 User: "Create design doc for three-pane layout"
 You: [Read user stories and test definitions, then create design doc]
-```
+```text
 
 **Updating design doc:**
 
-```
+```text
 User: "Update design doc to add error handling section"
 You: [Read existing design doc, add Implementation Notes section with error handling]
-```
+```text
 
 ---
 
@@ -169,3 +169,4 @@ Before saving, verify:
 **Important:** Design docs are instructions that LLMs read and follow.
 
 **See:** `@.safeword/guides/llm-guide.md` for comprehensive framework on writing clear, actionable documentation that LLMs can reliably follow.
+````

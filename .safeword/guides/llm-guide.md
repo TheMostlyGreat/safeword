@@ -14,13 +14,13 @@ This guide covers two related topics:
 
 Use JSON mode for predictable LLM responses. Define explicit schemas with validation. Return structured data, not prose.
 
-```typescript
+````typescript
 // ❌ BAD - Prose output
 "The user wants to create a campaign named 'Shadows' with 4 players"
 
 // ✅ GOOD - Structured JSON
 { "intent": "create_campaign", "name": "Shadows", "playerCount": 4 }
-```
+```text
 
 ### Cost Optimization
 
@@ -44,7 +44,7 @@ userMessage: `Character: ${dynamicState}\nAction: ${userInput}`;
 
 // ❌ BAD - Uncacheable (character state in system prompt)
 systemPrompt: `Rules + Character: ${dynamicState}`;
-```
+```text
 
 ### Testing AI Outputs
 
@@ -88,7 +88,7 @@ Problem: A function with database calls could match both
 4. Pure function? → Unit test
 
 Stops at first match, no ambiguity.
-```
+```text
 
 ### 2. Explicit Over Implicit
 
@@ -103,7 +103,7 @@ Examples needing definition:
 - "Critical paths" → Always critical: auth, payment. Rarely: UI polish, admin
 - "Browser" → Real browser (Playwright/Cypress), not jsdom
 - "Pure function" → Input → output, no I/O (define edge cases like Date.now())
-```
+```text
 
 ### 3. No Contradictions
 
@@ -119,7 +119,7 @@ Section A: "Write E2E tests only for critical user paths"
 Section B: "All critical multi-page user flows have at least one E2E test"
 
 - Definition of "critical" with examples
-```
+```text
 
 ### 4. Concrete Examples Over Abstract Rules
 
@@ -140,7 +140,7 @@ await expect(page.locator('.total')).toContainText('80')
 it('applies 20% discount', () => {
 expect(calculateDiscount(100, 0.20)).toBe(80)
 })
-```
+```text
 
 ### 5. Edge Cases Must Be Explicit
 
@@ -156,7 +156,7 @@ Edge cases:
 - Non-deterministic functions (Math.random(), Date.now()) → Unit test with mocked randomness/time
 - Environment dependencies (process.env) → Integration test
 - Mixed pure + I/O → Extract pure part, unit test separately
-```
+```text
 
 ### 6. Actionable Over Vague
 
@@ -170,7 +170,7 @@ Replace subjective terms with optimization rules + red flags.
 - Write as many fast tests as possible
 - Write E2E tests only for critical paths requiring a browser
 - Red flag: If you have more E2E tests than integration tests, suite is too slow
-```
+```text
 
 ### 7. Decision Trees: Sequential Over Parallel
 
@@ -184,7 +184,7 @@ Structure decisions as ordered steps, not simultaneous checks.
 
 ✅ GOOD - Sequential:
 Answer questions IN ORDER. Stop at the first match.
-```
+```text
 
 ### 8. Tie-Breaking Rules
 
@@ -196,7 +196,7 @@ When multiple options could apply, tell LLMs how to choose.
 
 Reference in decision trees:
 "If multiple seem to apply, use the tie-breaking rule stated above: choose the faster one."
-```
+```text
 
 ### 9. Lookup Tables for Complex Decisions
 
@@ -208,7 +208,7 @@ When decision logic has 3+ branches, provide a reference table.
 | Calculation error  | ✅    | ✅           | ✅   | Unit (fastest)    |
 | Database query bug | ❌    | ✅           | ✅   | Integration       |
 | CSS layout broken  | ❌    | ❌           | ✅   | E2E (only option) |
-```
+```text
 
 ### 10. Avoid Caveats in Tables
 
@@ -217,7 +217,7 @@ Keep patterns clean. Parentheticals break LLM pattern matching.
 ```markdown
 ❌ BAD: | State management bug | ❌ NO (if mocked) | ✅ YES |
 ✅ GOOD: | State management bug (Zustand, Redux) | ❌ NO | ✅ YES |
-```
+```text
 
 ### 11. Percentages: Context or None
 
@@ -229,7 +229,7 @@ Don't use percentages without adjustment guidance.
 ✅ BETTER: "Baseline: 70/20/10. Adjust: Microservices → 60/30/10, UI-heavy → 60/20/20"
 
 ✅ BEST: "Write as many fast tests as possible. Red flag: More E2E than integration = too slow."
-```
+```text
 
 ### 12. Specificity in Questions
 
@@ -240,7 +240,7 @@ Use precise technical terms, not general descriptions.
 ✅ GOOD: "Does this require a real browser (Playwright/Cypress)?"
 
 Note: React Testing Library does NOT require a browser - that's integration testing.
-```
+```text
 
 ### 13. Re-evaluation Paths
 
@@ -257,7 +257,7 @@ When LLMs hit dead ends, provide concrete next steps.
    - isValidEmail(email) → Unit test
    - checkUserExists(email) → Integration test (database)
    - Login form → Dashboard → E2E test (multi-page)"
-```
+```text
 
 ---
 
@@ -292,7 +292,7 @@ Before saving/committing LLM-consumable documentation:
 
 ```markdown
 Follow the test pyramid: lots of unit tests, some integration tests, few E2E tests.
-```
+```text
 
 **After (LLM-optimized):**
 
@@ -309,4 +309,5 @@ Edge cases:
 
 - React components with React Testing Library → Integration (not E2E, no real browser)
 - Non-deterministic functions (Date.now()) → Unit test with mocked time
-```
+```text
+````

@@ -16,11 +16,11 @@
 
 **Create CLI package structure:**
 
-```bash
+`````bash
 mkdir -p packages/cli/src/{commands,lib,templates}
 cd packages/cli
 npm init -y
-```
+```text
 
 **Install dependencies:**
 
@@ -36,7 +36,7 @@ npm install picocolors execa
 
 # Dev dependencies
 npm install -D typescript @types/node @types/fs-extra tsx vitest
-```
+```text
 
 **Why these choices:**
 
@@ -64,7 +64,7 @@ safeword init --yes              # Accept all defaults
 safeword init --ci               # Non-interactive (CI mode)
 safeword init --linting-only     # Skip quality review
 safeword init --quality-only     # Skip linting
-```
+```text
 
 **Flow:**
 
@@ -97,11 +97,11 @@ export async function detectProjectType(): Promise<ProjectType> {
 
   return 'minimal';
 }
-```
+```text
 
 **Output (interactive mode):**
 
-```
+```text
 $ safeword init
 
 ○  Detecting project type...
@@ -149,7 +149,7 @@ $ safeword init
    git commit -m "Add safeword config"
 
    Try it: Ask Claude to create a file
-```
+```text
 
 ---
 
@@ -164,7 +164,7 @@ safeword verify                  # Show status, exit 0/1
 safeword verify --auto-init      # Init if not configured (teammate onboarding)
 safeword verify --repair         # Fix broken hooks
 safeword verify --ci             # CI mode (minimal output)
-```
+```text
 
 **Checks:**
 
@@ -195,7 +195,7 @@ async function repair() {
     await addSafewordReference();
   }
 }
-```
+```text
 
 **Use case (teammate onboarding):**
 
@@ -206,7 +206,7 @@ async function repair() {
     "prepare": "safeword verify --silent || echo 'ℹ Run: npx safeword init'"
   }
 }
-```
+```text
 
 Teammate runs `npm install` → `prepare` hook runs → Prints message if not configured.
 
@@ -221,7 +221,7 @@ Teammate runs `npm install` → `prepare` hook runs → Prints message if not co
 ```bash
 safeword --version
 # 1.0.0
-```
+```text
 
 **Implementation:**
 
@@ -234,7 +234,7 @@ const pkgPath = join(__dirname, '../package.json');
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
 
 program.version(pkg.version);
-```
+```text
 
 ---
 
@@ -244,11 +244,11 @@ program.version(pkg.version);
 
 ```bash
 safeword status
-```
+```text
 
 **Output:**
 
-```
+```text
 Safeword Status
 
 Project: /Users/alex/projects/my-app
@@ -269,7 +269,7 @@ Config:
   • linting_mode: biome
 
 To update: safeword upgrade
-```
+```text
 
 **Data sources:**
 
@@ -286,7 +286,7 @@ To update: safeword upgrade
 
 **Structure:**
 
-```
+```text
 packages/cli/src/templates/
 ├── SAFEWORD.md                 # Core patterns (copied from framework/SAFEWORD.md)
 ├── guides/                     # All guides
@@ -303,7 +303,7 @@ packages/cli/src/templates/
     ├── eslint.config.mjs
     ├── biome.jsonc
     └── prettierrc
-```
+```text
 
 **Copy operation:**
 
@@ -322,7 +322,7 @@ export async function copyTemplates(projectDir: string) {
   const version = require('../package.json').version;
   await fs.writeFile(join(targetDir, 'version'), version);
 }
-```
+```text
 
 **Why embed vs download:**
 
@@ -346,7 +346,7 @@ if (isCI && !options.yes && !options.ci) {
   console.error('Use --yes or --ci flag for non-interactive mode');
   process.exit(1);
 }
-```
+```text
 
 **CI mode behavior:**
 
@@ -358,7 +358,7 @@ safeword init --ci
 # No prompts (use defaults)
 # Minimal output (errors + summary only)
 # Exit code 0 = success, 1 = failure
-```
+```text
 
 **GitHub Actions example:**
 
@@ -374,7 +374,7 @@ jobs:
       - uses: actions/setup-node@v3
       - run: npm install
       - run: npx @safeword/cli verify --ci
-```
+```text
 
 ---
 
@@ -403,7 +403,7 @@ export async function runPackageManagerCommand(
 
   await execa(cmds[pkgManager], { shell: true });
 }
-```
+```text
 
 **Ask before mutating package.json:**
 
@@ -420,7 +420,7 @@ if (!options.yes && !options.ci) {
     await addToPackageJson(pkgManager);
   }
 }
-```
+```text
 
 ---
 
@@ -441,17 +441,17 @@ export function getConfigDir(): string {
   const xdgConfigHome = process.env.XDG_CONFIG_HOME || join(homedir(), '.config');
   return join(xdgConfigHome, 'safeword');
 }
-```
+```text
 
 **Structure:**
 
-```
+```text
 ~/.local/share/safeword/
 └── .safeword/learnings/ # Project learnings
 
 ~/.config/safeword/
 └── config.json          # CLI preferences (future)
-```
+```text
 
 **Phase 1:** Only implement if adding `safeword learning add` command. Otherwise defer to Phase 2.
 
@@ -473,7 +473,7 @@ describe('detectProjectType', () => {
     expect(type).toBe('nextjs');
   });
 });
-```
+```text
 
 **Integration tests (mock fs):**
 
@@ -494,7 +494,7 @@ describe('safeword init', () => {
     expect(vol.existsSync('/project/.safeword')).toBe(true);
   });
 });
-```
+```text
 
 **Manual smoke test:**
 
@@ -507,7 +507,7 @@ cd ~/test-project
 safeword init --yes
 safeword verify
 safeword status
-```
+```text
 
 ---
 
@@ -565,7 +565,7 @@ safeword status
   "repository": "github:TheMostlyGreat/safeword",
   "license": "MIT"
 }
-```
+```text
 
 **Build:**
 
@@ -577,14 +577,14 @@ safeword status
     "test": "vitest"
   }
 }
-```
+```text
 
 **Publish:**
 
 ```bash
 npm run build
 npm publish --access public
-```
+```text
 
 **Usage after publish:**
 
@@ -592,7 +592,7 @@ npm publish --access public
 npx @safeword/cli init        # Download + run (cached)
 npm install -g @safeword/cli  # Global install
 safeword init                 # Run globally
-```
+```text
 
 ---
 
@@ -622,7 +622,7 @@ echo "⚠️  WARNING: Bash setup scripts are deprecated"
 echo "   Use the new CLI instead: npx @safeword/cli init"
 echo "   Bash scripts will be removed in v2.0.0"
 echo ""
-```
+```text
 
 ---
 
@@ -637,51 +637,56 @@ echo ""
 
 ```bash
 npx @safeword/cli init
-```
-````
+```text
+`````
 
 **2. Verify:**
 
-```bash
+````bash
 npx @safeword/cli verify
-```
+```text
 
 **3. Commit:**
 
 ```bash
 git add .safeword .claude SAFEWORD.md package.json
 git commit -m "Add safeword config"
-```
+```text
 
 ````
 
 **Add CLI reference docs:**
+
 ```markdown
 ## CLI Reference
 
 ### safeword init
+
 Initialize safeword in current project
 
 Options:
-  --yes          Accept all defaults
-  --ci           Non-interactive mode (CI/CD)
-  --linting-only Skip quality review setup
-  --quality-only Skip linting setup
+--yes Accept all defaults
+--ci Non-interactive mode (CI/CD)
+--linting-only Skip quality review setup
+--quality-only Skip linting setup
 
 ### safeword verify
+
 Verify safeword configuration
 
 Options:
-  --auto-init    Auto-initialize if not configured
-  --repair       Fix broken hooks
-  --ci           CI mode (exit 0/1)
+--auto-init Auto-initialize if not configured
+--repair Fix broken hooks
+--ci CI mode (exit 0/1)
 
 ### safeword status
+
 Show detailed project status
 
 ### safeword --version
+
 Show CLI version
-````
+```
 
 ---
 

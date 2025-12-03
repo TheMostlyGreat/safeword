@@ -118,14 +118,15 @@ _Tests for non-functional requirements from user story Technical Constraints sec
 
 ## Test Execution
 
-```bash
+````bash
 # Run all tests for this feature
 [command to run all tests]
 
 # Run specific test
 [command to run specific test with --grep flag]
-```
+```text
 
 ---
 
 **Last Updated**: [YYYY-MM-DD]
+````

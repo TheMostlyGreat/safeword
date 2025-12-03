@@ -99,7 +99,7 @@ Answer **IN ORDER**. Stop at the first "Yes":
 
 **✅ GOOD:**
 
-```
+```plaintext
 project/
 ├── ARCHITECTURE.md
 └── docs/design/
@@ -273,7 +273,7 @@ Answer **IN ORDER**:
 
 ## File Organization
 
-```
+```plaintext
 project/
 ├── ARCHITECTURE.md              # Single comprehensive doc
 ├── .safeword/planning/
