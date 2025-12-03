@@ -11,7 +11,8 @@ export default defineConfig({
       exclude: ['src/**/*.test.ts', 'src/index.ts'],
     },
     // Increase timeout for integration tests that spawn processes
-    testTimeout: 30000,
+    // Default 30s isn't enough for npm installs in some tests
+    testTimeout: 60000,
     // Run tests sequentially to avoid temp directory conflicts
     pool: 'forks',
     poolOptions: {

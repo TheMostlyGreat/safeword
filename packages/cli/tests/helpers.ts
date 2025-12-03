@@ -28,10 +28,12 @@ export function createTempDir(): string {
 }
 
 /**
- * Removes a temporary directory and all contents
+ * Removes a temporary directory and all contents.
+ * Uses rmSync's built-in retry for ENOTEMPTY/EBUSY errors from
+ * npm/git processes that haven't released file handles.
  */
 export function removeTempDir(dir: string): void {
-  rmSync(dir, { recursive: true, force: true });
+  rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 }
 
 /**
