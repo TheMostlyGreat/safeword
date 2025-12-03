@@ -118,7 +118,7 @@ for TEST_FILE in $TEST_FILES; do
     done
     echo ""
     echo "To investigate:"
-    echo "  npm test $TEST_FILE    # Run just this test"
+    echo "  $RUNNER $TEST_FILE    # Run just this test"
     echo "  cat $TEST_FILE         # Review test code for missing cleanup"
     exit 1
   fi
