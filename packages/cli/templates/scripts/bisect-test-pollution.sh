@@ -4,32 +4,35 @@
 # Use when: Tests pass individually but fail together, tests leave files behind,
 # tests affect each other, test isolation problems, shared state between tests
 #
-# Usage: ./bisect-test-pollution.sh <file_to_check> <test_pattern>
-# Example: ./bisect-test-pollution.sh '.git' 'src/**/*.test.ts'
+# Usage: ./bisect-test-pollution.sh <file_to_check> <name_pattern> [search_dir]
+# Example: ./bisect-test-pollution.sh '.git' '*.test.ts' src
+# Example: ./bisect-test-pollution.sh '.git' '*.test.ts'  (searches current dir)
 
 set -e
 
-if [ $# -ne 2 ]; then
-  echo "Usage: $0 <file_to_check> <test_pattern>"
-  echo "Example: $0 '.git' 'src/**/*.test.ts'"
+if [ $# -lt 2 ]; then
+  echo "Usage: $0 <file_to_check> <name_pattern> [search_dir]"
+  echo "Example: $0 '.git' '*.test.ts' src"
+  echo "Example: $0 '.git' '*.test.ts'"
   echo ""
   echo "Runs tests one-by-one to find which creates <file_to_check>"
   exit 1
 fi
 
 POLLUTION_CHECK="$1"
-TEST_PATTERN="$2"
+NAME_PATTERN="$2"
+SEARCH_DIR="${3:-.}"
 
 echo "Searching for test that creates: $POLLUTION_CHECK"
-echo "Test pattern: $TEST_PATTERN"
+echo "Test pattern: $NAME_PATTERN in $SEARCH_DIR"
 echo ""
 
-# Get list of test files
-TEST_FILES=$(find . -path "$TEST_PATTERN" 2>/dev/null | sort)
+# Get list of test files using find (portable across bash versions)
+TEST_FILES=$(find "$SEARCH_DIR" -type f -name "$NAME_PATTERN" 2>/dev/null | sort)
 TOTAL=$(echo "$TEST_FILES" | grep -c . || echo 0)
 
 if [ "$TOTAL" -eq 0 ]; then
-  echo "No test files found matching: $TEST_PATTERN"
+  echo "No test files found matching: $NAME_PATTERN in $SEARCH_DIR"
   exit 1
 fi
 

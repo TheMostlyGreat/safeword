@@ -199,7 +199,7 @@ When tests pass individually but fail together (test isolation problem, tests af
 tests leave files behind), use bisection:
 
 ```bash
-./.safeword/scripts/bisect-test-pollution.sh '.git' 'src/**/*.test.ts'
+./.safeword/scripts/bisect-test-pollution.sh '.git' '*.test.ts' src
 ```
 
 See: @./.safeword/scripts/bisect-test-pollution.sh
