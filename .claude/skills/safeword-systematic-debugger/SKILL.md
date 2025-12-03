@@ -229,8 +229,20 @@ Log **expected vs actual**. Remove after fixing.
 | 3. Hypothesis     | "Is my theory correct?"               | Confirmed or formed new theory     |
 | 4. Implementation | "Does the fix work?"                  | Test passes, issue resolved        |
 
+## Finding Zombie Process Spawners
+
+When tests leave processes behind (playwright browsers not cleaned up, port stays in use,
+zombie node processes, chromium accumulating), use bisection to find the culprit:
+
+```bash
+./.safeword/scripts/bisect-zombie-processes.sh 'chromium' '*.test.ts' tests
+./.safeword/scripts/bisect-zombie-processes.sh 'playwright' '*.spec.ts' e2e
+```
+
+See: @./.safeword/scripts/bisect-zombie-processes.sh
+
 ## Related Resources
 
-- Process cleanup: @./.safeword/guides/zombie-process-cleanup.md
+- Process cleanup guide: @./.safeword/guides/zombie-process-cleanup.md
 - Debug logging style: @./.safeword/guides/code-philosophy.md
 - TDD for fix verification: @./.safeword/guides/tdd-best-practices.md
