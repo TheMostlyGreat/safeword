@@ -10,6 +10,8 @@
     "eval:view": "promptfoo view",
     "eval:no-cache": "dotenv -e .env -- promptfoo eval -c promptfoo.yaml --no-cache",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "lint:sh": "shellcheck **/*.sh .safeword/hooks/* packages/cli/templates/hooks/* packages/cli/templates/scripts/* 2>/dev/null || true",
+    "format:sh": "shfmt -w -i 2 -ci **/*.sh .safeword/hooks/* packages/cli/templates/hooks/* packages/cli/templates/scripts/* 2>/dev/null || echo 'shfmt not installed (brew install shfmt)'",
     "format:check": "prettier --check .",
     "knip": "knip",
     "prepare": "husky || true"
@@ -31,6 +33,7 @@
     "markdownlint-cli2": "^0.19.1",
     "prettier": "^3.7.3",
     "promptfoo": "^0.119.5",
+    "shellcheck": "^4.1.0",
     "typescript-eslint": "^8.47.0"
   },
   "dependencies": {
@@ -51,6 +54,9 @@
     "*.md": [
       "markdownlint-cli2 --fix",
       "prettier --write"
+    ],
+    "*.sh": [
+      "shellcheck"
     ]
   }
 }

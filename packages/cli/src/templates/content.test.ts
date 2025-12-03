@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getPrettierConfig } from './content';
+import { getPrettierConfig, getLintStagedConfig } from './content';
 import type { ProjectType } from '../utils/project-detector';
 
 const baseProjectType: ProjectType = {
@@ -20,6 +20,7 @@ const baseProjectType: ProjectType = {
   playwright: false,
   tailwind: false,
   publishableLibrary: false,
+  shell: false,
 };
 
 describe('getPrettierConfig', () => {
@@ -75,5 +76,21 @@ describe('getPrettierConfig', () => {
     const config = JSON.parse(getPrettierConfig(projectType));
 
     expect(config.plugins).toBeUndefined();
+  });
+});
+
+describe('getLintStagedConfig', () => {
+  it('should not include shell pattern when shell is false', () => {
+    const config = getLintStagedConfig(baseProjectType);
+
+    expect(config['*.sh']).toBeUndefined();
+    expect(config['*.md']).toBeDefined();
+  });
+
+  it('should include shell pattern when shell is true', () => {
+    const projectType = { ...baseProjectType, shell: true };
+    const config = getLintStagedConfig(projectType);
+
+    expect(config['*.sh']).toEqual(['shellcheck', 'prettier --write']);
   });
 });

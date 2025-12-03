@@ -5,7 +5,7 @@
 # Looks for {"proposedChanges": ..., "madeChanges": ...} JSON blob
 
 # Change to project directory if set
-[ -n "$CLAUDE_PROJECT_DIR" ] && cd "$CLAUDE_PROJECT_DIR"
+[ -n "$CLAUDE_PROJECT_DIR" ] && cd "$CLAUDE_PROJECT_DIR" || true
 
 # Check for .safeword directory
 if [ ! -d ".safeword" ]; then

@@ -18,21 +18,23 @@ file=$(echo "$input" | jq -r '.tool_input.file_path // .tool_input.notebook_path
 [ -z "$file" ] || [ ! -f "$file" ] && exit 0
 
 # Change to project directory
-[ -n "$CLAUDE_PROJECT_DIR" ] && cd "$CLAUDE_PROJECT_DIR"
+[ -n "$CLAUDE_PROJECT_DIR" ] && cd "$CLAUDE_PROJECT_DIR" || true
 
 # Determine linter based on file extension
 case "$file" in
   # JS/TS and framework files - ESLint first (fix code), then Prettier (format)
   *.js|*.jsx|*.ts|*.tsx|*.mjs|*.mts|*.cjs|*.cts|*.vue|*.svelte|*.astro)
-    errors=$(npx eslint --fix "$file" 2>&1)
-    [ $? -ne 0 ] && [ -n "$errors" ] && echo "$errors"
+    if ! errors=$(npx eslint --fix "$file" 2>&1); then
+      [ -n "$errors" ] && echo "$errors"
+    fi
     npx prettier --write "$file" 2>/dev/null
     ;;
 
   # Markdown - markdownlint first, then Prettier
   *.md)
-    errors=$(npx markdownlint-cli2 --fix "$file" 2>&1)
-    [ $? -ne 0 ] && [ -n "$errors" ] && echo "$errors"
+    if ! errors=$(npx markdownlint-cli2 --fix "$file" 2>&1); then
+      [ -n "$errors" ] && echo "$errors"
+    fi
     npx prettier --write "$file" 2>/dev/null
     ;;
 

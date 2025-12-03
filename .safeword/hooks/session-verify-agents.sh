@@ -5,7 +5,7 @@
 LINK='**⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**'
 
 # Change to project directory if set
-[ -n "$CLAUDE_PROJECT_DIR" ] && cd "$CLAUDE_PROJECT_DIR"
+[ -n "$CLAUDE_PROJECT_DIR" ] && cd "$CLAUDE_PROJECT_DIR" || true
 
 if [ ! -d ".safeword" ]; then
   # Not a safeword project, skip silently

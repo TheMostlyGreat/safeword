@@ -5,6 +5,9 @@
  * appropriate linting rules.
  */
 
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
 export interface PackageJson {
   name?: string;
   version?: string;
@@ -31,12 +34,44 @@ export interface ProjectType {
   playwright: boolean;
   tailwind: boolean;
   publishableLibrary: boolean;
+  shell: boolean;
 }
 
 /**
- * Detects project type from package.json contents
+ * Checks if a directory contains any .sh files up to specified depth.
+ * Excludes node_modules and .git directories.
  */
-export function detectProjectType(packageJson: PackageJson): ProjectType {
+export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
+  const excludeDirs = new Set(['node_modules', '.git', '.safeword']);
+
+  function scan(dir: string, depth: number): boolean {
+    if (depth > maxDepth) return false;
+
+    try {
+      const entries = readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isFile() && entry.name.endsWith('.sh')) {
+          return true;
+        }
+        if (entry.isDirectory() && !excludeDirs.has(entry.name)) {
+          if (scan(join(dir, entry.name), depth + 1)) {
+            return true;
+          }
+        }
+      }
+    } catch {
+      // Ignore permission errors
+    }
+    return false;
+  }
+
+  return scan(cwd, 0);
+}
+
+/**
+ * Detects project type from package.json contents and optional file scanning
+ */
+export function detectProjectType(packageJson: PackageJson, cwd?: string): ProjectType {
   const deps = packageJson.dependencies || {};
   const devDeps = packageJson.devDependencies || {};
   const allDeps = { ...deps, ...devDeps };
@@ -58,6 +93,9 @@ export function detectProjectType(packageJson: PackageJson): ProjectType {
   const hasEntryPoints = !!(packageJson.main || packageJson.module || packageJson.exports);
   const isPublishable = hasEntryPoints && packageJson.private !== true;
 
+  // Shell scripts: detected by scanning for .sh files
+  const hasShell = cwd ? hasShellScripts(cwd) : false;
+
   return {
     typescript: hasTypescript,
     react: hasReact || hasNextJs, // Next.js implies React
@@ -72,5 +110,6 @@ export function detectProjectType(packageJson: PackageJson): ProjectType {
     playwright: hasPlaywright,
     tailwind: hasTailwind,
     publishableLibrary: isPublishable,
+    shell: hasShell,
   };
 }

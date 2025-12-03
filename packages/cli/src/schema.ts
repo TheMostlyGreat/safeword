@@ -9,7 +9,7 @@
 
 import { VERSION } from './version.js';
 import { type ProjectType } from './utils/project-detector.js';
-import { AGENTS_MD_LINK, getPrettierConfig, LINT_STAGED_CONFIG } from './templates/content.js';
+import { AGENTS_MD_LINK, getPrettierConfig, getLintStagedConfig } from './templates/content.js';
 import { getEslintConfig, SETTINGS_HOOKS } from './templates/config.js';
 import { generateBoundariesConfig, detectArchitecture } from './utils/boundaries.js';
 import { HUSKY_PRE_COMMIT_CONTENT, MCP_SERVERS } from './utils/install.js';
@@ -86,6 +86,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/planning/test-definitions',
     '.safeword/planning/design',
     '.safeword/planning/issues',
+    '.safeword/scripts',
     '.husky',
   ],
 
@@ -153,9 +154,15 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/prompts/architecture.md': { template: 'prompts/architecture.md' },
     '.safeword/prompts/quality-review.md': { template: 'prompts/quality-review.md' },
 
-    // Claude skills and commands (4 files)
+    // Scripts (1 file)
+    '.safeword/scripts/find-polluter.sh': { template: 'scripts/find-polluter.sh' },
+
+    // Claude skills and commands (5 files)
     '.claude/skills/safeword-quality-reviewer/SKILL.md': {
       template: 'skills/safeword-quality-reviewer/SKILL.md',
+    },
+    '.claude/skills/safeword-systematic-debugger/SKILL.md': {
+      template: 'skills/safeword-systematic-debugger/SKILL.md',
     },
     '.claude/commands/architecture.md': { template: 'commands/architecture.md' },
     '.claude/commands/lint.md': { template: 'commands/lint.md' },
@@ -188,6 +195,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       ],
       conditionalKeys: {
         publishableLibrary: ['scripts.publint'],
+        shell: ['scripts.lint:sh'],
       },
       merge: (existing, ctx) => {
         const scripts = (existing.scripts as Record<string, string>) ?? {};
@@ -206,11 +214,16 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
           scripts.publint = 'publint';
         }
 
+        // Conditional: lint:sh for projects with shell scripts
+        if (ctx.projectType.shell && !scripts['lint:sh']) {
+          scripts['lint:sh'] = 'shellcheck **/*.sh';
+        }
+
         result.scripts = scripts;
 
         // Add lint-staged config
         if (!existing['lint-staged']) {
-          result['lint-staged'] = LINT_STAGED_CONFIG;
+          result['lint-staged'] = getLintStagedConfig(ctx.projectType);
         }
 
         return result;
@@ -221,6 +234,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
         // Remove safeword-specific scripts but preserve lint/format (useful standalone)
         delete scripts['lint:md'];
+        delete scripts['lint:sh'];
         delete scripts['format:check'];
         delete scripts.knip;
         delete scripts.prepare;
@@ -351,6 +365,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       vitest: ['@vitest/eslint-plugin'],
       tailwind: ['prettier-plugin-tailwindcss'],
       publishableLibrary: ['publint'],
+      shell: ['shellcheck', 'prettier-plugin-sh'],
     },
   },
 };

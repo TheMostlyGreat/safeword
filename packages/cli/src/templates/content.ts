@@ -43,6 +43,8 @@ export function getPrettierConfig(projectType: ProjectType): string {
 
   if (projectType.astro) plugins.push('prettier-plugin-astro');
   if (projectType.svelte) plugins.push('prettier-plugin-svelte');
+  if (projectType.shell) plugins.push('prettier-plugin-sh');
+  // Tailwind must be last for proper class sorting
   if (projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
 
   if (plugins.length > 0) {
@@ -53,15 +55,23 @@ export function getPrettierConfig(projectType: ProjectType): string {
 }
 
 /**
- * lint-staged configuration for pre-commit hooks
- * Runs linters only on staged files for fast commits
+ * Generate lint-staged configuration based on project type.
+ * Only includes shell patterns when shell scripts are detected.
  *
  * SYNC: Keep file patterns in sync with post-tool-lint.sh in:
  *   packages/cli/templates/hooks/post-tool-lint.sh
  */
-export const LINT_STAGED_CONFIG = {
-  '*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}': ['eslint --fix', 'prettier --write'],
-  '*.{vue,svelte,astro}': ['eslint --fix', 'prettier --write'],
-  '*.{json,css,scss,html,yaml,yml,graphql}': ['prettier --write'],
-  '*.md': ['markdownlint-cli2 --fix', 'prettier --write'],
-};
+export function getLintStagedConfig(projectType: ProjectType): Record<string, string[]> {
+  const config: Record<string, string[]> = {
+    '*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}': ['eslint --fix', 'prettier --write'],
+    '*.{vue,svelte,astro}': ['eslint --fix', 'prettier --write'],
+    '*.{json,css,scss,html,yaml,yml,graphql}': ['prettier --write'],
+    '*.md': ['markdownlint-cli2 --fix', 'prettier --write'],
+  };
+
+  if (projectType.shell) {
+    config['*.sh'] = ['shellcheck', 'prettier --write'];
+  }
+
+  return config;
+}
