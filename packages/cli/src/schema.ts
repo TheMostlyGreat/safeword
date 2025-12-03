@@ -82,7 +82,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/templates',
     '.safeword/prompts',
     '.safeword/planning',
-    '.safeword/planning/user-stories',
+    '.safeword/planning/specs',
     '.safeword/planning/test-definitions',
     '.safeword/planning/design',
     '.safeword/planning/issues',
@@ -135,12 +135,15 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/guides/user-story-guide.md': { template: 'guides/user-story-guide.md' },
     '.safeword/guides/zombie-process-cleanup.md': { template: 'guides/zombie-process-cleanup.md' },
 
-    // Templates (5 files)
+    // Templates (6 files)
     '.safeword/templates/architecture-template.md': {
       template: 'doc-templates/architecture-template.md',
     },
     '.safeword/templates/design-doc-template.md': {
       template: 'doc-templates/design-doc-template.md',
+    },
+    '.safeword/templates/task-spec-template.md': {
+      template: 'doc-templates/task-spec-template.md',
     },
     '.safeword/templates/test-definitions-feature.md': {
       template: 'doc-templates/test-definitions-feature.md',
@@ -154,18 +157,22 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/prompts/architecture.md': { template: 'prompts/architecture.md' },
     '.safeword/prompts/quality-review.md': { template: 'prompts/quality-review.md' },
 
-    // Scripts (2 files)
+    // Scripts (3 files)
     '.safeword/scripts/bisect-test-pollution.sh': { template: 'scripts/bisect-test-pollution.sh' },
     '.safeword/scripts/bisect-zombie-processes.sh': {
       template: 'scripts/bisect-zombie-processes.sh',
     },
+    '.safeword/scripts/lint-md.sh': { template: 'scripts/lint-md.sh' },
 
-    // Claude skills and commands (5 files)
+    // Claude skills and commands (6 files)
     '.claude/skills/safeword-quality-reviewer/SKILL.md': {
       template: 'skills/safeword-quality-reviewer/SKILL.md',
     },
     '.claude/skills/safeword-systematic-debugger/SKILL.md': {
       template: 'skills/safeword-systematic-debugger/SKILL.md',
+    },
+    '.claude/skills/safeword-tdd-enforcer/SKILL.md': {
+      template: 'skills/safeword-tdd-enforcer/SKILL.md',
     },
     '.claude/commands/architecture.md': { template: 'commands/architecture.md' },
     '.claude/commands/lint.md': { template: 'commands/lint.md' },

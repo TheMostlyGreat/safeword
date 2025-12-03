@@ -69,6 +69,7 @@ Training data is stale. Follow this sequence:
 | Trigger                                                    | Template                                           |
 | ---------------------------------------------------------- | -------------------------------------------------- |
 | User asks for user story OR planning new feature scope     | @./.safeword/templates/user-stories-template.md    |
+| Bug, improvement, refactor, or internal task               | @./.safeword/templates/task-spec-template.md       |
 | Need test definitions for a feature OR acceptance criteria | @./.safeword/templates/test-definitions-feature.md |
 | Feature spans 3+ components OR needs technical spec        | @./.safeword/templates/design-doc-template.md      |
 | Making decision with long-term impact OR trade-offs        | @./.safeword/templates/architecture-template.md    |
@@ -80,12 +81,20 @@ Training data is stale. Follow this sequence:
 
 **Location:** `.safeword/planning/` at project root
 
-| Type             | Path                                   |
-| ---------------- | -------------------------------------- |
-| User stories     | `.safeword/planning/user-stories/`     |
-| Test definitions | `.safeword/planning/test-definitions/` |
-| Design docs      | `.safeword/planning/design/`           |
-| Issues           | `.safeword/planning/issues/`           |
+| Type             | Path                                   | Contents                          |
+| ---------------- | -------------------------------------- | --------------------------------- |
+| Specs            | `.safeword/planning/specs/`            | `feature-*.md` and `task-*.md`    |
+| Test definitions | `.safeword/planning/test-definitions/` | `feature-*.md` (L2 features only) |
+| Design docs      | `.safeword/planning/design/`           | Complex features (3+ components)  |
+| Issues           | `.safeword/planning/issues/`           | Issue tracking                    |
+
+**Artifact Levels:**
+
+| Level  | Artifacts                                            | Test Location       |
+| ------ | ---------------------------------------------------- | ------------------- |
+| **L2** | Feature Spec + Test Definitions (+ Design Doc if 3+) | `test-definitions/` |
+| **L1** | Task Spec                                            | Inline in spec      |
+| **L0** | Task Spec (minimal)                                  | Existing tests      |
 
 **Archive:** Move completed docs to `archive/` subfolder within each.
 
@@ -136,22 +145,31 @@ status: in_progress
 
 ## Feature Development
 
-**Follow this order:**
+**Triage first - answer IN ORDER, stop at first match:**
+
+| Question                                 | Level          | Artifacts                    |
+| ---------------------------------------- | -------------- | ---------------------------- |
+| User-facing feature with business value? | **L2 Feature** | Spec + Test Defs (+ Design)  |
+| Bug, improvement, internal, or refactor? | **L1 Task**    | Spec with inline tests       |
+| Typo, config, or trivial change?         | **L0 Micro**   | Minimal spec, existing tests |
+
+**Then follow this order:**
 
 1. **Check/create ticket** if context-loss risk exists (see decision tree above)
-2. **Read user stories** (`.safeword/planning/user-stories/`)
-3. **Read test definitions** (`.safeword/planning/test-definitions/`)
-4. **Read design doc** if complex (>3 components OR 2+ user stories)
+2. **Read/create spec** (`.safeword/planning/specs/`)
+3. **Read/create test definitions** (L2 only: `.safeword/planning/test-definitions/`)
+4. **Read/create design doc** if complex (3+ components)
 5. **TDD: RED → GREEN → REFACTOR**
 6. **Update ticket** with progress, ask user to confirm completion
 
 **Edge cases:**
 
-| Situation                           | Action                            |
-| ----------------------------------- | --------------------------------- |
-| User stories exist, test defs don't | Create test defs first            |
-| Test defs exist, user stories don't | Ask if user stories needed        |
-| Neither exist                       | Create both before implementation |
+| Situation                 | Action                  |
+| ------------------------- | ----------------------- |
+| Spec exists, no test defs | Create test defs (L2)   |
+| Test defs exist, no spec  | Create spec first       |
+| Neither exist             | Create spec, then tests |
+| L0/L1 task                | Inline tests in spec    |
 
 ---
 

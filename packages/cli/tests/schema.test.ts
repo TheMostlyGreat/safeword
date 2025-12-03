@@ -57,7 +57,7 @@ describe('Schema - Single Source of Truth', () => {
         '.safeword/templates',
         '.safeword/prompts',
         '.safeword/planning',
-        '.safeword/planning/user-stories',
+        '.safeword/planning/specs',
         '.safeword/planning/test-definitions',
         '.safeword/planning/design',
         '.safeword/planning/issues',
@@ -99,9 +99,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('ownedFiles', () => {
-    it('should have exactly 39 owned files', async () => {
+    it('should have exactly 43 owned files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(39);
+      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(43);
     });
 
     it('should have entry for every template file', async () => {

@@ -30,7 +30,7 @@ LLMs skip TDD discipline despite guides. Even "trivial" tasks expand in scope. A
 │  ↓ commit: test                                             │
 ├─────────────────────────────────────────────────────────────┤
 │  Phase 2: GREEN      │ Minimal implementation               │
-│  ↓ gate: test passes, no extra code                         │
+│  ↓ gate: test passes, no extra code, no mocks               │
 │  ↓ commit: implementation                                   │
 ├─────────────────────────────────────────────────────────────┤
 │  Phase 3: REFACTOR   │ Improve without changing behavior    │
@@ -46,31 +46,27 @@ LLMs skip TDD discipline despite guides. Even "trivial" tasks expand in scope. A
 ```text
 .safeword/planning/
 ├── specs/               # All scoping artifacts
-│   ├── feature-*.md     # L2/L3: User stories (high-level AC)
+│   ├── feature-*.md     # L2: User stories (high-level AC)
 │   └── task-*.md        # L0/L1: Task specs (tests inline)
-├── test-definitions/    # L2/L3 only: Detailed test suites
+├── test-definitions/    # L2 only: Detailed test suites
 │   └── feature-*.md     # Maps to feature specs
-└── design/              # L3 only
+└── design/              # Complex features only
 ```text
-
-**Tiered approach:**
-
-- **L0/L1 (Task):** Tests inline in task spec (simple)
-- **L2/L3 (Feature/Epic):** Separate test definitions file (detailed)
 
 ## Artifact Levels
 
-| Level  | Name    | Artifacts                             | Test Location                   |
-| ------ | ------- | ------------------------------------- | ------------------------------- |
-| **L3** | Epic    | Feature Spec + Test Defs + Design Doc | `test-definitions/feature-*.md` |
-| **L2** | Feature | Feature Spec + Test Defs              | `test-definitions/feature-*.md` |
-| **L1** | Task    | Task Spec                             | Inline in spec                  |
-| **L0** | Micro   | Task Spec (minimal)                   | Inline in spec                  |
+| Level  | Name    | Artifacts                                          | Test Location                         |
+| ------ | ------- | -------------------------------------------------- | ------------------------------------- |
+| **L2** | Feature | Feature Spec + Test Defs (+ Design Doc if complex) | `test-definitions/feature-*.md`       |
+| **L1** | Task    | Task Spec                                          | Inline in spec                        |
+| **L0** | Micro   | Task Spec (minimal)                                | Existing tests (no new test required) |
 
-**Why tiered:**
+**Key points:**
 
-- L2/L3 features need detailed test definitions (status tracking, steps, expected outcomes, coverage summaries)
-- L0/L1 tasks don't need 471-line test files for a bug fix
+- L2 features need detailed test definitions (status tracking, steps, expected outcomes)
+- L1 tasks have inline test scenarios
+- L0 micro tasks are scoped but can rely on existing tests
+- Design Doc is optional within L2 (add if 3+ components or architectural)
 
 ---
 
@@ -92,28 +88,35 @@ allowed-tools: '*'
 
 **Protocol:**
 
-```text
-1. What type of work?
-   ├─ User-facing feature → L2 or L3
-   ├─ Bug/improvement/internal → L1
-   └─ Typo/config/tiny fix → L0
+Answer IN ORDER. Stop at first match:
 
+```text
+1. User-facing feature with business value? → L2 Feature
+2. Bug, improvement, internal, or refactor? → L1 Task
+3. Typo, config, or trivial change? → L0 Micro
+```text
+
+Then:
+
+```text
 2. Does spec exist?
    ├─ Yes → Read it, confirm scope
    └─ No → Create it (see templates below)
 
-3. For L2/L3: Do test definitions exist?
+3. For L2: Do test definitions exist?
    ├─ Yes → Read them
    └─ No → Create them (guide: @.safeword/guides/test-definitions-guide.md)
 
-4. Is scope clear?
+4. For L2: Is this complex (3+ components, new schema, architectural)?
+   ├─ Yes → Create/read Design Doc
+   └─ No → Skip Design Doc
+
+5. Is scope clear?
    ├─ Yes → Proceed to Phase 1
    └─ No → Clarify with user before proceeding
 ```text
 
-### Feature Spec (L2/L3)
-
-High-level user story with acceptance criteria. Detailed tests go in separate file.
+### Feature Spec (L2)
 
 ```markdown
 # Feature: [Name]
@@ -129,36 +132,17 @@ High-level user story with acceptance criteria. Detailed tests go in separate fi
 
 **Test Definitions:** `.safeword/planning/test-definitions/feature-[name].md`
 
-**Design Doc:** [Link if L3, "N/A" if L2]
+**Design Doc:** [Link if complex, "N/A" if straightforward]
 ```text
 
 Location: `.safeword/planning/specs/feature-[name].md`
 
-### Test Definitions (L2/L3)
-
-Detailed test suites with steps, expected outcomes, and status tracking.
-
-- Guide: `@.safeword/guides/test-definitions-guide.md`
-- Template: `@.safeword/templates/test-definitions-feature.md`
-- Location: `.safeword/planning/test-definitions/feature-[name].md`
-
-Includes:
-
-- Test suites organized by feature area
-- Status per test (✅/⏭️/❌/🔴)
-- Detailed steps and expected outcomes
-- Coverage summary with percentages
-- Skipped test rationales
-- Execution commands
-
-### Task Spec (L0/L1)
-
-Lightweight spec with tests inline. No separate test definitions file.
+### Task Spec (L1)
 
 ```markdown
 # Task: [Name]
 
-**Type:** Bug | Improvement | Internal | Refactor | Micro
+**Type:** Bug | Improvement | Internal | Refactor
 
 **Scope:** [1-2 sentences]
 
@@ -177,13 +161,36 @@ Lightweight spec with tests inline. No separate test definitions file.
 
 Location: `.safeword/planning/specs/task-[name].md`
 
+### Task Spec - Micro (L0)
+
+```markdown
+# Task: [Name]
+
+**Type:** Micro
+
+**Scope:** [One sentence - what exactly is changing]
+
+**Out of Scope:** [Boundaries - prevents scope creep]
+
+**Done When:**
+
+- [ ] [Single observable outcome]
+
+**Tests:**
+
+- [ ] Existing tests pass (no new test needed)
+```text
+
+Location: `.safeword/planning/specs/task-[name].md`
+
 ### Exit Criteria
 
-- [ ] Level identified (L0/L1/L2/L3)
+- [ ] Level identified (L0/L1/L2)
 - [ ] Spec exists with clear scope
 - [ ] "Out of Scope" explicitly defined
-- [ ] For L2/L3: Test definitions file exists
-- [ ] For L0/L1: Test scenarios in spec
+- [ ] For L2: Test definitions file exists
+- [ ] For L1: Test scenarios in spec
+- [ ] For L0: Existing test coverage confirmed
 
 ---
 
@@ -193,18 +200,20 @@ Location: `.safeword/planning/specs/task-[name].md`
 
 **Protocol:**
 
-1. Pick ONE test from spec (L0/L1) or test definitions (L2/L3)
+1. Pick ONE test from spec (L1) or test definitions (L2)
 2. Write test code
 3. Run test
 4. Verify: fails because behavior missing (not syntax error)
 5. Commit test
 
+**For L0:** If existing tests cover the behavior, skip to Phase 2. The spec scopes the work; new tests aren't required for trivial changes.
+
 **Exit Criteria:**
 
-- [ ] Test written
+- [ ] Test written (or existing test confirmed for L0)
 - [ ] Test executed
-- [ ] Test fails for RIGHT reason
-- [ ] Committed: `test: [behavior]`
+- [ ] Test fails for RIGHT reason (or passes for L0 existing test)
+- [ ] Committed: `test: [behavior]` (skip for L0)
 
 **Red Flags → STOP:**
 
@@ -232,16 +241,37 @@ Location: `.safeword/planning/specs/task-[name].md`
 
 - [ ] Test passes
 - [ ] No extra code
+- [ ] No hardcoded/mock values
 - [ ] Committed: `feat:` or `fix:`
 
 **Red Flags → STOP:**
 
-| Flag                | Action                                 |
-| ------------------- | -------------------------------------- |
-| "Just in case" code | Delete it                              |
-| Multiple functions  | Delete extras                          |
-| Refactoring         | Stop - that's Phase 3                  |
-| Test still fails    | Debug (→ systematic-debugger if stuck) |
+| Flag                         | Action                                 |
+| ---------------------------- | -------------------------------------- |
+| "Just in case" code          | Delete it                              |
+| Multiple functions           | Delete extras                          |
+| Refactoring                  | Stop - that's Phase 3                  |
+| Test still fails             | Debug (→ systematic-debugger if stuck) |
+| Hardcoded value to pass test | Implement real logic (see below)       |
+
+### Anti-Pattern: Mock Implementations
+
+LLMs sometimes write hardcoded values to pass tests. This is not TDD.
+
+```typescript
+// ❌ BAD - Hardcoded to pass test
+function calculateDiscount(amount, tier) {
+  return 80; // Passes test but isn't real
+}
+
+// ✅ GOOD - Actual logic
+function calculateDiscount(amount, tier) {
+  if (tier === 'VIP') return amount * 0.8;
+  return amount;
+}
+```text
+
+**If you wrote a hardcoded value:** The next test cycle will catch it (different input will fail). But fix it now - mocks are technical debt.
 
 ---
 
@@ -274,11 +304,13 @@ Location: `.safeword/planning/specs/task-[name].md`
 More tests in spec/test-definitions?
 ├─ Yes → Return to Phase 1
 └─ No → All "Done When" / AC checked?
-        ├─ Yes → Complete (update test def status if L2/L3)
+        ├─ Yes → Complete (update test def status if L2)
         └─ No → Update spec, return to Phase 0
 ```text
 
-For L2/L3: Update test definition status (✅/⏭️/❌/🔴) as tests pass.
+For L2: Update test definition status (✅/⏭️/❌/🔴) as tests pass.
+
+**Note:** Multiple test cycles naturally catch mock implementations. If you hardcoded `return 80` for the first test, the second test with different input will fail.
 
 ---
 
@@ -294,54 +326,16 @@ For L2/L3: Update test definition status (✅/⏭️/❌/🔴) as tests pass.
 Level: L2 (user-facing feature)
 Spec: .safeword/planning/specs/feature-vip-discount.md
 Test Defs: .safeword/planning/test-definitions/feature-vip-discount.md
+Design Doc: N/A (single component)
 ```text
 
-Feature spec (high-level):
+**Phase 1:** Write test → FAIL → commit
 
-```markdown
-# Feature: VIP Discount
-
-**User Story:** As a customer, I want VIP discounts applied automatically.
-
-**Acceptance Criteria:**
-
-- [ ] VIP users get 20% discount
-- [ ] Non-VIP users get no discount
-
-**Out of Scope:** Other tiers, UI changes
-
-**Test Definitions:** `.safeword/planning/test-definitions/feature-vip-discount.md`
-```text
-
-Test definitions (detailed):
-
-```markdown
-# Test Definitions: VIP Discount
-
-## Test Suite 1: Discount Calculation
-
-### Test 1.1: VIP users receive 20% discount ❌
-
-**Status**: ❌ Not Implemented
-**Steps**:
-
-1. Create order with amount 100
-2. Apply discount for VIP user
-3. Verify final amount
-
-**Expected**:
-
-- Final amount = 80
-- Discount applied = 20
-```text
-
-**Phase 1:** Write test 1.1 → FAIL → commit → update status to 🔴
-
-**Phase 2:** Minimal implementation → PASS → commit → update status to ✅
+**Phase 2:** Minimal implementation → PASS → commit
 
 **Phase 3:** No changes needed
 
-**Phase 4:** More tests? Yes → Phase 1
+**Phase 4:** More tests? Yes → Phase 1 (second test catches any hardcoding)
 
 ---
 
@@ -401,7 +395,7 @@ Spec: .safeword/planning/specs/task-fix-typo-error-msg.md
 
 **Scope:** Typo in auth error ("authetication" → "authentication")
 
-**Out of Scope:** Error handling logic, other messages
+**Out of Scope:** Error handling logic, other messages, refactoring
 
 **Done When:**
 
@@ -412,9 +406,11 @@ Spec: .safeword/planning/specs/task-fix-typo-error-msg.md
 - [ ] Existing auth tests pass
 ```text
 
-**Phase 1:** Existing tests cover this → no new test needed
+**Phase 1:** Existing tests cover behavior → skip new test
 
-**Phase 2:** Fix typo → tests pass → commit `fix: typo in auth error`
+**Phase 2:** Fix typo → run existing tests → PASS → commit `fix: typo in auth error`
+
+**Why L0 still needs a spec:** "Fix typo" can become "refactor error handling" without explicit boundaries. The spec prevents scope creep even when no new test is needed.
 
 ---
 
@@ -430,29 +426,29 @@ Spec: .safeword/planning/specs/task-fix-typo-error-msg.md
 
 ## Key Decisions
 
-### 1. Tiered test definitions
+### 1. Three levels (not four)
 
-**What:** L0/L1 tests inline, L2/L3 get separate test definitions file
-**Why:** Bug fixes don't need 471-line test files. Features do.
-**Trade-off:** Two patterns, but right-sized for each level
+**What:** L0 (Micro), L1 (Task), L2 (Feature). Design Doc is optional within L2.
+**Why:** L2 vs L3 distinction was only "has Design Doc." Simpler to make it optional.
+**Trade-off:** Less granularity, but clearer triage.
 
-### 2. L0 still gets scoped
+### 2. L0 can skip new tests
+
+**What:** Micro tasks rely on existing test coverage
+**Why:** Writing a test for a typo fix is ceremony without value
+**Trade-off:** Must confirm existing tests actually cover the change
+
+### 3. L0 still gets scoped
 
 **What:** Even "trivial" tasks create a minimal spec
 **Why:** Scope creep happens. "Fix typo" becomes "refactor error handling."
 **Trade-off:** Small overhead, prevents rabbit holes
 
-### 3. Test definitions track status
+### 4. Mock implementation warning
 
-**What:** L2/L3 test definitions use ✅/⏭️/❌/🔴 status per test
-**Why:** Visibility into progress, matches existing workflow
-**Trade-off:** Requires updating test def file as tests pass
-
-### 4. Triage is part of the skill
-
-**What:** Phase 0 determines level before TDD starts
-**Why:** Scoping prevents scope creep. Prerequisite, not separate.
-**Trade-off:** Skill does more, but workflow is cohesive
+**What:** Explicit red flag for hardcoded values in Phase 2
+**Why:** LLMs optimize for "make test pass" - may hardcode values
+**Trade-off:** Iterate cycle catches mocks anyway, but explicit warning helps
 
 ---
 
@@ -466,15 +462,18 @@ Spec: .safeword/planning/specs/task-fix-typo-error-msg.md
 
 **Update:** SAFEWORD.md planning folder references
 
+**Size target:** SKILL.md should be <300 lines for efficient loading
+
 ---
 
 ## Success Criteria
 
 1. Triage catches scope creep before coding
-2. L2/L3 features get detailed test definitions
-3. L0/L1 tasks get lightweight inline tests
-4. RED phase verifies test fails for right reason
-5. GREEN phase produces minimal code
-6. Each phase commits appropriately
-7. LLM states current phase explicitly
+2. L2 features get detailed test definitions
+3. L1 tasks get inline test scenarios
+4. L0 micro tasks are scoped but skip new tests
+5. RED phase verifies test fails for right reason
+6. GREEN phase produces minimal code (no mocks)
+7. Each phase commits appropriately
+8. LLM states current phase explicitly
 ````
