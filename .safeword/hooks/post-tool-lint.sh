@@ -1,12 +1,14 @@
 #!/bin/bash
 # Safeword: Auto-lint changed files (PostToolUse)
-# Silently auto-fixes, only outputs unfixable errors
+# Auto-fixes what it can, blocks on unfixable errors so Claude can fix them.
+#
+# Strategy (Option B - see .safeword/learnings/post-tool-linting-strategies.md):
+# - Formatters: always exit 0 (they did their job)
+# - ESLint: exit 2 if unfixable errors remain (Claude should fix unused vars, etc.)
+# - Markdown: always exit 0 (low-risk, MD040 can't always be auto-fixed)
 #
 # SYNC: Keep file patterns in sync with LINT_STAGED_CONFIG in:
 #   packages/cli/src/templates/content.ts
-#
-# This hook is intentionally simple - ESLint's config handles
-# framework-specific rules (React, Vue, Svelte, Astro, etc.)
 
 # Require jq for JSON parsing
 command -v jq &> /dev/null || exit 0
@@ -23,18 +25,26 @@ file=$(echo "$input" | jq -r '.tool_input.file_path // .tool_input.notebook_path
 # Determine linter based on file extension
 case "$file" in
   # JS/TS and framework files - ESLint first (fix code), then Prettier (format)
+  # Exit 2 if unfixable errors remain so Claude can address them
   *.js|*.jsx|*.ts|*.tsx|*.mjs|*.mts|*.cjs|*.cts|*.vue|*.svelte|*.astro)
-    if ! errors=$(npx eslint --fix "$file" 2>&1); then
-      [ -n "$errors" ] && echo "$errors"
-    fi
+    # Run --fix and capture output + exit code in single pass
+    errors=$(npx eslint --fix "$file" 2>&1)
+    eslint_exit=$?
+
+    # Always format
     npx prettier --write "$file" 2>/dev/null
+
+    # If ESLint failed, output errors and block
+    if [ $eslint_exit -ne 0 ]; then
+      echo "$errors" >&2
+      exit 2
+    fi
     ;;
 
   # Markdown - markdownlint first, then Prettier
+  # Always exit 0 - MD040 (language hints) often can't be auto-fixed
   *.md)
-    if ! errors=$(npx markdownlint-cli2 --fix "$file" 2>&1); then
-      [ -n "$errors" ] && echo "$errors"
-    fi
+    npx markdownlint-cli2 --fix "$file" 2>/dev/null
     npx prettier --write "$file" 2>/dev/null
     ;;
 
