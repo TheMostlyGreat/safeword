@@ -1,7 +1,11 @@
 #!/bin/bash
-# Find which test creates unwanted files/state (test pollution)
-# Usage: ./find-polluter.sh <file_to_check> <test_pattern>
-# Example: ./find-polluter.sh '.git' 'src/**/*.test.ts'
+# Bisect test pollution: Find which test creates unwanted files or shared state
+#
+# Use when: Tests pass individually but fail together, tests leave files behind,
+# tests affect each other, test isolation problems, shared state between tests
+#
+# Usage: ./bisect-test-pollution.sh <file_to_check> <test_pattern>
+# Example: ./bisect-test-pollution.sh '.git' 'src/**/*.test.ts'
 
 set -e
 

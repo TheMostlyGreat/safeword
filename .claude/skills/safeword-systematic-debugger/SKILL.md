@@ -195,13 +195,14 @@ If you catch yourself thinking:
 
 ## Finding Test Pollution
 
-When tests pass individually but fail together, use bisection:
+When tests pass individually but fail together (test isolation problem, tests affect each other,
+tests leave files behind), use bisection:
 
 ```bash
-./.safeword/scripts/find-polluter.sh '.git' 'src/**/*.test.ts'
+./.safeword/scripts/bisect-test-pollution.sh '.git' 'src/**/*.test.ts'
 ```
 
-See: @./.safeword/scripts/find-polluter.sh
+See: @./.safeword/scripts/bisect-test-pollution.sh
 
 ## Debug Logging
 

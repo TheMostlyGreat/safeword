@@ -155,7 +155,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/prompts/quality-review.md': { template: 'prompts/quality-review.md' },
 
     // Scripts (1 file)
-    '.safeword/scripts/find-polluter.sh': { template: 'scripts/find-polluter.sh' },
+    '.safeword/scripts/bisect-test-pollution.sh': { template: 'scripts/bisect-test-pollution.sh' },
 
     // Claude skills and commands (5 files)
     '.claude/skills/safeword-quality-reviewer/SKILL.md': {
