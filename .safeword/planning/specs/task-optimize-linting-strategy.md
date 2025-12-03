@@ -37,15 +37,37 @@ Optimize the linting configuration in safeword to work well with AI coding assis
 
 1. Developer edits file
 2. Claude Code makes changes
-3. **No immediate linting feedback**
-4. At commit time, lint-staged runs all linters
-5. If errors, commit blocked
+3. **PostToolUse hook runs** (`.safeword/hooks/post-tool-lint.sh`)
+   - ESLint --fix + Prettier for JS/TS
+   - markdownlint --fix + Prettier for MD
+   - Prettier only for JSON/CSS/etc
+   - **Always exits 0** (never blocks)
+   - Outputs errors to stderr if unfixable
+4. At commit time, lint-staged runs all linters (backup)
+5. If errors at commit, commit blocked
 
-### Problems with Current State
+### Current PostToolUse Behavior
 
-1. **No feedback during editing** - Claude doesn't learn from lint errors until commit
-2. **All-or-nothing at commit** - Either everything passes or commit fails
-3. **Unknown exit code behavior** - Do our formatters return 0 after auto-fix?
+```bash
+# From .safeword/hooks/post-tool-lint.sh
+case "$file" in
+  *.ts|*.tsx|...)
+    npx eslint --fix "$file"  # Fix what we can
+    npx prettier --write "$file"  # Format
+    ;;
+  *.md)
+    npx markdownlint-cli2 --fix "$file"
+    npx prettier --write "$file"
+    ;;
+esac
+exit 0  # ALWAYS exits 0 - never blocks Claude
+```
+
+### Questions About Current State
+
+1. **Are unfixable errors fed back to Claude?** - Script outputs errors but exits 0
+2. **Is latency acceptable?** - ESLint + Prettier on every edit
+3. **Should type errors block?** - Currently no TypeScript checking in hook
 
 ---
 
@@ -83,13 +105,13 @@ echo "Exit code: $?"
 | Security      | Hardcoded secret  | **Yes (block)** |
 | Unused import | Dead code         | Maybe           |
 
-### Q4: What's our risk tolerance for loops?
+### Q4: Should we change error feedback behavior?
 
 Options:
 
-- **Conservative:** No PostToolUse hooks, keep commit-time only
-- **Moderate:** Add hooks for formatters only (always exit 0)
-- **Aggressive:** Add hooks for type checking too (may cause loops)
+- **Keep Current:** Always exit 0, errors shown but don't block
+- **Add Blocking:** Exit 2 on unfixable ESLint errors (Claude retries)
+- **Add Type Checking:** Run `tsc --noEmit`, exit 2 on type errors
 
 ---
 
@@ -105,30 +127,29 @@ Options:
 
 Based on audit, choose one:
 
-**Option A: Keep Current (Conservative)**
+**Option A: Keep Current (exit 0 always)**
 
-- Pros: No risk of loops, already works
-- Cons: No feedback during editing
-- Action: Document why and close issue
+- Pros: No risk of loops, auto-fixes silently
+- Cons: Claude doesn't learn from unfixable errors
+- Action: Document current behavior and close issue
 
-**Option B: Add Format-Only Hooks (Moderate)**
+**Option B: Block on Unfixable ESLint Errors**
 
-- Pros: Clean formatting without asking, no loop risk
-- Cons: Still no type feedback during editing
-- Action: Add PostToolUse hook for Prettier only
+- Pros: Claude learns from real code issues
+- Cons: May cause retry loops on edge cases
+- Action: Change exit code when ESLint has unfixable errors
 
-**Option C: Add Type Feedback Hooks (Aggressive)**
+**Option C: Add TypeScript Checking**
 
-- Pros: Claude learns from type errors immediately
-- Cons: Risk of loops, added latency
-- Action: Add hooks with retry cap, monitor for loops
+- Pros: Type errors caught immediately
+- Cons: Slow (tsc), high loop risk
+- Action: Add tsc --noEmit to hook, exit 2 on errors
 
 ### Phase 3: Implementation (if B or C)
 
-- [ ] Create `.claude/settings.json` with PostToolUse hooks
-- [ ] Ensure formatters exit 0
-- [ ] Add retry cap mechanism if needed
-- [ ] Test with intentional errors
+- [ ] Modify `.safeword/hooks/post-tool-lint.sh`
+- [ ] Test with intentional unfixable errors
+- [ ] Verify no infinite loops
 - [ ] Document in SAFEWORD.md
 
 ---
