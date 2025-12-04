@@ -42,7 +42,7 @@
 
 **Example format:**
 
-````markdown
+`````markdown
 **[Entity] state** (source of truth: [storage type])
 
 - `field1`: constraint (e.g., 0-100 integer)
@@ -200,4 +200,4 @@ Before finalizing data architecture doc:
 - [ ] Version and status match codebase (verify with git/deployment)
 - [ ] Cross-referenced from root ARCHITECTURE.md or SAFEWORD.md (link exists)
 ````
-````
+`````

@@ -164,7 +164,7 @@ After filling out story, mentally check:
 
 ### ✅ GOOD Constraints (Specific, Testable)
 
-````markdown
+`````markdown
 ### Performance
 
 - [ ] API response < 200ms at P95 under 100 concurrent users
@@ -256,4 +256,4 @@ Save stories as: `.safeword/planning/user-stories/[slug].md`
 - `user-story-1.md` ← Not descriptive
 - `STORY_CAMPAIGN_SWITCHING_FINAL_v2.md` ← Bloated
 ````
-````
+`````

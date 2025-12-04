@@ -36,7 +36,7 @@ All project context files should:
 
 **MANDATORY:** Every project-level context file (CLAUDE.md, CURSOR.md, AGENTS.md) must start with a trigger to SAFEWORD:
 
-````markdown
+`````markdown
 # Project Name - Developer Context
 
 **⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**
@@ -457,4 +457,4 @@ Before committing:
 - Keep under 50KB for optimal performance (though no hard limit)
 - Use imports to modularize instead of monolithic files
 ````
-````
+`````

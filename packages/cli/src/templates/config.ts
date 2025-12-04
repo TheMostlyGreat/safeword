@@ -39,7 +39,7 @@ const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };
 
 // Build dynamic ignores based on detected frameworks
-const ignores = ["node_modules/", "dist/", "build/", "coverage/"];
+const ignores = ["**/node_modules/", "**/dist/", "**/build/", "**/coverage/"];
 if (deps["next"]) ignores.push(".next/");
 if (deps["astro"]) ignores.push(".astro/");
 if (deps["vue"] || deps["nuxt"]) ignores.push(".nuxt/");

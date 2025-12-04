@@ -3,104 +3,225 @@
  *
  * Auto-detects common architecture directories and generates
  * eslint-plugin-boundaries config with sensible hierarchy rules.
+ *
+ * Supports:
+ * - Standard projects (src/utils, utils/)
+ * - Monorepos (packages/*, apps/*)
+ * - Various naming conventions (helpers, shared, core, etc.)
  */
 
 import { join } from 'node:path';
+import { existsSync, readdirSync } from 'node:fs';
 import { exists } from './fs.js';
 
 /**
- * Architecture directories to detect, ordered from bottom to top of hierarchy.
- * Lower items can be imported by higher items, not vice versa.
+ * Architecture layer definitions with alternative names.
+ * Each layer maps to equivalent directory names.
+ * Order defines hierarchy: earlier = lower layer.
  */
-const ARCHITECTURE_DIRS = [
-  'types', // Bottom: can be imported by everything
-  'utils',
-  'lib',
-  'hooks',
-  'services',
-  'components',
-  'features',
-  'modules',
-  'app', // Top: can import everything
+const ARCHITECTURE_LAYERS = [
+  // Layer 0: Pure types (no imports)
+  { layer: 'types', dirs: ['types', 'interfaces', 'schemas'] },
+  // Layer 1: Utilities (only types)
+  { layer: 'utils', dirs: ['utils', 'helpers', 'shared', 'common', 'core'] },
+  // Layer 2: Libraries (types, utils)
+  { layer: 'lib', dirs: ['lib', 'libraries'] },
+  // Layer 3: State & logic (types, utils, lib)
+  { layer: 'hooks', dirs: ['hooks', 'composables'] },
+  { layer: 'services', dirs: ['services', 'api', 'stores', 'state'] },
+  // Layer 4: UI components (all above)
+  { layer: 'components', dirs: ['components', 'ui'] },
+  // Layer 5: Features (all above)
+  { layer: 'features', dirs: ['features', 'modules', 'domains'] },
+  // Layer 6: Entry points (can import everything)
+  { layer: 'app', dirs: ['app', 'pages', 'views', 'routes', 'commands'] },
 ] as const;
 
-type ArchDir = (typeof ARCHITECTURE_DIRS)[number];
+type Layer = (typeof ARCHITECTURE_LAYERS)[number]['layer'];
 
 /**
  * Hierarchy rules: what each layer can import
  * Lower layers have fewer import permissions
  */
-const HIERARCHY: Record<ArchDir, ArchDir[]> = {
-  types: [], // types can't import anything (pure type definitions)
+const HIERARCHY: Record<Layer, Layer[]> = {
+  types: [],
   utils: ['types'],
   lib: ['utils', 'types'],
   hooks: ['lib', 'utils', 'types'],
   services: ['lib', 'utils', 'types'],
   components: ['hooks', 'services', 'lib', 'utils', 'types'],
   features: ['components', 'hooks', 'services', 'lib', 'utils', 'types'],
-  modules: ['components', 'hooks', 'services', 'lib', 'utils', 'types'],
-  app: ['features', 'modules', 'components', 'hooks', 'services', 'lib', 'utils', 'types'],
+  app: ['features', 'components', 'hooks', 'services', 'lib', 'utils', 'types'],
 };
 
+export interface DetectedElement {
+  layer: Layer;
+  pattern: string; // glob pattern for boundaries config
+  location: string; // human-readable location
+}
+
 export interface DetectedArchitecture {
-  directories: ArchDir[];
-  inSrc: boolean; // true if dirs are in src/, false if at root
+  elements: DetectedElement[];
+  isMonorepo: boolean;
+}
+
+/**
+ * Find monorepo package directories
+ */
+function findMonorepoPackages(projectDir: string): string[] {
+  const packages: string[] = [];
+
+  // Check common monorepo patterns
+  const monorepoRoots = ['packages', 'apps', 'libs', 'modules'];
+
+  for (const root of monorepoRoots) {
+    const rootPath = join(projectDir, root);
+    if (existsSync(rootPath)) {
+      try {
+        const entries = readdirSync(rootPath, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.isDirectory() && !entry.name.startsWith('.')) {
+            packages.push(join(root, entry.name));
+          }
+        }
+      } catch {
+        // Directory not readable, skip
+      }
+    }
+  }
+
+  return packages;
+}
+
+/**
+ * Check if a layer already exists for this path prefix
+ */
+function hasLayerForPrefix(elements: DetectedElement[], layer: Layer, pathPrefix: string): boolean {
+  return elements.some(e => e.layer === layer && e.pattern.startsWith(pathPrefix));
+}
+
+/**
+ * Scan a single search path for architecture layers
+ */
+function scanSearchPath(
+  projectDir: string,
+  searchPath: string,
+  pathPrefix: string,
+  elements: DetectedElement[],
+): void {
+  for (const layerDef of ARCHITECTURE_LAYERS) {
+    for (const dirName of layerDef.dirs) {
+      const fullPath = join(projectDir, searchPath, dirName);
+      if (exists(fullPath) && !hasLayerForPrefix(elements, layerDef.layer, pathPrefix)) {
+        elements.push({
+          layer: layerDef.layer,
+          pattern: `${pathPrefix}${dirName}/**`,
+          location: `${pathPrefix}${dirName}`,
+        });
+      }
+    }
+  }
+}
+
+/**
+ * Scan a directory for architecture layers
+ */
+function scanForLayers(projectDir: string, basePath: string): DetectedElement[] {
+  const elements: DetectedElement[] = [];
+  const prefix = basePath ? `${basePath}/` : '';
+
+  // Check src/ and root level
+  scanSearchPath(projectDir, join(basePath, 'src'), `${prefix}src/`, elements);
+  scanSearchPath(projectDir, basePath, prefix, elements);
+
+  return elements;
 }
 
 /**
  * Detects architecture directories in the project
- * Always returns a result (even with 0 directories) - boundaries is always configured
+ * Handles both standard projects and monorepos
  */
 export function detectArchitecture(projectDir: string): DetectedArchitecture {
-  const foundInSrc: ArchDir[] = [];
-  const foundAtRoot: ArchDir[] = [];
+  const elements: DetectedElement[] = [];
 
-  for (const dir of ARCHITECTURE_DIRS) {
-    if (exists(join(projectDir, 'src', dir))) {
-      foundInSrc.push(dir);
-    }
-    if (exists(join(projectDir, dir))) {
-      foundAtRoot.push(dir);
+  // First, check for monorepo packages
+  const packages = findMonorepoPackages(projectDir);
+  const isMonorepo = packages.length > 0;
+
+  if (isMonorepo) {
+    // Scan each package
+    for (const pkg of packages) {
+      elements.push(...scanForLayers(projectDir, pkg));
     }
   }
 
-  // Prefer src/ location if more dirs found there
-  const inSrc = foundInSrc.length >= foundAtRoot.length;
-  const found = inSrc ? foundInSrc : foundAtRoot;
+  // Also scan root level (works for both monorepo root and standard projects)
+  elements.push(...scanForLayers(projectDir, ''));
 
-  return { directories: found, inSrc };
+  // Deduplicate by pattern
+  const seen = new Set<string>();
+  const uniqueElements = elements.filter(e => {
+    if (seen.has(e.pattern)) return false;
+    seen.add(e.pattern);
+    return true;
+  });
+
+  return { elements: uniqueElements, isMonorepo };
 }
 
 /**
- * Generates the boundaries config file content
+ * Format a single element for the config
  */
-export function generateBoundariesConfig(arch: DetectedArchitecture): string {
-  const prefix = arch.inSrc ? 'src/' : '';
-  const hasDirectories = arch.directories.length > 0;
+function formatElement(el: DetectedElement): string {
+  return `      { type: '${el.layer}', pattern: '${el.pattern}', mode: 'full' }`;
+}
 
-  // Generate element definitions with mode: 'full' to match from project root only
-  const elements = arch.directories
-    .map(dir => `      { type: '${dir}', pattern: '${prefix}${dir}/**', mode: 'full' }`)
-    .join(',\n');
+/**
+ * Format allowed imports for a rule
+ */
+function formatAllowedImports(allowed: Layer[]): string {
+  return allowed.map(d => `'${d}'`).join(', ');
+}
+
+/**
+ * Generate a single rule for what a layer can import
+ */
+function generateRule(layer: Layer, detectedLayers: Set<Layer>): string | null {
+  const allowedLayers = HIERARCHY[layer];
+  if (allowedLayers.length === 0) return null;
+
+  const allowed = allowedLayers.filter(dep => detectedLayers.has(dep));
+  if (allowed.length === 0) return null;
+
+  return `        { from: ['${layer}'], allow: [${formatAllowedImports(allowed)}] }`;
+}
+
+/**
+ * Build description of what was detected
+ */
+function buildDetectedInfo(arch: DetectedArchitecture): string {
+  if (arch.elements.length === 0) {
+    return 'No architecture directories detected yet - add types/, utils/, components/, etc.';
+  }
+  const locations = arch.elements.map(e => e.location).join(', ');
+  const monorepoNote = arch.isMonorepo ? ' (monorepo)' : '';
+  return `Detected: ${locations}${monorepoNote}`;
+}
+
+export function generateBoundariesConfig(arch: DetectedArchitecture): string {
+  const hasElements = arch.elements.length > 0;
+
+  // Generate element definitions
+  const elementsContent = arch.elements.map(formatElement).join(',\n');
 
   // Generate rules (what each layer can import)
-  const rules = arch.directories
-    .filter(dir => HIERARCHY[dir].length > 0)
-    .map(dir => {
-      const allowed = HIERARCHY[dir].filter(dep => arch.directories.includes(dep));
-      if (allowed.length === 0) return null;
-      return `        { from: ['${dir}'], allow: [${allowed.map(d => `'${d}'`).join(', ')}] }`;
-    })
-    .filter(Boolean)
-    .join(',\n');
+  const detectedLayers = new Set(arch.elements.map(e => e.layer));
+  const rules = [...detectedLayers]
+    .map(layer => generateRule(layer, detectedLayers))
+    .filter((rule): rule is string => rule !== null);
+  const rulesContent = rules.join(',\n');
 
-  const detectedInfo = hasDirectories
-    ? `Detected directories: ${arch.directories.join(', ')} (${arch.inSrc ? 'in src/' : 'at root'})`
-    : 'No architecture directories detected yet - add types/, utils/, components/, etc.';
-
-  // Build elements array content (empty array if no directories)
-  const elementsContent = elements || '';
-  const rulesContent = rules || '';
+  const detectedInfo = buildDetectedInfo(arch);
 
   return `/**
  * Architecture Boundaries Configuration (AUTO-GENERATED)
@@ -127,13 +248,17 @@ export default {
 ${elementsContent}
     ],
   },
-  rules: {
+  rules: {${
+    hasElements
+      ? `
     'boundaries/element-types': ['warn', {
       default: 'disallow',
       rules: [
 ${rulesContent}
       ],
-    }],
+    }],`
+      : ''
+  }
     'boundaries/no-unknown': 'off', // Allow files outside defined elements
     'boundaries/no-unknown-files': 'off', // Allow non-matching files
   },
