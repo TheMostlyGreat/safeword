@@ -53,7 +53,7 @@ const configs = [
 ];
 
 // TypeScript support (detected from package.json)
-if (deps["typescript"]) {
+if (deps["typescript"] || deps["typescript-eslint"]) {
   const tseslint = await import("typescript-eslint");
   configs.push(importX.flatConfigs.typescript);
   configs.push(...tseslint.default.configs.recommended);
@@ -131,6 +131,21 @@ configs.push({
 
 // Architecture boundaries${options.boundaries ? '\nconfigs.push(boundariesConfig);' : ''}
 
+// Disable import-x resolution rules - resolver not installed for monorepo
+// Keep import-x/order and other non-resolution rules active
+configs.push({
+  name: "import-x-resolver-off",
+  files: ["**/*.{js,ts,jsx,tsx,mjs,mts,cjs,cts}"],
+  rules: {
+    "import-x/no-unresolved": "off",
+    "import-x/namespace": "off",
+    "import-x/no-duplicates": "off",
+    "import-x/default": "off",
+    "import-x/no-named-as-default": "off",
+    "import-x/no-named-as-default-member": "off",
+  },
+});
+
 // eslint-config-prettier must be last to disable conflicting rules
 configs.push(eslintConfigPrettier);
 
@@ -138,6 +153,15 @@ export default defineConfig(configs);
 `;
 }
 
+// Cursor hooks configuration (.cursor/hooks.json format)
+// See: https://cursor.com/docs/agent/hooks
+export const CURSOR_HOOKS = {
+  beforeSubmitPrompt: [{ command: './.safeword/hooks/cursor/before-submit-prompt.sh' }],
+  afterFileEdit: [{ command: './.safeword/hooks/cursor/after-file-edit.sh' }],
+  afterAgentResponse: [{ command: './.safeword/hooks/cursor/after-agent-response.sh' }],
+};
+
+// Claude Code hooks configuration (.claude/settings.json format)
 export const SETTINGS_HOOKS = {
   SessionStart: [
     {

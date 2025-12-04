@@ -4,7 +4,7 @@
 #
 # Strategy (Option B - see .safeword/learnings/post-tool-linting-strategies.md):
 # - Formatters: always exit 0 (they did their job)
-# - ESLint: exit 2 if unfixable errors remain (Claude should fix unused vars, etc.)
+# - ESLint: exit 2 if unfixable ERRORS remain (--quiet ignores warnings)
 # - Markdown: always exit 0 (low-risk, MD040 can't always be auto-fixed)
 #
 # SYNC: Keep file patterns in sync with LINT_STAGED_CONFIG in:
@@ -27,8 +27,8 @@ case "$file" in
   # JS/TS and framework files - ESLint first (fix code), then Prettier (format)
   # Exit 2 if unfixable errors remain so Claude can address them
   *.js|*.jsx|*.ts|*.tsx|*.mjs|*.mts|*.cjs|*.cts|*.vue|*.svelte|*.astro)
-    # Run --fix and capture output + exit code in single pass
-    errors=$(npx eslint --fix "$file" 2>&1)
+    # Run --fix --quiet: auto-fix what we can, only report errors (not warnings)
+    errors=$(npx eslint --fix --quiet "$file" 2>&1)
     eslint_exit=$?
 
     # Always format
