@@ -10,7 +10,7 @@
 import { VERSION } from './version.js';
 import { type ProjectType } from './utils/project-detector.js';
 import { AGENTS_MD_LINK, getPrettierConfig, getLintStagedConfig } from './templates/content.js';
-import { getEslintConfig, SETTINGS_HOOKS } from './templates/config.js';
+import { getEslintConfig, SETTINGS_HOOKS, CURSOR_HOOKS } from './templates/config.js';
 import { generateBoundariesConfig, detectArchitecture } from './utils/boundaries.js';
 import { HUSKY_PRE_COMMIT_CONTENT, MCP_SERVERS } from './utils/install.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';
@@ -32,9 +32,8 @@ export interface FileDefinition {
   generator?: (ctx: ProjectContext) => string; // Dynamic generator needing context
 }
 
-export interface ManagedFileDefinition extends FileDefinition {
-  // managedFiles: created if missing, updated only if content === current template output
-}
+// managedFiles: created if missing, updated only if content === current template output
+export type ManagedFileDefinition = FileDefinition;
 
 export interface JsonMergeDefinition {
   keys: string[]; // Dot-notation keys we manage
@@ -77,6 +76,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   ownedDirs: [
     '.safeword',
     '.safeword/hooks',
+    '.safeword/hooks/cursor',
     '.safeword/lib',
     '.safeword/guides',
     '.safeword/templates',
@@ -88,6 +88,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/planning/issues',
     '.safeword/scripts',
     '.husky',
+    '.cursor',
+    '.cursor/rules',
+    '.cursor/commands',
   ],
 
   // Directories we add to but don't own (not deleted on reset)
@@ -180,6 +183,18 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
     // Husky (1 file)
     '.husky/pre-commit': { content: HUSKY_PRE_COMMIT_CONTENT },
+
+    // Cursor rules (1 file)
+    '.cursor/rules/safeword-core.mdc': { template: 'cursor/rules/safeword-core.mdc' },
+
+    // Cursor commands (3 files - same as Claude)
+    '.cursor/commands/lint.md': { template: 'commands/lint.md' },
+    '.cursor/commands/quality-review.md': { template: 'commands/quality-review.md' },
+    '.cursor/commands/architecture.md': { template: 'commands/architecture.md' },
+
+    // Cursor hooks adapters (2 files)
+    '.safeword/hooks/cursor/after-file-edit.sh': { template: 'hooks/cursor/after-file-edit.sh' },
+    '.safeword/hooks/cursor/stop.sh': { template: 'hooks/cursor/stop.sh' },
   },
 
   // Files created if missing, updated only if content matches current template
@@ -329,6 +344,69 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         return result;
       },
     },
+
+    '.cursor/mcp.json': {
+      keys: ['mcpServers.context7', 'mcpServers.playwright'],
+      removeFileIfEmpty: true,
+      merge: existing => {
+        const mcpServers = (existing.mcpServers as Record<string, unknown>) ?? {};
+        return {
+          ...existing,
+          mcpServers: {
+            ...mcpServers,
+            context7: MCP_SERVERS.context7,
+            playwright: MCP_SERVERS.playwright,
+          },
+        };
+      },
+      unmerge: existing => {
+        const result = { ...existing };
+        const mcpServers = { ...((existing.mcpServers as Record<string, unknown>) ?? {}) };
+
+        delete mcpServers.context7;
+        delete mcpServers.playwright;
+
+        if (Object.keys(mcpServers).length > 0) {
+          result.mcpServers = mcpServers;
+        } else {
+          delete result.mcpServers;
+        }
+
+        return result;
+      },
+    },
+
+    '.cursor/hooks.json': {
+      keys: ['version', 'hooks.afterFileEdit', 'hooks.stop'],
+      removeFileIfEmpty: true,
+      merge: existing => {
+        const hooks = (existing.hooks as Record<string, unknown[]>) ?? {};
+        return {
+          ...existing,
+          version: 1, // Required by Cursor
+          hooks: {
+            ...hooks,
+            ...CURSOR_HOOKS,
+          },
+        };
+      },
+      unmerge: existing => {
+        const result = { ...existing };
+        const hooks = { ...((existing.hooks as Record<string, unknown[]>) ?? {}) };
+
+        delete hooks.afterFileEdit;
+        delete hooks.stop;
+
+        if (Object.keys(hooks).length > 0) {
+          result.hooks = hooks;
+        } else {
+          delete result.hooks;
+          delete result.version;
+        }
+
+        return result;
+      },
+    },
   },
 
   // Text files where we patch specific content
@@ -354,6 +432,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       'prettier',
       '@eslint/js',
       'eslint-plugin-import-x',
+      'eslint-import-resolver-typescript',
       'eslint-plugin-sonarjs',
       'eslint-plugin-boundaries',
       'eslint-plugin-playwright',

@@ -41,9 +41,9 @@ describe('Schema - Single Source of Truth', () => {
   const templatesDir = join(__dirname, '../templates');
 
   describe('ownedDirs', () => {
-    it('should have exactly 13 owned directories', async () => {
+    it('should have exactly 17 owned directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.ownedDirs.length).toBe(13);
+      expect(SAFEWORD_SCHEMA.ownedDirs.length).toBe(17);
     });
 
     it('should include all required .safeword subdirectories', async () => {
@@ -51,6 +51,7 @@ describe('Schema - Single Source of Truth', () => {
       const required = [
         '.safeword',
         '.safeword/hooks',
+        '.safeword/hooks/cursor',
         '.safeword/lib',
         '.safeword/scripts',
         '.safeword/guides',
@@ -62,6 +63,9 @@ describe('Schema - Single Source of Truth', () => {
         '.safeword/planning/design',
         '.safeword/planning/issues',
         '.husky',
+        '.cursor',
+        '.cursor/rules',
+        '.cursor/commands',
       ];
 
       for (const dir of required) {
@@ -99,9 +103,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('ownedFiles', () => {
-    it('should have exactly 43 owned files', async () => {
+    it('should have exactly 49 owned files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(43);
+      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(49);
     });
 
     it('should have entry for every template file', async () => {
@@ -177,16 +181,18 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('jsonMerges', () => {
-    it('should have exactly 3 json merge definitions', async () => {
+    it('should have exactly 5 json merge definitions', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.jsonMerges).length).toBe(3);
+      expect(Object.keys(SAFEWORD_SCHEMA.jsonMerges).length).toBe(5);
     });
 
-    it('should include package.json, .claude/settings.json, .mcp.json', async () => {
+    it('should include package.json, .claude/settings.json, .mcp.json, and Cursor configs', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('package.json');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.claude/settings.json');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.mcp.json');
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.cursor/mcp.json');
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.cursor/hooks.json');
     });
   });
 
@@ -212,9 +218,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('packages', () => {
-    it('should have 13 base packages', async () => {
+    it('should have 14 base packages', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(13);
+      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(14);
     });
 
     it('should include all required base packages', async () => {
@@ -224,6 +230,7 @@ describe('Schema - Single Source of Truth', () => {
         'prettier',
         '@eslint/js',
         'eslint-plugin-import-x',
+        'eslint-import-resolver-typescript',
         'eslint-plugin-sonarjs',
         'eslint-plugin-boundaries',
         'eslint-plugin-playwright',

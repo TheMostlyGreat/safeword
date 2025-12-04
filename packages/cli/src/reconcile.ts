@@ -172,7 +172,7 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   }
 
   // 4. chmod hook/lib directories (only .husky if git repo)
-  const chmodPaths = ['.safeword/hooks', '.safeword/lib'];
+  const chmodPaths = ['.safeword/hooks', '.safeword/hooks/cursor', '.safeword/lib'];
   if (ctx.isGitRepo) chmodPaths.push(HUSKY_DIR);
   actions.push({ type: 'chmod', paths: chmodPaths });
 
@@ -269,9 +269,9 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   }
 
   // 4. chmod (only .husky if git repo)
-  const chmodPaths = ['.safeword/hooks', '.safeword/lib'];
-  if (ctx.isGitRepo) chmodPaths.push(HUSKY_DIR);
-  actions.push({ type: 'chmod', paths: chmodPaths });
+  const chmodPathsUpgrade = ['.safeword/hooks', '.safeword/hooks/cursor', '.safeword/lib'];
+  if (ctx.isGitRepo) chmodPathsUpgrade.push(HUSKY_DIR);
+  actions.push({ type: 'chmod', paths: chmodPathsUpgrade });
 
   // 5. JSON merges (always apply to ensure keys are present)
   for (const [filePath, def] of Object.entries(schema.jsonMerges)) {

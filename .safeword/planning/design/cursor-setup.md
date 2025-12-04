@@ -8,20 +8,17 @@ Add Cursor IDE support to safeword, parallel to Claude Code. Uses `@file` refere
 
 ## Files Created
 
-````text
+```text
 .cursor/
 ├── rules/
-│   ├── safeword-core.mdc          # @.safeword/SAFEWORD.md
-│   └── safeword-testing.mdc       # @.safeword/guides/tdd-best-practices.md
+│   └── safeword-core.mdc          # @.safeword/SAFEWORD.md
 ├── commands/
-│   ├── lint.md                    # Same as .claude/commands/lint.md
-│   ├── quality-review.md          # Same as .claude/commands/quality-review.md
-│   └── architecture.md            # Same as .claude/commands/architecture.md
+│   ├── lint.md                    # Same as .claude/commands/
+│   ├── quality-review.md
+│   └── architecture.md
 ├── mcp.json                       # Same MCP servers as .mcp.json
 └── hooks.json                     # Cursor hook config
-
-AGENTS.md                          # Points to .safeword/SAFEWORD.md
-```text
+```
 
 ## Rule Files (Pure References)
 
@@ -33,29 +30,39 @@ alwaysApply: true
 ---
 
 @.safeword/SAFEWORD.md
-```text
+```
 
-### safeword-testing.mdc
-
-```markdown
----
-globs: ['**/*.test.ts', '**/*.spec.ts', '**/*.test.tsx', '**/*.spec.tsx']
----
-
-@.safeword/guides/tdd-best-practices.md
-```text
+Only one rule needed. TDD guide triggers are already in SAFEWORD.md - no separate testing rule required.
 
 ## Commands
 
-Cursor commands don't support `@file` references (per [docs](https://cursor.com/docs/agent/chat/commands) - plain markdown only).
+| Platform    | @file in Commands           |
+| ----------- | --------------------------- |
+| Claude Code | ✅ Yes                      |
+| Cursor      | ❌ No (plain markdown only) |
 
-**Options**:
+**Note:** `.safeword/prompts/` contains programmatic prompts (JSON output format) for code consumption. Slash commands are different - they're human-readable instructions. These serve different purposes and should stay separate.
 
-1. Duplicate content from `.claude/commands/` (drift risk)
-2. Share source files in `.safeword/prompts/` that both reference
-3. Keep commands in `.claude/commands/`, symlink or copy during setup
+**Decision**: Cursor commands copy Claude command content. Both platforms use the same templates.
 
-**Decision**: Option 2 - Move command content to `.safeword/prompts/`, have both Claude and Cursor commands be copies of those source files. Single source of truth in `.safeword/`.
+```text
+packages/cli/templates/commands/
+├── lint.md              # Source template (with frontmatter)
+├── quality-review.md
+└── architecture.md
+
+.claude/commands/         # Installed from templates/commands/
+├── lint.md
+├── quality-review.md
+└── architecture.md
+
+.cursor/commands/         # Installed from same templates/commands/
+├── lint.md
+├── quality-review.md
+└── architecture.md
+```
+
+Frontmatter (Claude-specific `---` block) is harmless in Cursor - it's just ignored as markdown content.
 
 ## AGENTS.md
 
@@ -63,7 +70,7 @@ Cursor commands don't support `@file` references (per [docs](https://cursor.com/
 **Read first:** .safeword/SAFEWORD.md
 
 This project uses safeword for development workflows.
-```text
+```
 
 ## MCP Configuration
 
@@ -82,9 +89,53 @@ Same servers as Claude, different location:
     }
   }
 }
-```text
+```
 
 ## Hooks
+
+**Available Cursor hook events (Dec 2025):**
+
+- `beforeSubmitPrompt` - Before prompt sent
+- `afterFileEdit` - After file changes
+- `afterAgentResponse` - After assistant message
+- `stop` - Agent loop completion
+- `beforeShellExecution` / `afterShellExecution` - Shell commands
+- `beforeMCPExecution` / `afterMCPExecution` - MCP tool calls
+- `beforeReadFile` - Before file read
+- `afterAgentThought` - After reasoning blocks
+- `beforeTabFileRead` / `afterTabFileEdit` - Tab completions
+
+**Hook mapping (Claude → Cursor):**
+
+| Claude Hook              | Cursor Hook     | Notes                                           |
+| ------------------------ | --------------- | ----------------------------------------------- |
+| SessionStart             | ❌ None         | Covered by `alwaysApply` rule                   |
+| UserPromptSubmit         | ❌ None         | `beforeSubmitPrompt` can only block, not inject |
+| PostToolUse (Write/Edit) | `afterFileEdit` | Lint check (observation only)                   |
+| Stop                     | `stop`          | Inject followup if files were edited            |
+
+**Key Cursor limitation:** Only the `stop` hook can inject messages via `followup_message`. Other hooks are observation-only or can only block.
+
+### Decision: Marker File Approach
+
+**Rejected alternatives:**
+
+1. **Two-hook system** (`afterAgentResponse` → parse JSON → `stop`): Requires parsing response text, complex regex, no precedent
+2. **Pure loop_count heuristic**: Would trigger on any multi-tool response (e.g., reading files), false positives
+3. **Unconditional review**: Noisy UX, reviews trivial responses
+4. **No automatic review**: Defeats safeword's purpose
+
+**Chosen approach:** Marker file communication between `afterFileEdit` and `stop`:
+
+1. `afterFileEdit` → creates `/tmp/safeword-cursor-edited-{conversation_id}`
+2. `stop` → checks for marker, injects review if found, cleans up marker
+
+**Rationale:**
+
+- Only triggers when files are actually edited (not just reads)
+- Simple file-based communication (no JSON parsing)
+- Marker cleanup on each stop prevents stale state
+- User can always invoke `/quality-review` manually for edge cases
 
 ```json
 {
@@ -94,15 +145,14 @@ Same servers as Claude, different location:
     "stop": [{ "command": "./.safeword/hooks/cursor/stop.sh" }]
   }
 }
-```text
-
-Cursor adapters in `.safeword/hooks/cursor/` call shared core logic in `.safeword/lib/`.
+```
 
 ## What We Removed (vs earlier draft)
 
 1. **safeword-typescript.mdc** - Deleted. TS guidelines are in SAFEWORD.md already.
 2. **safeword-guides-agent.mdc** - Deleted. Guide triggers are in SAFEWORD.md already.
-3. **Inline content in rules** - All rules are now pure `@file` references.
+3. **safeword-testing.mdc** - Deleted. TDD triggers are in SAFEWORD.md already.
+4. **Inline content in rules** - All rules are now pure `@file` references.
 
 ## Schema Changes
 
@@ -112,47 +162,41 @@ Cursor adapters in `.safeword/hooks/cursor/` call shared core logic in `.safewor
 '.cursor/rules',
 '.cursor/commands',
 '.safeword/hooks/cursor',
-'.safeword/prompts',  // NEW: shared command content
 
 // ownedFiles additions:
 '.cursor/rules/safeword-core.mdc': { template: 'cursor/rules/safeword-core.mdc' },
-'.cursor/rules/safeword-testing.mdc': { template: 'cursor/rules/safeword-testing.mdc' },
-'.cursor/commands/lint.md': { template: 'prompts/lint.md' },
-'.cursor/commands/quality-review.md': { template: 'prompts/quality-review.md' },
-'.cursor/commands/architecture.md': { template: 'prompts/architecture.md' },
-'.claude/commands/lint.md': { template: 'prompts/lint.md' },  // UPDATE existing
-'.claude/commands/quality-review.md': { template: 'prompts/quality-review.md' },
-'.claude/commands/architecture.md': { template: 'prompts/architecture.md' },
-'AGENTS.md': { template: 'cursor/AGENTS.md' },
+'.cursor/commands/lint.md': { template: 'commands/lint.md' },  // Same as Claude
+'.cursor/commands/quality-review.md': { template: 'commands/quality-review.md' },
+'.cursor/commands/architecture.md': { template: 'commands/architecture.md' },
 '.safeword/hooks/cursor/after-file-edit.sh': { template: 'hooks/cursor/after-file-edit.sh' },
 '.safeword/hooks/cursor/stop.sh': { template: 'hooks/cursor/stop.sh' },
 
 // jsonMerges additions:
 '.cursor/mcp.json': { /* same pattern as .mcp.json */ },
 '.cursor/hooks.json': { /* merge hooks */ },
-```text
+```
+
+Note: Claude commands already use `templates/commands/*.md` - no changes needed there.
 
 ## Implementation Plan
 
-### Phase 1: Consolidate Commands
+### Phase 1: Create Cursor Templates
 
-1. Move command content to `packages/cli/templates/prompts/`
-2. Update Claude commands to use shared templates
-3. Create Cursor commands from same templates
+1. `cursor/rules/safeword-core.mdc` (5 lines - @file ref)
+2. `hooks/cursor/after-file-edit.sh` (adapter for lint)
+3. `hooks/cursor/stop.sh` (loop_count heuristic, inject followup_message)
 
-### Phase 2: Create Cursor Templates
+### Phase 2: Schema & Setup
 
-1. `cursor/rules/safeword-core.mdc` (5 lines)
-2. `cursor/rules/safeword-testing.mdc` (6 lines)
-3. `cursor/AGENTS.md` (3 lines)
-4. `hooks/cursor/after-file-edit.sh`
-5. `hooks/cursor/stop.sh`
+1. Add Cursor entries to schema (ownedDirs, ownedFiles, jsonMerges)
+2. Add editor selection prompt to setup ("Claude Code", "Cursor", "Both")
+3. Add `safeword add cursor` / `safeword remove cursor` commands
 
-### Phase 3: Schema & Setup
+### Notes
 
-1. Add Cursor entries to schema
-2. Add editor selection prompt to setup
-3. Add `safeword add cursor` / `safeword remove cursor`
+- Commands: Both platforms use same `templates/commands/*.md` (no changes needed)
+- AGENTS.md: Already handled by existing textPatches in schema
+- Frontmatter in Cursor commands: Harmless, just renders as text
 
 ## References
 
@@ -160,4 +204,3 @@ Cursor adapters in `.safeword/hooks/cursor/` call shared core logic in `.safewor
 - [Cursor Commands Docs](https://cursor.com/docs/agent/chat/commands)
 - [Cursor MCP Docs](https://cursor.com/docs/context/mcp)
 - [Cursor Hooks Docs](https://cursor.com/docs/agent/hooks)
-````

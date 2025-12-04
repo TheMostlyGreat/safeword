@@ -149,7 +149,6 @@ export default defineConfig(configs);
 // See: https://cursor.com/docs/agent/hooks
 export const CURSOR_HOOKS = {
   afterFileEdit: [{ command: './.safeword/hooks/cursor/after-file-edit.sh' }],
-  afterAgentResponse: [{ command: './.safeword/hooks/cursor/after-agent-response.sh' }],
   stop: [{ command: './.safeword/hooks/cursor/stop.sh' }],
 };
 
