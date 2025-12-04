@@ -22,10 +22,12 @@
  * @returns ESLint config file content as a string
  */
 export function getEslintConfig(options: { boundaries?: boolean }): string {
-  return `import { readFileSync } from "fs";
+  return `/* eslint-disable import-x/no-unresolved -- dynamic imports for optional framework plugins */
+import { readFileSync } from "fs";
 import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
 import { importX } from "eslint-plugin-import-x";
+import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
 import sonarjs from "eslint-plugin-sonarjs";
 import sdl from "@microsoft/eslint-plugin-sdl";
 import playwright from "eslint-plugin-playwright";
@@ -48,6 +50,11 @@ const configs = [
   { ignores },
   js.configs.recommended,
   importX.flatConfigs.recommended,
+  {
+    settings: {
+      "import-x/resolver-next": [createTypeScriptImportResolver()],
+    },
+  },
   sonarjs.configs.recommended,
   ...sdl.configs.recommended,
 ];
@@ -131,21 +138,6 @@ configs.push({
 
 // Architecture boundaries${options.boundaries ? '\nconfigs.push(boundariesConfig);' : ''}
 
-// Disable import-x resolution rules - resolver not installed for monorepo
-// Keep import-x/order and other non-resolution rules active
-configs.push({
-  name: "import-x-resolver-off",
-  files: ["**/*.{js,ts,jsx,tsx,mjs,mts,cjs,cts}"],
-  rules: {
-    "import-x/no-unresolved": "off",
-    "import-x/namespace": "off",
-    "import-x/no-duplicates": "off",
-    "import-x/default": "off",
-    "import-x/no-named-as-default": "off",
-    "import-x/no-named-as-default-member": "off",
-  },
-});
-
 // eslint-config-prettier must be last to disable conflicting rules
 configs.push(eslintConfigPrettier);
 
@@ -156,9 +148,9 @@ export default defineConfig(configs);
 // Cursor hooks configuration (.cursor/hooks.json format)
 // See: https://cursor.com/docs/agent/hooks
 export const CURSOR_HOOKS = {
-  beforeSubmitPrompt: [{ command: './.safeword/hooks/cursor/before-submit-prompt.sh' }],
   afterFileEdit: [{ command: './.safeword/hooks/cursor/after-file-edit.sh' }],
   afterAgentResponse: [{ command: './.safeword/hooks/cursor/after-agent-response.sh' }],
+  stop: [{ command: './.safeword/hooks/cursor/stop.sh' }],
 };
 
 // Claude Code hooks configuration (.claude/settings.json format)
