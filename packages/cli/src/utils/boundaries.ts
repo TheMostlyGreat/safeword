@@ -11,7 +11,7 @@
  */
 
 import { join } from 'node:path';
-import { existsSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { exists } from './fs.js';
 
 /**
@@ -76,7 +76,7 @@ function findMonorepoPackages(projectDir: string): string[] {
 
   for (const root of monorepoRoots) {
     const rootPath = join(projectDir, root);
-    if (existsSync(rootPath)) {
+    if (exists(rootPath)) {
       try {
         const entries = readdirSync(rootPath, { withFileTypes: true });
         for (const entry of entries) {
@@ -212,7 +212,7 @@ export function generateBoundariesConfig(arch: DetectedArchitecture): string {
   const hasElements = arch.elements.length > 0;
 
   // Generate element definitions
-  const elementsContent = arch.elements.map(formatElement).join(',\n');
+  const elementsContent = arch.elements.map(el => formatElement(el)).join(',\n');
 
   // Generate rules (what each layer can import)
   const detectedLayers = new Set(arch.elements.map(e => e.layer));

@@ -255,7 +255,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       },
       unmerge: existing => {
         const result = { ...existing };
-        const scripts = { ...((existing.scripts as Record<string, string>) ?? {}) };
+        const scripts = { ...(existing.scripts as Record<string, string>) };
 
         // Remove safeword-specific scripts but preserve lint/format (useful standalone)
         delete scripts['lint:md'];
@@ -330,7 +330,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       },
       unmerge: existing => {
         const result = { ...existing };
-        const mcpServers = { ...((existing.mcpServers as Record<string, unknown>) ?? {}) };
+        const mcpServers = { ...(existing.mcpServers as Record<string, unknown>) };
 
         delete mcpServers.context7;
         delete mcpServers.playwright;
@@ -361,7 +361,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       },
       unmerge: existing => {
         const result = { ...existing };
-        const mcpServers = { ...((existing.mcpServers as Record<string, unknown>) ?? {}) };
+        const mcpServers = { ...(existing.mcpServers as Record<string, unknown>) };
 
         delete mcpServers.context7;
         delete mcpServers.playwright;
@@ -392,7 +392,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       },
       unmerge: existing => {
         const result = { ...existing };
-        const hooks = { ...((existing.hooks as Record<string, unknown[]>) ?? {}) };
+        const hooks = { ...(existing.hooks as Record<string, unknown[]>) };
 
         delete hooks.afterFileEdit;
         delete hooks.stop;
@@ -434,6 +434,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       'eslint-plugin-import-x',
       'eslint-import-resolver-typescript',
       'eslint-plugin-sonarjs',
+      'eslint-plugin-unicorn',
       'eslint-plugin-boundaries',
       'eslint-plugin-playwright',
       '@microsoft/eslint-plugin-sdl',

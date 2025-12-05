@@ -31,6 +31,7 @@ import { createTypeScriptImportResolver } from "eslint-import-resolver-typescrip
 import sonarjs from "eslint-plugin-sonarjs";
 import sdl from "@microsoft/eslint-plugin-sdl";
 import playwright from "eslint-plugin-playwright";
+import unicorn from "eslint-plugin-unicorn";
 import eslintConfigPrettier from "eslint-config-prettier";
 ${options.boundaries ? 'import boundariesConfig from "./.safeword/eslint-boundaries.config.mjs";' : ''}
 
@@ -57,6 +58,25 @@ const configs = [
   },
   sonarjs.configs.recommended,
   ...sdl.configs.recommended,
+  unicorn.configs["flat/recommended"],
+  {
+    // Unicorn overrides for LLM-generated code
+    // Keep modern JS enforcement, disable overly pedantic rules
+    rules: {
+      "unicorn/prevent-abbreviations": "off", // ctx, dir, pkg, err are standard
+      "unicorn/no-null": "off", // null is valid JS
+      "unicorn/no-process-exit": "off", // CLI apps use process.exit
+      "unicorn/import-style": "off", // Named imports are fine
+      "unicorn/numeric-separators-style": "off", // Style preference
+      "unicorn/text-encoding-identifier-case": "off", // utf-8 vs utf8
+      "unicorn/switch-case-braces": "warn", // Good practice, not critical
+      "unicorn/catch-error-name": "warn", // Reasonable, auto-fixable
+      "unicorn/no-negated-condition": "off", // Sometimes clearer
+      "unicorn/no-array-reduce": "off", // Reduce is fine when readable
+      "unicorn/no-array-for-each": "off", // forEach is fine
+      "unicorn/prefer-module": "off", // CJS still valid
+    },
+  },
 ];
 
 // TypeScript support (detected from package.json)
