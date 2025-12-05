@@ -53,7 +53,7 @@ describe('Reconcile - Reconciliation Engine', () => {
         vitest: false,
         tailwind: false,
         publishableLibrary: false,
-        ...((overrides.projectType as Record<string, boolean>) ?? {}),
+        ...(overrides.projectType as Record<string, boolean>),
       },
       devDeps: (overrides.devDeps as Record<string, string>) ?? {},
       isGitRepo: (overrides.isGitRepo as boolean) ?? true, // Default to true so husky tests pass
@@ -238,6 +238,81 @@ describe('Reconcile - Reconciliation Engine', () => {
   });
 
   describe('reconcile() - upgrade mode', () => {
+    it('should remove deprecated files that exist', async () => {
+      const { reconcile } = await import('../src/reconcile.js');
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      createPackageJson();
+      const ctx = createContext();
+
+      // First install
+      await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
+
+      // Create a deprecated file (simulating old version)
+      const deprecatedPath = join(tempDir, '.safeword/templates/user-stories-template.md');
+      mkdirSync(join(tempDir, '.safeword/templates'), { recursive: true });
+      writeFileSync(deprecatedPath, '# Old User Stories Template');
+
+      // Upgrade should remove deprecated file
+      const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx);
+
+      expect(result.removed).toContain('.safeword/templates/user-stories-template.md');
+      expect(existsSync(deprecatedPath)).toBe(false);
+    });
+
+    it('should not fail when deprecated files do not exist', async () => {
+      const { reconcile } = await import('../src/reconcile.js');
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      createPackageJson();
+      const ctx = createContext();
+
+      // First install
+      await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
+
+      // Ensure deprecated file does not exist
+      const deprecatedPath = join(tempDir, '.safeword/templates/user-stories-template.md');
+      expect(existsSync(deprecatedPath)).toBe(false);
+
+      // Upgrade should succeed without errors
+      const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx);
+
+      expect(result.applied).toBe(true);
+      // Deprecated file not in removed list since it didn't exist
+      expect(result.removed).not.toContain('.safeword/templates/user-stories-template.md');
+    });
+
+    it('should include deprecated files in dryRun upgrade actions', async () => {
+      const { reconcile } = await import('../src/reconcile.js');
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      createPackageJson();
+      const ctx = createContext();
+
+      // First install
+      await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
+
+      // Create a deprecated file
+      const deprecatedPath = join(tempDir, '.safeword/templates/user-stories-template.md');
+      mkdirSync(join(tempDir, '.safeword/templates'), { recursive: true });
+      writeFileSync(deprecatedPath, '# Old Template');
+
+      // dryRun upgrade should report deprecated file in actions
+      const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
+
+      // Should have rm action for deprecated file
+      const rmActions = result.actions.filter(a => a.type === 'rm');
+      expect(rmActions.some(a => a.path === '.safeword/templates/user-stories-template.md')).toBe(
+        true,
+      );
+
+      // File should still exist (dryRun)
+      expect(existsSync(deprecatedPath)).toBe(true);
+
+      // Should be in removed list
+      expect(result.removed).toContain('.safeword/templates/user-stories-template.md');
+    });
+
     it('should update owned files only if content changed', async () => {
       const { reconcile } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
@@ -332,7 +407,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Uninstall
-      const result = await reconcile(SAFEWORD_SCHEMA, 'uninstall', ctx);
+      await reconcile(SAFEWORD_SCHEMA, 'uninstall', ctx);
 
       // All owned files should be removed
       expect(existsSync(join(tempDir, '.claude/commands/lint.md'))).toBe(false);
