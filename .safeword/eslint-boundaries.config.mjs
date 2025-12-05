@@ -19,17 +19,16 @@ import boundaries from 'eslint-plugin-boundaries';
 export default {
   plugins: { boundaries },
   settings: {
-    'boundaries/elements': [
-
-    ],
+    'boundaries/elements': [],
   },
   rules: {
-    'boundaries/element-types': ['warn', {
-      default: 'disallow',
-      rules: [
-
-      ],
-    }],
+    'boundaries/element-types': [
+      'warn',
+      {
+        default: 'disallow',
+        rules: [],
+      },
+    ],
     'boundaries/no-unknown': 'off', // Allow files outside defined elements
     'boundaries/no-unknown-files': 'off', // Allow non-matching files
   },

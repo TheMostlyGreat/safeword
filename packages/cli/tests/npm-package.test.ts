@@ -32,7 +32,16 @@ describe('NPM Package Structure', () => {
     const templatesPath = join(cliRoot, 'templates');
     expect(existsSync(templatesPath)).toBe(true);
 
-    const required = ['SAFEWORD.md', 'guides', 'doc-templates', 'hooks', 'prompts', 'skills', 'commands', 'lib'];
+    const required = [
+      'SAFEWORD.md',
+      'guides',
+      'doc-templates',
+      'hooks',
+      'prompts',
+      'skills',
+      'commands',
+      'lib',
+    ];
     for (const item of required) {
       expect(existsSync(join(templatesPath, item))).toBe(true);
     }
@@ -65,7 +74,7 @@ describe('NPM Package Structure', () => {
     const files = readdirSync(guidesPath);
 
     // Should have multiple guide files
-    const mdFiles = files.filter((f) => f.endsWith('.md'));
+    const mdFiles = files.filter(f => f.endsWith('.md'));
     expect(mdFiles.length).toBeGreaterThan(5);
   });
 

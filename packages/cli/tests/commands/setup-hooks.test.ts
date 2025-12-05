@@ -18,6 +18,19 @@ import {
   initGitRepo,
 } from '../helpers';
 
+interface HookCommand {
+  command?: string;
+}
+
+interface HookEntry {
+  hooks?: HookCommand[];
+}
+
+/** Check if hook entry contains command matching pattern */
+function hasHookCommand(entry: HookEntry, pattern: string): boolean {
+  return entry.hooks?.some(h => h.command?.includes(pattern)) ?? false;
+}
+
 describe('Test Suite 3: Setup - Hooks and Skills', () => {
   let tempDir: string;
 
@@ -131,10 +144,7 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
 
       // Find hook entry that references AGENTS.md check (new nested format)
       const agentsHookEntry = settings.hooks.SessionStart.find(
-        (entry: { hooks?: Array<{ command?: string }> }) =>
-          entry.hooks?.some(
-            (h) => h.command && (h.command.includes('AGENTS') || h.command.includes('agents')),
-          ),
+        (entry: HookEntry) => hasHookCommand(entry, 'AGENTS') || hasHookCommand(entry, 'agents'),
       );
 
       expect(agentsHookEntry).toBeDefined();
@@ -161,9 +171,8 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
       const settings = JSON.parse(readTestFile(tempDir, '.claude/settings.json'));
 
       // Find hook entry that references timestamp injection (new nested format)
-      const timestampHookEntry = settings.hooks.UserPromptSubmit.find(
-        (entry: { hooks?: Array<{ command?: string }> }) =>
-          entry.hooks?.some((h) => h.command && h.command.includes('prompt-timestamp')),
+      const timestampHookEntry = settings.hooks.UserPromptSubmit.find((entry: HookEntry) =>
+        hasHookCommand(entry, 'prompt-timestamp'),
       );
 
       expect(timestampHookEntry).toBeDefined();
@@ -207,7 +216,7 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
       expect(fileExists(tempDir, '.safeword/lib')).toBe(true);
 
       const libDir = join(tempDir, '.safeword/lib');
-      const shFiles = readdirSync(libDir).filter((f) => f.endsWith('.sh'));
+      const shFiles = readdirSync(libDir).filter(f => f.endsWith('.sh'));
       expect(shFiles.length).toBeGreaterThan(0);
     });
   });
@@ -270,7 +279,7 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
 
       // Should contain markdown command files
       const commandsDir = join(tempDir, '.claude/commands');
-      const mdFiles = readdirSync(commandsDir).filter((f) => f.endsWith('.md'));
+      const mdFiles = readdirSync(commandsDir).filter(f => f.endsWith('.md'));
       expect(mdFiles.length).toBeGreaterThan(0);
     });
   });
