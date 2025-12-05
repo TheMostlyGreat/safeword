@@ -130,7 +130,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   sharedDirs: ['.claude', '.claude/skills', '.claude/commands'],
 
   // Created on setup but NOT deleted on reset (preserves user data)
-  preservedDirs: ['.safeword/learnings', '.safeword/tickets', '.safeword/tickets/completed'],
+  preservedDirs: [
+    '.safeword/learnings',
+    '.safeword/tickets',
+    '.safeword/tickets/completed',
+    '.safeword/logs',
+  ],
 
   // Files to delete on upgrade (renamed or removed in newer versions)
   deprecatedFiles: ['.safeword/templates/user-stories-template.md'],
@@ -174,7 +179,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/guides/user-story-guide.md': { template: 'guides/user-story-guide.md' },
     '.safeword/guides/zombie-process-cleanup.md': { template: 'guides/zombie-process-cleanup.md' },
 
-    // Templates (6 files)
+    // Templates (7 files)
     '.safeword/templates/architecture-template.md': {
       template: 'doc-templates/architecture-template.md',
     },
@@ -191,6 +196,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/templates/feature-spec-template.md': {
       template: 'doc-templates/feature-spec-template.md',
     },
+    '.safeword/templates/work-log-template.md': { template: 'doc-templates/work-log-template.md' },
 
     // Prompts (2 files)
     '.safeword/prompts/architecture.md': { template: 'prompts/architecture.md' },

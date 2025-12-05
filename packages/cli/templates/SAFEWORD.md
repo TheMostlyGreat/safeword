@@ -74,6 +74,7 @@ Training data is stale. Follow this sequence:
 | Feature spans 3+ components OR needs technical spec        | @./.safeword/templates/design-doc-template.md      |
 | Making decision with long-term impact OR trade-offs        | @./.safeword/templates/architecture-template.md    |
 | Task needs context anchoring (see Ticket System below)     | @./.safeword/templates/ticket-template.md          |
+| Starting execution of a plan, ticket, or spec              | @./.safeword/templates/work-log-template.md        |
 
 ---
 
@@ -139,7 +140,41 @@ status: in_progress
 
 - Log immediately after each action
 - Re-read ticket before significant actions
+- For detailed scratch notes, use a separate work log (see Work Logs below)
 - **CRITICAL:** Never mark `done` without user confirmation
+
+---
+
+## Work Logs
+
+**Purpose:** Scratch pad and working memory during execution. Think hard. Keep notes.
+
+**Location:** `.safeword/logs/{artifact-type}-{slug}.md`
+
+**Naming convention:**
+
+| Working on...         | Log file name            |
+| --------------------- | ------------------------ |
+| Ticket `001-fix-auth` | `ticket-001-fix-auth.md` |
+| Spec `task-add-cache` | `spec-task-add-cache.md` |
+| Design doc `oauth`    | `design-oauth.md`        |
+
+**One artifact = one log.** If log exists, append a new session. Don't spawn multiple logs for the same work.
+
+**When to create:**
+
+- Starting execution of a plan, ticket, or spec
+- Investigation or debugging that may span multiple attempts
+- Any work where you might lose context
+
+**Think hard behaviors:**
+
+1. **Re-read the log** before each major action
+2. **Pause to review** your approach periodically
+3. **Log findings** as you discover them, not after
+4. **Note dead ends** so you don't repeat them
+
+**Log what helps you stay on track:** findings, decisions, hypotheses, blockers, scratch calculations. Use your discretion.
 
 ---
 

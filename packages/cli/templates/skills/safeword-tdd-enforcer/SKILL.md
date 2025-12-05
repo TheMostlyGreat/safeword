@@ -65,6 +65,31 @@ Answer IN ORDER. Stop at first match:
 
 ---
 
+## Work Log
+
+**Think hard. Keep notes.**
+
+Before starting Phase 1, create or open a work log:
+
+**Location:** `.safeword/logs/{artifact-type}-{slug}.md`
+
+| Working on...         | Log file name            |
+| --------------------- | ------------------------ |
+| Ticket `001-fix-auth` | `ticket-001-fix-auth.md` |
+| Spec `task-add-cache` | `spec-task-add-cache.md` |
+
+**One artifact = one log.** If log exists, append a new session.
+
+**Behaviors:**
+
+1. **Re-read the log** before each phase transition
+2. **Log findings** as you discover them
+3. **Note dead ends** so you don't repeat them
+
+**Template:** @./.safeword/templates/work-log-template.md
+
+---
+
 ## Phase 1: RED
 
 **Iron Law:** NO IMPLEMENTATION UNTIL TEST FAILS FOR THE RIGHT REASON

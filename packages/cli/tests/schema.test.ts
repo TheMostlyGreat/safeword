@@ -89,9 +89,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('preservedDirs', () => {
-    it('should have exactly 3 preserved directories', async () => {
+    it('should have exactly 4 preserved directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.preservedDirs.length).toBe(3);
+      expect(SAFEWORD_SCHEMA.preservedDirs.length).toBe(4);
     });
 
     it('should preserve user content directories', async () => {
@@ -99,13 +99,14 @@ describe('Schema - Single Source of Truth', () => {
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/learnings');
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/tickets');
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/tickets/completed');
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/logs');
     });
   });
 
   describe('ownedFiles', () => {
-    it('should have exactly 49 owned files', async () => {
+    it('should have exactly 50 owned files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(49);
+      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(50);
     });
 
     it('should have entry for every template file', async () => {

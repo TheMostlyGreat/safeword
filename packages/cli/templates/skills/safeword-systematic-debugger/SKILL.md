@@ -26,6 +26,33 @@ Answer IN ORDER. Stop at first match:
 - "Quick fix" seems obvious (red flag)
 - Already tried 1+ fixes that didn't work
 
+---
+
+## Work Log
+
+**Think hard. Keep notes.**
+
+Before starting Phase 1, create or open a work log:
+
+**Location:** `.safeword/logs/{artifact-type}-{slug}.md`
+
+| Working on...         | Log file name            |
+| --------------------- | ------------------------ |
+| Ticket `001-fix-auth` | `ticket-001-fix-auth.md` |
+| Spec `task-add-cache` | `spec-task-add-cache.md` |
+
+**One artifact = one log.** If log exists, append a new session.
+
+**Especially important for debugging:**
+
+1. **Re-read the log** before each hypothesis
+2. **Log what you tried** and why it didn't work
+3. **Note dead ends** - debugging often revisits same paths
+
+**Template:** @./.safeword/templates/work-log-template.md
+
+---
+
 ## The Four Phases
 
 Complete each phase before proceeding.
