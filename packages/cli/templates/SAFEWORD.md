@@ -161,11 +161,12 @@ status: in_progress
 
 **One artifact = one log.** If log exists, append a new session. Don't spawn multiple logs for the same work.
 
-**When to create:**
+**Create log? Answer IN ORDER, stop at first match:**
 
-- Starting execution of a plan, ticket, or spec
-- Investigation or debugging that may span multiple attempts
-- Any work where you might lose context
+1. Executing a plan, ticket, or spec? → Create log
+2. Investigation/debugging with multiple attempts? → Create log
+3. Risk of losing context? → Create log
+4. Quick single-action task? → Skip log
 
 **Think hard behaviors:**
 
@@ -175,6 +176,15 @@ status: in_progress
 4. **Note dead ends** so you don't repeat them
 
 **Log what helps you stay on track:** findings, decisions, hypotheses, blockers, scratch calculations. Use your discretion.
+
+**Edge cases:**
+
+| Situation                       | Action                                                                                        |
+| ------------------------------- | --------------------------------------------------------------------------------------------- |
+| Multiple artifacts at once      | One log per artifact (don't combine)                                                          |
+| No clear artifact (exploratory) | Create `explore-{topic}.md`, convert to proper artifact when scope clarifies                  |
+| Very long artifact name         | Abbreviate slug: `ticket-001-implement-oauth-with-refresh.md` → `ticket-001-oauth-refresh.md` |
+| Resuming after context loss     | Re-read entire log before continuing                                                          |
 
 ---
 
