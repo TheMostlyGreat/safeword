@@ -22,7 +22,7 @@
 **Where** (if applicable): `[file/path/component.ts]`
 **Interface**:
 
-````typescript
+```typescript
 // Key types/interfaces
 interface Example {
   id: string;
@@ -31,7 +31,7 @@ interface Example {
 
 // Key methods
 function doSomething(input: Example): Result;
-```text
+```
 
 **Dependencies**: [What it uses]
 **Tests**: [Which test scenarios this component enables]
@@ -49,7 +49,7 @@ interface AnotherExample {
 }
 
 function anotherMethod(input: AnotherExample): Output;
-```text
+```
 
 **Dependencies**: [Different dependencies]
 **Tests**: [Different test scenarios this enables]
@@ -70,7 +70,7 @@ interface Item {
   name: string;
   // ...
 }
-```text
+```
 
 ## Component Interaction (if applicable)
 
@@ -132,4 +132,3 @@ Component [N] → Component [N+1]
 - [ADR-XXX: Related decision]
 - [External docs or examples]
 - [Proof of concept]
-````

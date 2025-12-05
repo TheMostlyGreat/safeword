@@ -46,7 +46,7 @@ Tests are the specification. When a test fails, the implementation is wrong—no
 
 ### Test Speed Hierarchy (Fast → Slow)
 
-````text
+```text
 Unit (milliseconds)      ← Pure functions, no I/O
   ↓
 Integration (seconds)    ← Multiple modules, database, API calls
@@ -54,7 +54,7 @@ Integration (seconds)    ← Multiple modules, database, API calls
 LLM Eval (seconds)       ← AI judgment, costs $0.01-0.30 per run
   ↓
 E2E (seconds-minutes)    ← Full browser, user flows
-```text
+```
 
 ### Anti-Patterns: Testing at the Wrong Level
 
@@ -72,7 +72,7 @@ test('discount calculation', async ({ page }) => {
 it('applies 20% discount', () => {
   expect(calculateDiscount(100, 0.2)).toBe(80);
 });
-```text
+```
 
 ❌ **Testing UI components at the wrong level**
 
@@ -97,7 +97,7 @@ test('user sees header after login', async ({ page }) => {
   await page.click('button:has-text("Login")')
   await expect(page.getByRole('banner')).toContainText('Alex')
 })
-```text
+```
 
 **Principle:** Use integration tests for component behavior, E2E tests for multi-page user flows.
 
@@ -146,7 +146,7 @@ test('user sees header after login', async ({ page }) => {
 it('calculates total with tax', () => {
   expect(calculateTotal(100, 0.08)).toBe(108); // FAILS - function doesn't exist
 });
-```text
+```
 
 ### Phase 2: GREEN (Make Tests Pass)
 
@@ -163,7 +163,7 @@ it('calculates total with tax', () => {
 function calculateTotal(amount: number, taxRate: number): number {
   return amount + amount * taxRate;
 }
-```text
+```
 
 ### Phase 3: REFACTOR (Clean Up)
 
@@ -207,7 +207,7 @@ Answer these questions in order to choose the test type. Questions are mutually 
    └─ YES → Unit test
       Examples: Calculations, formatters, validators, pure algorithms
    └─ NO → Re-evaluate: What are you actually testing?
-```text
+```
 
 **Edge cases:**
 
@@ -269,7 +269,7 @@ it('applies 20% discount for VIP users', () => {
 it('calls setState with correct value', () => {
   expect(setState).toHaveBeenCalledWith({ count: 1 });
 });
-```text
+```
 
 ### 2. Integration Tests
 
@@ -290,7 +290,7 @@ describe('Agent + State Integration', () => {
     expect(store.messages).toHaveLength(2); // player + AI response
   });
 });
-```text
+```
 
 ### 3. E2E Tests
 
@@ -310,7 +310,7 @@ test('user creates account and first item', async ({ page }) => {
   await page.click('text=Save');
   await expect(page.getByText('My First Item')).toBeVisible();
 });
-```text
+```
 
 ### E2E Testing with Persistent Dev Servers
 
@@ -345,7 +345,7 @@ export default defineConfig({
     baseURL: 'http://localhost:4000', // Test against test instance
   },
 });
-```text
+```
 
 **Package.json Scripts** (example uses 3000/4000 - adjust to your project's ports):
 
@@ -357,7 +357,7 @@ export default defineConfig({
     "test:e2e": "playwright test"
   }
 }
-```text
+```
 
 **Why this pattern:**
 
@@ -392,7 +392,7 @@ export default defineConfig({
       value: |
         EXCELLENT: Confirms pizza type/size, asks for delivery details
         POOR: Generic response or wrong intent
-```text
+```
 
 **Assertion types:**
 
@@ -462,7 +462,7 @@ it('applies discount to VIP users', () => {
   const result = applyDiscount(user, cart); // Act
   expect(result.total).toBe(80); // Assert
 });
-```text
+```
 
 ### Test Naming
 
@@ -476,7 +476,7 @@ it('preserves user input after validation error');
 // ❌ BAD
 it('works correctly');
 it('should call setState');
-```text
+```
 
 ### Test Independence
 
@@ -501,7 +501,7 @@ it('test A', () => {
 it('test B', () => {
   expect(sharedUser.name).toBe('Alice');
 });
-```text
+```
 
 ### Async Testing
 
@@ -516,7 +516,7 @@ await sleep(500); // Flaky test
 await expect.poll(() => getStatus()).toBe('ready');
 await page.waitForSelector('[data-testid="loaded"]');
 await waitFor(() => expect(screen.getByText('Success')).toBeVisible());
-```text
+```
 
 **Why:** Polling is deterministic (passes when condition is met) and faster (no unnecessary waiting).
 
@@ -608,7 +608,7 @@ npm run test:e2e # E2E tests only
 - All tests must pass
 - No skipped tests without justification
 - Coverage thresholds met
-```text
+```
 
 **If not found:** Ask user "Where are the testing docs?"
 
@@ -616,4 +616,3 @@ npm run test:e2e # E2E tests only
 
 1. **Global** (`~/.claude/development-workflow.md`) - Universal methodology (test type selection, TDD workflow)
 2. **Project** (`tests/SAFEWORD.md`) - Specific stack, commands, patterns
-````

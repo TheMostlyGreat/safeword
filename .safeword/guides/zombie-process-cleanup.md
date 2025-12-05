@@ -32,7 +32,7 @@ See `development-workflow.md` → "E2E Testing with Persistent Dev Servers" for 
 
 **Recommended cleanup pattern** (replace ports with your project's ports):
 
-````bash
+```bash
 # Kill both dev server AND test server ports
 # Example: Next.js (3000/4000), Vite (5173/6173), or your project's ports
 lsof -ti:3000 -ti:4000 | xargs kill -9 2>/dev/null
@@ -42,7 +42,7 @@ pkill -f "playwright.*$(pwd)" 2>/dev/null
 
 # Wait for cleanup
 sleep 2
-```text
+```
 
 **Why this works:**
 
@@ -76,7 +76,7 @@ ps aux | grep -E "(playwright|chromium)" | grep "$PROJECT_DIR" | grep -v grep | 
 pgrep -f "playwright test.*$(basename $PROJECT_DIR)" | xargs kill -9 2>/dev/null
 
 echo "Cleanup complete!"
-```text
+```
 
 **Make executable:** `chmod +x scripts/cleanup.sh`
 
@@ -94,7 +94,7 @@ lsof -ti:3000 | xargs kill -9 2>/dev/null
 
 # Kill Next.js build processes for this project
 ps aux | grep "next dev" | grep "$(pwd)" | grep -v grep | awk '{print $2}' | xargs kill -9 2>/dev/null
-```text
+```
 
 ### Playwright E2E Tests
 
@@ -104,14 +104,14 @@ pkill -f "playwright.*$(pwd)" 2>/dev/null
 
 # Or more specific (by project name)
 pkill -f "playwright.*my-project-name" 2>/dev/null
-```text
+```
 
 ### Vite Projects
 
 ```bash
 # Kill Vite dev server (typically port 5173)
 lsof -ti:5173 | xargs kill -9 2>/dev/null
-```text
+```
 
 ### React Native / Expo
 
@@ -121,7 +121,7 @@ lsof -ti:8081 | xargs kill -9 2>/dev/null
 
 # Kill Expo dev tools (port 19000-19006)
 lsof -ti:19000-19006 | xargs kill -9 2>/dev/null
-```text
+```
 
 ---
 
@@ -136,7 +136,7 @@ tmux new -s project-name
 
 # Kill everything in this session only
 tmux kill-session -t project-name
-```text
+```
 
 **Pros:**
 
@@ -172,7 +172,7 @@ lsof -i:3000
 
 # More details
 lsof -i:3000 -P -n
-```text
+```
 
 ### Find All Node Processes
 
@@ -182,14 +182,14 @@ ps aux | grep -E "(node|playwright|chromium)"
 
 # More detailed (with working directory)
 lsof -p $(pgrep node) | grep cwd
-```text
+```
 
 ### Find Processes by Project Directory
 
 ```bash
 # Find processes running in specific directory
 ps aux | grep "/Users/alex/projects/my-project"
-```text
+```
 
 ---
 
@@ -217,4 +217,3 @@ ps aux | grep "/Users/alex/projects/my-project"
 ✅ **DO:** Filter by project directory with `$(pwd)`
 ✅ **DO:** Create project-specific cleanup scripts
 ✅ **DO:** Clean up before AND after development sessions
-````

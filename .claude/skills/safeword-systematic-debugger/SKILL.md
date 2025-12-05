@@ -36,12 +36,12 @@ Complete each phase before proceeding.
 
 **1. Read Error Messages Completely**
 
-````text
+```text
 Don't skip past errors. They often contain the exact solution.
 - Full stack trace (note line numbers, file paths)
 - Error codes and messages
 - Warnings that preceded the error
-```text
+```
 
 **2. Reproduce Consistently**
 
@@ -56,7 +56,7 @@ Don't skip past errors. They often contain the exact solution.
 ```bash
 git diff HEAD~5          # Recent code changes
 git log --oneline -10    # Recent commits
-```text
+```
 
 What changed that could cause this? Dependencies? Config? Environment?
 
@@ -69,7 +69,7 @@ Symptom: Error at line 50 in utils.js
     ↑ Called by handler.js:120
     ↑ Called by router.js:45
     ↑ Called by app.js:10 ← ROOT CAUSE: bad input here
-```text
+```
 
 **Technique:**
 
@@ -87,7 +87,7 @@ When system has multiple layers (API → service → database):
 echo "=== Layer 1 (API): request=$REQUEST ==="
 echo "=== Layer 2 (Service): input=$INPUT ==="
 echo "=== Layer 3 (DB): query=$QUERY ==="
-```text
+```
 
 Run once to find WHERE it breaks. Then investigate that layer.
 
@@ -144,7 +144,7 @@ it('handles empty input without crashing', () => {
   // This test should FAIL before fix, PASS after
   expect(() => processData('')).not.toThrow();
 });
-```text
+```
 
 **2. Implement Fix**
 
@@ -199,7 +199,7 @@ When tests pass individually but fail together (test isolation problem, tests af
 
 ```bash
 ./.safeword/scripts/bisect-test-pollution.sh '.git' '*.test.ts' src
-```text
+```
 
 See: @./.safeword/scripts/bisect-test-pollution.sh
 
@@ -215,7 +215,7 @@ console.log(data);
 // ✅ GOOD
 console.log('validateUser', { expected: 'admin', actual: user.role });
 console.log('processOrder', JSON.stringify({ input, output }, null, 2));
-```text
+```
 
 Log **expected vs actual**. Remove after fixing.
 
@@ -235,7 +235,7 @@ When tests leave processes behind (playwright browsers not cleaned up, port stay
 ```bash
 ./.safeword/scripts/bisect-zombie-processes.sh 'chromium' '*.test.ts' tests
 ./.safeword/scripts/bisect-zombie-processes.sh 'playwright' '*.spec.ts' e2e
-```text
+```
 
 See: @./.safeword/scripts/bisect-zombie-processes.sh
 
@@ -244,4 +244,3 @@ See: @./.safeword/scripts/bisect-zombie-processes.sh
 - Process cleanup guide: @./.safeword/guides/zombie-process-cleanup.md
 - Debug logging style: @./.safeword/guides/code-philosophy.md
 - TDD for fix verification: @./.safeword/guides/tdd-best-practices.md
-````

@@ -1,24 +1,31 @@
 #!/bin/bash
-# Safeword: Auto-lint changed files (PostToolUse)
-# Silently auto-fixes, only outputs unfixable errors
-#
-# SYNC: Keep file patterns in sync with LINT_STAGED_CONFIG in:
-#   packages/cli/src/templates/content.ts
-#
-# This hook is intentionally simple - ESLint's config handles
-# framework-specific rules (React, Vue, Svelte, Astro, etc.)
+# Safeword: Cursor adapter for afterFileEdit
+# Auto-lints changed files, only outputs unfixable errors
+# Sets marker file for stop hook to trigger quality review
 
 # Require jq for JSON parsing
 command -v jq &> /dev/null || exit 0
 
 input=$(cat)
-file=$(echo "$input" | jq -r '.tool_input.file_path // .tool_input.notebook_path // empty' 2>/dev/null)
 
-# Exit silently if no file or file doesn't exist
+# Get workspace root and file path from Cursor's JSON format
+workspace=$(echo "$input" | jq -r '.workspace_roots[0] // empty' 2>/dev/null)
+file=$(echo "$input" | jq -r '.file_path // empty' 2>/dev/null)
+conv_id=$(echo "$input" | jq -r '.conversation_id // "default"' 2>/dev/null)
+
+# Exit silently if no file
 [ -z "$file" ] || [ ! -f "$file" ] && exit 0
 
-# Change to project directory
-[ -n "$CLAUDE_PROJECT_DIR" ] && cd "$CLAUDE_PROJECT_DIR" || true
+# Change to workspace directory
+[ -n "$workspace" ] && cd "$workspace" || true
+
+# Check for .safeword directory
+if [ ! -d ".safeword" ]; then
+  exit 0
+fi
+
+# Set marker file for stop hook to know edits were made
+touch "/tmp/safeword-cursor-edited-${conv_id}"
 
 # Determine linter based on file extension
 case "$file" in

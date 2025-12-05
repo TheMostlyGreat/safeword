@@ -14,9 +14,9 @@
 
 At the end of EVERY response, include a JSON summary with this exact structure:
 
-````json
+```json
 {"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}
-```text
+```
 
 Where (all fields describe **this response only**, not cumulative):
 
@@ -122,7 +122,7 @@ Examples:
 ```javascript
 // ❌ Bad: console.log('here')
 // ✅ Good: console.log('validateUser', { expected: 'admin', actual: user.role })
-```text
+```
 
 **Cross-Platform Development:**
 
@@ -133,7 +133,7 @@ Examples:
 ```javascript
 // ❌ Bad: dir + '/' + filename
 // ✅ Good: path.join(dir, filename)
-```text
+```
 
 ## Best Practices (Always Apply)
 
@@ -195,5 +195,4 @@ Before completing any work, verify:
 ```text
 # ❌ Bad: "misc fixes"
 # ✅ Good: "fix: login button not responding to clicks"
-```text
-````
+```

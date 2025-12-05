@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "./.safeword/hooks/cursor/after-file-edit.sh"
+      }
+    ],
+    "stop": [
+      {
+        "command": "./.safeword/hooks/cursor/stop.sh"
+      }
+    ]
+  }
+}

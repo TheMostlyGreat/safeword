@@ -76,10 +76,10 @@ Boundaries enforced via `eslint-plugin-boundaries`. See `.safeword/guides/archit
 
 ### Relationships
 
-````text
+```text
 [Entity A] 1──n [Entity B]
 [Entity B] n──n [Entity C]
-```text
+```
 
 ### Schema Notes
 
@@ -91,7 +91,7 @@ Boundaries enforced via `eslint-plugin-boundaries`. See `.safeword/guides/archit
 
 ### [Decision Title]
 
-**Status:** Active | Superseded | Deprecated
+**Status:** Active | Superseded | Deprecated  
 **Date:** YYYY-MM-DD
 
 | Field          | Value                                         |
@@ -108,8 +108,8 @@ Boundaries enforced via `eslint-plugin-boundaries`. See `.safeword/guides/archit
 
 ### [Pattern Name]
 
-**What:** [Brief description]
-**Why:** [Rationale]
+**What:** [Brief description]  
+**Why:** [Rationale]  
 **Example:** See `src/path/example.ts`
 
 ---
@@ -118,7 +118,7 @@ Boundaries enforced via `eslint-plugin-boundaries`. See `.safeword/guides/archit
 
 ### From [Previous State] to [Target State]
 
-**Trigger:** [When to migrate]
+**Trigger:** [When to migrate]  
 **Steps:**
 
 1. [Step 1]
@@ -134,4 +134,3 @@ Boundaries enforced via `eslint-plugin-boundaries`. See `.safeword/guides/archit
 
 - [Link to relevant docs]
 - [Link to ADRs if migrating from ADR system]
-````

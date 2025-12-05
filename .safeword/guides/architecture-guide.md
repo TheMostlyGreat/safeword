@@ -99,13 +99,13 @@ Answer **IN ORDER**. Stop at the first "Yes":
 
 **✅ GOOD:**
 
-````text
+```plaintext
 project/
 ├── ARCHITECTURE.md
 └── docs/design/
     ├── feature-a.md
     └── feature-b.md
-```text
+```
 
 **❌ BAD:** `docs/adr/001-use-typescript.md, 002-adopt-monorepo.md...` (50+ files = fragmented context)
 
@@ -120,7 +120,7 @@ Update in place with version/status tracking:
 **What**: Migrated from localStorage to IndexedDB
 **Why**: Hit 5MB limit, needed unlimited storage
 **Migration**: Completed 2025-01-20, users auto-migrated on load
-```text
+```
 
 **Edge cases:**
 
@@ -139,7 +139,7 @@ Update in place with version/status tracking:
 **Why**: Static data saves NKB per instance; updates affect all instances instantly
 **Trade-off**: More complex loading (fetch static + query persistent)
 **Alternatives Considered**: All localStorage (rejected: 5MB limit); All IndexedDB (rejected: overkill for config)
-```text
+```
 
 **❌ BAD:** `Database: PostgreSQL, State: Zustand, UI: React` (no rationale)
 
@@ -166,7 +166,7 @@ Update in place with version/status tracking:
 ```markdown
 **Implementation**: See `src/stores/gameStore.ts:12-45`
 **Usage example**: See `src/components/GamePanel.tsx`
-```text
+```
 
 **❌ BAD:** "We use Zustand for state management" (no reference to actual code)
 
@@ -273,7 +273,7 @@ Answer **IN ORDER**:
 
 ## File Organization
 
-```text
+```plaintext
 project/
 ├── ARCHITECTURE.md              # Single comprehensive doc
 ├── .safeword/planning/
@@ -281,7 +281,7 @@ project/
 │   ├── test-definitions/
 │   └── design/                  # Feature-specific design docs
 └── src/
-```text
+```
 
 ---
 
@@ -368,7 +368,7 @@ export default defineConfig([
     },
   },
 ]);
-```text
+```
 
 3. Define layers in `ARCHITECTURE.md` (see template)
 
@@ -421,4 +421,3 @@ export default defineConfig([
 ✅ Living document (update in place)
 ✅ LLMs consume entire architecture at once
 ✅ Sequential decision trees prevent ambiguity
-````

@@ -254,11 +254,13 @@ Actual: [What happened]
 - Old broken code
 + New fixed code
 ```
+````
 
 ## Lesson
 
 [One-sentence takeaway]
-````
+
+````text
 
 ---
 
@@ -277,10 +279,9 @@ Project-specific gotchas in `.safeword/learnings/`:
 - **Electron Renderer Context** - Renderer = browser, not Node.js; use `split(/[/\\]/)` for paths → `.safeword/learnings/electron-contexts.md`
 
 **Additional gotchas:**
-
 - Tab state timing: Add tab first (trigger render), wait 50ms, load content
 - File validation: Whitelist extensions before operations
-```
+````
 
 **Pattern:** Bold name + one-sentence summary + optional link
 
