@@ -165,8 +165,7 @@ status: in_progress
 
 1. Executing a plan, ticket, or spec? → Create log
 2. Investigation/debugging with multiple attempts? → Create log
-3. Risk of losing context? → Create log
-4. Quick single-action task? → Skip log
+3. Quick single-action task? → Skip log
 
 **Think hard behaviors:**
 
@@ -179,12 +178,11 @@ status: in_progress
 
 **Edge cases:**
 
-| Situation                       | Action                                                                                        |
-| ------------------------------- | --------------------------------------------------------------------------------------------- |
-| Multiple artifacts at once      | One log per artifact (don't combine)                                                          |
-| No clear artifact (exploratory) | Create `explore-{topic}.md`, convert to proper artifact when scope clarifies                  |
-| Very long artifact name         | Abbreviate slug: `ticket-001-implement-oauth-with-refresh.md` → `ticket-001-oauth-refresh.md` |
-| Resuming after context loss     | Re-read entire log before continuing                                                          |
+| Situation                       | Action                                                                       |
+| ------------------------------- | ---------------------------------------------------------------------------- |
+| Multiple artifacts at once      | One log per artifact (don't combine)                                         |
+| No clear artifact (exploratory) | Create `explore-{topic}.md`, convert to proper artifact when scope clarifies |
+| Resuming after context loss     | Re-read entire log before continuing                                         |
 
 ---
 
