@@ -19,7 +19,7 @@ import {
   type PackageJson,
   type ProjectType,
 } from '../utils/project-detector.js';
-import { SAFEWORD_SCHEMA } from '../schema.js';
+import { getBaseEslintPackages, getConditionalEslintPackages } from '../schema.js';
 
 export interface SyncOptions {
   quiet?: boolean;
@@ -27,43 +27,17 @@ export interface SyncOptions {
 }
 
 /**
- * Base ESLint packages always required for linting.
- * Explicit list for clarity - sync only cares about ESLint plugins.
- *
- * NOTE: This is a subset of SAFEWORD_SCHEMA.packages.base (which includes
- * prettier, markdownlint-cli2, husky, lint-staged, knip). When adding new
- * ESLint packages to schema.ts, also add them here if they should be
- * auto-installed on pre-commit.
- */
-const BASE_ESLINT_PACKAGES = [
-  'eslint',
-  '@eslint/js',
-  'eslint-plugin-import-x',
-  'eslint-plugin-sonarjs',
-  '@microsoft/eslint-plugin-sdl',
-  'eslint-config-prettier',
-  'eslint-plugin-boundaries',
-  'eslint-plugin-playwright',
-];
-
-/**
  * Get required ESLint packages based on project type.
- * Uses explicit base list + SAFEWORD_SCHEMA.packages.conditional for frameworks.
+ * Derives from schema - single source of truth, no separate list to maintain.
  */
 function getRequiredPlugins(projectType: ProjectType): string[] {
-  const plugins: string[] = [...BASE_ESLINT_PACKAGES];
-  const { conditional } = SAFEWORD_SCHEMA.packages;
+  const plugins: string[] = [...getBaseEslintPackages()];
 
-  // Add conditional packages from schema based on detected project type
-  for (const [key, deps] of Object.entries(conditional)) {
-    // Special case: react plugins also needed for nextjs
-    const isActive =
-      key === 'react'
-        ? projectType.react || projectType.nextjs
-        : projectType[key as keyof ProjectType];
-
-    if (isActive && deps) {
-      plugins.push(...deps);
+  // Add conditional ESLint packages based on detected project type
+  // Note: Next.js already sets react=true in project-detector.ts
+  for (const [key, isActive] of Object.entries(projectType)) {
+    if (isActive) {
+      plugins.push(...getConditionalEslintPackages(key));
     }
   }
 

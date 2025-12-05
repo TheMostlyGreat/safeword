@@ -12,6 +12,7 @@ import { compareVersions } from '../utils/version.js';
 import { createProjectContext } from '../utils/context.js';
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
+import { sync } from './sync.js';
 
 export async function upgrade(): Promise<void> {
   const cwd = process.cwd();
@@ -61,15 +62,15 @@ export async function upgrade(): Promise<void> {
       }
     }
 
-    // Report packages that need installation
+    // Auto-sync: install missing ESLint packages
     if (result.packagesToInstall.length > 0) {
-      info(`\nPackages to install: ${result.packagesToInstall.length}`);
-      info('Run `safeword sync` to install missing packages');
+      info(`\nSyncing ${result.packagesToInstall.length} package(s)...`);
+      await sync();
     }
 
     success(`\nSafeword upgraded to v${VERSION}`);
-  } catch (err) {
-    error(`Upgrade failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+  } catch (error_) {
+    error(`Upgrade failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);
   }
 }

@@ -223,6 +223,80 @@ describe('Schema - Single Source of Truth', () => {
       expect(SAFEWORD_SCHEMA.packages.base.length).toBe(15);
     });
 
+    describe('getBaseEslintPackages', () => {
+      it('should return only ESLint-related packages from base', async () => {
+        const { getBaseEslintPackages } = await import('../src/schema.js');
+        const eslintPackages = getBaseEslintPackages();
+
+        // Should include ESLint packages
+        expect(eslintPackages).toContain('eslint');
+        expect(eslintPackages).toContain('@eslint/js');
+        expect(eslintPackages).toContain('eslint-plugin-sonarjs');
+        expect(eslintPackages).toContain('eslint-plugin-unicorn');
+        expect(eslintPackages).toContain('eslint-import-resolver-typescript');
+
+        // Should NOT include non-ESLint packages
+        expect(eslintPackages).not.toContain('prettier');
+        expect(eslintPackages).not.toContain('husky');
+        expect(eslintPackages).not.toContain('lint-staged');
+        expect(eslintPackages).not.toContain('markdownlint-cli2');
+        expect(eslintPackages).not.toContain('knip');
+      });
+
+      it('should return consistent results (single source of truth)', async () => {
+        const { getBaseEslintPackages, SAFEWORD_SCHEMA } = await import('../src/schema.js');
+        const eslintPackages = getBaseEslintPackages();
+
+        // All returned packages should be in base
+        for (const pkg of eslintPackages) {
+          expect(SAFEWORD_SCHEMA.packages.base).toContain(pkg);
+        }
+      });
+    });
+
+    describe('getConditionalEslintPackages', () => {
+      it('should return ESLint packages for react', async () => {
+        const { getConditionalEslintPackages } = await import('../src/schema.js');
+        const reactPackages = getConditionalEslintPackages('react');
+
+        expect(reactPackages).toContain('eslint-plugin-react');
+        expect(reactPackages).toContain('eslint-plugin-react-hooks');
+      });
+
+      it('should return ESLint packages for typescript', async () => {
+        const { getConditionalEslintPackages } = await import('../src/schema.js');
+        const tsPackages = getConditionalEslintPackages('typescript');
+
+        expect(tsPackages).toContain('typescript-eslint');
+      });
+
+      it('should return ESLint packages for vitest', async () => {
+        const { getConditionalEslintPackages } = await import('../src/schema.js');
+        const vitestPackages = getConditionalEslintPackages('vitest');
+
+        expect(vitestPackages).toContain('@vitest/eslint-plugin');
+      });
+
+      it('should return empty array for unknown key', async () => {
+        const { getConditionalEslintPackages } = await import('../src/schema.js');
+        const unknown = getConditionalEslintPackages('unknown-framework');
+
+        expect(unknown).toEqual([]);
+      });
+
+      it('should filter out non-ESLint packages from conditional', async () => {
+        const { getConditionalEslintPackages, SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+        // tailwind conditional includes prettier-plugin-tailwindcss (not ESLint)
+        const tailwindEslint = getConditionalEslintPackages('tailwind');
+        const tailwindAll = SAFEWORD_SCHEMA.packages.conditional['tailwind'];
+
+        // Should filter out non-ESLint packages
+        expect(tailwindAll).toContain('prettier-plugin-tailwindcss');
+        expect(tailwindEslint).not.toContain('prettier-plugin-tailwindcss');
+      });
+    });
+
     it('should include all required base packages', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       const required = [
