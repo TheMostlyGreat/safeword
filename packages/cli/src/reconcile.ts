@@ -199,6 +199,21 @@ interface ReconcilePlan {
   packagesToRemove: string[];
 }
 
+function planDeprecatedFilesRemoval(
+  deprecatedFiles: string[],
+  cwd: string,
+): { actions: Action[]; removed: string[] } {
+  const actions: Action[] = [];
+  const removed: string[] = [];
+  for (const filePath of deprecatedFiles) {
+    if (exists(join(cwd, filePath))) {
+      actions.push({ type: 'rm', path: filePath });
+      removed.push(filePath);
+    }
+  }
+  return { actions, removed };
+}
+
 function computePlan(
   schema: SafewordSchema,
   mode: ReconcileMode,
@@ -326,20 +341,25 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     // If file exists, don't update during upgrade - user may have customized it
   }
 
-  // 4. chmod (only .husky if git repo)
+  // 4. Remove deprecated files (renamed or removed in newer versions)
+  const deprecatedFiles = planDeprecatedFilesRemoval(schema.deprecatedFiles, ctx.cwd);
+  actions.push(...deprecatedFiles.actions);
+  const wouldRemove = deprecatedFiles.removed;
+
+  // 5. chmod (only .husky if git repo)
   const chmodPathsUpgrade = ['.safeword/hooks', '.safeword/hooks/cursor', '.safeword/lib'];
   if (ctx.isGitRepo) chmodPathsUpgrade.push(HUSKY_DIR);
   actions.push({ type: 'chmod', paths: chmodPathsUpgrade });
 
-  // 5. JSON merges (always apply to ensure keys are present)
+  // 6. JSON merges (always apply to ensure keys are present)
   for (const [filePath, def] of Object.entries(schema.jsonMerges)) {
     actions.push({ type: 'json-merge', path: filePath, definition: def });
   }
 
-  // 6. Text patches (only if marker missing)
+  // 7. Text patches (only if marker missing)
   actions.push(...planTextPatches(schema.textPatches, ctx.cwd));
 
-  // 7. Compute packages to install (husky/lint-staged skipped if no git repo)
+  // 8. Compute packages to install (husky/lint-staged skipped if no git repo)
   const packagesToInstall = computePackagesToInstall(
     schema,
     ctx.projectType,
@@ -351,7 +371,7 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     actions,
     wouldCreate,
     wouldUpdate,
-    wouldRemove: [],
+    wouldRemove,
     packagesToInstall,
     packagesToRemove: [],
   };

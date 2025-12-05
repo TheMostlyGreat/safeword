@@ -55,6 +55,7 @@ export interface SafewordSchema {
   ownedDirs: string[]; // Fully owned - create on setup, delete on reset
   sharedDirs: string[]; // We add to but don't own
   preservedDirs: string[]; // Created on setup, NOT deleted on reset (user data)
+  deprecatedFiles: string[]; // Files to delete on upgrade (renamed or removed)
   ownedFiles: Record<string, FileDefinition>; // Overwrite on upgrade (if changed)
   managedFiles: Record<string, ManagedFileDefinition>; // Create if missing, update if safeword content
   jsonMerges: Record<string, JsonMergeDefinition>;
@@ -130,6 +131,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
   // Created on setup but NOT deleted on reset (preserves user data)
   preservedDirs: ['.safeword/learnings', '.safeword/tickets', '.safeword/tickets/completed'],
+
+  // Files to delete on upgrade (renamed or removed in newer versions)
+  deprecatedFiles: ['.safeword/templates/user-stories-template.md'],
 
   // Files owned by safeword (overwritten on upgrade if content changed)
   ownedFiles: {
