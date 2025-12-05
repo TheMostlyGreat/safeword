@@ -1,7 +1,7 @@
-# User Stories: [Feature Name] (Issue #[number])
+# Feature Spec: [Feature Name] (Issue #[number])
 
 **Guide**: `@./.safeword/guides/user-story-guide.md` - Best practices, INVEST criteria, and examples
-**Template**: `@./.safeword/templates/user-stories-template.md`
+**Template**: `@./.safeword/templates/feature-spec-template.md`
 
 **Feature**: [Brief description of the feature]
 

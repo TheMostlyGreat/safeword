@@ -184,8 +184,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       template: 'doc-templates/test-definitions-feature.md',
     },
     '.safeword/templates/ticket-template.md': { template: 'doc-templates/ticket-template.md' },
-    '.safeword/templates/user-stories-template.md': {
-      template: 'doc-templates/user-stories-template.md',
+    '.safeword/templates/feature-spec-template.md': {
+      template: 'doc-templates/feature-spec-template.md',
     },
 
     // Prompts (2 files)

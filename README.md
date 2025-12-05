@@ -54,7 +54,7 @@ Key directories created in your project:
 
 - `.safeword/guides/` - Core methodology and best practices
 - `.safeword/templates/` - Fillable document structures
-- `.safeword/planning/` - Planning documentation (user-stories, test-definitions, design, issues)
+- `.safeword/planning/` - Planning documentation (specs, test-definitions, design, issues)
 - `.safeword/hooks/` - Automation scripts for Claude Code
 - `.claude/commands/` - Slash commands
 - `.claude/skills/` - Specialized agent capabilities
@@ -106,7 +106,7 @@ Key directories created in your project:
 
 | Template                        | Purpose                                          | Used By                   |
 | ------------------------------- | ------------------------------------------------ | ------------------------- |
-| **user-stories-template.md**    | User story structure (As a X / Given-When-Then)  | user-story-guide.md       |
+| **feature-spec-template.md**    | Feature spec (user stories + constraints)        | user-story-guide.md       |
 | **test-definitions-feature.md** | Test definition structure (suites, tests, steps) | test-definitions-guide.md |
 | **design-doc-template.md**      | Design doc structure (architecture, components)  | design-doc-guide.md       |
 
@@ -137,7 +137,7 @@ Key directories created in your project:
 
 ```plaintext
 planning/
-├── user-stories/       User story documents
+├── specs/              Feature and task specs
 ├── test-definitions/   Test definition documents
 ├── design/            Design docs and research
 └── issues/            Issue capture and tracking

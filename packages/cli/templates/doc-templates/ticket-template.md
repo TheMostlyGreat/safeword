@@ -50,9 +50,9 @@ last_modified: YYYY-MM-DDTHH:MM:SSZ
 
 ### Planning Docs
 
-{Only for complex features that need user stories, test definitions, design docs}
+{Only for complex features that need feature specs, test definitions, design docs}
 
-- .safeword/planning/user-stories/XXX-feature-name.md
+- .safeword/planning/specs/feature-XXX-name.md
 - .safeword/planning/test-definitions/XXX-feature-name.md
 - .safeword/planning/design/XXX-feature-name.md
 

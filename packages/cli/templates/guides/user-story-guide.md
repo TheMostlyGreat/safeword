@@ -2,19 +2,19 @@
 
 ## How to Fill Out Feature User Stories
 
-**Template:** `@.safeword/templates/user-stories-template.md`
+**Template:** `@.safeword/templates/feature-spec-template.md`
 
 **When user asks:** "Create user stories for issue #N" or "Create user stories for [feature]"
 
 **What you do:**
 
-1. Read `@.safeword/templates/user-stories-template.md`
+1. Read `@.safeword/templates/feature-spec-template.md`
 2. Fill in feature name, issue number, status
 3. Create numbered stories (Story 1, Story 2, etc.)
 4. Add acceptance criteria with ✅/❌ checkboxes for tracking
 5. Include test file references
 6. Add summary with completion % and phases
-7. Save to project location (e.g., `planning/user-stories/45-feature-name.md`)
+7. Save to project location (e.g., `planning/specs/feature-45-name.md`)
 
 **DO include:**
 
@@ -242,7 +242,7 @@ After filling out story, mentally check:
 
 ## File Naming Convention
 
-Save stories as: `.safeword/planning/user-stories/[slug].md`
+Save specs as: `.safeword/planning/specs/feature-[slug].md`
 
 **Good filenames:**
 

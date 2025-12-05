@@ -1218,7 +1218,7 @@ tests:
         ---
         ## Template Location
 
-        Use `user-stories-template.md` from `.safeword/templates/`
+        Use `feature-spec-template.md` from `.safeword/templates/`
 
         ## Workflow
         1. Fill in feature name
@@ -1434,7 +1434,7 @@ tests:
     vars:
       input: 'Create user stories for a new payment feature'
       context: |
-        file_path: .safeword/templates/user-stories-template.md (excerpt)
+        file_path: .safeword/templates/feature-spec-template.md (excerpt)
         ---
         ## Technical Constraints
 
@@ -1824,7 +1824,7 @@ tests:
 
         | Need | Template | Location |
         |------|----------|----------|
-        | Feature/issue user stories | `user-stories-template.md` | `.safeword/planning/user-stories/` |
+        | Feature/issue specs | `feature-spec-template.md` | `.safeword/planning/specs/` |
         | Feature test suites | `test-definitions-feature.md` | `.safeword/planning/test-definitions/` |
         | Feature implementation design | `design-doc-template.md` | `.safeword/planning/design/` |
         | Project-wide architecture | No template | `ARCHITECTURE.md` at root |
@@ -1833,7 +1833,7 @@ tests:
     assert:
       - type: llm-rubric
         value: |
-          The response should recommend user-stories-template.md and/or design-doc-template.md for a feature.
+          The response should recommend feature-spec-template.md and/or design-doc-template.md for a feature.
           EXCELLENT: Recommends starting with user stories, then design doc, explains workflow
           ACCEPTABLE: Recommends appropriate template(s) for feature documentation
           POOR: Recommends architecture doc for a single feature
