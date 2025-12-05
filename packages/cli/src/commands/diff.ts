@@ -30,9 +30,7 @@ function createUnifiedDiff(oldContent: string, newContent: string, filename: str
   const oldLines = oldContent.split('\n');
   const newLines = newContent.split('\n');
 
-  const lines: string[] = [];
-  lines.push(`--- a/${filename}`);
-  lines.push(`+++ b/${filename}`);
+  const lines: string[] = [`--- a/${filename}`, `+++ b/${filename}`];
 
   // Simple diff - show all changes
   let hasChanges = false;
@@ -64,6 +62,52 @@ function createUnifiedDiff(oldContent: string, newContent: string, filename: str
   lines.splice(2, 0, `@@ -1,${oldLines.length} +1,${newLines.length} @@`);
 
   return lines.join('\n');
+}
+
+/** List files by category */
+function listFileCategory(categoryName: string, files: FileDiff[]): void {
+  if (files.length === 0) return;
+  info(`\n${categoryName}:`);
+  for (const file of files) {
+    listItem(file.path);
+  }
+}
+
+/** Show verbose diff output for modified files */
+function showModifiedDiffs(files: FileDiff[]): void {
+  for (const file of files) {
+    if (!file.currentContent || !file.newContent) continue;
+    info(`\n${file.path}:`);
+    const diffOutput = createUnifiedDiff(file.currentContent, file.newContent, file.path);
+    if (diffOutput) {
+      console.log(diffOutput);
+    }
+  }
+}
+
+/** Show verbose output for added files (truncated preview) */
+function showAddedPreviews(files: FileDiff[]): void {
+  for (const file of files) {
+    if (!file.newContent) continue;
+    info(`\n${file.path}: (new file)`);
+    const allLines = file.newContent.split('\n');
+    const lines = allLines.slice(0, 10);
+    for (const line of lines) {
+      console.log(`+${line}`);
+    }
+    if (allLines.length > 10) {
+      console.log('... (truncated)');
+    }
+  }
+}
+
+/** Show packages to install */
+function showPackagesToInstall(packages: string[]): void {
+  if (packages.length === 0) return;
+  info('\nPackages to install:');
+  for (const pkg of packages) {
+    listItem(pkg);
+  }
 }
 
 /**
@@ -147,60 +191,16 @@ export async function diff(options: DiffOptions): Promise<void> {
   }
 
   // List by category
-  if (added.length > 0) {
-    info('\nAdded:');
-    for (const file of added) {
-      listItem(file.path);
-    }
-  }
-
-  if (modified.length > 0) {
-    info('\nModified:');
-    for (const file of modified) {
-      listItem(file.path);
-    }
-  }
-
-  if (unchanged.length > 0) {
-    info('\nUnchanged:');
-    for (const file of unchanged) {
-      listItem(file.path);
-    }
-  }
+  listFileCategory('Added', added);
+  listFileCategory('Modified', modified);
+  listFileCategory('Unchanged', unchanged);
 
   // Verbose output - show actual diffs
   if (options.verbose) {
     header('Detailed Changes');
-
-    for (const file of modified) {
-      if (file.currentContent && file.newContent) {
-        info(`\n${file.path}:`);
-        const diffOutput = createUnifiedDiff(file.currentContent, file.newContent, file.path);
-        if (diffOutput) {
-          console.log(diffOutput);
-        }
-      }
-    }
-
-    for (const file of added) {
-      if (file.newContent) {
-        info(`\n${file.path}: (new file)`);
-        const lines = file.newContent.split('\n').slice(0, 10);
-        for (const line of lines) {
-          console.log(`+${line}`);
-        }
-        if (file.newContent.split('\n').length > 10) {
-          console.log('... (truncated)');
-        }
-      }
-    }
-
-    if (result.packagesToInstall.length > 0) {
-      info('\nPackages to install:');
-      for (const pkg of result.packagesToInstall) {
-        listItem(pkg);
-      }
-    }
+    showModifiedDiffs(modified);
+    showAddedPreviews(added);
+    showPackagesToInstall(result.packagesToInstall);
   }
 
   if (added.length === 0 && modified.length === 0 && result.packagesToInstall.length === 0) {

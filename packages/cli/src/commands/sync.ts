@@ -52,33 +52,19 @@ const BASE_ESLINT_PACKAGES = [
  */
 function getRequiredPlugins(projectType: ProjectType): string[] {
   const plugins: string[] = [...BASE_ESLINT_PACKAGES];
-
-  // Add conditional packages from schema based on detected project type
   const { conditional } = SAFEWORD_SCHEMA.packages;
 
-  if (projectType.typescript && conditional.typescript) {
-    plugins.push(...conditional.typescript);
-  }
-  if ((projectType.react || projectType.nextjs) && conditional.react) {
-    plugins.push(...conditional.react);
-  }
-  if (projectType.nextjs && conditional.nextjs) {
-    plugins.push(...conditional.nextjs);
-  }
-  if (projectType.astro && conditional.astro) {
-    plugins.push(...conditional.astro);
-  }
-  if (projectType.vue && conditional.vue) {
-    plugins.push(...conditional.vue);
-  }
-  if (projectType.svelte && conditional.svelte) {
-    plugins.push(...conditional.svelte);
-  }
-  if (projectType.electron && conditional.electron) {
-    plugins.push(...conditional.electron);
-  }
-  if (projectType.vitest && conditional.vitest) {
-    plugins.push(...conditional.vitest);
+  // Add conditional packages from schema based on detected project type
+  for (const [key, deps] of Object.entries(conditional)) {
+    // Special case: react plugins also needed for nextjs
+    const isActive =
+      key === 'react'
+        ? projectType.react || projectType.nextjs
+        : projectType[key as keyof ProjectType];
+
+    if (isActive && deps) {
+      plugins.push(...deps);
+    }
   }
 
   return plugins;
@@ -138,11 +124,12 @@ export async function sync(options: SyncOptions = {}): Promise<void> {
   }
 
   try {
+    // eslint-disable-next-line sonarjs/os-command -- npm install with known package names
     execSync(`npm install -D ${missingPlugins.join(' ')}`, {
       cwd,
       stdio: options.quiet ? 'pipe' : 'inherit',
     });
-  } catch (error) {
+  } catch {
     // Clear error message for network/install failures
     const pluginList = missingPlugins.join(' ');
     console.error(`\n✗ Failed to install ESLint plugins\n`);
@@ -155,6 +142,7 @@ export async function sync(options: SyncOptions = {}): Promise<void> {
   // Stage modified files if --stage flag is set (for pre-commit hook)
   if (options.stage) {
     try {
+      // eslint-disable-next-line sonarjs/no-os-command-from-path -- git with fixed args
       execSync('git add package.json package-lock.json', {
         cwd,
         stdio: 'pipe',

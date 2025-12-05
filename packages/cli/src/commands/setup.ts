@@ -27,6 +27,24 @@ interface PackageJson {
   'lint-staged'?: Record<string, string[]>;
 }
 
+/** Print file changes summary */
+function printChangesSummary(
+  created: string[],
+  updated: string[],
+  packageJsonCreated: boolean,
+): void {
+  if (created.length > 0 || packageJsonCreated) {
+    info('\nCreated:');
+    if (packageJsonCreated) listItem('package.json');
+    for (const file of created) listItem(file);
+  }
+
+  if (updated.length > 0) {
+    info('\nModified:');
+    for (const file of updated) listItem(file);
+  }
+}
+
 export async function setup(options: SetupOptions): Promise<void> {
   const cwd = process.cwd();
   const safewordDir = join(cwd, '.safeword');
@@ -75,6 +93,7 @@ export async function setup(options: SetupOptions): Promise<void> {
       try {
         const installCmd = `npm install -D ${result.packagesToInstall.join(' ')}`;
         info(`Running: ${installCmd}`);
+        // eslint-disable-next-line sonarjs/os-command -- npm install with known package names
         execSync(installCmd, { cwd, stdio: 'inherit' });
         success('Installed linting dependencies');
       } catch {
@@ -95,31 +114,15 @@ export async function setup(options: SetupOptions): Promise<void> {
 
     // Print summary
     header('Setup Complete');
-
-    if (result.created.length > 0 || packageJsonCreated) {
-      info('\nCreated:');
-      if (packageJsonCreated) {
-        listItem('package.json');
-      }
-      for (const file of result.created) {
-        listItem(file);
-      }
-    }
-
-    if (result.updated.length > 0) {
-      info('\nModified:');
-      for (const file of result.updated) {
-        listItem(file);
-      }
-    }
+    printChangesSummary(result.created, result.updated, packageJsonCreated);
 
     info('\nNext steps:');
     listItem('Run `safeword check` to verify setup');
     listItem('Commit the new files to git');
 
     success(`\nSafeword ${VERSION} installed successfully!`);
-  } catch (err) {
-    error(`Setup failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+  } catch (error_) {
+    error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);
   }
 }
