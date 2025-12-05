@@ -135,14 +135,14 @@ describe('Schema - Single Source of Truth', () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
       // Files that are generated (not from templates)
-      const generatedFiles = [
+      const generatedFiles = new Set([
         '.safeword/version',
         '.safeword/eslint-boundaries.config.mjs',
         '.husky/pre-commit',
-      ];
+      ]);
 
       for (const [path, def] of Object.entries(SAFEWORD_SCHEMA.ownedFiles)) {
-        if (generatedFiles.includes(path)) continue;
+        if (generatedFiles.has(path)) continue;
 
         // If it has a template reference, verify template exists
         if (def.template) {
@@ -218,9 +218,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('packages', () => {
-    it('should have 14 base packages', async () => {
+    it('should have 15 base packages', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(14);
+      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(15);
     });
 
     it('should include all required base packages', async () => {
@@ -232,6 +232,7 @@ describe('Schema - Single Source of Truth', () => {
         'eslint-plugin-import-x',
         'eslint-import-resolver-typescript',
         'eslint-plugin-sonarjs',
+        'eslint-plugin-unicorn',
         'eslint-plugin-boundaries',
         'eslint-plugin-playwright',
         '@microsoft/eslint-plugin-sdl',
