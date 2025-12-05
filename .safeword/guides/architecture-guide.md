@@ -277,7 +277,7 @@ Answer **IN ORDER**:
 project/
 ├── ARCHITECTURE.md              # Single comprehensive doc
 ├── .safeword/planning/
-│   ├── user-stories/
+│   ├── specs/
 │   ├── test-definitions/
 │   └── design/                  # Feature-specific design docs
 └── src/

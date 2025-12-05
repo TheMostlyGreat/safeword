@@ -51,7 +51,7 @@ Answer IN ORDER. Stop at first match:
 
 **Templates:**
 
-- L2 Feature: @./.safeword/templates/user-stories-template.md
+- L2 Feature: @./.safeword/templates/feature-spec-template.md
 - L1/L0 Task: @./.safeword/templates/task-spec-template.md
 - Test Definitions: @./.safeword/templates/test-definitions-feature.md
 

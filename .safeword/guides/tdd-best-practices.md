@@ -12,7 +12,7 @@ Patterns and examples for user stories and test definitions following TDD best p
 
 | Need                          | Template                      | Location                               |
 | ----------------------------- | ----------------------------- | -------------------------------------- |
-| Feature/issue user stories    | `user-stories-template.md`    | `.safeword/planning/user-stories/`     |
+| Feature/issue specs           | `feature-spec-template.md`    | `.safeword/planning/specs/`            |
 | Feature test suites           | `test-definitions-feature.md` | `.safeword/planning/test-definitions/` |
 | Feature implementation design | `design-doc-template.md`      | `.safeword/planning/design/`           |
 | Project-wide architecture     | No template                   | `ARCHITECTURE.md` at root              |
@@ -21,7 +21,7 @@ Patterns and examples for user stories and test definitions following TDD best p
 
 ### Template Details
 
-**User Stories** (`@.safeword/templates/user-stories-template.md`) - **For features/issues**
+**Feature Specs** (`@.safeword/templates/feature-spec-template.md`) - **For features/issues**
 
 - Multiple related stories in one file
 - Status tracking (✅/❌ per story and AC)

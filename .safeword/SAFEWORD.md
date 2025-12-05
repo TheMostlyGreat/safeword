@@ -68,7 +68,7 @@ Training data is stale. Follow this sequence:
 
 | Trigger                                                    | Template                                           |
 | ---------------------------------------------------------- | -------------------------------------------------- |
-| User asks for user story OR planning new feature scope     | @./.safeword/templates/user-stories-template.md    |
+| Planning new feature scope OR creating feature spec        | @./.safeword/templates/feature-spec-template.md    |
 | Bug, improvement, refactor, or internal task               | @./.safeword/templates/task-spec-template.md       |
 | Need test definitions for a feature OR acceptance criteria | @./.safeword/templates/test-definitions-feature.md |
 | Feature spans 3+ components OR needs technical spec        | @./.safeword/templates/design-doc-template.md      |

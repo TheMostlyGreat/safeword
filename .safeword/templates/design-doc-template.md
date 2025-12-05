@@ -3,7 +3,7 @@
 **Guide**: `@./.safeword/guides/design-doc-guide.md` - Principles, structure guidelines, and avoiding bloat
 **Template**: `@./.safeword/templates/design-doc-template.md`
 
-**Related**: User Stories: `[path]` | Test Definitions: `[path]`
+**Related**: Feature Spec: `[path]` | Test Definitions: `[path]`
 
 **TDD Note**: This design implements tests from Test Definitions. Reference specific test scenarios (e.g., "Test 3.1: Component X enables keyboard shortcut Y").
 

@@ -148,4 +148,4 @@ The spec takes 30 seconds to write and prevents hours of scope creep.
 | **Task Spec (L1)**    | Bug, improvement, internal, refactor    | Task spec with inline tests          |
 | **Task Spec (L0)**    | Typo, config, trivial                   | Minimal task spec, existing tests    |
 
-For L2 features, use: `@./.safeword/templates/user-stories-template.md`
+For L2 features, use: `@./.safeword/templates/feature-spec-template.md`
