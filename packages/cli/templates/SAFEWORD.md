@@ -182,7 +182,6 @@ status: in_progress
 | ------------------------------- | ---------------------------------------------------------------------------- |
 | Multiple artifacts at once      | One log per artifact (don't combine)                                         |
 | No clear artifact (exploratory) | Create `explore-{topic}.md`, convert to proper artifact when scope clarifies |
-| Resuming after context loss     | Re-read entire log before continuing                                         |
 
 ---
 
