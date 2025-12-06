@@ -270,4 +270,4 @@ See: @./.safeword/scripts/bisect-zombie-processes.sh
 
 - Process cleanup guide: @./.safeword/guides/zombie-process-cleanup.md
 - Debug logging style: @./.safeword/guides/code-philosophy.md
-- TDD for fix verification: @./.safeword/guides/tdd-best-practices.md
+- TDD for fix verification: @./.safeword/guides/testing-guide.md

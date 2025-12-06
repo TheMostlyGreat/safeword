@@ -118,7 +118,8 @@ describe('Setup Command - Reconcile Integration', () => {
 
       // Check guides
       expect(existsSync(join(tempDir, '.safeword/guides/architecture-guide.md'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/guides/development-workflow.md'))).toBe(true);
+      expect(existsSync(join(tempDir, '.safeword/guides/planning-guide.md'))).toBe(true);
+      expect(existsSync(join(tempDir, '.safeword/guides/testing-guide.md'))).toBe(true);
 
       // Check claude files
       expect(existsSync(join(tempDir, '.claude/commands/lint.md'))).toBe(true);
@@ -276,10 +277,10 @@ describe('Setup Command - Reconcile Integration', () => {
         });
 
         expect(result).toContain('Setup');
-      } catch (err) {
+      } catch (error) {
         // Check if setup itself worked even if npm install timed out
-        const stderr = (err as { stderr?: string }).stderr || '';
-        const stdout = (err as { stdout?: string }).stdout || '';
+        const stderr = (error as { stderr?: string }).stderr || '';
+        const stdout = (error as { stdout?: string }).stdout || '';
 
         // If we see setup output and .safeword exists, the reconcile worked
         if (
@@ -288,7 +289,7 @@ describe('Setup Command - Reconcile Integration', () => {
         ) {
           expect(true).toBe(true);
         } else {
-          throw err;
+          throw error;
         }
       }
     });
@@ -311,8 +312,8 @@ describe('Setup Command - Reconcile Integration', () => {
         });
         // Should not reach here
         expect(true).toBe(false);
-      } catch (err) {
-        const stderr = (err as { stderr?: string }).stderr || '';
+      } catch (error) {
+        const stderr = (error as { stderr?: string }).stderr || '';
         expect(stderr.toLowerCase()).toContain('already configured');
       }
     });

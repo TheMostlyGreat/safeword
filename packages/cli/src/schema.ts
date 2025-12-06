@@ -138,7 +138,14 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   ],
 
   // Files to delete on upgrade (renamed or removed in newer versions)
-  deprecatedFiles: ['.safeword/templates/user-stories-template.md'],
+  deprecatedFiles: [
+    '.safeword/templates/user-stories-template.md',
+    // Consolidated into planning-guide.md and testing-guide.md (v0.8.0)
+    '.safeword/guides/development-workflow.md',
+    '.safeword/guides/tdd-best-practices.md',
+    '.safeword/guides/user-story-guide.md',
+    '.safeword/guides/test-definitions-guide.md',
+  ],
 
   // Files owned by safeword (overwritten on upgrade if content changed)
   ownedFiles: {
@@ -162,7 +169,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/lib/common.sh': { template: 'lib/common.sh' },
     '.safeword/lib/jq-fallback.sh': { template: 'lib/jq-fallback.sh' },
 
-    // Guides (13 files)
+    // Guides (11 files)
     '.safeword/guides/architecture-guide.md': { template: 'guides/architecture-guide.md' },
     '.safeword/guides/cli-reference.md': { template: 'guides/cli-reference.md' },
     '.safeword/guides/code-philosophy.md': { template: 'guides/code-philosophy.md' },
@@ -171,12 +178,10 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       template: 'guides/data-architecture-guide.md',
     },
     '.safeword/guides/design-doc-guide.md': { template: 'guides/design-doc-guide.md' },
-    '.safeword/guides/development-workflow.md': { template: 'guides/development-workflow.md' },
     '.safeword/guides/learning-extraction.md': { template: 'guides/learning-extraction.md' },
     '.safeword/guides/llm-guide.md': { template: 'guides/llm-guide.md' },
-    '.safeword/guides/tdd-best-practices.md': { template: 'guides/tdd-best-practices.md' },
-    '.safeword/guides/test-definitions-guide.md': { template: 'guides/test-definitions-guide.md' },
-    '.safeword/guides/user-story-guide.md': { template: 'guides/user-story-guide.md' },
+    '.safeword/guides/planning-guide.md': { template: 'guides/planning-guide.md' },
+    '.safeword/guides/testing-guide.md': { template: 'guides/testing-guide.md' },
     '.safeword/guides/zombie-process-cleanup.md': { template: 'guides/zombie-process-cleanup.md' },
 
     // Templates (7 files)

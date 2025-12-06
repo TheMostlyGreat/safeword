@@ -241,6 +241,5 @@ Phase 0: L0 → create minimal spec → Phase 1: no new test (existing tests cov
 
 ## Related
 
-- @./.safeword/guides/test-definitions-guide.md
-- @./.safeword/guides/tdd-best-practices.md
-- @./.safeword/guides/development-workflow.md
+- @./.safeword/guides/planning-guide.md
+- @./.safeword/guides/testing-guide.md
