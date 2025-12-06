@@ -44,21 +44,21 @@ Training data is stale. Follow this sequence:
 
 **Read the matching guide when ANY trigger fires:**
 
-| Trigger                                                   | Guide                                          |
-| --------------------------------------------------------- | ---------------------------------------------- |
-| Starting ANY feature, bug fix, or enhancement             | @./.safeword/guides/development-workflow.md    |
-| Need to write OR review user stories                      | @./.safeword/guides/user-story-guide.md        |
-| Need to write OR review test definitions                  | @./.safeword/guides/test-definitions-guide.md  |
-| Writing tests, doing TDD, or test is failing              | @./.safeword/guides/tdd-best-practices.md      |
-| Creating OR updating a design doc                         | @./.safeword/guides/design-doc-guide.md        |
-| Making architectural decision OR writing ADR              | @./.safeword/guides/architecture-guide.md      |
-| Designing data models, schemas, or database changes       | @./.safeword/guides/data-architecture-guide.md |
-| Calling LLM APIs OR writing LLM-consumable docs           | @./.safeword/guides/llm-guide.md               |
-| Updating CLAUDE.md, SAFEWORD.md, or any context file      | @./.safeword/guides/context-files-guide.md     |
-| Hit same bug 3+ times OR discovered undocumented gotcha   | @./.safeword/guides/learning-extraction.md     |
-| Process hanging, port in use, or zombie process suspected | @./.safeword/guides/zombie-process-cleanup.md  |
-| Using `safeword` CLI commands                             | @./.safeword/guides/cli-reference.md           |
-| Debugging issues OR need git/cross-platform guidance      | @./.safeword/guides/code-philosophy.md         |
+| Trigger                                                   | Guide                                           |
+| --------------------------------------------------------- | ----------------------------------------------- |
+| Starting ANY feature, bug fix, or enhancement             | `./.safeword/guides/development-workflow.md`    |
+| Need to write OR review user stories                      | `./.safeword/guides/user-story-guide.md`        |
+| Need to write OR review test definitions                  | `./.safeword/guides/test-definitions-guide.md`  |
+| Writing tests, doing TDD, or test is failing              | `./.safeword/guides/tdd-best-practices.md`      |
+| Creating OR updating a design doc                         | `./.safeword/guides/design-doc-guide.md`        |
+| Making architectural decision OR writing ADR              | `./.safeword/guides/architecture-guide.md`      |
+| Designing data models, schemas, or database changes       | `./.safeword/guides/data-architecture-guide.md` |
+| Calling LLM APIs OR writing LLM-consumable docs           | `./.safeword/guides/llm-guide.md`               |
+| Updating CLAUDE.md, SAFEWORD.md, or any context file      | `./.safeword/guides/context-files-guide.md`     |
+| Hit same bug 3+ times OR discovered undocumented gotcha   | `./.safeword/guides/learning-extraction.md`     |
+| Process hanging, port in use, or zombie process suspected | `./.safeword/guides/zombie-process-cleanup.md`  |
+| Using `safeword` CLI commands                             | `./.safeword/guides/cli-reference.md`           |
+| Debugging issues OR need git/cross-platform guidance      | `./.safeword/guides/code-philosophy.md`         |
 
 ---
 
@@ -66,15 +66,15 @@ Training data is stale. Follow this sequence:
 
 **Use the matching template when ANY trigger fires:**
 
-| Trigger                                                    | Template                                           |
-| ---------------------------------------------------------- | -------------------------------------------------- |
-| Planning new feature scope OR creating feature spec        | @./.safeword/templates/feature-spec-template.md    |
-| Bug, improvement, refactor, or internal task               | @./.safeword/templates/task-spec-template.md       |
-| Need test definitions for a feature OR acceptance criteria | @./.safeword/templates/test-definitions-feature.md |
-| Feature spans 3+ components OR needs technical spec        | @./.safeword/templates/design-doc-template.md      |
-| Making decision with long-term impact OR trade-offs        | @./.safeword/templates/architecture-template.md    |
-| Task needs context anchoring (see Ticket System below)     | @./.safeword/templates/ticket-template.md          |
-| Starting execution of a plan, ticket, or spec              | @./.safeword/templates/work-log-template.md        |
+| Trigger                                                    | Template                                            |
+| ---------------------------------------------------------- | --------------------------------------------------- |
+| Planning new feature scope OR creating feature spec        | `./.safeword/templates/feature-spec-template.md`    |
+| Bug, improvement, refactor, or internal task               | `./.safeword/templates/task-spec-template.md`       |
+| Need test definitions for a feature OR acceptance criteria | `./.safeword/templates/test-definitions-feature.md` |
+| Feature spans 3+ components OR needs technical spec        | `./.safeword/templates/design-doc-template.md`      |
+| Making decision with long-term impact OR trade-offs        | `./.safeword/templates/architecture-template.md`    |
+| Task needs context anchoring (see Ticket System below)     | `./.safeword/templates/ticket-template.md`          |
+| Starting execution of a plan, ticket, or spec              | `./.safeword/templates/work-log-template.md`        |
 
 ---
 
@@ -286,9 +286,19 @@ When markdown lint reports MD040 (missing language), choose:
 
 ---
 
-## Learning Extraction
+## Learnings
 
-**Suggest extraction when ANY apply:**
+**Location:** `.safeword/learnings/`
+
+**Check learnings FIRST when:**
+
+1. Stuck on an issue OR debugging same problem 2+ times
+2. Working with unfamiliar technology in this codebase
+3. Issue involves testing, processes, or integrations
+
+**How:** `ls .safeword/learnings/` then read relevant files.
+
+**Extract new learning when ANY apply:**
 
 - 5+ debug cycles on same issue
 - 3+ approaches tried
