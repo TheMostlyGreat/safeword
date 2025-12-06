@@ -217,3 +217,12 @@ ps aux | grep "/Users/alex/projects/my-project"
 ✅ **DO:** Filter by project directory with `$(pwd)`
 ✅ **DO:** Create project-specific cleanup scripts
 ✅ **DO:** Clean up before AND after development sessions
+
+---
+
+## Key Takeaways
+
+- Use port-based cleanup, not `killall node` (affects all projects)
+- Filter by project directory: `pkill -f "playwright.*$(pwd)"`
+- Clean up before AND after development sessions
+- Create project-specific `scripts/cleanup.sh` for consistent cleanup

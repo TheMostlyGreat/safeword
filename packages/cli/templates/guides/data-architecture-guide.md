@@ -198,3 +198,12 @@ Before finalizing data architecture doc:
 - [ ] Migration strategy covers both additive and breaking changes
 - [ ] Version and status match codebase (verify with git/deployment)
 - [ ] Cross-referenced from root ARCHITECTURE.md or SAFEWORD.md (link exists)
+
+---
+
+## Key Takeaways
+
+- Data quality, governance, accessibility are core principles
+- Every entity needs: attributes, types, relationships, constraints
+- Performance targets use concrete numbers (e.g., <100ms, not "fast")
+- Migration strategy covers both additive and breaking changes

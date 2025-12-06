@@ -254,3 +254,12 @@ Save specs as: `.safeword/planning/specs/feature-[slug].md`
 
 - `user-story-1.md` ← Not descriptive
 - `STORY_CAMPAIGN_SWITCHING_FINAL_v2.md` ← Bloated
+
+---
+
+## Key Takeaways
+
+- INVEST checklist: Independent, Negotiable, Valuable, Estimable, Small, Testable
+- "As a [role], I want [action], so that [value]"—always include the "so that"
+- 1-3 acceptance criteria per story; split if >3
+- Include technical constraints (performance, security, etc.) when relevant

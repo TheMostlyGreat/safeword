@@ -616,3 +616,12 @@ npm run test:e2e # E2E tests only
 
 1. **Global** (`~/.claude/development-workflow.md`) - Universal methodology (test type selection, TDD workflow)
 2. **Project** (`tests/SAFEWORD.md`) - Specific stack, commands, patterns
+
+---
+
+## Key Takeaways
+
+- RED → GREEN → REFACTOR (never skip steps)
+- Choose test type by answering questions IN ORDER (unit → integration → E2E)
+- Never use arbitrary timeouts—poll until condition is met
+- Test behavior, not implementation details

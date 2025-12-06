@@ -413,11 +413,9 @@ export default defineConfig([
 
 ---
 
-## Key Takeaway
+## Key Takeaways
 
-**One comprehensive architecture document per project** > many scattered ADR files:
-
-✅ Full context in one place
-✅ Living document (update in place)
-✅ LLMs consume entire architecture at once
-✅ Sequential decision trees prevent ambiguity
+- One Architecture Doc per project—not scattered ADRs
+- Every decision needs: What / Why / Trade-off / Alternatives
+- Update when adding: technology, schema, or project-wide pattern
+- Living document—update in place with version/status tracking

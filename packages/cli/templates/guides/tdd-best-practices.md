@@ -613,4 +613,12 @@ Before writing a story, verify it passes all six criteria:
 - **Unit:** Single function/module logic (fast, cheap, low-level confidence)
 
 **Ratio guidance:** 70% unit, 20% integration, 10% E2E (adjust based on project)
-````
+
+---
+
+## Key Takeaways
+
+- RED → GREEN → REFACTOR (commit after each GREEN)
+- Test behavior, not implementation details
+- One assertion per test; test names describe behavior
+- User stories pass INVEST checklist before writing tests

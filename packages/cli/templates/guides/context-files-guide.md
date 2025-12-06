@@ -455,3 +455,12 @@ Before committing:
 - Bloated files cost more tokens and introduce noise
 - Keep under 50KB for optimal performance (though no hard limit)
 - Use imports to modularize instead of monolithic files
+
+---
+
+## Key Takeaways
+
+- Keep context files under 200 lines—use imports to modularize
+- Short declarative bullets, not narrative paragraphs
+- Update immediately when architecture changes (stale docs = confusion)
+- Put critical rules at the END of documents (recency bias)

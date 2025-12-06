@@ -33,3 +33,11 @@ Common flags:
 - `-y, --yes` - Skip confirmations (setup, reset)
 - `-v, --verbose` - Show detailed output (diff)
 - `-q, --quiet` - Suppress output (sync)
+
+---
+
+## Key Takeaways
+
+- Always use `@latest` for setup/check/upgrade/diff to get current CLI
+- Run `sync` after adding/removing frameworks to update linting plugins
+- Use `diff` before `upgrade` to preview changes

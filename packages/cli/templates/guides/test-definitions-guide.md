@@ -332,4 +332,12 @@ npm run test:e2e -- tests/feature-name.spec.ts --grep "specific test name"
 - Concrete examples over abstract rules
 - Edge cases must be explicit
 - Actionable over vague language
-````
+
+---
+
+## Key Takeaways
+
+- Map each user story acceptance criterion to specific tests
+- Include tests for technical constraints (performance, security, etc.)
+- Test behavior, not implementation details
+- Every skipped test needs documented rationale
