@@ -1,10 +1,12 @@
 # LLM Guide
 
-This guide covers two related topics:
+This guide covers three related topics:
 
 **Part 1: Integration** - How to call LLMs effectively (API calls, structured outputs, caching, testing)
 
 **Part 2: Writing for LLMs** - How to write documentation that LLMs will read and follow (SAFEWORD.md, CLAUDE.md, guides)
+
+**Part 3: Writing Skills** - How to write Claude Skills that are discoverable and effective
 
 ---
 
@@ -258,6 +260,71 @@ When LLMs hit dead ends, provide concrete next steps.
    - checkUserExists(email) → Integration test (database)
    - Login form → Dashboard → E2E test (multi-page)"
 ```
+
+---
+
+## Part 3: Writing Skills
+
+When creating Claude Skills (SKILL.md files), apply these additional principles:
+
+### Skill Naming
+
+Use **gerund form** (verb + -ing) for skill names per [official best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices).
+
+```markdown
+✅ GOOD (gerund):
+
+- processing-pdfs
+- analyzing-spreadsheets
+- brainstorming
+
+✅ ACCEPTABLE (noun-agent):
+
+- pdf-processor
+- tdd-enforcer
+- quality-reviewer
+
+❌ BAD (vague):
+
+- helper, utils, tools
+- documents, data, files
+```
+
+### Skill Descriptions
+
+Write in **third person**. Include what it does AND when to use it.
+
+```yaml
+# ❌ BAD
+description: I help you process PDFs
+
+# ❌ BAD - Missing triggers
+description: Processes PDF files
+
+# ✅ GOOD
+description: Extracts text from PDFs, fills forms, merges documents. Use when working with PDF files or when user mentions PDFs, forms, or document extraction.
+```
+
+### Skill Structure
+
+Keep SKILL.md under 500 lines. Use progressive disclosure for complex skills.
+
+```markdown
+# SKILL.md (main, <500 lines)
+
+See [REFERENCE.md](REFERENCE.md) for API details
+See [EXAMPLES.md](EXAMPLES.md) for patterns
+
+# REFERENCE.md (loaded only when needed)
+
+# EXAMPLES.md (loaded only when needed)
+```
+
+**Key rules:**
+
+- References one level deep only (no nested references)
+- Long reference files need table of contents at top
+- Forward slashes in paths (`reference/guide.md`, not `reference\guide.md`)
 
 ---
 
