@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { getPrettierConfig, getLintStagedConfig } from './content';
+import { getEslintConfig } from './config';
 import type { ProjectType } from '../utils/project-detector';
 
 const baseProjectType: ProjectType = {
@@ -92,5 +93,46 @@ describe('getLintStagedConfig', () => {
     const config = getLintStagedConfig(projectType);
 
     expect(config['*.sh']).toEqual(['shellcheck', 'prettier --write']);
+  });
+});
+
+describe('getEslintConfig', () => {
+  it('should use import.meta.url for config-relative path resolution (not CWD)', () => {
+    // This test documents a critical fix: the ESLint config must resolve package.json
+    // relative to the config file location, NOT relative to process.cwd().
+    // When lint-staged runs from a subdirectory in a monorepo, CWD-relative resolution
+    // would read the wrong package.json and fail to find framework ESLint plugins.
+    const config = getEslintConfig({ boundaries: false });
+
+    // Must use import.meta.url pattern for config-relative resolution
+    expect(config).toContain('import.meta.url');
+    expect(config).toContain('fileURLToPath');
+    expect(config).toContain('dirname');
+
+    // Must NOT use CWD-relative path (the bug we fixed)
+    expect(config).not.toMatch(/readFileSync\s*\(\s*["']\.\/package\.json["']/);
+  });
+
+  it('should include tryImport helper for graceful plugin loading errors', () => {
+    const config = getEslintConfig({ boundaries: false });
+
+    // Must have tryImport helper that provides actionable error messages
+    expect(config).toContain('async function tryImport');
+    expect(config).toContain('ERR_MODULE_NOT_FOUND');
+    expect(config).toContain('npm install -D');
+  });
+
+  it('should include boundaries config when option is true', () => {
+    const config = getEslintConfig({ boundaries: true });
+
+    expect(config).toContain('boundariesConfig');
+    expect(config).toContain('.safeword/eslint-boundaries.config.mjs');
+  });
+
+  it('should exclude boundaries config when option is false', () => {
+    const config = getEslintConfig({ boundaries: false });
+
+    expect(config).not.toContain('boundariesConfig');
+    expect(config).not.toContain('eslint-boundaries.config.mjs');
   });
 });
