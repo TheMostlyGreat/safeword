@@ -154,6 +154,18 @@ name: refactoring
 description: Systematic refactoring with small-step discipline. Use when user says 'refactor', 'clean up', 'restructure', 'extract', 'rename', 'simplify', or 'code smell'. Enforces one change → test → commit cycle. For structural improvements, NOT style/formatting (use /lint). NOT for adding features or fixing bugs.
 ```
 
+## LLM Guide Compliance (Implementation Notes)
+
+The SKILL.md must follow `.safeword/guides/llm-guide.md` principles:
+
+- [ ] **Define jargon:** "Code smell" with concrete examples (duplication, long function, etc.)
+- [ ] **Good/bad examples:** Each refactoring tier needs before/after code snippets
+- [ ] **Tie-breaker:** "If multiple refactorings apply, choose smallest scope first"
+- [ ] **Re-evaluation path:** "After 2 failed refactoring attempts, stop and ask user"
+- [ ] **Edge cases explicit:** What if code has partial test coverage?
+- [ ] **Recency bias:** Put "Key Takeaways" or "Always Remember" section at END
+- [ ] **Sequential decisions:** ASSESS phase must be "Answer IN ORDER, stop at first match"
+
 ## Success Criteria
 
 1. Skill triggers appropriately (not on every change)
@@ -162,6 +174,7 @@ description: Systematic refactoring with small-step discipline. Use when user sa
 4. Handles untested code safely
 5. Integrates with existing skills
 6. Stays under 300 lines (avoid bloat)
+7. Passes LLM Guide compliance checklist above
 
 ## Test Plan
 
