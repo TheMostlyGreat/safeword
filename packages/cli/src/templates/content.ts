@@ -8,7 +8,7 @@
 
 import type { ProjectType } from '../utils/project-detector.js';
 
-export const AGENTS_MD_LINK = `**⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**
+export const AGENTS_MD_LINK = `**⚠️ ALWAYS READ FIRST:** \`.safeword/SAFEWORD.md\`
 
 The SAFEWORD.md file contains core development patterns, workflows, and conventions.
 Read it BEFORE working on any task in this project.

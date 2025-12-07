@@ -70,7 +70,7 @@ describe('Test Suite 2: Setup - Core Files', () => {
       expect(fileExists(tempDir, 'AGENTS.md')).toBe(true);
 
       const content = readTestFile(tempDir, 'AGENTS.md');
-      expect(content).toContain('**⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**');
+      expect(content).toContain('.safeword/SAFEWORD.md');
     });
   });
 
@@ -89,7 +89,7 @@ describe('Test Suite 2: Setup - Core Files', () => {
 
       // Link should be first
       const lines = content.split('\n');
-      expect(lines[0]).toContain('**⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**');
+      expect(lines[0]).toContain('.safeword/SAFEWORD.md');
 
       // Original content preserved
       expect(content).toContain('# My Project');

@@ -464,13 +464,13 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     'AGENTS.md': {
       operation: 'prepend',
       content: AGENTS_MD_LINK,
-      marker: '@./.safeword/SAFEWORD.md',
+      marker: '.safeword/SAFEWORD.md',
       createIfMissing: true,
     },
     'CLAUDE.md': {
       operation: 'prepend',
       content: AGENTS_MD_LINK,
-      marker: '@./.safeword/SAFEWORD.md',
+      marker: '.safeword/SAFEWORD.md',
       createIfMissing: false, // Only patch if exists, don't create (AGENTS.md is primary)
     },
   },
