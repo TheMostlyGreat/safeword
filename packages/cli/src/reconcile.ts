@@ -613,6 +613,10 @@ function executeJsonMerge(
   const fullPath = join(cwd, path);
   const existing = readJson<Record<string, unknown>>(fullPath) ?? {};
   const merged = def.merge(existing, ctx);
+
+  // Skip write if content is unchanged (avoids formatting churn)
+  if (JSON.stringify(existing) === JSON.stringify(merged)) return;
+
   writeJson(fullPath, merged);
 }
 
