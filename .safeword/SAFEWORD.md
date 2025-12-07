@@ -44,19 +44,19 @@ Training data is stale. Follow this sequence:
 
 **Read the matching guide when ANY trigger fires:**
 
-| Trigger                                                   | Guide                                          |
-| --------------------------------------------------------- | ---------------------------------------------- |
-| Starting feature/task OR writing specs/test definitions   | @./.safeword/guides/planning-guide.md          |
-| Choosing test type, doing TDD, OR test is failing         | @./.safeword/guides/testing-guide.md           |
-| Creating OR updating a design doc                         | @./.safeword/guides/design-doc-guide.md        |
-| Making architectural decision OR writing ADR              | @./.safeword/guides/architecture-guide.md      |
-| Designing data models, schemas, or database changes       | @./.safeword/guides/data-architecture-guide.md |
-| Calling LLM APIs OR writing LLM-consumable docs           | @./.safeword/guides/llm-guide.md               |
-| Updating CLAUDE.md, SAFEWORD.md, or any context file      | @./.safeword/guides/context-files-guide.md     |
-| Hit same bug 3+ times OR discovered undocumented gotcha   | @./.safeword/guides/learning-extraction.md     |
-| Process hanging, port in use, or zombie process suspected | @./.safeword/guides/zombie-process-cleanup.md  |
-| Using `safeword` CLI commands                             | @./.safeword/guides/cli-reference.md           |
-| Debugging issues OR need git/cross-platform guidance      | @./.safeword/guides/code-philosophy.md         |
+| Trigger                                                   | Guide                                           |
+| --------------------------------------------------------- | ----------------------------------------------- |
+| Starting feature/task OR writing specs/test definitions   | `./.safeword/guides/planning-guide.md`          |
+| Choosing test type, doing TDD, OR test is failing         | `./.safeword/guides/testing-guide.md`           |
+| Creating OR updating a design doc                         | `./.safeword/guides/design-doc-guide.md`        |
+| Making architectural decision OR writing ADR              | `./.safeword/guides/architecture-guide.md`      |
+| Designing data models, schemas, or database changes       | `./.safeword/guides/data-architecture-guide.md` |
+| Calling LLM APIs OR writing LLM-consumable docs           | `./.safeword/guides/llm-guide.md`               |
+| Updating CLAUDE.md, SAFEWORD.md, or any context file      | `./.safeword/guides/context-files-guide.md`     |
+| Hit same bug 3+ times OR discovered undocumented gotcha   | `./.safeword/guides/learning-extraction.md`     |
+| Process hanging, port in use, or zombie process suspected | `./.safeword/guides/zombie-process-cleanup.md`  |
+| Using `safeword` CLI commands                             | `./.safeword/guides/cli-reference.md`           |
+| Debugging issues OR need git/cross-platform guidance      | `./.safeword/guides/code-philosophy.md`         |
 
 ---
 
@@ -64,14 +64,15 @@ Training data is stale. Follow this sequence:
 
 **Use the matching template when ANY trigger fires:**
 
-| Trigger                                                    | Template                                           |
-| ---------------------------------------------------------- | -------------------------------------------------- |
-| Planning new feature scope OR creating feature spec        | @./.safeword/templates/feature-spec-template.md    |
-| Bug, improvement, refactor, or internal task               | @./.safeword/templates/task-spec-template.md       |
-| Need test definitions for a feature OR acceptance criteria | @./.safeword/templates/test-definitions-feature.md |
-| Feature spans 3+ components OR needs technical spec        | @./.safeword/templates/design-doc-template.md      |
-| Making decision with long-term impact OR trade-offs        | @./.safeword/templates/architecture-template.md    |
-| Task needs context anchoring (see Ticket System below)     | @./.safeword/templates/ticket-template.md          |
+| Trigger                                                    | Template                                            |
+| ---------------------------------------------------------- | --------------------------------------------------- |
+| Planning new feature scope OR creating feature spec        | `./.safeword/templates/feature-spec-template.md`    |
+| Bug, improvement, refactor, or internal task               | `./.safeword/templates/task-spec-template.md`       |
+| Need test definitions for a feature OR acceptance criteria | `./.safeword/templates/test-definitions-feature.md` |
+| Feature spans 3+ components OR needs technical spec        | `./.safeword/templates/design-doc-template.md`      |
+| Making decision with long-term impact OR trade-offs        | `./.safeword/templates/architecture-template.md`    |
+| Task needs context anchoring (see Ticket System below)     | `./.safeword/templates/ticket-template.md`          |
+| Starting execution of a plan, ticket, or spec              | `./.safeword/templates/work-log-template.md`        |
 
 ---
 
@@ -137,7 +138,48 @@ status: in_progress
 
 - Log immediately after each action
 - Re-read ticket before significant actions
+- For detailed scratch notes, use a separate work log (see Work Logs below)
 - **CRITICAL:** Never mark `done` without user confirmation
+
+---
+
+## Work Logs
+
+**Purpose:** Scratch pad and working memory during execution. Think hard. Keep notes.
+
+**Location:** `.safeword/logs/{artifact-type}-{slug}.md`
+
+**Naming convention:**
+
+| Working on...         | Log file name            |
+| --------------------- | ------------------------ |
+| Ticket `001-fix-auth` | `ticket-001-fix-auth.md` |
+| Spec `task-add-cache` | `spec-task-add-cache.md` |
+| Design doc `oauth`    | `design-oauth.md`        |
+
+**One artifact = one log.** If log exists, append a new session. Don't spawn multiple logs for the same work.
+
+**Create log? Answer IN ORDER, stop at first match:**
+
+1. Executing a plan, ticket, or spec? → Create log
+2. Investigation/debugging with multiple attempts? → Create log
+3. Quick single-action task? → Skip log
+
+**Think hard behaviors:**
+
+1. **Re-read the log** before each major action
+2. **Pause to review** your approach periodically
+3. **Log findings** as you discover them, not after
+4. **Note dead ends** so you don't repeat them
+
+**Log what helps you stay on track:** findings, decisions, hypotheses, blockers, scratch calculations. Use your discretion.
+
+**Edge cases:**
+
+| Situation                       | Action                                                                       |
+| ------------------------------- | ---------------------------------------------------------------------------- |
+| Multiple artifacts at once      | One log per artifact (don't combine)                                         |
+| No clear artifact (exploratory) | Create `explore-{topic}.md`, convert to proper artifact when scope clarifies |
 
 ---
 
@@ -242,9 +284,19 @@ When markdown lint reports MD040 (missing language), choose:
 
 ---
 
-## Learning Extraction
+## Learnings
 
-**Suggest extraction when ANY apply:**
+**Location:** `.safeword/learnings/`
+
+**Check learnings FIRST when:**
+
+1. Stuck on an issue OR debugging same problem 2+ times
+2. Working with unfamiliar technology in this codebase
+3. Issue involves testing, processes, or integrations
+
+**How:** `ls .safeword/learnings/` then read relevant files.
+
+**Extract new learning when ANY apply:**
 
 - 5+ debug cycles on same issue
 - 3+ approaches tried
@@ -252,3 +304,14 @@ When markdown lint reports MD040 (missing language), choose:
 - Integration struggle between tools
 
 **Before extracting:** Check `.safeword/learnings/` for existing similar learnings—update, don't duplicate.
+
+---
+
+## Always Remember
+
+1. **Clarity → Simplicity → Correctness** (in that order)
+2. **Test what you can test**—never ask user to verify
+3. **RED → GREEN → REFACTOR**—never skip steps
+4. **Commit after each GREEN phase**
+5. **Read the matching guide** when a trigger fires
+6. **End every response** with: `{"proposedChanges": bool, "madeChanges": bool, "askedQuestion": bool}`

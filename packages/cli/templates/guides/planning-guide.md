@@ -25,15 +25,15 @@ How to write specs, user stories, and test definitions before implementation.
 
 ## Templates
 
-| Need                            | Template                                             |
-| ------------------------------- | ---------------------------------------------------- |
-| L2 Feature spec                 | `@./.safeword/templates/feature-spec-template.md`    |
-| L1/L0 Task spec                 | `@./.safeword/templates/task-spec-template.md`       |
-| L2 Test definitions             | `@./.safeword/templates/test-definitions-feature.md` |
-| Complex feature design          | `@./.safeword/templates/design-doc-template.md`      |
-| Architectural decision          | `@./.safeword/templates/architecture-template.md`    |
-| Context anchor for complex work | `@./.safeword/templates/ticket-template.md`          |
-| Execution scratch pad           | `@./.safeword/templates/work-log-template.md`        |
+| Need                            | Template                                          |
+| ------------------------------- | ------------------------------------------------- |
+| L2 Feature spec                 | `.safeword/templates/feature-spec-template.md`    |
+| L1/L0 Task spec                 | `.safeword/templates/task-spec-template.md`       |
+| L2 Test definitions             | `.safeword/templates/test-definitions-feature.md` |
+| Complex feature design          | `.safeword/templates/design-doc-template.md`      |
+| Architectural decision          | `.safeword/templates/architecture-template.md`    |
+| Context anchor for complex work | `.safeword/templates/ticket-template.md`          |
+| Execution scratch pad           | `.safeword/templates/work-log-template.md`        |
 
 ---
 
@@ -240,7 +240,7 @@ Test: All existing tests pass, no new mutations
 
 ### How to Fill Out Test Definitions
 
-1. Read `@./.safeword/templates/test-definitions-feature.md`
+1. Read `.safeword/templates/test-definitions-feature.md`
 2. Read user story's Technical Constraints section (if exists)
 3. Fill in feature name, issue number, test file path
 4. Organize tests into logical suites

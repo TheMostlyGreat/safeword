@@ -1,6 +1,6 @@
 # Task: [Name]
 
-**Guide**: `@./.safeword/guides/development-workflow.md`
+**Guide**: `@./.safeword/guides/planning-guide.md`
 **Template**: `@./.safeword/templates/task-spec-template.md`
 
 ---

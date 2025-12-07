@@ -550,3 +550,12 @@ This is a **living process** - iterate and refine based on what works.
 - Refactor when multiple learnings cover similar topics (consolidate)
 - Split when learning file >200 lines (focus on single concept)
 - Update SAFEWORD.md references when learnings move or merge
+
+---
+
+## Key Takeaways
+
+- Extract after 5+ debug cycles or 3+ approaches tried
+- Check existing learnings first—update, don't duplicate
+- One concept per file, under 200 lines
+- Extract immediately while fresh (don't defer to "later")

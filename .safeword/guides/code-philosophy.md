@@ -196,3 +196,12 @@ Before completing any work, verify:
 # ❌ Bad: "misc fixes"
 # ✅ Good: "fix: login button not responding to clicks"
 ```
+
+---
+
+## Key Takeaways
+
+- Clarity → Simplicity → Correctness (in that order)
+- Delete unused code—no "just in case" abstractions
+- Commit often with descriptive messages
+- Verify library versions before using APIs (training data is stale)

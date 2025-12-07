@@ -1,5 +1,17 @@
 # Design Doc Guide for Claude Code
 
+## Escalation Check
+
+**STOP if ANY apply—use `architecture-guide.md` first:**
+
+- [ ] Need to choose a technology or library
+- [ ] Need to design a data model or schema
+- [ ] Pattern will affect 2+ features
+
+Then return here.
+
+---
+
 ## How to Fill Out Design Doc
 
 **Template:** `@.safeword/templates/design-doc-template.md`
@@ -169,3 +181,12 @@ Before saving, verify:
 **Important:** Design docs are instructions that LLMs read and follow.
 
 **See:** `@.safeword/guides/llm-guide.md` for comprehensive framework on writing clear, actionable documentation that LLMs can reliably follow.
+
+---
+
+## Key Takeaways
+
+- Escalate to Architecture Doc if: new tech, new schema, or pattern affects 2+ features
+- Reference user stories and test definitions—don't duplicate them
+- Every decision needs: what, why, trade-off
+- ~121 lines target (concise, LLM-optimized)

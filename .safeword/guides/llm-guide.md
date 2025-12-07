@@ -1,12 +1,10 @@
 # LLM Guide
 
-This guide covers three related topics:
+This guide covers two related topics:
 
 **Part 1: Integration** - How to call LLMs effectively (API calls, structured outputs, caching, testing)
 
 **Part 2: Writing for LLMs** - How to write documentation that LLMs will read and follow (SAFEWORD.md, CLAUDE.md, guides)
-
-**Part 3: Writing Skills** - How to write Claude Skills that are discoverable and effective
 
 ---
 
@@ -261,17 +259,43 @@ When LLMs hit dead ends, provide concrete next steps.
    - Login form → Dashboard → E2E test (multi-page)"
 ```
 
----
+### 14. Position-Aware Writing (Recency Bias)
 
-## Part 3: Writing Skills
+LLMs retain information at the **beginning and end** of context better than the middle. Structure documents accordingly.
 
-See @./.safeword/guides/skill-authoring-guide.md for comprehensive guidance on:
+```markdown
+❌ BAD - Critical rules buried in middle:
 
-- Skill naming (gerund form preferred)
-- Description requirements (third person + triggers)
-- Progressive disclosure structure
-- Workflows and feedback loops
-- Quality checklist for publishing
+# Guide
+
+## Background (100 lines)
+
+## Details (200 lines)
+
+## Critical Rules (10 lines) ← forgotten
+
+## Appendix (50 lines)
+
+✅ GOOD - Critical rules at end:
+
+# Guide
+
+## Background (100 lines)
+
+## Details (200 lines)
+
+## Appendix (50 lines)
+
+## Key Takeaways (10 lines) ← retained
+```
+
+**Application:**
+
+- CLAUDE.md / SAFEWORD.md: Put "Always Remember" section last
+- Guides: End with "Key Takeaways" section
+- Templates: Put most important sections at top OR bottom, not middle
+
+**Research basis:** "Lost in the middle" phenomenon—models show <40% recall for middle content vs >80% for beginning/end content.
 
 ---
 
@@ -281,6 +305,7 @@ See @./.safeword/guides/skill-authoring-guide.md for comprehensive guidance on:
 ❌ **Undefined jargon** - "Technical debt", "code smell" need definitions
 ❌ **Competing guidance** - Multiple decision frameworks that contradict each other
 ❌ **Outdated references** - Remove concepts, but forget to update all mentions
+❌ **Critical info in the middle** - Most important rules buried between background and appendix
 
 ---
 
@@ -297,6 +322,7 @@ Before saving/committing LLM-consumable documentation:
 - [ ] Tie-breaking rules provided
 - [ ] Complex decisions (3+ branches) have lookup tables
 - [ ] Dead-end paths have re-evaluation steps with examples
+- [ ] Critical rules positioned at END of document (recency bias)
 
 ---
 
@@ -324,3 +350,12 @@ Edge cases:
 - React components with React Testing Library → Integration (not E2E, no real browser)
 - Non-deterministic functions (Date.now()) → Unit test with mocked time
 ```
+
+---
+
+## Key Takeaways
+
+- Decision trees: sequential, MECE, with tie-breakers
+- Every rule needs concrete examples (good vs bad)
+- Define all terms explicitly—assume nothing is obvious
+- Put critical rules at the END of documents (recency bias)
