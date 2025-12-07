@@ -138,15 +138,37 @@ Before starting Phase 1, create or open a work log:
 - [ ] No hardcoded/mock values
 - [ ] Committed
 
+### Verification Gate
+
+**Before claiming GREEN:** Evidence before claims, always.
+
+```text
+✅ CORRECT                          ❌ WRONG
+─────────────────────────────────   ─────────────────────────────────
+Run: npm test                       "Tests should pass now"
+Output: ✓ 34/34 tests pass          "I'm confident this works"
+Claim: "All tests pass"             "Tests pass" (no output shown)
+```
+
+**The Rule:** If you haven't run the verification command in this response, you cannot claim it passes.
+
+| Claim            | Requires                      | Not Sufficient              |
+| ---------------- | ----------------------------- | --------------------------- |
+| "Tests pass"     | Fresh test output: 0 failures | "should pass", previous run |
+| "Build succeeds" | Build command: exit 0         | "linter passed"             |
+| "Bug fixed"      | Original symptom test passes  | "code changed"              |
+
 **Red Flags → STOP:**
 
-| Flag                | Action                                 |
-| ------------------- | -------------------------------------- |
-| "Just in case" code | Delete it                              |
-| Multiple functions  | Delete extras                          |
-| Refactoring         | Stop - that's Phase 3                  |
-| Test still fails    | Debug (→ systematic-debugger if stuck) |
-| Hardcoded value     | Implement real logic (see below)       |
+| Flag                        | Action                                 |
+| --------------------------- | -------------------------------------- |
+| "should", "probably" claims | Run command, show output first         |
+| "Done!" before verification | Run command, show output first         |
+| "Just in case" code         | Delete it                              |
+| Multiple functions          | Delete extras                          |
+| Refactoring                 | Stop - that's Phase 3                  |
+| Test still fails            | Debug (→ systematic-debugger if stuck) |
+| Hardcoded value             | Implement real logic (see below)       |
 
 ### Anti-Pattern: Mock Implementations
 
