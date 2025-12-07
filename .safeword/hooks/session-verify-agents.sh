@@ -2,7 +2,8 @@
 # Safeword: Verify AGENTS.md link (SessionStart)
 # Self-heals by restoring the link if removed
 
-LINK='**⚠️ ALWAYS READ FIRST: @./.safeword/SAFEWORD.md**'
+# shellcheck disable=SC2016 # Backticks are literal markdown, not command substitution
+LINK='**⚠️ ALWAYS READ FIRST:** `.safeword/SAFEWORD.md`'
 
 # Change to project directory if set
 [ -n "$CLAUDE_PROJECT_DIR" ] && cd "$CLAUDE_PROJECT_DIR" || true
@@ -20,7 +21,7 @@ if [ ! -f "AGENTS.md" ]; then
 fi
 
 # Check if link is present
-if ! grep -q "@./.safeword/SAFEWORD.md" AGENTS.md; then
+if ! grep -q ".safeword/SAFEWORD.md" AGENTS.md; then
   # Link missing, prepend it
   CONTENT=$(cat AGENTS.md)
   echo -e "$LINK\n\n$CONTENT" > AGENTS.md

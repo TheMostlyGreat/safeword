@@ -1,6 +1,6 @@
 ---
 name: tdd-enforcer
-description: Use when implementing features, fixing bugs, or making code changes. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
+description: Use when implementing features, fixing bugs, or adding new behavior. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. NOT for pure refactoring (use refactoring skill for structural improvements without behavior change). Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
 allowed-tools: '*'
 ---
 
@@ -17,7 +17,7 @@ Answer IN ORDER. Stop at first match:
 1. Implementing new feature? → Use this skill
 2. Fixing bug? → Use this skill
 3. Adding enhancement? → Use this skill
-4. Refactoring? → Use this skill
+4. Refactoring only (no new behavior)? → Skip (use refactoring skill)
 5. Research/investigation only? → Skip this skill
 
 ---
