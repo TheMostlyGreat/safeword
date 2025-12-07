@@ -24,6 +24,8 @@
 export function getEslintConfig(options: { boundaries?: boolean }): string {
   return `/* eslint-disable import-x/no-unresolved -- dynamic imports for optional framework plugins */
 import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
 import { importX } from "eslint-plugin-import-x";
@@ -35,9 +37,26 @@ import unicorn from "eslint-plugin-unicorn";
 import eslintConfigPrettier from "eslint-config-prettier";
 ${options.boundaries ? 'import boundariesConfig from "./.safeword/eslint-boundaries.config.mjs";' : ''}
 
-// Read package.json to detect frameworks at runtime
-const pkg = JSON.parse(readFileSync("./package.json", "utf8"));
+// Read package.json relative to this config file (not CWD)
+// This ensures correct detection in monorepos where lint-staged may run from subdirectories
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, "package.json"), "utf8"));
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+
+// Helper for dynamic imports with actionable error messages
+async function tryImport(pkgName, frameworkName) {
+  try {
+    return await import(pkgName);
+  } catch (err) {
+    if (err.code === "ERR_MODULE_NOT_FOUND") {
+      console.error(\`\\n✗ Missing ESLint plugin for \${frameworkName}\\n\`);
+      console.error(\`Your package.json has \${frameworkName} but the ESLint plugin is not installed.\`);
+      console.error(\`Run: npm install -D \${pkgName}\\n\`);
+      console.error(\`Or run: npx safeword sync\\n\`);
+    }
+    throw err;
+  }
+}
 
 // Build dynamic ignores based on detected frameworks
 const ignores = ["**/node_modules/", "**/dist/", "**/build/", "**/coverage/"];
@@ -81,16 +100,16 @@ const configs = [
 
 // TypeScript support (detected from package.json)
 if (deps["typescript"] || deps["typescript-eslint"]) {
-  const tseslint = await import("typescript-eslint");
+  const tseslint = await tryImport("typescript-eslint", "TypeScript");
   configs.push(importX.flatConfigs.typescript);
   configs.push(...tseslint.default.configs.recommended);
 }
 
 // React/Next.js support
 if (deps["react"] || deps["next"]) {
-  const react = await import("eslint-plugin-react");
-  const reactHooks = await import("eslint-plugin-react-hooks");
-  const jsxA11y = await import("eslint-plugin-jsx-a11y");
+  const react = await tryImport("eslint-plugin-react", "React");
+  const reactHooks = await tryImport("eslint-plugin-react-hooks", "React");
+  const jsxA11y = await tryImport("eslint-plugin-jsx-a11y", "React");
   configs.push(react.default.configs.flat.recommended);
   configs.push(react.default.configs.flat["jsx-runtime"]);
   configs.push({
@@ -103,7 +122,7 @@ if (deps["react"] || deps["next"]) {
 
 // Next.js plugin
 if (deps["next"]) {
-  const nextPlugin = await import("@next/eslint-plugin-next");
+  const nextPlugin = await tryImport("@next/eslint-plugin-next", "Next.js");
   configs.push({
     name: "nextjs",
     plugins: { "@next/next": nextPlugin.default },
@@ -113,31 +132,31 @@ if (deps["next"]) {
 
 // Astro support
 if (deps["astro"]) {
-  const astro = await import("eslint-plugin-astro");
+  const astro = await tryImport("eslint-plugin-astro", "Astro");
   configs.push(...astro.default.configs.recommended);
 }
 
 // Vue support
 if (deps["vue"] || deps["nuxt"]) {
-  const vue = await import("eslint-plugin-vue");
+  const vue = await tryImport("eslint-plugin-vue", "Vue");
   configs.push(...vue.default.configs["flat/recommended"]);
 }
 
 // Svelte support
 if (deps["svelte"] || deps["@sveltejs/kit"]) {
-  const svelte = await import("eslint-plugin-svelte");
+  const svelte = await tryImport("eslint-plugin-svelte", "Svelte");
   configs.push(...svelte.default.configs.recommended);
 }
 
 // Electron support
 if (deps["electron"]) {
-  const electron = await import("@electron-toolkit/eslint-config");
+  const electron = await tryImport("@electron-toolkit/eslint-config", "Electron");
   configs.push(electron.default);
 }
 
 // Vitest support (scoped to test files)
 if (deps["vitest"]) {
-  const vitest = await import("@vitest/eslint-plugin");
+  const vitest = await tryImport("@vitest/eslint-plugin", "Vitest");
   configs.push({
     name: "vitest",
     files: ["**/*.test.{js,ts,jsx,tsx}", "**/*.spec.{js,ts,jsx,tsx}", "**/tests/**"],

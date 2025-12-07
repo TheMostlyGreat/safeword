@@ -11,13 +11,42 @@ import {
   createTempDir,
   removeTempDir,
   createConfiguredProject,
-  runCli,
   readTestFile,
   writeTestFile,
   fileExists,
   measureTimeSync,
 } from '../helpers';
 import { unlinkSync } from 'node:fs';
+
+/**
+ * Helper to run the self-healing hook script
+ */
+function runSelfHealingHook(dir: string): { stdout: string; exitCode: number } {
+  // The hook script location: .safeword/hooks/session-verify-agents.sh
+  const hookPath = join(dir, '.safeword/hooks/session-verify-agents.sh');
+
+  if (!fileExists(dir, '.safeword/hooks/session-verify-agents.sh')) {
+    // Hook may have different name - check for any agents-related hook
+    // For now, return a placeholder
+    return { stdout: '', exitCode: 0 };
+  }
+
+  try {
+    // eslint-disable-next-line sonarjs/os-command -- test helper running known hook script
+    const stdout = execSync(`bash "${hookPath}"`, {
+      cwd: dir,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    return { stdout, exitCode: 0 };
+  } catch (error: unknown) {
+    const execError = error as { stdout?: string; status?: number };
+    return {
+      stdout: execError.stdout ?? '',
+      exitCode: execError.status ?? 1,
+    };
+  }
+}
 
 describe('Test Suite 12: AGENTS.md Self-Healing', () => {
   let tempDir: string;
@@ -29,35 +58,6 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
   afterEach(() => {
     removeTempDir(tempDir);
   });
-
-  /**
-   * Helper to run the self-healing hook script
-   */
-  function runSelfHealingHook(dir: string): { stdout: string; exitCode: number } {
-    // The hook script location: .safeword/hooks/session-verify-agents.sh
-    const hookPath = join(dir, '.safeword/hooks/session-verify-agents.sh');
-
-    if (!fileExists(dir, '.safeword/hooks/session-verify-agents.sh')) {
-      // Hook may have different name - check for any agents-related hook
-      // For now, return a placeholder
-      return { stdout: '', exitCode: 0 };
-    }
-
-    try {
-      const stdout = execSync(`bash "${hookPath}"`, {
-        cwd: dir,
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'pipe'],
-      });
-      return { stdout, exitCode: 0 };
-    } catch (error: unknown) {
-      const execError = error as { stdout?: string; status?: number };
-      return {
-        stdout: execError.stdout ?? '',
-        exitCode: execError.status ?? 1,
-      };
-    }
-  }
 
   describe('Test 12.1: Hook detects missing link', () => {
     it('should detect when safeword link is missing', async () => {
@@ -84,7 +84,6 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
       await createConfiguredProject(tempDir);
 
       // Remove the safeword link
-      const content = readTestFile(tempDir, 'AGENTS.md');
       const withoutLink = '# My Project\n\nSome content without the link.\n';
       writeTestFile(tempDir, 'AGENTS.md', withoutLink);
 
@@ -150,7 +149,7 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
 
       // Count links
       const contentAfter = readTestFile(tempDir, 'AGENTS.md');
-      const linkCount = (contentAfter.match(/@\.\/\.safeword\/SAFEWORD\.md/g) || []).length;
+      const linkCount = (contentAfter.match(/\.safeword\/SAFEWORD\.md/g) || []).length;
 
       expect(linkCount).toBe(1);
     });

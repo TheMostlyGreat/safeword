@@ -143,11 +143,18 @@ describe('Setup - Template Bundling (Story 1)', () => {
     // Must have at least SAFEWORD.md with links to verify
     expect(allMdFiles.length).toBeGreaterThan(0);
 
-    // Extract all @./.safeword/ links and verify targets exist
-    // Pattern: @./.safeword/path.md - stop at whitespace, backticks, quotes, parens, or markdown formatting
-    const linkPattern = /@\.\/\.safeword\/[a-zA-Z0-9_\-/]+\.md/g;
+    // Extract all .safeword/ links and verify targets exist
+    // Pattern: .safeword/path.md - stop at whitespace, backticks, quotes, parens, or markdown formatting
+    const linkPattern = /\.safeword\/[a-zA-Z0-9_\-/]+\.md/g;
     const brokenLinks: { file: string; link: string }[] = [];
     let totalLinks = 0;
+
+    // Patterns for example/placeholder links that shouldn't be validated
+    const examplePatterns = [
+      /XXX/, // Template placeholders like XXX-feature-name.md
+      /file\.md$/, // Generic "file.md" examples in docs
+      /learnings\//, // Example learning file paths in documentation
+    ];
 
     for (const mdFile of allMdFiles) {
       const content = readFileSync(mdFile, 'utf-8');
@@ -155,8 +162,13 @@ describe('Setup - Template Bundling (Story 1)', () => {
       totalLinks += links.length;
 
       for (const link of links) {
-        // Convert @./.safeword/path to relative path
-        const relativePath = link.replace('@./', '');
+        // Skip example/placeholder links
+        if (examplePatterns.some(p => p.test(link))) {
+          continue;
+        }
+
+        // The link is already a relative path like .safeword/path.md
+        const relativePath = link;
 
         if (!fileExists(tempDir, relativePath)) {
           brokenLinks.push({

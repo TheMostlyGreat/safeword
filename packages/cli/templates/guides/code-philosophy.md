@@ -109,7 +109,7 @@ Examples:
 - ✅ If a test fails, fix the implementation—not the test
 - ✅ If a test seems wrong or requirements changed, explain why and ask before changing it
 
-**Workflow:** See `@.safeword/guides/development-workflow.md` for comprehensive TDD workflow (RED → GREEN → REFACTOR phases)
+**Workflow:** See `.safeword/guides/testing-guide.md` for comprehensive TDD workflow (RED → GREEN → REFACTOR phases)
 
 ## Debugging & Troubleshooting
 

@@ -139,8 +139,8 @@ Then return here.
 
 **If prerequisites don't exist:**
 
-1. User stories missing → Create them first (guide: `@.safeword/guides/user-story-guide.md`)
-2. Test definitions missing → Create them after user stories (guide: `@.safeword/guides/test-definitions-guide.md`)
+1. Feature spec missing → Create it first (guide: `.safeword/guides/planning-guide.md`)
+2. Test definitions missing → Create them after feature spec (guide: `.safeword/guides/planning-guide.md`)
 3. Then create design doc referencing both
 
 ---
