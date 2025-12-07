@@ -202,6 +202,7 @@ ps aux | grep "/Users/alex/projects/my-project"
 | Kill all for this project                | `./scripts/cleanup.sh`                                           |
 | Check what's on port                     | `lsof -i:3000`                                                   |
 | Find zombie processes                    | `ps aux \| grep -E "(node\|playwright\|chromium)"`               |
+| Preview what `pkill -f` would kill       | `pgrep -f "pattern"` (verify before running pkill)               |
 | Kill by process ID                       | `kill -9 <PID>`                                                  |
 
 ---
@@ -210,6 +211,7 @@ ps aux | grep "/Users/alex/projects/my-project"
 
 ❌ **DON'T:** `killall node` (kills all projects)
 ❌ **DON'T:** `pkill -9 node` (kills all projects)
+❌ **DON'T:** `pkill -f "pattern"` without `pgrep -f` first (matches full command line, can kill unintended processes)
 ❌ **DON'T:** Kill processes without checking working directory
 ❌ **DON'T:** Assume zombie browsers will clean themselves up (they won't)
 
