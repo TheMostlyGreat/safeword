@@ -9,14 +9,16 @@ Read it BEFORE working on any task in this project.
 
 ## Cross-Platform Skills
 
-This project maintains skill parity between Claude Code and Cursor using the `.mdc` format.
+**Source of truth:** `.safeword/skills/*.md`
 
-**How it works:**
+Skills are authored once in `.safeword/skills/` and synced to both Claude Code and Cursor formats via script.
 
-| Tool        | Reads                          | Location                    |
-| ----------- | ------------------------------ | --------------------------- |
-| Claude Code | SKILL.md (ignores frontmatter) | `.claude/skills/*/SKILL.md` |
-| Cursor      | .mdc with YAML frontmatter     | `.cursor/rules/*.mdc`       |
+**Sync command:** `.safeword/scripts/sync-skills.sh`
+
+| Output      | Location                    | Format                  |
+| ----------- | --------------------------- | ----------------------- |
+| Claude Code | `.claude/skills/*/SKILL.md` | YAML frontmatter + body |
+| Cursor      | `.cursor/rules/*.mdc`       | YAML frontmatter + body |
 
 **Skills available:**
 
@@ -28,6 +30,8 @@ This project maintains skill parity between Claude Code and Cursor using the `.m
 | `quality-reviewer` | 'double check', 'verify versions'         |
 
 **Authoring guide:** @./.safeword/guides/skill-authoring-guide.md
+
+**Never edit generated files directly** - they contain `AUTO-GENERATED` headers. Edit the source in `.safeword/skills/` and re-run the sync script.
 
 ---
 

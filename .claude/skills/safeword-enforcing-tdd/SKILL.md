@@ -1,7 +1,15 @@
+# AUTO-GENERATED - DO NOT EDIT
+
+# Source: .safeword/skills/enforcing-tdd.md
+
+# Run: .safeword/scripts/sync-skills.sh
+
 ---
+
 name: enforcing-tdd
 description: Use when implementing features, fixing bugs, or making code changes. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
-allowed-tools: '*'
+allowed-tools: '\*'
+
 ---
 
 # TDD Enforcer
@@ -48,12 +56,6 @@ Answer IN ORDER. Stop at first match:
 
 - Specs: `.safeword/planning/specs/`
 - Test definitions: `.safeword/planning/test-definitions/`
-
-**Templates:**
-
-- L2 Feature: @./.safeword/templates/feature-spec-template.md
-- L1/L0 Task: @./.safeword/templates/task-spec-template.md
-- Test Definitions: @./.safeword/templates/test-definitions-feature.md
 
 ### Exit Criteria
 
@@ -211,11 +213,3 @@ Phase 0: L0 → create minimal spec → Phase 1: no new test (existing tests cov
 | Test fails unexpectedly | → debugging         |
 | Review needed           | → quality-reviewer  |
 | Scope expanding         | → Update spec first |
-
----
-
-## Related
-
-- @./.safeword/guides/test-definitions-guide.md
-- @./.safeword/guides/tdd-best-practices.md
-- @./.safeword/guides/development-workflow.md

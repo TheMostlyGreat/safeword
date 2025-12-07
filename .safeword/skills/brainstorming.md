@@ -1,10 +1,6 @@
-# AUTO-GENERATED - DO NOT EDIT
-# Source: .safeword/skills/brainstorming.md
-# Run: .safeword/scripts/sync-skills.sh
-
 ---
+name: brainstorming
 description: Use before implementation when refining rough ideas into specs. Guides collaborative design through Socratic questioning, alternative exploration, and incremental validation. Triggers: 'brainstorm', 'design', 'explore options', 'figure out', 'think through', 'what approach'.
-alwaysApply: false
 ---
 
 # Brainstorming Ideas Into Specs

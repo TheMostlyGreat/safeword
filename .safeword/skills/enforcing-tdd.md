@@ -1,10 +1,6 @@
-# AUTO-GENERATED - DO NOT EDIT
-# Source: .safeword/skills/enforcing-tdd.md
-# Run: .safeword/scripts/sync-skills.sh
-
 ---
+name: enforcing-tdd
 description: Use when implementing features, fixing bugs, or making code changes. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
-alwaysApply: false
 ---
 
 # TDD Enforcer

@@ -1,10 +1,6 @@
-# AUTO-GENERATED - DO NOT EDIT
-# Source: .safeword/skills/quality-reviewer.md
-# Run: .safeword/scripts/sync-skills.sh
-
 ---
+name: quality-reviewer
 description: Deep code review with web research to verify against latest ecosystem. Use when user says 'double check against latest', 'verify versions', 'check security', 'review against docs', or needs deep analysis beyond automatic quality hook.
-alwaysApply: false
 ---
 
 # Quality Reviewer

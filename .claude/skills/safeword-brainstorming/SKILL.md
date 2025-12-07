@@ -1,7 +1,15 @@
+# AUTO-GENERATED - DO NOT EDIT
+
+# Source: .safeword/skills/brainstorming.md
+
+# Run: .safeword/scripts/sync-skills.sh
+
 ---
+
 name: brainstorming
 description: Use before implementation when refining rough ideas into specs. Guides collaborative design through Socratic questioning, alternative exploration, and incremental validation. Triggers: 'brainstorm', 'design', 'explore options', 'figure out', 'think through', 'what approach'.
-allowed-tools: '*'
+allowed-tools: '\*'
+
 ---
 
 # Brainstorming Ideas Into Specs
@@ -164,12 +172,6 @@ Which direction feels right?
 - L1/L0: `.safeword/planning/specs/task-[slug].md`
 - L2 Test Defs: `.safeword/planning/test-definitions/feature-[slug].md`
 
-**Templates:**
-
-- L2: @./.safeword/templates/feature-spec-template.md
-- L1/L0: @./.safeword/templates/task-spec-template.md
-- Test Defs: @./.safeword/templates/test-definitions-feature.md
-
 **Exit Criteria:**
 
 - [ ] Spec created in correct location
@@ -214,44 +216,3 @@ Which direction feels right?
 | Skip alternatives              | Always present 2-3 options       |
 | Accept vague requirements      | Probe until concrete             |
 | Add "nice to have" features    | Put them in "Out of Scope"       |
-
----
-
-## Integration
-
-| Scenario                           | Handoff                  |
-| ---------------------------------- | ------------------------ |
-| Design complete, ready to build    | → enforcing-tdd          |
-| Need architectural decision record | → Architecture guide     |
-| Complex design (3+ components)     | → Also create Design Doc |
-
----
-
-## Example Flow
-
-```text
-User: "I want to add dark mode"
-
-Phase 1: [Check existing UI code, theme patterns]
-
-Phase 2: "Is this for the whole app or specific components?"
-         "Should it auto-detect system preference?"
-         "Do you need a manual toggle?"
-
-Phase 3: "I'd recommend Option A (CSS variables + system detection).
-          Option A: CSS variables...
-          Option B: Tailwind dark classes...
-          Option C: Theme context provider...
-          Which direction?"
-
-Phase 4: [Present overview] "Does this look right?"
-         [Present components] "Does this look right?"
-         [Present data flow] "Does this look right?"
-         ...
-
-Phase 5: [L2 Feature → Create feature-dark-mode.md + test defs]
-         [Commit]
-
-Phase 6: "Ready to start TDD?"
-         → Invoke enforcing-tdd
-```
