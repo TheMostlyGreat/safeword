@@ -1,7 +1,7 @@
 # Design: [Feature Name]
 
-**Guide**: `@./.safeword/guides/design-doc-guide.md` - Principles, structure guidelines, and avoiding bloat
-**Template**: `@./.safeword/templates/design-doc-template.md`
+**Guide**: `.safeword/guides/design-doc-guide.md` - Principles, structure guidelines, and avoiding bloat
+**Template**: `.safeword/templates/design-doc-template.md`
 
 **Related**: Feature Spec: `[path]` | Test Definitions: `[path]`
 

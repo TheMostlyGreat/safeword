@@ -1,7 +1,7 @@
 # Test Definitions: [Feature Name] (Issue #[number])
 
-**Guide**: `@./.safeword/guides/testing-guide.md` - Structure, status tracking, and TDD workflow
-**Template**: `@./.safeword/templates/test-definitions-feature.md`
+**Guide**: `.safeword/guides/testing-guide.md` - Structure, status tracking, and TDD workflow
+**Template**: `.safeword/templates/test-definitions-feature.md`
 
 **Feature**: [Brief description of the feature]
 

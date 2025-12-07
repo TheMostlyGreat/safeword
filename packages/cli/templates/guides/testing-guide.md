@@ -272,7 +272,7 @@ export default defineConfig({
 }
 ```
 
-**Cleanup:** See `@./.safeword/guides/zombie-process-cleanup.md` for killing zombie servers.
+**Cleanup:** See `.safeword/guides/zombie-process-cleanup.md` for killing zombie servers.
 
 ---
 
