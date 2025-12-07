@@ -39,8 +39,6 @@ Skills are authored once in `.safeword/skills/` and synced to both Claude Code a
 
 **Location:** `.safeword-project/` (never touched by CLI reset/upgrade)
 
-| Folder       | Purpose                            |
-| ------------ | ---------------------------------- |
-| `guides/`    | Project-specific guides            |
-| `skills/`    | Project-specific skills            |
-| `learnings/` | Extracted learnings from debugging |
+| Folder    | Purpose                 |
+| --------- | ----------------------- |
+| `guides/` | Project-specific guides |
