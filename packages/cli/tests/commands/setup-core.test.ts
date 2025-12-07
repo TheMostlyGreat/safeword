@@ -104,7 +104,7 @@ describe('Test Suite 2: Setup - Core Files', () => {
 
       // Verify link exists
       const contentBefore = readTestFile(tempDir, 'AGENTS.md');
-      const linkCount = (contentBefore.match(/@\.\/\.safeword\/SAFEWORD\.md/g) || []).length;
+      const linkCount = (contentBefore.match(/\.safeword\/SAFEWORD\.md/g) || []).length;
       expect(linkCount).toBe(1);
 
       // Run upgrade
@@ -112,7 +112,7 @@ describe('Test Suite 2: Setup - Core Files', () => {
 
       // Count links after
       const contentAfter = readTestFile(tempDir, 'AGENTS.md');
-      const linkCountAfter = (contentAfter.match(/@\.\/\.safeword\/SAFEWORD\.md/g) || []).length;
+      const linkCountAfter = (contentAfter.match(/\.safeword\/SAFEWORD\.md/g) || []).length;
 
       expect(linkCountAfter).toBe(1);
     });

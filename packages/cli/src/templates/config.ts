@@ -22,7 +22,7 @@
  * @returns ESLint config file content as a string
  */
 export function getEslintConfig(options: { boundaries?: boolean }): string {
-  return `/* eslint-disable import-x/no-unresolved -- dynamic imports for optional framework plugins */
+  return `/* eslint-disable import-x/no-unresolved, no-undef -- dynamic imports for optional framework plugins, console used in tryImport */
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
