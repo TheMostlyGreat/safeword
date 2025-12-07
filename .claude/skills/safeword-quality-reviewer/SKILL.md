@@ -1,6 +1,6 @@
 ---
 name: quality-reviewer
-description: Deep code review with web research to verify against latest ecosystem. Use when user says 'double check against latest', 'verify versions', 'check security', 'review against docs', or needs analysis beyond automatic hook. Do NOT use for quick fixes, writing new code, or when automatic quality hook suffices.
+description: Deep code review with web research to verify against latest ecosystem. Use when user says 'double check against latest', 'verify versions', 'check security', 'review against docs', or needs deep analysis beyond automatic quality hook.
 allowed-tools: '*'
 ---
 
