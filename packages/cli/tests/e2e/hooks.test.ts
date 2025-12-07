@@ -86,7 +86,7 @@ describe('E2E: SessionStart Hooks', () => {
       expect(output).toContain('Created AGENTS.md');
 
       const content = readTestFile(projectDir, 'AGENTS.md');
-      expect(content).toContain('@./.safeword/SAFEWORD.md');
+      expect(content).toContain('.safeword/SAFEWORD.md');
     });
 
     it('restores link if removed from AGENTS.md', () => {
@@ -102,14 +102,14 @@ describe('E2E: SessionStart Hooks', () => {
       expect(output).toContain('Restored AGENTS.md link');
 
       const content = readTestFile(projectDir, 'AGENTS.md');
-      expect(content).toContain('@./.safeword/SAFEWORD.md');
+      expect(content).toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('My Project'); // Original content preserved
     });
 
     it('does nothing if link already present', () => {
       // Ensure link is present
       const originalContent = readTestFile(projectDir, 'AGENTS.md');
-      expect(originalContent).toContain('@./.safeword/SAFEWORD.md');
+      expect(originalContent).toContain('.safeword/SAFEWORD.md');
 
       const output = execSync('bash .safeword/hooks/session-verify-agents.sh', {
         cwd: projectDir,

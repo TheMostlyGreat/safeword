@@ -164,7 +164,7 @@ describe('Test Suite 11: Reset', () => {
       const updatedContent = readTestFile(tempDir, 'AGENTS.md');
 
       // Link removed
-      expect(updatedContent).not.toContain('@./.safeword/SAFEWORD.md');
+      expect(updatedContent).not.toContain('.safeword/SAFEWORD.md');
 
       // Custom content preserved
       expect(updatedContent).toContain('My Custom Section');

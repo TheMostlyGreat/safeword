@@ -41,7 +41,7 @@ describe('Check Command - Reconcile Integration', () => {
     writeFileSync(join(tempDir, '.claude/settings.json'), JSON.stringify({ hooks: {} }, null, 2));
 
     // AGENTS.md
-    writeFileSync(join(tempDir, 'AGENTS.md'), '@./.safeword/SAFEWORD.md\n\n# Agents');
+    writeFileSync(join(tempDir, 'AGENTS.md'), '.safeword/SAFEWORD.md\n\n# Agents');
   }
 
   describe('checkHealth using reconcile dryRun', () => {

@@ -189,7 +189,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       // AGENTS.md should be created with the prepend content
       expect(existsSync(join(tempDir, 'AGENTS.md'))).toBe(true);
       const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
-      expect(content).toContain('@./.safeword/SAFEWORD.md');
+      expect(content).toContain('.safeword/SAFEWORD.md');
     });
 
     it('should compute packages to install', async () => {
@@ -461,7 +461,7 @@ describe('Reconcile - Reconciliation Engine', () => {
 
       // Verify patch was applied
       let content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
-      expect(content).toContain('@./.safeword/SAFEWORD.md');
+      expect(content).toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('Custom content here');
 
       // Uninstall
@@ -469,7 +469,7 @@ describe('Reconcile - Reconciliation Engine', () => {
 
       // Patch removed, user content preserved
       content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
-      expect(content).not.toContain('@./.safeword/SAFEWORD.md');
+      expect(content).not.toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('Custom content here');
     });
 

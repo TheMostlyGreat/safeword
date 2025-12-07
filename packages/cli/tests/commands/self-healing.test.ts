@@ -67,7 +67,7 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
       const content = readTestFile(tempDir, 'AGENTS.md');
       const withoutLink = content
         .split('\n')
-        .filter(line => !line.includes('@./.safeword/SAFEWORD.md'))
+        .filter(line => !line.includes('.safeword/SAFEWORD.md'))
         .join('\n');
       writeTestFile(tempDir, 'AGENTS.md', withoutLink);
 
@@ -93,7 +93,7 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
 
       // Link should be restored
       const updatedContent = readTestFile(tempDir, 'AGENTS.md');
-      expect(updatedContent).toContain('@./.safeword/SAFEWORD.md');
+      expect(updatedContent).toContain('.safeword/SAFEWORD.md');
 
       // Original content preserved
       expect(updatedContent).toContain('My Project');
@@ -131,7 +131,7 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
       expect(fileExists(tempDir, 'AGENTS.md')).toBe(true);
 
       const content = readTestFile(tempDir, 'AGENTS.md');
-      expect(content).toContain('@./.safeword/SAFEWORD.md');
+      expect(content).toContain('.safeword/SAFEWORD.md');
     });
   });
 
@@ -141,7 +141,7 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
 
       // Verify link exists
       const contentBefore = readTestFile(tempDir, 'AGENTS.md');
-      expect(contentBefore).toContain('@./.safeword/SAFEWORD.md');
+      expect(contentBefore).toContain('.safeword/SAFEWORD.md');
 
       // Run hook multiple times
       runSelfHealingHook(tempDir);

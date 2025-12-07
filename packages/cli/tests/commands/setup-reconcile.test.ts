@@ -206,7 +206,7 @@ describe('Setup Command - Reconcile Integration', () => {
       // AGENTS.md should be created with safeword link
       expect(existsSync(join(tempDir, 'AGENTS.md'))).toBe(true);
       const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
-      expect(content).toContain('@./.safeword/SAFEWORD.md');
+      expect(content).toContain('.safeword/SAFEWORD.md');
     });
 
     it('should prepend to existing AGENTS.md', async () => {
@@ -227,7 +227,7 @@ describe('Setup Command - Reconcile Integration', () => {
 
       // AGENTS.md should have link prepended
       const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
-      expect(content).toContain('@./.safeword/SAFEWORD.md');
+      expect(content).toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('Custom content here');
     });
 

@@ -42,7 +42,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
     writeFileSync(join(tempDir, '.claude/settings.json'), JSON.stringify({ hooks: {} }, null, 2));
 
     // AGENTS.md with link
-    writeFileSync(tempDir + '/AGENTS.md', '@./.safeword/SAFEWORD.md\n\n# Agents');
+    writeFileSync(tempDir + '/AGENTS.md', '.safeword/SAFEWORD.md\n\n# Agents');
   }
 
   describe('reconcile mode=upgrade', () => {
@@ -245,7 +245,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
       // AGENTS.md should have the link added
       const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
-      expect(content).toContain('@./.safeword/SAFEWORD.md');
+      expect(content).toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('My Project'); // Original content preserved
     });
   });

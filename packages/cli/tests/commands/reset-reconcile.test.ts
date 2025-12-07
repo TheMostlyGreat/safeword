@@ -94,7 +94,7 @@ describe('Reset Command - Reconcile Integration', () => {
     );
 
     // AGENTS.md
-    writeFileSync(join(tempDir, 'AGENTS.md'), '@./.safeword/SAFEWORD.md\n\n# My Project');
+    writeFileSync(join(tempDir, 'AGENTS.md'), '.safeword/SAFEWORD.md\n\n# My Project');
 
     // Linting config
     writeFileSync(join(tempDir, 'eslint.config.mjs'), '// eslint config');
@@ -152,7 +152,7 @@ describe('Reset Command - Reconcile Integration', () => {
 
       // AGENTS.md should no longer have the safeword link
       const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
-      expect(content).not.toContain('@./.safeword/SAFEWORD.md');
+      expect(content).not.toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('My Project'); // Original content preserved
     });
 
