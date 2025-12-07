@@ -43,26 +43,85 @@ Use **gerund form** (verb + -ing). This clearly describes the activity.
 
 ---
 
-## Description
+## Description (Critical for Selection Accuracy)
 
-The description is critical for discovery. Claude uses it to choose from 100+ available skills.
+The description is the **primary signal** for skill discovery. Claude uses pure LLM reasoning—no embeddings, classifiers, or pattern matching—to select skills based solely on description text.
 
-**Requirements:**
+**How selection works:**
 
-- Write in **third person** (not "I help you..." or "You can use this...")
+1. At startup, all skill descriptions load into system prompt (~100 tokens each)
+2. Claude reads descriptions and matches user intent using language understanding
+3. Best-matching skill is selected and its full SKILL.md loads
+
+**This means:** Description quality directly determines auto-invocation accuracy.
+
+### Requirements
+
+- Write in **third person** (injected into system prompt; first/second person causes issues)
 - Include **what it does** AND **when to use it**
+- Include **trigger phrases** users would actually say
 - Max 1024 characters
 
+### The WHEN + WHEN NOT Pattern
+
+Generic descriptions fail. Specific boundaries succeed.
+
 ```yaml
-# BAD - First person
-description: I help you process PDFs
+# BAD - Too vague, will misfire
+description: Helps with code quality
 
 # BAD - Missing triggers
-description: Processes PDF files
+description: Performs deep code review with web research
 
-# GOOD - Third person + triggers
-description: Extracts text from PDFs, fills forms, merges documents. Use when working with PDF files or when user mentions PDFs, forms, or document extraction.
+# GOOD - Specific triggers + boundaries
+description: Deep code quality review with web research. Use when user
+  requests verification against latest docs ('double check against latest',
+  'verify versions', 'check security'), needs analysis beyond automatic
+  hook, or works on projects without SAFEWORD.md. Do NOT use for quick
+  fixes or when user just wants code written.
 ```
+
+### Effective Description Anatomy
+
+```yaml
+description: [WHAT it does]. [WHEN to use - specific triggers].
+  [WHEN NOT to use - prevents misfires].
+```
+
+**Examples from official docs:**
+
+```yaml
+# PDF Processing
+description: Extract text and tables from PDF files, fill forms, merge
+  documents. Use when working with PDF files or when user mentions PDFs,
+  forms, or document extraction.
+
+# Git Commit Helper
+description: Generate descriptive commit messages by analyzing git diffs.
+  Use when user asks for help writing commit messages or reviewing staged
+  changes.
+
+# Stakeholder Context (with WHEN NOT)
+description: Stakeholder context for Test Project when discussing product
+  features, UX research, or stakeholder interviews. Auto-invoke when user
+  mentions Test Project, product lead, or UX research. Do NOT load for
+  general stakeholder discussions unrelated to Test Project.
+```
+
+### Keywords Matter
+
+Include terms users would actually say:
+
+- File extensions: `.pdf`, `.xlsx`, `.docx`
+- Action words: "debug", "review", "verify", "check"
+- Domain terms: "commit message", "test failure", "latest docs"
+- Quoted phrases: `'double check'`, `'not working'`
+
+### Testing Selection Accuracy
+
+1. Try invoking with various phrasings - does the right skill activate?
+2. Try similar requests - does it avoid misfiring on wrong skills?
+3. Test with Haiku (needs more guidance) and Opus (avoid over-triggering)
 
 ---
 

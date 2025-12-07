@@ -1,6 +1,6 @@
 ---
-name: reviewing-quality
-description: Deep code quality review with web research. Use when user explicitly requests verification against latest docs ('double check against latest', 'verify versions', 'check security'), needs deeper analysis beyond automatic hook, or is working on projects without SAFEWORD.md/CLAUDE.md. Fetches current documentation (WebFetch), checks latest versions (WebSearch), and provides deep analysis (performance, security, alternatives).
+name: quality-reviewer
+description: Deep code review with web research to verify against latest ecosystem. Use when user says 'double check against latest', 'verify versions', 'check security', 'review against docs', or needs analysis beyond automatic hook. Do NOT use for quick fixes, writing new code, or when automatic quality hook suffices.
 allowed-tools: '*'
 ---
 

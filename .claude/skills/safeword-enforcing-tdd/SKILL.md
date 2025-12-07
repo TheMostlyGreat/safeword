@@ -209,7 +209,7 @@ Phase 0: L0 → create minimal spec → Phase 1: no new test (existing tests cov
 | Scenario                | Handoff             |
 | ----------------------- | ------------------- |
 | Test fails unexpectedly | → debugging         |
-| Review needed           | → reviewing-quality |
+| Review needed           | → quality-reviewer  |
 | Scope expanding         | → Update spec first |
 
 ---
