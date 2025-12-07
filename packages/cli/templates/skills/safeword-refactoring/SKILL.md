@@ -35,12 +35,12 @@ Answer IN ORDER. Stop at first match:
 
 **Is this actually refactoring?**
 
-| User Intent         | Action                               |
-| ------------------- | ------------------------------------ |
-| "Make this cleaner" | ✓ Refactoring                        |
-| "Add validation"    | ✗ New behavior → tdd-enforcer        |
-| "Fix this bug"      | ✗ Bug fix → tdd-enforcer or debugger |
-| "Format this code"  | ✗ Style → /lint                      |
+| User Intent         | Action                                          |
+| ------------------- | ----------------------------------------------- |
+| "Make this cleaner" | ✓ Refactoring                                   |
+| "Add validation"    | ✗ New behavior → tdd-enforcer                   |
+| "Fix this bug"      | ✗ Bug fix → tdd-enforcer or systematic-debugger |
+| "Format this code"  | ✗ Style → /lint                                 |
 
 **If not refactoring:** Explain and suggest correct approach.
 
