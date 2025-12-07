@@ -19,6 +19,8 @@ How to write specs, user stories, and test definitions before implementation.
 - Specs: `.safeword/planning/specs/`
 - Test definitions: `.safeword/planning/test-definitions/`
 
+**If none fit:** Break down the work. A single task spanning all three levels should be split into separate L2 feature + L1 tasks.
+
 ---
 
 ## Templates
@@ -46,6 +48,12 @@ How to write specs, user stories, and test definitions before implementation.
 | Job Story                      | Problem-solving, user motivation unclear    | "User needs to accomplish X" |
 
 **Decision rule:** Default to Standard. Use Given-When-Then for APIs or complex state. Use Job Story when focusing on the problem, not the solution.
+
+**Edge cases:**
+
+- API with UI? → Standard for UI, Given-When-Then for API contract tests
+- Unclear user role? → Job Story to focus on the problem first, convert to Standard later
+- Technical task (refactor, upgrade)? → Skip story format, use Technical Task template
 
 ### Standard Format (Recommended)
 
