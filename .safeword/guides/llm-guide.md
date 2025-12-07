@@ -265,66 +265,13 @@ When LLMs hit dead ends, provide concrete next steps.
 
 ## Part 3: Writing Skills
 
-When creating Claude Skills (SKILL.md files), apply these additional principles:
+See @./.safeword/guides/skill-authoring-guide.md for comprehensive guidance on:
 
-### Skill Naming
-
-Use **gerund form** (verb + -ing) for skill names per [official best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices).
-
-```markdown
-✅ GOOD (gerund):
-
-- processing-pdfs
-- analyzing-spreadsheets
-- brainstorming
-
-✅ ACCEPTABLE (noun-agent):
-
-- pdf-processor
-- tdd-enforcer
-- quality-reviewer
-
-❌ BAD (vague):
-
-- helper, utils, tools
-- documents, data, files
-```
-
-### Skill Descriptions
-
-Write in **third person**. Include what it does AND when to use it.
-
-```yaml
-# ❌ BAD
-description: I help you process PDFs
-
-# ❌ BAD - Missing triggers
-description: Processes PDF files
-
-# ✅ GOOD
-description: Extracts text from PDFs, fills forms, merges documents. Use when working with PDF files or when user mentions PDFs, forms, or document extraction.
-```
-
-### Skill Structure
-
-Keep SKILL.md under 500 lines. Use progressive disclosure for complex skills.
-
-```markdown
-# SKILL.md (main, <500 lines)
-
-See [REFERENCE.md](REFERENCE.md) for API details
-See [EXAMPLES.md](EXAMPLES.md) for patterns
-
-# REFERENCE.md (loaded only when needed)
-
-# EXAMPLES.md (loaded only when needed)
-```
-
-**Key rules:**
-
-- References one level deep only (no nested references)
-- Long reference files need table of contents at top
-- Forward slashes in paths (`reference/guide.md`, not `reference\guide.md`)
+- Skill naming (gerund form preferred)
+- Description requirements (third person + triggers)
+- Progressive disclosure structure
+- Workflows and feedback loops
+- Quality checklist for publishing
 
 ---
 

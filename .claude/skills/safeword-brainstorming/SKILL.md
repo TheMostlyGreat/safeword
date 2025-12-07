@@ -17,7 +17,7 @@ Answer IN ORDER. Stop at first match:
 1. Rough idea needs refinement? → Use this skill
 2. Multiple approaches possible? → Use this skill
 3. Unclear requirements? → Use this skill
-4. Clear task, obvious approach? → Skip (use TDD Enforcer directly)
+4. Clear task, obvious approach? → Skip (use enforcing-tdd directly)
 5. Pure research/investigation? → Skip
 
 ---
@@ -184,12 +184,12 @@ Which direction feels right?
 
 1. Summarize what was created
 2. Ask: "Ready to start implementation with TDD?"
-3. If yes → Invoke TDD Enforcer skill
+3. If yes → Invoke enforcing-tdd skill
 
 **Exit Criteria:**
 
 - [ ] User confirmed spec is complete
-- [ ] Handed off to TDD Enforcer (if continuing)
+- [ ] Handed off to enforcing-tdd (if continuing)
 
 ---
 
@@ -221,7 +221,7 @@ Which direction feels right?
 
 | Scenario                           | Handoff                  |
 | ---------------------------------- | ------------------------ |
-| Design complete, ready to build    | → TDD Enforcer           |
+| Design complete, ready to build    | → enforcing-tdd          |
 | Need architectural decision record | → Architecture guide     |
 | Complex design (3+ components)     | → Also create Design Doc |
 
@@ -253,5 +253,5 @@ Phase 5: [L2 Feature → Create feature-dark-mode.md + test defs]
          [Commit]
 
 Phase 6: "Ready to start TDD?"
-         → Invoke TDD Enforcer
+         → Invoke enforcing-tdd
 ```

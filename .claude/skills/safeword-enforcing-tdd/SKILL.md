@@ -1,5 +1,5 @@
 ---
-name: tdd-enforcer
+name: enforcing-tdd
 description: Use when implementing features, fixing bugs, or making code changes. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
 allowed-tools: '*'
 ---
@@ -115,13 +115,13 @@ Answer IN ORDER. Stop at first match:
 
 **Red Flags → STOP:**
 
-| Flag                | Action                                 |
-| ------------------- | -------------------------------------- |
-| "Just in case" code | Delete it                              |
-| Multiple functions  | Delete extras                          |
-| Refactoring         | Stop - that's Phase 3                  |
-| Test still fails    | Debug (→ systematic-debugger if stuck) |
-| Hardcoded value     | Implement real logic (see below)       |
+| Flag                | Action                             |
+| ------------------- | ---------------------------------- |
+| "Just in case" code | Delete it                          |
+| Multiple functions  | Delete extras                      |
+| Refactoring         | Stop - that's Phase 3              |
+| Test still fails    | Debug (→ debugging skill if stuck) |
+| Hardcoded value     | Implement real logic (see below)   |
 
 ### Anti-Pattern: Mock Implementations
 
@@ -206,11 +206,11 @@ Phase 0: L0 → create minimal spec → Phase 1: no new test (existing tests cov
 
 ## Integration
 
-| Scenario                | Handoff               |
-| ----------------------- | --------------------- |
-| Test fails unexpectedly | → systematic-debugger |
-| Review needed           | → quality-reviewer    |
-| Scope expanding         | → Update spec first   |
+| Scenario                | Handoff             |
+| ----------------------- | ------------------- |
+| Test fails unexpectedly | → debugging         |
+| Review needed           | → reviewing-quality |
+| Scope expanding         | → Update spec first |
 
 ---
 

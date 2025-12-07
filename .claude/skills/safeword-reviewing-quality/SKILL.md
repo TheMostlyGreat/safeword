@@ -1,5 +1,5 @@
 ---
-name: quality-reviewer
+name: reviewing-quality
 description: Deep code quality review with web research. Use when user explicitly requests verification against latest docs ('double check against latest', 'verify versions', 'check security'), needs deeper analysis beyond automatic hook, or is working on projects without SAFEWORD.md/CLAUDE.md. Fetches current documentation (WebFetch), checks latest versions (WebSearch), and provides deep analysis (performance, security, alternatives).
 allowed-tools: '*'
 ---
