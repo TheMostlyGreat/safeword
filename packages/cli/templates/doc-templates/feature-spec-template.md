@@ -1,6 +1,6 @@
 # Feature Spec: [Feature Name] (Issue #[number])
 
-**Guide**: `@./.safeword/guides/user-story-guide.md` - Best practices, INVEST criteria, and examples
+**Guide**: `@./.safeword/guides/planning-guide.md` - Best practices, INVEST criteria, and examples
 **Template**: `@./.safeword/templates/feature-spec-template.md`
 
 **Feature**: [Brief description of the feature]
