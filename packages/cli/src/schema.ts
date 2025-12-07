@@ -214,9 +214,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.safeword/scripts/lint-md.sh': { template: 'scripts/lint-md.sh' },
 
-    // Claude skills and commands (6 files)
+    // Claude skills and commands (7 files)
     '.claude/skills/safeword-quality-reviewer/SKILL.md': {
       template: 'skills/safeword-quality-reviewer/SKILL.md',
+    },
+    '.claude/skills/safeword-refactoring/SKILL.md': {
+      template: 'skills/safeword-refactoring/SKILL.md',
     },
     '.claude/skills/safeword-systematic-debugger/SKILL.md': {
       template: 'skills/safeword-systematic-debugger/SKILL.md',

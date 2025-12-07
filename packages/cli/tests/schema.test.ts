@@ -104,9 +104,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('ownedFiles', () => {
-    it('should have exactly 48 owned files', async () => {
+    it('should have exactly 49 owned files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(48);
+      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(49);
     });
 
     it('should have entry for every template file', async () => {
