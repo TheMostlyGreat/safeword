@@ -46,7 +46,7 @@ Training data is stale. Follow this sequence:
 
 | Trigger                                                   | Guide                                          |
 | --------------------------------------------------------- | ---------------------------------------------- |
-| Writing user stories, specs, OR test definitions          | @./.safeword/guides/planning-guide.md          |
+| Starting feature/task OR writing specs/test definitions   | @./.safeword/guides/planning-guide.md          |
 | Choosing test type, doing TDD, OR test is failing         | @./.safeword/guides/testing-guide.md           |
 | Creating OR updating a design doc                         | @./.safeword/guides/design-doc-guide.md        |
 | Making architectural decision OR writing ADR              | @./.safeword/guides/architecture-guide.md      |
