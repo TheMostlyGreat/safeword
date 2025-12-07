@@ -29,12 +29,18 @@ Skills are authored once in `.safeword/skills/` and synced to both Claude Code a
 | `enforcing-tdd`    | 'implement', 'build', 'feature'           |
 | `quality-reviewer` | 'double check', 'verify versions'         |
 
-**Authoring guide:** @./.safeword/guides/skill-authoring-guide.md
+**Authoring guide:** @./.safeword-project/guides/skill-authoring-guide.md
 
 **Never edit generated files directly** - they contain `AUTO-GENERATED` headers. Edit the source in `.safeword/skills/` and re-run the sync script.
 
 ---
 
-## Project-Specific Guidance
+## Project-Specific Content
 
-Add Claude-specific context, commands, or workflow notes here.
+**Location:** `.safeword-project/` (never touched by CLI reset/upgrade)
+
+| Folder       | Purpose                            |
+| ------------ | ---------------------------------- |
+| `guides/`    | Project-specific guides            |
+| `skills/`    | Project-specific skills            |
+| `learnings/` | Extracted learnings from debugging |
