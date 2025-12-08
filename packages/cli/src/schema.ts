@@ -214,18 +214,21 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.safeword/scripts/lint-md.sh': { template: 'scripts/lint-md.sh' },
 
-    // Claude skills and commands (7 files)
+    // Claude skills and commands (8 files)
+    '.claude/skills/safeword-brainstorming/SKILL.md': {
+      template: 'skills/safeword-brainstorming/SKILL.md',
+    },
+    '.claude/skills/safeword-debugging/SKILL.md': {
+      template: 'skills/safeword-debugging/SKILL.md',
+    },
+    '.claude/skills/safeword-enforcing-tdd/SKILL.md': {
+      template: 'skills/safeword-enforcing-tdd/SKILL.md',
+    },
     '.claude/skills/safeword-quality-reviewer/SKILL.md': {
       template: 'skills/safeword-quality-reviewer/SKILL.md',
     },
     '.claude/skills/safeword-refactoring/SKILL.md': {
       template: 'skills/safeword-refactoring/SKILL.md',
-    },
-    '.claude/skills/safeword-systematic-debugger/SKILL.md': {
-      template: 'skills/safeword-systematic-debugger/SKILL.md',
-    },
-    '.claude/skills/safeword-tdd-enforcer/SKILL.md': {
-      template: 'skills/safeword-tdd-enforcer/SKILL.md',
     },
     '.claude/commands/architecture.md': { template: 'commands/architecture.md' },
     '.claude/commands/lint.md': { template: 'commands/lint.md' },
@@ -234,8 +237,23 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Husky (1 file)
     '.husky/pre-commit': { content: HUSKY_PRE_COMMIT_CONTENT },
 
-    // Cursor rules (1 file)
+    // Cursor rules (6 files)
     '.cursor/rules/safeword-core.mdc': { template: 'cursor/rules/safeword-core.mdc' },
+    '.cursor/rules/safeword-brainstorming.mdc': {
+      template: 'cursor/rules/safeword-brainstorming.mdc',
+    },
+    '.cursor/rules/safeword-debugging.mdc': {
+      template: 'cursor/rules/safeword-debugging.mdc',
+    },
+    '.cursor/rules/safeword-enforcing-tdd.mdc': {
+      template: 'cursor/rules/safeword-enforcing-tdd.mdc',
+    },
+    '.cursor/rules/safeword-quality-reviewer.mdc': {
+      template: 'cursor/rules/safeword-quality-reviewer.mdc',
+    },
+    '.cursor/rules/safeword-refactoring.mdc': {
+      template: 'cursor/rules/safeword-refactoring.mdc',
+    },
 
     // Cursor commands (3 files - same as Claude)
     '.cursor/commands/lint.md': { template: 'commands/lint.md' },

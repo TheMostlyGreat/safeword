@@ -1,6 +1,6 @@
 ---
-name: tdd-enforcer
-description: Use when implementing features, fixing bugs, or adding new behavior. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. NOT for pure refactoring (use refactoring skill for structural improvements without behavior change). Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
+name: enforcing-tdd
+description: Use when implementing features, fixing bugs, or making code changes. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
 allowed-tools: '*'
 ---
 
@@ -17,7 +17,7 @@ Answer IN ORDER. Stop at first match:
 1. Implementing new feature? → Use this skill
 2. Fixing bug? → Use this skill
 3. Adding enhancement? → Use this skill
-4. Refactoring only (no new behavior)? → Skip (use refactoring skill)
+4. Refactoring? → Use this skill
 5. Research/investigation only? → Skip this skill
 
 ---
@@ -160,15 +160,15 @@ Claim: "All tests pass"             "Tests pass" (no output shown)
 
 **Red Flags → STOP:**
 
-| Flag                        | Action                                 |
-| --------------------------- | -------------------------------------- |
-| "should", "probably" claims | Run command, show output first         |
-| "Done!" before verification | Run command, show output first         |
-| "Just in case" code         | Delete it                              |
-| Multiple functions          | Delete extras                          |
-| Refactoring                 | Stop - that's Phase 3                  |
-| Test still fails            | Debug (→ systematic-debugger if stuck) |
-| Hardcoded value             | Implement real logic (see below)       |
+| Flag                        | Action                             |
+| --------------------------- | ---------------------------------- |
+| "should", "probably" claims | Run command, show output first     |
+| "Done!" before verification | Run command, show output first     |
+| "Just in case" code         | Delete it                          |
+| Multiple functions          | Delete extras                      |
+| Refactoring                 | Stop - that's Phase 3              |
+| Test still fails            | Debug (→ debugging skill if stuck) |
+| Hardcoded value             | Implement real logic (see below)   |
 
 ### Anti-Pattern: Mock Implementations
 
@@ -253,11 +253,11 @@ Phase 0: L0 → create minimal spec → Phase 1: no new test (existing tests cov
 
 ## Integration
 
-| Scenario                | Handoff               |
-| ----------------------- | --------------------- |
-| Test fails unexpectedly | → systematic-debugger |
-| Review needed           | → quality-reviewer    |
-| Scope expanding         | → Update spec first   |
+| Scenario                | Handoff             |
+| ----------------------- | ------------------- |
+| Test fails unexpectedly | → debugging skill   |
+| Review needed           | → quality-reviewer  |
+| Scope expanding         | → Update spec first |
 
 ---
 

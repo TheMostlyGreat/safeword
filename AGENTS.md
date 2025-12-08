@@ -71,31 +71,37 @@ npm run eval:view      # Open web UI for results
 
 ---
 
-## Cross-Platform Skills
+## CLI Parity (Claude Code / Cursor)
 
-**Source of truth:** `.safeword/skills/*.md`
+The CLI installs matching skills for both Claude Code and Cursor IDEs.
 
-Skills are authored once in `.safeword/skills/` and synced to both Claude Code and Cursor formats via script.
+**Source of truth:** `packages/cli/src/schema.ts`
 
-**Sync command:** `.safeword/scripts/sync-skills.sh`
+**Parity tests:** `packages/cli/tests/schema.test.ts` (Claude/Cursor parity section)
 
-| Output      | Location                    | Format                  |
-| ----------- | --------------------------- | ----------------------- |
-| Claude Code | `.claude/skills/*/SKILL.md` | YAML frontmatter + body |
-| Cursor      | `.cursor/rules/*.mdc`       | YAML frontmatter + body |
+| IDE         | Skills Location                | Commands Location       | Format                  |
+| ----------- | ------------------------------ | ----------------------- | ----------------------- |
+| Claude Code | `.claude/skills/safeword-*/`   | `.claude/commands/*.md` | YAML frontmatter + body |
+| Cursor      | `.cursor/rules/safeword-*.mdc` | `.cursor/commands/*.md` | YAML frontmatter + body |
 
-**Skills available:**
+**Skills installed:**
 
-| Skill              | Trigger                                   |
-| ------------------ | ----------------------------------------- |
-| `brainstorming`    | 'brainstorm', 'design', 'explore options' |
-| `debugging`        | 'debug', 'fix error', 'not working'       |
-| `enforcing-tdd`    | 'implement', 'build', 'feature'           |
-| `quality-reviewer` | 'double check', 'verify versions'         |
+| Skill              | Trigger                                     |
+| ------------------ | ------------------------------------------- |
+| `brainstorming`    | 'brainstorm', 'design', 'explore options'   |
+| `debugging`        | 'debug', 'fix error', 'not working'         |
+| `enforcing-tdd`    | 'implement', 'build', 'feature', 'refactor' |
+| `quality-reviewer` | 'double check', 'verify versions'           |
+| `refactoring`      | 'refactor', 'clean up', 'restructure'       |
 
-**Authoring guide:** `.safeword-project/guides/skill-authoring-guide.md`
+**Note:** Cursor also gets `safeword-core.mdc` (core instructions, no Claude Code equivalent needed).
 
-**Never edit generated files directly** - they contain `AUTO-GENERATED` headers. Edit the source in `.safeword/skills/` and re-run the sync script.
+**Editing skills:**
+
+1. Edit templates in `packages/cli/templates/skills/` (Claude) and `packages/cli/templates/cursor/rules/` (Cursor)
+2. Update `packages/cli/src/schema.ts` if adding/removing skills
+3. Run parity tests: `npm test -- --testNamePattern="parity"`
+4. Run `npx safeword upgrade` to sync to local project
 
 ---
 

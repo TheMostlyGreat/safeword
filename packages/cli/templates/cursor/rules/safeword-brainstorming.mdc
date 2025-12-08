@@ -1,6 +1,6 @@
 ---
-name: brainstorming
 description: Use before implementation when refining rough ideas into specs. Guides collaborative design through Socratic questioning, alternative exploration, and incremental validation. Triggers: 'brainstorm', 'design', 'explore options', 'figure out', 'think through', 'what approach'.
+alwaysApply: false
 ---
 
 # Brainstorming Ideas Into Specs
@@ -94,11 +94,6 @@ I'd recommend Option A because [reason].
 - Pros: [benefits]
 - Cons: [drawbacks]
 
-**Option C: [Name]** (if applicable)
-- Approach: [how it works]
-- Pros: [benefits]
-- Cons: [drawbacks]
-
 Which direction feels right?
 ```
 
@@ -156,12 +151,6 @@ Which direction feels right?
 | User-facing feature with business value? | **L2** → Feature Spec        |
 | Bug, improvement, internal, or refactor? | **L1** → Task Spec           |
 | Typo, config, or trivial change?         | **L0** → Task Spec (minimal) |
-
-**Output Locations:**
-
-- L2: `.safeword/planning/specs/feature-[slug].md`
-- L1/L0: `.safeword/planning/specs/task-[slug].md`
-- L2 Test Defs: `.safeword/planning/test-definitions/feature-[slug].md`
 
 **Exit Criteria:**
 

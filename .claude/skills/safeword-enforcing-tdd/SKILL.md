@@ -1,15 +1,7 @@
-# AUTO-GENERATED - DO NOT EDIT
-
-# Source: .safeword/skills/enforcing-tdd.md
-
-# Run: .safeword/scripts/sync-skills.sh
-
 ---
-
 name: enforcing-tdd
 description: Use when implementing features, fixing bugs, or making code changes. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
-allowed-tools: '\*'
-
+allowed-tools: '*'
 ---
 
 # TDD Enforcer
@@ -57,6 +49,12 @@ Answer IN ORDER. Stop at first match:
 - Specs: `.safeword/planning/specs/`
 - Test definitions: `.safeword/planning/test-definitions/`
 
+**Templates:**
+
+- L2 Feature: @./.safeword/templates/feature-spec-template.md
+- L1/L0 Task: @./.safeword/templates/task-spec-template.md
+- Test Definitions: @./.safeword/templates/test-definitions-feature.md
+
 ### Exit Criteria
 
 - [ ] Level identified (L0/L1/L2)
@@ -64,6 +62,31 @@ Answer IN ORDER. Stop at first match:
 - [ ] L2: Test definitions file exists
 - [ ] L1: Test scenarios in spec
 - [ ] L0: Existing test coverage confirmed
+
+---
+
+## Work Log
+
+**Think hard. Keep notes.**
+
+Before starting Phase 1, create or open a work log:
+
+**Location:** `.safeword/logs/{artifact-type}-{slug}.md`
+
+| Working on...         | Log file name            |
+| --------------------- | ------------------------ |
+| Ticket `001-fix-auth` | `ticket-001-fix-auth.md` |
+| Spec `task-add-cache` | `spec-task-add-cache.md` |
+
+**One artifact = one log.** If log exists, append a new session.
+
+**Behaviors:**
+
+1. **Re-read the log** before each phase transition
+2. **Log findings** as you discover them
+3. **Note dead ends** so you don't repeat them
+
+**Template:** @./.safeword/templates/work-log-template.md
 
 ---
 
@@ -115,15 +138,37 @@ Answer IN ORDER. Stop at first match:
 - [ ] No hardcoded/mock values
 - [ ] Committed
 
+### Verification Gate
+
+**Before claiming GREEN:** Evidence before claims, always.
+
+```text
+✅ CORRECT                          ❌ WRONG
+─────────────────────────────────   ─────────────────────────────────
+Run: npm test                       "Tests should pass now"
+Output: ✓ 34/34 tests pass          "I'm confident this works"
+Claim: "All tests pass"             "Tests pass" (no output shown)
+```
+
+**The Rule:** If you haven't run the verification command in this response, you cannot claim it passes.
+
+| Claim            | Requires                      | Not Sufficient              |
+| ---------------- | ----------------------------- | --------------------------- |
+| "Tests pass"     | Fresh test output: 0 failures | "should pass", previous run |
+| "Build succeeds" | Build command: exit 0         | "linter passed"             |
+| "Bug fixed"      | Original symptom test passes  | "code changed"              |
+
 **Red Flags → STOP:**
 
-| Flag                | Action                             |
-| ------------------- | ---------------------------------- |
-| "Just in case" code | Delete it                          |
-| Multiple functions  | Delete extras                      |
-| Refactoring         | Stop - that's Phase 3              |
-| Test still fails    | Debug (→ debugging skill if stuck) |
-| Hardcoded value     | Implement real logic (see below)   |
+| Flag                        | Action                             |
+| --------------------------- | ---------------------------------- |
+| "should", "probably" claims | Run command, show output first     |
+| "Done!" before verification | Run command, show output first     |
+| "Just in case" code         | Delete it                          |
+| Multiple functions          | Delete extras                      |
+| Refactoring                 | Stop - that's Phase 3              |
+| Test still fails            | Debug (→ debugging skill if stuck) |
+| Hardcoded value             | Implement real logic (see below)   |
 
 ### Anti-Pattern: Mock Implementations
 
@@ -210,6 +255,13 @@ Phase 0: L0 → create minimal spec → Phase 1: no new test (existing tests cov
 
 | Scenario                | Handoff             |
 | ----------------------- | ------------------- |
-| Test fails unexpectedly | → debugging         |
+| Test fails unexpectedly | → debugging skill   |
 | Review needed           | → quality-reviewer  |
 | Scope expanding         | → Update spec first |
+
+---
+
+## Related
+
+- @./.safeword/guides/planning-guide.md
+- @./.safeword/guides/testing-guide.md

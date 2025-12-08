@@ -1,7 +1,6 @@
 ---
-name: tdd-enforcer
-description: Use when implementing features, fixing bugs, or adding new behavior. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. NOT for pure refactoring (use refactoring skill for structural improvements without behavior change). Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
-allowed-tools: '*'
+description: Use when implementing features, fixing bugs, or making code changes. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
+alwaysApply: false
 ---
 
 # TDD Enforcer
@@ -17,7 +16,7 @@ Answer IN ORDER. Stop at first match:
 1. Implementing new feature? → Use this skill
 2. Fixing bug? → Use this skill
 3. Adding enhancement? → Use this skill
-4. Refactoring only (no new behavior)? → Skip (use refactoring skill)
+4. Refactoring? → Use this skill
 5. Research/investigation only? → Skip this skill
 
 ---
@@ -49,12 +48,6 @@ Answer IN ORDER. Stop at first match:
 - Specs: `.safeword/planning/specs/`
 - Test definitions: `.safeword/planning/test-definitions/`
 
-**Templates:**
-
-- L2 Feature: @./.safeword/templates/feature-spec-template.md
-- L1/L0 Task: @./.safeword/templates/task-spec-template.md
-- Test Definitions: @./.safeword/templates/test-definitions-feature.md
-
 ### Exit Criteria
 
 - [ ] Level identified (L0/L1/L2)
@@ -62,31 +55,6 @@ Answer IN ORDER. Stop at first match:
 - [ ] L2: Test definitions file exists
 - [ ] L1: Test scenarios in spec
 - [ ] L0: Existing test coverage confirmed
-
----
-
-## Work Log
-
-**Think hard. Keep notes.**
-
-Before starting Phase 1, create or open a work log:
-
-**Location:** `.safeword/logs/{artifact-type}-{slug}.md`
-
-| Working on...         | Log file name            |
-| --------------------- | ------------------------ |
-| Ticket `001-fix-auth` | `ticket-001-fix-auth.md` |
-| Spec `task-add-cache` | `spec-task-add-cache.md` |
-
-**One artifact = one log.** If log exists, append a new session.
-
-**Behaviors:**
-
-1. **Re-read the log** before each phase transition
-2. **Log findings** as you discover them
-3. **Note dead ends** so you don't repeat them
-
-**Template:** @./.safeword/templates/work-log-template.md
 
 ---
 
@@ -152,12 +120,6 @@ Claim: "All tests pass"             "Tests pass" (no output shown)
 
 **The Rule:** If you haven't run the verification command in this response, you cannot claim it passes.
 
-| Claim            | Requires                      | Not Sufficient              |
-| ---------------- | ----------------------------- | --------------------------- |
-| "Tests pass"     | Fresh test output: 0 failures | "should pass", previous run |
-| "Build succeeds" | Build command: exit 0         | "linter passed"             |
-| "Bug fixed"      | Original symptom test passes  | "code changed"              |
-
 **Red Flags → STOP:**
 
 | Flag                        | Action                                 |
@@ -167,7 +129,7 @@ Claim: "All tests pass"             "Tests pass" (no output shown)
 | "Just in case" code         | Delete it                              |
 | Multiple functions          | Delete extras                          |
 | Refactoring                 | Stop - that's Phase 3                  |
-| Test still fails            | Debug (→ systematic-debugger if stuck) |
+| Test still fails            | Debug (→ debugging skill if stuck)     |
 | Hardcoded value             | Implement real logic (see below)       |
 
 ### Anti-Pattern: Mock Implementations
@@ -236,32 +198,10 @@ For L2: Update test definition status (✅/⏭️/❌/🔴) as tests pass.
 
 ---
 
-## Examples
-
-**L2 Feature** ("Add VIP discount"):
-Phase 0: L2 → create spec + test defs → Phase 1: write test → FAIL → commit → Phase 2: implement → PASS → commit → Phase 3: clean up → Phase 4: more tests? → repeat
-
-**L1 Bug** ("Fix login timeout"):
-Phase 0: L1 → create task spec → Phase 1: write failing test → commit → Phase 2: fix → PASS → commit → Phase 3: clean up if needed → Phase 4: done
-
-**L0 Micro** ("Fix typo"):
-Phase 0: L0 → create minimal spec → Phase 1: no new test (existing tests cover) → Phase 2: fix typo → tests PASS → commit → done
-
-**Why L0 needs a spec:** "Fix typo" can become "refactor error handling" without explicit "Out of Scope".
-
----
-
 ## Integration
 
-| Scenario                | Handoff               |
-| ----------------------- | --------------------- |
-| Test fails unexpectedly | → systematic-debugger |
+| Scenario                | Handoff           |
+| ----------------------- | ----------------- |
+| Test fails unexpectedly | → debugging skill |
 | Review needed           | → quality-reviewer    |
 | Scope expanding         | → Update spec first   |
-
----
-
-## Related
-
-- @./.safeword/guides/planning-guide.md
-- @./.safeword/guides/testing-guide.md

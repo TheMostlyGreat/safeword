@@ -1,5 +1,5 @@
 ---
-name: systematic-debugger
+name: debugging
 description: Four-phase debugging framework that ensures root cause identification before fixes. Use when encountering bugs, test failures, unexpected behavior, or when previous fix attempts failed. Enforces investigate-first discipline ('debug this', 'fix this error', 'test is failing', 'not working').
 allowed-tools: '*'
 ---
@@ -25,33 +25,6 @@ Answer IN ORDER. Stop at first match:
 - Under time pressure (emergencies make guessing tempting)
 - "Quick fix" seems obvious (red flag)
 - Already tried 1+ fixes that didn't work
-
----
-
-## Work Log
-
-**Think hard. Keep notes.**
-
-Before starting Phase 1, create or open a work log:
-
-**Location:** `.safeword/logs/{artifact-type}-{slug}.md`
-
-| Working on...         | Log file name            |
-| --------------------- | ------------------------ |
-| Ticket `001-fix-auth` | `ticket-001-fix-auth.md` |
-| Spec `task-add-cache` | `spec-task-add-cache.md` |
-
-**One artifact = one log.** If log exists, append a new session.
-
-**Especially important for debugging:**
-
-1. **Re-read the log** before each hypothesis
-2. **Log what you tried** and why it didn't work
-3. **Note dead ends** - debugging often revisits same paths
-
-**Template:** @./.safeword/templates/work-log-template.md
-
----
 
 ## The Four Phases
 
@@ -220,32 +193,6 @@ If you catch yourself thinking:
 
 **ALL mean: STOP. Return to Phase 1.**
 
-## Finding Test Pollution
-
-When tests pass individually but fail together (test isolation problem, tests affect each other, tests leave files behind), use bisection:
-
-```bash
-./.safeword/scripts/bisect-test-pollution.sh '.git' '*.test.ts' src
-```
-
-See: @./.safeword/scripts/bisect-test-pollution.sh
-
-## Debug Logging
-
-When adding diagnostic logging:
-
-```javascript
-// ❌ BAD
-console.log('here');
-console.log(data);
-
-// ✅ GOOD
-console.log('validateUser', { expected: 'admin', actual: user.role });
-console.log('processOrder', JSON.stringify({ input, output }, null, 2));
-```
-
-Log **expected vs actual**. Remove after fixing.
-
 ## Quick Reference
 
 | Phase             | Key Question                          | Success Criteria                   |
@@ -254,20 +201,3 @@ Log **expected vs actual**. Remove after fixing.
 | 2. Pattern        | "What's different from working code?" | Identified key differences         |
 | 3. Hypothesis     | "Is my theory correct?"               | Confirmed or formed new theory     |
 | 4. Implementation | "Does the fix work?"                  | Test passes, issue resolved        |
-
-## Finding Zombie Process Spawners
-
-When tests leave processes behind (playwright browsers not cleaned up, port stays in use, zombie node processes, chromium accumulating), use bisection to find the culprit:
-
-```bash
-./.safeword/scripts/bisect-zombie-processes.sh 'chromium' '*.test.ts' tests
-./.safeword/scripts/bisect-zombie-processes.sh 'playwright' '*.spec.ts' e2e
-```
-
-See: @./.safeword/scripts/bisect-zombie-processes.sh
-
-## Related Resources
-
-- Process cleanup guide: @./.safeword/guides/zombie-process-cleanup.md
-- Debug logging style: @./.safeword/guides/code-philosophy.md
-- TDD for fix verification: @./.safeword/guides/testing-guide.md

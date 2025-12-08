@@ -104,9 +104,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('ownedFiles', () => {
-    it('should have exactly 49 owned files', async () => {
+    it('should have exactly 55 owned files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(49);
+      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(55);
     });
 
     it('should have entry for every template file', async () => {
@@ -341,6 +341,48 @@ describe('Schema - Single Source of Truth', () => {
       for (const condition of requiredConditions) {
         expect(SAFEWORD_SCHEMA.packages.conditional).toHaveProperty(condition);
       }
+    });
+  });
+
+  describe('Claude/Cursor parity', () => {
+    it('should have matching skills for Claude and Cursor (excluding core)', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      // Extract skill names from schema paths
+      const claudeSkills = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
+        .filter(path => path.startsWith('.claude/skills/safeword-'))
+        .map(path => path.match(/safeword-([^/]+)/)?.[1])
+        .filter(Boolean)
+        .toSorted();
+
+      const cursorRules = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
+        .filter(path => path.startsWith('.cursor/rules/safeword-') && !path.includes('core'))
+        .map(path => path.match(/safeword-([^.]+)/)?.[1])
+        .filter(Boolean)
+        .toSorted();
+
+      // Both should have the same skills
+      expect(cursorRules).toEqual(claudeSkills);
+    });
+
+    it('should have matching commands for Claude and Cursor', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      // Extract command names from schema paths
+      const claudeCommands = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
+        .filter(path => path.startsWith('.claude/commands/'))
+        .map(path => path.split('/').pop())
+        .filter(Boolean)
+        .toSorted();
+
+      const cursorCommands = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
+        .filter(path => path.startsWith('.cursor/commands/'))
+        .map(path => path.split('/').pop())
+        .filter(Boolean)
+        .toSorted();
+
+      // Both should have the same commands
+      expect(cursorCommands).toEqual(claudeCommands);
     });
   });
 });

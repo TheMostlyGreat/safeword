@@ -1,7 +1,3 @@
-# AUTO-GENERATED - DO NOT EDIT
-# Source: .safeword/skills/enforcing-tdd.md
-# Run: .safeword/scripts/sync-skills.sh
-
 ---
 description: Use when implementing features, fixing bugs, or making code changes. Ensures scope is defined before coding, then enforces RED → GREEN → REFACTOR test discipline. Triggers: 'implement', 'add', 'build', 'create', 'fix', 'change', 'feature', 'bug'.
 alwaysApply: false
@@ -110,15 +106,31 @@ Answer IN ORDER. Stop at first match:
 - [ ] No hardcoded/mock values
 - [ ] Committed
 
+### Verification Gate
+
+**Before claiming GREEN:** Evidence before claims, always.
+
+```text
+✅ CORRECT                          ❌ WRONG
+─────────────────────────────────   ─────────────────────────────────
+Run: npm test                       "Tests should pass now"
+Output: ✓ 34/34 tests pass          "I'm confident this works"
+Claim: "All tests pass"             "Tests pass" (no output shown)
+```
+
+**The Rule:** If you haven't run the verification command in this response, you cannot claim it passes.
+
 **Red Flags → STOP:**
 
-| Flag                | Action                             |
-| ------------------- | ---------------------------------- |
-| "Just in case" code | Delete it                          |
-| Multiple functions  | Delete extras                      |
-| Refactoring         | Stop - that's Phase 3              |
-| Test still fails    | Debug (→ debugging skill if stuck) |
-| Hardcoded value     | Implement real logic (see below)   |
+| Flag                        | Action                                 |
+| --------------------------- | -------------------------------------- |
+| "should", "probably" claims | Run command, show output first         |
+| "Done!" before verification | Run command, show output first         |
+| "Just in case" code         | Delete it                              |
+| Multiple functions          | Delete extras                          |
+| Refactoring                 | Stop - that's Phase 3                  |
+| Test still fails            | Debug (→ debugging skill if stuck)     |
+| Hardcoded value             | Implement real logic (see below)       |
 
 ### Anti-Pattern: Mock Implementations
 
@@ -186,25 +198,10 @@ For L2: Update test definition status (✅/⏭️/❌/🔴) as tests pass.
 
 ---
 
-## Examples
-
-**L2 Feature** ("Add VIP discount"):
-Phase 0: L2 → create spec + test defs → Phase 1: write test → FAIL → commit → Phase 2: implement → PASS → commit → Phase 3: clean up → Phase 4: more tests? → repeat
-
-**L1 Bug** ("Fix login timeout"):
-Phase 0: L1 → create task spec → Phase 1: write failing test → commit → Phase 2: fix → PASS → commit → Phase 3: clean up if needed → Phase 4: done
-
-**L0 Micro** ("Fix typo"):
-Phase 0: L0 → create minimal spec → Phase 1: no new test (existing tests cover) → Phase 2: fix typo → tests PASS → commit → done
-
-**Why L0 needs a spec:** "Fix typo" can become "refactor error handling" without explicit "Out of Scope".
-
----
-
 ## Integration
 
-| Scenario                | Handoff             |
-| ----------------------- | ------------------- |
-| Test fails unexpectedly | → debugging         |
-| Review needed           | → quality-reviewer  |
-| Scope expanding         | → Update spec first |
+| Scenario                | Handoff           |
+| ----------------------- | ----------------- |
+| Test fails unexpectedly | → debugging skill |
+| Review needed           | → quality-reviewer    |
+| Scope expanding         | → Update spec first   |
