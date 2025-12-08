@@ -99,25 +99,36 @@ const configs = [
 ];
 
 // TypeScript support (detected from package.json)
-// Uses recommendedTypeChecked + stylisticTypeChecked for type-aware linting
+// Uses type-aware rules if tsconfig.json exists, otherwise falls back to basic rules
 if (deps["typescript"] || deps["typescript-eslint"]) {
   const tseslint = await tryImport("typescript-eslint", "TypeScript");
+  const { existsSync } = await import("fs");
+  const hasTsconfig = existsSync(join(__dirname, "tsconfig.json"));
+
   configs.push(importX.flatConfigs.typescript);
-  configs.push(...tseslint.default.configs.recommendedTypeChecked);
-  configs.push(...tseslint.default.configs.stylisticTypeChecked);
-  configs.push({
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: __dirname,
+
+  if (hasTsconfig) {
+    // Type-aware linting (recommended + stylistic)
+    configs.push(...tseslint.default.configs.recommendedTypeChecked);
+    configs.push(...tseslint.default.configs.stylisticTypeChecked);
+    configs.push({
+      languageOptions: {
+        parserOptions: {
+          projectService: true,
+          tsconfigRootDir: __dirname,
+        },
       },
-    },
-  });
-  // Disable type-checked rules for JS files (no type info available)
-  configs.push({
-    files: ["**/*.js", "**/*.mjs", "**/*.cjs"],
-    extends: [tseslint.default.configs.disableTypeChecked],
-  });
+    });
+    // Disable type-checked rules for JS files (no type info available)
+    configs.push({
+      files: ["**/*.js", "**/*.mjs", "**/*.cjs"],
+      extends: [tseslint.default.configs.disableTypeChecked],
+    });
+  } else {
+    // Fall back to non-type-aware rules when no tsconfig exists
+    configs.push(...tseslint.default.configs.recommended);
+    configs.push(...tseslint.default.configs.stylistic);
+  }
 }
 
 // React/Next.js support
