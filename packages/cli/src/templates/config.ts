@@ -99,10 +99,19 @@ const configs = [
 ];
 
 // TypeScript support (detected from package.json)
+// Uses stylisticTypeChecked for type-aware rules + style consistency
 if (deps["typescript"] || deps["typescript-eslint"]) {
   const tseslint = await tryImport("typescript-eslint", "TypeScript");
   configs.push(importX.flatConfigs.typescript);
-  configs.push(...tseslint.default.configs.recommended);
+  configs.push(...tseslint.default.configs.stylisticTypeChecked);
+  configs.push({
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: __dirname,
+      },
+    },
+  });
 }
 
 // React/Next.js support
