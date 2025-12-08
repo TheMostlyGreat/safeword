@@ -99,10 +99,11 @@ const configs = [
 ];
 
 // TypeScript support (detected from package.json)
-// Uses stylisticTypeChecked for type-aware rules + style consistency
+// Uses recommendedTypeChecked + stylisticTypeChecked for type-aware linting
 if (deps["typescript"] || deps["typescript-eslint"]) {
   const tseslint = await tryImport("typescript-eslint", "TypeScript");
   configs.push(importX.flatConfigs.typescript);
+  configs.push(...tseslint.default.configs.recommendedTypeChecked);
   configs.push(...tseslint.default.configs.stylisticTypeChecked);
   configs.push({
     languageOptions: {
@@ -111,6 +112,11 @@ if (deps["typescript"] || deps["typescript-eslint"]) {
         tsconfigRootDir: __dirname,
       },
     },
+  });
+  // Disable type-checked rules for JS files (no type info available)
+  configs.push({
+    files: ["**/*.js", "**/*.mjs", "**/*.cjs"],
+    extends: [tseslint.default.configs.disableTypeChecked],
   });
 }
 
