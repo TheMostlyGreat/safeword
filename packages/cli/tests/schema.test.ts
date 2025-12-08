@@ -41,9 +41,9 @@ describe('Schema - Single Source of Truth', () => {
   const templatesDir = join(__dirname, '../templates');
 
   describe('ownedDirs', () => {
-    it('should have exactly 17 owned directories', async () => {
+    it('should have exactly 18 owned directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.ownedDirs.length).toBe(17);
+      expect(SAFEWORD_SCHEMA.ownedDirs.length).toBe(18);
     });
 
     it('should include all required .safeword subdirectories', async () => {
@@ -62,6 +62,7 @@ describe('Schema - Single Source of Truth', () => {
         '.safeword/planning/test-definitions',
         '.safeword/planning/design',
         '.safeword/planning/issues',
+        '.safeword/planning/plans',
         '.husky',
         '.cursor',
         '.cursor/rules',
@@ -104,9 +105,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('ownedFiles', () => {
-    it('should have exactly 55 owned files', async () => {
+    it('should have exactly 57 owned files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(55);
+      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(57);
     });
 
     it('should have entry for every template file', async () => {
