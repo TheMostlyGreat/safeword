@@ -119,6 +119,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/planning/test-definitions',
     '.safeword/planning/design',
     '.safeword/planning/issues',
+    '.safeword/planning/plans',
     '.safeword/scripts',
     '.husky',
     '.cursor',
@@ -214,7 +215,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.safeword/scripts/lint-md.sh': { template: 'scripts/lint-md.sh' },
 
-    // Claude skills and commands (8 files)
+    // Claude skills and commands (9 files)
     '.claude/skills/safeword-brainstorming/SKILL.md': {
       template: 'skills/safeword-brainstorming/SKILL.md',
     },
@@ -230,6 +231,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/skills/safeword-refactoring/SKILL.md': {
       template: 'skills/safeword-refactoring/SKILL.md',
     },
+    '.claude/skills/safeword-writing-plans/SKILL.md': {
+      template: 'skills/safeword-writing-plans/SKILL.md',
+    },
     '.claude/commands/architecture.md': { template: 'commands/architecture.md' },
     '.claude/commands/lint.md': { template: 'commands/lint.md' },
     '.claude/commands/quality-review.md': { template: 'commands/quality-review.md' },
@@ -237,7 +241,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Husky (1 file)
     '.husky/pre-commit': { content: HUSKY_PRE_COMMIT_CONTENT },
 
-    // Cursor rules (6 files)
+    // Cursor rules (7 files)
     '.cursor/rules/safeword-core.mdc': { template: 'cursor/rules/safeword-core.mdc' },
     '.cursor/rules/safeword-brainstorming.mdc': {
       template: 'cursor/rules/safeword-brainstorming.mdc',
@@ -253,6 +257,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.cursor/rules/safeword-refactoring.mdc': {
       template: 'cursor/rules/safeword-refactoring.mdc',
+    },
+    '.cursor/rules/safeword-writing-plans.mdc': {
+      template: 'cursor/rules/safeword-writing-plans.mdc',
     },
 
     // Cursor commands (3 files - same as Claude)
