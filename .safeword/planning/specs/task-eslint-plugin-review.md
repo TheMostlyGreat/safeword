@@ -42,7 +42,7 @@ Review each ESLint plugin in our config for optimal LLM coding agent usage. Veri
 
 | Plugin                   | Status  | Key Focus                        |
 | ------------------------ | ------- | -------------------------------- |
-| `eslint-plugin-import-x` | pending | Import validation, circular deps |
+| `eslint-plugin-import-x` | done    | Import validation, circular deps |
 | `@eslint/js`             | pending | Base JS rules                    |
 | `eslint-plugin-jsdoc`    | pending | Documentation for LLM context    |
 
@@ -127,3 +127,4 @@ For each plugin:
 | `eslint-plugin-sonarjs`        | 2025-12-08 | v3.0.5 recommended preset optimal; ~201 rules at error, 0 at warn; cognitive-complexity threshold 15; no changes needed         |
 | `eslint-plugin-unicorn`        | 2025-12-08 | v62.0.0 flat/recommended with 9 disabled + 3 warn overrides; enforces modern JS patterns; config already well-tuned             |
 | `eslint-plugin-regexp`         | 2025-12-08 | v2.10.0 flat/recommended; 54 error, 6 warn; no-super-linear-backtracking (ReDoS) at error; no changes needed                    |
+| `eslint-plugin-import-x`       | 2025-12-08 | v4.16.1 flat/recommended + typescript; 4 error, 3 warn; order disabled for simple-import-sort; no-cycle skipped (perf)          |
