@@ -54,7 +54,7 @@ Review each ESLint plugin in our config for optimal LLM coding agent usage. Veri
 | `@next/eslint-plugin-next`  | done    | Next.js patterns |
 | `@vitest/eslint-plugin`     | done    | Test patterns    |
 | `eslint-plugin-playwright`  | done    | E2E patterns     |
-| `eslint-plugin-astro`       | pending | Astro patterns   |
+| `eslint-plugin-astro`       | done    | Astro patterns   |
 | `eslint-plugin-vue`         | pending | Vue patterns     |
 | `eslint-plugin-svelte`      | pending | Svelte patterns  |
 
@@ -134,3 +134,4 @@ For each plugin:
 | `@next/eslint-plugin-next`     | 2025-12-08 | v16.0.8 recommended; enforces Next.js patterns (Link, Image, Script); dynamically loaded; no changes needed                     |
 | `@vitest/eslint-plugin`        | 2025-12-08 | v1.5.2 recommended; ~10 error, 0 warn; catches empty tests, focused tests, conditional expects; dynamically loaded; no changes  |
 | `eslint-plugin-playwright`     | 2025-12-08 | v2.4.0 flat/recommended; 13 error, 14 warn; missing-playwright-await critical; always loaded; scoped to e2e; no changes needed  |
+| `eslint-plugin-astro`          | 2025-12-08 | v1.5.0 flat/recommended; ~9 rules at error; catches deprecated APIs; includes parser; dynamically loaded; no changes needed     |
