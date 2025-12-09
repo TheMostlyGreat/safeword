@@ -34,7 +34,7 @@ Review each ESLint plugin in our config for optimal LLM coding agent usage. Veri
 
 | Plugin                  | Status  | Key Focus                           |
 | ----------------------- | ------- | ----------------------------------- |
-| `eslint-plugin-sonarjs` | pending | Cognitive complexity, code smells   |
+| `eslint-plugin-sonarjs` | done    | Cognitive complexity, code smells   |
 | `eslint-plugin-unicorn` | pending | Modern JS vs outdated training data |
 | `eslint-plugin-regexp`  | pending | ReDoS, malformed regex              |
 
@@ -71,14 +71,15 @@ Review each ESLint plugin in our config for optimal LLM coding agent usage. Veri
 
 For each plugin:
 
-1. [ ] Check installed version vs latest
-2. [ ] Web search for official docs + LLM-specific research
-3. [ ] Verify which preset we're using (recommended, strict, etc.)
-4. [ ] Check if preset actually enables rules (SDL trap)
-5. [ ] Audit severities (warn → error for LLM-critical rules)
-6. [ ] Verify config works with `eslint --print-config`
-7. [ ] Create plugin research doc + fix any config issues
-8. [ ] Get user approval → commit
+1. [ ] Read internal LLM research doc first (`.safeword/learnings/llm-coding-agents-linting.md`)
+2. [ ] Check installed version vs latest
+3. [ ] Web search for official docs + LLM-specific research
+4. [ ] Verify which preset we're using (recommended, strict, etc.)
+5. [ ] Check if preset actually enables rules (SDL trap)
+6. [ ] Audit severities (warn → error for LLM-critical rules)
+7. [ ] Verify config works with `eslint --print-config`
+8. [ ] Create plugin research doc + fix any config issues
+9. [ ] Get user approval → commit
 
 ---
 
@@ -123,3 +124,4 @@ For each plugin:
 | `typescript-eslint`            | 2025-12-08 | Using `strictTypeChecked` + `stylisticTypeChecked`; all LLM-critical rules at error; custom `strict-boolean-expressions` config |
 | `eslint-plugin-promise`        | 2025-12-08 | flat/recommended working; added `no-multiple-resolved: "error"` (not in preset, catches missing return after resolve)           |
 | `eslint-plugin-boundaries`     | 2025-12-08 | Config already optimal; `element-types: "error"` with `default: "disallow"` aligns with LLM research; no changes needed         |
+| `eslint-plugin-sonarjs`        | 2025-12-08 | v3.0.5 recommended preset optimal; ~201 rules at error, 0 at warn; cognitive-complexity threshold 15; no changes needed         |
