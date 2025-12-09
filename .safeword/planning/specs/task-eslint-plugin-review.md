@@ -48,15 +48,15 @@ Review each ESLint plugin in our config for optimal LLM coding agent usage. Veri
 
 ### Tier 4 - Framework-Specific
 
-| Plugin                      | Status  | Key Focus        |
-| --------------------------- | ------- | ---------------- |
-| `eslint-plugin-react-hooks` | done    | Rules of hooks   |
-| `@next/eslint-plugin-next`  | done    | Next.js patterns |
-| `@vitest/eslint-plugin`     | done    | Test patterns    |
-| `eslint-plugin-playwright`  | done    | E2E patterns     |
-| `eslint-plugin-astro`       | done    | Astro patterns   |
-| `eslint-plugin-vue`         | done    | Vue patterns     |
-| `eslint-plugin-svelte`      | pending | Svelte patterns  |
+| Plugin                      | Status | Key Focus        |
+| --------------------------- | ------ | ---------------- |
+| `eslint-plugin-react-hooks` | done   | Rules of hooks   |
+| `@next/eslint-plugin-next`  | done   | Next.js patterns |
+| `@vitest/eslint-plugin`     | done   | Test patterns    |
+| `eslint-plugin-playwright`  | done   | E2E patterns     |
+| `eslint-plugin-astro`       | done   | Astro patterns   |
+| `eslint-plugin-vue`         | done   | Vue patterns     |
+| `eslint-plugin-svelte`      | done   | Svelte patterns  |
 
 ### Tier 5 - Skip (Style/Formatting)
 
@@ -136,3 +136,4 @@ For each plugin:
 | `eslint-plugin-playwright`     | 2025-12-08 | v2.4.0 flat/recommended; 13 error, 14 warn; missing-playwright-await critical; always loaded; scoped to e2e; no changes needed  |
 | `eslint-plugin-astro`          | 2025-12-08 | v1.5.0 flat/recommended; ~9 rules at error; catches deprecated APIs; includes parser; dynamically loaded; no changes needed     |
 | `eslint-plugin-vue`            | 2025-12-08 | v10.6.2 flat/recommended; 80+ rules; essential at error, rest at warn; catches Vue 2→3 migration; no changes needed             |
+| `eslint-plugin-svelte`         | 2025-12-08 | v3.13.1 recommended; 40+ rules; catches XSS, DOM manipulation, reactive mistakes; dynamically loaded; no changes needed         |
