@@ -35,7 +35,7 @@ Review each ESLint plugin in our config for optimal LLM coding agent usage. Veri
 | Plugin                  | Status  | Key Focus                           |
 | ----------------------- | ------- | ----------------------------------- |
 | `eslint-plugin-sonarjs` | done    | Cognitive complexity, code smells   |
-| `eslint-plugin-unicorn` | pending | Modern JS vs outdated training data |
+| `eslint-plugin-unicorn` | done    | Modern JS vs outdated training data |
 | `eslint-plugin-regexp`  | pending | ReDoS, malformed regex              |
 
 ### Tier 3 - Moderate Value
@@ -125,3 +125,4 @@ For each plugin:
 | `eslint-plugin-promise`        | 2025-12-08 | flat/recommended working; added `no-multiple-resolved: "error"` (not in preset, catches missing return after resolve)           |
 | `eslint-plugin-boundaries`     | 2025-12-08 | Config already optimal; `element-types: "error"` with `default: "disallow"` aligns with LLM research; no changes needed         |
 | `eslint-plugin-sonarjs`        | 2025-12-08 | v3.0.5 recommended preset optimal; ~201 rules at error, 0 at warn; cognitive-complexity threshold 15; no changes needed         |
+| `eslint-plugin-unicorn`        | 2025-12-08 | v62.0.0 flat/recommended with 9 disabled + 3 warn overrides; enforces modern JS patterns; config already well-tuned             |
