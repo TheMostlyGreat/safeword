@@ -27,7 +27,7 @@ Review each ESLint plugin in our config for optimal LLM coding agent usage. Veri
 | Plugin                     | Status  | Key Focus                                      |
 | -------------------------- | ------- | ---------------------------------------------- |
 | `typescript-eslint`        | done    | Type safety, async/await, `any` escape hatches |
-| `eslint-plugin-promise`    | pending | Floating promises, unhandled rejections        |
+| `eslint-plugin-promise`    | done    | Floating promises, unhandled rejections        |
 | `eslint-plugin-boundaries` | pending | Architecture enforcement                       |
 
 ### Tier 2 - High Value
@@ -121,3 +121,4 @@ For each plugin:
 | ------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `@microsoft/eslint-plugin-sdl` | 2025-12-08 | SDL registers security plugin but doesn't enable rules; configured all 13 security rules with error/warn split                  |
 | `typescript-eslint`            | 2025-12-08 | Using `strictTypeChecked` + `stylisticTypeChecked`; all LLM-critical rules at error; custom `strict-boolean-expressions` config |
+| `eslint-plugin-promise`        | 2025-12-08 | flat/recommended working; added `no-multiple-resolved: "error"` (not in preset, catches missing return after resolve)           |
