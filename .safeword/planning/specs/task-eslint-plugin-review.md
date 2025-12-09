@@ -51,7 +51,7 @@ Review each ESLint plugin in our config for optimal LLM coding agent usage. Veri
 | Plugin                      | Status  | Key Focus        |
 | --------------------------- | ------- | ---------------- |
 | `eslint-plugin-react-hooks` | done    | Rules of hooks   |
-| `@next/eslint-plugin-next`  | pending | Next.js patterns |
+| `@next/eslint-plugin-next`  | done    | Next.js patterns |
 | `@vitest/eslint-plugin`     | pending | Test patterns    |
 | `eslint-plugin-playwright`  | pending | E2E patterns     |
 | `eslint-plugin-astro`       | pending | Astro patterns   |
@@ -131,3 +131,4 @@ For each plugin:
 | `@eslint/js`                   | 2025-12-08 | v9.39.1 recommended; 46 error, 0 warn; core JS rules; many disabled rules covered by typescript-eslint; no changes needed       |
 | `eslint-plugin-jsdoc`          | 2025-12-08 | v61.5.0 flat/recommended-typescript; 0 error, 34 warn (appropriate for docs); no changes needed                                 |
 | `eslint-plugin-react-hooks`    | 2025-12-08 | v7.0.1 recommended; rules-of-hooks:error, exhaustive-deps:warn; critical for LLM React code; no changes needed                  |
+| `@next/eslint-plugin-next`     | 2025-12-08 | v16.0.8 recommended; enforces Next.js patterns (Link, Image, Script); dynamically loaded; no changes needed                     |
