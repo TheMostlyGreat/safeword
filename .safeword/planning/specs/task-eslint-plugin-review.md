@@ -50,7 +50,7 @@ Review each ESLint plugin in our config for optimal LLM coding agent usage. Veri
 
 | Plugin                      | Status  | Key Focus        |
 | --------------------------- | ------- | ---------------- |
-| `eslint-plugin-react-hooks` | pending | Rules of hooks   |
+| `eslint-plugin-react-hooks` | done    | Rules of hooks   |
 | `@next/eslint-plugin-next`  | pending | Next.js patterns |
 | `@vitest/eslint-plugin`     | pending | Test patterns    |
 | `eslint-plugin-playwright`  | pending | E2E patterns     |
@@ -130,3 +130,4 @@ For each plugin:
 | `eslint-plugin-import-x`       | 2025-12-08 | v4.16.1 flat/recommended + typescript; 4 error, 3 warn; order disabled for simple-import-sort; no-cycle skipped (perf)          |
 | `@eslint/js`                   | 2025-12-08 | v9.39.1 recommended; 46 error, 0 warn; core JS rules; many disabled rules covered by typescript-eslint; no changes needed       |
 | `eslint-plugin-jsdoc`          | 2025-12-08 | v61.5.0 flat/recommended-typescript; 0 error, 34 warn (appropriate for docs); no changes needed                                 |
+| `eslint-plugin-react-hooks`    | 2025-12-08 | v7.0.1 recommended; rules-of-hooks:error, exhaustive-deps:warn; critical for LLM React code; no changes needed                  |
