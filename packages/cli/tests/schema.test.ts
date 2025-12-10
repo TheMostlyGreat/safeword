@@ -47,9 +47,9 @@ describe('Schema - Single Source of Truth', () => {
   const templatesDir = join(__dirname, '../templates');
 
   describe('ownedDirs', () => {
-    it('should have exactly 18 owned directories', async () => {
+    it('should have exactly 17 owned directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.ownedDirs.length).toBe(18);
+      expect(SAFEWORD_SCHEMA.ownedDirs.length).toBe(17);
     });
 
     it('should include all required .safeword subdirectories', async () => {
@@ -69,7 +69,6 @@ describe('Schema - Single Source of Truth', () => {
         '.safeword/planning/design',
         '.safeword/planning/issues',
         '.safeword/planning/plans',
-        '.husky',
         '.cursor',
         '.cursor/rules',
         '.cursor/commands',
@@ -82,16 +81,17 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('sharedDirs', () => {
-    it('should have exactly 3 shared directories', async () => {
+    it('should have exactly 4 shared directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.sharedDirs.length).toBe(3);
+      expect(SAFEWORD_SCHEMA.sharedDirs.length).toBe(4);
     });
 
-    it('should include .claude directories', async () => {
+    it('should include .claude and .husky directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude');
       expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude/skills');
       expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude/commands');
+      expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.husky');
     });
   });
 
@@ -111,9 +111,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('ownedFiles', () => {
-    it('should have exactly 57 owned files', async () => {
+    it('should have exactly 59 owned files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(57);
+      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(59);
     });
 
     it('should have entry for every template file', async () => {
@@ -146,7 +146,6 @@ describe('Schema - Single Source of Truth', () => {
       const generatedFiles = new Set([
         '.safeword/version',
         '.safeword/eslint-boundaries.config.mjs',
-        '.husky/pre-commit',
       ]);
 
       for (const [path, def] of Object.entries(SAFEWORD_SCHEMA.ownedFiles)) {
@@ -206,9 +205,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('textPatches', () => {
-    it('should have exactly 2 text patches', async () => {
+    it('should have exactly 3 text patches', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.textPatches).length).toBe(2);
+      expect(Object.keys(SAFEWORD_SCHEMA.textPatches).length).toBe(3);
     });
 
     it('should include AGENTS.md patch (creates if missing)', async () => {
@@ -224,12 +223,19 @@ describe('Schema - Single Source of Truth', () => {
       expect(SAFEWORD_SCHEMA.textPatches['CLAUDE.md'].operation).toBe('prepend');
       expect(SAFEWORD_SCHEMA.textPatches['CLAUDE.md'].createIfMissing).toBe(false);
     });
+
+    it('should include .husky/pre-commit patch (creates if missing)', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty('.husky/pre-commit');
+      expect(SAFEWORD_SCHEMA.textPatches['.husky/pre-commit'].operation).toBe('prepend');
+      expect(SAFEWORD_SCHEMA.textPatches['.husky/pre-commit'].createIfMissing).toBe(true);
+    });
   });
 
   describe('packages', () => {
-    it('should have 15 base packages', async () => {
+    it('should have 19 base packages', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(15);
+      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(19);
     });
 
     describe('getBaseEslintPackages', () => {
@@ -318,7 +324,11 @@ describe('Schema - Single Source of Truth', () => {
         'eslint-plugin-unicorn',
         'eslint-plugin-boundaries',
         'eslint-plugin-playwright',
-        '@microsoft/eslint-plugin-sdl',
+        'eslint-plugin-promise',
+        'eslint-plugin-regexp',
+        'eslint-plugin-jsdoc',
+        'eslint-plugin-simple-import-sort',
+        'eslint-plugin-security',
         'eslint-config-prettier',
         'markdownlint-cli2',
         'knip',

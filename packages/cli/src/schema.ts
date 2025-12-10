@@ -123,14 +123,13 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/planning/issues',
     '.safeword/planning/plans',
     '.safeword/scripts',
-    '.husky',
     '.cursor',
     '.cursor/rules',
     '.cursor/commands',
   ],
 
   // Directories we add to but don't own (not deleted on reset)
-  sharedDirs: ['.claude', '.claude/skills', '.claude/commands'],
+  sharedDirs: ['.claude', '.claude/skills', '.claude/commands', '.husky'],
 
   // Created on setup but NOT deleted on reset (preserves user data)
   preservedDirs: [
@@ -210,11 +209,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/prompts/architecture.md': { template: 'prompts/architecture.md' },
     '.safeword/prompts/quality-review.md': { template: 'prompts/quality-review.md' },
 
-    // Scripts (3 files)
+    // Scripts (4 files)
     '.safeword/scripts/bisect-test-pollution.sh': { template: 'scripts/bisect-test-pollution.sh' },
     '.safeword/scripts/bisect-zombie-processes.sh': {
       template: 'scripts/bisect-zombie-processes.sh',
     },
+    '.safeword/scripts/cleanup-zombies.sh': { template: 'scripts/cleanup-zombies.sh' },
     '.safeword/scripts/lint-md.sh': { template: 'scripts/lint-md.sh' },
 
     // Claude skills and commands (9 files)
@@ -240,9 +240,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/commands/cleanup-zombies.md': { template: 'commands/cleanup-zombies.md' },
     '.claude/commands/lint.md': { template: 'commands/lint.md' },
     '.claude/commands/quality-review.md': { template: 'commands/quality-review.md' },
-
-    // Husky (1 file)
-    '.husky/pre-commit': { content: HUSKY_PRE_COMMIT_CONTENT },
 
     // Cursor rules (7 files)
     '.cursor/rules/safeword-core.mdc': { template: 'cursor/rules/safeword-core.mdc' },
@@ -527,6 +524,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       content: AGENTS_MD_LINK,
       marker: '.safeword/SAFEWORD.md',
       createIfMissing: false, // Only patch if exists, don't create (AGENTS.md is primary)
+    },
+    '.husky/pre-commit': {
+      operation: 'prepend',
+      content: HUSKY_PRE_COMMIT_CONTENT,
+      marker: '# safeword:lint-staged',
+      createIfMissing: true,
     },
   },
 

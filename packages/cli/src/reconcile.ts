@@ -71,10 +71,16 @@ function planMissingDirs(
  * Plan text-patch actions for files missing the marker
  * @param patches
  * @param cwd
+ * @param isGitRepo
  */
-function planTextPatches(patches: Record<string, TextPatchDefinition>, cwd: string): Action[] {
+function planTextPatches(
+  patches: Record<string, TextPatchDefinition>,
+  cwd: string,
+  isGitRepo: boolean,
+): Action[] {
   const actions: Action[] = [];
   for (const [filePath, def] of Object.entries(patches)) {
+    if (shouldSkipForNonGit(filePath, isGitRepo)) continue;
     const content = readFileSafe(join(cwd, filePath)) ?? '';
     if (!content.includes(def.marker)) {
       actions.push({ type: 'text-patch', path: filePath, definition: def });
@@ -327,8 +333,9 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     actions.push({ type: 'json-merge', path: filePath, definition: def });
   }
 
-  // 6. Text patches
+  // 6. Text patches (skip .husky files in non-git repos)
   for (const [filePath, def] of Object.entries(schema.textPatches)) {
+    if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
     actions.push({ type: 'text-patch', path: filePath, definition: def });
     if (def.createIfMissing && !exists(join(ctx.cwd, filePath))) {
       wouldCreate.push(filePath);
@@ -419,8 +426,8 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     actions.push({ type: 'json-merge', path: filePath, definition: def });
   }
 
-  // 7. Text patches (only if marker missing)
-  actions.push(...planTextPatches(schema.textPatches, ctx.cwd));
+  // 7. Text patches (only if marker missing, skip .husky in non-git repos)
+  actions.push(...planTextPatches(schema.textPatches, ctx.cwd, ctx.isGitRepo));
 
   // 8. Compute packages to install (husky/lint-staged skipped if no git repo)
   const packagesToInstall = computePackagesToInstall(

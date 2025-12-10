@@ -177,8 +177,8 @@ describe('Reset Command - Reconcile Integration', () => {
       expect(existsSync(join(tempDir, '.safeword/hooks'))).toBe(false);
       expect(existsSync(join(tempDir, '.safeword/guides'))).toBe(false);
 
-      // But .husky is in ownedDirs, should be removed
-      expect(existsSync(join(tempDir, '.husky'))).toBe(false);
+      // .husky is a sharedDir, should NOT be removed (preserves user hooks)
+      expect(existsSync(join(tempDir, '.husky'))).toBe(true);
     });
 
     it('should unmerge MCP servers', async () => {
