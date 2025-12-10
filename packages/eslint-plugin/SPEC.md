@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (5/9 stories complete)
+**Status**: 🚧 In Progress (6/9 stories complete)
 
 ---
 
@@ -201,14 +201,17 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Acceptance Criteria**:
 
-- [ ] `unicorn/no-null` = off
-- [ ] `unicorn/prevent-abbreviations` = off
-- [ ] `unicorn/no-array-for-each` = off
-- [ ] Clean idiomatic code produces 0 errors, 0 warnings
+- [x] `unicorn/no-null` = off
+- [x] `unicorn/prevent-abbreviations` = off
+- [x] `unicorn/no-array-for-each` = off
+- [x] `jsdoc/require-param-type` = off (modern JS uses inference)
+- [x] `jsdoc/require-returns-type` = off
+- [x] `jsdoc/require-property-type` = off
+- [x] Clean idiomatic code produces 0 errors, 0 warnings
 
-**Tests**: Lint idiomatic JS/TS → verify 0 errors, 0 warnings
+**Tests**: `human-friendly.test.ts` - Lint idiomatic JS → verify 0 errors, 0 warnings
 
-**Status**: ❌ Not Started
+**Status**: ✅ Complete
 
 ---
 
@@ -285,7 +288,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 5/9 stories (56%)
+**Completed**: 6/9 stories (67%)
 
 ### Phase 1: Core
 
@@ -307,4 +310,4 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Future**: Vue, Svelte, Python (ruff?), Go (golangci-lint?)
 
-**Next Steps**: Implement Story 6 (Human-Friendly) - verify clean idiomatic code produces 0 errors, 0 warnings.
+**Next Steps**: Implement Story 7 (React Support) - add React-specific linting rules.
