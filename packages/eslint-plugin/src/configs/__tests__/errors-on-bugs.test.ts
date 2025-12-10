@@ -188,6 +188,43 @@ export { result };
     });
   });
 
+  describe('design constraint rules (recommended)', () => {
+    it('max-depth errors on deeply nested code', () => {
+      // Depth 5: if > if > if > if > if (exceeds max-depth 4)
+      const code = `function deep(a, b, c, d, e) {
+  if (a) {
+    if (b) {
+      if (c) {
+        if (d) {
+          if (e) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+export { deep };
+`;
+      const errors = lintJs(code, 'max-depth');
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].severity).toBe(ERROR);
+    });
+
+    it('max-params errors on functions with too many parameters', () => {
+      // 6 params exceeds max-params 5
+      const code = `function tooMany(a, b, c, d, e, f) {
+  return a + b + c + d + e + f;
+}
+export { tooMany };
+`;
+      const errors = lintJs(code, 'max-params');
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].severity).toBe(ERROR);
+    });
+  });
+
   describe('typescript-eslint rules (recommendedTypeScript)', () => {
     // Type-checked rules require TypeScript's type system which isn't
     // available in standalone Linter. We verify config severity instead.

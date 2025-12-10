@@ -34,7 +34,7 @@ export const basePlugins: any[] = [
   // ESLint core recommended
   js.configs.recommended,
 
-  // Auto-fixable code style rules - catches common LLM patterns
+  // Code style and design rules - catches common LLM patterns
   {
     rules: {
       'no-unneeded-ternary': 'error', // x ? true : false → x
