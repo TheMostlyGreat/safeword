@@ -43,6 +43,18 @@ function getRuleConfig(config: any[], ruleId: string): unknown {
   }
   return undefined;
 }
+
+/**
+ * Assert a rule is configured at error severity in the config.
+ * @param config - ESLint flat config array
+ * @param ruleId - Rule ID to check
+ */
+function expectErrorSeverity(config: any[], ruleId: string): void {
+  const ruleConfig = getRuleConfig(config, ruleId);
+  expect(ruleConfig).toBeDefined();
+  const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
+  expect(severity === 'error' || severity === ERROR).toBe(true);
+}
 /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, security/detect-object-injection */
 
 describe('Story 4: Errors on Bugs', () => {
@@ -181,64 +193,31 @@ export { result };
     // available in standalone Linter. We verify config severity instead.
 
     it('@typescript-eslint/no-explicit-any is configured at error severity', () => {
-      const ruleConfig = getRuleConfig(recommendedTypeScript, '@typescript-eslint/no-explicit-any');
-      expect(ruleConfig).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- getRuleConfig returns unknown
-      const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
-      expect(severity === 'error' || severity === ERROR).toBe(true);
+      expectErrorSeverity(recommendedTypeScript, '@typescript-eslint/no-explicit-any');
     });
 
     it('@typescript-eslint/no-floating-promises is configured at error severity', () => {
-      const ruleConfig = getRuleConfig(
-        recommendedTypeScript,
-        '@typescript-eslint/no-floating-promises',
-      );
-      expect(ruleConfig).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- getRuleConfig returns unknown
-      const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
-      expect(severity === 'error' || severity === ERROR).toBe(true);
+      expectErrorSeverity(recommendedTypeScript, '@typescript-eslint/no-floating-promises');
     });
 
     it('@typescript-eslint/no-misused-promises is configured at error severity', () => {
       // Catches: if (promise) {} or passing promise to non-async callback
-      const ruleConfig = getRuleConfig(
-        recommendedTypeScript,
-        '@typescript-eslint/no-misused-promises',
-      );
-      expect(ruleConfig).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- getRuleConfig returns unknown
-      const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
-      expect(severity === 'error' || severity === ERROR).toBe(true);
+      expectErrorSeverity(recommendedTypeScript, '@typescript-eslint/no-misused-promises');
     });
 
     it('@typescript-eslint/await-thenable is configured at error severity', () => {
       // Catches: await 5 or await "string" (awaiting non-promises)
-      const ruleConfig = getRuleConfig(recommendedTypeScript, '@typescript-eslint/await-thenable');
-      expect(ruleConfig).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- getRuleConfig returns unknown
-      const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
-      expect(severity === 'error' || severity === ERROR).toBe(true);
+      expectErrorSeverity(recommendedTypeScript, '@typescript-eslint/await-thenable');
     });
 
     it('@typescript-eslint/require-await is configured at error severity', () => {
       // Catches: async function with no await (pointless async)
-      const ruleConfig = getRuleConfig(recommendedTypeScript, '@typescript-eslint/require-await');
-      expect(ruleConfig).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- getRuleConfig returns unknown
-      const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
-      expect(severity === 'error' || severity === ERROR).toBe(true);
+      expectErrorSeverity(recommendedTypeScript, '@typescript-eslint/require-await');
     });
 
     it('@typescript-eslint/no-unnecessary-condition is configured at error severity', () => {
       // Catches: redundant null checks due to LLM type blindness
-      const ruleConfig = getRuleConfig(
-        recommendedTypeScript,
-        '@typescript-eslint/no-unnecessary-condition',
-      );
-      expect(ruleConfig).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- getRuleConfig returns unknown
-      const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
-      expect(severity === 'error' || severity === ERROR).toBe(true);
+      expectErrorSeverity(recommendedTypeScript, '@typescript-eslint/no-unnecessary-condition');
     });
   });
 });

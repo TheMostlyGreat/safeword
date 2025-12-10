@@ -26,7 +26,7 @@ export default {
   },
   rules: {
     'boundaries/element-types': [
-      'error', // Changed from 'warn' - LLMs only respond to blocking errors
+      'error',
       {
         default: 'disallow',
         rules: [{ from: ['app'], allow: ['utils'] }],
