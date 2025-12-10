@@ -77,9 +77,12 @@ describe('Reset Command - Reconcile Integration', () => {
     writeFileSync(join(tempDir, '.claude/commands/lint.md'), '# Lint');
     writeFileSync(join(tempDir, '.claude/skills/safeword-quality-reviewer/SKILL.md'), '# Skill');
 
-    // .husky
+    // .husky - with safeword patch and user's custom hook
     mkdirSync(join(tempDir, '.husky'), { recursive: true });
-    writeFileSync(join(tempDir, '.husky/pre-commit'), 'npx lint-staged');
+    writeFileSync(
+      join(tempDir, '.husky/pre-commit'),
+      '# safeword:pre-commit\nnpx safeword sync --quiet --stage\nnpx lint-staged\n\n# User custom hook\necho "Running pre-commit"',
+    );
 
     // .mcp.json
     writeFileSync(
@@ -158,6 +161,30 @@ describe('Reset Command - Reconcile Integration', () => {
       const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
       expect(content).not.toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('My Project'); // Original content preserved
+    });
+
+    it('should remove safeword content from .husky/pre-commit via text-unpatch', async () => {
+      const { reconcile } = await import('../../src/reconcile.js');
+      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
+      const { createProjectContext } = await import('../../src/utils/context.js');
+
+      createConfiguredProject();
+
+      const ctx = createProjectContext(tempDir);
+      await reconcile(SAFEWORD_SCHEMA, 'uninstall', ctx);
+
+      // .husky/pre-commit should still exist (sharedDir)
+      expect(existsSync(join(tempDir, '.husky/pre-commit'))).toBe(true);
+
+      // Safeword content should be removed
+      const content = readFileSync(join(tempDir, '.husky/pre-commit'), 'utf-8');
+      expect(content).not.toContain('# safeword:pre-commit');
+      expect(content).not.toContain('npx safeword sync');
+      expect(content).not.toContain('npx lint-staged');
+
+      // User custom hook should be preserved
+      expect(content).toContain('# User custom hook');
+      expect(content).toContain('echo "Running pre-commit"');
     });
 
     it('should remove owned directories (except preserved)', async () => {

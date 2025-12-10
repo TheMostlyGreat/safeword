@@ -6,10 +6,11 @@
  */
 
 /**
- * Husky pre-commit hook content - lint-staged only
+ * Husky pre-commit hook content - sync + lint-staged
  * This is prepended to existing hooks, preserving user customizations
  */
-export const HUSKY_PRE_COMMIT_CONTENT = '# safeword:lint-staged\nnpx lint-staged\n';
+export const HUSKY_PRE_COMMIT_CONTENT =
+  '# safeword:pre-commit\nnpx safeword sync --quiet --stage\nnpx lint-staged\n';
 
 /**
  * MCP servers installed by safeword

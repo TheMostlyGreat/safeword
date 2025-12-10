@@ -528,7 +528,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.husky/pre-commit': {
       operation: 'prepend',
       content: HUSKY_PRE_COMMIT_CONTENT,
-      marker: '# safeword:lint-staged',
+      marker: '# safeword:pre-commit',
       createIfMissing: true,
     },
   },
