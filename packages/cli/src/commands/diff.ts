@@ -42,8 +42,8 @@ function createUnifiedDiff(oldContent: string, newContent: string, filename: str
   const maxLines = Math.max(oldLines.length, newLines.length);
 
   for (let i = 0; i < maxLines; i++) {
-    const oldLine = oldLines[i];
-    const newLine = newLines[i];
+    const oldLine: string | undefined = oldLines[i];
+    const newLine: string | undefined = newLines[i];
 
     if (oldLine === newLine) {
       lines.push(` ${oldLine ?? ''}`);

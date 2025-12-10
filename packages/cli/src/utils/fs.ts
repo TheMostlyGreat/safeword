@@ -134,11 +134,11 @@ export function makeScriptsExecutable(dirPath: string): void {
  * Read JSON file
  * @param path
  */
-export function readJson<T = unknown>(path: string): T | null {
+export function readJson(path: string): unknown {
   const content = readFileSafe(path);
   if (!content) return null;
   try {
-    return JSON.parse(content) as T;
+    return JSON.parse(content) as unknown;
   } catch {
     return null;
   }
