@@ -12,7 +12,7 @@
 
 import { execSync, spawnSync } from 'node:child_process';
 
-import { afterAll,beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   createTempDir,
@@ -313,6 +313,11 @@ describe('E2E: Stop Hook', () => {
   });
 
   // Helper to create a mock transcript with an assistant message
+  /**
+   *
+   * @param projectDir
+   * @param assistantText
+   */
   function createMockTranscript(projectDir: string, assistantText: string): string {
     const transcriptPath = `${projectDir}/.safeword/test-transcript.jsonl`;
     const message = {
@@ -326,6 +331,11 @@ describe('E2E: Stop Hook', () => {
   }
 
   // Helper to run stop hook with mock transcript
+  /**
+   *
+   * @param projectDir
+   * @param transcriptPath
+   */
   function runStopHook(
     projectDir: string,
     transcriptPath: string,

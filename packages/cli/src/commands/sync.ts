@@ -30,6 +30,7 @@ export interface SyncOptions {
 /**
  * Get required ESLint packages based on project type.
  * Derives from schema - single source of truth, no separate list to maintain.
+ * @param projectType
  */
 function getRequiredPlugins(projectType: ProjectType): string[] {
   const plugins: string[] = [...getBaseEslintPackages()];
@@ -47,6 +48,8 @@ function getRequiredPlugins(projectType: ProjectType): string[] {
 
 /**
  * Check which packages are missing from devDependencies
+ * @param required
+ * @param installed
  */
 function getMissingPackages(required: string[], installed: Record<string, string>): string[] {
   return required.filter(pkg => !(pkg in installed));
@@ -54,6 +57,7 @@ function getMissingPackages(required: string[], installed: Record<string, string
 
 /**
  * Sync linting configuration with current project dependencies
+ * @param options
  */
 export async function sync(options: SyncOptions = {}): Promise<void> {
   const cwd = process.cwd();
@@ -99,7 +103,6 @@ export async function sync(options: SyncOptions = {}): Promise<void> {
   }
 
   try {
-    // eslint-disable-next-line sonarjs/os-command -- npm install with known package names
     execSync(`npm install -D ${missingPlugins.join(' ')}`, {
       cwd,
       stdio: options.quiet ? 'pipe' : 'inherit',
@@ -117,7 +120,6 @@ export async function sync(options: SyncOptions = {}): Promise<void> {
   // Stage modified files if --stage flag is set (for pre-commit hook)
   if (options.stage) {
     try {
-      // eslint-disable-next-line sonarjs/no-os-command-from-path -- git with fixed args
       execSync('git add package.json package-lock.json', {
         cwd,
         stdio: 'pipe',

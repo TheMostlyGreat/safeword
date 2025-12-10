@@ -8,11 +8,11 @@
  */
 
 import { execSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync,rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('Upgrade Command - Reconcile Integration', () => {
   let tempDir: string;
@@ -26,6 +26,10 @@ describe('Upgrade Command - Reconcile Integration', () => {
   });
 
   // Helper to create a minimal configured project
+  /**
+   *
+   * @param version
+   */
   function createConfiguredProject(version = '0.5.0') {
     // package.json
     writeFileSync(

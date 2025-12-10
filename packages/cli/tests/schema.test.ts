@@ -8,10 +8,10 @@
  */
 
 import { readdirSync, statSync } from 'node:fs';
-import { dirname,join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { describe, expect,it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,6 +21,11 @@ const __dirname = dirname(__filename);
 
 describe('Schema - Single Source of Truth', () => {
   // Helper to collect all files in templates/ directory
+  /**
+   *
+   * @param dir
+   * @param prefix
+   */
   function collectTemplateFiles(dir: string, prefix = ''): string[] {
     const files: string[] = [];
     const entries = readdirSync(dir, { withFileTypes: true });
@@ -354,13 +359,13 @@ describe('Schema - Single Source of Truth', () => {
       // Extract skill names from schema paths
       const claudeSkills = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
         .filter(path => path.startsWith('.claude/skills/safeword-'))
-        .map(path => (/safeword-([^/]+)/.exec(path))?.[1])
+        .map(path => /safeword-([^/]+)/.exec(path)?.[1])
         .filter(Boolean)
         .toSorted();
 
       const cursorRules = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
         .filter(path => path.startsWith('.cursor/rules/safeword-') && !path.includes('core'))
-        .map(path => (/safeword-([^.]+)/.exec(path))?.[1])
+        .map(path => /safeword-([^.]+)/.exec(path)?.[1])
         .filter(Boolean)
         .toSorted();
 

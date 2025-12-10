@@ -8,6 +8,7 @@ import { exists } from './fs.js';
 
 /**
  * Check if directory is a git repository
+ * @param cwd
  */
 export function isGitRepo(cwd: string): boolean {
   return exists(join(cwd, '.git'));

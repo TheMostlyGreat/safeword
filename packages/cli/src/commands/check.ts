@@ -10,7 +10,7 @@ import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists, readFileSafe } from '../utils/fs.js';
-import { header, info, keyValue,success, warn } from '../utils/output.js';
+import { header, info, keyValue, success, warn } from '../utils/output.js';
 import { isNewerVersion } from '../utils/version.js';
 import { VERSION } from '../version.js';
 
@@ -18,7 +18,11 @@ export interface CheckOptions {
   offline?: boolean;
 }
 
-/** Check for missing files from write actions */
+/**
+ * Check for missing files from write actions
+ * @param cwd
+ * @param actions
+ */
 function findMissingFiles(cwd: string, actions: { type: string; path: string }[]): string[] {
   const issues: string[] = [];
   for (const action of actions) {
@@ -29,7 +33,11 @@ function findMissingFiles(cwd: string, actions: { type: string; path: string }[]
   return issues;
 }
 
-/** Check for missing text patch markers */
+/**
+ * Check for missing text patch markers
+ * @param cwd
+ * @param actions
+ */
 function findMissingPatches(
   cwd: string,
   actions: { type: string; path: string; definition?: { marker: string } }[],
@@ -63,11 +71,14 @@ interface HealthStatus {
 
 /**
  * Check for latest version from npm (with timeout)
+ * @param timeout
  */
 async function checkLatestVersion(timeout = 3000): Promise<string | null> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, timeout);
 
     const response = await fetch('https://registry.npmjs.org/safeword/latest', {
       signal: controller.signal,
@@ -86,6 +97,7 @@ async function checkLatestVersion(timeout = 3000): Promise<string | null> {
 
 /**
  * Check project configuration health using reconcile dryRun
+ * @param cwd
  */
 async function checkHealth(cwd: string): Promise<HealthStatus> {
   const safewordDir = join(cwd, '.safeword');
@@ -133,7 +145,10 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
   };
 }
 
-/** Check for CLI updates and report status */
+/**
+ * Check for CLI updates and report status
+ * @param health
+ */
 async function reportUpdateStatus(health: HealthStatus): Promise<void> {
   info('\nChecking for updates...');
   const latestVersion = await checkLatestVersion();
@@ -154,7 +169,10 @@ async function reportUpdateStatus(health: HealthStatus): Promise<void> {
   }
 }
 
-/** Compare project version vs CLI version and report */
+/**
+ * Compare project version vs CLI version and report
+ * @param health
+ */
 function reportVersionMismatch(health: HealthStatus): void {
   if (!health.projectVersion) return;
 
@@ -169,7 +187,10 @@ function reportVersionMismatch(health: HealthStatus): void {
   }
 }
 
-/** Report issues or success */
+/**
+ * Report issues or success
+ * @param health
+ */
 function reportHealthSummary(health: HealthStatus): void {
   if (health.issues.length > 0) {
     header('Issues Found');
@@ -190,6 +211,10 @@ function reportHealthSummary(health: HealthStatus): void {
   success('\nConfiguration is healthy');
 }
 
+/**
+ *
+ * @param options
+ */
 export async function check(options: CheckOptions): Promise<void> {
   const cwd = process.cwd();
 

@@ -40,10 +40,17 @@ export interface ProjectType {
 /**
  * Checks if a directory contains any .sh files up to specified depth.
  * Excludes node_modules and .git directories.
+ * @param cwd
+ * @param maxDepth
  */
 export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
   const excludeDirs = new Set(['node_modules', '.git', '.safeword']);
 
+  /**
+   *
+   * @param dir
+   * @param depth
+   */
   function scan(dir: string, depth: number): boolean {
     if (depth > maxDepth) return false;
 
@@ -53,9 +60,13 @@ export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
         if (entry.isFile() && entry.name.endsWith('.sh')) {
           return true;
         }
-        if (entry.isDirectory() && !excludeDirs.has(entry.name) && scan(join(dir, entry.name), depth + 1)) {
-            return true;
-          }
+        if (
+          entry.isDirectory() &&
+          !excludeDirs.has(entry.name) &&
+          scan(join(dir, entry.name), depth + 1)
+        ) {
+          return true;
+        }
       }
     } catch {
       // Ignore permission errors
@@ -68,6 +79,8 @@ export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
 
 /**
  * Detects project type from package.json contents and optional file scanning
+ * @param packageJson
+ * @param cwd
  */
 export function detectProjectType(packageJson: PackageJson, cwd?: string): ProjectType {
   const deps = packageJson.dependencies || {};

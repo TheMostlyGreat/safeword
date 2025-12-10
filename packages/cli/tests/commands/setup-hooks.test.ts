@@ -7,7 +7,7 @@
 import { chmodSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   createTempDir,
@@ -28,7 +28,11 @@ interface HookEntry {
   hooks?: HookCommand[];
 }
 
-/** Check if hook entry contains command matching pattern */
+/**
+ * Check if hook entry contains command matching pattern
+ * @param entry
+ * @param pattern
+ */
 function hasHookCommand(entry: HookEntry, pattern: string): boolean {
   return entry.hooks?.some(h => h.command?.includes(pattern)) ?? false;
 }
@@ -155,7 +159,7 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
       const agentsCommand = agentsHookEntry?.hooks?.[0]?.command;
       if (agentsCommand) {
         // Extract script path from command if it's a bash script
-        const scriptMatch = agentsCommand.match(/bash\s+([^\s]+)/);
+        const scriptMatch = agentsCommand.match(/bash\s+(\S+)/);
         if (scriptMatch) {
           expect(fileExists(tempDir, scriptMatch[1])).toBe(true);
         }

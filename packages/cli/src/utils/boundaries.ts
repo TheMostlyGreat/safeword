@@ -68,6 +68,7 @@ export interface DetectedArchitecture {
 
 /**
  * Find monorepo package directories
+ * @param projectDir
  */
 function findMonorepoPackages(projectDir: string): string[] {
   const packages: string[] = [];
@@ -96,6 +97,9 @@ function findMonorepoPackages(projectDir: string): string[] {
 
 /**
  * Check if a layer already exists for this path prefix
+ * @param elements
+ * @param layer
+ * @param pathPrefix
  */
 function hasLayerForPrefix(elements: DetectedElement[], layer: Layer, pathPrefix: string): boolean {
   return elements.some(e => e.layer === layer && e.pattern.startsWith(pathPrefix));
@@ -103,6 +107,10 @@ function hasLayerForPrefix(elements: DetectedElement[], layer: Layer, pathPrefix
 
 /**
  * Scan a single search path for architecture layers
+ * @param projectDir
+ * @param searchPath
+ * @param pathPrefix
+ * @param elements
  */
 function scanSearchPath(
   projectDir: string,
@@ -126,6 +134,8 @@ function scanSearchPath(
 
 /**
  * Scan a directory for architecture layers
+ * @param projectDir
+ * @param basePath
  */
 function scanForLayers(projectDir: string, basePath: string): DetectedElement[] {
   const elements: DetectedElement[] = [];
@@ -141,6 +151,7 @@ function scanForLayers(projectDir: string, basePath: string): DetectedElement[] 
 /**
  * Detects architecture directories in the project
  * Handles both standard projects and monorepos
+ * @param projectDir
  */
 export function detectArchitecture(projectDir: string): DetectedArchitecture {
   const elements: DetectedElement[] = [];
@@ -172,6 +183,7 @@ export function detectArchitecture(projectDir: string): DetectedArchitecture {
 
 /**
  * Format a single element for the config
+ * @param el
  */
 function formatElement(el: DetectedElement): string {
   return `      { type: '${el.layer}', pattern: '${el.pattern}', mode: 'full' }`;
@@ -179,6 +191,7 @@ function formatElement(el: DetectedElement): string {
 
 /**
  * Format allowed imports for a rule
+ * @param allowed
  */
 function formatAllowedImports(allowed: Layer[]): string {
   return allowed.map(d => `'${d}'`).join(', ');
@@ -186,6 +199,8 @@ function formatAllowedImports(allowed: Layer[]): string {
 
 /**
  * Generate a single rule for what a layer can import
+ * @param layer
+ * @param detectedLayers
  */
 function generateRule(layer: Layer, detectedLayers: Set<Layer>): string | null {
   const allowedLayers = HIERARCHY[layer];
@@ -199,6 +214,7 @@ function generateRule(layer: Layer, detectedLayers: Set<Layer>): string | null {
 
 /**
  * Build description of what was detected
+ * @param arch
  */
 function buildDetectedInfo(arch: DetectedArchitecture): string {
   if (arch.elements.length === 0) {
@@ -209,6 +225,10 @@ function buildDetectedInfo(arch: DetectedArchitecture): string {
   return `Detected: ${locations}${monorepoNote}`;
 }
 
+/**
+ *
+ * @param arch
+ */
 export function generateBoundariesConfig(arch: DetectedArchitecture): string {
   const hasElements = arch.elements.length > 0;
 

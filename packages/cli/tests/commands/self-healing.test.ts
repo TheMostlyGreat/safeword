@@ -8,7 +8,7 @@ import { execSync } from 'node:child_process';
 import { unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   createConfiguredProject,
@@ -22,6 +22,7 @@ import {
 
 /**
  * Helper to run the self-healing hook script
+ * @param dir
  */
 function runSelfHealingHook(dir: string): { stdout: string; exitCode: number } {
   // The hook script location: .safeword/hooks/session-verify-agents.sh
@@ -34,7 +35,6 @@ function runSelfHealingHook(dir: string): { stdout: string; exitCode: number } {
   }
 
   try {
-    // eslint-disable-next-line sonarjs/os-command -- test helper running known hook script
     const stdout = execSync(`bash "${hookPath}"`, {
       cwd: dir,
       encoding: 'utf-8',

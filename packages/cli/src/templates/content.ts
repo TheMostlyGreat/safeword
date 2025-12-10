@@ -31,6 +31,7 @@ interface PrettierConfig {
 /**
  * Generate .prettierrc content based on project type.
  * Explicitly lists plugins to ensure compatibility with pnpm/Yarn PnP.
+ * @param projectType
  */
 export function getPrettierConfig(projectType: ProjectType): string {
   const config: PrettierConfig = {
@@ -66,6 +67,7 @@ export function getPrettierConfig(projectType: ProjectType): string {
  *
  * SYNC: Keep file patterns in sync with post-tool-lint.sh in:
  *   packages/cli/templates/hooks/post-tool-lint.sh
+ * @param projectType
  */
 export function getLintStagedConfig(projectType: ProjectType): Record<string, string[]> {
   const config: Record<string, string[]> = {

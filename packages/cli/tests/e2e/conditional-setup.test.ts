@@ -13,7 +13,7 @@
 
 import { execSync } from 'node:child_process';
 
-import { afterEach,describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   createNextJsPackageJson,
@@ -480,14 +480,13 @@ describe('E2E: Conditional Setup - Git Integration', () => {
 
       // Create a valid file, stage it, and commit
       writeTestFile(projectDir, 'src/valid.ts', 'export const valid = 1;\n');
-      // eslint-disable-next-line sonarjs/no-os-command-from-path -- test helper
+
       execSync('git add src/valid.ts', { cwd: projectDir });
 
       // Commit should succeed (lint-staged passes)
-      // eslint-disable-next-line sonarjs/no-os-command-from-path -- test helper
+
       execSync('git commit -m "test commit"', { cwd: projectDir, encoding: 'utf-8' });
 
-      // eslint-disable-next-line sonarjs/no-os-command-from-path -- test helper
       const log = execSync('git log --oneline -1', { cwd: projectDir, encoding: 'utf-8' });
       expect(log).toContain('test commit');
     },

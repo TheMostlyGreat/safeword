@@ -14,13 +14,17 @@ import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists } from '../utils/fs.js';
-import { error, header, info, listItem,success, warn } from '../utils/output.js';
+import { error, header, info, listItem, success, warn } from '../utils/output.js';
 
 export interface ResetOptions {
   yes?: boolean;
   full?: boolean;
 }
 
+/**
+ *
+ * @param options
+ */
 export async function reset(options: ResetOptions): Promise<void> {
   const cwd = process.cwd();
   const safewordDir = join(cwd, '.safeword');

@@ -12,7 +12,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname,join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Get the directory of this module (for locating templates)
@@ -50,6 +50,7 @@ export function getTemplatesDir(): string {
 
 /**
  * Check if a path exists
+ * @param path
  */
 export function exists(path: string): boolean {
   return existsSync(path);
@@ -57,6 +58,7 @@ export function exists(path: string): boolean {
 
 /**
  * Create directory recursively
+ * @param path
  */
 export function ensureDir(path: string): void {
   if (!existsSync(path)) {
@@ -66,6 +68,7 @@ export function ensureDir(path: string): void {
 
 /**
  * Read file as string
+ * @param path
  */
 export function readFile(path: string): string {
   return readFileSync(path, 'utf-8');
@@ -73,6 +76,7 @@ export function readFile(path: string): string {
 
 /**
  * Read file as string, return null if not exists
+ * @param path
  */
 export function readFileSafe(path: string): string | null {
   if (!existsSync(path)) return null;
@@ -81,6 +85,8 @@ export function readFileSafe(path: string): string | null {
 
 /**
  * Write file, creating parent directories if needed
+ * @param path
+ * @param content
  */
 export function writeFile(path: string, content: string): void {
   ensureDir(dirname(path));
@@ -89,6 +95,7 @@ export function writeFile(path: string, content: string): void {
 
 /**
  * Remove file or directory recursively
+ * @param path
  */
 export function remove(path: string): void {
   if (existsSync(path)) {
@@ -98,6 +105,7 @@ export function remove(path: string): void {
 
 /**
  * Remove directory only if empty, returns true if removed
+ * @param path
  */
 export function removeIfEmpty(path: string): boolean {
   if (!existsSync(path)) return false;
@@ -111,6 +119,7 @@ export function removeIfEmpty(path: string): boolean {
 
 /**
  * Make all shell scripts in a directory executable
+ * @param dirPath
  */
 export function makeScriptsExecutable(dirPath: string): void {
   if (!existsSync(dirPath)) return;
@@ -123,6 +132,7 @@ export function makeScriptsExecutable(dirPath: string): void {
 
 /**
  * Read JSON file
+ * @param path
  */
 export function readJson<T = unknown>(path: string): T | null {
   const content = readFileSafe(path);
@@ -136,6 +146,8 @@ export function readJson<T = unknown>(path: string): T | null {
 
 /**
  * Write JSON file with formatting
+ * @param path
+ * @param data
  */
 export function writeJson(path: string, data: unknown): void {
   writeFile(path, JSON.stringify(data, null, 2) + '\n');

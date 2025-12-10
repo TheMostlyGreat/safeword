@@ -7,11 +7,11 @@
  * TDD RED phase - these tests should FAIL until src/reconcile.ts is implemented.
  */
 
-import { existsSync,mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 // This import will fail until reconcile.ts is created (RED phase)
 // import { reconcile, computePackagesToInstall } from '../src/reconcile.js';
@@ -29,6 +29,10 @@ describe('Reconcile - Reconciliation Engine', () => {
   });
 
   // Helper to create a minimal package.json
+  /**
+   *
+   * @param content
+   */
   function createPackageJson(content: Record<string, unknown> = {}) {
     const defaultContent = {
       name: 'test-project',
@@ -40,6 +44,10 @@ describe('Reconcile - Reconciliation Engine', () => {
   }
 
   // Helper to create project context
+  /**
+   *
+   * @param overrides
+   */
   function createContext(overrides: Record<string, unknown> = {}) {
     return {
       cwd: tempDir,
