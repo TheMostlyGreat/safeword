@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (4/9 stories complete)
+**Status**: 🚧 In Progress (5/9 stories complete)
 
 ---
 
@@ -180,13 +180,16 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Acceptance Criteria**:
 
-- [ ] `security/detect-object-injection` = warn
-- [ ] `security/detect-possible-timing-attacks` = warn
-- [ ] Complexity warnings (sonarjs) = warn
+- [x] `security/detect-object-injection` = warn
+- [x] `security/detect-possible-timing-attacks` = warn
+- [x] `security/detect-buffer-noassert` = warn
+- [x] `security/detect-new-buffer` = warn
+- [x] `security/detect-pseudoRandomBytes` = warn
+- [x] ~~Complexity (sonarjs) = warn~~ → Kept at error (LLMs ignore warnings, need to force simplification)
 
-**Tests**: Lint suspicious code → verify warnings (not errors)
+**Tests**: `warns-on-suspicious.test.ts` - Lint suspicious code → verify warnings (not errors)
 
-**Status**: ❌ Not Started
+**Status**: ✅ Complete
 
 ---
 
@@ -282,7 +285,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 4/9 stories (44%)
+**Completed**: 5/9 stories (56%)
 
 ### Phase 1: Core
 
@@ -304,4 +307,4 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Future**: Vue, Svelte, Python (ruff?), Go (golangci-lint?)
 
-**Next Steps**: Implement Story 5 (Warns on Suspicious) - test that suspicious patterns warn (not error).
+**Next Steps**: Implement Story 6 (Human-Friendly) - verify clean idiomatic code produces 0 errors, 0 warnings.
