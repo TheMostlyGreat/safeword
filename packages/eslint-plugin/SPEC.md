@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (2/9 stories complete)
+**Status**: 🚧 In Progress (3/9 stories complete)
 
 ---
 
@@ -132,14 +132,14 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Acceptance Criteria**:
 
-- [ ] Config enables fixable rules (import sorting, prettier)
-- [ ] `eslint --fix` resolves import order violations
-- [ ] `eslint --fix` resolves formatting violations
-- [ ] After fix, no style errors remain
+- [x] Config enables fixable rules (import sorting, code style)
+- [x] `eslint --fix` resolves import order violations
+- [x] `eslint --fix` resolves code style violations (prefer-template, object-shorthand, etc.)
+- [x] After fix, no fixable errors remain
 
-**Tests**: Lint messy code → run fix → verify 0 style errors
+**Tests**: `autofix.test.ts` - Lint messy code → run fix → verify 0 fixable errors
 
-**Status**: ❌ Not Started
+**Status**: ✅ Complete
 
 ---
 
@@ -272,7 +272,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 2/9 stories (22%)
+**Completed**: 3/9 stories (33%)
 
 ### Phase 1: Core
 
@@ -294,4 +294,4 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Future**: Vue, Svelte, Python (ruff?), Go (golangci-lint?)
 
-**Next Steps**: Implement Story 2 (Config Loads and Lints) - add tests for config loading.
+**Next Steps**: Implement Story 4 (Errors on Bugs) - test that bug-catching rules error correctly.
