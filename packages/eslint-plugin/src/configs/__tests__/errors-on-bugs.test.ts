@@ -223,6 +223,17 @@ export { tooMany };
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].severity).toBe(ERROR);
     });
+
+    it('eqeqeq errors on == (except null check)', () => {
+      const code = `const x = 1;
+const bad = x == '1';  // should error
+const ok = x == null;  // allowed (checks null and undefined)
+export { bad, ok };
+`;
+      const errors = lintJs(code, 'eqeqeq');
+      expect(errors.length).toBe(1); // Only the first == errors
+      expect(errors[0].severity).toBe(ERROR);
+    });
   });
 
   describe('typescript-eslint rules (recommendedTypeScript)', () => {
