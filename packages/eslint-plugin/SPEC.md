@@ -156,13 +156,14 @@ User overrides always win. On upgrade, user config unchanged.
 - [x] `@typescript-eslint/no-explicit-any` = error (we override to error)
 - [x] `promise/no-multiple-resolved` = error
 
-**Extended Coverage** (17 rules tested):
+**Extended Coverage** (19 rules tested):
 
 - Security: `detect-eval-with-expression`, `detect-non-literal-regexp`, `detect-non-literal-fs-filename`, `detect-child-process`
 - SonarJS: `os-command`, `no-identical-expressions`
 - Promise: `no-multiple-resolved`, `no-nesting`, `valid-params`
 - Safeword: `no-incomplete-error-handling`
 - Unicorn: `no-array-reduce`
+- Design: `max-depth` (4), `max-params` (5)
 - TypeScript: `no-explicit-any`, `no-floating-promises`, `no-misused-promises`, `await-thenable`, `require-await`, `no-unnecessary-condition`
 
 **Tests**: `errors-on-bugs.test.ts` - Runtime tests lint buggy code, config tests verify type-checked rules at error severity
