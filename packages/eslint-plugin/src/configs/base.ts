@@ -48,6 +48,9 @@ export const basePlugins: any[] = [
       curly: 'error', // Require braces around if/else/for/while
       'arrow-body-style': ['error', 'as-needed'], // () => { return x } → () => x
       'prefer-arrow-callback': ['error', { allowNamedFunctions: true }], // function() {} → () => {}
+      // Design constraints - forces LLMs to decompose code
+      'max-depth': ['error', 4], // Forces early returns, avoids deep nesting
+      'max-params': ['error', 5], // Forces object params or decomposition
     },
   },
 
