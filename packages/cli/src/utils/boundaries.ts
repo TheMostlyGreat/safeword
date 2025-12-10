@@ -78,17 +78,17 @@ function findMonorepoPackages(projectDir: string): string[] {
 
   for (const root of monorepoRoots) {
     const rootPath = join(projectDir, root);
-    if (exists(rootPath)) {
-      try {
-        const entries = readdirSync(rootPath, { withFileTypes: true });
-        for (const entry of entries) {
-          if (entry.isDirectory() && !entry.name.startsWith('.')) {
-            packages.push(join(root, entry.name));
-          }
+    if (!exists(rootPath)) continue;
+
+    try {
+      const entries = readdirSync(rootPath, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory() && !entry.name.startsWith('.')) {
+          packages.push(join(root, entry.name));
         }
-      } catch {
-        // Directory not readable, skip
       }
+    } catch {
+      // Directory not readable, skip
     }
   }
 
