@@ -15,10 +15,13 @@
  *   export default [...safeword.configs.recommendedTypeScript];
  */
 
-import type { Linter, Rule } from 'eslint';
+/* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
+
+import type { Rule } from 'eslint';
 
 import { recommended } from './configs/recommended.js';
 import { recommendedTypeScript } from './configs/recommended-typescript.js';
+import { rules } from './rules/index.js';
 
 interface SafewordPlugin {
   meta: {
@@ -26,8 +29,7 @@ interface SafewordPlugin {
     version: string;
   };
   configs: {
-    recommended: Linter.Config[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages
+    recommended: any[];
     recommendedTypeScript: any[];
   };
   rules: Record<string, Rule.RuleModule>;
@@ -42,7 +44,7 @@ const plugin: SafewordPlugin = {
     recommended,
     recommendedTypeScript,
   },
-  rules: {},
+  rules,
 };
 
 export default plugin;

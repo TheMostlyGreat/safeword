@@ -11,9 +11,11 @@
  * - Incorrect async/await patterns
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- ESLint config types are incompatible across plugin packages */
+
 import { importX } from 'eslint-plugin-import-x';
 import pluginJsdoc from 'eslint-plugin-jsdoc';
-import tseslint from 'typescript-eslint';
+import { configs as tseslintConfigs } from 'typescript-eslint';
 
 import { basePlugins, prettierConfig } from './base.js';
 
@@ -25,7 +27,7 @@ import { basePlugins, prettierConfig } from './base.js';
  * Note: Uses any[] because ESLint plugin types are incompatible across packages.
  * Runtime validation by ESLint ensures correctness.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages
+
 export const recommendedTypeScript: any[] = [
   // All base plugins (security, promise, unicorn, etc.)
   ...basePlugins,
@@ -34,8 +36,18 @@ export const recommendedTypeScript: any[] = [
   importX.flatConfigs.typescript,
 
   // typescript-eslint strict + stylistic (type-checked)
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
+  ...tseslintConfigs.strictTypeChecked,
+  ...tseslintConfigs.stylisticTypeChecked,
+
+  // Enable projectService for type-checked rules (modern approach, auto-discovers tsconfig)
+  {
+    files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+      },
+    },
+  },
 
   // JSDoc for TypeScript
   pluginJsdoc.configs['flat/recommended-typescript'],

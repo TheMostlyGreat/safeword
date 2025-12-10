@@ -6,23 +6,50 @@
  */
 
 import js from '@eslint/js';
-import type { Linter } from 'eslint';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import { importX } from 'eslint-plugin-import-x';
 import pluginPromise from 'eslint-plugin-promise';
-import * as pluginRegexp from 'eslint-plugin-regexp';
+import { configs as regexpConfigs } from 'eslint-plugin-regexp';
 import pluginSecurity from 'eslint-plugin-security';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
-import sonarjs from 'eslint-plugin-sonarjs';
+import { configs as sonarConfigs } from 'eslint-plugin-sonarjs';
 import unicorn from 'eslint-plugin-unicorn';
+
+import { rules as safewordRules } from '../rules/index.js';
 
 /**
  * Base plugins - shared between JS and TS configs
  * Does NOT include JSDoc (different config per language) or Prettier (must be last)
+ *
+ * Note: Uses any[] because ESLint plugin types are incompatible across packages.
+ * Runtime validation by ESLint ensures correctness.
  */
-export const basePlugins: Linter.Config[] = [
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages
+export const basePlugins: any[] = [
+  // Default ignores - always skip these directories
+  {
+    ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.git/**'],
+  },
+
   // ESLint core recommended
   js.configs.recommended,
+
+  // Auto-fixable code style rules - catches common LLM patterns
+  {
+    rules: {
+      'no-unneeded-ternary': 'error', // x ? true : false → x
+      'prefer-template': 'error', // 'a' + b → `a${b}`
+      'dot-notation': 'error', // obj["prop"] → obj.prop
+      'object-shorthand': 'error', // { foo: foo } → { foo }
+      'no-extra-boolean-cast': 'error', // !!value → Boolean(value) or value
+      'prefer-object-spread': 'error', // Object.assign({}, x) → { ...x }
+      'logical-assignment-operators': 'error', // x = x ?? y → x ??= y
+      'operator-assignment': 'error', // x = x + 1 → x += 1
+      curly: 'error', // Require braces around if/else/for/while
+      'arrow-body-style': ['error', 'as-needed'], // () => { return x } → () => x
+      'prefer-arrow-callback': ['error', { allowNamedFunctions: true }], // function() {} → () => {}
+    },
+  },
 
   // Import validation
   importX.flatConfigs.recommended,
@@ -33,8 +60,7 @@ export const basePlugins: Linter.Config[] = [
   },
 
   // Code quality / complexity
-  // eslint-disable-next-line import-x/no-named-as-default-member -- sonarjs default export pattern
-  sonarjs.configs.recommended,
+  sonarConfigs.recommended,
 
   // Security - detect common vulnerabilities
   pluginSecurity.configs.recommended,
@@ -74,7 +100,7 @@ export const basePlugins: Linter.Config[] = [
   },
 
   // Regexp - catches ReDoS vulnerabilities and malformed regex
-  pluginRegexp.configs.recommended,
+  regexpConfigs['flat/recommended'],
 
   // Modern JS enforcement
   unicorn.configs.recommended,
@@ -103,6 +129,14 @@ export const basePlugins: Linter.Config[] = [
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       'import-x/order': 'off', // Disable in favor of simple-import-sort
+    },
+  },
+
+  // Safeword custom rules - LLM-specific patterns
+  {
+    plugins: { safeword: { rules: safewordRules } },
+    rules: {
+      'safeword/no-incomplete-error-handling': 'error',
     },
   },
 ];

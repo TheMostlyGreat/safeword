@@ -9,15 +9,20 @@
  * For TypeScript projects, use `recommendedTypeScript` instead.
  */
 
-import type { Linter } from 'eslint';
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- ESLint config types are incompatible across plugin packages */
+
 import pluginJsdoc from 'eslint-plugin-jsdoc';
 
 import { basePlugins, prettierConfig } from './base.js';
 
 /**
  * JavaScript recommended config - core plugins without TypeScript
+ *
+ * Note: Uses any[] because ESLint plugin types are incompatible across packages.
+ * Runtime validation by ESLint ensures correctness.
  */
-export const recommended: Linter.Config[] = [
+
+export const recommended: any[] = [
   // All base plugins (security, promise, unicorn, etc.)
   ...basePlugins,
 
