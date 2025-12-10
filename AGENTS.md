@@ -36,6 +36,8 @@ A CLI tool that sets up AI coding agent configurations (guides, hooks, templates
 | Tests     | Vitest, promptfoo (LLM evals)      |
 | Linting   | ESLint 9 + Prettier                |
 
+**Linting for Agents:** Warnings are useless to coding agents. Only auto-fixable rules and errors matter. Warnings require human judgment and should be reviewed outside the agent's loop.
+
 ## Development Workflow
 
 ### Editing Source Templates
