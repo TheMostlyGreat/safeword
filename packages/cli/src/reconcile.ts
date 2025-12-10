@@ -6,26 +6,27 @@
  */
 
 import { join } from 'node:path';
+
+import type {
+  FileDefinition,
+  JsonMergeDefinition,
+  ProjectContext,
+  SafewordSchema,
+  TextPatchDefinition,
+} from './schema.js';
 import {
-  exists,
   ensureDir,
-  writeFile,
+  exists,
+  getTemplatesDir,
+  makeScriptsExecutable,
   readFile,
   readFileSafe,
   readJson,
-  writeJson,
   remove,
   removeIfEmpty,
-  makeScriptsExecutable,
-  getTemplatesDir,
+  writeFile,
+  writeJson,
 } from './utils/fs.js';
-import type {
-  SafewordSchema,
-  ProjectContext,
-  FileDefinition,
-  JsonMergeDefinition,
-  TextPatchDefinition,
-} from './schema.js';
 import type { ProjectType } from './utils/project-detector.js';
 
 // ============================================================================
@@ -34,12 +35,21 @@ import type { ProjectType } from './utils/project-detector.js';
 
 const HUSKY_DIR = '.husky';
 
-/** Check if path should be skipped in non-git repos (husky files) */
+/**
+ * Check if path should be skipped in non-git repos (husky files)
+ * @param path
+ * @param isGitRepo
+ */
 function shouldSkipForNonGit(path: string, isGitRepo: boolean): boolean {
   return path.startsWith(HUSKY_DIR) && !isGitRepo;
 }
 
-/** Plan mkdir actions for directories that don't exist */
+/**
+ * Plan mkdir actions for directories that don't exist
+ * @param dirs
+ * @param cwd
+ * @param isGitRepo
+ */
 function planMissingDirs(
   dirs: string[],
   cwd: string,
@@ -57,7 +67,11 @@ function planMissingDirs(
   return { actions, created };
 }
 
-/** Plan text-patch actions for files missing the marker */
+/**
+ * Plan text-patch actions for files missing the marker
+ * @param patches
+ * @param cwd
+ */
 function planTextPatches(patches: Record<string, TextPatchDefinition>, cwd: string): Action[] {
   const actions: Action[] = [];
   for (const [filePath, def] of Object.entries(patches)) {
@@ -69,7 +83,11 @@ function planTextPatches(patches: Record<string, TextPatchDefinition>, cwd: stri
   return actions;
 }
 
-/** Plan rmdir actions for directories that exist */
+/**
+ * Plan rmdir actions for directories that exist
+ * @param dirs
+ * @param cwd
+ */
 function planExistingDirsRemoval(
   dirs: string[],
   cwd: string,
@@ -85,7 +103,11 @@ function planExistingDirsRemoval(
   return { actions, removed };
 }
 
-/** Plan rm actions for files that exist */
+/**
+ * Plan rm actions for files that exist
+ * @param files
+ * @param cwd
+ */
 function planExistingFilesRemoval(
   files: string[],
   cwd: string,
@@ -101,7 +123,10 @@ function planExistingFilesRemoval(
   return { actions, removed };
 }
 
-/** Check if a .claude path needs parent dir cleanup */
+/**
+ * Check if a .claude path needs parent dir cleanup
+ * @param filePath
+ */
 function getClaudeParentDirForCleanup(filePath: string): string | null {
   if (!filePath.startsWith('.claude/')) return null;
   const parentDir = filePath.slice(0, Math.max(0, filePath.lastIndexOf('/')));
@@ -151,6 +176,13 @@ export interface ReconcileOptions {
 // Main reconcile function
 // ============================================================================
 
+/**
+ *
+ * @param schema
+ * @param mode
+ * @param ctx
+ * @param options
+ */
 export async function reconcile(
   schema: SafewordSchema,
   mode: ReconcileMode,
@@ -199,6 +231,11 @@ interface ReconcilePlan {
   packagesToRemove: string[];
 }
 
+/**
+ *
+ * @param deprecatedFiles
+ * @param cwd
+ */
 function planDeprecatedFilesRemoval(
   deprecatedFiles: string[],
   cwd: string,
@@ -214,6 +251,12 @@ function planDeprecatedFilesRemoval(
   return { actions, removed };
 }
 
+/**
+ *
+ * @param schema
+ * @param mode
+ * @param ctx
+ */
 function computePlan(
   schema: SafewordSchema,
   mode: ReconcileMode,
@@ -235,6 +278,11 @@ function computePlan(
   }
 }
 
+/**
+ *
+ * @param schema
+ * @param ctx
+ */
 function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): ReconcilePlan {
   const actions: Action[] = [];
   const wouldCreate: string[] = [];
@@ -264,8 +312,13 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     }
   }
 
-  // 4. chmod hook/lib directories (only .husky if git repo)
-  const chmodPaths = ['.safeword/hooks', '.safeword/hooks/cursor', '.safeword/lib'];
+  // 4. chmod hook/lib/scripts directories (only .husky if git repo)
+  const chmodPaths = [
+    '.safeword/hooks',
+    '.safeword/hooks/cursor',
+    '.safeword/lib',
+    '.safeword/scripts',
+  ];
   if (ctx.isGitRepo) chmodPaths.push(HUSKY_DIR);
   actions.push({ type: 'chmod', paths: chmodPaths });
 
@@ -300,6 +353,11 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   };
 }
 
+/**
+ *
+ * @param schema
+ * @param ctx
+ */
 function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): ReconcilePlan {
   const actions: Action[] = [];
   const wouldCreate: string[] = [];
@@ -347,7 +405,12 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   const wouldRemove = deprecatedFiles.removed;
 
   // 5. chmod (only .husky if git repo)
-  const chmodPathsUpgrade = ['.safeword/hooks', '.safeword/hooks/cursor', '.safeword/lib'];
+  const chmodPathsUpgrade = [
+    '.safeword/hooks',
+    '.safeword/hooks/cursor',
+    '.safeword/lib',
+    '.safeword/scripts',
+  ];
   if (ctx.isGitRepo) chmodPathsUpgrade.push(HUSKY_DIR);
   actions.push({ type: 'chmod', paths: chmodPathsUpgrade });
 
@@ -377,6 +440,12 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   };
 }
 
+/**
+ *
+ * @param schema
+ * @param ctx
+ * @param full
+ */
 function computeUninstallPlan(
   schema: SafewordSchema,
   ctx: ProjectContext,
@@ -458,6 +527,11 @@ interface ExecutionResult {
   removed: string[];
 }
 
+/**
+ *
+ * @param plan
+ * @param ctx
+ */
 function executePlan(plan: ReconcilePlan, ctx: ProjectContext): ExecutionResult {
   const created: string[] = [];
   const updated: string[] = [];
@@ -471,6 +545,12 @@ function executePlan(plan: ReconcilePlan, ctx: ProjectContext): ExecutionResult 
   return result;
 }
 
+/**
+ *
+ * @param action
+ * @param ctx
+ * @param result
+ */
 function executeAction(action: Action, ctx: ProjectContext, result: ExecutionResult): void {
   switch (action.type) {
     case 'mkdir': {
@@ -528,6 +608,13 @@ function executeAction(action: Action, ctx: ProjectContext, result: ExecutionRes
   }
 }
 
+/**
+ *
+ * @param cwd
+ * @param path
+ * @param content
+ * @param result
+ */
 function executeWrite(cwd: string, path: string, content: string, result: ExecutionResult): void {
   const fullPath = join(cwd, path);
   const existed = exists(fullPath);
@@ -539,6 +626,11 @@ function executeWrite(cwd: string, path: string, content: string, result: Execut
 // Helper functions
 // ============================================================================
 
+/**
+ *
+ * @param def
+ * @param ctx
+ */
 function resolveFileContent(def: FileDefinition, ctx: ProjectContext): string {
   if (def.template) {
     const templatesDir = getTemplatesDir();
@@ -556,6 +648,11 @@ function resolveFileContent(def: FileDefinition, ctx: ProjectContext): string {
   throw new Error('FileDefinition must have template, content, or generator');
 }
 
+/**
+ *
+ * @param installedPath
+ * @param newContent
+ */
 function fileNeedsUpdate(installedPath: string, newContent: string): boolean {
   if (!exists(installedPath)) return true;
   const currentContent = readFileSafe(installedPath);
@@ -565,6 +662,13 @@ function fileNeedsUpdate(installedPath: string, newContent: string): boolean {
 // Packages that require git repo
 const GIT_ONLY_PACKAGES = new Set(['husky', 'lint-staged']);
 
+/**
+ *
+ * @param schema
+ * @param projectType
+ * @param installedDevDeps
+ * @param isGitRepo
+ */
 export function computePackagesToInstall(
   schema: SafewordSchema,
   projectType: ProjectType,
@@ -587,6 +691,12 @@ export function computePackagesToInstall(
   return needed.filter(pkg => !(pkg in installedDevDeps));
 }
 
+/**
+ *
+ * @param schema
+ * @param projectType
+ * @param installedDevDeps
+ */
 function computePackagesToRemove(
   schema: SafewordSchema,
   projectType: ProjectType,
@@ -604,6 +714,13 @@ function computePackagesToRemove(
   return safewordPackages.filter(pkg => pkg in installedDevDeps);
 }
 
+/**
+ *
+ * @param cwd
+ * @param path
+ * @param def
+ * @param ctx
+ */
 function executeJsonMerge(
   cwd: string,
   path: string,
@@ -620,6 +737,12 @@ function executeJsonMerge(
   writeJson(fullPath, merged);
 }
 
+/**
+ *
+ * @param cwd
+ * @param path
+ * @param def
+ */
 function executeJsonUnmerge(cwd: string, path: string, def: JsonMergeDefinition): void {
   const fullPath = join(cwd, path);
   if (!exists(fullPath)) return;
@@ -643,6 +766,12 @@ function executeJsonUnmerge(cwd: string, path: string, def: JsonMergeDefinition)
   writeJson(fullPath, unmerged);
 }
 
+/**
+ *
+ * @param cwd
+ * @param path
+ * @param def
+ */
 function executeTextPatch(cwd: string, path: string, def: TextPatchDefinition): void {
   const fullPath = join(cwd, path);
   let content = readFileSafe(fullPath) ?? '';
@@ -656,6 +785,12 @@ function executeTextPatch(cwd: string, path: string, def: TextPatchDefinition): 
   writeFile(fullPath, content);
 }
 
+/**
+ *
+ * @param cwd
+ * @param path
+ * @param def
+ */
 function executeTextUnpatch(cwd: string, path: string, def: TextPatchDefinition): void {
   const fullPath = join(cwd, path);
   const content = readFileSafe(fullPath);
