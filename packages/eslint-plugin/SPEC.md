@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (3/9 stories complete)
+**Status**: 🚧 In Progress (4/9 stories complete)
 
 ---
 
@@ -151,14 +151,14 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Acceptance Criteria**:
 
-- [ ] `security/detect-eval-with-expression` = error
-- [ ] `@typescript-eslint/no-floating-promises` = error
-- [ ] `@typescript-eslint/no-explicit-any` = error (we override to error)
-- [ ] `promise/no-multiple-resolved` = error
+- [x] `security/detect-eval-with-expression` = error
+- [x] `@typescript-eslint/no-floating-promises` = error (via strictTypeChecked)
+- [x] `@typescript-eslint/no-explicit-any` = error (we override to error)
+- [x] `promise/no-multiple-resolved` = error
 
-**Tests**: Lint buggy code → verify specific errors returned
+**Tests**: `errors-on-bugs.test.ts` - Lint buggy code → verify specific errors returned
 
-**Status**: ❌ Not Started
+**Status**: ✅ Complete
 
 ---
 
@@ -272,7 +272,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 3/9 stories (33%)
+**Completed**: 4/9 stories (44%)
 
 ### Phase 1: Core
 
