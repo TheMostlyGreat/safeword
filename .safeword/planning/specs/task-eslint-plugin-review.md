@@ -58,12 +58,12 @@ Review each ESLint plugin in our config for optimal LLM coding agent usage. Veri
 | `eslint-plugin-vue`         | done   | Vue patterns     |
 | `eslint-plugin-svelte`      | done   | Svelte patterns  |
 
-### Tier 5 - Skip (Style/Formatting)
+### Tier 5 - Style/Formatting (Documented)
 
-| Plugin                             | Reason                             |
-| ---------------------------------- | ---------------------------------- |
-| `eslint-plugin-simple-import-sort` | Auto-fix only, no config decisions |
-| `eslint-config-prettier`           | Conflict resolution, no rules      |
+| Plugin                             | Status | Key Focus                          |
+| ---------------------------------- | ------ | ---------------------------------- |
+| `eslint-plugin-simple-import-sort` | done   | Auto-fix only, 2 rules at error    |
+| `eslint-config-prettier`           | done   | Conflict resolution, disables only |
 
 ---
 
@@ -118,22 +118,24 @@ For each plugin:
 
 ## Completed Reviews
 
-| Plugin                         | Date       | Findings                                                                                                                        |
-| ------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `@microsoft/eslint-plugin-sdl` | 2025-12-08 | SDL registers security plugin but doesn't enable rules; configured all 13 security rules with error/warn split                  |
-| `typescript-eslint`            | 2025-12-08 | Using `strictTypeChecked` + `stylisticTypeChecked`; all LLM-critical rules at error; custom `strict-boolean-expressions` config |
-| `eslint-plugin-promise`        | 2025-12-08 | flat/recommended working; added `no-multiple-resolved: "error"` (not in preset, catches missing return after resolve)           |
-| `eslint-plugin-boundaries`     | 2025-12-08 | Config already optimal; `element-types: "error"` with `default: "disallow"` aligns with LLM research; no changes needed         |
-| `eslint-plugin-sonarjs`        | 2025-12-08 | v3.0.5 recommended preset optimal; ~201 rules at error, 0 at warn; cognitive-complexity threshold 15; no changes needed         |
-| `eslint-plugin-unicorn`        | 2025-12-08 | v62.0.0 flat/recommended with 9 disabled + 3 warn overrides; enforces modern JS patterns; config already well-tuned             |
-| `eslint-plugin-regexp`         | 2025-12-08 | v2.10.0 flat/recommended; 54 error, 6 warn; no-super-linear-backtracking (ReDoS) at error; no changes needed                    |
-| `eslint-plugin-import-x`       | 2025-12-08 | v4.16.1 flat/recommended + typescript; 4 error, 3 warn; order disabled for simple-import-sort; no-cycle skipped (perf)          |
-| `@eslint/js`                   | 2025-12-08 | v9.39.1 recommended; 46 error, 0 warn; core JS rules; many disabled rules covered by typescript-eslint; no changes needed       |
-| `eslint-plugin-jsdoc`          | 2025-12-08 | v61.5.0 flat/recommended-typescript; 0 error, 34 warn (appropriate for docs); no changes needed                                 |
-| `eslint-plugin-react-hooks`    | 2025-12-08 | v7.0.1 recommended; rules-of-hooks:error, exhaustive-deps:warn; critical for LLM React code; no changes needed                  |
-| `@next/eslint-plugin-next`     | 2025-12-08 | v16.0.8 recommended; enforces Next.js patterns (Link, Image, Script); dynamically loaded; no changes needed                     |
-| `@vitest/eslint-plugin`        | 2025-12-08 | v1.5.2 recommended; ~10 error, 0 warn; catches empty tests, focused tests, conditional expects; dynamically loaded; no changes  |
-| `eslint-plugin-playwright`     | 2025-12-08 | v2.4.0 flat/recommended; 13 error, 14 warn; missing-playwright-await critical; always loaded; scoped to e2e; no changes needed  |
-| `eslint-plugin-astro`          | 2025-12-08 | v1.5.0 flat/recommended; ~9 rules at error; catches deprecated APIs; includes parser; dynamically loaded; no changes needed     |
-| `eslint-plugin-vue`            | 2025-12-08 | v10.6.2 flat/recommended; 80+ rules; essential at error, rest at warn; catches Vue 2→3 migration; no changes needed             |
-| `eslint-plugin-svelte`         | 2025-12-08 | v3.13.1 recommended; 40+ rules; catches XSS, DOM manipulation, reactive mistakes; dynamically loaded; no changes needed         |
+| Plugin                             | Date       | Findings                                                                                                                        |
+| ---------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `@microsoft/eslint-plugin-sdl`     | 2025-12-08 | SDL registers security plugin but doesn't enable rules; configured all 13 security rules with error/warn split                  |
+| `typescript-eslint`                | 2025-12-08 | Using `strictTypeChecked` + `stylisticTypeChecked`; all LLM-critical rules at error; custom `strict-boolean-expressions` config |
+| `eslint-plugin-promise`            | 2025-12-08 | flat/recommended working; added `no-multiple-resolved: "error"` (not in preset, catches missing return after resolve)           |
+| `eslint-plugin-boundaries`         | 2025-12-08 | Config already optimal; `element-types: "error"` with `default: "disallow"` aligns with LLM research; no changes needed         |
+| `eslint-plugin-sonarjs`            | 2025-12-08 | v3.0.5 recommended preset optimal; ~201 rules at error, 0 at warn; cognitive-complexity threshold 15; no changes needed         |
+| `eslint-plugin-unicorn`            | 2025-12-08 | v62.0.0 flat/recommended with 9 disabled + 3 warn overrides; enforces modern JS patterns; config already well-tuned             |
+| `eslint-plugin-regexp`             | 2025-12-08 | v2.10.0 flat/recommended; 54 error, 6 warn; no-super-linear-backtracking (ReDoS) at error; no changes needed                    |
+| `eslint-plugin-import-x`           | 2025-12-08 | v4.16.1 flat/recommended + typescript; 4 error, 3 warn; order disabled for simple-import-sort; no-cycle skipped (perf)          |
+| `@eslint/js`                       | 2025-12-08 | v9.39.1 recommended; 46 error, 0 warn; core JS rules; many disabled rules covered by typescript-eslint; no changes needed       |
+| `eslint-plugin-jsdoc`              | 2025-12-08 | v61.5.0 flat/recommended-typescript; 0 error, 34 warn (appropriate for docs); no changes needed                                 |
+| `eslint-plugin-react-hooks`        | 2025-12-08 | v7.0.1 recommended; rules-of-hooks:error, exhaustive-deps:warn; critical for LLM React code; no changes needed                  |
+| `@next/eslint-plugin-next`         | 2025-12-08 | v16.0.8 recommended; enforces Next.js patterns (Link, Image, Script); dynamically loaded; no changes needed                     |
+| `@vitest/eslint-plugin`            | 2025-12-08 | v1.5.2 recommended; ~10 error, 0 warn; catches empty tests, focused tests, conditional expects; dynamically loaded; no changes  |
+| `eslint-plugin-playwright`         | 2025-12-08 | v2.4.0 flat/recommended; 13 error, 14 warn; missing-playwright-await critical; always loaded; scoped to e2e; no changes needed  |
+| `eslint-plugin-astro`              | 2025-12-08 | v1.5.0 flat/recommended; ~9 rules at error; catches deprecated APIs; includes parser; dynamically loaded; no changes needed     |
+| `eslint-plugin-vue`                | 2025-12-08 | v10.6.2 flat/recommended; 80+ rules; essential at error, rest at warn; catches Vue 2→3 migration; no changes needed             |
+| `eslint-plugin-svelte`             | 2025-12-08 | v3.13.1 recommended; 40+ rules; catches XSS, DOM manipulation, reactive mistakes; dynamically loaded; no changes needed         |
+| `eslint-plugin-simple-import-sort` | 2025-12-10 | v12.1.1; 2 rules (imports/exports) both at error; 100% auto-fixable; no presets; low LLM relevance                              |
+| `eslint-config-prettier`           | 2025-12-10 | v10.1.8; disables conflicting rules from 10+ plugins; must be last in config; CLI helper verified no conflicts                  |
