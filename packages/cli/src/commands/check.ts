@@ -5,13 +5,14 @@
  */
 
 import { join } from 'node:path';
-import { VERSION } from '../version.js';
-import { exists, readFileSafe } from '../utils/fs.js';
-import { info, success, warn, header, keyValue } from '../utils/output.js';
-import { isNewerVersion } from '../utils/version.js';
-import { createProjectContext } from '../utils/context.js';
+
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
+import { createProjectContext } from '../utils/context.js';
+import { exists, readFileSafe } from '../utils/fs.js';
+import { header, info, keyValue,success, warn } from '../utils/output.js';
+import { isNewerVersion } from '../utils/version.js';
+import { VERSION } from '../version.js';
 
 export interface CheckOptions {
   offline?: boolean;

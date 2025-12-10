@@ -7,11 +7,12 @@
  * TDD RED phase - these tests verify reconcile integration.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import { execSync } from 'node:child_process';
+import { existsSync,mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
 
 describe('Reset Command - Reconcile Integration', () => {
   let tempDir: string;
@@ -278,13 +279,13 @@ describe('Reset Command - Reconcile Integration', () => {
 
         // .safeword should be removed
         expect(existsSync(join(tempDir, '.safeword'))).toBe(false);
-      } catch (err) {
-        const stdout = (err as { stdout?: string }).stdout || '';
+      } catch (error) {
+        const stdout = (error as { stdout?: string }).stdout || '';
         // If reset ran, check the output
         if (stdout.includes('Reset') || stdout.includes('Removed')) {
           expect(existsSync(join(tempDir, '.safeword'))).toBe(false);
         } else {
-          throw err;
+          throw error;
         }
       }
     });

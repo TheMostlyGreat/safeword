@@ -53,11 +53,9 @@ export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
         if (entry.isFile() && entry.name.endsWith('.sh')) {
           return true;
         }
-        if (entry.isDirectory() && !excludeDirs.has(entry.name)) {
-          if (scan(join(dir, entry.name), depth + 1)) {
+        if (entry.isDirectory() && !excludeDirs.has(entry.name) && scan(join(dir, entry.name), depth + 1)) {
             return true;
           }
-        }
       }
     } catch {
       // Ignore permission errors

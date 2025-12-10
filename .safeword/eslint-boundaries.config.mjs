@@ -5,7 +5,7 @@
  *
  * This enforces import boundaries between architectural layers:
  * - Lower layers (types, utils) cannot import from higher layers (components, features)
- * - Uses 'warn' severity - informative, not blocking
+ * - Uses 'error' severity - LLMs ignore warnings, errors force compliance
  *
  * Recognized directories (in hierarchy order):
  *   types → utils → lib → hooks/services → components → features/modules → app
@@ -26,7 +26,7 @@ export default {
   },
   rules: {
     'boundaries/element-types': [
-      'warn',
+      'error', // Changed from 'warn' - LLMs only respond to blocking errors
       {
         default: 'disallow',
         rules: [{ from: ['app'], allow: ['utils'] }],

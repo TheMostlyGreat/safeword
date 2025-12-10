@@ -5,13 +5,14 @@
  */
 
 import { join } from 'node:path';
-import { VERSION } from '../version.js';
-import { exists, readFileSafe } from '../utils/fs.js';
-import { info, success, error, header, listItem } from '../utils/output.js';
-import { compareVersions } from '../utils/version.js';
-import { createProjectContext } from '../utils/context.js';
+
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
+import { createProjectContext } from '../utils/context.js';
+import { exists, readFileSafe } from '../utils/fs.js';
+import { error, header, info, listItem,success } from '../utils/output.js';
+import { compareVersions } from '../utils/version.js';
+import { VERSION } from '../version.js';
 import { sync } from './sync.js';
 
 export async function upgrade(): Promise<void> {

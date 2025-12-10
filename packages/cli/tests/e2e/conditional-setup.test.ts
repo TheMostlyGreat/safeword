@@ -11,20 +11,22 @@
  * Each test creates a fresh project to test specific conditions.
  */
 
-import { describe, it, expect, afterEach } from 'vitest';
 import { execSync } from 'node:child_process';
+
+import { afterEach,describe, expect, it } from 'vitest';
+
 import {
-  createTempDir,
-  removeTempDir,
-  createPackageJson,
-  createTypeScriptPackageJson,
-  createReactPackageJson,
   createNextJsPackageJson,
-  initGitRepo,
-  runCli,
-  readTestFile,
-  writeTestFile,
+  createPackageJson,
+  createReactPackageJson,
+  createTempDir,
+  createTypeScriptPackageJson,
   fileExists,
+  initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
 } from '../helpers';
 
 /** Setup timeout: 10 minutes - npm install can take 7+ minutes */

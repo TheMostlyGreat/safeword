@@ -4,19 +4,21 @@
  * Tests for SessionStart hook that maintains AGENTS.md link.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { execSync } from 'node:child_process';
+import { unlinkSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
-  createTempDir,
-  removeTempDir,
   createConfiguredProject,
-  readTestFile,
-  writeTestFile,
+  createTempDir,
   fileExists,
   measureTimeSync,
+  readTestFile,
+  removeTempDir,
+  writeTestFile,
 } from '../helpers';
-import { unlinkSync } from 'node:fs';
 
 /**
  * Helper to run the self-healing hook script

@@ -4,20 +4,22 @@
  * Tests for `safeword check` command.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import {
-  createTempDir,
-  removeTempDir,
-  createTypeScriptPackageJson,
-  createConfiguredProject,
-  runCli,
-  readTestFile,
-  writeTestFile,
-  fileExists,
-  initGitRepo,
-} from '../helpers';
 import { unlinkSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
+import {
+  createConfiguredProject,
+  createTempDir,
+  createTypeScriptPackageJson,
+  fileExists,
+  initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
+} from '../helpers';
 
 describe('Test Suite 8: Health Check', () => {
   let tempDir: string;

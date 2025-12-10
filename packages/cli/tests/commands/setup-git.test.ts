@@ -4,15 +4,16 @@
  * Tests for git detection and Husky/lint-staged setup.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
-  runCli,
-  readTestFile,
   fileExists,
   initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
 } from '../helpers';
 
 describe('Test Suite 7: Git Repository Handling', () => {

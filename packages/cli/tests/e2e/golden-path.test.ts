@@ -9,16 +9,18 @@
  * Uses a single project setup (expensive) shared across all tests.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
+
+import { afterAll,beforeAll, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
   initGitRepo,
-  runCli,
   readTestFile,
+  removeTempDir,
+  runCli,
   writeTestFile,
 } from '../helpers';
 

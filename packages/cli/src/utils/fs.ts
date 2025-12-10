@@ -3,16 +3,16 @@
  */
 
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
-  readFileSync,
-  writeFileSync,
-  rmSync,
-  rmdirSync,
   readdirSync,
-  chmodSync,
+  readFileSync,
+  rmdirSync,
+  rmSync,
+  writeFileSync,
 } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { dirname,join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Get the directory of this module (for locating templates)

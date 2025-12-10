@@ -22,6 +22,9 @@ interface PrettierConfig {
   trailingComma: string;
   printWidth: number;
   endOfLine: string;
+  useTabs: boolean;
+  bracketSpacing: boolean;
+  arrowParens: string;
   plugins?: string[];
 }
 
@@ -34,9 +37,12 @@ export function getPrettierConfig(projectType: ProjectType): string {
     semi: true,
     singleQuote: true,
     tabWidth: 2,
-    trailingComma: 'es5',
+    trailingComma: 'all',
     printWidth: 100,
     endOfLine: 'lf',
+    useTabs: false,
+    bracketSpacing: true,
+    arrowParens: 'avoid',
   };
 
   const plugins: string[] = [];

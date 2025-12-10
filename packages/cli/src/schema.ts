@@ -7,13 +7,13 @@
  * Adding a new file? Add it here and it will be handled by setup/upgrade/reset.
  */
 
-import { VERSION } from './version.js';
-import { type ProjectType } from './utils/project-detector.js';
-import { AGENTS_MD_LINK, getPrettierConfig, getLintStagedConfig } from './templates/content.js';
-import { getEslintConfig, SETTINGS_HOOKS, CURSOR_HOOKS } from './templates/config.js';
-import { generateBoundariesConfig, detectArchitecture } from './utils/boundaries.js';
-import { HUSKY_PRE_COMMIT_CONTENT, MCP_SERVERS } from './utils/install.js';
+import { CURSOR_HOOKS, getEslintConfig, SETTINGS_HOOKS } from './templates/config.js';
+import { AGENTS_MD_LINK, getLintStagedConfig, getPrettierConfig } from './templates/content.js';
+import { detectArchitecture, generateBoundariesConfig } from './utils/boundaries.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';
+import { HUSKY_PRE_COMMIT_CONTENT, MCP_SERVERS } from './utils/install.js';
+import { type ProjectType } from './utils/project-detector.js';
+import { VERSION } from './version.js';
 
 // ============================================================================
 // Interfaces
@@ -73,6 +73,7 @@ export interface SafewordSchema {
 /**
  * Check if a package name is an ESLint-related package.
  * Used by sync command to filter packages for pre-commit installation.
+ * @param pkg
  */
 function isEslintPackage(pkg: string): boolean {
   return (
@@ -96,6 +97,7 @@ export function getBaseEslintPackages(): string[] {
 
 /**
  * Get conditional ESLint packages for a specific project type key.
+ * @param key
  */
 export function getConditionalEslintPackages(key: string): string[] {
   const deps = SAFEWORD_SCHEMA.packages.conditional[key];
@@ -279,6 +281,32 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.prettierrc': { generator: ctx => getPrettierConfig(ctx.projectType) },
     '.markdownlint-cli2.jsonc': { template: 'markdownlint-cli2.jsonc' },
+    // Minimal tsconfig for ESLint type-checked linting (only if missing)
+    'tsconfig.json': {
+      generator: ctx => {
+        // Only create for TypeScript projects
+        if (!ctx.devDeps.typescript && !ctx.devDeps['typescript-eslint']) {
+          return ''; // Empty = skip this file
+        }
+        return JSON.stringify(
+          {
+            compilerOptions: {
+              target: 'ES2022',
+              module: 'NodeNext',
+              moduleResolution: 'NodeNext',
+              strict: true,
+              esModuleInterop: true,
+              skipLibCheck: true,
+              noEmit: true,
+            },
+            include: ['**/*.ts', '**/*.tsx'],
+            exclude: ['node_modules', 'dist', 'build'],
+          },
+          null,
+          2,
+        );
+      },
+    },
   },
 
   // JSON files where we merge specific keys
@@ -360,7 +388,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         const mergedHooks: Record<string, unknown[]> = { ...existingHooks };
 
         for (const [event, newHooks] of Object.entries(SETTINGS_HOOKS)) {
-          const eventHooks = (mergedHooks[event] as unknown[]) ?? [];
+          const eventHooks = mergedHooks[event] ?? [];
           const nonSafewordHooks = filterOutSafewordHooks(eventHooks);
           mergedHooks[event] = [...nonSafewordHooks, ...newHooks];
         }
@@ -373,7 +401,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         const cleanedHooks: Record<string, unknown[]> = {};
 
         for (const [event, eventHooks] of Object.entries(existingHooks)) {
-          const nonSafewordHooks = filterOutSafewordHooks(eventHooks as unknown[]);
+          const nonSafewordHooks = filterOutSafewordHooks(eventHooks);
           if (nonSafewordHooks.length > 0) {
             cleanedHooks[event] = nonSafewordHooks;
           }
@@ -512,7 +540,11 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       'eslint-plugin-unicorn',
       'eslint-plugin-boundaries',
       'eslint-plugin-playwright',
-      '@microsoft/eslint-plugin-sdl',
+      'eslint-plugin-promise',
+      'eslint-plugin-regexp',
+      'eslint-plugin-jsdoc',
+      'eslint-plugin-simple-import-sort',
+      'eslint-plugin-security',
       'eslint-config-prettier',
       'markdownlint-cli2',
       'knip',

@@ -10,8 +10,9 @@
  * - Various naming conventions (helpers, shared, core, etc.)
  */
 
-import { join } from 'node:path';
 import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { exists } from './fs.js';
 
 /**

@@ -7,13 +7,14 @@
  * Use --full to also remove linting config and uninstall npm packages
  */
 
-import { join } from 'node:path';
 import { execSync } from 'node:child_process';
-import { exists } from '../utils/fs.js';
-import { info, success, warn, error, header, listItem } from '../utils/output.js';
-import { createProjectContext } from '../utils/context.js';
+import { join } from 'node:path';
+
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
+import { createProjectContext } from '../utils/context.js';
+import { exists } from '../utils/fs.js';
+import { error, header, info, listItem,success, warn } from '../utils/output.js';
 
 export interface ResetOptions {
   yes?: boolean;
@@ -81,8 +82,8 @@ export async function reset(options: ResetOptions): Promise<void> {
     }
 
     success('\nSafeword configuration removed');
-  } catch (err) {
-    error(`Reset failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+  } catch (error_) {
+    error(`Reset failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);
   }
 }

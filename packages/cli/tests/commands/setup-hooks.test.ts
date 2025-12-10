@@ -4,18 +4,20 @@
  * Tests for Claude Code hook registration and skill copying.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { chmodSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
-  runCli,
-  readTestFile,
-  writeTestFile,
   fileExists,
   initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
 } from '../helpers';
 
 interface HookCommand {

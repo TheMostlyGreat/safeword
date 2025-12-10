@@ -11,15 +11,16 @@
  * - Clear error message if installation fails
  */
 
-import { join } from 'node:path';
 import { execSync } from 'node:child_process';
+import { join } from 'node:path';
+
+import { getBaseEslintPackages, getConditionalEslintPackages } from '../schema.js';
 import { exists, readJson } from '../utils/fs.js';
 import {
   detectProjectType,
   type PackageJson,
   type ProjectType,
 } from '../utils/project-detector.js';
-import { getBaseEslintPackages, getConditionalEslintPackages } from '../schema.js';
 
 export interface SyncOptions {
   quiet?: boolean;

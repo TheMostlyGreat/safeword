@@ -7,10 +7,11 @@
  * TDD RED phase - these tests should FAIL until src/schema.ts is implemented.
  */
 
-import { describe, it, expect } from 'vitest';
 import { readdirSync, statSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { dirname,join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { describe, expect,it } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -169,16 +170,17 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('managedFiles', () => {
-    it('should have exactly 3 managed files', async () => {
+    it('should have exactly 4 managed files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.managedFiles).length).toBe(3);
+      expect(Object.keys(SAFEWORD_SCHEMA.managedFiles).length).toBe(4);
     });
 
-    it('should include eslint.config.mjs, .prettierrc, .markdownlint-cli2.jsonc', async () => {
+    it('should include eslint.config.mjs, .prettierrc, .markdownlint-cli2.jsonc, tsconfig.json', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('eslint.config.mjs');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('.prettierrc');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('.markdownlint-cli2.jsonc');
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('tsconfig.json');
     });
   });
 
@@ -291,7 +293,7 @@ describe('Schema - Single Source of Truth', () => {
 
         // tailwind conditional includes prettier-plugin-tailwindcss (not ESLint)
         const tailwindEslint = getConditionalEslintPackages('tailwind');
-        const tailwindAll = SAFEWORD_SCHEMA.packages.conditional['tailwind'];
+        const tailwindAll = SAFEWORD_SCHEMA.packages.conditional.tailwind;
 
         // Should filter out non-ESLint packages
         expect(tailwindAll).toContain('prettier-plugin-tailwindcss');
@@ -352,13 +354,13 @@ describe('Schema - Single Source of Truth', () => {
       // Extract skill names from schema paths
       const claudeSkills = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
         .filter(path => path.startsWith('.claude/skills/safeword-'))
-        .map(path => path.match(/safeword-([^/]+)/)?.[1])
+        .map(path => (/safeword-([^/]+)/.exec(path))?.[1])
         .filter(Boolean)
         .toSorted();
 
       const cursorRules = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
         .filter(path => path.startsWith('.cursor/rules/safeword-') && !path.includes('core'))
-        .map(path => path.match(/safeword-([^.]+)/)?.[1])
+        .map(path => (/safeword-([^.]+)/.exec(path))?.[1])
         .filter(Boolean)
         .toSorted();
 

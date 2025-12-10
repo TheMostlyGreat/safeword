@@ -8,17 +8,19 @@
  * integration tests (Tests 4.4-4.8).
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { chmodSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
-  runCli,
-  readTestFile,
   fileExists,
   initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
 } from '../helpers';
 
 describe('Test Suite 4: Setup - Linting (Integration)', () => {

@@ -5,10 +5,11 @@
  */
 
 import { join } from 'node:path';
+
+import type { ProjectContext } from '../schema.js';
 import { readJson } from './fs.js';
 import { isGitRepo } from './git.js';
 import { detectProjectType, type PackageJson } from './project-detector.js';
-import type { ProjectContext } from '../schema.js';
 
 /**
  * Create a ProjectContext from the current working directory.

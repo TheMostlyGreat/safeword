@@ -10,17 +10,19 @@
  * Uses a single project setup (expensive) shared across all tests.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execSync, spawnSync } from 'node:child_process';
+
+import { afterAll,beforeAll, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
-  initGitRepo,
-  runCli,
-  readTestFile,
-  writeTestFile,
   fileExists,
+  initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
 } from '../helpers';
 
 describe('E2E: SessionStart Hooks', () => {

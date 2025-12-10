@@ -8,18 +8,20 @@
  * First 3 tests FAIL until Story 1 is implemented.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
-  runCli,
-  readTestFile,
-  writeTestFile,
   fileExists,
   initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
 } from '../helpers';
 
 describe('Setup - Template Bundling (Story 1)', () => {

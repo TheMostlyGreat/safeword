@@ -5,12 +5,13 @@
  */
 
 import { join } from 'node:path';
-import { VERSION } from '../version.js';
-import { exists, readFileSafe } from '../utils/fs.js';
-import { info, success, error, header, listItem } from '../utils/output.js';
-import { createProjectContext } from '../utils/context.js';
-import { reconcile, type Action } from '../reconcile.js';
+
+import { type Action,reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
+import { createProjectContext } from '../utils/context.js';
+import { exists, readFileSafe } from '../utils/fs.js';
+import { error, header, info, listItem,success } from '../utils/output.js';
+import { VERSION } from '../version.js';
 
 export interface DiffOptions {
   verbose?: boolean;

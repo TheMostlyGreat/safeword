@@ -9,20 +9,22 @@
  * - Works with Husky pre-commit integration
  */
 
-import { describe, it, expect, afterEach } from 'vitest';
 import { execSync } from 'node:child_process';
+
+import { afterEach,describe, expect, it } from 'vitest';
+
 import {
-  createTempDir,
-  removeTempDir,
-  createPackageJson,
-  createTypeScriptPackageJson,
-  initGitRepo,
-  runCli,
-  readTestFile,
-  writeTestFile,
-  fileExists,
-  measureTime,
   CLI_PATH,
+  createPackageJson,
+  createTempDir,
+  createTypeScriptPackageJson,
+  fileExists,
+  initGitRepo,
+  measureTime,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
 } from '../helpers';
 
 describe('E2E: Sync Command', () => {

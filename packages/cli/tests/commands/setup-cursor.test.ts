@@ -4,15 +4,16 @@
  * Tests for Cursor IDE configuration (rules, commands, hooks, MCP).
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
-  runCli,
-  readTestFile,
   fileExists,
   initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
 } from '../helpers';
 
 describe('Test Suite: Setup - Cursor IDE Support', () => {

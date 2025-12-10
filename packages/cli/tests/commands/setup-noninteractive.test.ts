@@ -4,13 +4,14 @@
  * Tests for CI/headless operation.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
-  runCli,
   fileExists,
+  removeTempDir,
+  runCli,
 } from '../helpers';
 
 describe('Test Suite 6: Non-Interactive Setup', () => {
