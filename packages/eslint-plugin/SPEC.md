@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (6/9 stories complete)
+**Status**: 🚧 In Progress (5/9 stories complete)
 
 ---
 
@@ -196,22 +196,18 @@ User overrides always win. On upgrade, user config unchanged.
 ## Story 6: Human-Friendly
 
 **As a** human engineer
-**I want** minimal noise in my editor
-**So that** I'm not annoyed by the LLM-focused rules
+**I want** safeword linting to only run during agent operations
+**So that** I'm not interrupted by strict rules while coding
 
 **Acceptance Criteria**:
 
-- [x] `unicorn/no-null` = off
-- [x] `unicorn/prevent-abbreviations` = off
-- [x] `unicorn/no-array-for-each` = off
-- [x] `jsdoc/require-param-type` = off (modern JS uses inference)
-- [x] `jsdoc/require-returns-type` = off
-- [x] `jsdoc/require-property-type` = off
-- [x] Clean idiomatic code produces 0 errors, 0 warnings
+- [x] Linting runs via CLI hooks (tool use, agent stop) - not in editor
+- [x] Humans opt-in via `/lint` command if they want strict checking
+- [ ] Pre-commit hook only runs formatting, not safeword linting
 
-**Tests**: `human-friendly.test.ts` - Lint idiomatic JS → verify 0 errors, 0 warnings
+**Architecture**: Humans have their own linting setup. Safeword's strict rules only apply to agent-generated code via hooks.
 
-**Status**: ✅ Complete
+**Status**: 🚧 In Progress (pre-commit behavior TBD)
 
 ---
 
@@ -288,7 +284,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 6/9 stories (67%)
+**Completed**: 5/9 stories (56%)
 
 ### Phase 1: Core
 

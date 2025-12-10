@@ -28,14 +28,6 @@ export const recommended: any[] = [
 
   // JSDoc - JavaScript flavor (no TS-specific rules)
   pluginJsdoc.configs['flat/recommended'],
-  {
-    rules: {
-      // Don't require JSDoc types - modern JS uses inference or TypeScript
-      'jsdoc/require-param-type': 'off',
-      'jsdoc/require-returns-type': 'off',
-      'jsdoc/require-property-type': 'off',
-    },
-  },
 
   // Prettier must be last to disable conflicting rules
   prettierConfig,
