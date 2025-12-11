@@ -176,9 +176,10 @@ export { grouped };
       expect(errors[0].severity).toBe(ERROR);
     });
 
-    it('unicorn/prevent-abbreviations errors on abbreviated names', () => {
-      const code = `function process(ctx, dir) {
-  return ctx.path + dir;
+    it('unicorn/prevent-abbreviations errors on non-standard abbreviations', () => {
+      // ctx, dir, err, etc. are allowed - but uncommon ones like 'str', 'num' are not
+      const code = `function process(str, num) {
+  return str + num;
 }
 export { process };
 `;

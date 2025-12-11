@@ -117,7 +117,35 @@ export const basePlugins: any[] = [
       'unicorn/switch-case-braces': 'error',
       'unicorn/catch-error-name': 'error',
       'unicorn/no-array-reduce': 'error', // LLMs write confusing reduce
-      'unicorn/prevent-abbreviations': 'error', // Force clear naming
+      'unicorn/prevent-abbreviations': [
+        'error',
+        {
+          allowList: {
+            ctx: true, // context
+            req: true, // request
+            res: true, // response
+            err: true, // error
+            dir: true, // directory
+            pkg: true, // package
+            env: true, // environment
+            args: true, // arguments
+            params: true, // parameters
+            props: true, // properties
+            ref: true, // reference
+            src: true, // source
+            dest: true, // destination
+            db: true, // database
+            fn: true, // function
+            cb: true, // callback
+            acc: true, // accumulator
+            prev: true, // previous
+            curr: true, // current
+            i: true, // index
+            j: true, // index
+            k: true, // index
+          },
+        },
+      ],
       'unicorn/no-null': 'error', // Use undefined
       'unicorn/no-array-for-each': 'error', // Use for...of
       'unicorn/no-negated-condition': 'error', // Clearer conditionals
