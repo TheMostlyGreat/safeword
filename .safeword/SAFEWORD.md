@@ -311,7 +311,7 @@ When markdown lint reports MD040 (missing language), choose:
 
 1. **Clarity → Simplicity → Correctness** (in that order)
 2. **Test what you can test**—never ask user to verify
-3. **RED → GREEN → REFACTOR**—never skip steps
+3. **RED → GREEN → REFACTOR**—never skip steps (use `safeword-enforcing-tdd` skill for full protocol)
 4. **Commit after each GREEN phase**
 5. **Read the matching guide** when a trigger fires
 6. **End every response** with: `{"proposedChanges": bool, "madeChanges": bool, "askedQuestion": bool}`
