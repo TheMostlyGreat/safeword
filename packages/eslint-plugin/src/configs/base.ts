@@ -106,23 +106,21 @@ export const basePlugins: any[] = [
   // Regexp - catches ReDoS vulnerabilities and malformed regex
   regexpConfigs['flat/recommended'],
 
-  // Modern JS enforcement
+  // Modern JS enforcement - strict for agents
   unicorn.configs.recommended,
   {
     rules: {
-      'unicorn/prevent-abbreviations': 'off', // ctx, dir, pkg, err are standard
-      'unicorn/no-null': 'off', // null is valid JS
+      // Keep off - legitimate use cases
       'unicorn/no-process-exit': 'off', // CLI apps use process.exit
-      'unicorn/import-style': 'off', // Named imports are fine
-      'unicorn/numeric-separators-style': 'off', // Style preference
-      'unicorn/text-encoding-identifier-case': 'off', // utf-8 vs utf8
-      'unicorn/no-negated-condition': 'off', // Sometimes clearer
-      'unicorn/no-array-for-each': 'off', // forEach is fine
-      'unicorn/prefer-module': 'off', // CJS still valid
+      'unicorn/prefer-module': 'off', // CJS still valid in Node.js ecosystem
       // Escalated to error for LLM code
       'unicorn/switch-case-braces': 'error',
       'unicorn/catch-error-name': 'error',
       'unicorn/no-array-reduce': 'error', // LLMs write confusing reduce
+      'unicorn/prevent-abbreviations': 'error', // Force clear naming
+      'unicorn/no-null': 'error', // Use undefined
+      'unicorn/no-array-for-each': 'error', // Use for...of
+      'unicorn/no-negated-condition': 'error', // Clearer conditionals
     },
   },
 

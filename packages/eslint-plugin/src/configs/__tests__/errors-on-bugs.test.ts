@@ -158,7 +158,7 @@ exec(cmd);
     });
   });
 
-  describe('unicorn rules (recommended)', () => {
+  describe('unicorn rules (strict for agents)', () => {
     it('unicorn/no-array-reduce errors on complex reduce', () => {
       // Note: Rule allows simple operations like `(acc, n) => acc + n`
       // Complex reduce with object manipulation triggers the rule
@@ -172,6 +172,50 @@ exec(cmd);
 export { grouped };
 `;
       const errors = lintJs(code, 'unicorn/no-array-reduce');
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].severity).toBe(ERROR);
+    });
+
+    it('unicorn/prevent-abbreviations errors on abbreviated names', () => {
+      const code = `function process(ctx, dir) {
+  return ctx.path + dir;
+}
+export { process };
+`;
+      const errors = lintJs(code, 'unicorn/prevent-abbreviations');
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].severity).toBe(ERROR);
+    });
+
+    it('unicorn/no-null errors on null usage', () => {
+      const code = `const value = null;
+export { value };
+`;
+      const errors = lintJs(code, 'unicorn/no-null');
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].severity).toBe(ERROR);
+    });
+
+    it('unicorn/no-array-for-each errors on forEach', () => {
+      const code = `const items = [1, 2, 3];
+items.forEach(item => console.log(item));
+`;
+      const errors = lintJs(code, 'unicorn/no-array-for-each');
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].severity).toBe(ERROR);
+    });
+
+    it('unicorn/no-negated-condition errors on negated conditions', () => {
+      const code = `function check(x) {
+  if (!x) {
+    return 'no';
+  } else {
+    return 'yes';
+  }
+}
+export { check };
+`;
+      const errors = lintJs(code, 'unicorn/no-negated-condition');
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].severity).toBe(ERROR);
     });
