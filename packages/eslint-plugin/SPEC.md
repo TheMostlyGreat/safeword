@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (6/9 stories complete)
+**Status**: 🚧 In Progress (6/10 stories complete)
 
 ---
 
@@ -265,6 +265,37 @@ User overrides always win. On upgrade, user config unchanged.
 
 ---
 
+## Story 10: Test Linting (Vitest + Playwright)
+
+**As a** LLM coding agent
+**I want** test-specific linting rules
+**So that** I write correct, idiomatic tests
+
+**Acceptance Criteria**:
+
+- [ ] `eslint-plugin-vitest` integrated for unit tests
+- [ ] `eslint-plugin-playwright` integrated for e2e tests
+- [ ] Both apply to `**/*.test.ts`, `**/*.spec.ts`, `**/*.e2e.ts` (self-filter by globals)
+- [ ] Separate exports available: `vitestConfig`, `playwrightConfig`
+- [ ] Enforces: proper assertions, no focused tests, async handling
+- [ ] Catches: missing awaits in async tests, incorrect matchers
+
+**Architecture**: Both plugins apply to all test files. Plugins self-filter by detecting their own globals (`describe`/`it` vs `test.describe`). Separate exports for projects wanting explicit control.
+
+**Key Rules**:
+
+- [ ] `vitest/expect-expect` = error (tests must have assertions)
+- [ ] `vitest/no-focused-tests` = error (no .only in CI)
+- [ ] `vitest/no-identical-title` = error
+- [ ] `vitest/valid-expect` = error
+- [ ] `playwright/no-focused-test` = error
+- [ ] `playwright/no-skipped-test` = warn
+- [ ] `playwright/valid-expect` = error
+
+**Status**: ❌ Not Started
+
+---
+
 ## Open Questions
 
 ### Architecture
@@ -284,7 +315,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 6/9 stories (67%)
+**Completed**: 6/10 stories (60%)
 
 ### Phase 1: Core
 
@@ -304,6 +335,10 @@ User overrides always win. On upgrade, user config unchanged.
 - Story 8: Next.js
 - Story 9: Astro
 
+### Phase 4: Testing
+
+- Story 10: Vitest + Playwright
+
 **Future**: Vue, Svelte, Python (ruff?), Go (golangci-lint?)
 
-**Next Steps**: Implement Story 7 (React Support) - add React-specific linting rules.
+**Next Steps**: Implement Story 10 (Test Linting) - add Vitest and Playwright rules for TDD.
