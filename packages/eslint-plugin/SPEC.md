@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (5/9 stories complete)
+**Status**: 🚧 In Progress (6/9 stories complete)
 
 ---
 
@@ -203,11 +203,11 @@ User overrides always win. On upgrade, user config unchanged.
 
 - [x] Linting runs via CLI hooks (tool use, agent stop) - not in editor
 - [x] Humans opt-in via `/lint` command if they want strict checking
-- [ ] Pre-commit hook only runs formatting, not safeword linting
+- [x] Pre-commit/CI: out of scope (users handle their own)
 
-**Architecture**: Humans have their own linting setup. Safeword's strict rules only apply to agent-generated code via hooks.
+**Architecture**: Safeword's strict rules only apply to agent-generated code via hooks. Humans have their own linting/CI setup.
 
-**Status**: 🚧 In Progress (pre-commit behavior TBD)
+**Status**: ✅ Complete
 
 ---
 
@@ -284,7 +284,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 5/9 stories (56%)
+**Completed**: 6/9 stories (67%)
 
 ### Phase 1: Core
 
