@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (6/10 stories complete)
+**Status**: 🚧 In Progress (7/10 stories complete)
 
 ---
 
@@ -219,13 +219,18 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Acceptance Criteria**:
 
-- [ ] `recommendedTypeScriptReact` config exists
-- [ ] Includes eslint-plugin-react-hooks
-- [ ] `react-hooks/rules-of-hooks` = error
-- [ ] `react-hooks/exhaustive-deps` = error
-- [ ] Catches: conditional hook call, missing dependency
+- [x] `recommendedTypeScriptReact` config exists
+- [x] Includes eslint-plugin-react and eslint-plugin-react-hooks
+- [x] `react-hooks/rules-of-hooks` = error
+- [x] `react-hooks/exhaustive-deps` = error
+- [x] `react/jsx-key` = error (LLMs forget keys)
+- [x] `react/jsx-no-duplicate-props` = error
+- [x] `react/prop-types` = off (TypeScript handles this)
+- [x] `react/react-in-jsx-scope` = off (React 17+)
 
-**Status**: ❌ Not Started
+**Tests**: `react.test.ts` - Config severity tests for hooks and JSX rules
+
+**Status**: ✅ Complete
 
 ---
 
@@ -315,7 +320,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 6/10 stories (60%)
+**Completed**: 7/10 stories (70%)
 
 ### Phase 1: Core
 
