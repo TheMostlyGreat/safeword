@@ -80,6 +80,13 @@ export const recommendedTypeScript: any[] = [
 
   // Prettier must be last to disable conflicting rules
   prettierConfig,
+
+  // Re-enable curly after prettier (prettier turns it off but we want braces for LLM code)
+  {
+    rules: {
+      curly: 'error', // Force braces on if/else/for/while - LLMs write unsafe single-line blocks
+    },
+  },
 ];
 
 export default recommendedTypeScript;
