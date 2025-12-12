@@ -1,8 +1,8 @@
 /**
- * Tests for ESLint warning severity - Story 5: Warns on Suspicious
+ * Tests for ESLint rule severities - Story 5: Security Rules
  *
- * Verifies that suspicious-but-not-bug rules are at warning severity (1)
- * so humans can review them without blocking CI.
+ * Verifies that security rules are at error severity (LLMs ignore warnings).
+ * All security rules now at error - no distinction between "high confidence" and "advisory".
  */
 
 import { Linter } from 'eslint';
@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 
 import { recommended } from '../recommended.js';
 
-const WARN = 1;
+const ERROR = 2;
 
 const jsLinter = new Linter({ configType: 'flat' });
 
@@ -42,60 +42,56 @@ function getRuleConfig(config: any[], ruleId: string): unknown {
 }
 
 /**
- * Assert a rule is configured at warning severity in the config.
+ * Assert a rule is configured at error severity in the config.
  * @param config - ESLint flat config array
  * @param ruleId - Rule ID to check
  */
-function expectWarnSeverity(config: any[], ruleId: string): void {
+function expectErrorSeverity(config: any[], ruleId: string): void {
   const ruleConfig = getRuleConfig(config, ruleId);
   expect(ruleConfig).toBeDefined();
   const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
-  expect(severity === 'warn' || severity === WARN).toBe(true);
+  expect(severity === 'error' || severity === ERROR).toBe(true);
 }
 /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, security/detect-object-injection */
 
-describe('Story 5: Warns on Suspicious', () => {
-  describe('security rules with high false-positive rate (recommended)', () => {
-    it('security/detect-object-injection warns on bracket notation', () => {
-      // This often triggers false positives on normal object access
+describe('Story 5: Security Rules at Error', () => {
+  describe('all security rules at error severity (LLMs ignore warnings)', () => {
+    it('security/detect-object-injection errors on bracket notation', () => {
       const code = `const key = 'prop';
 const obj = { prop: 1 };
 const value = obj[key];
 export { value };
 `;
-      const warnings = lintJs(code, 'security/detect-object-injection');
-      expect(warnings.length).toBeGreaterThan(0);
-      expect(warnings[0].severity).toBe(WARN);
+      const errors = lintJs(code, 'security/detect-object-injection');
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].severity).toBe(ERROR);
     });
 
-    it('security/detect-possible-timing-attacks is configured at warn severity', () => {
-      // This rule only triggers on specific patterns (password/secret comparisons)
-      // We verify config severity instead of runtime detection
-      expectWarnSeverity(recommended, 'security/detect-possible-timing-attacks');
+    it('security/detect-possible-timing-attacks is configured at error severity', () => {
+      expectErrorSeverity(recommended, 'security/detect-possible-timing-attacks');
     });
 
-    it('security/detect-buffer-noassert is configured at warn severity', () => {
-      expectWarnSeverity(recommended, 'security/detect-buffer-noassert');
+    it('security/detect-buffer-noassert is configured at error severity', () => {
+      expectErrorSeverity(recommended, 'security/detect-buffer-noassert');
     });
 
-    it('security/detect-new-buffer is configured at warn severity', () => {
-      expectWarnSeverity(recommended, 'security/detect-new-buffer');
+    it('security/detect-new-buffer is configured at error severity', () => {
+      expectErrorSeverity(recommended, 'security/detect-new-buffer');
     });
 
-    it('security/detect-pseudoRandomBytes is configured at warn severity', () => {
-      expectWarnSeverity(recommended, 'security/detect-pseudoRandomBytes');
+    it('security/detect-pseudoRandomBytes is configured at error severity', () => {
+      expectErrorSeverity(recommended, 'security/detect-pseudoRandomBytes');
     });
   });
 
-  describe('confirms warning vs error distinction', () => {
-    it('security/detect-eval-with-expression is error (not warn)', () => {
-      // Confirm dangerous rules stay at error
+  describe('confirms critical security rules also at error', () => {
+    it('security/detect-eval-with-expression is error', () => {
       const code = `const userInput = 'code';
 eval(userInput);
 `;
       const errors = lintJs(code, 'security/detect-eval-with-expression');
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(2); // ERROR, not WARN
+      expect(errors[0].severity).toBe(ERROR);
     });
   });
 });

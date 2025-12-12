@@ -61,6 +61,9 @@ export const basePlugins: any[] = [
     settings: {
       'import-x/resolver-next': [createTypeScriptImportResolver()],
     },
+    rules: {
+      'import-x/no-duplicates': 'error', // LLMs create duplicate imports
+    },
   },
 
   // Code quality / complexity
@@ -80,12 +83,12 @@ export const basePlugins: any[] = [
       'security/detect-unsafe-regex': 'error',
       'security/detect-disable-mustache-escape': 'error',
       'security/detect-no-csrf-before-method-override': 'error',
-      // High false positive rate (~40%) - warn for human review
-      'security/detect-object-injection': 'warn',
-      'security/detect-possible-timing-attacks': 'warn',
-      'security/detect-buffer-noassert': 'warn',
-      'security/detect-new-buffer': 'warn',
-      'security/detect-pseudoRandomBytes': 'warn',
+      // Escalate all to error (LLMs ignore warnings)
+      'security/detect-object-injection': 'error',
+      'security/detect-possible-timing-attacks': 'error',
+      'security/detect-buffer-noassert': 'error',
+      'security/detect-new-buffer': 'error',
+      'security/detect-pseudoRandomBytes': 'error',
     },
   },
 
@@ -105,6 +108,17 @@ export const basePlugins: any[] = [
 
   // Regexp - catches ReDoS vulnerabilities and malformed regex
   regexpConfigs['flat/recommended'],
+  {
+    rules: {
+      // Escalate warn rules to error (LLMs ignore warnings)
+      'regexp/confusing-quantifier': 'error',
+      'regexp/no-empty-alternative': 'error',
+      'regexp/no-lazy-ends': 'error',
+      'regexp/no-potentially-useless-backreference': 'error',
+      'regexp/no-useless-flag': 'error',
+      'regexp/optimal-lookaround-quantifier': 'error',
+    },
+  },
 
   // Modern JS enforcement - strict for agents
   unicorn.configs.recommended,
