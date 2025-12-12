@@ -74,6 +74,12 @@ export const recommendedTypeScript: any[] = [
           allowAny: false,
         },
       ],
+
+      // Design rules not in strict+stylistic (high LLM value)
+      '@typescript-eslint/consistent-type-imports': 'error', // import type { X } for types
+      '@typescript-eslint/switch-exhaustiveness-check': 'error', // Missing case in union switch
+      '@typescript-eslint/no-shadow': 'error', // Variable shadows outer scope
+      '@typescript-eslint/require-array-sort-compare': 'error', // [].sort() needs compareFn
     },
   },
 
