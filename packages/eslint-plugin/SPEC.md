@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (8/10 stories complete)
+**Status**: 🚧 In Progress (9/10 stories complete)
 
 ---
 
@@ -282,26 +282,28 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Acceptance Criteria**:
 
-- [ ] `eslint-plugin-vitest` integrated for unit tests
-- [ ] `eslint-plugin-playwright` integrated for e2e tests
-- [ ] Both apply to `**/*.test.ts`, `**/*.spec.ts`, `**/*.e2e.ts` (self-filter by globals)
-- [ ] Separate exports available: `vitestConfig`, `playwrightConfig`
-- [ ] Enforces: proper assertions, no focused tests, async handling
-- [ ] Catches: missing awaits in async tests, incorrect matchers
-
-**Architecture**: Both plugins apply to all test files. Plugins self-filter by detecting their own globals (`describe`/`it` vs `test.describe`). Separate exports for projects wanting explicit control.
+- [x] `eslint-plugin-vitest` integrated for unit tests
+- [x] `eslint-plugin-playwright` integrated for e2e tests
+- [x] Both target `**/*.test.ts`, `**/*.spec.ts`, `**/*.e2e.ts`
+- [x] Separate exports: `vitestConfig`, `playwrightConfig`
+- [x] Enforces: proper assertions, no focused tests, async handling
+- [x] All Playwright warns escalated to error EXCEPT `no-skipped-test` (TDD exception)
 
 **Key Rules**:
 
-- [ ] `vitest/expect-expect` = error (tests must have assertions)
-- [ ] `vitest/no-focused-tests` = error (no .only in CI)
-- [ ] `vitest/no-identical-title` = error
-- [ ] `vitest/valid-expect` = error
-- [ ] `playwright/no-focused-test` = error
-- [ ] `playwright/no-skipped-test` = warn
-- [ ] `playwright/valid-expect` = error
+- [x] `vitest/expect-expect` = error
+- [x] `vitest/no-focused-tests` = error
+- [x] `vitest/no-identical-title` = error
+- [x] `vitest/valid-expect` = error
+- [x] `playwright/expect-expect` = error (escalated from warn)
+- [x] `playwright/no-focused-test` = error
+- [x] `playwright/no-skipped-test` = warn (TDD exception)
+- [x] `playwright/no-wait-for-timeout` = error (escalated from warn)
+- [x] `playwright/no-page-pause` = error (escalated from warn)
 
-**Status**: ❌ Not Started
+**Tests**: `testing.test.ts` - Config structure + severity tests for both plugins
+
+**Status**: ✅ Complete
 
 ---
 
@@ -324,7 +326,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 8/10 stories (80%)
+**Completed**: 9/10 stories (90%)
 
 ### Phase 1: Core
 

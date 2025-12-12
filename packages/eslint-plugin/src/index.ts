@@ -19,16 +19,22 @@
  *
  *   // Next.js projects
  *   export default [...safeword.configs.recommendedTypeScriptNext];
+ *
+ *   // Test files (add to existing config)
+ *   export default [...safeword.configs.recommendedTypeScript, ...safeword.configs.vitest];
+ *   export default [...safeword.configs.recommendedTypeScript, ...safeword.configs.playwright];
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
 import type { Rule } from 'eslint';
 
+import { playwrightConfig } from './configs/playwright.js';
 import { recommended } from './configs/recommended.js';
 import { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
 import { recommendedTypeScriptReact } from './configs/recommended-react.js';
 import { recommendedTypeScript } from './configs/recommended-typescript.js';
+import { vitestConfig } from './configs/vitest.js';
 import { rules } from './rules/index.js';
 
 interface SafewordPlugin {
@@ -41,6 +47,8 @@ interface SafewordPlugin {
     recommendedTypeScript: any[];
     recommendedTypeScriptReact: any[];
     recommendedTypeScriptNext: any[];
+    vitest: any[];
+    playwright: any[];
   };
   rules: Record<string, Rule.RuleModule>;
 }
@@ -55,13 +63,17 @@ const plugin: SafewordPlugin = {
     recommendedTypeScript,
     recommendedTypeScriptReact,
     recommendedTypeScriptNext,
+    vitest: vitestConfig,
+    playwright: playwrightConfig,
   },
   rules,
 };
 
 export default plugin;
 
+export { playwrightConfig } from './configs/playwright.js';
 export { recommended } from './configs/recommended.js';
 export { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
 export { recommendedTypeScriptReact } from './configs/recommended-react.js';
 export { recommendedTypeScript } from './configs/recommended-typescript.js';
+export { vitestConfig } from './configs/vitest.js';
