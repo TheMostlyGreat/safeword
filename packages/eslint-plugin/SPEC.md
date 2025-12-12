@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (7/10 stories complete)
+**Status**: 🚧 In Progress (8/10 stories complete)
 
 ---
 
@@ -242,13 +242,17 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Acceptance Criteria**:
 
-- [ ] `recommendedTypeScriptNext` config exists
-- [ ] Includes @next/eslint-plugin-next
-- [ ] `@next/next/no-img-element` = error
-- [ ] `@next/next/no-html-link-for-pages` = error
-- [ ] Catches: `<img>` instead of `<Image>`, `<a>` instead of `<Link>`
+- [x] `recommendedTypeScriptNext` config exists
+- [x] Extends React config (inherits hooks + JSX rules)
+- [x] Includes @next/eslint-plugin-next (core-web-vitals base)
+- [x] `@next/next/no-img-element` = error
+- [x] `@next/next/no-html-link-for-pages` = error
+- [x] `@next/next/no-head-element` = error
+- [x] All 21 Next.js rules at error severity (no warnings)
 
-**Status**: ❌ Not Started
+**Tests**: `nextjs.test.ts` - Config severity tests + no-warnings check
+
+**Status**: ✅ Complete
 
 ---
 
@@ -320,7 +324,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 7/10 stories (70%)
+**Completed**: 8/10 stories (80%)
 
 ### Phase 1: Core
 

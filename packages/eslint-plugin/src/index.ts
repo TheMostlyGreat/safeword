@@ -16,6 +16,9 @@
  *
  *   // React + TypeScript projects
  *   export default [...safeword.configs.recommendedTypeScriptReact];
+ *
+ *   // Next.js projects
+ *   export default [...safeword.configs.recommendedTypeScriptNext];
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
@@ -23,6 +26,7 @@
 import type { Rule } from 'eslint';
 
 import { recommended } from './configs/recommended.js';
+import { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
 import { recommendedTypeScriptReact } from './configs/recommended-react.js';
 import { recommendedTypeScript } from './configs/recommended-typescript.js';
 import { rules } from './rules/index.js';
@@ -36,6 +40,7 @@ interface SafewordPlugin {
     recommended: any[];
     recommendedTypeScript: any[];
     recommendedTypeScriptReact: any[];
+    recommendedTypeScriptNext: any[];
   };
   rules: Record<string, Rule.RuleModule>;
 }
@@ -49,6 +54,7 @@ const plugin: SafewordPlugin = {
     recommended,
     recommendedTypeScript,
     recommendedTypeScriptReact,
+    recommendedTypeScriptNext,
   },
   rules,
 };
@@ -56,5 +62,6 @@ const plugin: SafewordPlugin = {
 export default plugin;
 
 export { recommended } from './configs/recommended.js';
+export { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
 export { recommendedTypeScriptReact } from './configs/recommended-react.js';
 export { recommendedTypeScript } from './configs/recommended-typescript.js';

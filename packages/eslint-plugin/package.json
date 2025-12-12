@@ -35,18 +35,19 @@
   },
   "dependencies": {
     "@eslint/js": "^9.18.0",
+    "@next/eslint-plugin-next": "^16.0.10",
     "eslint-config-prettier": "^10.1.5",
     "eslint-import-resolver-typescript": "^4.4.3",
     "eslint-plugin-import-x": "^4.16.1",
     "eslint-plugin-jsdoc": "^61.0.0",
     "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-regexp": "^2.10.0",
     "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-sonarjs": "^3.0.0",
     "eslint-plugin-unicorn": "^62.0.0",
-    "eslint-plugin-react": "^7.37.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
     "typescript-eslint": "^8.19.0"
   },
   "devDependencies": {
