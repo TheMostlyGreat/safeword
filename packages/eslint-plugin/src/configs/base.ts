@@ -63,6 +63,9 @@ export const basePlugins: any[] = [
     },
     rules: {
       'import-x/no-duplicates': 'error', // LLMs create duplicate imports
+      // Turn off rules with high false-positive rate (binary: error or off)
+      'import-x/no-named-as-default': 'off',
+      'import-x/no-named-as-default-member': 'off',
     },
   },
 

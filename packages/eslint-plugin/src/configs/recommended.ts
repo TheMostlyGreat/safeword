@@ -26,8 +26,9 @@ export const recommended: any[] = [
   // All base plugins (security, promise, unicorn, etc.)
   ...basePlugins,
 
-  // JSDoc - JavaScript flavor (no TS-specific rules)
-  pluginJsdoc.configs['flat/recommended'],
+  // JSDoc - JavaScript needs docs (no type safety net)
+  // Using error config - LLMs ignore warnings
+  pluginJsdoc.configs['flat/recommended-error'],
 
   // Prettier must be last to disable conflicting rules
   prettierConfig,

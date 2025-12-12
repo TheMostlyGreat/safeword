@@ -14,7 +14,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- ESLint config types are incompatible across plugin packages */
 
 import { importX } from 'eslint-plugin-import-x';
-import pluginJsdoc from 'eslint-plugin-jsdoc';
 import { configs as tseslintConfigs } from 'typescript-eslint';
 
 import { basePlugins, prettierConfig } from './base.js';
@@ -49,8 +48,8 @@ export const recommendedTypeScript: any[] = [
     },
   },
 
-  // JSDoc for TypeScript
-  pluginJsdoc.configs['flat/recommended-typescript'],
+  // No JSDoc for TypeScript - types > docs
+  // TypeScript signatures provide better documentation than JSDoc
 
   // TypeScript-specific rule overrides for LLM code
   {
