@@ -2,7 +2,7 @@
 
 **Feature**: Quality enforcement system for LLM-generated code
 
-**Status**: 🚧 In Progress (9/10 stories complete)
+**Status**: ✅ Complete (10/10 stories)
 
 ---
 
@@ -52,7 +52,7 @@ recommended                      # JS base
 recommendedTypeScript            # TS base (strict + stylistic)
 recommendedTypeScriptReact       # + React hooks, JSX rules
 recommendedTypeScriptNext        # + Next.js specific
-recommendedTypeScriptAstro       # + Astro specific
+astro                            # Astro projects (standalone)
 ```
 
 ---
@@ -264,13 +264,21 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Acceptance Criteria**:
 
-- [ ] `recommendedTypeScriptAstro` config exists
-- [ ] Includes eslint-plugin-astro
-- [ ] `astro/no-set-html-directive` = error (XSS prevention)
-- [ ] `astro/no-conflict-set-directives` = error
-- [ ] Catches: unsafe HTML injection, conflicting directives
+- [x] `astro` config exists (standalone, `.astro` files don't need TS rules)
+- [x] Includes eslint-plugin-astro
+- [x] `astro/no-set-html-directive` = error (XSS prevention)
+- [x] `astro/no-conflict-set-directives` = error
+- [x] `astro/no-unsafe-inline-scripts` = error (CSP safety)
+- [x] `astro/no-exports-from-components` = error (LLMs try to export from .astro)
+- [x] All 8 recommended rules at error (includes 4 deprecated API rules)
+- [x] Catches: unsafe HTML injection, conflicting directives, deprecated APIs
 
-**Status**: ❌ Not Started
+**Key Rules** (11 total, all at error):
+
+- Recommended (8): missing-client-only-directive-value, no-conflict-set-directives, no-deprecated-astro-canonicalurl, no-deprecated-astro-fetchcontent, no-deprecated-astro-resolve, no-deprecated-getentrybyslug, no-unused-define-vars-in-style, valid-compile
+- LLM-critical (3): no-set-html-directive, no-unsafe-inline-scripts, no-exports-from-components
+
+**Status**: ✅ Complete
 
 ---
 
@@ -326,7 +334,7 @@ User overrides always win. On upgrade, user config unchanged.
 
 ## Summary
 
-**Completed**: 9/10 stories (90%)
+**Completed**: 10/10 stories (100%)
 
 ### Phase 1: Core
 
@@ -352,4 +360,4 @@ User overrides always win. On upgrade, user config unchanged.
 
 **Future**: Vue, Svelte, Python (ruff?), Go (golangci-lint?)
 
-**Next Steps**: Implement Story 10 (Test Linting) - add Vitest and Playwright rules for TDD.
+**Next Steps**: All stories complete. Consider Vue, Svelte, Python, or Go support for future expansion.

@@ -20,6 +20,9 @@
  *   // Next.js projects
  *   export default [...safeword.configs.recommendedTypeScriptNext];
  *
+ *   // Astro projects
+ *   export default [...safeword.configs.astro];
+ *
  *   // Test files (add to existing config)
  *   export default [...safeword.configs.recommendedTypeScript, ...safeword.configs.vitest];
  *   export default [...safeword.configs.recommendedTypeScript, ...safeword.configs.playwright];
@@ -29,6 +32,7 @@
 
 import type { Rule } from 'eslint';
 
+import { astroConfig } from './configs/astro.js';
 import { playwrightConfig } from './configs/playwright.js';
 import { recommended } from './configs/recommended.js';
 import { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
@@ -47,6 +51,7 @@ interface SafewordPlugin {
     recommendedTypeScript: any[];
     recommendedTypeScriptReact: any[];
     recommendedTypeScriptNext: any[];
+    astro: any[];
     vitest: any[];
     playwright: any[];
   };
@@ -63,6 +68,7 @@ const plugin: SafewordPlugin = {
     recommendedTypeScript,
     recommendedTypeScriptReact,
     recommendedTypeScriptNext,
+    astro: astroConfig,
     vitest: vitestConfig,
     playwright: playwrightConfig,
   },
@@ -71,6 +77,7 @@ const plugin: SafewordPlugin = {
 
 export default plugin;
 
+export { astroConfig } from './configs/astro.js';
 export { playwrightConfig } from './configs/playwright.js';
 export { recommended } from './configs/recommended.js';
 export { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';

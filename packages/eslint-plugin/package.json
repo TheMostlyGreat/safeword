@@ -38,6 +38,7 @@
     "@next/eslint-plugin-next": "^16.0.10",
     "eslint-config-prettier": "^10.1.5",
     "eslint-import-resolver-typescript": "^4.4.3",
+    "eslint-plugin-astro": "^1.5.0",
     "eslint-plugin-import-x": "^4.16.1",
     "eslint-plugin-jsdoc": "^61.0.0",
     "eslint-plugin-playwright": "^2.4.0",
