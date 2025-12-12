@@ -7,10 +7,11 @@
  * TDD RED phase - these tests verify reconcile integration.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync, unlinkSync } from 'node:fs';
-import { join } from 'node:path';
+import { mkdirSync, mkdtempSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('Check Command - Reconcile Integration', () => {
   let tempDir: string;
@@ -24,6 +25,9 @@ describe('Check Command - Reconcile Integration', () => {
   });
 
   // Helper to create a minimal configured project
+  /**
+   *
+   */
   function createConfiguredProject() {
     // package.json
     writeFileSync(

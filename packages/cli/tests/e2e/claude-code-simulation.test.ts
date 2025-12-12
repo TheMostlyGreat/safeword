@@ -10,15 +10,17 @@
  * This only tests that hooks are reachable from different cwd.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { spawnSync } from 'node:child_process';
+
+import { afterAll,beforeAll, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
   initGitRepo,
-  runCli,
   readTestFile,
+  removeTempDir,
+  runCli,
 } from '../helpers';
 
 describe('E2E: Claude Code Hook Path Resolution', () => {

@@ -4,6 +4,24 @@
 
 ---
 
+## Quick Start
+
+Use the built-in cleanup script:
+
+```bash
+# Preview what would be killed (safe)
+./.safeword/scripts/cleanup-zombies.sh --dry-run
+
+# Kill zombie processes
+./.safeword/scripts/cleanup-zombies.sh
+```
+
+The script auto-detects your framework (Vite, Next.js, etc.) and kills only processes belonging to this project.
+
+For manual control or debugging, see the detailed sections below.
+
+---
+
 ## The Problem
 
 When running dev servers and E2E tests across multiple projects, zombie processes accumulate:
@@ -52,35 +70,32 @@ sleep 2
 
 ---
 
-## Project-Specific Cleanup Script
+## Built-in Cleanup Script
 
-For frequent cleanup needs, create `scripts/cleanup.sh` in each project:
+Safeword includes a cleanup script at `.safeword/scripts/cleanup-zombies.sh`:
 
 ```bash
-#!/bin/bash
-# scripts/cleanup.sh - Kill only THIS project's processes
+# Auto-detect framework and clean up
+./.safeword/scripts/cleanup-zombies.sh
 
-DEV_PORT=3000                    # Dev server port (change per project)
-TEST_PORT=$((DEV_PORT + 1000))   # Test server port (Playwright managed)
-PROJECT_DIR="$(pwd)"
+# Preview first (recommended)
+./.safeword/scripts/cleanup-zombies.sh --dry-run
 
-echo "Cleaning up $PROJECT_DIR (dev: $DEV_PORT, test: $TEST_PORT)..."
+# Explicit port override
+./.safeword/scripts/cleanup-zombies.sh 5173
 
-# Kill both dev and test servers by port
-lsof -ti:$DEV_PORT -ti:$TEST_PORT | xargs kill -9 2>/dev/null
-
-# Kill Playwright browsers for this project
-ps aux | grep -E "(playwright|chromium)" | grep "$PROJECT_DIR" | grep -v grep | awk '{print $2}' | xargs kill -9 2>/dev/null
-
-# Kill test runners
-pgrep -f "playwright test.*$(basename $PROJECT_DIR)" | xargs kill -9 2>/dev/null
-
-echo "Cleanup complete!"
+# Port + additional pattern
+./.safeword/scripts/cleanup-zombies.sh 5173 "electron"
 ```
 
-**Make executable:** `chmod +x scripts/cleanup.sh`
+**Features:**
 
-**Usage:** `./scripts/cleanup.sh`
+- Auto-detects port from config files (vite.config.ts, next.config.js, etc.)
+- Kills dev port AND test port (port + 1000)
+- Scopes all pattern matching to current project directory
+- `--dry-run` shows what would be killed without killing
+
+**Supported frameworks:** Vite, Next.js, Nuxt, SvelteKit, Astro, Angular
 
 ---
 
@@ -197,9 +212,10 @@ ps aux | grep "/Users/alex/projects/my-project"
 
 | Situation                                | Command                                                          |
 | ---------------------------------------- | ---------------------------------------------------------------- |
+| Quick cleanup (recommended)              | `./.safeword/scripts/cleanup-zombies.sh`                         |
+| Preview before killing                   | `./.safeword/scripts/cleanup-zombies.sh --dry-run`               |
 | Kill dev + test servers (use your ports) | `lsof -ti:$DEV_PORT -ti:$TEST_PORT \| xargs kill -9 2>/dev/null` |
 | Kill Playwright (this project)           | `pkill -f "playwright.*$(pwd)"`                                  |
-| Kill all for this project                | `./scripts/cleanup.sh`                                           |
 | Check what's on port                     | `lsof -i:3000`                                                   |
 | Find zombie processes                    | `ps aux \| grep -E "(node\|playwright\|chromium)"`               |
 | Preview what `pkill -f` would kill       | `pgrep -f "pattern"` (verify before running pkill)               |
@@ -224,7 +240,7 @@ ps aux | grep "/Users/alex/projects/my-project"
 
 ## Key Takeaways
 
-- Use port-based cleanup, not `killall node` (affects all projects)
-- Filter by project directory: `pkill -f "playwright.*$(pwd)"`
+- Use `./.safeword/scripts/cleanup-zombies.sh` for quick, safe cleanup
+- Always preview with `--dry-run` first when unsure
+- Never use `killall node` (affects all projects)
 - Clean up before AND after development sessions
-- Create project-specific `scripts/cleanup.sh` for consistent cleanup

@@ -5,15 +5,17 @@
  */
 
 import { join } from 'node:path';
+
+import type { ProjectContext } from '../schema.js';
 import { readJson } from './fs.js';
 import { isGitRepo } from './git.js';
 import { detectProjectType, type PackageJson } from './project-detector.js';
-import type { ProjectContext } from '../schema.js';
 
 /**
  * Create a ProjectContext from the current working directory.
  *
  * Reads package.json and detects project type for use with reconcile().
+ * @param cwd
  */
 export function createProjectContext(cwd: string): ProjectContext {
   const packageJson = readJson<PackageJson>(join(cwd, 'package.json'));

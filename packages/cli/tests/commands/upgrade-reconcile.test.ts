@@ -7,11 +7,12 @@
  * TDD RED phase - these tests verify reconcile integration.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import { execSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('Upgrade Command - Reconcile Integration', () => {
   let tempDir: string;
@@ -25,6 +26,10 @@ describe('Upgrade Command - Reconcile Integration', () => {
   });
 
   // Helper to create a minimal configured project
+  /**
+   *
+   * @param version
+   */
   function createConfiguredProject(version = '0.5.0') {
     // package.json
     writeFileSync(
@@ -224,7 +229,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
       // Safeword hooks should be added (they have structure { hooks: [{ command: '...' }] })
       const hasSafeword = settings.hooks?.SessionStart?.some(
-        (h: { hooks?: Array<{ command?: string }> }) =>
+        (h: { hooks?: { command?: string }[] }) =>
           h.hooks?.some((cmd: { command?: string }) => cmd.command?.includes('.safeword')),
       );
       expect(hasSafeword).toBe(true);
@@ -263,17 +268,17 @@ describe('Upgrade Command - Reconcile Integration', () => {
         });
 
         expect(result).toContain('Upgrade');
-      } catch (err) {
+      } catch (error) {
         // Check if upgrade itself worked even if npm install timed out
-        const stderr = (err as { stderr?: string }).stderr || '';
-        const stdout = (err as { stdout?: string }).stdout || '';
+        const stderr = (error as { stderr?: string }).stderr || '';
+        const stdout = (error as { stdout?: string }).stdout || '';
 
         // If we see upgrade output, the reconcile worked
         if (stdout.includes('Upgrade') || stdout.includes('Upgrading')) {
           // Upgrade ran, might have failed on npm install
           expect(true).toBe(true);
         } else {
-          throw err;
+          throw error;
         }
       }
     });
@@ -290,8 +295,8 @@ describe('Upgrade Command - Reconcile Integration', () => {
         });
         // Should not reach here
         expect(true).toBe(false);
-      } catch (err) {
-        const stderr = (err as { stderr?: string }).stderr || '';
+      } catch (error) {
+        const stderr = (error as { stderr?: string }).stderr || '';
         expect(stderr.toLowerCase()).toMatch(/older|downgrade|cli/i);
       }
     });
@@ -312,8 +317,8 @@ describe('Upgrade Command - Reconcile Integration', () => {
         });
         // Should not reach here
         expect(true).toBe(false);
-      } catch (err) {
-        const stderr = (err as { stderr?: string }).stderr || '';
+      } catch (error) {
+        const stderr = (error as { stderr?: string }).stderr || '';
         expect(stderr.toLowerCase()).toContain('not configured');
       }
     });

@@ -8,18 +8,20 @@
  * First 3 tests FAIL until Story 1 is implemented.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
-  runCli,
-  readTestFile,
-  writeTestFile,
   fileExists,
   initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
 } from '../helpers';
 
 describe('Setup - Template Bundling (Story 1)', () => {
@@ -125,6 +127,10 @@ describe('Setup - Template Bundling (Story 1)', () => {
     const safewordDir = join(tempDir, '.safeword');
     const allMdFiles: string[] = [];
 
+    /**
+     *
+     * @param dir
+     */
     function collectMdFiles(dir: string) {
       if (!fileExists(tempDir, dir.replace(tempDir + '/', ''))) return;
       const entries = readdirSync(dir, { withFileTypes: true });
@@ -145,7 +151,7 @@ describe('Setup - Template Bundling (Story 1)', () => {
 
     // Extract all .safeword/ links and verify targets exist
     // Pattern: .safeword/path.md - stop at whitespace, backticks, quotes, parens, or markdown formatting
-    const linkPattern = /\.safeword\/[a-zA-Z0-9_\-/]+\.md/g;
+    const linkPattern = /\.safeword\/[\w\-/]+\.md/g;
     const brokenLinks: { file: string; link: string }[] = [];
     let totalLinks = 0;
 

@@ -5,12 +5,13 @@
  */
 
 import { join } from 'node:path';
-import { VERSION } from '../version.js';
-import { exists, readFileSafe } from '../utils/fs.js';
-import { info, success, error, header, listItem } from '../utils/output.js';
-import { createProjectContext } from '../utils/context.js';
-import { reconcile, type Action } from '../reconcile.js';
+
+import { type Action, reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
+import { createProjectContext } from '../utils/context.js';
+import { exists, readFileSafe } from '../utils/fs.js';
+import { error, header, info, listItem, success } from '../utils/output.js';
+import { VERSION } from '../version.js';
 
 export interface DiffOptions {
   verbose?: boolean;
@@ -25,6 +26,9 @@ interface FileDiff {
 
 /**
  * Create a unified diff between two strings
+ * @param oldContent
+ * @param newContent
+ * @param filename
  */
 function createUnifiedDiff(oldContent: string, newContent: string, filename: string): string {
   const oldLines = oldContent.split('\n');
@@ -38,8 +42,8 @@ function createUnifiedDiff(oldContent: string, newContent: string, filename: str
   const maxLines = Math.max(oldLines.length, newLines.length);
 
   for (let i = 0; i < maxLines; i++) {
-    const oldLine = oldLines[i];
-    const newLine = newLines[i];
+    const oldLine: string | undefined = oldLines[i];
+    const newLine: string | undefined = newLines[i];
 
     if (oldLine === newLine) {
       lines.push(` ${oldLine ?? ''}`);
@@ -64,7 +68,11 @@ function createUnifiedDiff(oldContent: string, newContent: string, filename: str
   return lines.join('\n');
 }
 
-/** List files by category */
+/**
+ * List files by category
+ * @param categoryName
+ * @param files
+ */
 function listFileCategory(categoryName: string, files: FileDiff[]): void {
   if (files.length === 0) return;
   info(`\n${categoryName}:`);
@@ -73,7 +81,10 @@ function listFileCategory(categoryName: string, files: FileDiff[]): void {
   }
 }
 
-/** Show verbose diff output for modified files */
+/**
+ * Show verbose diff output for modified files
+ * @param files
+ */
 function showModifiedDiffs(files: FileDiff[]): void {
   for (const file of files) {
     if (!file.currentContent || !file.newContent) continue;
@@ -85,7 +96,10 @@ function showModifiedDiffs(files: FileDiff[]): void {
   }
 }
 
-/** Show verbose output for added files (truncated preview) */
+/**
+ * Show verbose output for added files (truncated preview)
+ * @param files
+ */
 function showAddedPreviews(files: FileDiff[]): void {
   for (const file of files) {
     if (!file.newContent) continue;
@@ -101,7 +115,10 @@ function showAddedPreviews(files: FileDiff[]): void {
   }
 }
 
-/** Show packages to install */
+/**
+ * Show packages to install
+ * @param packages
+ */
 function showPackagesToInstall(packages: string[]): void {
   if (packages.length === 0) return;
   info('\nPackages to install:');
@@ -112,6 +129,8 @@ function showPackagesToInstall(packages: string[]): void {
 
 /**
  * Convert reconcile actions to file diffs
+ * @param actions
+ * @param cwd
  */
 function actionsToDiffs(actions: Action[], cwd: string): FileDiff[] {
   const diffs: FileDiff[] = [];
@@ -152,6 +171,10 @@ function actionsToDiffs(actions: Action[], cwd: string): FileDiff[] {
   return diffs;
 }
 
+/**
+ *
+ * @param options
+ */
 export async function diff(options: DiffOptions): Promise<void> {
   const cwd = process.cwd();
   const safewordDir = join(cwd, '.safeword');

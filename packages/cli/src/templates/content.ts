@@ -22,21 +22,28 @@ interface PrettierConfig {
   trailingComma: string;
   printWidth: number;
   endOfLine: string;
+  useTabs: boolean;
+  bracketSpacing: boolean;
+  arrowParens: string;
   plugins?: string[];
 }
 
 /**
  * Generate .prettierrc content based on project type.
  * Explicitly lists plugins to ensure compatibility with pnpm/Yarn PnP.
+ * @param projectType
  */
 export function getPrettierConfig(projectType: ProjectType): string {
   const config: PrettierConfig = {
     semi: true,
     singleQuote: true,
     tabWidth: 2,
-    trailingComma: 'es5',
+    trailingComma: 'all',
     printWidth: 100,
     endOfLine: 'lf',
+    useTabs: false,
+    bracketSpacing: true,
+    arrowParens: 'avoid',
   };
 
   const plugins: string[] = [];
@@ -60,6 +67,7 @@ export function getPrettierConfig(projectType: ProjectType): string {
  *
  * SYNC: Keep file patterns in sync with post-tool-lint.sh in:
  *   packages/cli/templates/hooks/post-tool-lint.sh
+ * @param projectType
  */
 export function getLintStagedConfig(projectType: ProjectType): Record<string, string[]> {
   const config: Record<string, string[]> = {

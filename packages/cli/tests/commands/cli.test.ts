@@ -4,7 +4,8 @@
  * Tests for CLI entry point, version display, and help output.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
 import { runCli, runCliSync } from '../helpers';
 
 describe('Test Suite 1: Version and Help', () => {

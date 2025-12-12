@@ -4,6 +4,8 @@
 
 /**
  * Compare two semver versions
+ * @param a
+ * @param b
  * @returns -1 if a < b, 0 if a == b, 1 if a > b
  */
 export function compareVersions(a: string, b: string): -1 | 0 | 1 {
@@ -22,6 +24,8 @@ export function compareVersions(a: string, b: string): -1 | 0 | 1 {
 
 /**
  * Check if latest version is newer than current
+ * @param current
+ * @param latest
  */
 export function isNewerVersion(current: string, latest: string): boolean {
   return compareVersions(current, latest) === -1;

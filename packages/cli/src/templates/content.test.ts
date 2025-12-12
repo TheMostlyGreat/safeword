@@ -2,10 +2,11 @@
  * Unit tests for content templates
  */
 
-import { describe, it, expect } from 'vitest';
-import { getPrettierConfig, getLintStagedConfig } from './content';
-import { getEslintConfig } from './config';
+import { describe, expect,it } from 'vitest';
+
 import type { ProjectType } from '../utils/project-detector';
+import { getEslintConfig } from './config';
+import { getLintStagedConfig,getPrettierConfig } from './content';
 
 const baseProjectType: ProjectType = {
   typescript: false,

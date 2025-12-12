@@ -4,17 +4,18 @@
  * Tests for .safeword/ directory creation and AGENTS.md handling.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
+  createConfiguredProject,
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
-  runCli,
-  readTestFile,
-  writeTestFile,
   fileExists,
   initGitRepo,
-  createConfiguredProject,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
 } from '../helpers';
 
 describe('Test Suite 2: Setup - Core Files', () => {

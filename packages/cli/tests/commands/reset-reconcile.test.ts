@@ -7,11 +7,12 @@
  * TDD RED phase - these tests verify reconcile integration.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import { execSync } from 'node:child_process';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('Reset Command - Reconcile Integration', () => {
   let tempDir: string;
@@ -25,6 +26,9 @@ describe('Reset Command - Reconcile Integration', () => {
   });
 
   // Helper to create a configured project
+  /**
+   *
+   */
   function createConfiguredProject() {
     // package.json
     writeFileSync(
@@ -73,9 +77,12 @@ describe('Reset Command - Reconcile Integration', () => {
     writeFileSync(join(tempDir, '.claude/commands/lint.md'), '# Lint');
     writeFileSync(join(tempDir, '.claude/skills/safeword-quality-reviewer/SKILL.md'), '# Skill');
 
-    // .husky
+    // .husky - with safeword patch and user's custom hook
     mkdirSync(join(tempDir, '.husky'), { recursive: true });
-    writeFileSync(join(tempDir, '.husky/pre-commit'), 'npx lint-staged');
+    writeFileSync(
+      join(tempDir, '.husky/pre-commit'),
+      '# safeword:pre-commit\nnpx safeword sync --quiet --stage\nnpx lint-staged\n\n# User custom hook\necho "Running pre-commit"',
+    );
 
     // .mcp.json
     writeFileSync(
@@ -156,6 +163,30 @@ describe('Reset Command - Reconcile Integration', () => {
       expect(content).toContain('My Project'); // Original content preserved
     });
 
+    it('should remove safeword content from .husky/pre-commit via text-unpatch', async () => {
+      const { reconcile } = await import('../../src/reconcile.js');
+      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
+      const { createProjectContext } = await import('../../src/utils/context.js');
+
+      createConfiguredProject();
+
+      const ctx = createProjectContext(tempDir);
+      await reconcile(SAFEWORD_SCHEMA, 'uninstall', ctx);
+
+      // .husky/pre-commit should still exist (sharedDir)
+      expect(existsSync(join(tempDir, '.husky/pre-commit'))).toBe(true);
+
+      // Safeword content should be removed
+      const content = readFileSync(join(tempDir, '.husky/pre-commit'), 'utf-8');
+      expect(content).not.toContain('# safeword:pre-commit');
+      expect(content).not.toContain('npx safeword sync');
+      expect(content).not.toContain('npx lint-staged');
+
+      // User custom hook should be preserved
+      expect(content).toContain('# User custom hook');
+      expect(content).toContain('echo "Running pre-commit"');
+    });
+
     it('should remove owned directories (except preserved)', async () => {
       const { reconcile } = await import('../../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
@@ -173,8 +204,8 @@ describe('Reset Command - Reconcile Integration', () => {
       expect(existsSync(join(tempDir, '.safeword/hooks'))).toBe(false);
       expect(existsSync(join(tempDir, '.safeword/guides'))).toBe(false);
 
-      // But .husky is in ownedDirs, should be removed
-      expect(existsSync(join(tempDir, '.husky'))).toBe(false);
+      // .husky is a sharedDir, should NOT be removed (preserves user hooks)
+      expect(existsSync(join(tempDir, '.husky'))).toBe(true);
     });
 
     it('should unmerge MCP servers', async () => {
@@ -278,13 +309,13 @@ describe('Reset Command - Reconcile Integration', () => {
 
         // .safeword should be removed
         expect(existsSync(join(tempDir, '.safeword'))).toBe(false);
-      } catch (err) {
-        const stdout = (err as { stdout?: string }).stdout || '';
+      } catch (error) {
+        const stdout = (error as { stdout?: string }).stdout || '';
         // If reset ran, check the output
         if (stdout.includes('Reset') || stdout.includes('Removed')) {
           expect(existsSync(join(tempDir, '.safeword'))).toBe(false);
         } else {
-          throw err;
+          throw error;
         }
       }
     });

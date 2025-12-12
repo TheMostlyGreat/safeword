@@ -4,15 +4,16 @@
  * Uses reconcile() with mode='install' to create all managed files.
  */
 
-import { join, basename } from 'node:path';
-import { VERSION } from '../version.js';
-import { exists, writeJson } from '../utils/fs.js';
-import { info, success, warn, error, header, listItem } from '../utils/output.js';
-import { isGitRepo } from '../utils/git.js';
-import { createProjectContext } from '../utils/context.js';
+import { execSync } from 'node:child_process';
+import { basename, join } from 'node:path';
+
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
-import { execSync } from 'node:child_process';
+import { createProjectContext } from '../utils/context.js';
+import { exists, writeJson } from '../utils/fs.js';
+import { isGitRepo } from '../utils/git.js';
+import { error, header, info, listItem, success, warn } from '../utils/output.js';
+import { VERSION } from '../version.js';
 
 export interface SetupOptions {
   yes?: boolean;
@@ -27,7 +28,12 @@ interface PackageJson {
   'lint-staged'?: Record<string, string[]>;
 }
 
-/** Print file changes summary */
+/**
+ * Print file changes summary
+ * @param created
+ * @param updated
+ * @param packageJsonCreated
+ */
 function printChangesSummary(
   created: string[],
   updated: string[],
@@ -45,6 +51,10 @@ function printChangesSummary(
   }
 }
 
+/**
+ *
+ * @param options
+ */
 export async function setup(options: SetupOptions): Promise<void> {
   const cwd = process.cwd();
   const safewordDir = join(cwd, '.safeword');
@@ -93,7 +103,7 @@ export async function setup(options: SetupOptions): Promise<void> {
       try {
         const installCmd = `npm install -D ${result.packagesToInstall.join(' ')}`;
         info(`Running: ${installCmd}`);
-        // eslint-disable-next-line sonarjs/os-command -- npm install with known package names
+
         execSync(installCmd, { cwd, stdio: 'inherit' });
         success('Installed linting dependencies');
       } catch {

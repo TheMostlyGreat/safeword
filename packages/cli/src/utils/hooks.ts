@@ -14,6 +14,7 @@ interface HookEntry {
 
 /**
  * Type guard to check if a value is a hook entry with hooks array
+ * @param h
  */
 export function isHookEntry(h: unknown): h is HookEntry {
   return (
@@ -23,6 +24,7 @@ export function isHookEntry(h: unknown): h is HookEntry {
 
 /**
  * Check if a hook entry contains a safeword hook (command contains '.safeword')
+ * @param h
  */
 export function isSafewordHook(h: unknown): boolean {
   if (!isHookEntry(h)) return false;
@@ -31,6 +33,7 @@ export function isSafewordHook(h: unknown): boolean {
 
 /**
  * Filter out safeword hooks from an array of hook entries
+ * @param hooks
  */
 export function filterOutSafewordHooks(hooks: unknown[]): unknown[] {
   return hooks.filter(h => !isSafewordHook(h));

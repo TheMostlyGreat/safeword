@@ -4,16 +4,17 @@
  * Tests for `safeword upgrade` command.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
-  createTempDir,
-  removeTempDir,
-  createTypeScriptPackageJson,
   createConfiguredProject,
-  runCli,
-  readTestFile,
-  writeTestFile,
+  createTempDir,
+  createTypeScriptPackageJson,
   fileExists,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
 } from '../helpers';
 
 describe('Test Suite 9: Upgrade', () => {

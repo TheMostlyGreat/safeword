@@ -4,12 +4,13 @@
  * Tests for `safeword diff` command.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
-  createTempDir,
-  removeTempDir,
-  createTypeScriptPackageJson,
   createConfiguredProject,
+  createTempDir,
+  createTypeScriptPackageJson,
+  removeTempDir,
   runCli,
   writeTestFile,
 } from '../helpers';

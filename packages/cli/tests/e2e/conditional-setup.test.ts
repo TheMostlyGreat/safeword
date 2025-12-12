@@ -11,20 +11,22 @@
  * Each test creates a fresh project to test specific conditions.
  */
 
-import { describe, it, expect, afterEach } from 'vitest';
 import { execSync } from 'node:child_process';
+
+import { afterEach, describe, expect, it } from 'vitest';
+
 import {
-  createTempDir,
-  removeTempDir,
-  createPackageJson,
-  createTypeScriptPackageJson,
-  createReactPackageJson,
   createNextJsPackageJson,
-  initGitRepo,
-  runCli,
-  readTestFile,
-  writeTestFile,
+  createPackageJson,
+  createReactPackageJson,
+  createTempDir,
+  createTypeScriptPackageJson,
   fileExists,
+  initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
 } from '../helpers';
 
 /** Setup timeout: 10 minutes - npm install can take 7+ minutes */
@@ -478,14 +480,13 @@ describe('E2E: Conditional Setup - Git Integration', () => {
 
       // Create a valid file, stage it, and commit
       writeTestFile(projectDir, 'src/valid.ts', 'export const valid = 1;\n');
-      // eslint-disable-next-line sonarjs/no-os-command-from-path -- test helper
+
       execSync('git add src/valid.ts', { cwd: projectDir });
 
       // Commit should succeed (lint-staged passes)
-      // eslint-disable-next-line sonarjs/no-os-command-from-path -- test helper
+
       execSync('git commit -m "test commit"', { cwd: projectDir, encoding: 'utf-8' });
 
-      // eslint-disable-next-line sonarjs/no-os-command-from-path -- test helper
       const log = execSync('git log --oneline -1', { cwd: projectDir, encoding: 'utf-8' });
       expect(log).toContain('test commit');
     },

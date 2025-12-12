@@ -1,9 +1,9 @@
-import { execSync, exec } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { exec, execSync } from 'node:child_process';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
-import { promisify } from 'node:util';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
 
@@ -31,6 +31,7 @@ export function createTempDir(): string {
  * Removes a temporary directory and all contents.
  * Uses rmSync's built-in retry for ENOTEMPTY/EBUSY errors from
  * npm/git processes that haven't released file handles.
+ * @param dir
  */
 export function removeTempDir(dir: string): void {
   rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -38,6 +39,8 @@ export function removeTempDir(dir: string): void {
 
 /**
  * Creates a minimal package.json in the given directory
+ * @param dir
+ * @param overrides
  */
 export function createPackageJson(dir: string, overrides: Record<string, unknown> = {}): void {
   const pkg = {
@@ -50,6 +53,8 @@ export function createPackageJson(dir: string, overrides: Record<string, unknown
 
 /**
  * Creates a TypeScript package.json (with typescript in devDependencies)
+ * @param dir
+ * @param overrides
  */
 export function createTypeScriptPackageJson(
   dir: string,
@@ -65,6 +70,8 @@ export function createTypeScriptPackageJson(
 
 /**
  * Creates a React package.json
+ * @param dir
+ * @param overrides
  */
 export function createReactPackageJson(dir: string, overrides: Record<string, unknown> = {}): void {
   createPackageJson(dir, {
@@ -78,6 +85,8 @@ export function createReactPackageJson(dir: string, overrides: Record<string, un
 
 /**
  * Creates a Next.js package.json
+ * @param dir
+ * @param overrides
  */
 export function createNextJsPackageJson(
   dir: string,
@@ -105,6 +114,12 @@ export interface CliResult {
 /**
  * Runs the CLI with the given arguments in the specified directory
  * Uses built CLI (dist/cli.js)
+ * @param args
+ * @param options
+ * @param options.cwd
+ * @param options.input
+ * @param options.env
+ * @param options.timeout
  */
 export async function runCli(
   args: string[],
@@ -145,6 +160,11 @@ export async function runCli(
 
 /**
  * Runs the CLI synchronously (for simple tests)
+ * @param args
+ * @param options
+ * @param options.cwd
+ * @param options.env
+ * @param options.timeout
  */
 export function runCliSync(
   args: string[],
@@ -183,6 +203,8 @@ export function runCliSync(
 
 /**
  * Reads a file from the test directory
+ * @param dir
+ * @param relativePath
  */
 export function readTestFile(dir: string, relativePath: string): string {
   return readFileSync(join(dir, relativePath), 'utf-8');
@@ -190,6 +212,9 @@ export function readTestFile(dir: string, relativePath: string): string {
 
 /**
  * Writes a file to the test directory
+ * @param dir
+ * @param relativePath
+ * @param content
  */
 export function writeTestFile(dir: string, relativePath: string, content: string): void {
   const fullPath = join(dir, relativePath);
@@ -202,6 +227,8 @@ export function writeTestFile(dir: string, relativePath: string, content: string
 
 /**
  * Checks if a file exists in the test directory
+ * @param dir
+ * @param relativePath
  */
 export function fileExists(dir: string, relativePath: string): boolean {
   return existsSync(join(dir, relativePath));
@@ -209,6 +236,7 @@ export function fileExists(dir: string, relativePath: string): boolean {
 
 /**
  * Initializes a git repository in the given directory
+ * @param dir
  */
 export function initGitRepo(dir: string): void {
   execSync('git init', { cwd: dir, stdio: 'pipe' });
@@ -218,6 +246,7 @@ export function initGitRepo(dir: string): void {
 
 /**
  * Creates a configured project (runs setup) for tests that need pre-configured state
+ * @param dir
  */
 export async function createConfiguredProject(dir: string): Promise<void> {
   createTypeScriptPackageJson(dir);
@@ -227,6 +256,7 @@ export async function createConfiguredProject(dir: string): Promise<void> {
 
 /**
  * Measures execution time of a function in milliseconds
+ * @param fn
  */
 export async function measureTime<T>(fn: () => Promise<T>): Promise<{ result: T; timeMs: number }> {
   const start = performance.now();
@@ -237,6 +267,7 @@ export async function measureTime<T>(fn: () => Promise<T>): Promise<{ result: T;
 
 /**
  * Measures execution time of a sync function in milliseconds
+ * @param fn
  */
 export function measureTimeSync<T>(fn: () => T): { result: T; timeMs: number } {
   const start = performance.now();

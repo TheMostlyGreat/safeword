@@ -6,10 +6,11 @@
  */
 
 /**
- * Husky pre-commit hook content - includes safeword sync + lint-staged
- * The sync command keeps ESLint plugins aligned with detected frameworks
+ * Husky pre-commit hook content - sync + lint-staged
+ * This is prepended to existing hooks, preserving user customizations
  */
-export const HUSKY_PRE_COMMIT_CONTENT = 'npx safeword sync --quiet --stage\nnpx lint-staged\n';
+export const HUSKY_PRE_COMMIT_CONTENT =
+  '# safeword:pre-commit\nnpx safeword sync --quiet --stage\nnpx lint-staged\n';
 
 /**
  * MCP servers installed by safeword

@@ -5,15 +5,16 @@
  * These tests verify performance, compatibility, and quality requirements.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
   createTempDir,
-  removeTempDir,
   createTypeScriptPackageJson,
+  initGitRepo,
+  measureTime,
+  removeTempDir,
   runCli,
   runCliSync,
-  measureTime,
-  initGitRepo,
 } from './helpers';
 
 describe('Test Suite 0: Technical Constraints', () => {

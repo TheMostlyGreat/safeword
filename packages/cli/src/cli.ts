@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+
 import { VERSION } from './version.js';
 
 const program = new Command();

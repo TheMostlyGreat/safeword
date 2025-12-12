@@ -4,17 +4,18 @@
  * Tests for `safeword reset` command.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import {
-  createTempDir,
-  removeTempDir,
-  createTypeScriptPackageJson,
   createConfiguredProject,
-  runCli,
-  readTestFile,
-  writeTestFile,
+  createTempDir,
+  createTypeScriptPackageJson,
   fileExists,
   initGitRepo,
+  readTestFile,
+  removeTempDir,
+  runCli,
+  writeTestFile,
 } from '../helpers';
 
 describe('Test Suite 11: Reset', () => {
