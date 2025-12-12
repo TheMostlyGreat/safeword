@@ -71,6 +71,15 @@ export const basePlugins: any[] = [
 
   // Code quality / complexity
   sonarConfigs.recommended,
+  {
+    rules: {
+      // Enable design rules (off by default but valuable for clean code)
+      'sonarjs/no-collapsible-if': 'error', // if(a) { if(b) } → if(a && b)
+      'sonarjs/no-nested-switch': 'error', // Switch inside switch is a smell
+      'sonarjs/prefer-immediate-return': 'error', // const x = y; return x → return y
+      'sonarjs/no-inconsistent-returns': 'error', // Some paths return, some don't
+    },
+  },
 
   // Security - detect common vulnerabilities
   pluginSecurity.configs.recommended,
