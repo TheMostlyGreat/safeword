@@ -1,8 +1,11 @@
 /**
  * ESLint configuration for Playwright e2e tests
  *
- * Applies to test files: *.test.ts, *.spec.ts, *.e2e.ts
- * Enforces e2e test best practices for LLM-generated tests.
+ * Applies ONLY to e2e test files to avoid conflicts with vitest:
+ * - *.e2e.ts files (explicit e2e naming)
+ * - Files in e2e/ directories
+ *
+ * Does NOT apply to regular *.test.ts files (those are vitest).
  *
  * All rules escalated to error EXCEPT no-skipped-test (stays warn for TDD).
  */
@@ -16,10 +19,14 @@ import playwrightPlugin from 'eslint-plugin-playwright';
  *
  * Based on recommended config with all warns escalated to error.
  * Exception: no-skipped-test stays at warn (legitimate TDD pattern).
+ *
+ * File patterns target only e2e tests to avoid vitest conflicts:
+ * - Explicit e2e suffix: *.e2e.{ts,tsx,js,jsx}
+ * - Files in e2e directories
  */
 export const playwrightConfig: any[] = [
   {
-    files: ['**/*.test.{ts,tsx,js,jsx}', '**/*.spec.{ts,tsx,js,jsx}', '**/*.e2e.{ts,tsx,js,jsx}'],
+    files: ['**/*.e2e.{ts,tsx,js,jsx}', '**/e2e/**/*.{ts,tsx,js,jsx}'],
     plugins: {
       playwright: playwrightPlugin,
     },

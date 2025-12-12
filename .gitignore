@@ -5,7 +5,6 @@ dist/
 examples/
 .prettierignore
 .prettierrc
-eslint.config.mjs
 .env
 .env.local
 
