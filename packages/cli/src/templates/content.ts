@@ -58,7 +58,7 @@ export function getPrettierConfig(projectType: ProjectType): string {
     config.plugins = plugins;
   }
 
-  return JSON.stringify(config, null, 2) + '\n';
+  return `${JSON.stringify(config, undefined, 2)}\n`;
 }
 
 /**

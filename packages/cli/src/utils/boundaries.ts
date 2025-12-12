@@ -11,7 +11,7 @@
  */
 
 import { readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { exists } from './fs.js';
 
@@ -68,23 +68,23 @@ export interface DetectedArchitecture {
 
 /**
  * Find monorepo package directories
- * @param projectDir
+ * @param projectDirectory
  */
-function findMonorepoPackages(projectDir: string): string[] {
+function findMonorepoPackages(projectDirectory: string): string[] {
   const packages: string[] = [];
 
   // Check common monorepo patterns
   const monorepoRoots = ['packages', 'apps', 'libs', 'modules'];
 
   for (const root of monorepoRoots) {
-    const rootPath = join(projectDir, root);
+    const rootPath = nodePath.join(projectDirectory, root);
     if (!exists(rootPath)) continue;
 
     try {
       const entries = readdirSync(rootPath, { withFileTypes: true });
       for (const entry of entries) {
         if (entry.isDirectory() && !entry.name.startsWith('.')) {
-          packages.push(join(root, entry.name));
+          packages.push(nodePath.join(root, entry.name));
         }
       }
     } catch {
@@ -102,28 +102,30 @@ function findMonorepoPackages(projectDir: string): string[] {
  * @param pathPrefix
  */
 function hasLayerForPrefix(elements: DetectedElement[], layer: Layer, pathPrefix: string): boolean {
-  return elements.some(e => e.layer === layer && e.pattern.startsWith(pathPrefix));
+  return elements.some(
+    element => element.layer === layer && element.pattern.startsWith(pathPrefix),
+  );
 }
 
 /**
  * Scan a single search path for architecture layers
- * @param projectDir
+ * @param projectDirectory
  * @param searchPath
  * @param pathPrefix
  * @param elements
  */
 function scanSearchPath(
-  projectDir: string,
+  projectDirectory: string,
   searchPath: string,
   pathPrefix: string,
   elements: DetectedElement[],
 ): void {
-  for (const layerDef of ARCHITECTURE_LAYERS) {
-    for (const dirName of layerDef.dirs) {
-      const fullPath = join(projectDir, searchPath, dirName);
-      if (exists(fullPath) && !hasLayerForPrefix(elements, layerDef.layer, pathPrefix)) {
+  for (const layerDefinition of ARCHITECTURE_LAYERS) {
+    for (const dirName of layerDefinition.dirs) {
+      const fullPath = nodePath.join(projectDirectory, searchPath, dirName);
+      if (exists(fullPath) && !hasLayerForPrefix(elements, layerDefinition.layer, pathPrefix)) {
         elements.push({
-          layer: layerDef.layer,
+          layer: layerDefinition.layer,
           pattern: `${pathPrefix}${dirName}/**`,
           location: `${pathPrefix}${dirName}`,
         });
@@ -134,16 +136,16 @@ function scanSearchPath(
 
 /**
  * Scan a directory for architecture layers
- * @param projectDir
+ * @param projectDirectory
  * @param basePath
  */
-function scanForLayers(projectDir: string, basePath: string): DetectedElement[] {
+function scanForLayers(projectDirectory: string, basePath: string): DetectedElement[] {
   const elements: DetectedElement[] = [];
   const prefix = basePath ? `${basePath}/` : '';
 
   // Check src/ and root level
-  scanSearchPath(projectDir, join(basePath, 'src'), `${prefix}src/`, elements);
-  scanSearchPath(projectDir, basePath, prefix, elements);
+  scanSearchPath(projectDirectory, nodePath.join(basePath, 'src'), `${prefix}src/`, elements);
+  scanSearchPath(projectDirectory, basePath, prefix, elements);
 
   return elements;
 }
@@ -151,30 +153,30 @@ function scanForLayers(projectDir: string, basePath: string): DetectedElement[] 
 /**
  * Detects architecture directories in the project
  * Handles both standard projects and monorepos
- * @param projectDir
+ * @param projectDirectory
  */
-export function detectArchitecture(projectDir: string): DetectedArchitecture {
+export function detectArchitecture(projectDirectory: string): DetectedArchitecture {
   const elements: DetectedElement[] = [];
 
   // First, check for monorepo packages
-  const packages = findMonorepoPackages(projectDir);
+  const packages = findMonorepoPackages(projectDirectory);
   const isMonorepo = packages.length > 0;
 
   if (isMonorepo) {
     // Scan each package
     for (const pkg of packages) {
-      elements.push(...scanForLayers(projectDir, pkg));
+      elements.push(...scanForLayers(projectDirectory, pkg));
     }
   }
 
   // Also scan root level (works for both monorepo root and standard projects)
-  elements.push(...scanForLayers(projectDir, ''));
+  elements.push(...scanForLayers(projectDirectory, ''));
 
   // Deduplicate by pattern
   const seen = new Set<string>();
-  const uniqueElements = elements.filter(e => {
-    if (seen.has(e.pattern)) return false;
-    seen.add(e.pattern);
+  const uniqueElements = elements.filter(element => {
+    if (seen.has(element.pattern)) return false;
+    seen.add(element.pattern);
     return true;
   });
 
@@ -185,8 +187,8 @@ export function detectArchitecture(projectDir: string): DetectedArchitecture {
  * Format a single element for the config
  * @param el
  */
-function formatElement(el: DetectedElement): string {
-  return `      { type: '${el.layer}', pattern: '${el.pattern}', mode: 'full' }`;
+function formatElement(element: DetectedElement): string {
+  return `      { type: '${element.layer}', pattern: '${element.pattern}', mode: 'full' }`;
 }
 
 /**
@@ -202,12 +204,12 @@ function formatAllowedImports(allowed: Layer[]): string {
  * @param layer
  * @param detectedLayers
  */
-function generateRule(layer: Layer, detectedLayers: Set<Layer>): string | null {
+function generateRule(layer: Layer, detectedLayers: Set<Layer>): string | undefined {
   const allowedLayers = HIERARCHY[layer];
-  if (allowedLayers.length === 0) return null;
+  if (allowedLayers.length === 0) return undefined;
 
   const allowed = allowedLayers.filter(dep => detectedLayers.has(dep));
-  if (allowed.length === 0) return null;
+  if (allowed.length === 0) return undefined;
 
   return `        { from: ['${layer}'], allow: [${formatAllowedImports(allowed)}] }`;
 }
@@ -220,7 +222,7 @@ function buildDetectedInfo(arch: DetectedArchitecture): string {
   if (arch.elements.length === 0) {
     return 'No architecture directories detected yet - add types/, utils/, components/, etc.';
   }
-  const locations = arch.elements.map(e => e.location).join(', ');
+  const locations = arch.elements.map(element => element.location).join(', ');
   const monorepoNote = arch.isMonorepo ? ' (monorepo)' : '';
   return `Detected: ${locations}${monorepoNote}`;
 }
@@ -233,13 +235,13 @@ export function generateBoundariesConfig(arch: DetectedArchitecture): string {
   const hasElements = arch.elements.length > 0;
 
   // Generate element definitions
-  const elementsContent = arch.elements.map(el => formatElement(el)).join(',\n');
+  const elementsContent = arch.elements.map(element => formatElement(element)).join(',\n');
 
   // Generate rules (what each layer can import)
-  const detectedLayers = new Set(arch.elements.map(e => e.layer));
+  const detectedLayers = new Set(arch.elements.map(element => element.layer));
   const rules = [...detectedLayers]
     .map(layer => generateRule(layer, detectedLayers))
-    .filter((rule): rule is string => rule !== null);
+    .filter((rule): rule is string => rule !== undefined);
   const rulesContent = rules.join(',\n');
 
   const detectedInfo = buildDetectedInfo(arch);

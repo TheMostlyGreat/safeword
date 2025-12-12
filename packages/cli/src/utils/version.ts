@@ -13,10 +13,10 @@ export function compareVersions(a: string, b: string): -1 | 0 | 1 {
   const bParts = b.split('.').map(Number);
 
   for (let i = 0; i < 3; i++) {
-    const aVal = aParts[i] ?? 0;
-    const bVal = bParts[i] ?? 0;
-    if (aVal < bVal) return -1;
-    if (aVal > bVal) return 1;
+    const aValue = aParts[i] ?? 0;
+    const bValue = bParts[i] ?? 0;
+    if (aValue < bValue) return -1;
+    if (aValue > bValue) return 1;
   }
 
   return 0;

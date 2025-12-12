@@ -5,27 +5,27 @@
  * These tests verify performance, compatibility, and quality requirements.
  */
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-  createTempDir,
+  createTemporaryDirectory,
   createTypeScriptPackageJson,
   initGitRepo,
   measureTime,
-  removeTempDir,
+  removeTemporaryDirectory,
   runCli,
   runCliSync,
 } from './helpers';
 
 describe('Test Suite 0: Technical Constraints', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = createTempDir();
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    removeTempDir(tempDir);
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
   describe('Test 0.1: CLI startup time under 500ms', () => {
@@ -34,9 +34,7 @@ describe('Test Suite 0: Technical Constraints', () => {
       const times: number[] = [];
 
       for (let i = 0; i < runs; i++) {
-        const { timeMs } = await measureTime(async () => {
-          return runCliSync(['--version']);
-        });
+        const { timeMs } = await measureTime(async () => runCliSync(['--version']));
         times.push(timeMs);
       }
 
@@ -50,15 +48,15 @@ describe('Test Suite 0: Technical Constraints', () => {
 
   describe('Test 0.2: Setup completes under 30s', () => {
     it('should complete setup in under 30 seconds', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      const { result, timeMs } = await measureTime(async () => {
-        return runCli(['setup', '--yes'], { cwd: tempDir, timeout: 60000 });
-      });
+      const { result, timeMs } = await measureTime(async () =>
+        runCli(['setup', '--yes'], { cwd: temporaryDirectory, timeout: 60_000 }),
+      );
 
       expect(result.exitCode).toBe(0);
-      expect(timeMs).toBeLessThan(30000);
+      expect(timeMs).toBeLessThan(30_000);
     });
   });
 
@@ -80,12 +78,12 @@ describe('Test Suite 0: Technical Constraints', () => {
 
   describe('Test 0.4: Works with different package managers', () => {
     it('should work with npm', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
       const result = await runCli(['setup', '--yes'], {
-        cwd: tempDir,
-        timeout: 60000,
+        cwd: temporaryDirectory,
+        timeout: 60_000,
       });
 
       expect(result.exitCode).toBe(0);

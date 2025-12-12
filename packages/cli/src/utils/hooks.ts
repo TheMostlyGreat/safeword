@@ -18,7 +18,10 @@ interface HookEntry {
  */
 export function isHookEntry(h: unknown): h is HookEntry {
   return (
-    typeof h === 'object' && h !== null && 'hooks' in h && Array.isArray((h as HookEntry).hooks)
+    typeof h === 'object' &&
+    h !== undefined &&
+    'hooks' in h &&
+    Array.isArray((h as HookEntry).hooks)
   );
 }
 

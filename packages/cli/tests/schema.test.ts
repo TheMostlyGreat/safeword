@@ -8,13 +8,13 @@
  */
 
 import { readdirSync, statSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import nodePath from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = nodePath.dirname(__filename);
 
 // This import will fail until schema.ts is created (RED phase)
 // import { SAFEWORD_SCHEMA } from '../src/schema.js';
@@ -32,7 +32,7 @@ describe('Schema - Single Source of Truth', () => {
 
     for (const entry of entries) {
       const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
-      const fullPath = join(dir, entry.name);
+      const fullPath = nodePath.join(dir, entry.name);
 
       if (entry.isDirectory()) {
         files.push(...collectTemplateFiles(fullPath, relativePath));
@@ -44,7 +44,7 @@ describe('Schema - Single Source of Truth', () => {
     return files;
   }
 
-  const templatesDir = join(__dirname, '../templates');
+  const templatesDirectory = nodePath.join(__dirname, '../templates');
 
   describe('ownedDirs', () => {
     it('should have exactly 17 owned directories', async () => {
@@ -81,17 +81,16 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('sharedDirs', () => {
-    it('should have exactly 4 shared directories', async () => {
+    it('should have exactly 3 shared directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.sharedDirs.length).toBe(4);
+      expect(SAFEWORD_SCHEMA.sharedDirs.length).toBe(3);
     });
 
-    it('should include .claude and .husky directories', async () => {
+    it('should include .claude directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude');
       expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude/skills');
       expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude/commands');
-      expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.husky');
     });
   });
 
@@ -111,14 +110,14 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('ownedFiles', () => {
-    it('should have exactly 59 owned files', async () => {
+    it('should have exactly 58 owned files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(59);
+      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(58);
     });
 
     it('should have entry for every template file', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      const templateFiles = collectTemplateFiles(templatesDir);
+      const templateFiles = collectTemplateFiles(templatesDirectory);
 
       // Exclude markdownlint-cli2.jsonc (it's a managedFile)
       const ownedTemplateFiles = templateFiles.filter(f => f !== 'markdownlint-cli2.jsonc');
@@ -143,17 +142,14 @@ describe('Schema - Single Source of Truth', () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
       // Files that are generated (not from templates)
-      const generatedFiles = new Set([
-        '.safeword/version',
-        '.safeword/eslint-boundaries.config.mjs',
-      ]);
+      const generatedFiles = new Set(['.safeword/version']);
 
-      for (const [path, def] of Object.entries(SAFEWORD_SCHEMA.ownedFiles)) {
+      for (const [path, definition] of Object.entries(SAFEWORD_SCHEMA.ownedFiles)) {
         if (generatedFiles.has(path)) continue;
 
         // If it has a template reference, verify template exists
-        if (def.template) {
-          const templatePath = join(templatesDir, def.template);
+        if (definition.template) {
+          const templatePath = nodePath.join(templatesDirectory, definition.template);
           const exists = (() => {
             try {
               statSync(templatePath);
@@ -165,7 +161,7 @@ describe('Schema - Single Source of Truth', () => {
 
           if (!exists) {
             expect.fail(
-              `Schema entry '${path}' references template '${def.template}' which does not exist`,
+              `Schema entry '${path}' references template '${definition.template}' which does not exist`,
             );
           }
         }
@@ -205,9 +201,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('textPatches', () => {
-    it('should have exactly 3 text patches', async () => {
+    it('should have exactly 2 text patches', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.textPatches).length).toBe(3);
+      expect(Object.keys(SAFEWORD_SCHEMA.textPatches).length).toBe(2);
     });
 
     it('should include AGENTS.md patch (creates if missing)', async () => {
@@ -223,19 +219,12 @@ describe('Schema - Single Source of Truth', () => {
       expect(SAFEWORD_SCHEMA.textPatches['CLAUDE.md'].operation).toBe('prepend');
       expect(SAFEWORD_SCHEMA.textPatches['CLAUDE.md'].createIfMissing).toBe(false);
     });
-
-    it('should include .husky/pre-commit patch (creates if missing)', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty('.husky/pre-commit');
-      expect(SAFEWORD_SCHEMA.textPatches['.husky/pre-commit'].operation).toBe('prepend');
-      expect(SAFEWORD_SCHEMA.textPatches['.husky/pre-commit'].createIfMissing).toBe(true);
-    });
   });
 
   describe('packages', () => {
-    it('should have 19 base packages', async () => {
+    it('should have 6 base packages', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(19);
+      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(6);
     });
 
     describe('getBaseEslintPackages', () => {
@@ -243,17 +232,13 @@ describe('Schema - Single Source of Truth', () => {
         const { getBaseEslintPackages } = await import('../src/schema.js');
         const eslintPackages = getBaseEslintPackages();
 
-        // Should include ESLint packages
+        // Should include ESLint packages (eslint-plugin-safeword bundles everything)
         expect(eslintPackages).toContain('eslint');
-        expect(eslintPackages).toContain('@eslint/js');
-        expect(eslintPackages).toContain('eslint-plugin-sonarjs');
-        expect(eslintPackages).toContain('eslint-plugin-unicorn');
-        expect(eslintPackages).toContain('eslint-import-resolver-typescript');
+        expect(eslintPackages).toContain('eslint-config-prettier');
+        expect(eslintPackages).toContain('eslint-plugin-safeword');
 
         // Should NOT include non-ESLint packages
         expect(eslintPackages).not.toContain('prettier');
-        expect(eslintPackages).not.toContain('husky');
-        expect(eslintPackages).not.toContain('lint-staged');
         expect(eslintPackages).not.toContain('markdownlint-cli2');
         expect(eslintPackages).not.toContain('knip');
       });
@@ -270,26 +255,25 @@ describe('Schema - Single Source of Truth', () => {
     });
 
     describe('getConditionalEslintPackages', () => {
-      it('should return ESLint packages for react', async () => {
+      it('should return ESLint packages for vue (not in safeword plugin)', async () => {
         const { getConditionalEslintPackages } = await import('../src/schema.js');
-        const reactPackages = getConditionalEslintPackages('react');
+        const vuePackages = getConditionalEslintPackages('vue');
 
-        expect(reactPackages).toContain('eslint-plugin-react');
-        expect(reactPackages).toContain('eslint-plugin-react-hooks');
+        expect(vuePackages).toContain('eslint-plugin-vue');
       });
 
-      it('should return ESLint packages for typescript', async () => {
+      it('should return ESLint packages for svelte (not in safeword plugin)', async () => {
         const { getConditionalEslintPackages } = await import('../src/schema.js');
-        const tsPackages = getConditionalEslintPackages('typescript');
+        const sveltePackages = getConditionalEslintPackages('svelte');
 
-        expect(tsPackages).toContain('typescript-eslint');
+        expect(sveltePackages).toContain('eslint-plugin-svelte');
       });
 
-      it('should return ESLint packages for vitest', async () => {
+      it('should return ESLint packages for electron (not in safeword plugin)', async () => {
         const { getConditionalEslintPackages } = await import('../src/schema.js');
-        const vitestPackages = getConditionalEslintPackages('vitest');
+        const electronPackages = getConditionalEslintPackages('electron');
 
-        expect(vitestPackages).toContain('@vitest/eslint-plugin');
+        expect(electronPackages).toContain('@electron-toolkit/eslint-config');
       });
 
       it('should return empty array for unknown key', async () => {
@@ -317,23 +301,10 @@ describe('Schema - Single Source of Truth', () => {
       const required = [
         'eslint',
         'prettier',
-        '@eslint/js',
-        'eslint-plugin-import-x',
-        'eslint-import-resolver-typescript',
-        'eslint-plugin-sonarjs',
-        'eslint-plugin-unicorn',
-        'eslint-plugin-boundaries',
-        'eslint-plugin-playwright',
-        'eslint-plugin-promise',
-        'eslint-plugin-regexp',
-        'eslint-plugin-jsdoc',
-        'eslint-plugin-simple-import-sort',
-        'eslint-plugin-security',
         'eslint-config-prettier',
+        'eslint-plugin-safeword',
         'markdownlint-cli2',
         'knip',
-        'husky',
-        'lint-staged',
       ];
 
       for (const pkg of required) {
@@ -341,19 +312,17 @@ describe('Schema - Single Source of Truth', () => {
       }
     });
 
-    it('should have conditional packages for all framework types', async () => {
+    it('should have conditional packages for frameworks not in safeword plugin', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      // These frameworks are NOT in eslint-plugin-safeword (or need prettier plugins)
       const requiredConditions = [
-        'typescript',
-        'react',
-        'nextjs',
-        'astro',
-        'vue',
-        'svelte',
-        'vitest',
-        'tailwind',
-        'publishableLibrary',
-        'shell',
+        'vue', // eslint-plugin-vue
+        'svelte', // eslint-plugin-svelte + prettier-plugin-svelte
+        'electron', // @electron-toolkit/eslint-config
+        'astro', // prettier-plugin-astro (ESLint rules are in safeword)
+        'tailwind', // prettier-plugin-tailwindcss
+        'publishableLibrary', // publint
+        'shell', // shellcheck + prettier-plugin-sh
       ];
 
       for (const condition of requiredConditions) {
@@ -371,13 +340,13 @@ describe('Schema - Single Source of Truth', () => {
         .filter(path => path.startsWith('.claude/skills/safeword-'))
         .map(path => /safeword-([^/]+)/.exec(path)?.[1])
         .filter(Boolean)
-        .toSorted();
+        .toSorted((a, b) => a.localeCompare(b));
 
       const cursorRules = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
         .filter(path => path.startsWith('.cursor/rules/safeword-') && !path.includes('core'))
         .map(path => /safeword-([^.]+)/.exec(path)?.[1])
         .filter(Boolean)
-        .toSorted();
+        .toSorted((a, b) => a.localeCompare(b));
 
       // Both should have the same skills
       expect(cursorRules).toEqual(claudeSkills);
@@ -391,13 +360,13 @@ describe('Schema - Single Source of Truth', () => {
         .filter(path => path.startsWith('.claude/commands/'))
         .map(path => path.split('/').pop())
         .filter(Boolean)
-        .toSorted();
+        .toSorted((a, b) => a.localeCompare(b));
 
       const cursorCommands = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
         .filter(path => path.startsWith('.cursor/commands/'))
         .map(path => path.split('/').pop())
         .filter(Boolean)
-        .toSorted();
+        .toSorted((a, b) => a.localeCompare(b));
 
       // Both should have the same commands
       expect(cursorCommands).toEqual(claudeCommands);

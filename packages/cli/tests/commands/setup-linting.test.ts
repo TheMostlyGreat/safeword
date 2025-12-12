@@ -9,66 +9,66 @@
  */
 
 import { chmodSync } from 'node:fs';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-  createTempDir,
+  createTemporaryDirectory,
   createTypeScriptPackageJson,
   fileExists,
   initGitRepo,
   readTestFile,
-  removeTempDir,
+  removeTemporaryDirectory,
   runCli,
 } from '../helpers';
 
 describe('Test Suite 4: Setup - Linting (Integration)', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = createTempDir();
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    removeTempDir(tempDir);
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
   describe('Test 4.4: Creates eslint.config.mjs', () => {
     it('should create ESLint flat config', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      expect(fileExists(tempDir, 'eslint.config.mjs')).toBe(true);
+      expect(fileExists(temporaryDirectory, 'eslint.config.mjs')).toBe(true);
 
-      const content = readTestFile(tempDir, 'eslint.config.mjs');
+      const content = readTestFile(temporaryDirectory, 'eslint.config.mjs');
       // Should be a valid ESLint flat config
       expect(content).toContain('export');
     });
 
     it('should include TypeScript config when detected', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      const content = readTestFile(tempDir, 'eslint.config.mjs');
+      const content = readTestFile(temporaryDirectory, 'eslint.config.mjs');
       expect(content).toMatch(/typescript|@typescript-eslint/i);
     });
   });
 
   describe('Test 4.5: Creates .prettierrc', () => {
     it('should create Prettier config', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      expect(fileExists(tempDir, '.prettierrc')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.prettierrc')).toBe(true);
 
-      const content = readTestFile(tempDir, '.prettierrc');
+      const content = readTestFile(temporaryDirectory, '.prettierrc');
       // Should be valid JSON
       expect(() => JSON.parse(content)).not.toThrow();
     });
@@ -76,26 +76,26 @@ describe('Test Suite 4: Setup - Linting (Integration)', () => {
 
   describe('Test 4.6: Adds lint script to package.json', () => {
     it('should add lint script', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
+      const packageJson = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
       expect(packageJson.scripts?.lint).toBe('eslint .');
     });
 
     it('should not overwrite existing lint script', async () => {
-      createTypeScriptPackageJson(tempDir, {
+      createTypeScriptPackageJson(temporaryDirectory, {
         scripts: {
           lint: 'eslint src/',
         },
       });
-      initGitRepo(tempDir);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
+      const packageJson = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
       // Original script should be preserved
       expect(packageJson.scripts?.lint).toBe('eslint src/');
     });
@@ -103,26 +103,26 @@ describe('Test Suite 4: Setup - Linting (Integration)', () => {
 
   describe('Test 4.7: Adds format script to package.json', () => {
     it('should add format script', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
+      const packageJson = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
       expect(packageJson.scripts?.format).toBe('prettier --write .');
     });
 
     it('should not overwrite existing format script', async () => {
-      createTypeScriptPackageJson(tempDir, {
+      createTypeScriptPackageJson(temporaryDirectory, {
         scripts: {
           format: 'prettier --write src/',
         },
       });
-      initGitRepo(tempDir);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
+      const packageJson = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
       // Original script should be preserved
       expect(packageJson.scripts?.format).toBe('prettier --write src/');
     });
@@ -130,16 +130,16 @@ describe('Test Suite 4: Setup - Linting (Integration)', () => {
 
   describe('Test 4.8: Exit 1 if linting setup fails', () => {
     it('should fail with exit 1 when package.json is not writable', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
       // Make package.json read-only
-      chmodSync(join(tempDir, 'package.json'), 0o444);
+      chmodSync(nodePath.join(temporaryDirectory, 'package.json'), 0o444);
 
-      const result = await runCli(['setup', '--yes'], { cwd: tempDir });
+      const result = await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
       // Restore permissions for cleanup
-      chmodSync(join(tempDir, 'package.json'), 0o644);
+      chmodSync(nodePath.join(temporaryDirectory, 'package.json'), 0o644);
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr.toLowerCase()).toMatch(/lint|permission|write|failed|package/i);
@@ -148,24 +148,24 @@ describe('Test Suite 4: Setup - Linting (Integration)', () => {
 
   describe('Test 4.9: Creates markdownlint config', () => {
     it('should create .markdownlint-cli2.jsonc', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
       // Using markdownlint-cli2's preferred config filename
-      expect(fileExists(tempDir, '.markdownlint-cli2.jsonc')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.markdownlint-cli2.jsonc')).toBe(true);
     });
   });
 
   describe('Test 4.10: Adds lint:md script', () => {
     it('should add lint:md script to package.json', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
+      const packageJson = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
       expect(packageJson.scripts?.['lint:md']).toBeDefined();
       expect(packageJson.scripts?.['lint:md']).toContain('markdownlint');
     });
@@ -173,12 +173,12 @@ describe('Test Suite 4: Setup - Linting (Integration)', () => {
 
   describe('Test 4.11: Adds format:check script', () => {
     it('should add format:check script to package.json', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
+      const packageJson = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
       expect(packageJson.scripts?.['format:check']).toBeDefined();
       expect(packageJson.scripts?.['format:check']).toContain('prettier');
       expect(packageJson.scripts?.['format:check']).toContain('--check');

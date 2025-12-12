@@ -4,7 +4,7 @@
  * Uses reconcile() with dryRun to compute what would change.
  */
 
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { type Action, reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
@@ -141,26 +141,26 @@ function actionsToDiffs(actions: Action[], cwd: string): FileDiff[] {
       if (seenPaths.has(action.path)) continue;
       seenPaths.add(action.path);
 
-      const fullPath = join(cwd, action.path);
+      const fullPath = nodePath.join(cwd, action.path);
       const currentContent = readFileSafe(fullPath);
 
-      if (currentContent === null) {
+      if (currentContent === undefined) {
         diffs.push({
           path: action.path,
           status: 'added',
           newContent: action.content,
         });
-      } else if (currentContent.trim() !== action.content.trim()) {
+      } else if (currentContent.trim() === action.content.trim()) {
         diffs.push({
           path: action.path,
-          status: 'modified',
+          status: 'unchanged',
           currentContent,
           newContent: action.content,
         });
       } else {
         diffs.push({
           path: action.path,
-          status: 'unchanged',
+          status: 'modified',
           currentContent,
           newContent: action.content,
         });
@@ -177,16 +177,16 @@ function actionsToDiffs(actions: Action[], cwd: string): FileDiff[] {
  */
 export async function diff(options: DiffOptions): Promise<void> {
   const cwd = process.cwd();
-  const safewordDir = join(cwd, '.safeword');
+  const safewordDirectory = nodePath.join(cwd, '.safeword');
 
   // Check if configured
-  if (!exists(safewordDir)) {
+  if (!exists(safewordDirectory)) {
     error('Not configured. Run `safeword setup` first.');
     process.exit(1);
   }
 
   // Read project version
-  const versionPath = join(safewordDir, 'version');
+  const versionPath = nodePath.join(safewordDirectory, 'version');
   const projectVersion = readFileSafe(versionPath)?.trim() ?? 'unknown';
 
   header('Safeword Diff');

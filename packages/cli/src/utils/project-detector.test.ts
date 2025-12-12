@@ -4,9 +4,10 @@
  * These are pure unit tests for the detectProjectType function.
  */
 
-import { describe, expect,it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { detectProjectType, PackageJson } from './project-detector';
+import type { PackageJson } from './project-detector';
+import { detectProjectType } from './project-detector';
 
 describe('detectProjectType', () => {
   describe('Test 4.1: Detects TypeScript project', () => {

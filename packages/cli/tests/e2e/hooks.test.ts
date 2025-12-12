@@ -15,38 +15,38 @@ import { execSync, spawnSync } from 'node:child_process';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
-  createTempDir,
+  createTemporaryDirectory,
   createTypeScriptPackageJson,
   fileExists,
   initGitRepo,
   readTestFile,
-  removeTempDir,
+  removeTemporaryDirectory,
   runCli,
   writeTestFile,
 } from '../helpers';
 
 describe('E2E: SessionStart Hooks', () => {
-  let projectDir: string;
+  let projectDirectory: string;
 
   beforeAll(async () => {
-    projectDir = createTempDir();
-    createTypeScriptPackageJson(projectDir);
-    initGitRepo(projectDir);
-    await runCli(['setup', '--yes'], { cwd: projectDir });
-  }, 180000);
+    projectDirectory = createTemporaryDirectory();
+    createTypeScriptPackageJson(projectDirectory);
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
 
   afterAll(() => {
-    if (projectDir) {
-      removeTempDir(projectDir);
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
     }
   });
 
   describe('session-version.sh', () => {
     it('outputs version message for safeword project', () => {
       const output = execSync('bash .safeword/hooks/session-version.sh', {
-        cwd: projectDir,
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-        encoding: 'utf-8',
+        cwd: projectDirectory,
+        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+        encoding: 'utf8',
       });
 
       expect(output).toContain('SAFE WORD');
@@ -55,19 +55,19 @@ describe('E2E: SessionStart Hooks', () => {
     });
 
     it('exits silently for non-safeword project', () => {
-      const nonSafewordDir = createTempDir();
+      const nonSafewordDirectory = createTemporaryDirectory();
       try {
         // Run in a directory without .safeword
         const output = execSync('bash .safeword/hooks/session-version.sh', {
-          cwd: projectDir, // Script is here
-          env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDir }, // But points to non-safeword dir
-          encoding: 'utf-8',
+          cwd: projectDirectory, // Script is here
+          env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDirectory }, // But points to non-safeword dir
+          encoding: 'utf8',
         });
 
         // Should output nothing (silent exit)
         expect(output.trim()).toBe('');
       } finally {
-        removeTempDir(nonSafewordDir);
+        removeTemporaryDirectory(nonSafewordDirectory);
       }
     });
   });
@@ -75,70 +75,70 @@ describe('E2E: SessionStart Hooks', () => {
   describe('session-verify-agents.sh', () => {
     it('creates AGENTS.md if missing', () => {
       // Remove AGENTS.md
-      execSync('rm -f AGENTS.md', { cwd: projectDir });
-      expect(fileExists(projectDir, 'AGENTS.md')).toBe(false);
+      execSync('rm -f AGENTS.md', { cwd: projectDirectory });
+      expect(fileExists(projectDirectory, 'AGENTS.md')).toBe(false);
 
       const output = execSync('bash .safeword/hooks/session-verify-agents.sh', {
-        cwd: projectDir,
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-        encoding: 'utf-8',
+        cwd: projectDirectory,
+        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+        encoding: 'utf8',
       });
 
-      expect(fileExists(projectDir, 'AGENTS.md')).toBe(true);
+      expect(fileExists(projectDirectory, 'AGENTS.md')).toBe(true);
       expect(output).toContain('Created AGENTS.md');
 
-      const content = readTestFile(projectDir, 'AGENTS.md');
+      const content = readTestFile(projectDirectory, 'AGENTS.md');
       expect(content).toContain('.safeword/SAFEWORD.md');
     });
 
     it('restores link if removed from AGENTS.md', () => {
       // Overwrite AGENTS.md without the link
-      writeTestFile(projectDir, 'AGENTS.md', '# My Project\n\nSome content\n');
+      writeTestFile(projectDirectory, 'AGENTS.md', '# My Project\n\nSome content\n');
 
       const output = execSync('bash .safeword/hooks/session-verify-agents.sh', {
-        cwd: projectDir,
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-        encoding: 'utf-8',
+        cwd: projectDirectory,
+        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+        encoding: 'utf8',
       });
 
       expect(output).toContain('Restored AGENTS.md link');
 
-      const content = readTestFile(projectDir, 'AGENTS.md');
+      const content = readTestFile(projectDirectory, 'AGENTS.md');
       expect(content).toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('My Project'); // Original content preserved
     });
 
     it('does nothing if link already present', () => {
       // Ensure link is present
-      const originalContent = readTestFile(projectDir, 'AGENTS.md');
+      const originalContent = readTestFile(projectDirectory, 'AGENTS.md');
       expect(originalContent).toContain('.safeword/SAFEWORD.md');
 
       const output = execSync('bash .safeword/hooks/session-verify-agents.sh', {
-        cwd: projectDir,
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-        encoding: 'utf-8',
+        cwd: projectDirectory,
+        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+        encoding: 'utf8',
       });
 
       // Should be silent (no action needed)
       expect(output.trim()).toBe('');
 
       // Content unchanged
-      const newContent = readTestFile(projectDir, 'AGENTS.md');
+      const newContent = readTestFile(projectDirectory, 'AGENTS.md');
       expect(newContent).toBe(originalContent);
     });
 
     it('exits silently for non-safeword project', () => {
-      const nonSafewordDir = createTempDir();
+      const nonSafewordDirectory = createTemporaryDirectory();
       try {
         const output = execSync('bash .safeword/hooks/session-verify-agents.sh', {
-          cwd: projectDir,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDir },
-          encoding: 'utf-8',
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDirectory },
+          encoding: 'utf8',
         });
 
         expect(output.trim()).toBe('');
       } finally {
-        removeTempDir(nonSafewordDir);
+        removeTemporaryDirectory(nonSafewordDirectory);
       }
     });
   });
@@ -146,13 +146,13 @@ describe('E2E: SessionStart Hooks', () => {
   describe('session-lint-check.sh', () => {
     it('outputs no warnings when lint configs exist', () => {
       // Project should have eslint and prettier after setup
-      expect(fileExists(projectDir, 'eslint.config.mjs')).toBe(true);
-      expect(fileExists(projectDir, '.prettierrc')).toBe(true);
+      expect(fileExists(projectDirectory, 'eslint.config.mjs')).toBe(true);
+      expect(fileExists(projectDirectory, '.prettierrc')).toBe(true);
 
       const output = execSync('bash .safeword/hooks/session-lint-check.sh', {
-        cwd: projectDir,
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-        encoding: 'utf-8',
+        cwd: projectDirectory,
+        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+        encoding: 'utf8',
       });
 
       // Should not contain warnings
@@ -161,78 +161,78 @@ describe('E2E: SessionStart Hooks', () => {
 
     it('warns when ESLint config is missing', () => {
       // Temporarily remove ESLint config
-      execSync('mv eslint.config.mjs eslint.config.mjs.bak', { cwd: projectDir });
+      execSync('mv eslint.config.mjs eslint.config.mjs.bak', { cwd: projectDirectory });
 
       try {
         const output = execSync('bash .safeword/hooks/session-lint-check.sh', {
-          cwd: projectDir,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-          encoding: 'utf-8',
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+          encoding: 'utf8',
         });
 
         expect(output).toContain('ESLint config not found');
       } finally {
         // Restore ESLint config
-        execSync('mv eslint.config.mjs.bak eslint.config.mjs', { cwd: projectDir });
+        execSync('mv eslint.config.mjs.bak eslint.config.mjs', { cwd: projectDirectory });
       }
     });
 
     it('warns when Prettier config is missing', () => {
       // Temporarily remove Prettier config
-      execSync('mv .prettierrc .prettierrc.bak', { cwd: projectDir });
+      execSync('mv .prettierrc .prettierrc.bak', { cwd: projectDirectory });
 
       try {
         const output = execSync('bash .safeword/hooks/session-lint-check.sh', {
-          cwd: projectDir,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-          encoding: 'utf-8',
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+          encoding: 'utf8',
         });
 
         expect(output).toContain('Prettier config not found');
       } finally {
         // Restore Prettier config
-        execSync('mv .prettierrc.bak .prettierrc', { cwd: projectDir });
+        execSync('mv .prettierrc.bak .prettierrc', { cwd: projectDirectory });
       }
     });
 
     it('exits silently for non-safeword project', () => {
-      const nonSafewordDir = createTempDir();
+      const nonSafewordDirectory = createTemporaryDirectory();
       try {
         const output = execSync('bash .safeword/hooks/session-lint-check.sh', {
-          cwd: projectDir,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDir },
-          encoding: 'utf-8',
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDirectory },
+          encoding: 'utf8',
         });
 
         expect(output.trim()).toBe('');
       } finally {
-        removeTempDir(nonSafewordDir);
+        removeTemporaryDirectory(nonSafewordDirectory);
       }
     });
   });
 });
 
 describe('E2E: UserPromptSubmit Hooks', () => {
-  let projectDir: string;
+  let projectDirectory: string;
 
   beforeAll(async () => {
-    projectDir = createTempDir();
-    createTypeScriptPackageJson(projectDir);
-    initGitRepo(projectDir);
-    await runCli(['setup', '--yes'], { cwd: projectDir });
-  }, 180000);
+    projectDirectory = createTemporaryDirectory();
+    createTypeScriptPackageJson(projectDirectory);
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
 
   afterAll(() => {
-    if (projectDir) {
-      removeTempDir(projectDir);
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
     }
   });
 
   describe('prompt-timestamp.sh', () => {
     it('outputs current timestamp in expected format', () => {
       const output = execSync('bash .safeword/hooks/prompt-timestamp.sh', {
-        cwd: projectDir,
-        encoding: 'utf-8',
+        cwd: projectDirectory,
+        encoding: 'utf8',
       });
 
       expect(output).toContain('Current time:');
@@ -251,9 +251,9 @@ describe('E2E: UserPromptSubmit Hooks', () => {
       const output = execSync(
         'echo "Help me implement a new feature for user authentication" | bash .safeword/hooks/prompt-questions.sh',
         {
-          cwd: projectDir,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-          encoding: 'utf-8',
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+          encoding: 'utf8',
         },
       );
 
@@ -267,9 +267,9 @@ describe('E2E: UserPromptSubmit Hooks', () => {
     it('outputs nothing for short prompts', () => {
       // Pipe a short prompt (<20 chars)
       const output = execSync('echo "fix bug" | bash .safeword/hooks/prompt-questions.sh', {
-        cwd: projectDir,
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-        encoding: 'utf-8',
+        cwd: projectDirectory,
+        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+        encoding: 'utf8',
       });
 
       // Should be silent for short prompts
@@ -277,67 +277,67 @@ describe('E2E: UserPromptSubmit Hooks', () => {
     });
 
     it('exits silently for non-safeword project', () => {
-      const nonSafewordDir = createTempDir();
+      const nonSafewordDirectory = createTemporaryDirectory();
       try {
         const output = execSync(
           'echo "Help me implement a new feature for user authentication" | bash .safeword/hooks/prompt-questions.sh',
           {
-            cwd: projectDir,
-            env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDir },
-            encoding: 'utf-8',
+            cwd: projectDirectory,
+            env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDirectory },
+            encoding: 'utf8',
           },
         );
 
         expect(output.trim()).toBe('');
       } finally {
-        removeTempDir(nonSafewordDir);
+        removeTemporaryDirectory(nonSafewordDirectory);
       }
     });
   });
 });
 
 describe('E2E: Stop Hook', () => {
-  let projectDir: string;
+  let projectDirectory: string;
 
   beforeAll(async () => {
-    projectDir = createTempDir();
-    createTypeScriptPackageJson(projectDir);
-    initGitRepo(projectDir);
-    await runCli(['setup', '--yes'], { cwd: projectDir });
-  }, 180000);
+    projectDirectory = createTemporaryDirectory();
+    createTypeScriptPackageJson(projectDirectory);
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
 
   afterAll(() => {
-    if (projectDir) {
-      removeTempDir(projectDir);
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
     }
   });
 
   // Helper to create a mock transcript with an assistant message
   /**
    *
-   * @param projectDir
+   * @param targetDirectory
    * @param assistantText
    */
-  function createMockTranscript(projectDir: string, assistantText: string): string {
-    const transcriptPath = `${projectDir}/.safeword/test-transcript.jsonl`;
+  function createMockTranscript(targetDirectory: string, assistantText: string): string {
+    const transcriptPath = `${targetDirectory}/.safeword/test-transcript.jsonl`;
     const message = {
       role: 'assistant',
       message: {
         content: [{ type: 'text', text: assistantText }],
       },
     };
-    writeTestFile(projectDir, '.safeword/test-transcript.jsonl', JSON.stringify(message));
+    writeTestFile(targetDirectory, '.safeword/test-transcript.jsonl', JSON.stringify(message));
     return transcriptPath;
   }
 
   // Helper to run stop hook with mock transcript
   /**
    *
-   * @param projectDir
+   * @param targetDirectory
    * @param transcriptPath
    */
   function runStopHook(
-    projectDir: string,
+    targetDirectory: string,
     transcriptPath: string,
   ): { stdout: string; stderr: string; exitCode: number } {
     const input = JSON.stringify({ transcript_path: transcriptPath });
@@ -346,9 +346,9 @@ describe('E2E: Stop Hook', () => {
         'bash',
         ['-c', `echo '${input}' | bash .safeword/hooks/stop-quality.sh`],
         {
-          cwd: projectDir,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-          encoding: 'utf-8',
+          cwd: targetDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: targetDirectory },
+          encoding: 'utf8',
         },
       );
       return {
@@ -370,9 +370,9 @@ describe('E2E: Stop Hook', () => {
     it('triggers quality review when madeChanges is true', () => {
       const text =
         'I made some edits.\n\n{"proposedChanges": false, "madeChanges": true, "askedQuestion": false}';
-      const transcriptPath = createMockTranscript(projectDir, text);
+      const transcriptPath = createMockTranscript(projectDirectory, text);
 
-      const result = runStopHook(projectDir, transcriptPath);
+      const result = runStopHook(projectDirectory, transcriptPath);
 
       expect(result.exitCode).toBe(2);
       expect(result.stderr).toContain('Quality Review');
@@ -383,9 +383,9 @@ describe('E2E: Stop Hook', () => {
     it('triggers quality review when proposedChanges is true', () => {
       const text =
         'I propose these changes.\n\n{"proposedChanges": true, "madeChanges": false, "askedQuestion": false}';
-      const transcriptPath = createMockTranscript(projectDir, text);
+      const transcriptPath = createMockTranscript(projectDirectory, text);
 
-      const result = runStopHook(projectDir, transcriptPath);
+      const result = runStopHook(projectDirectory, transcriptPath);
 
       expect(result.exitCode).toBe(2);
       expect(result.stderr).toContain('Quality Review');
@@ -394,9 +394,9 @@ describe('E2E: Stop Hook', () => {
     it('skips review when askedQuestion is true', () => {
       const text =
         'What approach do you prefer?\n\n{"proposedChanges": true, "madeChanges": true, "askedQuestion": true}';
-      const transcriptPath = createMockTranscript(projectDir, text);
+      const transcriptPath = createMockTranscript(projectDirectory, text);
 
-      const result = runStopHook(projectDir, transcriptPath);
+      const result = runStopHook(projectDirectory, transcriptPath);
 
       expect(result.exitCode).toBe(0);
       expect(result.stderr).not.toContain('Quality Review');
@@ -405,9 +405,9 @@ describe('E2E: Stop Hook', () => {
     it('handles JSON fields in different order', () => {
       const text =
         'Done.\n\n{"madeChanges": true, "askedQuestion": false, "proposedChanges": false}';
-      const transcriptPath = createMockTranscript(projectDir, text);
+      const transcriptPath = createMockTranscript(projectDirectory, text);
 
-      const result = runStopHook(projectDir, transcriptPath);
+      const result = runStopHook(projectDirectory, transcriptPath);
 
       expect(result.exitCode).toBe(2);
       expect(result.stderr).toContain('Quality Review');
@@ -415,9 +415,9 @@ describe('E2E: Stop Hook', () => {
 
     it('blocks when JSON blob is missing', () => {
       const text = 'I made some changes but forgot the JSON summary.';
-      const transcriptPath = createMockTranscript(projectDir, text);
+      const transcriptPath = createMockTranscript(projectDirectory, text);
 
-      const result = runStopHook(projectDir, transcriptPath);
+      const result = runStopHook(projectDirectory, transcriptPath);
 
       expect(result.exitCode).toBe(2);
       expect(result.stderr).toContain('missing required JSON summary');
@@ -425,9 +425,9 @@ describe('E2E: Stop Hook', () => {
 
     it('blocks when JSON blob has missing field', () => {
       const text = 'Partial JSON.\n\n{"proposedChanges": true, "madeChanges": false}';
-      const transcriptPath = createMockTranscript(projectDir, text);
+      const transcriptPath = createMockTranscript(projectDirectory, text);
 
-      const result = runStopHook(projectDir, transcriptPath);
+      const result = runStopHook(projectDirectory, transcriptPath);
 
       expect(result.exitCode).toBe(2);
       expect(result.stderr).toContain('missing required JSON summary');
@@ -436,27 +436,27 @@ describe('E2E: Stop Hook', () => {
     it('exits silently when no changes made or proposed', () => {
       const text =
         'Just answered a question.\n\n{"proposedChanges": false, "madeChanges": false, "askedQuestion": false}';
-      const transcriptPath = createMockTranscript(projectDir, text);
+      const transcriptPath = createMockTranscript(projectDirectory, text);
 
-      const result = runStopHook(projectDir, transcriptPath);
+      const result = runStopHook(projectDirectory, transcriptPath);
 
       expect(result.exitCode).toBe(0);
       expect(result.stderr).toBe('');
     });
 
     it('exits silently for non-safeword project', () => {
-      const nonSafewordDir = createTempDir();
+      const nonSafewordDirectory = createTemporaryDirectory();
       try {
         const input = JSON.stringify({ transcript_path: '/tmp/fake.jsonl' });
         const output = execSync(`echo '${input}' | bash .safeword/hooks/stop-quality.sh`, {
-          cwd: projectDir,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDir },
-          encoding: 'utf-8',
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDirectory },
+          encoding: 'utf8',
         });
 
         expect(output.trim()).toBe('');
       } finally {
-        removeTempDir(nonSafewordDir);
+        removeTemporaryDirectory(nonSafewordDirectory);
       }
     });
 
@@ -465,9 +465,9 @@ describe('E2E: Stop Hook', () => {
       const text =
         'First update: {"proposedChanges": false, "madeChanges": false, "askedQuestion": false}\n\n' +
         'Then I made edits: {"proposedChanges": false, "madeChanges": true, "askedQuestion": false}';
-      const transcriptPath = createMockTranscript(projectDir, text);
+      const transcriptPath = createMockTranscript(projectDirectory, text);
 
-      const result = runStopHook(projectDir, transcriptPath);
+      const result = runStopHook(projectDirectory, transcriptPath);
 
       expect(result.exitCode).toBe(2);
       expect(result.stderr).toContain('Quality Review');

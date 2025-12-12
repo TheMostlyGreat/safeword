@@ -9,19 +9,19 @@
 
 import { mkdirSync, mkdtempSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('Check Command - Reconcile Integration', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'safeword-check-reconcile-'));
+    temporaryDirectory = mkdtempSync(nodePath.join(tmpdir(), 'safeword-check-reconcile-'));
   });
 
   afterEach(() => {
-    rmSync(tempDir, { recursive: true, force: true });
+    rmSync(temporaryDirectory, { recursive: true, force: true });
   });
 
   // Helper to create a minimal configured project
@@ -31,21 +31,27 @@ describe('Check Command - Reconcile Integration', () => {
   function createConfiguredProject() {
     // package.json
     writeFileSync(
-      join(tempDir, 'package.json'),
-      JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+      nodePath.join(temporaryDirectory, 'package.json'),
+      JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
     );
 
     // .safeword directory with minimal files
-    mkdirSync(join(tempDir, '.safeword'), { recursive: true });
-    writeFileSync(join(tempDir, '.safeword/version'), '0.6.3');
-    writeFileSync(join(tempDir, '.safeword/SAFEWORD.md'), '# Test');
+    mkdirSync(nodePath.join(temporaryDirectory, '.safeword'), { recursive: true });
+    writeFileSync(nodePath.join(temporaryDirectory, '.safeword/version'), '0.6.3');
+    writeFileSync(nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'), '# Test');
 
     // .claude directory
-    mkdirSync(join(tempDir, '.claude'), { recursive: true });
-    writeFileSync(join(tempDir, '.claude/settings.json'), JSON.stringify({ hooks: {} }, null, 2));
+    mkdirSync(nodePath.join(temporaryDirectory, '.claude'), { recursive: true });
+    writeFileSync(
+      nodePath.join(temporaryDirectory, '.claude/settings.json'),
+      JSON.stringify({ hooks: {} }, undefined, 2),
+    );
 
     // AGENTS.md
-    writeFileSync(join(tempDir, 'AGENTS.md'), '.safeword/SAFEWORD.md\n\n# Agents');
+    writeFileSync(
+      nodePath.join(temporaryDirectory, 'AGENTS.md'),
+      '.safeword/SAFEWORD.md\n\n# Agents',
+    );
   }
 
   describe('checkHealth using reconcile dryRun', () => {
@@ -57,9 +63,9 @@ describe('Check Command - Reconcile Integration', () => {
       createConfiguredProject();
 
       // Delete a file that should exist
-      unlinkSync(join(tempDir, '.safeword/SAFEWORD.md'));
+      unlinkSync(nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'));
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
 
       // dryRun should detect the missing file as needing to be created
@@ -82,23 +88,23 @@ describe('Check Command - Reconcile Integration', () => {
       const { execSync } = await import('node:child_process');
 
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
       // Run actual setup (this is an integration test)
-      const cliPath = join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
         execSync(`npx tsx ${cliPath} setup --yes`, {
-          cwd: tempDir,
+          cwd: temporaryDirectory,
           stdio: 'pipe',
-          timeout: 60000,
+          timeout: 60_000,
         });
       } catch {
         // May fail due to npm install timeout, but files should be created
       }
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
 
       // After fresh setup, upgrade dryRun should find minimal/no changes
@@ -122,9 +128,12 @@ describe('Check Command - Reconcile Integration', () => {
       createConfiguredProject();
 
       // Create AGENTS.md without the safeword link
-      writeFileSync(join(tempDir, 'AGENTS.md'), '# My Project\n\nSome content.');
+      writeFileSync(
+        nodePath.join(temporaryDirectory, 'AGENTS.md'),
+        '# My Project\n\nSome content.',
+      );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
 
       // Should have a text-patch action for AGENTS.md
@@ -143,7 +152,7 @@ describe('Check Command - Reconcile Integration', () => {
       createConfiguredProject();
 
       // No dev dependencies installed
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
 
       // Should report packages to install
@@ -160,7 +169,7 @@ describe('Check Command - Reconcile Integration', () => {
 
       // Add some packages to devDependencies
       writeFileSync(
-        join(tempDir, 'package.json'),
+        nodePath.join(temporaryDirectory, 'package.json'),
         JSON.stringify(
           {
             name: 'test',
@@ -171,13 +180,13 @@ describe('Check Command - Reconcile Integration', () => {
               husky: '^9.0.0',
             },
           },
-          null,
+          undefined,
           2,
         ),
       );
 
       const { createProjectContext } = await import('../../src/utils/context.js');
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
 
       // Installed packages should not be in packagesToInstall

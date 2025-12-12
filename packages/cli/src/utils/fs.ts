@@ -12,11 +12,11 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, join } from 'node:path';
+import nodePath from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Get the directory of this module (for locating templates)
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Get path to bundled templates directory.
@@ -28,19 +28,19 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  * Path resolution (bundled with tsup):
  * - From dist/chunk-*.js: __dirname = packages/cli/dist/ → ../templates
  */
-export function getTemplatesDir(): string {
+export function getTemplatesDirectory(): string {
   const knownTemplateFile = 'SAFEWORD.md';
 
   // Try different relative paths - the bundled code ends up in dist/ directly (flat)
   // while source is in src/utils/
   const candidates = [
-    join(__dirname, '..', 'templates'), // From dist/ (flat bundled)
-    join(__dirname, '..', '..', 'templates'), // From src/utils/ or dist/utils/
-    join(__dirname, 'templates'), // Direct sibling (unlikely but safe)
+    nodePath.join(__dirname, '..', 'templates'), // From dist/ (flat bundled)
+    nodePath.join(__dirname, '..', '..', 'templates'), // From src/utils/ or dist/utils/
+    nodePath.join(__dirname, 'templates'), // Direct sibling (unlikely but safe)
   ];
 
   for (const candidate of candidates) {
-    if (existsSync(join(candidate, knownTemplateFile))) {
+    if (existsSync(nodePath.join(candidate, knownTemplateFile))) {
       return candidate;
     }
   }
@@ -60,7 +60,7 @@ export function exists(path: string): boolean {
  * Create directory recursively
  * @param path
  */
-export function ensureDir(path: string): void {
+export function ensureDirectory(path: string): void {
   if (!existsSync(path)) {
     mkdirSync(path, { recursive: true });
   }
@@ -71,16 +71,16 @@ export function ensureDir(path: string): void {
  * @param path
  */
 export function readFile(path: string): string {
-  return readFileSync(path, 'utf-8');
+  return readFileSync(path, 'utf8');
 }
 
 /**
  * Read file as string, return null if not exists
  * @param path
  */
-export function readFileSafe(path: string): string | null {
-  if (!existsSync(path)) return null;
-  return readFileSync(path, 'utf-8');
+export function readFileSafe(path: string): string | undefined {
+  if (!existsSync(path)) return undefined;
+  return readFileSync(path, 'utf8');
 }
 
 /**
@@ -89,7 +89,7 @@ export function readFileSafe(path: string): string | null {
  * @param content
  */
 export function writeFile(path: string, content: string): void {
-  ensureDir(dirname(path));
+  ensureDirectory(nodePath.dirname(path));
   writeFileSync(path, content);
 }
 
@@ -125,7 +125,7 @@ export function makeScriptsExecutable(dirPath: string): void {
   if (!existsSync(dirPath)) return;
   for (const file of readdirSync(dirPath)) {
     if (file.endsWith('.sh')) {
-      chmodSync(join(dirPath, file), 0o755);
+      chmodSync(nodePath.join(dirPath, file), 0o755);
     }
   }
 }
@@ -136,11 +136,11 @@ export function makeScriptsExecutable(dirPath: string): void {
  */
 export function readJson(path: string): unknown {
   const content = readFileSafe(path);
-  if (!content) return null;
+  if (!content) return undefined;
   try {
     return JSON.parse(content) as unknown;
   } catch {
-    return null;
+    return undefined;
   }
 }
 
@@ -150,5 +150,5 @@ export function readJson(path: string): unknown {
  * @param data
  */
 export function writeJson(path: string, data: unknown): void {
-  writeFile(path, JSON.stringify(data, null, 2) + '\n');
+  writeFile(path, `${JSON.stringify(data, undefined, 2)}\n`);
 }

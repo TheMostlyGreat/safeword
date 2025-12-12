@@ -1,50 +1,31 @@
 /**
  * Configuration templates - ESLint config generation and hook settings
  *
- * ESLint flat config (v9+) with:
- * - Dynamic framework detection from package.json at runtime
- * - Static imports for base plugins (always installed by safeword)
- * - Dynamic imports for framework plugins (loaded only if framework detected)
- * - defineConfig helper for validation and type checking
- * - eslint-config-prettier last to avoid conflicts
+ * ESLint flat config (v9+) using eslint-plugin-safeword for all rules.
+ * Framework detection from package.json at runtime selects the appropriate config.
  *
  * See: https://eslint.org/docs/latest/use/configure/configuration-files
  */
 
 /**
- * Generates a dynamic ESLint config that adapts to project frameworks at runtime.
+ * Generates an ESLint config using eslint-plugin-safeword.
  *
- * The generated config reads package.json to detect frameworks and dynamically
- * imports the corresponding ESLint plugins. This allows the config to be generated
- * once at setup and automatically adapt when frameworks are added or removed.
- * @param options
- * @param options.boundaries - Whether to include architecture boundaries config
+ * The generated config reads package.json to detect frameworks and selects
+ * the appropriate safeword config. Dynamic imports handle frameworks not
+ * yet in the safeword plugin (Vue, Svelte, Electron).
  * @returns ESLint config file content as a string
  */
-export function getEslintConfig(options: { boundaries?: boolean }): string {
-  return `/* eslint-disable import-x/no-unresolved, no-undef -- dynamic imports for optional framework plugins, console used in tryImport */
+export function getEslintConfig(): string {
+  return `/* eslint-disable import-x/no-unresolved, no-undef -- dynamic imports for optional framework plugins */
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { defineConfig } from "eslint/config";
-import js from "@eslint/js";
-import { importX } from "eslint-plugin-import-x";
-import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
-import sonarjs from "eslint-plugin-sonarjs";
-import pluginSecurity from "eslint-plugin-security";
-import pluginPromise from "eslint-plugin-promise";
-import * as pluginRegexp from "eslint-plugin-regexp";
-import pluginJsdoc from "eslint-plugin-jsdoc";
-import simpleImportSort from "eslint-plugin-simple-import-sort";
-import playwright from "eslint-plugin-playwright";
-import unicorn from "eslint-plugin-unicorn";
+import safeword from "eslint-plugin-safeword";
 import eslintConfigPrettier from "eslint-config-prettier";
-${options.boundaries ? 'import boundariesConfig from "./.safeword/eslint-boundaries.config.mjs";' : ''}
 
 // Read package.json relative to this config file (not CWD)
-// This ensures correct detection in monorepos where lint-staged may run from subdirectories
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(readFileSync(join(__dirname, "package.json"), "utf8"));
+const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(nodePath.join(__dirname, "package.json"), "utf8"));
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };
 
 // Helper for dynamic imports with actionable error messages
@@ -69,214 +50,55 @@ if (deps["astro"]) ignores.push(".astro/");
 if (deps["vue"] || deps["nuxt"]) ignores.push(".nuxt/");
 if (deps["svelte"] || deps["@sveltejs/kit"]) ignores.push(".svelte-kit/");
 
-// Start with base configs (always loaded)
+// Select appropriate safeword config based on detected framework
+// Order matters: most specific first
+let baseConfig;
+if (deps["next"]) {
+  baseConfig = safeword.configs.recommendedTypeScriptNext;
+} else if (deps["react"]) {
+  baseConfig = safeword.configs.recommendedTypeScriptReact;
+} else if (deps["astro"]) {
+  baseConfig = safeword.configs.astro;
+} else if (deps["typescript"] || deps["typescript-eslint"]) {
+  baseConfig = safeword.configs.recommendedTypeScript;
+} else {
+  baseConfig = safeword.configs.recommended;
+}
+
+// Start with ignores + safeword config
 const configs = [
   { ignores },
-  js.configs.recommended,
-  importX.flatConfigs.recommended,
-  {
-    settings: {
-      "import-x/resolver-next": [createTypeScriptImportResolver()],
-    },
-  },
-  sonarjs.configs.recommended,
-  // Security plugin - detect common vulnerabilities
-  pluginSecurity.configs.recommended,
-  {
-    rules: {
-      // Security rules at error severity (LLMs ignore warnings)
-      "security/detect-bidi-characters": "error", // Trojan Source attacks - critical for LLM code
-      "security/detect-eval-with-expression": "error",
-      "security/detect-non-literal-fs-filename": "error",
-      "security/detect-non-literal-regexp": "error",
-      "security/detect-non-literal-require": "error",
-      "security/detect-child-process": "error",
-      "security/detect-unsafe-regex": "error",
-      "security/detect-disable-mustache-escape": "error",
-      "security/detect-no-csrf-before-method-override": "error",
-      // High false positive rate (~40%) - warn for human review
-      "security/detect-object-injection": "warn",
-      "security/detect-possible-timing-attacks": "warn",
-      "security/detect-buffer-noassert": "warn",
-      "security/detect-new-buffer": "warn",
-      "security/detect-pseudoRandomBytes": "warn",
-    },
-  },
-  // Promise plugin - catches floating promises (critical for LLM code)
-  pluginPromise.configs["flat/recommended"],
-  {
-    rules: {
-      "promise/no-multiple-resolved": "error", // Not in preset, catches missing return after resolve
-      // LLMs mix callback/promise paradigms - escalate to error
-      "promise/no-callback-in-promise": "error",
-      "promise/no-nesting": "error",
-      "promise/no-promise-in-callback": "error",
-      "promise/no-return-in-finally": "error",
-      "promise/valid-params": "error",
-    },
-  },
-  // Regexp plugin - catches ReDoS vulnerabilities and malformed regex
-  pluginRegexp.configs["flat/recommended"],
-  // JSDoc plugin - helps LLMs understand code context via documentation
-  pluginJsdoc.configs["flat/recommended-typescript"],
-  unicorn.configs["flat/recommended"],
-  {
-    // Unicorn overrides for LLM-generated code
-    // Keep modern JS enforcement, disable overly pedantic rules
-    rules: {
-      "unicorn/prevent-abbreviations": "off", // ctx, dir, pkg, err are standard
-      "unicorn/no-null": "off", // null is valid JS
-      "unicorn/no-process-exit": "off", // CLI apps use process.exit
-      "unicorn/import-style": "off", // Named imports are fine
-      "unicorn/numeric-separators-style": "off", // Style preference
-      "unicorn/text-encoding-identifier-case": "off", // utf-8 vs utf8
-      "unicorn/switch-case-braces": "error", // Enforce consistent style
-      "unicorn/catch-error-name": "error", // Enforce consistent error naming
-      "unicorn/no-negated-condition": "off", // Sometimes clearer
-      "unicorn/no-array-reduce": "error", // LLMs write confusing reduce - force alternatives
-      "unicorn/no-array-for-each": "off", // forEach is fine
-      "unicorn/prefer-module": "off", // CJS still valid
-    },
-  },
-  // Simple import sort - auto-fixable, reduces noise for LLMs
-  {
-    plugins: { "simple-import-sort": simpleImportSort },
-    rules: {
-      "simple-import-sort/imports": "error",
-      "simple-import-sort/exports": "error",
-      "import-x/order": "off", // Disable import-x order in favor of simple-import-sort
-    },
-  },
+  ...baseConfig,
 ];
 
-// TypeScript support (detected from package.json)
-// Uses type-aware rules if tsconfig.json exists, otherwise falls back to basic rules
-if (deps["typescript"] || deps["typescript-eslint"]) {
-  const tseslint = await tryImport("typescript-eslint", "TypeScript");
-  const { existsSync } = await import("fs");
-  const hasTsconfig = existsSync(join(__dirname, "tsconfig.json"));
-
-  configs.push(importX.flatConfigs.typescript);
-
-  if (hasTsconfig) {
-    // Type-aware linting (strict + stylistic for maximum LLM guardrails)
-    configs.push(...tseslint.default.configs.strictTypeChecked);
-    configs.push(...tseslint.default.configs.stylisticTypeChecked);
-    configs.push({
-      languageOptions: {
-        parserOptions: {
-          projectService: true,
-          tsconfigRootDir: __dirname,
-        },
-      },
-    });
-    // Disable type-checked rules for JS files (no type info available)
-    configs.push({
-      files: ["**/*.js", "**/*.mjs", "**/*.cjs"],
-      extends: [tseslint.default.configs.disableTypeChecked],
-    });
-    // LLM-critical TypeScript overrides
-    configs.push({
-      files: ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
-      rules: {
-        "@typescript-eslint/consistent-type-definitions": "off",
-        // LLMs use \`any\` when stuck - force them to use \`unknown\` instead
-        "@typescript-eslint/no-explicit-any": "error",
-        // Catch truthy/falsy bugs - LLMs often check objects/arrays wrong
-        "@typescript-eslint/strict-boolean-expressions": ["error", {
-          allowString: true,       // Allow string checks (common pattern)
-          allowNumber: false,      // Disallow number checks (0 is falsy bug)
-          allowNullableObject: true,
-          allowNullableBoolean: true,
-          allowNullableString: true,
-          allowNullableNumber: false,
-          allowAny: false,
-        }],
-      },
-    });
-  } else {
-    // Fall back to non-type-aware rules when no tsconfig exists
-    configs.push(...tseslint.default.configs.recommended);
-    configs.push(...tseslint.default.configs.stylistic);
-  }
+// Add test configs if testing frameworks detected
+if (deps["vitest"]) {
+  configs.push(...safeword.configs.vitest);
+}
+if (deps["playwright"] || deps["@playwright/test"]) {
+  configs.push(...safeword.configs.playwright);
 }
 
-// React/Next.js support
-if (deps["react"] || deps["next"]) {
-  const react = await tryImport("eslint-plugin-react", "React");
-  const reactHooks = await tryImport("eslint-plugin-react-hooks", "React");
-  const jsxA11y = await tryImport("eslint-plugin-jsx-a11y", "React");
-  configs.push(react.default.configs.flat.recommended);
-  configs.push(react.default.configs.flat["jsx-runtime"]);
-  configs.push({
-    name: "react-hooks",
-    plugins: { "react-hooks": reactHooks.default },
-    rules: reactHooks.default.configs.recommended.rules,
-  });
-  configs.push(jsxA11y.default.flatConfigs.recommended);
-}
-
-// Next.js plugin
-if (deps["next"]) {
-  const nextPlugin = await tryImport("@next/eslint-plugin-next", "Next.js");
-  configs.push({
-    name: "nextjs",
-    plugins: { "@next/next": nextPlugin.default },
-    rules: nextPlugin.default.configs.recommended.rules,
-  });
-}
-
-// Astro support
-if (deps["astro"]) {
-  const astro = await tryImport("eslint-plugin-astro", "Astro");
-  configs.push(...astro.default.configs.recommended);
-}
-
-// Vue support
+// Frameworks NOT in eslint-plugin-safeword (dynamic imports)
 if (deps["vue"] || deps["nuxt"]) {
   const vue = await tryImport("eslint-plugin-vue", "Vue");
   configs.push(...vue.default.configs["flat/recommended"]);
 }
 
-// Svelte support
 if (deps["svelte"] || deps["@sveltejs/kit"]) {
   const svelte = await tryImport("eslint-plugin-svelte", "Svelte");
   configs.push(...svelte.default.configs.recommended);
 }
 
-// Electron support
 if (deps["electron"]) {
   const electron = await tryImport("@electron-toolkit/eslint-config", "Electron");
   configs.push(electron.default);
 }
 
-// Vitest support (scoped to test files)
-if (deps["vitest"]) {
-  const vitest = await tryImport("@vitest/eslint-plugin", "Vitest");
-  configs.push({
-    name: "vitest",
-    files: ["**/*.test.{js,ts,jsx,tsx}", "**/*.spec.{js,ts,jsx,tsx}", "**/tests/**"],
-    plugins: { vitest: vitest.default },
-    languageOptions: {
-      globals: { ...vitest.default.environments.env.globals },
-    },
-    rules: { ...vitest.default.configs.recommended.rules },
-  });
-}
-
-// Playwright for e2e tests (always included - safeword sets up Playwright)
-configs.push({
-  name: "playwright",
-  files: ["**/e2e/**", "**/*.e2e.{js,ts,jsx,tsx}", "**/playwright/**"],
-  ...playwright.configs["flat/recommended"],
-});
-
-// Architecture boundaries${options.boundaries ? '\nconfigs.push(boundariesConfig);' : ''}
-
 // eslint-config-prettier must be last to disable conflicting rules
 configs.push(eslintConfigPrettier);
 
-export default defineConfig(configs);
+export default configs;
 `;
 }
 

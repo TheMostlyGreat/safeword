@@ -2,11 +2,11 @@
  * Unit tests for content templates
  */
 
-import { describe, expect,it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import type { ProjectType } from '../utils/project-detector';
 import { getEslintConfig } from './config';
-import { getLintStagedConfig,getPrettierConfig } from './content';
+import { getPrettierConfig } from './content';
 
 const baseProjectType: ProjectType = {
   typescript: false,
@@ -81,29 +81,13 @@ describe('getPrettierConfig', () => {
   });
 });
 
-describe('getLintStagedConfig', () => {
-  it('should not include shell pattern when shell is false', () => {
-    const config = getLintStagedConfig(baseProjectType);
-
-    expect(config['*.sh']).toBeUndefined();
-    expect(config['*.md']).toBeDefined();
-  });
-
-  it('should include shell pattern when shell is true', () => {
-    const projectType = { ...baseProjectType, shell: true };
-    const config = getLintStagedConfig(projectType);
-
-    expect(config['*.sh']).toEqual(['shellcheck', 'prettier --write']);
-  });
-});
-
 describe('getEslintConfig', () => {
   it('should use import.meta.url for config-relative path resolution (not CWD)', () => {
     // This test documents a critical fix: the ESLint config must resolve package.json
     // relative to the config file location, NOT relative to process.cwd().
     // When lint-staged runs from a subdirectory in a monorepo, CWD-relative resolution
     // would read the wrong package.json and fail to find framework ESLint plugins.
-    const config = getEslintConfig({ boundaries: false });
+    const config = getEslintConfig();
 
     // Must use import.meta.url pattern for config-relative resolution
     expect(config).toContain('import.meta.url');
@@ -114,26 +98,36 @@ describe('getEslintConfig', () => {
     expect(config).not.toMatch(/readFileSync\s*\(\s*["']\.\/package\.json["']/);
   });
 
-  it('should include tryImport helper for graceful plugin loading errors', () => {
-    const config = getEslintConfig({ boundaries: false });
+  it('should import eslint-plugin-safeword', () => {
+    const config = getEslintConfig();
 
-    // Must have tryImport helper that provides actionable error messages
+    expect(config).toContain('import safeword from "eslint-plugin-safeword"');
+    expect(config).toContain('safeword.configs');
+  });
+
+  it('should include tryImport helper for unsupported frameworks', () => {
+    const config = getEslintConfig();
+
+    // Must have tryImport helper for Vue/Svelte/Electron (not in safeword plugin)
     expect(config).toContain('async function tryImport');
     expect(config).toContain('ERR_MODULE_NOT_FOUND');
     expect(config).toContain('npm install -D');
   });
 
-  it('should include boundaries config when option is true', () => {
-    const config = getEslintConfig({ boundaries: true });
+  it('should include framework detection for safeword config selection', () => {
+    const config = getEslintConfig();
 
-    expect(config).toContain('boundariesConfig');
-    expect(config).toContain('.safeword/eslint-boundaries.config.mjs');
+    // Config should detect frameworks and select appropriate safeword config
+    expect(config).toContain('safeword.configs.recommendedTypeScriptNext');
+    expect(config).toContain('safeword.configs.recommendedTypeScriptReact');
+    expect(config).toContain('safeword.configs.recommendedTypeScript');
+    expect(config).toContain('safeword.configs.recommended');
   });
 
-  it('should exclude boundaries config when option is false', () => {
-    const config = getEslintConfig({ boundaries: false });
+  it('should include vitest and playwright configs', () => {
+    const config = getEslintConfig();
 
-    expect(config).not.toContain('boundariesConfig');
-    expect(config).not.toContain('eslint-boundaries.config.mjs');
+    expect(config).toContain('safeword.configs.vitest');
+    expect(config).toContain('safeword.configs.playwright');
   });
 });

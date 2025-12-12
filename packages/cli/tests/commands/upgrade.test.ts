@@ -4,54 +4,54 @@
  * Tests for `safeword upgrade` command.
  */
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   createConfiguredProject,
-  createTempDir,
+  createTemporaryDirectory,
   createTypeScriptPackageJson,
   fileExists,
   readTestFile,
-  removeTempDir,
+  removeTemporaryDirectory,
   runCli,
   writeTestFile,
 } from '../helpers';
 
 describe('Test Suite 9: Upgrade', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = createTempDir();
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    removeTempDir(tempDir);
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
   describe('Test 9.1: Overwrites .safeword files', () => {
     it('should restore modified files to CLI version', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Modify a safeword file
-      const originalContent = readTestFile(tempDir, '.safeword/SAFEWORD.md');
-      writeTestFile(tempDir, '.safeword/SAFEWORD.md', '# Modified content\n');
+      const originalContent = readTestFile(temporaryDirectory, '.safeword/SAFEWORD.md');
+      writeTestFile(temporaryDirectory, '.safeword/SAFEWORD.md', '# Modified content\n');
 
-      await runCli(['upgrade'], { cwd: tempDir });
+      await runCli(['upgrade'], { cwd: temporaryDirectory });
 
-      const restoredContent = readTestFile(tempDir, '.safeword/SAFEWORD.md');
+      const restoredContent = readTestFile(temporaryDirectory, '.safeword/SAFEWORD.md');
       // Should be restored (not the modified content)
       expect(restoredContent).not.toBe('# Modified content\n');
     });
 
     it('should update .safeword/version', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Set an older version
-      writeTestFile(tempDir, '.safeword/version', '0.0.1');
+      writeTestFile(temporaryDirectory, '.safeword/version', '0.0.1');
 
-      await runCli(['upgrade'], { cwd: tempDir });
+      await runCli(['upgrade'], { cwd: temporaryDirectory });
 
-      const version = readTestFile(tempDir, '.safeword/version').trim();
+      const version = readTestFile(temporaryDirectory, '.safeword/version').trim();
       expect(version).not.toBe('0.0.1');
       expect(version).toMatch(/^\d+\.\d+\.\d+/);
     });
@@ -59,36 +59,40 @@ describe('Test Suite 9: Upgrade', () => {
 
   describe('Test 9.2: Updates skills', () => {
     it('should restore modified skill files', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Find and modify a skill file if it exists
-      if (fileExists(tempDir, '.claude/skills')) {
+      if (fileExists(temporaryDirectory, '.claude/skills')) {
         // The actual skill path depends on implementation
         // This test structure is correct for when skills are implemented
       }
 
-      const result = await runCli(['upgrade'], { cwd: tempDir });
+      const result = await runCli(['upgrade'], { cwd: temporaryDirectory });
       expect(result.exitCode).toBe(0);
     });
   });
 
   describe('Test 9.3: Preserves non-safeword hooks', () => {
     it('should preserve custom hooks', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Add a custom hook
-      const settings = JSON.parse(readTestFile(tempDir, '.claude/settings.json'));
-      settings.hooks = settings.hooks || {};
-      settings.hooks.SessionStart = settings.hooks.SessionStart || [];
+      const settings = JSON.parse(readTestFile(temporaryDirectory, '.claude/settings.json'));
+      settings.hooks ||= {};
+      settings.hooks.SessionStart ||= [];
       settings.hooks.SessionStart.push({
         command: 'echo "My custom hook"',
         description: 'Custom hook',
       });
-      writeTestFile(tempDir, '.claude/settings.json', JSON.stringify(settings, null, 2));
+      writeTestFile(
+        temporaryDirectory,
+        '.claude/settings.json',
+        JSON.stringify(settings, undefined, 2),
+      );
 
-      await runCli(['upgrade'], { cwd: tempDir });
+      await runCli(['upgrade'], { cwd: temporaryDirectory });
 
-      const updatedSettings = JSON.parse(readTestFile(tempDir, '.claude/settings.json'));
+      const updatedSettings = JSON.parse(readTestFile(temporaryDirectory, '.claude/settings.json'));
       const hasCustomHook = updatedSettings.hooks.SessionStart.some(
         (hook: { command?: string }) => hook.command === 'echo "My custom hook"',
       );
@@ -99,34 +103,34 @@ describe('Test Suite 9: Upgrade', () => {
 
   describe('Test 9.4: Same-version reinstalls', () => {
     it('should restore files even at same version', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Get current version
-      const version = readTestFile(tempDir, '.safeword/version').trim();
+      const version = readTestFile(temporaryDirectory, '.safeword/version').trim();
 
       // Modify a file
-      writeTestFile(tempDir, '.safeword/SAFEWORD.md', '# Corrupted\n');
+      writeTestFile(temporaryDirectory, '.safeword/SAFEWORD.md', '# Corrupted\n');
 
-      await runCli(['upgrade'], { cwd: tempDir });
+      await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       // File should be restored
-      const content = readTestFile(tempDir, '.safeword/SAFEWORD.md');
+      const content = readTestFile(temporaryDirectory, '.safeword/SAFEWORD.md');
       expect(content).not.toBe('# Corrupted\n');
 
       // Version should remain same
-      const newVersion = readTestFile(tempDir, '.safeword/version').trim();
+      const newVersion = readTestFile(temporaryDirectory, '.safeword/version').trim();
       expect(newVersion).toBe(version);
     });
   });
 
   describe('Test 9.5: Refuses to downgrade', () => {
     it('should error when project is newer than CLI', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Set a future version
-      writeTestFile(tempDir, '.safeword/version', '99.99.99');
+      writeTestFile(temporaryDirectory, '.safeword/version', '99.99.99');
 
-      const result = await runCli(['upgrade'], { cwd: tempDir });
+      const result = await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr.toLowerCase()).toMatch(/older|downgrade|cli|update/i);
@@ -135,10 +139,10 @@ describe('Test Suite 9: Upgrade', () => {
 
   describe('Test 9.6: Unconfigured project error', () => {
     it('should error on unconfigured project', async () => {
-      createTypeScriptPackageJson(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
       // No setup
 
-      const result = await runCli(['upgrade'], { cwd: tempDir });
+      const result = await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr.toLowerCase()).toContain('not configured');
@@ -148,12 +152,12 @@ describe('Test Suite 9: Upgrade', () => {
 
   describe('Test 9.7: Prints summary of changes', () => {
     it('should show what changed', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Modify to create changes
-      writeTestFile(tempDir, '.safeword/version', '0.0.1');
+      writeTestFile(temporaryDirectory, '.safeword/version', '0.0.1');
 
-      const result = await runCli(['upgrade'], { cwd: tempDir });
+      const result = await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
       // Should show some summary of changes
@@ -163,24 +167,26 @@ describe('Test Suite 9: Upgrade', () => {
 
   describe('Test 9.8: Preserves learnings directory', () => {
     it('should preserve user learnings on upgrade', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Create user learning file
       writeTestFile(
-        tempDir,
+        temporaryDirectory,
         '.safeword/learnings/my-custom-learning.md',
         '# My Learning\n\nImportant discovery about the codebase.',
       );
 
       // Modify version to trigger upgrade
-      writeTestFile(tempDir, '.safeword/version', '0.0.1');
+      writeTestFile(temporaryDirectory, '.safeword/version', '0.0.1');
 
-      await runCli(['upgrade'], { cwd: tempDir });
+      await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       // User learning should be preserved
-      expect(fileExists(tempDir, '.safeword/learnings/my-custom-learning.md')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword/learnings/my-custom-learning.md')).toBe(
+        true,
+      );
 
-      const content = readTestFile(tempDir, '.safeword/learnings/my-custom-learning.md');
+      const content = readTestFile(temporaryDirectory, '.safeword/learnings/my-custom-learning.md');
       expect(content).toContain('My Learning');
       expect(content).toContain('Important discovery');
     });
@@ -188,22 +194,22 @@ describe('Test Suite 9: Upgrade', () => {
 
   describe('Test 9.9: Creates backup before upgrade', () => {
     it('should create .safeword.backup directory', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Modify version to trigger upgrade
-      writeTestFile(tempDir, '.safeword/version', '0.0.1');
+      writeTestFile(temporaryDirectory, '.safeword/version', '0.0.1');
 
       // Check for backup during upgrade (it may be deleted after success)
       // We verify by checking that upgrade succeeds without data loss
-      const originalSafeword = readTestFile(tempDir, '.safeword/SAFEWORD.md');
+      const originalSafeword = readTestFile(temporaryDirectory, '.safeword/SAFEWORD.md');
 
-      await runCli(['upgrade'], { cwd: tempDir });
+      await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       // After successful upgrade, backup should be deleted
-      expect(fileExists(tempDir, '.safeword.backup')).toBe(false);
+      expect(fileExists(temporaryDirectory, '.safeword.backup')).toBe(false);
 
       // Files should still exist
-      expect(fileExists(tempDir, '.safeword/SAFEWORD.md')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword/SAFEWORD.md')).toBe(true);
     });
   });
 

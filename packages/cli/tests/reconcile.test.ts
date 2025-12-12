@@ -9,7 +9,7 @@
 
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -18,14 +18,14 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 // import { SAFEWORD_SCHEMA } from '../src/schema.js';
 
 describe('Reconcile - Reconciliation Engine', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'safeword-reconcile-test-'));
+    temporaryDirectory = mkdtempSync(nodePath.join(tmpdir(), 'safeword-reconcile-test-'));
   });
 
   afterEach(() => {
-    rmSync(tempDir, { recursive: true, force: true });
+    rmSync(temporaryDirectory, { recursive: true, force: true });
   });
 
   // Helper to create a minimal package.json
@@ -39,7 +39,10 @@ describe('Reconcile - Reconciliation Engine', () => {
       version: '1.0.0',
       ...content,
     };
-    writeFileSync(join(tempDir, 'package.json'), JSON.stringify(defaultContent, null, 2));
+    writeFileSync(
+      nodePath.join(temporaryDirectory, 'package.json'),
+      JSON.stringify(defaultContent, undefined, 2),
+    );
     return defaultContent;
   }
 
@@ -50,7 +53,7 @@ describe('Reconcile - Reconciliation Engine', () => {
    */
   function createContext(overrides: Record<string, unknown> = {}) {
     return {
-      cwd: tempDir,
+      cwd: temporaryDirectory,
       projectType: {
         typescript: false,
         react: false,
@@ -64,8 +67,8 @@ describe('Reconcile - Reconciliation Engine', () => {
         publishableLibrary: false,
         ...(overrides.projectType as Record<string, boolean>),
       },
-      devDeps: (overrides.devDeps as Record<string, string>) ?? {},
-      isGitRepo: (overrides.isGitRepo as boolean) ?? true, // Default to true so husky tests pass
+      developmentDeps: (overrides.developmentDeps as Record<string, string>) ?? {},
+      isGitRepo: (overrides.isGitRepo as boolean) ?? true,
     };
   }
 
@@ -83,7 +86,7 @@ describe('Reconcile - Reconciliation Engine', () => {
 
       // Verify all ownedDirs were created
       for (const dir of SAFEWORD_SCHEMA.ownedDirs) {
-        expect(existsSync(join(tempDir, dir))).toBe(true);
+        expect(existsSync(nodePath.join(temporaryDirectory, dir))).toBe(true);
       }
     });
 
@@ -97,7 +100,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       for (const dir of SAFEWORD_SCHEMA.sharedDirs) {
-        expect(existsSync(join(tempDir, dir))).toBe(true);
+        expect(existsSync(nodePath.join(temporaryDirectory, dir))).toBe(true);
       }
     });
 
@@ -111,7 +114,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       for (const dir of SAFEWORD_SCHEMA.preservedDirs) {
-        expect(existsSync(join(tempDir, dir))).toBe(true);
+        expect(existsSync(nodePath.join(temporaryDirectory, dir))).toBe(true);
       }
     });
 
@@ -125,15 +128,14 @@ describe('Reconcile - Reconciliation Engine', () => {
       const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Check a sample of owned files exist
-      expect(existsSync(join(tempDir, '.safeword/SAFEWORD.md'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/version'))).toBe(true);
-      expect(existsSync(join(tempDir, '.husky/pre-commit'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/version'))).toBe(true);
 
       // created should include all owned files
       expect(result.created.length).toBeGreaterThan(0);
     });
 
-    it('should skip .husky directory and files in non-git repos', async () => {
+    it('should work in non-git repos', async () => {
       const { reconcile } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
@@ -142,13 +144,9 @@ describe('Reconcile - Reconciliation Engine', () => {
 
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
-      // .husky should NOT be created in non-git repos
-      expect(existsSync(join(tempDir, '.husky'))).toBe(false);
-      expect(existsSync(join(tempDir, '.husky/pre-commit'))).toBe(false);
-
-      // But .safeword should still be created
-      expect(existsSync(join(tempDir, '.safeword/SAFEWORD.md'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/hooks'))).toBe(true);
+      // .safeword should still be created
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/hooks'))).toBe(true);
     });
 
     it('should create managed files when missing', async () => {
@@ -161,9 +159,9 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // managedFiles should be created
-      expect(existsSync(join(tempDir, 'eslint.config.mjs'))).toBe(true);
-      expect(existsSync(join(tempDir, '.prettierrc'))).toBe(true);
-      expect(existsSync(join(tempDir, '.markdownlint-cli2.jsonc'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, 'eslint.config.mjs'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.markdownlint-cli2.jsonc'))).toBe(true);
     });
 
     it('should merge JSON files', async () => {
@@ -175,7 +173,9 @@ describe('Reconcile - Reconciliation Engine', () => {
 
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
-      const pkg = JSON.parse(readFileSync(join(tempDir, 'package.json'), 'utf-8'));
+      const pkg = JSON.parse(
+        readFileSync(nodePath.join(temporaryDirectory, 'package.json'), 'utf8'),
+      );
 
       // Existing scripts preserved
       expect(pkg.scripts.test).toBe('vitest');
@@ -183,7 +183,6 @@ describe('Reconcile - Reconciliation Engine', () => {
       expect(pkg.scripts.lint).toBe('eslint .');
       expect(pkg.scripts.format).toBe('prettier --write .');
       expect(pkg.scripts.knip).toBe('knip');
-      expect(pkg['lint-staged']).toBeDefined();
     });
 
     it('should apply text patches', async () => {
@@ -196,8 +195,8 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // AGENTS.md should be created with the prepend content
-      expect(existsSync(join(tempDir, 'AGENTS.md'))).toBe(true);
-      const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
+      expect(existsSync(nodePath.join(temporaryDirectory, 'AGENTS.md'))).toBe(true);
+      const content = readFileSync(nodePath.join(temporaryDirectory, 'AGENTS.md'), 'utf8');
       expect(content).toContain('.safeword/SAFEWORD.md');
     });
 
@@ -213,7 +212,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       // Should include all base packages
       expect(result.packagesToInstall).toContain('eslint');
       expect(result.packagesToInstall).toContain('prettier');
-      expect(result.packagesToInstall).toContain('husky');
+      expect(result.packagesToInstall).toContain('eslint-plugin-safeword');
     });
 
     it('should include conditional packages based on project type', async () => {
@@ -221,13 +220,13 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
       createPackageJson();
-      const ctx = createContext({ projectType: { typescript: true, react: true } });
+      const ctx = createContext({ projectType: { vue: true, tailwind: true } });
 
       const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
-      expect(result.packagesToInstall).toContain('typescript-eslint');
-      expect(result.packagesToInstall).toContain('eslint-plugin-react');
-      expect(result.packagesToInstall).toContain('eslint-plugin-react-hooks');
+      // Vue and tailwind plugins are NOT bundled in eslint-plugin-safeword
+      expect(result.packagesToInstall).toContain('eslint-plugin-vue');
+      expect(result.packagesToInstall).toContain('prettier-plugin-tailwindcss');
     });
 
     it('should exclude already installed packages', async () => {
@@ -235,14 +234,14 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
       createPackageJson({ devDependencies: { eslint: '^8.0.0', prettier: '^3.0.0' } });
-      const ctx = createContext({ devDeps: { eslint: '^8.0.0', prettier: '^3.0.0' } });
+      const ctx = createContext({ developmentDeps: { eslint: '^8.0.0', prettier: '^3.0.0' } });
 
       const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       expect(result.packagesToInstall).not.toContain('eslint');
       expect(result.packagesToInstall).not.toContain('prettier');
       // But should still include others
-      expect(result.packagesToInstall).toContain('husky');
+      expect(result.packagesToInstall).toContain('knip');
     });
   });
 
@@ -258,8 +257,11 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Create a deprecated file (simulating old version)
-      const deprecatedPath = join(tempDir, '.safeword/templates/user-stories-template.md');
-      mkdirSync(join(tempDir, '.safeword/templates'), { recursive: true });
+      const deprecatedPath = nodePath.join(
+        temporaryDirectory,
+        '.safeword/templates/user-stories-template.md',
+      );
+      mkdirSync(nodePath.join(temporaryDirectory, '.safeword/templates'), { recursive: true });
       writeFileSync(deprecatedPath, '# Old User Stories Template');
 
       // Upgrade should remove deprecated file
@@ -280,7 +282,10 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Ensure deprecated file does not exist
-      const deprecatedPath = join(tempDir, '.safeword/templates/user-stories-template.md');
+      const deprecatedPath = nodePath.join(
+        temporaryDirectory,
+        '.safeword/templates/user-stories-template.md',
+      );
       expect(existsSync(deprecatedPath)).toBe(false);
 
       // Upgrade should succeed without errors
@@ -302,8 +307,11 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Create a deprecated file
-      const deprecatedPath = join(tempDir, '.safeword/templates/user-stories-template.md');
-      mkdirSync(join(tempDir, '.safeword/templates'), { recursive: true });
+      const deprecatedPath = nodePath.join(
+        temporaryDirectory,
+        '.safeword/templates/user-stories-template.md',
+      );
+      mkdirSync(nodePath.join(temporaryDirectory, '.safeword/templates'), { recursive: true });
       writeFileSync(deprecatedPath, '# Old Template');
 
       // dryRun upgrade should report deprecated file in actions
@@ -333,7 +341,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Modify an owned file
-      const versionPath = join(tempDir, '.safeword/version');
+      const versionPath = nodePath.join(temporaryDirectory, '.safeword/version');
       writeFileSync(versionPath, 'old-version');
 
       // Upgrade should update it
@@ -370,7 +378,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // User modifies eslint config
-      const eslintPath = join(tempDir, 'eslint.config.mjs');
+      const eslintPath = nodePath.join(temporaryDirectory, 'eslint.config.mjs');
       writeFileSync(eslintPath, '// User customized config\nexport default [];');
 
       // Upgrade should NOT overwrite it
@@ -379,7 +387,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       expect(result.updated).not.toContain('eslint.config.mjs');
 
       // Verify content preserved
-      const content = readFileSync(eslintPath, 'utf-8');
+      const content = readFileSync(eslintPath, 'utf8');
       expect(content).toContain('User customized');
     });
 
@@ -419,12 +427,14 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'uninstall', ctx);
 
       // All owned files should be removed
-      expect(existsSync(join(tempDir, '.claude/commands/lint.md'))).toBe(false);
-      expect(existsSync(join(tempDir, '.claude/skills/safeword-quality-reviewer/SKILL.md'))).toBe(
-        false,
-      );
-      expect(existsSync(join(tempDir, '.safeword/SAFEWORD.md'))).toBe(false);
-      expect(existsSync(join(tempDir, '.safeword'))).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.claude/commands/lint.md'))).toBe(false);
+      expect(
+        existsSync(
+          nodePath.join(temporaryDirectory, '.claude/skills/safeword-quality-reviewer/SKILL.md'),
+        ),
+      ).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'))).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword'))).toBe(false);
     });
 
     it('should unmerge JSON files', async () => {
@@ -440,13 +450,14 @@ describe('Reconcile - Reconciliation Engine', () => {
       // Uninstall
       await reconcile(SAFEWORD_SCHEMA, 'uninstall', ctx);
 
-      const pkg = JSON.parse(readFileSync(join(tempDir, 'package.json'), 'utf-8'));
+      const pkg = JSON.parse(
+        readFileSync(nodePath.join(temporaryDirectory, 'package.json'), 'utf8'),
+      );
 
       // Safeword-specific scripts removed (but lint/format preserved)
       expect(pkg.scripts['lint:md']).toBeUndefined();
       expect(pkg.scripts['format:check']).toBeUndefined();
       expect(pkg.scripts.knip).toBeUndefined();
-      expect(pkg['lint-staged']).toBeUndefined();
 
       // lint/format preserved (useful standalone)
       expect(pkg.scripts.lint).toBe('eslint .');
@@ -461,7 +472,10 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
       // Create existing AGENTS.md with user content
-      writeFileSync(join(tempDir, 'AGENTS.md'), '# My Project\n\nCustom content here.');
+      writeFileSync(
+        nodePath.join(temporaryDirectory, 'AGENTS.md'),
+        '# My Project\n\nCustom content here.',
+      );
       createPackageJson();
       const ctx = createContext();
 
@@ -469,7 +483,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Verify patch was applied
-      let content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
+      let content = readFileSync(nodePath.join(temporaryDirectory, 'AGENTS.md'), 'utf8');
       expect(content).toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('Custom content here');
 
@@ -477,7 +491,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'uninstall', ctx);
 
       // Patch removed, user content preserved
-      content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
+      content = readFileSync(nodePath.join(temporaryDirectory, 'AGENTS.md'), 'utf8');
       expect(content).not.toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('Custom content here');
     });
@@ -493,22 +507,24 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Add a completed ticket (should be preserved - user content)
-      const completedDir = join(tempDir, '.safeword/tickets/completed');
-      mkdirSync(completedDir, { recursive: true });
-      writeFileSync(join(completedDir, '001-done.md'), 'Completed ticket');
+      const completedDirectory = nodePath.join(temporaryDirectory, '.safeword/tickets/completed');
+      mkdirSync(completedDirectory, { recursive: true });
+      writeFileSync(nodePath.join(completedDirectory, '001-done.md'), 'Completed ticket');
 
       // Uninstall
       await reconcile(SAFEWORD_SCHEMA, 'uninstall', ctx);
 
       // Owned dirs removed
-      expect(existsSync(join(tempDir, '.safeword/hooks'))).toBe(false);
-      expect(existsSync(join(tempDir, '.safeword/guides'))).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/hooks'))).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/guides'))).toBe(false);
 
       // Preserved dir still exists with user content
-      expect(existsSync(join(tempDir, '.safeword/tickets/completed/001-done.md'))).toBe(true);
+      expect(
+        existsSync(nodePath.join(temporaryDirectory, '.safeword/tickets/completed/001-done.md')),
+      ).toBe(true);
 
       // But .safeword parent still exists because of preserved content
-      expect(existsSync(join(tempDir, '.safeword'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword'))).toBe(true);
     });
   });
 
@@ -527,9 +543,9 @@ describe('Reconcile - Reconciliation Engine', () => {
       await reconcile(SAFEWORD_SCHEMA, 'uninstall-full', ctx);
 
       // Managed files removed
-      expect(existsSync(join(tempDir, 'eslint.config.mjs'))).toBe(false);
-      expect(existsSync(join(tempDir, '.prettierrc'))).toBe(false);
-      expect(existsSync(join(tempDir, '.markdownlint-cli2.jsonc'))).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, 'eslint.config.mjs'))).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.markdownlint-cli2.jsonc'))).toBe(false);
     });
 
     it('should compute packages to remove', async () => {
@@ -540,11 +556,11 @@ describe('Reconcile - Reconciliation Engine', () => {
         devDependencies: {
           eslint: '^8.0.0',
           prettier: '^3.0.0',
-          husky: '^9.0.0',
+          knip: '^5.0.0',
         },
       });
       const ctx = createContext({
-        devDeps: { eslint: '^8.0.0', prettier: '^3.0.0', husky: '^9.0.0' },
+        developmentDeps: { eslint: '^8.0.0', prettier: '^3.0.0', knip: '^5.0.0' },
       });
 
       // First install
@@ -556,7 +572,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       // Should include packages to remove
       expect(result.packagesToRemove).toContain('eslint');
       expect(result.packagesToRemove).toContain('prettier');
-      expect(result.packagesToRemove).toContain('husky');
+      expect(result.packagesToRemove).toContain('knip');
     });
 
     it('should remove .mcp.json if empty after unmerge', async () => {
@@ -568,13 +584,13 @@ describe('Reconcile - Reconciliation Engine', () => {
 
       // First install (creates .mcp.json with our servers)
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
-      expect(existsSync(join(tempDir, '.mcp.json'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.mcp.json'))).toBe(true);
 
       // Full uninstall
       await reconcile(SAFEWORD_SCHEMA, 'uninstall-full', ctx);
 
       // .mcp.json should be removed (was only our content)
-      expect(existsSync(join(tempDir, '.mcp.json'))).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.mcp.json'))).toBe(false);
     });
   });
 
@@ -591,8 +607,8 @@ describe('Reconcile - Reconciliation Engine', () => {
       expect(result.applied).toBe(false);
 
       // No files should be created
-      expect(existsSync(join(tempDir, '.safeword'))).toBe(false);
-      expect(existsSync(join(tempDir, '.claude'))).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword'))).toBe(false);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.claude'))).toBe(false);
     });
 
     it('should still compute actions in dryRun mode', async () => {
@@ -655,16 +671,16 @@ describe('Reconcile - Reconciliation Engine', () => {
       expect(result).toEqual(SAFEWORD_SCHEMA.packages.base);
     });
 
-    it('should add TypeScript packages when typescript: true', async () => {
+    it('should add conditional packages for vue', async () => {
       const { computePackagesToInstall } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
       const projectType = {
-        typescript: true,
+        typescript: false,
         react: false,
         nextjs: false,
         astro: false,
-        vue: false,
+        vue: true,
         svelte: false,
         electron: false,
         vitest: false,
@@ -674,7 +690,7 @@ describe('Reconcile - Reconciliation Engine', () => {
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
-      expect(result).toContain('typescript-eslint');
+      expect(result).toContain('eslint-plugin-vue');
     });
 
     it('should add multiple conditional packages', async () => {
@@ -682,25 +698,26 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
       const projectType = {
-        typescript: true,
-        react: true,
-        nextjs: true,
-        astro: false,
+        typescript: false,
+        react: false,
+        nextjs: false,
+        astro: true,
         vue: false,
-        svelte: false,
+        svelte: true,
         electron: false,
-        vitest: true,
+        vitest: false,
         tailwind: true,
-        publishableLibrary: false,
+        publishableLibrary: true,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
-      expect(result).toContain('typescript-eslint');
-      expect(result).toContain('eslint-plugin-react');
-      expect(result).toContain('@next/eslint-plugin-next');
-      expect(result).toContain('@vitest/eslint-plugin');
+      // Conditional packages NOT bundled in eslint-plugin-safeword
+      expect(result).toContain('prettier-plugin-astro');
+      expect(result).toContain('eslint-plugin-svelte');
+      expect(result).toContain('prettier-plugin-svelte');
       expect(result).toContain('prettier-plugin-tailwindcss');
+      expect(result).toContain('publint');
     });
 
     it('should exclude already installed packages', async () => {
@@ -720,21 +737,25 @@ describe('Reconcile - Reconciliation Engine', () => {
         publishableLibrary: false,
       };
 
-      const installedDevDeps = {
+      const installedDevelopmentDeps = {
         eslint: '^8.0.0',
         prettier: '^3.0.0',
-        husky: '^9.0.0',
+        knip: '^5.0.0',
       };
 
-      const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, installedDevDeps);
+      const result = computePackagesToInstall(
+        SAFEWORD_SCHEMA,
+        projectType,
+        installedDevelopmentDeps,
+      );
 
       expect(result).not.toContain('eslint');
       expect(result).not.toContain('prettier');
-      expect(result).not.toContain('husky');
-      expect(result).toContain('knip'); // Not installed, should be included
+      expect(result).not.toContain('knip');
+      expect(result).toContain('markdownlint-cli2'); // Not installed, should be included
     });
 
-    it('should exclude husky and lint-staged in non-git repos', async () => {
+    it('should include base packages regardless of git status', async () => {
       const { computePackagesToInstall } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
@@ -754,36 +775,11 @@ describe('Reconcile - Reconciliation Engine', () => {
       // isGitRepo = false
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {}, false);
 
-      expect(result).not.toContain('husky');
-      expect(result).not.toContain('lint-staged');
-      // Other base packages should still be included
+      // All base packages should be included
       expect(result).toContain('eslint');
       expect(result).toContain('prettier');
       expect(result).toContain('knip');
-    });
-
-    it('should include husky and lint-staged in git repos', async () => {
-      const { computePackagesToInstall } = await import('../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-
-      const projectType = {
-        typescript: false,
-        react: false,
-        nextjs: false,
-        astro: false,
-        vue: false,
-        svelte: false,
-        electron: false,
-        vitest: false,
-        tailwind: false,
-        publishableLibrary: false,
-      };
-
-      // isGitRepo = true (default)
-      const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {}, true);
-
-      expect(result).toContain('husky');
-      expect(result).toContain('lint-staged');
+      expect(result).toContain('eslint-plugin-safeword');
     });
   });
 });

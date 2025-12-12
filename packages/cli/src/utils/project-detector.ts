@@ -6,7 +6,7 @@
  */
 
 import { readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 export interface PackageJson {
   name?: string;
@@ -44,7 +44,7 @@ export interface ProjectType {
  * @param maxDepth
  */
 export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
-  const excludeDirs = new Set(['node_modules', '.git', '.safeword']);
+  const excludeDirectories = new Set(['node_modules', '.git', '.safeword']);
 
   /**
    *
@@ -62,8 +62,8 @@ export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
         }
         if (
           entry.isDirectory() &&
-          !excludeDirs.has(entry.name) &&
-          scan(join(dir, entry.name), depth + 1)
+          !excludeDirectories.has(entry.name) &&
+          scan(nodePath.join(dir, entry.name), depth + 1)
         ) {
           return true;
         }
@@ -84,20 +84,20 @@ export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
  */
 export function detectProjectType(packageJson: PackageJson, cwd?: string): ProjectType {
   const deps = packageJson.dependencies || {};
-  const devDeps = packageJson.devDependencies || {};
-  const allDeps = { ...deps, ...devDeps };
+  const developmentDeps = packageJson.devDependencies || {};
+  const allDeps = { ...deps, ...developmentDeps };
 
   const hasTypescript = 'typescript' in allDeps;
-  const hasReact = 'react' in deps || 'react' in devDeps;
+  const hasReact = 'react' in deps || 'react' in developmentDeps;
   const hasNextJs = 'next' in deps;
-  const hasAstro = 'astro' in deps || 'astro' in devDeps;
-  const hasVue = 'vue' in deps || 'vue' in devDeps;
+  const hasAstro = 'astro' in deps || 'astro' in developmentDeps;
+  const hasVue = 'vue' in deps || 'vue' in developmentDeps;
   const hasNuxt = 'nuxt' in deps;
-  const hasSvelte = 'svelte' in deps || 'svelte' in devDeps;
-  const hasSvelteKit = '@sveltejs/kit' in deps || '@sveltejs/kit' in devDeps;
-  const hasElectron = 'electron' in deps || 'electron' in devDeps;
-  const hasVitest = 'vitest' in devDeps;
-  const hasPlaywright = '@playwright/test' in devDeps;
+  const hasSvelte = 'svelte' in deps || 'svelte' in developmentDeps;
+  const hasSvelteKit = '@sveltejs/kit' in deps || '@sveltejs/kit' in developmentDeps;
+  const hasElectron = 'electron' in deps || 'electron' in developmentDeps;
+  const hasVitest = 'vitest' in developmentDeps;
+  const hasPlaywright = '@playwright/test' in developmentDeps;
   const hasTailwind = 'tailwindcss' in allDeps;
 
   // Publishable library: has entry points and is not marked private

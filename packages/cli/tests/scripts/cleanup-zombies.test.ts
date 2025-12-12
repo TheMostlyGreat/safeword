@@ -8,32 +8,32 @@
 import { execSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-const SCRIPT_PATH = join(__dirname, '../../templates/scripts/cleanup-zombies.sh');
+const SCRIPT_PATH = nodePath.join(__dirname, '../../templates/scripts/cleanup-zombies.sh');
 
 describe('cleanup-zombies.sh', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'cleanup-zombies-test-'));
+    temporaryDirectory = mkdtempSync(nodePath.join(tmpdir(), 'cleanup-zombies-test-'));
   });
 
   afterEach(() => {
-    rmSync(tempDir, { recursive: true, force: true });
+    rmSync(temporaryDirectory, { recursive: true, force: true });
   });
 
   function runScript(args: string[] = []): string {
     const cmd = `bash "${SCRIPT_PATH}" --dry-run ${args.join(' ')}`;
-    return execSync(cmd, { cwd: tempDir, encoding: 'utf-8' });
+    return execSync(cmd, { cwd: temporaryDirectory, encoding: 'utf8' });
   }
 
   function createFile(relativePath: string, content = ''): void {
-    const fullPath = join(tempDir, relativePath);
+    const fullPath = nodePath.join(temporaryDirectory, relativePath);
     const dir = fullPath.slice(0, Math.max(0, fullPath.lastIndexOf('/')));
-    if (dir && dir !== tempDir) {
+    if (dir && dir !== temporaryDirectory) {
       mkdirSync(dir, { recursive: true });
     }
     writeFileSync(fullPath, content);

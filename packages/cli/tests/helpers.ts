@@ -1,30 +1,30 @@
 import { exec, execSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import nodePath from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = nodePath.dirname(__filename);
 
 /**
  * Path to the CLI entry point (built)
  */
-export const CLI_PATH = join(__dirname, '../dist/cli.js');
+export const CLI_PATH = nodePath.join(__dirname, '../dist/cli.js');
 
 /**
  * Path to the CLI source (for ts-node execution during development)
  */
-export const CLI_SRC_PATH = join(__dirname, '../src/cli.ts');
+export const CLI_SRC_PATH = nodePath.join(__dirname, '../src/cli.ts');
 
 /**
  * Creates a temporary directory for test isolation
  */
-export function createTempDir(): string {
-  return mkdtempSync(join(tmpdir(), 'safeword-test-'));
+export function createTemporaryDirectory(): string {
+  return mkdtempSync(nodePath.join(tmpdir(), 'safeword-test-'));
 }
 
 /**
@@ -33,7 +33,7 @@ export function createTempDir(): string {
  * npm/git processes that haven't released file handles.
  * @param dir
  */
-export function removeTempDir(dir: string): void {
+export function removeTemporaryDirectory(dir: string): void {
   rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 }
 
@@ -48,7 +48,7 @@ export function createPackageJson(dir: string, overrides: Record<string, unknown
     version: '1.0.0',
     ...overrides,
   };
-  writeFileSync(join(dir, 'package.json'), JSON.stringify(pkg, null, 2));
+  writeFileSync(nodePath.join(dir, 'package.json'), JSON.stringify(pkg, undefined, 2));
 }
 
 /**
@@ -131,7 +131,7 @@ export async function runCli(
   } = {},
 ): Promise<CliResult> {
   // Increased timeout for setup command which now runs npm install
-  const { cwd = process.cwd(), input, env = {}, timeout = 120000 } = options;
+  const { cwd = process.cwd(), input, env = {}, timeout = 120_000 } = options;
 
   const command = `node ${CLI_PATH} ${args.join(' ')}`;
 
@@ -174,7 +174,7 @@ export function runCliSync(
     timeout?: number;
   } = {},
 ): CliResult {
-  const { cwd = process.cwd(), env = {}, timeout = 30000 } = options;
+  const { cwd = process.cwd(), env = {}, timeout = 30_000 } = options;
 
   const command = `node ${CLI_PATH} ${args.join(' ')}`;
 
@@ -183,7 +183,7 @@ export function runCliSync(
       cwd,
       env: { ...process.env, ...env },
       timeout,
-      encoding: 'utf-8',
+      encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     return { stdout, stderr: '', exitCode: 0 };
@@ -207,7 +207,7 @@ export function runCliSync(
  * @param relativePath
  */
 export function readTestFile(dir: string, relativePath: string): string {
-  return readFileSync(join(dir, relativePath), 'utf-8');
+  return readFileSync(nodePath.join(dir, relativePath), 'utf8');
 }
 
 /**
@@ -217,10 +217,10 @@ export function readTestFile(dir: string, relativePath: string): string {
  * @param content
  */
 export function writeTestFile(dir: string, relativePath: string, content: string): void {
-  const fullPath = join(dir, relativePath);
-  const parentDir = join(fullPath, '..');
-  if (!existsSync(parentDir)) {
-    mkdirSync(parentDir, { recursive: true });
+  const fullPath = nodePath.join(dir, relativePath);
+  const parentDirectory = nodePath.join(fullPath, '..');
+  if (!existsSync(parentDirectory)) {
+    mkdirSync(parentDirectory, { recursive: true });
   }
   writeFileSync(fullPath, content);
 }
@@ -231,7 +231,7 @@ export function writeTestFile(dir: string, relativePath: string, content: string
  * @param relativePath
  */
 export function fileExists(dir: string, relativePath: string): boolean {
-  return existsSync(join(dir, relativePath));
+  return existsSync(nodePath.join(dir, relativePath));
 }
 
 /**
@@ -245,11 +245,25 @@ export function initGitRepo(dir: string): void {
 }
 
 /**
- * Creates a configured project (runs setup) for tests that need pre-configured state
+ * Creates a configured project (runs setup) for tests that need pre-configured state.
+ * Includes base packages in devDependencies to prevent sync attempts during tests
+ * (eslint-plugin-safeword isn't published yet).
  * @param dir
  */
 export async function createConfiguredProject(dir: string): Promise<void> {
-  createTypeScriptPackageJson(dir);
+  createTypeScriptPackageJson(dir, {
+    devDependencies: {
+      typescript: '^5.0.0',
+      // Include safeword base packages to prevent sync attempts during upgrade tests
+      // (eslint-plugin-safeword isn't published yet)
+      eslint: '^9.0.0',
+      prettier: '^3.0.0',
+      'eslint-config-prettier': '^9.0.0',
+      'eslint-plugin-safeword': '^0.8.0',
+      'markdownlint-cli2': '^0.13.0',
+      knip: '^5.0.0',
+    },
+  });
   initGitRepo(dir);
   await runCli(['setup', '--yes'], { cwd: dir });
 }

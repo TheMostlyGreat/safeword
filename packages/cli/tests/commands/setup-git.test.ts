@@ -4,135 +4,98 @@
  * Tests for git detection and Husky/lint-staged setup.
  */
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-  createTempDir,
+  createTemporaryDirectory,
   createTypeScriptPackageJson,
   fileExists,
   initGitRepo,
   readTestFile,
-  removeTempDir,
+  removeTemporaryDirectory,
   runCli,
 } from '../helpers';
 
 describe('Test Suite 7: Git Repository Handling', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = createTempDir();
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    removeTempDir(tempDir);
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
-  describe('Test 7.1: Warns when no .git directory', () => {
-    it('should warn about skipped Husky setup', async () => {
-      createTypeScriptPackageJson(tempDir);
+  describe('Test 7.1: Works without .git directory', () => {
+    it('should complete setup without git repository', async () => {
+      createTypeScriptPackageJson(temporaryDirectory);
       // No git init
 
-      const result = await runCli(['setup', '--yes'], { cwd: tempDir });
+      const result = await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      // Output should mention skipped Husky
-      const output = result.stdout + result.stderr;
-      expect(output.toLowerCase()).toMatch(/skip.*husky|husky.*skip|no.*git/i);
+      // Setup should succeed
+      expect(result.exitCode).toBe(0);
     });
   });
 
   describe('Test 7.2: Works with existing git repository', () => {
     it('should complete setup with existing git repository', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      const result = await runCli(['setup', '--yes'], { cwd: tempDir });
+      const result = await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
-      expect(fileExists(tempDir, '.git')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.git')).toBe(true);
     });
   });
 
-  describe('Test 7.3: Skips git init in non-interactive mode', () => {
-    it('should skip git init in non-interactive mode', async () => {
-      createTypeScriptPackageJson(tempDir);
+  describe('Test 7.3: Works in non-interactive mode', () => {
+    it('should complete setup in non-interactive mode', async () => {
+      createTypeScriptPackageJson(temporaryDirectory);
       // No git init
 
-      const result = await runCli(['setup', '--yes'], { cwd: tempDir });
+      const result = await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
-      // Git should NOT be initialized
-      expect(fileExists(tempDir, '.git')).toBe(false);
-
-      // Should warn about skipped git hooks
-      const output = result.stdout + result.stderr;
-      expect(output.toLowerCase()).toMatch(/skip|warning|git/i);
+      // Git should NOT be initialized (safeword doesn't init git)
+      expect(fileExists(temporaryDirectory, '.git')).toBe(false);
     });
   });
 
-  describe('Test 7.4: Sets up Husky and lint-staged', () => {
-    it('should create .husky/pre-commit with lint-staged', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+  describe('Test 7.4: Sets up linting scripts', () => {
+    it('should add lint and format scripts to package.json', async () => {
+      createTypeScriptPackageJson(temporaryDirectory);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      expect(fileExists(tempDir, '.husky/pre-commit')).toBe(true);
-
-      const content = readTestFile(tempDir, '.husky/pre-commit');
-      expect(content).toContain('lint-staged');
-    });
-
-    it('should add lint-staged config to package.json', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
-
-      await runCli(['setup', '--yes'], { cwd: tempDir });
-
-      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
-      expect(packageJson['lint-staged']).toBeDefined();
-      expect(packageJson['lint-staged']['*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}']).toBeDefined();
-    });
-
-    it('should add prepare script for Husky', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
-
-      await runCli(['setup', '--yes'], { cwd: tempDir });
-
-      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
-      expect(packageJson.scripts?.prepare).toBe('husky || true');
+      const packageJson = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
+      expect(packageJson.scripts?.lint).toBeDefined();
+      expect(packageJson.scripts?.format).toBeDefined();
     });
   });
 
-  describe('Test 7.5: Preserves existing scripts and config', () => {
-    it('should not overwrite existing prepare script', async () => {
-      createTypeScriptPackageJson(tempDir, {
+  describe('Test 7.5: Preserves existing scripts', () => {
+    it('should not overwrite existing scripts', async () => {
+      createTypeScriptPackageJson(temporaryDirectory, {
         scripts: {
-          prepare: 'npm run build',
+          test: 'vitest',
+          build: 'tsc',
         },
       });
-      initGitRepo(tempDir);
+      initGitRepo(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
-      // Original prepare script should be preserved
-      expect(packageJson.scripts?.prepare).toBe('npm run build');
-    });
-
-    it('should not overwrite existing lint-staged config', async () => {
-      createTypeScriptPackageJson(tempDir, {
-        'lint-staged': {
-          '*.ts': ['custom-linter'],
-        },
-      });
-      initGitRepo(tempDir);
-
-      await runCli(['setup', '--yes'], { cwd: tempDir });
-
-      const packageJson = JSON.parse(readTestFile(tempDir, 'package.json'));
-      // Original lint-staged config should be preserved
-      expect(packageJson['lint-staged']['*.ts']).toEqual(['custom-linter']);
+      const packageJson = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
+      // Original scripts should be preserved
+      expect(packageJson.scripts?.test).toBe('vitest');
+      expect(packageJson.scripts?.build).toBe('tsc');
+      // New scripts should be added
+      expect(packageJson.scripts?.lint).toBeDefined();
+      expect(packageJson.scripts?.format).toBeDefined();
     });
   });
 });

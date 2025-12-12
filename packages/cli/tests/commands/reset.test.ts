@@ -4,38 +4,38 @@
  * Tests for `safeword reset` command.
  */
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   createConfiguredProject,
-  createTempDir,
+  createTemporaryDirectory,
   createTypeScriptPackageJson,
   fileExists,
   initGitRepo,
   readTestFile,
-  removeTempDir,
+  removeTemporaryDirectory,
   runCli,
   writeTestFile,
 } from '../helpers';
 
 describe('Test Suite 11: Reset', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = createTempDir();
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    removeTempDir(tempDir);
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
   describe('Test 11.1: Prompts for confirmation', () => {
     // In TTY mode, should prompt. We test the prompt message content.
     it('should mention removing safeword', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // With --yes, it shouldn't prompt but we can check the output
-      const result = await runCli(['reset', '--yes'], { cwd: tempDir });
+      const result = await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
       // Should mention what it's removing
       const output = result.stdout + result.stderr;
@@ -45,23 +45,23 @@ describe('Test Suite 11: Reset', () => {
 
   describe('Test 11.2: --yes auto-confirms', () => {
     it('should skip confirmation and remove .safeword', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
-      expect(fileExists(tempDir, '.safeword')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword')).toBe(true);
 
-      const result = await runCli(['reset', '--yes'], { cwd: tempDir });
+      const result = await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
-      expect(fileExists(tempDir, '.safeword')).toBe(false);
+      expect(fileExists(temporaryDirectory, '.safeword')).toBe(false);
     });
   });
 
   describe('Test 11.3: No TTY auto-confirms', () => {
     it('should auto-confirm in non-TTY mode', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       const result = await runCli(['reset'], {
-        cwd: tempDir,
+        cwd: temporaryDirectory,
         env: { CI: 'true' },
       });
 
@@ -72,35 +72,39 @@ describe('Test Suite 11: Reset', () => {
 
   describe('Test 11.4: Removes .safeword directory', () => {
     it('should remove .safeword/ completely', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
-      expect(fileExists(tempDir, '.safeword')).toBe(true);
-      expect(fileExists(tempDir, '.safeword/SAFEWORD.md')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword/SAFEWORD.md')).toBe(true);
 
-      await runCli(['reset', '--yes'], { cwd: tempDir });
+      await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
-      expect(fileExists(tempDir, '.safeword')).toBe(false);
+      expect(fileExists(temporaryDirectory, '.safeword')).toBe(false);
     });
   });
 
   describe('Test 11.5: Removes hooks from settings.json', () => {
     it('should remove safeword hooks but preserve custom hooks', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Add a custom hook
-      const settings = JSON.parse(readTestFile(tempDir, '.claude/settings.json'));
-      settings.hooks.SessionStart = settings.hooks.SessionStart || [];
+      const settings = JSON.parse(readTestFile(temporaryDirectory, '.claude/settings.json'));
+      settings.hooks.SessionStart ||= [];
       settings.hooks.SessionStart.push({
         command: 'echo "Custom preserved hook"',
         description: 'Custom',
       });
-      writeTestFile(tempDir, '.claude/settings.json', JSON.stringify(settings, null, 2));
+      writeTestFile(
+        temporaryDirectory,
+        '.claude/settings.json',
+        JSON.stringify(settings, undefined, 2),
+      );
 
-      await runCli(['reset', '--yes'], { cwd: tempDir });
+      await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
-      expect(fileExists(tempDir, '.claude/settings.json')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.claude/settings.json')).toBe(true);
 
-      const updatedSettings = JSON.parse(readTestFile(tempDir, '.claude/settings.json'));
+      const updatedSettings = JSON.parse(readTestFile(temporaryDirectory, '.claude/settings.json'));
 
       // Custom hook preserved
       const hasCustom = updatedSettings.hooks?.SessionStart?.some(
@@ -109,60 +113,63 @@ describe('Test Suite 11: Reset', () => {
       expect(hasCustom).toBe(true);
 
       // Safeword hooks removed (no references to .safeword)
-      const settingsStr = JSON.stringify(updatedSettings);
-      expect(settingsStr).not.toContain('.safeword/hooks');
+      const settingsString = JSON.stringify(updatedSettings);
+      expect(settingsString).not.toContain('.safeword/hooks');
     });
   });
 
   describe('Test 11.6: Removes safeword skills', () => {
     it('should remove safeword-* skill directories', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Verify skills exist after setup
-      const skillsExist = fileExists(tempDir, '.claude/skills');
+      const skillsExist = fileExists(temporaryDirectory, '.claude/skills');
 
-      await runCli(['reset', '--yes'], { cwd: tempDir });
+      const result = await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
+
+      // Command should complete successfully
+      expect(result.exitCode).toBe(0);
 
       // After reset, safeword skills should be gone
       // but .claude/skills directory may remain if empty or have other skills
       if (skillsExist) {
         // Check no safeword-* directories remain
         // This would require listing directory contents
-        // For now, verify the command completed
       }
     });
   });
 
-  describe('Test 11.7: Removes Husky hooks', () => {
-    it('should remove .husky directory on reset', async () => {
-      createTypeScriptPackageJson(tempDir);
-      initGitRepo(tempDir);
+  describe('Test 11.7: Cleans up safeword directories', () => {
+    it('should remove safeword directories on reset', async () => {
+      await createConfiguredProject(temporaryDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: tempDir });
+      // Verify safeword was created
+      expect(fileExists(temporaryDirectory, '.safeword')).toBe(true);
 
-      // Verify Husky was created
-      expect(fileExists(tempDir, '.husky/pre-commit')).toBe(true);
+      await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
-      await runCli(['reset', '--yes'], { cwd: tempDir });
-
-      // Husky directory should be removed
-      expect(fileExists(tempDir, '.husky')).toBe(false);
+      // Safeword directory should be removed
+      expect(fileExists(temporaryDirectory, '.safeword')).toBe(false);
     });
   });
 
   describe('Test 11.8: Removes link from AGENTS.md', () => {
     it('should remove safeword link but preserve other content', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Add custom content to AGENTS.md
-      const content = readTestFile(tempDir, 'AGENTS.md');
-      writeTestFile(tempDir, 'AGENTS.md', content + '\n## My Custom Section\n\nCustom content.\n');
+      const content = readTestFile(temporaryDirectory, 'AGENTS.md');
+      writeTestFile(
+        temporaryDirectory,
+        'AGENTS.md',
+        `${content}\n## My Custom Section\n\nCustom content.\n`,
+      );
 
-      await runCli(['reset', '--yes'], { cwd: tempDir });
+      await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
-      expect(fileExists(tempDir, 'AGENTS.md')).toBe(true);
+      expect(fileExists(temporaryDirectory, 'AGENTS.md')).toBe(true);
 
-      const updatedContent = readTestFile(tempDir, 'AGENTS.md');
+      const updatedContent = readTestFile(temporaryDirectory, 'AGENTS.md');
 
       // Link removed
       expect(updatedContent).not.toContain('.safeword/SAFEWORD.md');
@@ -175,21 +182,21 @@ describe('Test Suite 11: Reset', () => {
 
   describe('Test 11.9: Preserves linting config', () => {
     it('should keep eslint and prettier config', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
-      expect(fileExists(tempDir, 'eslint.config.mjs')).toBe(true);
-      expect(fileExists(tempDir, '.prettierrc')).toBe(true);
+      expect(fileExists(temporaryDirectory, 'eslint.config.mjs')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.prettierrc')).toBe(true);
 
-      const pkgBefore = JSON.parse(readTestFile(tempDir, 'package.json'));
+      const pkgBefore = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
 
-      await runCli(['reset', '--yes'], { cwd: tempDir });
+      await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
       // Linting files preserved
-      expect(fileExists(tempDir, 'eslint.config.mjs')).toBe(true);
-      expect(fileExists(tempDir, '.prettierrc')).toBe(true);
+      expect(fileExists(temporaryDirectory, 'eslint.config.mjs')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.prettierrc')).toBe(true);
 
       // Scripts preserved
-      const pkgAfter = JSON.parse(readTestFile(tempDir, 'package.json'));
+      const pkgAfter = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
       expect(pkgAfter.scripts?.lint).toBe(pkgBefore.scripts?.lint);
       expect(pkgAfter.scripts?.format).toBe(pkgBefore.scripts?.format);
     });
@@ -197,10 +204,10 @@ describe('Test Suite 11: Reset', () => {
 
   describe('Test 11.10: Unconfigured project message', () => {
     it('should show nothing to remove message', async () => {
-      createTypeScriptPackageJson(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
       // No setup
 
-      const result = await runCli(['reset', '--yes'], { cwd: tempDir });
+      const result = await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout.toLowerCase()).toMatch(/nothing|already|not configured/i);
@@ -209,51 +216,54 @@ describe('Test Suite 11: Reset', () => {
 
   describe('Test 11.11: Removes safeword slash commands', () => {
     it('should remove safeword commands but preserve custom ones', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Verify commands directory exists after setup
-      expect(fileExists(tempDir, '.claude/commands')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.claude/commands')).toBe(true);
 
       // Add a custom command that should be preserved
       writeTestFile(
-        tempDir,
+        temporaryDirectory,
         '.claude/commands/my-custom-command.md',
         '# My Custom Command\n\nDo something custom.',
       );
 
-      await runCli(['reset', '--yes'], { cwd: tempDir });
+      await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
       // Custom command should be preserved
-      expect(fileExists(tempDir, '.claude/commands/my-custom-command.md')).toBe(true);
-      const customContent = readTestFile(tempDir, '.claude/commands/my-custom-command.md');
+      expect(fileExists(temporaryDirectory, '.claude/commands/my-custom-command.md')).toBe(true);
+      const customContent = readTestFile(
+        temporaryDirectory,
+        '.claude/commands/my-custom-command.md',
+      );
       expect(customContent).toContain('My Custom Command');
 
       // Safeword commands should be removed (review, architecture, lint)
-      expect(fileExists(tempDir, '.claude/commands/review.md')).toBe(false);
+      expect(fileExists(temporaryDirectory, '.claude/commands/review.md')).toBe(false);
     });
   });
 
   describe('Test 11.12: Removes MCP servers from .mcp.json', () => {
     it('should remove context7 and playwright servers', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Verify MCP config exists
-      expect(fileExists(tempDir, '.mcp.json')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.mcp.json')).toBe(true);
 
       // Add a custom MCP server
-      const mcpConfig = JSON.parse(readTestFile(tempDir, '.mcp.json'));
+      const mcpConfig = JSON.parse(readTestFile(temporaryDirectory, '.mcp.json'));
       mcpConfig.mcpServers['my-custom-server'] = {
         command: 'my-server',
         args: ['--port', '3000'],
       };
-      writeTestFile(tempDir, '.mcp.json', JSON.stringify(mcpConfig, null, 2));
+      writeTestFile(temporaryDirectory, '.mcp.json', JSON.stringify(mcpConfig, undefined, 2));
 
-      await runCli(['reset', '--yes'], { cwd: tempDir });
+      await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
       // .mcp.json should still exist with custom server
-      expect(fileExists(tempDir, '.mcp.json')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.mcp.json')).toBe(true);
 
-      const updatedConfig = JSON.parse(readTestFile(tempDir, '.mcp.json'));
+      const updatedConfig = JSON.parse(readTestFile(temporaryDirectory, '.mcp.json'));
 
       // Custom server preserved
       expect(updatedConfig.mcpServers['my-custom-server']).toBeDefined();
@@ -265,7 +275,7 @@ describe('Test Suite 11: Reset', () => {
     });
 
     it('should delete or empty .mcp.json if only safeword servers remain', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Overwrite with only safeword servers
       const mcpConfig = {
@@ -274,13 +284,13 @@ describe('Test Suite 11: Reset', () => {
           playwright: { command: 'npx', args: ['@playwright/mcp'] },
         },
       };
-      writeTestFile(tempDir, '.mcp.json', JSON.stringify(mcpConfig, null, 2));
+      writeTestFile(temporaryDirectory, '.mcp.json', JSON.stringify(mcpConfig, undefined, 2));
 
-      await runCli(['reset', '--yes'], { cwd: tempDir });
+      await runCli(['reset', '--yes'], { cwd: temporaryDirectory });
 
       // Either .mcp.json is deleted OR mcpServers is empty
-      if (fileExists(tempDir, '.mcp.json')) {
-        const updatedConfig = JSON.parse(readTestFile(tempDir, '.mcp.json'));
+      if (fileExists(temporaryDirectory, '.mcp.json')) {
+        const updatedConfig = JSON.parse(readTestFile(temporaryDirectory, '.mcp.json'));
         const serverCount = Object.keys(updatedConfig.mcpServers || {}).length;
         expect(serverCount).toBe(0);
       }

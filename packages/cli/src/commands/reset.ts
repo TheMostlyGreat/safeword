@@ -8,7 +8,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
@@ -27,10 +27,10 @@ export interface ResetOptions {
  */
 export async function reset(options: ResetOptions): Promise<void> {
   const cwd = process.cwd();
-  const safewordDir = join(cwd, '.safeword');
+  const safewordDirectory = nodePath.join(cwd, '.safeword');
 
   // Check if configured
-  if (!exists(safewordDir)) {
+  if (!exists(safewordDirectory)) {
     info('Nothing to remove. Project is not configured with safeword.');
     return;
   }

@@ -4,7 +4,7 @@
  * Uses reconcile() with mode='upgrade' to update all managed files.
  */
 
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
@@ -20,16 +20,16 @@ import { sync } from './sync.js';
  */
 export async function upgrade(): Promise<void> {
   const cwd = process.cwd();
-  const safewordDir = join(cwd, '.safeword');
+  const safewordDirectory = nodePath.join(cwd, '.safeword');
 
   // Check if configured
-  if (!exists(safewordDir)) {
+  if (!exists(safewordDirectory)) {
     error('Not configured. Run `safeword setup` first.');
     process.exit(1);
   }
 
   // Read project version
-  const versionPath = join(safewordDir, 'version');
+  const versionPath = nodePath.join(safewordDirectory, 'version');
   const projectVersion = readFileSafe(versionPath)?.trim() ?? '0.0.0';
 
   // Check for downgrade

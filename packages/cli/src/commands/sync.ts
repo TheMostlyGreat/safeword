@@ -12,7 +12,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { getBaseEslintPackages, getConditionalEslintPackages } from '../schema.js';
 import { exists, readJson } from '../utils/fs.js';
@@ -61,11 +61,11 @@ function getMissingPackages(required: string[], installed: Record<string, string
  */
 export async function sync(options: SyncOptions = {}): Promise<void> {
   const cwd = process.cwd();
-  const safewordDir = join(cwd, '.safeword');
-  const packageJsonPath = join(cwd, 'package.json');
+  const safewordDirectory = nodePath.join(cwd, '.safeword');
+  const packageJsonPath = nodePath.join(cwd, 'package.json');
 
   // Must be in a safeword project
-  if (!exists(safewordDir)) {
+  if (!exists(safewordDirectory)) {
     if (!options.quiet) {
       console.error('Not a safeword project. Run `safeword setup` first.');
     }
@@ -86,11 +86,11 @@ export async function sync(options: SyncOptions = {}): Promise<void> {
 
   // Detect current project type
   const projectType = detectProjectType(packageJson);
-  const devDeps = packageJson.devDependencies || {};
+  const developmentDeps = packageJson.devDependencies || {};
 
   // Check for missing plugins
   const requiredPlugins = getRequiredPlugins(projectType);
-  const missingPlugins = getMissingPackages(requiredPlugins, devDeps);
+  const missingPlugins = getMissingPackages(requiredPlugins, developmentDeps);
 
   // Fast exit if nothing to install
   if (missingPlugins.length === 0) {
@@ -107,14 +107,14 @@ export async function sync(options: SyncOptions = {}): Promise<void> {
       cwd,
       stdio: options.quiet ? 'pipe' : 'inherit',
     });
-  } catch {
+  } catch (caughtError) {
     // Clear error message for network/install failures
     const pluginList = missingPlugins.join(' ');
     console.error(`\n✗ Failed to install ESLint plugins\n`);
     console.error(`Your project needs: ${pluginList}`);
     console.error(`\nRun manually when online:`);
     console.error(`  npm install -D ${pluginList}\n`);
-    process.exit(1);
+    throw caughtError;
   }
 
   // Stage modified files if --stage flag is set (for pre-commit hook)

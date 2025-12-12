@@ -10,19 +10,19 @@
 import { execSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('Upgrade Command - Reconcile Integration', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'safeword-upgrade-reconcile-'));
+    temporaryDirectory = mkdtempSync(nodePath.join(tmpdir(), 'safeword-upgrade-reconcile-'));
   });
 
   afterEach(() => {
-    rmSync(tempDir, { recursive: true, force: true });
+    rmSync(temporaryDirectory, { recursive: true, force: true });
   });
 
   // Helper to create a minimal configured project
@@ -33,21 +33,24 @@ describe('Upgrade Command - Reconcile Integration', () => {
   function createConfiguredProject(version = '0.5.0') {
     // package.json
     writeFileSync(
-      join(tempDir, 'package.json'),
-      JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+      nodePath.join(temporaryDirectory, 'package.json'),
+      JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
     );
 
     // .safeword directory with version file
-    mkdirSync(join(tempDir, '.safeword'), { recursive: true });
-    writeFileSync(join(tempDir, '.safeword/version'), version);
-    writeFileSync(join(tempDir, '.safeword/SAFEWORD.md'), '# Old content');
+    mkdirSync(nodePath.join(temporaryDirectory, '.safeword'), { recursive: true });
+    writeFileSync(nodePath.join(temporaryDirectory, '.safeword/version'), version);
+    writeFileSync(nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'), '# Old content');
 
     // .claude directory
-    mkdirSync(join(tempDir, '.claude'), { recursive: true });
-    writeFileSync(join(tempDir, '.claude/settings.json'), JSON.stringify({ hooks: {} }, null, 2));
+    mkdirSync(nodePath.join(temporaryDirectory, '.claude'), { recursive: true });
+    writeFileSync(
+      nodePath.join(temporaryDirectory, '.claude/settings.json'),
+      JSON.stringify({ hooks: {} }, undefined, 2),
+    );
 
     // AGENTS.md with link
-    writeFileSync(tempDir + '/AGENTS.md', '.safeword/SAFEWORD.md\n\n# Agents');
+    writeFileSync(`${temporaryDirectory}/AGENTS.md`, '.safeword/SAFEWORD.md\n\n# Agents');
   }
 
   describe('reconcile mode=upgrade', () => {
@@ -58,7 +61,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
       createConfiguredProject('0.5.0');
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
 
       // dryRun should compute actions without applying
@@ -83,17 +86,23 @@ describe('Upgrade Command - Reconcile Integration', () => {
       createConfiguredProject('0.5.0');
 
       // Read old content
-      const oldContent = readFileSync(join(tempDir, '.safeword/SAFEWORD.md'), 'utf-8');
+      const oldContent = readFileSync(
+        nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'),
+        'utf8',
+      );
       expect(oldContent).toBe('# Old content');
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx);
 
       // Should have applied changes
       expect(result.applied).toBe(true);
 
       // SAFEWORD.md should be updated
-      const newContent = readFileSync(join(tempDir, '.safeword/SAFEWORD.md'), 'utf-8');
+      const newContent = readFileSync(
+        nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'),
+        'utf8',
+      );
       expect(newContent).not.toBe('# Old content');
       expect(newContent).toContain('SAFEWORD Agent Instructions');
     });
@@ -105,7 +114,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
       createConfiguredProject('0.5.0');
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
 
       // Should report packages to install
@@ -121,7 +130,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
       // Add packages to devDependencies
       writeFileSync(
-        join(tempDir, 'package.json'),
+        nodePath.join(temporaryDirectory, 'package.json'),
         JSON.stringify(
           {
             name: 'test',
@@ -132,13 +141,13 @@ describe('Upgrade Command - Reconcile Integration', () => {
               husky: '^9.0.0',
             },
           },
-          null,
+          undefined,
           2,
         ),
       );
 
       const { createProjectContext } = await import('../../src/utils/context.js');
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
 
       // Installed packages should not be in packagesToInstall
@@ -158,13 +167,13 @@ describe('Upgrade Command - Reconcile Integration', () => {
       // Don't create some directories that should exist
       // .safeword/learnings should be created
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx);
 
       // Directories should be created
-      expect(existsSync(join(tempDir, '.safeword/learnings'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/tickets'))).toBe(true);
-      expect(existsSync(join(tempDir, '.claude/commands'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/learnings'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/tickets'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.claude/commands'))).toBe(true);
     });
 
     it('should preserve user files in shared directories', async () => {
@@ -176,20 +185,22 @@ describe('Upgrade Command - Reconcile Integration', () => {
       createConfiguredProject('0.5.0');
 
       // Create user learning file
-      mkdirSync(join(tempDir, '.safeword/learnings'), { recursive: true });
+      mkdirSync(nodePath.join(temporaryDirectory, '.safeword/learnings'), { recursive: true });
       writeFileSync(
-        join(tempDir, '.safeword/learnings/my-custom-learning.md'),
+        nodePath.join(temporaryDirectory, '.safeword/learnings/my-custom-learning.md'),
         '# My Learning\n\nImportant.',
       );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx);
 
       // User file should be preserved
-      expect(existsSync(join(tempDir, '.safeword/learnings/my-custom-learning.md'))).toBe(true);
+      expect(
+        existsSync(nodePath.join(temporaryDirectory, '.safeword/learnings/my-custom-learning.md')),
+      ).toBe(true);
       const content = readFileSync(
-        join(tempDir, '.safeword/learnings/my-custom-learning.md'),
-        'utf-8',
+        nodePath.join(temporaryDirectory, '.safeword/learnings/my-custom-learning.md'),
+        'utf8',
       );
       expect(content).toContain('My Learning');
     });
@@ -203,23 +214,25 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
       // Add a custom hook that should be preserved
       writeFileSync(
-        join(tempDir, '.claude/settings.json'),
+        nodePath.join(temporaryDirectory, '.claude/settings.json'),
         JSON.stringify(
           {
             hooks: {
               SessionStart: [{ command: 'echo custom', description: 'Custom hook' }],
             },
           },
-          null,
+          undefined,
           2,
         ),
       );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx);
 
       // Read updated settings
-      const settings = JSON.parse(readFileSync(join(tempDir, '.claude/settings.json'), 'utf-8'));
+      const settings = JSON.parse(
+        readFileSync(nodePath.join(temporaryDirectory, '.claude/settings.json'), 'utf8'),
+      );
 
       // Custom hook should be preserved
       const hasCustom = settings.hooks?.SessionStart?.some(
@@ -243,13 +256,16 @@ describe('Upgrade Command - Reconcile Integration', () => {
       createConfiguredProject('0.5.0');
 
       // Create AGENTS.md without the link
-      writeFileSync(join(tempDir, 'AGENTS.md'), '# My Project\n\nSome content.');
+      writeFileSync(
+        nodePath.join(temporaryDirectory, 'AGENTS.md'),
+        '# My Project\n\nSome content.',
+      );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx);
 
       // AGENTS.md should have the link added
-      const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
+      const content = readFileSync(nodePath.join(temporaryDirectory, 'AGENTS.md'), 'utf8');
       expect(content).toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('My Project'); // Original content preserved
     });
@@ -259,12 +275,12 @@ describe('Upgrade Command - Reconcile Integration', () => {
     it('should run upgrade successfully via CLI', async () => {
       createConfiguredProject('0.5.0');
 
-      const cliPath = join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
         const result = execSync(`npx tsx ${cliPath} upgrade`, {
-          cwd: tempDir,
-          encoding: 'utf-8',
-          timeout: 30000,
+          cwd: temporaryDirectory,
+          encoding: 'utf8',
+          timeout: 30_000,
         });
 
         expect(result).toContain('Upgrade');
@@ -286,12 +302,12 @@ describe('Upgrade Command - Reconcile Integration', () => {
     it('should refuse downgrade when project is newer', async () => {
       createConfiguredProject('99.99.99');
 
-      const cliPath = join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
         execSync(`npx tsx ${cliPath} upgrade`, {
-          cwd: tempDir,
-          encoding: 'utf-8',
-          timeout: 30000,
+          cwd: temporaryDirectory,
+          encoding: 'utf8',
+          timeout: 30_000,
         });
         // Should not reach here
         expect(true).toBe(false);
@@ -304,16 +320,16 @@ describe('Upgrade Command - Reconcile Integration', () => {
     it('should error on unconfigured project', async () => {
       // Just package.json, no .safeword
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const cliPath = join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
         execSync(`npx tsx ${cliPath} upgrade`, {
-          cwd: tempDir,
-          encoding: 'utf-8',
-          timeout: 30000,
+          cwd: temporaryDirectory,
+          encoding: 'utf8',
+          timeout: 30_000,
         });
         // Should not reach here
         expect(true).toBe(false);

@@ -5,7 +5,7 @@
  * This is the single source of truth for all file/dir/config operations.
  */
 
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import type {
   FileDefinition,
@@ -15,9 +15,9 @@ import type {
   TextPatchDefinition,
 } from './schema.js';
 import {
-  ensureDir,
+  ensureDirectory,
   exists,
-  getTemplatesDir,
+  getTemplatesDirectory,
   makeScriptsExecutable,
   readFile,
   readFileSafe,
@@ -50,16 +50,16 @@ function shouldSkipForNonGit(path: string, isGitRepo: boolean): boolean {
  * @param cwd
  * @param isGitRepo
  */
-function planMissingDirs(
-  dirs: string[],
+function planMissingDirectories(
+  directories: string[],
   cwd: string,
   isGitRepo: boolean,
 ): { actions: Action[]; created: string[] } {
   const actions: Action[] = [];
   const created: string[] = [];
-  for (const dir of dirs) {
+  for (const dir of directories) {
     if (shouldSkipForNonGit(dir, isGitRepo)) continue;
-    if (!exists(join(cwd, dir))) {
+    if (!exists(nodePath.join(cwd, dir))) {
       actions.push({ type: 'mkdir', path: dir });
       created.push(dir);
     }
@@ -79,11 +79,11 @@ function planTextPatches(
   isGitRepo: boolean,
 ): Action[] {
   const actions: Action[] = [];
-  for (const [filePath, def] of Object.entries(patches)) {
+  for (const [filePath, definition] of Object.entries(patches)) {
     if (shouldSkipForNonGit(filePath, isGitRepo)) continue;
-    const content = readFileSafe(join(cwd, filePath)) ?? '';
-    if (!content.includes(def.marker)) {
-      actions.push({ type: 'text-patch', path: filePath, definition: def });
+    const content = readFileSafe(nodePath.join(cwd, filePath)) ?? '';
+    if (!content.includes(definition.marker)) {
+      actions.push({ type: 'text-patch', path: filePath, definition });
     }
   }
   return actions;
@@ -94,14 +94,14 @@ function planTextPatches(
  * @param dirs
  * @param cwd
  */
-function planExistingDirsRemoval(
-  dirs: string[],
+function planExistingDirectoriesRemoval(
+  directories: string[],
   cwd: string,
 ): { actions: Action[]; removed: string[] } {
   const actions: Action[] = [];
   const removed: string[] = [];
-  for (const dir of dirs) {
-    if (exists(join(cwd, dir))) {
+  for (const dir of directories) {
+    if (exists(nodePath.join(cwd, dir))) {
       actions.push({ type: 'rmdir', path: dir });
       removed.push(dir);
     }
@@ -121,7 +121,7 @@ function planExistingFilesRemoval(
   const actions: Action[] = [];
   const removed: string[] = [];
   for (const filePath of files) {
-    if (exists(join(cwd, filePath))) {
+    if (exists(nodePath.join(cwd, filePath))) {
       actions.push({ type: 'rm', path: filePath });
       removed.push(filePath);
     }
@@ -133,18 +133,18 @@ function planExistingFilesRemoval(
  * Check if a .claude path needs parent dir cleanup
  * @param filePath
  */
-function getClaudeParentDirForCleanup(filePath: string): string | null {
-  if (!filePath.startsWith('.claude/')) return null;
-  const parentDir = filePath.slice(0, Math.max(0, filePath.lastIndexOf('/')));
+function getClaudeParentDirectoryForCleanup(filePath: string): string | undefined {
+  if (!filePath.startsWith('.claude/')) return undefined;
+  const parentDirectory = filePath.slice(0, Math.max(0, filePath.lastIndexOf('/')));
   if (
-    !parentDir ||
-    parentDir === '.claude' ||
-    parentDir === '.claude/skills' ||
-    parentDir === '.claude/commands'
+    !parentDirectory ||
+    parentDirectory === '.claude' ||
+    parentDirectory === '.claude/skills' ||
+    parentDirectory === '.claude/commands'
   ) {
-    return null;
+    return undefined;
   }
-  return parentDir;
+  return parentDirectory;
 }
 
 // ============================================================================
@@ -249,7 +249,7 @@ function planDeprecatedFilesRemoval(
   const actions: Action[] = [];
   const removed: string[] = [];
   for (const filePath of deprecatedFiles) {
-    if (exists(join(cwd, filePath))) {
+    if (exists(nodePath.join(cwd, filePath))) {
       actions.push({ type: 'rm', path: filePath });
       removed.push(filePath);
     }
@@ -281,6 +281,11 @@ function computePlan(
     case 'uninstall-full': {
       return computeUninstallPlan(schema, ctx, true);
     }
+    default: {
+      // Exhaustive check - TypeScript ensures all cases are handled
+      const _exhaustiveCheck: never = mode;
+      return _exhaustiveCheck;
+    }
   }
 }
 
@@ -294,25 +299,25 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   const wouldCreate: string[] = [];
 
   // 1. Create all directories (skip .husky if not a git repo)
-  const allDirs = [...schema.ownedDirs, ...schema.sharedDirs, ...schema.preservedDirs];
-  const missingDirs = planMissingDirs(allDirs, ctx.cwd, ctx.isGitRepo);
-  actions.push(...missingDirs.actions);
-  wouldCreate.push(...missingDirs.created);
+  const allDirectories = [...schema.ownedDirs, ...schema.sharedDirs, ...schema.preservedDirs];
+  const missingDirectories = planMissingDirectories(allDirectories, ctx.cwd, ctx.isGitRepo);
+  actions.push(...missingDirectories.actions);
+  wouldCreate.push(...missingDirectories.created);
 
   // 2. Write all owned files (skip .husky files if not a git repo)
-  for (const [filePath, def] of Object.entries(schema.ownedFiles)) {
+  for (const [filePath, definition] of Object.entries(schema.ownedFiles)) {
     if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
 
-    const content = resolveFileContent(def, ctx);
+    const content = resolveFileContent(definition, ctx);
     actions.push({ type: 'write', path: filePath, content });
     wouldCreate.push(filePath);
   }
 
   // 3. Write managed files (only if missing)
-  for (const [filePath, def] of Object.entries(schema.managedFiles)) {
-    const fullPath = join(ctx.cwd, filePath);
+  for (const [filePath, definition] of Object.entries(schema.managedFiles)) {
+    const fullPath = nodePath.join(ctx.cwd, filePath);
     if (!exists(fullPath)) {
-      const content = resolveFileContent(def, ctx);
+      const content = resolveFileContent(definition, ctx);
       actions.push({ type: 'write', path: filePath, content });
       wouldCreate.push(filePath);
     }
@@ -329,15 +334,15 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   actions.push({ type: 'chmod', paths: chmodPaths });
 
   // 5. JSON merges
-  for (const [filePath, def] of Object.entries(schema.jsonMerges)) {
-    actions.push({ type: 'json-merge', path: filePath, definition: def });
+  for (const [filePath, definition] of Object.entries(schema.jsonMerges)) {
+    actions.push({ type: 'json-merge', path: filePath, definition });
   }
 
   // 6. Text patches (skip .husky files in non-git repos)
-  for (const [filePath, def] of Object.entries(schema.textPatches)) {
+  for (const [filePath, definition] of Object.entries(schema.textPatches)) {
     if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
-    actions.push({ type: 'text-patch', path: filePath, definition: def });
-    if (def.createIfMissing && !exists(join(ctx.cwd, filePath))) {
+    actions.push({ type: 'text-patch', path: filePath, definition });
+    if (definition.createIfMissing && !exists(nodePath.join(ctx.cwd, filePath))) {
       wouldCreate.push(filePath);
     }
   }
@@ -346,7 +351,7 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   const packagesToInstall = computePackagesToInstall(
     schema,
     ctx.projectType,
-    ctx.devDeps,
+    ctx.developmentDeps,
     ctx.isGitRepo,
   );
 
@@ -371,17 +376,17 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   const wouldUpdate: string[] = [];
 
   // 1. Ensure directories exist (skip .husky if not a git repo)
-  const allDirs = [...schema.ownedDirs, ...schema.sharedDirs, ...schema.preservedDirs];
-  const missingDirs = planMissingDirs(allDirs, ctx.cwd, ctx.isGitRepo);
-  actions.push(...missingDirs.actions);
-  wouldCreate.push(...missingDirs.created);
+  const allDirectories = [...schema.ownedDirs, ...schema.sharedDirs, ...schema.preservedDirs];
+  const missingDirectories = planMissingDirectories(allDirectories, ctx.cwd, ctx.isGitRepo);
+  actions.push(...missingDirectories.actions);
+  wouldCreate.push(...missingDirectories.created);
 
   // 2. Update owned files if content changed (skip .husky files if not a git repo)
-  for (const [filePath, def] of Object.entries(schema.ownedFiles)) {
+  for (const [filePath, definition] of Object.entries(schema.ownedFiles)) {
     if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
 
-    const fullPath = join(ctx.cwd, filePath);
-    const newContent = resolveFileContent(def, ctx);
+    const fullPath = nodePath.join(ctx.cwd, filePath);
+    const newContent = resolveFileContent(definition, ctx);
 
     if (!fileNeedsUpdate(fullPath, newContent)) continue;
 
@@ -394,9 +399,9 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   }
 
   // 3. Update managed files only if content matches current template
-  for (const [filePath, def] of Object.entries(schema.managedFiles)) {
-    const fullPath = join(ctx.cwd, filePath);
-    const newContent = resolveFileContent(def, ctx);
+  for (const [filePath, definition] of Object.entries(schema.managedFiles)) {
+    const fullPath = nodePath.join(ctx.cwd, filePath);
+    const newContent = resolveFileContent(definition, ctx);
 
     if (!exists(fullPath)) {
       // Missing - create it
@@ -411,19 +416,23 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   actions.push(...deprecatedFiles.actions);
   const wouldRemove = deprecatedFiles.removed;
 
-  // 5. chmod (only .husky if git repo)
+  // 4b. Remove deprecated directories (no longer managed by safeword)
+  const deprecatedDirectories = planExistingDirectoriesRemoval(schema.deprecatedDirs, ctx.cwd);
+  actions.push(...deprecatedDirectories.actions);
+  wouldRemove.push(...deprecatedDirectories.removed);
+
+  // 5. chmod
   const chmodPathsUpgrade = [
     '.safeword/hooks',
     '.safeword/hooks/cursor',
     '.safeword/lib',
     '.safeword/scripts',
   ];
-  if (ctx.isGitRepo) chmodPathsUpgrade.push(HUSKY_DIR);
   actions.push({ type: 'chmod', paths: chmodPathsUpgrade });
 
   // 6. JSON merges (always apply to ensure keys are present)
-  for (const [filePath, def] of Object.entries(schema.jsonMerges)) {
-    actions.push({ type: 'json-merge', path: filePath, definition: def });
+  for (const [filePath, definition] of Object.entries(schema.jsonMerges)) {
+    actions.push({ type: 'json-merge', path: filePath, definition });
   }
 
   // 7. Text patches (only if marker missing, skip .husky in non-git repos)
@@ -433,9 +442,12 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   const packagesToInstall = computePackagesToInstall(
     schema,
     ctx.projectType,
-    ctx.devDeps,
+    ctx.developmentDeps,
     ctx.isGitRepo,
   );
+
+  // 9. Compute deprecated packages to remove (only those actually installed)
+  const packagesToRemove = schema.deprecatedPackages.filter(pkg => pkg in ctx.developmentDeps);
 
   return {
     actions,
@@ -443,7 +455,7 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     wouldUpdate,
     wouldRemove,
     packagesToInstall,
-    packagesToRemove: [],
+    packagesToRemove,
   };
 }
 
@@ -467,38 +479,38 @@ function computeUninstallPlan(
   wouldRemove.push(...ownedFiles.removed);
 
   // Collect parent dirs that need cleanup (for .claude/* skill dirs)
-  const dirsToCleanup = new Set<string>();
+  const directoriesToCleanup = new Set<string>();
   for (const filePath of ownedFiles.removed) {
-    const parentDir = getClaudeParentDirForCleanup(filePath);
-    if (parentDir) dirsToCleanup.add(parentDir);
+    const parentDirectory = getClaudeParentDirectoryForCleanup(filePath);
+    if (parentDirectory) directoriesToCleanup.add(parentDirectory);
   }
-  const cleanupDirs = planExistingDirsRemoval([...dirsToCleanup], ctx.cwd);
-  actions.push(...cleanupDirs.actions);
-  wouldRemove.push(...cleanupDirs.removed);
+  const cleanupDirectories = planExistingDirectoriesRemoval([...directoriesToCleanup], ctx.cwd);
+  actions.push(...cleanupDirectories.actions);
+  wouldRemove.push(...cleanupDirectories.removed);
 
   // 2. JSON unmerges
-  for (const [filePath, def] of Object.entries(schema.jsonMerges)) {
-    actions.push({ type: 'json-unmerge', path: filePath, definition: def });
+  for (const [filePath, definition] of Object.entries(schema.jsonMerges)) {
+    actions.push({ type: 'json-unmerge', path: filePath, definition });
   }
 
   // 3. Text unpatches
-  for (const [filePath, def] of Object.entries(schema.textPatches)) {
-    const fullPath = join(ctx.cwd, filePath);
+  for (const [filePath, definition] of Object.entries(schema.textPatches)) {
+    const fullPath = nodePath.join(ctx.cwd, filePath);
     if (exists(fullPath)) {
       const content = readFileSafe(fullPath) ?? '';
-      if (content.includes(def.marker)) {
-        actions.push({ type: 'text-unpatch', path: filePath, definition: def });
+      if (content.includes(definition.marker)) {
+        actions.push({ type: 'text-unpatch', path: filePath, definition });
       }
     }
   }
 
   // 4. Remove preserved directories first (reverse order, only if empty)
-  const preserved = planExistingDirsRemoval(schema.preservedDirs.toReversed(), ctx.cwd);
+  const preserved = planExistingDirectoriesRemoval(schema.preservedDirs.toReversed(), ctx.cwd);
   actions.push(...preserved.actions);
   wouldRemove.push(...preserved.removed);
 
   // 5. Remove owned directories (reverse order ensures children before parents)
-  const owned = planExistingDirsRemoval(schema.ownedDirs.toReversed(), ctx.cwd);
+  const owned = planExistingDirectoriesRemoval(schema.ownedDirs.toReversed(), ctx.cwd);
   actions.push(...owned.actions);
   wouldRemove.push(...owned.removed);
 
@@ -511,7 +523,7 @@ function computeUninstallPlan(
 
   // 7. Compute packages to remove (full only)
   const packagesToRemove = full
-    ? computePackagesToRemove(schema, ctx.projectType, ctx.devDeps)
+    ? computePackagesToRemove(schema, ctx.projectType, ctx.developmentDeps)
     : [];
 
   return {
@@ -561,14 +573,14 @@ function executePlan(plan: ReconcilePlan, ctx: ProjectContext): ExecutionResult 
 function executeAction(action: Action, ctx: ProjectContext, result: ExecutionResult): void {
   switch (action.type) {
     case 'mkdir': {
-      ensureDir(join(ctx.cwd, action.path));
+      ensureDirectory(nodePath.join(ctx.cwd, action.path));
       result.created.push(action.path);
       break;
     }
 
     case 'rmdir': {
       // Use removeIfEmpty to preserve directories with user content
-      if (removeIfEmpty(join(ctx.cwd, action.path))) {
+      if (removeIfEmpty(nodePath.join(ctx.cwd, action.path))) {
         result.removed.push(action.path);
       }
       break;
@@ -580,14 +592,14 @@ function executeAction(action: Action, ctx: ProjectContext, result: ExecutionRes
     }
 
     case 'rm': {
-      remove(join(ctx.cwd, action.path));
+      remove(nodePath.join(ctx.cwd, action.path));
       result.removed.push(action.path);
       break;
     }
 
     case 'chmod': {
       for (const path of action.paths) {
-        const fullPath = join(ctx.cwd, path);
+        const fullPath = nodePath.join(ctx.cwd, path);
         if (exists(fullPath)) makeScriptsExecutable(fullPath);
       }
       break;
@@ -623,7 +635,7 @@ function executeAction(action: Action, ctx: ProjectContext, result: ExecutionRes
  * @param result
  */
 function executeWrite(cwd: string, path: string, content: string, result: ExecutionResult): void {
-  const fullPath = join(cwd, path);
+  const fullPath = nodePath.join(cwd, path);
   const existed = exists(fullPath);
   writeFile(fullPath, content);
   (existed ? result.updated : result.created).push(path);
@@ -635,21 +647,21 @@ function executeWrite(cwd: string, path: string, content: string, result: Execut
 
 /**
  *
- * @param def
+ * @param definition
  * @param ctx
  */
-function resolveFileContent(def: FileDefinition, ctx: ProjectContext): string {
-  if (def.template) {
-    const templatesDir = getTemplatesDir();
-    return readFile(join(templatesDir, def.template));
+function resolveFileContent(definition: FileDefinition, ctx: ProjectContext): string {
+  if (definition.template) {
+    const templatesDirectory = getTemplatesDirectory();
+    return readFile(nodePath.join(templatesDirectory, definition.template));
   }
 
-  if (def.content) {
-    return typeof def.content === 'function' ? def.content() : def.content;
+  if (definition.content) {
+    return typeof definition.content === 'function' ? definition.content() : definition.content;
   }
 
-  if (def.generator) {
-    return def.generator(ctx);
+  if (definition.generator) {
+    return definition.generator(ctx);
   }
 
   throw new Error('FileDefinition must have template, content, or generator');
@@ -679,7 +691,7 @@ const GIT_ONLY_PACKAGES = new Set(['husky', 'lint-staged']);
 export function computePackagesToInstall(
   schema: SafewordSchema,
   projectType: ProjectType,
-  installedDevDeps: Record<string, string>,
+  installedDevelopmentDeps: Record<string, string>,
   isGitRepo = true,
 ): string[] {
   let needed = [...schema.packages.base];
@@ -695,7 +707,7 @@ export function computePackagesToInstall(
     }
   }
 
-  return needed.filter(pkg => !(pkg in installedDevDeps));
+  return needed.filter(pkg => !(pkg in installedDevelopmentDeps));
 }
 
 /**
@@ -707,7 +719,7 @@ export function computePackagesToInstall(
 function computePackagesToRemove(
   schema: SafewordSchema,
   projectType: ProjectType,
-  installedDevDeps: Record<string, string>,
+  installedDevelopmentDeps: Record<string, string>,
 ): string[] {
   const safewordPackages = [...schema.packages.base];
 
@@ -718,25 +730,25 @@ function computePackagesToRemove(
   }
 
   // Only remove packages that are actually installed
-  return safewordPackages.filter(pkg => pkg in installedDevDeps);
+  return safewordPackages.filter(pkg => pkg in installedDevelopmentDeps);
 }
 
 /**
  *
  * @param cwd
  * @param path
- * @param def
+ * @param definition
  * @param ctx
  */
 function executeJsonMerge(
   cwd: string,
   path: string,
-  def: JsonMergeDefinition,
+  definition: JsonMergeDefinition,
   ctx: ProjectContext,
 ): void {
-  const fullPath = join(cwd, path);
+  const fullPath = nodePath.join(cwd, path);
   const existing = readJson<Record<string, unknown>>(fullPath) ?? {};
-  const merged = def.merge(existing, ctx);
+  const merged = definition.merge(existing, ctx);
 
   // Skip write if content is unchanged (avoids formatting churn)
   if (JSON.stringify(existing) === JSON.stringify(merged)) return;
@@ -748,22 +760,20 @@ function executeJsonMerge(
  *
  * @param cwd
  * @param path
- * @param def
+ * @param definition
  */
-function executeJsonUnmerge(cwd: string, path: string, def: JsonMergeDefinition): void {
-  const fullPath = join(cwd, path);
+function executeJsonUnmerge(cwd: string, path: string, definition: JsonMergeDefinition): void {
+  const fullPath = nodePath.join(cwd, path);
   if (!exists(fullPath)) return;
 
   const existing = readJson<Record<string, unknown>>(fullPath);
   if (!existing) return;
 
-  const unmerged = def.unmerge(existing);
+  const unmerged = definition.unmerge(existing);
 
   // Check if file should be removed
-  if (def.removeFileIfEmpty) {
-    const remainingKeys = Object.keys(unmerged).filter(
-      k => unmerged[k] !== undefined && unmerged[k] !== null,
-    );
+  if (definition.removeFileIfEmpty) {
+    const remainingKeys = Object.keys(unmerged).filter(k => unmerged[k] !== undefined);
     if (remainingKeys.length === 0) {
       remove(fullPath);
       return;
@@ -777,17 +787,20 @@ function executeJsonUnmerge(cwd: string, path: string, def: JsonMergeDefinition)
  *
  * @param cwd
  * @param path
- * @param def
+ * @param definition
  */
-function executeTextPatch(cwd: string, path: string, def: TextPatchDefinition): void {
-  const fullPath = join(cwd, path);
+function executeTextPatch(cwd: string, path: string, definition: TextPatchDefinition): void {
+  const fullPath = nodePath.join(cwd, path);
   let content = readFileSafe(fullPath) ?? '';
 
   // Check if already patched
-  if (content.includes(def.marker)) return;
+  if (content.includes(definition.marker)) return;
 
   // Apply patch
-  content = def.operation === 'prepend' ? def.content + content : content + def.content;
+  content =
+    definition.operation === 'prepend'
+      ? definition.content + content
+      : content + definition.content;
 
   writeFile(fullPath, content);
 }
@@ -796,22 +809,22 @@ function executeTextPatch(cwd: string, path: string, def: TextPatchDefinition): 
  *
  * @param cwd
  * @param path
- * @param def
+ * @param definition
  */
-function executeTextUnpatch(cwd: string, path: string, def: TextPatchDefinition): void {
-  const fullPath = join(cwd, path);
+function executeTextUnpatch(cwd: string, path: string, definition: TextPatchDefinition): void {
+  const fullPath = nodePath.join(cwd, path);
   const content = readFileSafe(fullPath);
   if (!content) return;
 
   // Remove the patched content
   // First try to remove the full content block
-  let unpatched = content.replace(def.content, '');
+  let unpatched = content.replace(definition.content, '');
 
   // If full content wasn't found but marker exists, remove lines containing the marker
-  if (unpatched === content && content.includes(def.marker)) {
+  if (unpatched === content && content.includes(definition.marker)) {
     // Remove lines containing the marker
     const lines = content.split('\n');
-    const filtered = lines.filter(line => !line.includes(def.marker));
+    const filtered = lines.filter(line => !line.includes(definition.marker));
     unpatched = filtered.join('\n').replace(/^\n+/, ''); // Remove leading empty lines
   }
 

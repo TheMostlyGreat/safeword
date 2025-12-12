@@ -6,17 +6,17 @@
 
 import { execSync } from 'node:child_process';
 import { unlinkSync } from 'node:fs';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   createConfiguredProject,
-  createTempDir,
+  createTemporaryDirectory,
   fileExists,
   measureTimeSync,
   readTestFile,
-  removeTempDir,
+  removeTemporaryDirectory,
   writeTestFile,
 } from '../helpers';
 
@@ -26,7 +26,7 @@ import {
  */
 function runSelfHealingHook(dir: string): { stdout: string; exitCode: number } {
   // The hook script location: .safeword/hooks/session-verify-agents.sh
-  const hookPath = join(dir, '.safeword/hooks/session-verify-agents.sh');
+  const hookPath = nodePath.join(dir, '.safeword/hooks/session-verify-agents.sh');
 
   if (!fileExists(dir, '.safeword/hooks/session-verify-agents.sh')) {
     // Hook may have different name - check for any agents-related hook
@@ -37,7 +37,7 @@ function runSelfHealingHook(dir: string): { stdout: string; exitCode: number } {
   try {
     const stdout = execSync(`bash "${hookPath}"`, {
       cwd: dir,
-      encoding: 'utf-8',
+      encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     return { stdout, exitCode: 0 };
@@ -51,29 +51,29 @@ function runSelfHealingHook(dir: string): { stdout: string; exitCode: number } {
 }
 
 describe('Test Suite 12: AGENTS.md Self-Healing', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = createTempDir();
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    removeTempDir(tempDir);
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
   describe('Test 12.1: Hook detects missing link', () => {
     it('should detect when safeword link is missing', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Remove the safeword link from AGENTS.md
-      const content = readTestFile(tempDir, 'AGENTS.md');
+      const content = readTestFile(temporaryDirectory, 'AGENTS.md');
       const withoutLink = content
         .split('\n')
         .filter(line => !line.includes('.safeword/SAFEWORD.md'))
         .join('\n');
-      writeTestFile(tempDir, 'AGENTS.md', withoutLink);
+      writeTestFile(temporaryDirectory, 'AGENTS.md', withoutLink);
 
-      const result = runSelfHealingHook(tempDir);
+      const result = runSelfHealingHook(temporaryDirectory);
 
       // Hook should indicate repair is needed or perform repair
       // The exact output depends on implementation
@@ -83,17 +83,17 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
 
   describe('Test 12.2: Hook re-adds missing link', () => {
     it('should restore removed link', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Remove the safeword link
       const withoutLink = '# My Project\n\nSome content without the link.\n';
-      writeTestFile(tempDir, 'AGENTS.md', withoutLink);
+      writeTestFile(temporaryDirectory, 'AGENTS.md', withoutLink);
 
       // Run hook
-      runSelfHealingHook(tempDir);
+      runSelfHealingHook(temporaryDirectory);
 
       // Link should be restored
-      const updatedContent = readTestFile(tempDir, 'AGENTS.md');
+      const updatedContent = readTestFile(temporaryDirectory, 'AGENTS.md');
       expect(updatedContent).toContain('.safeword/SAFEWORD.md');
 
       // Original content preserved
@@ -104,12 +104,12 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
 
   describe('Test 12.3: Hook shows warning on restoration', () => {
     it('should output message when restoring', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Remove link
-      writeTestFile(tempDir, 'AGENTS.md', '# No link\n');
+      writeTestFile(temporaryDirectory, 'AGENTS.md', '# No link\n');
 
-      const result = runSelfHealingHook(tempDir);
+      const result = runSelfHealingHook(temporaryDirectory);
 
       // Should mention restoration
       const output = result.stdout.toLowerCase();
@@ -119,38 +119,38 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
 
   describe('Test 12.4: Hook recreates deleted AGENTS.md', () => {
     it('should recreate AGENTS.md if deleted', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Delete AGENTS.md entirely
-      unlinkSync(join(tempDir, 'AGENTS.md'));
-      expect(fileExists(tempDir, 'AGENTS.md')).toBe(false);
+      unlinkSync(nodePath.join(temporaryDirectory, 'AGENTS.md'));
+      expect(fileExists(temporaryDirectory, 'AGENTS.md')).toBe(false);
 
       // Run hook
-      runSelfHealingHook(tempDir);
+      runSelfHealingHook(temporaryDirectory);
 
       // AGENTS.md should be recreated
-      expect(fileExists(tempDir, 'AGENTS.md')).toBe(true);
+      expect(fileExists(temporaryDirectory, 'AGENTS.md')).toBe(true);
 
-      const content = readTestFile(tempDir, 'AGENTS.md');
+      const content = readTestFile(temporaryDirectory, 'AGENTS.md');
       expect(content).toContain('.safeword/SAFEWORD.md');
     });
   });
 
   describe('Test 12.5: Hook prevents duplicates', () => {
     it('should not add duplicate links', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Verify link exists
-      const contentBefore = readTestFile(tempDir, 'AGENTS.md');
+      const contentBefore = readTestFile(temporaryDirectory, 'AGENTS.md');
       expect(contentBefore).toContain('.safeword/SAFEWORD.md');
 
       // Run hook multiple times
-      runSelfHealingHook(tempDir);
-      runSelfHealingHook(tempDir);
-      runSelfHealingHook(tempDir);
+      runSelfHealingHook(temporaryDirectory);
+      runSelfHealingHook(temporaryDirectory);
+      runSelfHealingHook(temporaryDirectory);
 
       // Count links
-      const contentAfter = readTestFile(tempDir, 'AGENTS.md');
+      const contentAfter = readTestFile(temporaryDirectory, 'AGENTS.md');
       const linkCount = (contentAfter.match(/\.safeword\/SAFEWORD\.md/g) || []).length;
 
       expect(linkCount).toBe(1);
@@ -159,9 +159,9 @@ describe('Test Suite 12: AGENTS.md Self-Healing', () => {
 
   describe('Test 12.6: Hook exits cleanly', () => {
     it('should exit with code 0 and complete quickly', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
-      const { result, timeMs } = measureTimeSync(() => runSelfHealingHook(tempDir));
+      const { result, timeMs } = measureTimeSync(() => runSelfHealingHook(temporaryDirectory));
 
       expect(result.exitCode).toBe(0);
       expect(timeMs).toBeLessThan(1000); // Should complete in under 1 second

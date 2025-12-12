@@ -9,41 +9,41 @@
  */
 
 import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-  createTempDir,
+  createTemporaryDirectory,
   createTypeScriptPackageJson,
   fileExists,
   initGitRepo,
   readTestFile,
-  removeTempDir,
+  removeTemporaryDirectory,
   runCli,
   writeTestFile,
 } from '../helpers';
 
 describe('Setup - Template Bundling (Story 1)', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = createTempDir();
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    removeTempDir(tempDir);
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
   it('should install full SAFEWORD.md (not a stub)', async () => {
-    createTypeScriptPackageJson(tempDir);
-    initGitRepo(tempDir);
+    createTypeScriptPackageJson(temporaryDirectory);
+    initGitRepo(temporaryDirectory);
 
-    await runCli(['setup', '--yes'], { cwd: tempDir });
+    await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-    expect(fileExists(tempDir, '.safeword/SAFEWORD.md')).toBe(true);
+    expect(fileExists(temporaryDirectory, '.safeword/SAFEWORD.md')).toBe(true);
 
-    const content = readTestFile(tempDir, '.safeword/SAFEWORD.md');
+    const content = readTestFile(temporaryDirectory, '.safeword/SAFEWORD.md');
     // Full file is ~31KB, stub is <1KB
     expect(content.length).toBeGreaterThan(1000);
     // Verify it's the full methodology file, not a stub
@@ -51,80 +51,80 @@ describe('Setup - Template Bundling (Story 1)', () => {
   });
 
   it('should install methodology guides to .safeword/guides/', async () => {
-    createTypeScriptPackageJson(tempDir);
-    initGitRepo(tempDir);
+    createTypeScriptPackageJson(temporaryDirectory);
+    initGitRepo(temporaryDirectory);
 
-    await runCli(['setup', '--yes'], { cwd: tempDir });
+    await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-    expect(fileExists(tempDir, '.safeword/guides')).toBe(true);
+    expect(fileExists(temporaryDirectory, '.safeword/guides')).toBe(true);
 
-    const guidesDir = join(tempDir, '.safeword/guides');
-    const mdFiles = readdirSync(guidesDir).filter(f => f.endsWith('.md'));
+    const guidesDirectory = nodePath.join(temporaryDirectory, '.safeword/guides');
+    const mdFiles = readdirSync(guidesDirectory).filter(f => f.endsWith('.md'));
 
     expect(mdFiles.length).toBeGreaterThan(0);
   });
 
   it('should install document templates', async () => {
-    createTypeScriptPackageJson(tempDir);
-    initGitRepo(tempDir);
+    createTypeScriptPackageJson(temporaryDirectory);
+    initGitRepo(temporaryDirectory);
 
-    await runCli(['setup', '--yes'], { cwd: tempDir });
+    await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-    expect(fileExists(tempDir, '.safeword/templates')).toBe(true);
+    expect(fileExists(temporaryDirectory, '.safeword/templates')).toBe(true);
 
-    const templatesDir = join(tempDir, '.safeword/templates');
-    const mdFiles = readdirSync(templatesDir).filter(f => f.endsWith('.md'));
+    const templatesDirectory = nodePath.join(temporaryDirectory, '.safeword/templates');
+    const mdFiles = readdirSync(templatesDirectory).filter(f => f.endsWith('.md'));
 
     expect(mdFiles.length).toBeGreaterThan(0);
   });
 
   it('should install review prompts to .safeword/prompts/', async () => {
-    createTypeScriptPackageJson(tempDir);
-    initGitRepo(tempDir);
+    createTypeScriptPackageJson(temporaryDirectory);
+    initGitRepo(temporaryDirectory);
 
-    await runCli(['setup', '--yes'], { cwd: tempDir });
+    await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-    expect(fileExists(tempDir, '.safeword/prompts')).toBe(true);
+    expect(fileExists(temporaryDirectory, '.safeword/prompts')).toBe(true);
 
-    const promptsDir = join(tempDir, '.safeword/prompts');
-    const mdFiles = readdirSync(promptsDir).filter(f => f.endsWith('.md'));
+    const promptsDirectory = nodePath.join(temporaryDirectory, '.safeword/prompts');
+    const mdFiles = readdirSync(promptsDirectory).filter(f => f.endsWith('.md'));
 
     // Should have 2 review prompts
     expect(mdFiles.length).toBeGreaterThan(0);
   });
 
   it('should block re-run and preserve user content', async () => {
-    createTypeScriptPackageJson(tempDir);
-    initGitRepo(tempDir);
+    createTypeScriptPackageJson(temporaryDirectory);
+    initGitRepo(temporaryDirectory);
 
-    await runCli(['setup', '--yes'], { cwd: tempDir });
+    await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
     // Create user content
     writeTestFile(
-      tempDir,
+      temporaryDirectory,
       '.safeword/learnings/my-learning.md',
       '# My Learning\n\nImportant info.',
     );
 
     // Re-run setup should exit with error (already configured)
-    const result = await runCli(['setup', '--yes'], { cwd: tempDir });
+    const result = await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toContain('Already configured');
 
     // User content should be untouched
-    expect(fileExists(tempDir, '.safeword/learnings/my-learning.md')).toBe(true);
-    const content = readTestFile(tempDir, '.safeword/learnings/my-learning.md');
+    expect(fileExists(temporaryDirectory, '.safeword/learnings/my-learning.md')).toBe(true);
+    const content = readTestFile(temporaryDirectory, '.safeword/learnings/my-learning.md');
     expect(content).toContain('My Learning');
   });
 
   it('should have no broken internal links in installed templates', async () => {
-    createTypeScriptPackageJson(tempDir);
-    initGitRepo(tempDir);
+    createTypeScriptPackageJson(temporaryDirectory);
+    initGitRepo(temporaryDirectory);
 
-    await runCli(['setup', '--yes'], { cwd: tempDir });
+    await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
     // Collect all markdown files in .safeword/
-    const safewordDir = join(tempDir, '.safeword');
+    const safewordDirectory = nodePath.join(temporaryDirectory, '.safeword');
     const allMdFiles: string[] = [];
 
     /**
@@ -132,10 +132,10 @@ describe('Setup - Template Bundling (Story 1)', () => {
      * @param dir
      */
     function collectMdFiles(dir: string) {
-      if (!fileExists(tempDir, dir.replace(tempDir + '/', ''))) return;
+      if (!fileExists(temporaryDirectory, dir.replace(`${temporaryDirectory}/`, ''))) return;
       const entries = readdirSync(dir, { withFileTypes: true });
       for (const entry of entries) {
-        const fullPath = join(dir, entry.name);
+        const fullPath = nodePath.join(dir, entry.name);
         if (entry.isDirectory()) {
           collectMdFiles(fullPath);
         } else if (entry.name.endsWith('.md')) {
@@ -144,7 +144,7 @@ describe('Setup - Template Bundling (Story 1)', () => {
       }
     }
 
-    collectMdFiles(safewordDir);
+    collectMdFiles(safewordDirectory);
 
     // Must have at least SAFEWORD.md with links to verify
     expect(allMdFiles.length).toBeGreaterThan(0);
@@ -163,7 +163,7 @@ describe('Setup - Template Bundling (Story 1)', () => {
     ];
 
     for (const mdFile of allMdFiles) {
-      const content = readFileSync(mdFile, 'utf-8');
+      const content = readFileSync(mdFile, 'utf8');
       const links = content.match(linkPattern) || [];
       totalLinks += links.length;
 
@@ -176,9 +176,9 @@ describe('Setup - Template Bundling (Story 1)', () => {
         // The link is already a relative path like .safeword/path.md
         const relativePath = link;
 
-        if (!fileExists(tempDir, relativePath)) {
+        if (!fileExists(temporaryDirectory, relativePath)) {
           brokenLinks.push({
-            file: mdFile.replace(tempDir + '/', ''),
+            file: mdFile.replace(`${temporaryDirectory}/`, ''),
             link,
           });
         }

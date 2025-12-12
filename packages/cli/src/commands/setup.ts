@@ -5,7 +5,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { basename, join } from 'node:path';
+import nodePath from 'node:path';
 
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
@@ -57,19 +57,19 @@ function printChangesSummary(
  */
 export async function setup(options: SetupOptions): Promise<void> {
   const cwd = process.cwd();
-  const safewordDir = join(cwd, '.safeword');
+  const safewordDirectory = nodePath.join(cwd, '.safeword');
 
   // Check if already configured
-  if (exists(safewordDir)) {
+  if (exists(safewordDirectory)) {
     error('Already configured. Run `safeword upgrade` to update.');
     process.exit(1);
   }
 
   // Check for package.json, create if missing
-  const packageJsonPath = join(cwd, 'package.json');
+  const packageJsonPath = nodePath.join(cwd, 'package.json');
   let packageJsonCreated = false;
   if (!exists(packageJsonPath)) {
-    const dirName = basename(cwd) || 'project';
+    const dirName = nodePath.basename(cwd) || 'project';
     const defaultPackageJson: PackageJson = {
       name: dirName,
       version: '0.1.0',

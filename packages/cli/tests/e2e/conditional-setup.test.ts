@@ -19,44 +19,44 @@ import {
   createNextJsPackageJson,
   createPackageJson,
   createReactPackageJson,
-  createTempDir,
+  createTemporaryDirectory,
   createTypeScriptPackageJson,
   fileExists,
   initGitRepo,
   readTestFile,
-  removeTempDir,
+  removeTemporaryDirectory,
   runCli,
   writeTestFile,
 } from '../helpers';
 
 /** Setup timeout: 10 minutes - npm install can take 7+ minutes */
-const SETUP_TIMEOUT = 600000;
+const SETUP_TIMEOUT = 600_000;
 
 describe('E2E: Conditional Setup - Project Type Detection', () => {
-  let projectDir: string;
+  let projectDirectory: string;
 
   afterEach(() => {
-    if (projectDir) {
-      removeTempDir(projectDir);
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
     }
   });
 
   it(
     'detects TypeScript project and includes typescript-eslint',
     async () => {
-      projectDir = createTempDir();
-      createTypeScriptPackageJson(projectDir);
-      initGitRepo(projectDir);
+      projectDirectory = createTemporaryDirectory();
+      createTypeScriptPackageJson(projectDirectory);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Check ESLint config includes TypeScript
-      const eslintConfig = readTestFile(projectDir, 'eslint.config.mjs');
+      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('typescript-eslint');
       expect(eslintConfig).toContain('tseslint');
 
       // Check package.json has typescript-eslint installed
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies).toHaveProperty('typescript-eslint');
     },
     SETUP_TIMEOUT,
@@ -65,19 +65,19 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   it(
     'detects JavaScript-only project (no TypeScript plugins installed)',
     async () => {
-      projectDir = createTempDir();
-      createPackageJson(projectDir); // No TypeScript
-      initGitRepo(projectDir);
+      projectDirectory = createTemporaryDirectory();
+      createPackageJson(projectDirectory); // No TypeScript
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // ESLint config is dynamic - contains conditional code but doesn't execute it for JS projects
-      const eslintConfig = readTestFile(projectDir, 'eslint.config.mjs');
+      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('readFileSync'); // Dynamic config
       expect(eslintConfig).toContain('deps["typescript"]'); // Contains conditional
 
       // Key check: typescript-eslint package is NOT installed in devDependencies
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies).not.toHaveProperty('typescript-eslint');
     },
     SETUP_TIMEOUT,
@@ -86,22 +86,22 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   it(
     'detects React project and includes React plugins',
     async () => {
-      projectDir = createTempDir();
-      createReactPackageJson(projectDir, {
+      projectDirectory = createTemporaryDirectory();
+      createReactPackageJson(projectDirectory, {
         devDependencies: { typescript: '^5.0.0' },
       });
-      initGitRepo(projectDir);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Check ESLint config includes React
-      const eslintConfig = readTestFile(projectDir, 'eslint.config.mjs');
+      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('eslint-plugin-react');
       expect(eslintConfig).toContain('react-hooks');
       expect(eslintConfig).toContain('jsx-a11y');
 
       // Check package.json has React plugins installed
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies).toHaveProperty('eslint-plugin-react');
       expect(pkg.devDependencies).toHaveProperty('eslint-plugin-react-hooks');
       expect(pkg.devDependencies).toHaveProperty('eslint-plugin-jsx-a11y');
@@ -112,16 +112,16 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   it(
     'detects Next.js project and includes Next.js plugin',
     async () => {
-      projectDir = createTempDir();
-      createNextJsPackageJson(projectDir, {
+      projectDirectory = createTemporaryDirectory();
+      createNextJsPackageJson(projectDirectory, {
         devDependencies: { typescript: '^5.0.0' },
       });
-      initGitRepo(projectDir);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Check ESLint config includes Next.js
-      const eslintConfig = readTestFile(projectDir, 'eslint.config.mjs');
+      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('@next/eslint-plugin-next');
       expect(eslintConfig).toContain('nextPlugin');
       // Next.js also implies React
@@ -131,7 +131,7 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
       expect(eslintConfig).toContain('.next/');
 
       // Check package.json has Next.js plugin installed
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies).toHaveProperty('@next/eslint-plugin-next');
     },
     SETUP_TIMEOUT,
@@ -140,24 +140,24 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   it(
     'detects Astro project and includes Astro plugin',
     async () => {
-      projectDir = createTempDir();
-      createPackageJson(projectDir, {
+      projectDirectory = createTemporaryDirectory();
+      createPackageJson(projectDirectory, {
         dependencies: { astro: '^4.0.0' },
         devDependencies: { typescript: '^5.0.0' },
       });
-      initGitRepo(projectDir);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Check ESLint config includes Astro
-      const eslintConfig = readTestFile(projectDir, 'eslint.config.mjs');
+      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('eslint-plugin-astro');
 
       // Check ignores include .astro/
       expect(eslintConfig).toContain('.astro/');
 
       // Check package.json has Astro plugin installed
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies).toHaveProperty('eslint-plugin-astro');
     },
     SETUP_TIMEOUT,
@@ -166,24 +166,24 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   it(
     'detects Vue project and includes Vue plugin',
     async () => {
-      projectDir = createTempDir();
-      createPackageJson(projectDir, {
+      projectDirectory = createTemporaryDirectory();
+      createPackageJson(projectDirectory, {
         dependencies: { vue: '^3.0.0' },
         devDependencies: { typescript: '^5.0.0' },
       });
-      initGitRepo(projectDir);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Check ESLint config includes Vue
-      const eslintConfig = readTestFile(projectDir, 'eslint.config.mjs');
+      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('eslint-plugin-vue');
 
       // Check ignores include .nuxt/
       expect(eslintConfig).toContain('.nuxt/');
 
       // Check package.json has Vue plugin installed
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies).toHaveProperty('eslint-plugin-vue');
     },
     SETUP_TIMEOUT,
@@ -192,26 +192,26 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   it(
     'detects Svelte project and includes Svelte plugin',
     async () => {
-      projectDir = createTempDir();
-      createPackageJson(projectDir, {
+      projectDirectory = createTemporaryDirectory();
+      createPackageJson(projectDirectory, {
         devDependencies: {
           svelte: '^4.0.0',
           typescript: '^5.0.0',
         },
       });
-      initGitRepo(projectDir);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Check ESLint config includes Svelte
-      const eslintConfig = readTestFile(projectDir, 'eslint.config.mjs');
+      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('eslint-plugin-svelte');
 
       // Check ignores include .svelte-kit/
       expect(eslintConfig).toContain('.svelte-kit/');
 
       // Check package.json has Svelte plugin installed
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies).toHaveProperty('eslint-plugin-svelte');
     },
     SETUP_TIMEOUT,
@@ -220,23 +220,23 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   it(
     'detects Vitest project and includes Vitest plugin',
     async () => {
-      projectDir = createTempDir();
-      createPackageJson(projectDir, {
+      projectDirectory = createTemporaryDirectory();
+      createPackageJson(projectDirectory, {
         devDependencies: {
           vitest: '^1.0.0',
           typescript: '^5.0.0',
         },
       });
-      initGitRepo(projectDir);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Check ESLint config includes Vitest
-      const eslintConfig = readTestFile(projectDir, 'eslint.config.mjs');
+      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('@vitest/eslint-plugin');
 
       // Check package.json has Vitest plugin installed
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies).toHaveProperty('@vitest/eslint-plugin');
     },
     SETUP_TIMEOUT,
@@ -245,19 +245,19 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   it(
     'detects Tailwind and includes Prettier plugin',
     async () => {
-      projectDir = createTempDir();
-      createPackageJson(projectDir, {
+      projectDirectory = createTemporaryDirectory();
+      createPackageJson(projectDirectory, {
         devDependencies: {
           tailwindcss: '^3.0.0',
           typescript: '^5.0.0',
         },
       });
-      initGitRepo(projectDir);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Check package.json has Tailwind Prettier plugin installed
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies).toHaveProperty('prettier-plugin-tailwindcss');
     },
     SETUP_TIMEOUT,
@@ -266,8 +266,8 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   it(
     'detects publishable library and includes publint',
     async () => {
-      projectDir = createTempDir();
-      createPackageJson(projectDir, {
+      projectDirectory = createTemporaryDirectory();
+      createPackageJson(projectDirectory, {
         // Publishable: has main/exports, not private
         main: './dist/index.js',
         exports: {
@@ -275,12 +275,12 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
         },
         devDependencies: { typescript: '^5.0.0' },
       });
-      initGitRepo(projectDir);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Check package.json has publint installed
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies).toHaveProperty('publint');
       expect(pkg.scripts).toHaveProperty('publint');
     },
@@ -289,29 +289,29 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 });
 
 describe('E2E: Conditional Setup - Existing Config Preservation', () => {
-  let projectDir: string;
+  let projectDirectory: string;
 
   afterEach(() => {
-    if (projectDir) {
-      removeTempDir(projectDir);
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
     }
   });
 
   it(
     'preserves existing ESLint config (does not overwrite)',
     async () => {
-      projectDir = createTempDir();
-      createTypeScriptPackageJson(projectDir);
-      initGitRepo(projectDir);
+      projectDirectory = createTemporaryDirectory();
+      createTypeScriptPackageJson(projectDirectory);
+      initGitRepo(projectDirectory);
 
       // Create existing ESLint config
       const existingConfig = '// My custom ESLint config\nexport default [];\n';
-      writeTestFile(projectDir, 'eslint.config.mjs', existingConfig);
+      writeTestFile(projectDirectory, 'eslint.config.mjs', existingConfig);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Existing config should be preserved
-      const eslintConfig = readTestFile(projectDir, 'eslint.config.mjs');
+      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toBe(existingConfig);
     },
     SETUP_TIMEOUT,
@@ -320,18 +320,18 @@ describe('E2E: Conditional Setup - Existing Config Preservation', () => {
   it(
     'preserves existing Prettier config (does not overwrite)',
     async () => {
-      projectDir = createTempDir();
-      createTypeScriptPackageJson(projectDir);
-      initGitRepo(projectDir);
+      projectDirectory = createTemporaryDirectory();
+      createTypeScriptPackageJson(projectDirectory);
+      initGitRepo(projectDirectory);
 
       // Create existing Prettier config
       const existingConfig = '{ "semi": false, "singleQuote": true }';
-      writeTestFile(projectDir, '.prettierrc', existingConfig);
+      writeTestFile(projectDirectory, '.prettierrc', existingConfig);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Existing config should be preserved
-      const prettierConfig = readTestFile(projectDir, '.prettierrc');
+      const prettierConfig = readTestFile(projectDirectory, '.prettierrc');
       expect(prettierConfig).toBe(existingConfig);
     },
     SETUP_TIMEOUT,
@@ -340,20 +340,20 @@ describe('E2E: Conditional Setup - Existing Config Preservation', () => {
   it(
     'preserves existing lint scripts in package.json',
     async () => {
-      projectDir = createTempDir();
-      createPackageJson(projectDir, {
+      projectDirectory = createTemporaryDirectory();
+      createPackageJson(projectDirectory, {
         scripts: {
           lint: 'custom-lint-command',
           format: 'custom-format-command',
         },
         devDependencies: { typescript: '^5.0.0' },
       });
-      initGitRepo(projectDir);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Custom scripts should be preserved
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.scripts.lint).toBe('custom-lint-command');
       expect(pkg.scripts.format).toBe('custom-format-command');
     },
@@ -363,13 +363,13 @@ describe('E2E: Conditional Setup - Existing Config Preservation', () => {
   it(
     'merges hooks with existing non-safeword hooks',
     async () => {
-      projectDir = createTempDir();
-      createTypeScriptPackageJson(projectDir);
-      initGitRepo(projectDir);
+      projectDirectory = createTemporaryDirectory();
+      createTypeScriptPackageJson(projectDirectory);
+      initGitRepo(projectDirectory);
 
       // Create existing Claude settings with custom hooks
       writeTestFile(
-        projectDir,
+        projectDirectory,
         '.claude/settings.json',
         JSON.stringify(
           {
@@ -386,15 +386,15 @@ describe('E2E: Conditional Setup - Existing Config Preservation', () => {
               ],
             },
           },
-          null,
+          undefined,
           2,
         ),
       );
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Both custom and safeword hooks should exist
-      const settings = JSON.parse(readTestFile(projectDir, '.claude/settings.json'));
+      const settings = JSON.parse(readTestFile(projectDirectory, '.claude/settings.json'));
       const sessionStartHooks = settings.hooks.SessionStart;
 
       // Should have at least 4 hooks (1 custom + 3 safeword)
@@ -415,27 +415,27 @@ describe('E2E: Conditional Setup - Existing Config Preservation', () => {
 });
 
 describe('E2E: Conditional Setup - Git Integration', () => {
-  let projectDir: string;
+  let projectDirectory: string;
 
   afterEach(() => {
-    if (projectDir) {
-      removeTempDir(projectDir);
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
     }
   });
 
   it(
     'creates Husky pre-commit hook in git repo',
     async () => {
-      projectDir = createTempDir();
-      createTypeScriptPackageJson(projectDir);
-      initGitRepo(projectDir);
+      projectDirectory = createTemporaryDirectory();
+      createTypeScriptPackageJson(projectDirectory);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Husky should be configured
-      expect(fileExists(projectDir, '.husky/pre-commit')).toBe(true);
+      expect(fileExists(projectDirectory, '.husky/pre-commit')).toBe(true);
 
-      const preCommit = readTestFile(projectDir, '.husky/pre-commit');
+      const preCommit = readTestFile(projectDirectory, '.husky/pre-commit');
       expect(preCommit).toContain('lint-staged');
     },
     SETUP_TIMEOUT,
@@ -444,23 +444,26 @@ describe('E2E: Conditional Setup - Git Integration', () => {
   it(
     'skips Husky setup in non-git directory',
     async () => {
-      projectDir = createTempDir();
-      createTypeScriptPackageJson(projectDir);
+      projectDirectory = createTemporaryDirectory();
+      createTypeScriptPackageJson(projectDirectory);
       // Note: NOT calling initGitRepo
 
-      const result = await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      const result = await runCli(['setup', '--yes'], {
+        cwd: projectDirectory,
+        timeout: SETUP_TIMEOUT,
+      });
 
       // Setup should complete successfully
       expect(result.exitCode).toBe(0);
 
       // Husky directory should not exist (no git = no husky)
-      expect(fileExists(projectDir, '.husky')).toBe(false);
+      expect(fileExists(projectDirectory, '.husky')).toBe(false);
 
       // Should NOT have Husky pre-commit hook
-      expect(fileExists(projectDir, '.husky/pre-commit')).toBe(false);
+      expect(fileExists(projectDirectory, '.husky/pre-commit')).toBe(false);
 
       // husky and lint-staged should NOT be installed in non-git projects
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg.devDependencies?.husky).toBeUndefined();
       expect(pkg.devDependencies?.['lint-staged']).toBeUndefined();
       // But other base packages should be installed
@@ -472,22 +475,22 @@ describe('E2E: Conditional Setup - Git Integration', () => {
   it(
     'pre-commit hook runs lint-staged successfully',
     async () => {
-      projectDir = createTempDir();
-      createTypeScriptPackageJson(projectDir);
-      initGitRepo(projectDir);
+      projectDirectory = createTemporaryDirectory();
+      createTypeScriptPackageJson(projectDirectory);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // Create a valid file, stage it, and commit
-      writeTestFile(projectDir, 'src/valid.ts', 'export const valid = 1;\n');
+      writeTestFile(projectDirectory, 'src/valid.ts', 'export const valid = 1;\n');
 
-      execSync('git add src/valid.ts', { cwd: projectDir });
+      execSync('git add src/valid.ts', { cwd: projectDirectory });
 
       // Commit should succeed (lint-staged passes)
 
-      execSync('git commit -m "test commit"', { cwd: projectDir, encoding: 'utf-8' });
+      execSync('git commit -m "test commit"', { cwd: projectDirectory, encoding: 'utf8' });
 
-      const log = execSync('git log --oneline -1', { cwd: projectDir, encoding: 'utf-8' });
+      const log = execSync('git log --oneline -1', { cwd: projectDirectory, encoding: 'utf8' });
       expect(log).toContain('test commit');
     },
     SETUP_TIMEOUT,
@@ -495,27 +498,27 @@ describe('E2E: Conditional Setup - Git Integration', () => {
 });
 
 describe('E2E: Conditional Setup - Package.json Creation', () => {
-  let projectDir: string;
+  let projectDirectory: string;
 
   afterEach(() => {
-    if (projectDir) {
-      removeTempDir(projectDir);
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
     }
   });
 
   it(
     'creates package.json if missing',
     async () => {
-      projectDir = createTempDir();
+      projectDirectory = createTemporaryDirectory();
       // Note: NOT creating package.json
-      initGitRepo(projectDir);
+      initGitRepo(projectDirectory);
 
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
       // package.json should be created
-      expect(fileExists(projectDir, 'package.json')).toBe(true);
+      expect(fileExists(projectDirectory, 'package.json')).toBe(true);
 
-      const pkg = JSON.parse(readTestFile(projectDir, 'package.json'));
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
       expect(pkg).toHaveProperty('name');
       expect(pkg).toHaveProperty('version');
     },
@@ -523,57 +526,5 @@ describe('E2E: Conditional Setup - Package.json Creation', () => {
   );
 });
 
-describe('E2E: Conditional Setup - Architecture Boundaries', () => {
-  let projectDir: string;
-
-  afterEach(() => {
-    if (projectDir) {
-      removeTempDir(projectDir);
-    }
-  });
-
-  it(
-    'detects architecture directories and generates boundaries config',
-    async () => {
-      projectDir = createTempDir();
-      createTypeScriptPackageJson(projectDir);
-      initGitRepo(projectDir);
-
-      // Create architecture directories
-      writeTestFile(projectDir, 'src/types/index.ts', 'export type User = { id: string };\n');
-      writeTestFile(projectDir, 'src/utils/helpers.ts', 'export const helper = () => {};\n');
-      writeTestFile(projectDir, 'src/services/api.ts', 'export const api = {};\n');
-      writeTestFile(projectDir, 'src/components/Button.tsx', 'export const Button = () => null;\n');
-
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
-
-      // Boundaries config should be created
-      expect(fileExists(projectDir, '.safeword/eslint-boundaries.config.mjs')).toBe(true);
-
-      const boundariesConfig = readTestFile(projectDir, '.safeword/eslint-boundaries.config.mjs');
-      // Should detect the architecture directories
-      expect(boundariesConfig).toContain('types');
-      expect(boundariesConfig).toContain('utils');
-      expect(boundariesConfig).toContain('services');
-      expect(boundariesConfig).toContain('components');
-    },
-    SETUP_TIMEOUT,
-  );
-
-  it(
-    'handles projects without architecture directories',
-    async () => {
-      projectDir = createTempDir();
-      createTypeScriptPackageJson(projectDir);
-      initGitRepo(projectDir);
-
-      // No architecture directories - just a flat structure
-
-      await runCli(['setup', '--yes'], { cwd: projectDir, timeout: SETUP_TIMEOUT });
-
-      // Boundaries config should still be created (ready for when dirs are added)
-      expect(fileExists(projectDir, '.safeword/eslint-boundaries.config.mjs')).toBe(true);
-    },
-    SETUP_TIMEOUT,
-  );
-});
+// Note: Architecture boundaries are now project-specific (not generated by CLI).
+// Users who want boundaries should configure them in their own eslint.config.mjs.

@@ -12,36 +12,36 @@
 
 import { spawnSync } from 'node:child_process';
 
-import { afterAll,beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
-  createTempDir,
+  createTemporaryDirectory,
   createTypeScriptPackageJson,
   initGitRepo,
   readTestFile,
-  removeTempDir,
+  removeTemporaryDirectory,
   runCli,
 } from '../helpers';
 
 describe('E2E: Claude Code Hook Path Resolution', () => {
-  let projectDir: string;
-  let differentDir: string;
+  let projectDirectory: string;
+  let differentDirectory: string;
 
   beforeAll(async () => {
-    projectDir = createTempDir();
-    createTypeScriptPackageJson(projectDir);
-    initGitRepo(projectDir);
-    await runCli(['setup', '--yes'], { cwd: projectDir });
-    differentDir = createTempDir();
-  }, 180000);
+    projectDirectory = createTemporaryDirectory();
+    createTypeScriptPackageJson(projectDirectory);
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+    differentDirectory = createTemporaryDirectory();
+  }, 180_000);
 
   afterAll(() => {
-    if (projectDir) removeTempDir(projectDir);
-    if (differentDir) removeTempDir(differentDir);
+    if (projectDirectory) removeTemporaryDirectory(projectDirectory);
+    if (differentDirectory) removeTemporaryDirectory(differentDirectory);
   });
 
   it('all hooks execute without "not found" errors from different cwd', () => {
-    const settings = JSON.parse(readTestFile(projectDir, '.claude/settings.json'));
+    const settings = JSON.parse(readTestFile(projectDirectory, '.claude/settings.json'));
     const commands: string[] = [];
 
     // Extract all hook commands
@@ -58,10 +58,10 @@ describe('E2E: Claude Code Hook Path Resolution', () => {
     const failures: string[] = [];
     for (const command of commands) {
       const result = spawnSync('/bin/sh', ['-c', command], {
-        cwd: differentDir, // Simulates Claude Code running from different directory
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-        encoding: 'utf-8',
-        timeout: 10000,
+        cwd: differentDirectory, // Simulates Claude Code running from different directory
+        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+        encoding: 'utf8',
+        timeout: 10_000,
       });
 
       if (result.status === 127 || /not found|no such file/i.test(result.stderr + result.stdout)) {

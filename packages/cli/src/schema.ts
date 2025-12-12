@@ -8,10 +8,9 @@
  */
 
 import { CURSOR_HOOKS, getEslintConfig, SETTINGS_HOOKS } from './templates/config.js';
-import { AGENTS_MD_LINK, getLintStagedConfig, getPrettierConfig } from './templates/content.js';
-import { detectArchitecture, generateBoundariesConfig } from './utils/boundaries.js';
+import { AGENTS_MD_LINK, getPrettierConfig } from './templates/content.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';
-import { HUSKY_PRE_COMMIT_CONTENT, MCP_SERVERS } from './utils/install.js';
+import { MCP_SERVERS } from './utils/install.js';
 import { type ProjectType } from './utils/project-detector.js';
 import { VERSION } from './version.js';
 
@@ -22,7 +21,7 @@ import { VERSION } from './version.js';
 export interface ProjectContext {
   cwd: string;
   projectType: ProjectType;
-  devDeps: Record<string, string>;
+  developmentDeps: Record<string, string>;
   isGitRepo: boolean;
 }
 
@@ -56,6 +55,8 @@ export interface SafewordSchema {
   sharedDirs: string[]; // We add to but don't own
   preservedDirs: string[]; // Created on setup, NOT deleted on reset (user data)
   deprecatedFiles: string[]; // Files to delete on upgrade (renamed or removed)
+  deprecatedPackages: string[]; // Packages to uninstall on upgrade (consolidated into safeword plugin)
+  deprecatedDirs: string[]; // Directories to delete on upgrade (no longer managed)
   ownedFiles: Record<string, FileDefinition>; // Overwrite on upgrade (if changed)
   managedFiles: Record<string, ManagedFileDefinition>; // Create if missing, update if safeword content
   jsonMerges: Record<string, JsonMergeDefinition>;
@@ -129,7 +130,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   ],
 
   // Directories we add to but don't own (not deleted on reset)
-  sharedDirs: ['.claude', '.claude/skills', '.claude/commands', '.husky'],
+  sharedDirs: ['.claude', '.claude/skills', '.claude/commands'],
 
   // Created on setup but NOT deleted on reset (preserves user data)
   preservedDirs: [
@@ -147,6 +148,41 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/guides/tdd-best-practices.md',
     '.safeword/guides/user-story-guide.md',
     '.safeword/guides/test-definitions-guide.md',
+    // Boundaries config now project-specific (v0.9.0)
+    '.safeword/eslint-boundaries.config.mjs',
+  ],
+
+  // Packages to uninstall on upgrade (consolidated into eslint-plugin-safeword v0.9.0)
+  deprecatedPackages: [
+    // Individual ESLint plugins now bundled in eslint-plugin-safeword
+    '@eslint/js',
+    'eslint-plugin-import-x',
+    'eslint-import-resolver-typescript',
+    'eslint-plugin-sonarjs',
+    'eslint-plugin-unicorn',
+    'eslint-plugin-boundaries',
+    'eslint-plugin-playwright',
+    'eslint-plugin-promise',
+    'eslint-plugin-regexp',
+    'eslint-plugin-jsdoc',
+    'eslint-plugin-simple-import-sort',
+    'eslint-plugin-security',
+    // Conditional ESLint plugins now in safeword
+    'typescript-eslint',
+    'eslint-plugin-react',
+    'eslint-plugin-react-hooks',
+    'eslint-plugin-jsx-a11y',
+    '@next/eslint-plugin-next',
+    'eslint-plugin-astro',
+    '@vitest/eslint-plugin',
+    // Pre-commit hooks no longer managed by safeword
+    'husky',
+    'lint-staged',
+  ],
+
+  // Directories to delete on upgrade (no longer managed by safeword)
+  deprecatedDirs: [
+    '.husky', // Pre-commit hooks no longer managed by safeword
   ],
 
   // Files owned by safeword (overwritten on upgrade if content changed)
@@ -154,9 +190,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Core files
     '.safeword/SAFEWORD.md': { template: 'SAFEWORD.md' },
     '.safeword/version': { content: () => VERSION },
-    '.safeword/eslint-boundaries.config.mjs': {
-      generator: ctx => generateBoundariesConfig(detectArchitecture(ctx.cwd)),
-    },
 
     // Hooks (7 files)
     '.safeword/hooks/session-verify-agents.sh': { template: 'hooks/session-verify-agents.sh' },
@@ -276,7 +309,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // Files created if missing, updated only if content matches current template
   managedFiles: {
     'eslint.config.mjs': {
-      generator: () => getEslintConfig({ boundaries: true }),
+      generator: () => getEslintConfig(),
     },
     '.prettierrc': { generator: ctx => getPrettierConfig(ctx.projectType) },
     '.markdownlint-cli2.jsonc': { template: 'markdownlint-cli2.jsonc' },
@@ -284,7 +317,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     'tsconfig.json': {
       generator: ctx => {
         // Only create for TypeScript projects
-        if (!ctx.devDeps.typescript && !ctx.devDeps['typescript-eslint']) {
+        if (!ctx.developmentDeps.typescript && !ctx.developmentDeps['typescript-eslint']) {
           return ''; // Empty = skip this file
         }
         return JSON.stringify(
@@ -301,7 +334,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
             include: ['**/*.ts', '**/*.tsx'],
             exclude: ['node_modules', 'dist', 'build'],
           },
-          null,
+          undefined,
           2,
         );
       },
@@ -317,15 +350,13 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         'scripts.format',
         'scripts.format:check',
         'scripts.knip',
-        'scripts.prepare',
-        'lint-staged',
       ],
       conditionalKeys: {
         publishableLibrary: ['scripts.publint'],
         shell: ['scripts.lint:sh'],
       },
       merge: (existing, ctx) => {
-        const scripts = (existing.scripts as Record<string, string>) ?? {};
+        const scripts = { ...(existing.scripts as Record<string, string>) };
         const result = { ...existing };
 
         // Add scripts if not present
@@ -334,7 +365,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         if (!scripts.format) scripts.format = 'prettier --write .';
         if (!scripts['format:check']) scripts['format:check'] = 'prettier --check .';
         if (!scripts.knip) scripts.knip = 'knip';
-        if (!scripts.prepare) scripts.prepare = 'husky || true';
 
         // Conditional: publint for publishable libraries
         if (ctx.projectType.publishableLibrary && !scripts.publint) {
@@ -348,11 +378,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
         result.scripts = scripts;
 
-        // Add lint-staged config
-        if (!existing['lint-staged']) {
-          result['lint-staged'] = getLintStagedConfig(ctx.projectType);
-        }
-
         return result;
       },
       unmerge: existing => {
@@ -364,7 +389,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         delete scripts['lint:sh'];
         delete scripts['format:check'];
         delete scripts.knip;
-        delete scripts.prepare;
         delete scripts.publint;
 
         if (Object.keys(scripts).length > 0) {
@@ -372,8 +396,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         } else {
           delete result.scripts;
         }
-
-        delete result['lint-staged'];
 
         return result;
       },
@@ -525,47 +547,30 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       marker: '.safeword/SAFEWORD.md',
       createIfMissing: false, // Only patch if exists, don't create (AGENTS.md is primary)
     },
-    '.husky/pre-commit': {
-      operation: 'prepend',
-      content: HUSKY_PRE_COMMIT_CONTENT,
-      marker: '# safeword:pre-commit',
-      createIfMissing: true,
-    },
   },
 
   // NPM packages to install
   packages: {
     base: [
+      // Core tools
       'eslint',
       'prettier',
-      '@eslint/js',
-      'eslint-plugin-import-x',
-      'eslint-import-resolver-typescript',
-      'eslint-plugin-sonarjs',
-      'eslint-plugin-unicorn',
-      'eslint-plugin-boundaries',
-      'eslint-plugin-playwright',
-      'eslint-plugin-promise',
-      'eslint-plugin-regexp',
-      'eslint-plugin-jsdoc',
-      'eslint-plugin-simple-import-sort',
-      'eslint-plugin-security',
       'eslint-config-prettier',
+      // Safeword plugin (bundles all ESLint plugins)
+      'eslint-plugin-safeword',
+      // Non-ESLint tools
       'markdownlint-cli2',
       'knip',
-      'husky',
-      'lint-staged',
     ],
     conditional: {
-      typescript: ['typescript-eslint'],
-      react: ['eslint-plugin-react', 'eslint-plugin-react-hooks', 'eslint-plugin-jsx-a11y'],
-      nextjs: ['@next/eslint-plugin-next'],
-      astro: ['eslint-plugin-astro', 'prettier-plugin-astro'],
+      // Frameworks NOT in eslint-plugin-safeword
       vue: ['eslint-plugin-vue'],
       svelte: ['eslint-plugin-svelte', 'prettier-plugin-svelte'],
       electron: ['@electron-toolkit/eslint-config'],
-      vitest: ['@vitest/eslint-plugin'],
+      // Prettier plugins
+      astro: ['prettier-plugin-astro'],
       tailwind: ['prettier-plugin-tailwindcss'],
+      // Non-ESLint tools
       publishableLibrary: ['publint'],
       shell: ['shellcheck', 'prettier-plugin-sh'],
     },

@@ -4,7 +4,7 @@
  * Uses reconcile() with dryRun to detect missing files and configuration issues.
  */
 
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
@@ -26,7 +26,7 @@ export interface CheckOptions {
 function findMissingFiles(cwd: string, actions: { type: string; path: string }[]): string[] {
   const issues: string[] = [];
   for (const action of actions) {
-    if (action.type === 'write' && !exists(join(cwd, action.path))) {
+    if (action.type === 'write' && !exists(nodePath.join(cwd, action.path))) {
       issues.push(`Missing: ${action.path}`);
     }
   }
@@ -46,14 +46,14 @@ function findMissingPatches(
   for (const action of actions) {
     if (action.type !== 'text-patch') continue;
 
-    const fullPath = join(cwd, action.path);
-    if (!exists(fullPath)) {
-      issues.push(`${action.path} file missing`);
-    } else {
+    const fullPath = nodePath.join(cwd, action.path);
+    if (exists(fullPath)) {
       const content = readFileSafe(fullPath) ?? '';
       if (action.definition && !content.includes(action.definition.marker)) {
         issues.push(`${action.path} missing safeword link`);
       }
+    } else {
+      issues.push(`${action.path} file missing`);
     }
   }
   return issues;
@@ -61,10 +61,10 @@ function findMissingPatches(
 
 interface HealthStatus {
   configured: boolean;
-  projectVersion: string | null;
+  projectVersion: string | undefined;
   cliVersion: string;
   updateAvailable: boolean;
-  latestVersion: string | null;
+  latestVersion: string | undefined;
   issues: string[];
   missingPackages: string[];
 }
@@ -73,7 +73,7 @@ interface HealthStatus {
  * Check for latest version from npm (with timeout)
  * @param timeout
  */
-async function checkLatestVersion(timeout = 3000): Promise<string | null> {
+async function checkLatestVersion(timeout = 3000): Promise<string | undefined> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
@@ -86,12 +86,12 @@ async function checkLatestVersion(timeout = 3000): Promise<string | null> {
 
     clearTimeout(timeoutId);
 
-    if (!response.ok) return null;
+    if (!response.ok) return undefined;
 
     const data = (await response.json()) as { version?: string };
-    return data.version ?? null;
+    return data.version ?? undefined;
   } catch {
-    return null;
+    return undefined;
   }
 }
 
@@ -100,24 +100,24 @@ async function checkLatestVersion(timeout = 3000): Promise<string | null> {
  * @param cwd
  */
 async function checkHealth(cwd: string): Promise<HealthStatus> {
-  const safewordDir = join(cwd, '.safeword');
+  const safewordDirectory = nodePath.join(cwd, '.safeword');
 
   // Check if configured
-  if (!exists(safewordDir)) {
+  if (!exists(safewordDirectory)) {
     return {
       configured: false,
-      projectVersion: null,
+      projectVersion: undefined,
       cliVersion: VERSION,
       updateAvailable: false,
-      latestVersion: null,
+      latestVersion: undefined,
       issues: [],
       missingPackages: [],
     };
   }
 
   // Read project version
-  const versionPath = join(safewordDir, 'version');
-  const projectVersion = readFileSafe(versionPath)?.trim() ?? null;
+  const versionPath = nodePath.join(safewordDirectory, 'version');
+  const projectVersion = readFileSafe(versionPath)?.trim() ?? undefined;
 
   // Use reconcile with dryRun to detect issues
   const ctx = createProjectContext(cwd);
@@ -130,7 +130,7 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
   ];
 
   // Check for missing .claude/settings.json
-  if (!exists(join(cwd, '.claude', 'settings.json'))) {
+  if (!exists(nodePath.join(cwd, '.claude', 'settings.json'))) {
     issues.push('Missing: .claude/settings.json');
   }
 
@@ -139,7 +139,7 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
     projectVersion,
     cliVersion: VERSION,
     updateAvailable: false,
-    latestVersion: null,
+    latestVersion: undefined,
     issues,
     missingPackages: result.packagesToInstall,
   };

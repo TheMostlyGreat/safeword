@@ -4,36 +4,36 @@
  * Tests for `safeword diff` command.
  */
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   createConfiguredProject,
-  createTempDir,
+  createTemporaryDirectory,
   createTypeScriptPackageJson,
-  removeTempDir,
+  removeTemporaryDirectory,
   runCli,
   writeTestFile,
 } from '../helpers';
 
 describe('Test Suite 10: Diff', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = createTempDir();
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    removeTempDir(tempDir);
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
   describe('Test 10.1: Shows summary by default', () => {
     it('should show file counts without full diff', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Modify version to create differences
-      writeTestFile(tempDir, '.safeword/version', '0.0.1');
+      writeTestFile(temporaryDirectory, '.safeword/version', '0.0.1');
 
-      const result = await runCli(['diff'], { cwd: tempDir });
+      const result = await runCli(['diff'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
 
@@ -48,12 +48,12 @@ describe('Test Suite 10: Diff', () => {
 
   describe('Test 10.2: Lists files by category', () => {
     it('should categorize files as Added, Modified, or Unchanged', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Create a difference
-      writeTestFile(tempDir, '.safeword/version', '0.0.1');
+      writeTestFile(temporaryDirectory, '.safeword/version', '0.0.1');
 
-      const result = await runCli(['diff'], { cwd: tempDir });
+      const result = await runCli(['diff'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
 
@@ -65,12 +65,12 @@ describe('Test Suite 10: Diff', () => {
 
   describe('Test 10.3: Shows version transition', () => {
     it('should show from/to versions', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Set older project version
-      writeTestFile(tempDir, '.safeword/version', '1.0.0');
+      writeTestFile(temporaryDirectory, '.safeword/version', '1.0.0');
 
-      const result = await runCli(['diff'], { cwd: tempDir });
+      const result = await runCli(['diff'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
 
@@ -83,12 +83,12 @@ describe('Test Suite 10: Diff', () => {
 
   describe('Test 10.4: --verbose shows full diff', () => {
     it('should show unified diff with --verbose', async () => {
-      await createConfiguredProject(tempDir);
+      await createConfiguredProject(temporaryDirectory);
 
       // Create a modification
-      writeTestFile(tempDir, '.safeword/SAFEWORD.md', '# Modified\n');
+      writeTestFile(temporaryDirectory, '.safeword/SAFEWORD.md', '# Modified\n');
 
-      const result = await runCli(['diff', '--verbose'], { cwd: tempDir });
+      const result = await runCli(['diff', '--verbose'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
 
@@ -104,10 +104,10 @@ describe('Test Suite 10: Diff', () => {
 
   describe('Test 10.5: Unconfigured project error', () => {
     it('should error on unconfigured project', async () => {
-      createTypeScriptPackageJson(tempDir);
+      createTypeScriptPackageJson(temporaryDirectory);
       // No setup
 
-      const result = await runCli(['diff'], { cwd: tempDir });
+      const result = await runCli(['diff'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr.toLowerCase()).toContain('not configured');

@@ -8,21 +8,21 @@
  */
 
 import { execSync } from 'node:child_process';
-import { existsSync,mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import nodePath from 'node:path';
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('Setup Command - Reconcile Integration', () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'safeword-setup-reconcile-'));
+    temporaryDirectory = mkdtempSync(nodePath.join(tmpdir(), 'safeword-setup-reconcile-'));
   });
 
   afterEach(() => {
-    rmSync(tempDir, { recursive: true, force: true });
+    rmSync(temporaryDirectory, { recursive: true, force: true });
   });
 
   describe('reconcile mode=install', () => {
@@ -33,11 +33,11 @@ describe('Setup Command - Reconcile Integration', () => {
 
       // Create minimal package.json
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx, { dryRun: true });
 
       // dryRun should compute actions without applying
@@ -78,22 +78,24 @@ describe('Setup Command - Reconcile Integration', () => {
       const { createProjectContext } = await import('../../src/utils/context.js');
 
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Check directories created
-      expect(existsSync(join(tempDir, '.safeword'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/hooks'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/guides'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/learnings'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/tickets'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/tickets/completed'))).toBe(true);
-      expect(existsSync(join(tempDir, '.claude'))).toBe(true);
-      expect(existsSync(join(tempDir, '.claude/commands'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/hooks'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/guides'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/learnings'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/tickets'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/tickets/completed'))).toBe(
+        true,
+      );
+      expect(existsSync(nodePath.join(temporaryDirectory, '.claude'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.claude/commands'))).toBe(true);
     });
 
     it('should create all owned files when applied', async () => {
@@ -102,28 +104,38 @@ describe('Setup Command - Reconcile Integration', () => {
       const { createProjectContext } = await import('../../src/utils/context.js');
 
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Check core files
-      expect(existsSync(join(tempDir, '.safeword/SAFEWORD.md'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/version'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/version'))).toBe(true);
 
       // Check hook files
-      expect(existsSync(join(tempDir, '.safeword/hooks/session-verify-agents.sh'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/hooks/stop-quality.sh'))).toBe(true);
+      expect(
+        existsSync(nodePath.join(temporaryDirectory, '.safeword/hooks/session-verify-agents.sh')),
+      ).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/hooks/stop-quality.sh'))).toBe(
+        true,
+      );
 
       // Check guides
-      expect(existsSync(join(tempDir, '.safeword/guides/architecture-guide.md'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/guides/planning-guide.md'))).toBe(true);
-      expect(existsSync(join(tempDir, '.safeword/guides/testing-guide.md'))).toBe(true);
+      expect(
+        existsSync(nodePath.join(temporaryDirectory, '.safeword/guides/architecture-guide.md')),
+      ).toBe(true);
+      expect(
+        existsSync(nodePath.join(temporaryDirectory, '.safeword/guides/planning-guide.md')),
+      ).toBe(true);
+      expect(
+        existsSync(nodePath.join(temporaryDirectory, '.safeword/guides/testing-guide.md')),
+      ).toBe(true);
 
       // Check claude files
-      expect(existsSync(join(tempDir, '.claude/commands/lint.md'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.claude/commands/lint.md'))).toBe(true);
     });
 
     it('should create managed files only if missing', async () => {
@@ -132,22 +144,28 @@ describe('Setup Command - Reconcile Integration', () => {
       const { createProjectContext } = await import('../../src/utils/context.js');
 
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
       // Create existing eslint config with custom content
-      writeFileSync(join(tempDir, 'eslint.config.mjs'), '// Custom ESLint config');
+      writeFileSync(
+        nodePath.join(temporaryDirectory, 'eslint.config.mjs'),
+        '// Custom ESLint config',
+      );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Existing eslint config should NOT be overwritten
-      const eslintContent = readFileSync(join(tempDir, 'eslint.config.mjs'), 'utf-8');
+      const eslintContent = readFileSync(
+        nodePath.join(temporaryDirectory, 'eslint.config.mjs'),
+        'utf8',
+      );
       expect(eslintContent).toBe('// Custom ESLint config');
 
       // But prettierrc should be created if missing
-      expect(existsSync(join(tempDir, '.prettierrc'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(true);
     });
 
     it('should apply JSON merges for settings.json', async () => {
@@ -156,16 +174,18 @@ describe('Setup Command - Reconcile Integration', () => {
       const { createProjectContext } = await import('../../src/utils/context.js');
 
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Settings should be created with hooks
-      expect(existsSync(join(tempDir, '.claude/settings.json'))).toBe(true);
-      const settings = JSON.parse(readFileSync(join(tempDir, '.claude/settings.json'), 'utf-8'));
+      expect(existsSync(nodePath.join(temporaryDirectory, '.claude/settings.json'))).toBe(true);
+      const settings = JSON.parse(
+        readFileSync(nodePath.join(temporaryDirectory, '.claude/settings.json'), 'utf8'),
+      );
       expect(settings.hooks).toBeDefined();
       expect(settings.hooks.SessionStart).toBeDefined();
     });
@@ -176,19 +196,20 @@ describe('Setup Command - Reconcile Integration', () => {
       const { createProjectContext } = await import('../../src/utils/context.js');
 
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // Package.json should have scripts added
-      const packageJson = JSON.parse(readFileSync(join(tempDir, 'package.json'), 'utf-8'));
+      const packageJson = JSON.parse(
+        readFileSync(nodePath.join(temporaryDirectory, 'package.json'), 'utf8'),
+      );
       expect(packageJson.scripts?.lint).toBeDefined();
       expect(packageJson.scripts?.format).toBeDefined();
-      expect(packageJson.scripts?.prepare).toBeDefined();
-      expect(packageJson['lint-staged']).toBeDefined();
+      expect(packageJson.scripts?.knip).toBeDefined();
     });
 
     it('should create AGENTS.md via text patch', async () => {
@@ -197,16 +218,16 @@ describe('Setup Command - Reconcile Integration', () => {
       const { createProjectContext } = await import('../../src/utils/context.js');
 
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // AGENTS.md should be created with safeword link
-      expect(existsSync(join(tempDir, 'AGENTS.md'))).toBe(true);
-      const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
+      expect(existsSync(nodePath.join(temporaryDirectory, 'AGENTS.md'))).toBe(true);
+      const content = readFileSync(nodePath.join(temporaryDirectory, 'AGENTS.md'), 'utf8');
       expect(content).toContain('.safeword/SAFEWORD.md');
     });
 
@@ -216,18 +237,21 @@ describe('Setup Command - Reconcile Integration', () => {
       const { createProjectContext } = await import('../../src/utils/context.js');
 
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
       // Create existing AGENTS.md
-      writeFileSync(join(tempDir, 'AGENTS.md'), '# My Project\n\nCustom content here.');
+      writeFileSync(
+        nodePath.join(temporaryDirectory, 'AGENTS.md'),
+        '# My Project\n\nCustom content here.',
+      );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
       // AGENTS.md should have link prepended
-      const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8');
+      const content = readFileSync(nodePath.join(temporaryDirectory, 'AGENTS.md'), 'utf8');
       expect(content).toContain('.safeword/SAFEWORD.md');
       expect(content).toContain('Custom content here');
     });
@@ -237,44 +261,43 @@ describe('Setup Command - Reconcile Integration', () => {
       const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
       const { createProjectContext } = await import('../../src/utils/context.js');
 
-      // Create package.json with React dependency
+      // Create package.json with Vue dependency
       writeFileSync(
-        join(tempDir, 'package.json'),
+        nodePath.join(temporaryDirectory, 'package.json'),
         JSON.stringify(
           {
             name: 'test',
             version: '1.0.0',
             dependencies: {
-              react: '^18.0.0',
+              vue: '^3.0.0',
             },
           },
-          null,
+          undefined,
           2,
         ),
       );
 
-      const ctx = createProjectContext(tempDir);
+      const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx, { dryRun: true });
 
-      // Should include React-specific packages
-      expect(result.packagesToInstall).toContain('eslint-plugin-react');
-      expect(result.packagesToInstall).toContain('eslint-plugin-react-hooks');
+      // Should include Vue-specific packages (NOT bundled in eslint-plugin-safeword)
+      expect(result.packagesToInstall).toContain('eslint-plugin-vue');
     });
   });
 
   describe('setup command integration', () => {
     it('should run setup successfully via CLI', async () => {
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const cliPath = join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
         const result = execSync(`npx tsx ${cliPath} setup --yes`, {
-          cwd: tempDir,
-          encoding: 'utf-8',
-          timeout: 60000,
+          cwd: temporaryDirectory,
+          encoding: 'utf8',
+          timeout: 60_000,
         });
 
         expect(result).toContain('Setup');
@@ -286,7 +309,7 @@ describe('Setup Command - Reconcile Integration', () => {
         // If we see setup output and .safeword exists, the reconcile worked
         if (
           (stdout.includes('Setup') || stdout.includes('Created')) &&
-          existsSync(join(tempDir, '.safeword'))
+          existsSync(nodePath.join(temporaryDirectory, '.safeword'))
         ) {
           expect(true).toBe(true);
         } else {
@@ -297,19 +320,19 @@ describe('Setup Command - Reconcile Integration', () => {
 
     it('should error on already configured project', async () => {
       writeFileSync(
-        join(tempDir, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, null, 2),
+        nodePath.join(temporaryDirectory, 'package.json'),
+        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
       // Create .safeword dir
-      mkdirSync(join(tempDir, '.safeword'), { recursive: true });
+      mkdirSync(nodePath.join(temporaryDirectory, '.safeword'), { recursive: true });
 
-      const cliPath = join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
         execSync(`npx tsx ${cliPath} setup --yes`, {
-          cwd: tempDir,
-          encoding: 'utf-8',
-          timeout: 30000,
+          cwd: temporaryDirectory,
+          encoding: 'utf8',
+          timeout: 30_000,
         });
         // Should not reach here
         expect(true).toBe(false);
