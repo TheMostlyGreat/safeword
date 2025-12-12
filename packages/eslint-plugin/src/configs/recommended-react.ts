@@ -38,12 +38,18 @@ export const recommendedTypeScriptReact: any[] = [
   // React Hooks + Compiler rules (v7.x flat config)
   reactHooksPlugin.configs.flat.recommended,
 
-  // Escalate all warn rules to error (LLMs ignore warnings)
+  // Escalate warn rules to error + add LLM-critical rules not in recommended
   {
     rules: {
+      // Escalate default warns to error (LLMs ignore warnings)
       'react-hooks/exhaustive-deps': 'error', // Default: warn
       'react-hooks/incompatible-library': 'error', // Default: warn
       'react-hooks/unsupported-syntax': 'error', // Default: warn
+
+      // LLM-critical rules NOT in recommended preset
+      'react-hooks/void-use-memo': 'error', // LLMs forget to return from useMemo
+      'react-hooks/memoized-effect-dependencies': 'error', // LLMs create unstable refs as deps
+      'react-hooks/no-deriving-state-in-effects': 'error', // LLMs derive state in useEffect
     },
   },
 
