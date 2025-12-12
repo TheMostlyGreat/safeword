@@ -11,9 +11,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unnecessary-condition -- ESLint config types are incompatible across plugin packages */
 
 import reactPlugin from 'eslint-plugin-react';
-// eslint-disable-next-line @typescript-eslint/no-require-imports -- react-hooks 7.x types don't export configs
-const reactHooksPlugin = require('eslint-plugin-react-hooks') as {
-  configs: { flat: { recommended: any } };
+import reactHooksPluginImport from 'eslint-plugin-react-hooks';
+
+// Type assertion - react-hooks 7.x exports configs but types don't declare it
+const reactHooksPlugin = reactHooksPluginImport as unknown as {
+  configs: { flat: { 'recommended-latest': any } };
 };
 
 import { recommendedTypeScript } from './recommended-typescript.js';
@@ -36,9 +38,10 @@ export const recommendedTypeScriptReact: any[] = [
   reactPlugin.configs.flat?.['jsx-runtime'], // React 17+ (no import React needed)
 
   // React Hooks + Compiler rules (v7.x flat config)
-  reactHooksPlugin.configs.flat.recommended,
+  // Using recommended-latest which includes void-use-memo
+  reactHooksPlugin.configs.flat['recommended-latest'],
 
-  // Escalate warn rules to error + add LLM-critical rules not in recommended
+  // Escalate warn rules to error + add LLM-critical rules
   {
     rules: {
       // Escalate default warns to error (LLMs ignore warnings)
@@ -46,8 +49,7 @@ export const recommendedTypeScriptReact: any[] = [
       'react-hooks/incompatible-library': 'error', // Default: warn
       'react-hooks/unsupported-syntax': 'error', // Default: warn
 
-      // LLM-critical rules NOT in recommended preset
-      'react-hooks/void-use-memo': 'error', // LLMs forget to return from useMemo
+      // LLM-critical rules NOT in recommended-latest preset
       'react-hooks/memoized-effect-dependencies': 'error', // LLMs create unstable refs as deps
       'react-hooks/no-deriving-state-in-effects': 'error', // LLMs derive state in useEffect
     },
