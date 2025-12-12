@@ -63,6 +63,8 @@ export const basePlugins: any[] = [
     },
     rules: {
       'import-x/no-duplicates': 'error', // LLMs create duplicate imports
+      'import-x/no-cycle': 'error', // Circular dependencies A → B → A
+      'import-x/no-self-import': 'error', // File imports itself (copy-paste bug)
       // Turn off rules with high false-positive rate (binary: error or off)
       'import-x/no-named-as-default': 'off',
       'import-x/no-named-as-default-member': 'off',
