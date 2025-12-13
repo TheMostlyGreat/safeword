@@ -15,51 +15,6 @@ Read it BEFORE working on any task in this project.
 
 ---`;
 
-interface PrettierConfig {
-  semi: boolean;
-  singleQuote: boolean;
-  tabWidth: number;
-  trailingComma: string;
-  printWidth: number;
-  endOfLine: string;
-  useTabs: boolean;
-  bracketSpacing: boolean;
-  arrowParens: string;
-  plugins?: string[];
-}
-
-/**
- * Generate .prettierrc content based on project type.
- * Explicitly lists plugins to ensure compatibility with pnpm/Yarn PnP.
- * @param projectType
- */
-export function getPrettierConfig(projectType: ProjectType): string {
-  const config: PrettierConfig = {
-    semi: true,
-    singleQuote: true,
-    tabWidth: 2,
-    trailingComma: 'all',
-    printWidth: 100,
-    endOfLine: 'lf',
-    useTabs: false,
-    bracketSpacing: true,
-    arrowParens: 'avoid',
-  };
-
-  const plugins: string[] = [];
-
-  if (projectType.astro) plugins.push('prettier-plugin-astro');
-  if (projectType.shell) plugins.push('prettier-plugin-sh');
-  // Tailwind must be last for proper class sorting
-  if (projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
-
-  if (plugins.length > 0) {
-    config.plugins = plugins;
-  }
-
-  return `${JSON.stringify(config, undefined, 2)}\n`;
-}
-
 /**
  * Generate lint-staged configuration based on project type.
  * Only includes shell patterns when shell scripts are detected.
