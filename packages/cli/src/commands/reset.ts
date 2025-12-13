@@ -10,7 +10,7 @@
 import { execSync } from 'node:child_process';
 import nodePath from 'node:path';
 
-import { reconcile } from '../reconcile.js';
+import { reconcile, type ReconcileResult } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists } from '../utils/fs.js';
@@ -21,71 +21,65 @@ export interface ResetOptions {
   full?: boolean;
 }
 
-/**
- *
- * @param options
- */
+function uninstallPackages(cwd: string, packages: string[]): void {
+  if (packages.length === 0) return;
+
+  info('\nUninstalling devDependencies...');
+  const uninstallCmd = `npm uninstall ${packages.join(' ')}`;
+  info(`Running: ${uninstallCmd}`);
+
+  try {
+    execSync(uninstallCmd, { cwd, stdio: 'inherit' });
+    success('Uninstalled safeword devDependencies');
+  } catch {
+    warn('Failed to uninstall some packages. Run manually:');
+    listItem(uninstallCmd);
+  }
+}
+
+function printResetSummary(result: ReconcileResult, fullReset: boolean): void {
+  header('Reset Complete');
+
+  if (result.removed.length > 0) {
+    info('\nRemoved:');
+    for (const item of result.removed) {
+      listItem(item);
+    }
+  }
+
+  if (!fullReset) {
+    info('\nPreserved (use --full to remove):');
+    listItem('eslint.config.mjs');
+    listItem('.prettierrc');
+    listItem('.markdownlint-cli2.jsonc');
+    listItem('package.json (scripts, lint-staged config)');
+    listItem('devDependencies (eslint, prettier, husky, lint-staged, etc.)');
+  }
+
+  success('\nSafeword configuration removed');
+}
+
 export async function reset(options: ResetOptions): Promise<void> {
   const cwd = process.cwd();
   const safewordDirectory = nodePath.join(cwd, '.safeword');
 
-  // Check if configured
   if (!exists(safewordDirectory)) {
     info('Nothing to remove. Project is not configured with safeword.');
     return;
   }
 
   const fullReset = options.full ?? false;
+  const mode = fullReset ? 'uninstall-full' : 'uninstall';
 
   header('Safeword Reset');
-  if (fullReset) {
-    info('Performing full reset (including linting configuration)...');
-  } else {
-    info('Removing safeword configuration...');
-  }
+  info(fullReset ? 'Performing full reset (including linting configuration)...' : 'Removing safeword configuration...');
 
   try {
-    // Use reconcile with appropriate mode
-    const mode = fullReset ? 'uninstall-full' : 'uninstall';
     const ctx = createProjectContext(cwd);
     const result = await reconcile(SAFEWORD_SCHEMA, mode, ctx);
 
-    // Handle npm uninstall for full reset
-    if (fullReset && result.packagesToRemove.length > 0) {
-      info('\nUninstalling devDependencies...');
-
-      try {
-        const uninstallCmd = `npm uninstall ${result.packagesToRemove.join(' ')}`;
-        info(`Running: ${uninstallCmd}`);
-        execSync(uninstallCmd, { cwd, stdio: 'inherit' });
-        success('Uninstalled safeword devDependencies');
-      } catch {
-        warn('Failed to uninstall some packages. Run manually:');
-        listItem(`npm uninstall ${result.packagesToRemove.join(' ')}`);
-      }
-    }
-
-    // Print summary
-    header('Reset Complete');
-
-    if (result.removed.length > 0) {
-      info('\nRemoved:');
-      for (const item of result.removed) {
-        listItem(item);
-      }
-    }
-
-    // Note about preserved linting (only shown if not full reset)
-    if (!fullReset) {
-      info('\nPreserved (use --full to remove):');
-      listItem('eslint.config.mjs');
-      listItem('.prettierrc');
-      listItem('.markdownlint-cli2.jsonc');
-      listItem('package.json (scripts, lint-staged config)');
-      listItem('devDependencies (eslint, prettier, husky, lint-staged, etc.)');
-    }
-
-    success('\nSafeword configuration removed');
+    if (fullReset) uninstallPackages(cwd, result.packagesToRemove);
+    printResetSummary(result, fullReset);
   } catch (error_) {
     error(`Reset failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);

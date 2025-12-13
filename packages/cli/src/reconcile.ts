@@ -89,6 +89,52 @@ function planTextPatches(
   return actions;
 }
 
+function planOwnedFileWrites(
+  files: Record<string, FileDefinition>,
+  ctx: ProjectContext,
+): { actions: Action[]; created: string[] } {
+  const actions: Action[] = [];
+  const created: string[] = [];
+  for (const [filePath, definition] of Object.entries(files)) {
+    if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
+    const content = resolveFileContent(definition, ctx);
+    actions.push({ type: 'write', path: filePath, content });
+    created.push(filePath);
+  }
+  return { actions, created };
+}
+
+function planManagedFileWrites(
+  files: Record<string, FileDefinition>,
+  ctx: ProjectContext,
+): { actions: Action[]; created: string[] } {
+  const actions: Action[] = [];
+  const created: string[] = [];
+  for (const [filePath, definition] of Object.entries(files)) {
+    if (exists(nodePath.join(ctx.cwd, filePath))) continue;
+    const content = resolveFileContent(definition, ctx);
+    actions.push({ type: 'write', path: filePath, content });
+    created.push(filePath);
+  }
+  return { actions, created };
+}
+
+function planTextPatchesWithCreation(
+  patches: Record<string, TextPatchDefinition>,
+  ctx: ProjectContext,
+): { actions: Action[]; created: string[] } {
+  const actions: Action[] = [];
+  const created: string[] = [];
+  for (const [filePath, definition] of Object.entries(patches)) {
+    if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
+    actions.push({ type: 'text-patch', path: filePath, definition });
+    if (definition.createIfMissing && !exists(nodePath.join(ctx.cwd, filePath))) {
+      created.push(filePath);
+    }
+  }
+  return { actions, created };
+}
+
 /**
  * Plan rmdir actions for directories that exist
  * @param dirs
@@ -298,38 +344,24 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   const actions: Action[] = [];
   const wouldCreate: string[] = [];
 
-  // 1. Create all directories (skip .husky if not a git repo)
+  // 1. Create all directories
   const allDirectories = [...schema.ownedDirs, ...schema.sharedDirs, ...schema.preservedDirs];
-  const missingDirectories = planMissingDirectories(allDirectories, ctx.cwd, ctx.isGitRepo);
-  actions.push(...missingDirectories.actions);
-  wouldCreate.push(...missingDirectories.created);
+  const dirs = planMissingDirectories(allDirectories, ctx.cwd, ctx.isGitRepo);
+  actions.push(...dirs.actions);
+  wouldCreate.push(...dirs.created);
 
-  // 2. Write all owned files (skip .husky files if not a git repo)
-  for (const [filePath, definition] of Object.entries(schema.ownedFiles)) {
-    if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
-
-    const content = resolveFileContent(definition, ctx);
-    actions.push({ type: 'write', path: filePath, content });
-    wouldCreate.push(filePath);
-  }
+  // 2. Write owned files
+  const owned = planOwnedFileWrites(schema.ownedFiles, ctx);
+  actions.push(...owned.actions);
+  wouldCreate.push(...owned.created);
 
   // 3. Write managed files (only if missing)
-  for (const [filePath, definition] of Object.entries(schema.managedFiles)) {
-    const fullPath = nodePath.join(ctx.cwd, filePath);
-    if (!exists(fullPath)) {
-      const content = resolveFileContent(definition, ctx);
-      actions.push({ type: 'write', path: filePath, content });
-      wouldCreate.push(filePath);
-    }
-  }
+  const managed = planManagedFileWrites(schema.managedFiles, ctx);
+  actions.push(...managed.actions);
+  wouldCreate.push(...managed.created);
 
-  // 4. chmod hook/lib/scripts directories (only .husky if git repo)
-  const chmodPaths = [
-    '.safeword/hooks',
-    '.safeword/hooks/cursor',
-    '.safeword/lib',
-    '.safeword/scripts',
-  ];
+  // 4. chmod hook/lib/scripts directories
+  const chmodPaths = ['.safeword/hooks', '.safeword/hooks/cursor', '.safeword/lib', '.safeword/scripts'];
   if (ctx.isGitRepo) chmodPaths.push(HUSKY_DIR);
   actions.push({ type: 'chmod', paths: chmodPaths });
 
@@ -338,31 +370,15 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     actions.push({ type: 'json-merge', path: filePath, definition });
   }
 
-  // 6. Text patches (skip .husky files in non-git repos)
-  for (const [filePath, definition] of Object.entries(schema.textPatches)) {
-    if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
-    actions.push({ type: 'text-patch', path: filePath, definition });
-    if (definition.createIfMissing && !exists(nodePath.join(ctx.cwd, filePath))) {
-      wouldCreate.push(filePath);
-    }
-  }
+  // 6. Text patches
+  const patches = planTextPatchesWithCreation(schema.textPatches, ctx);
+  actions.push(...patches.actions);
+  wouldCreate.push(...patches.created);
 
-  // 7. Compute packages to install (husky/lint-staged skipped if no git repo)
-  const packagesToInstall = computePackagesToInstall(
-    schema,
-    ctx.projectType,
-    ctx.developmentDeps,
-    ctx.isGitRepo,
-  );
+  // 7. Compute packages to install
+  const packagesToInstall = computePackagesToInstall(schema, ctx.projectType, ctx.developmentDeps, ctx.isGitRepo);
 
-  return {
-    actions,
-    wouldCreate,
-    wouldUpdate: [],
-    wouldRemove: [],
-    packagesToInstall,
-    packagesToRemove: [],
-  };
+  return { actions, wouldCreate, wouldUpdate: [], wouldRemove: [], packagesToInstall, packagesToRemove: [] };
 }
 
 /**
@@ -570,60 +586,48 @@ function executePlan(plan: ReconcilePlan, ctx: ProjectContext): ExecutionResult 
  * @param ctx
  * @param result
  */
+function executeChmod(cwd: string, paths: string[]): void {
+  for (const path of paths) {
+    const fullPath = nodePath.join(cwd, path);
+    if (exists(fullPath)) makeScriptsExecutable(fullPath);
+  }
+}
+
+function executeRmdir(cwd: string, path: string, result: ExecutionResult): void {
+  if (removeIfEmpty(nodePath.join(cwd, path))) result.removed.push(path);
+}
+
 function executeAction(action: Action, ctx: ProjectContext, result: ExecutionResult): void {
   switch (action.type) {
-    case 'mkdir': {
+    case 'mkdir':
       ensureDirectory(nodePath.join(ctx.cwd, action.path));
       result.created.push(action.path);
       break;
-    }
-
-    case 'rmdir': {
-      // Use removeIfEmpty to preserve directories with user content
-      if (removeIfEmpty(nodePath.join(ctx.cwd, action.path))) {
-        result.removed.push(action.path);
-      }
+    case 'rmdir':
+      executeRmdir(ctx.cwd, action.path, result);
       break;
-    }
-
-    case 'write': {
+    case 'write':
       executeWrite(ctx.cwd, action.path, action.content, result);
       break;
-    }
-
-    case 'rm': {
+    case 'rm':
       remove(nodePath.join(ctx.cwd, action.path));
       result.removed.push(action.path);
       break;
-    }
-
-    case 'chmod': {
-      for (const path of action.paths) {
-        const fullPath = nodePath.join(ctx.cwd, path);
-        if (exists(fullPath)) makeScriptsExecutable(fullPath);
-      }
+    case 'chmod':
+      executeChmod(ctx.cwd, action.paths);
       break;
-    }
-
-    case 'json-merge': {
+    case 'json-merge':
       executeJsonMerge(ctx.cwd, action.path, action.definition, ctx);
       break;
-    }
-
-    case 'json-unmerge': {
+    case 'json-unmerge':
       executeJsonUnmerge(ctx.cwd, action.path, action.definition);
       break;
-    }
-
-    case 'text-patch': {
+    case 'text-patch':
       executeTextPatch(ctx.cwd, action.path, action.definition);
       break;
-    }
-
-    case 'text-unpatch': {
+    case 'text-unpatch':
       executeTextUnpatch(ctx.cwd, action.path, action.definition);
       break;
-    }
   }
 }
 
