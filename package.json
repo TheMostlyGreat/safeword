@@ -35,9 +35,6 @@
     "promptfoo": "^0.119.5",
     "shellcheck": "^4.1.0"
   },
-  "dependencies": {
-    "safeword": "^0.6.1"
-  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}": [
       "eslint --fix",
