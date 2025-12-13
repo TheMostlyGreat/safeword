@@ -160,7 +160,6 @@ describe('Reconcile - Reconciliation Engine', () => {
       // managedFiles should be created
       expect(existsSync(nodePath.join(temporaryDirectory, 'eslint.config.mjs'))).toBe(true);
       expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(true);
-      expect(existsSync(nodePath.join(temporaryDirectory, '.markdownlint-cli2.jsonc'))).toBe(true);
     });
 
     it('should merge JSON files', async () => {
@@ -544,7 +543,6 @@ describe('Reconcile - Reconciliation Engine', () => {
       // Managed files removed
       expect(existsSync(nodePath.join(temporaryDirectory, 'eslint.config.mjs'))).toBe(false);
       expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(false);
-      expect(existsSync(nodePath.join(temporaryDirectory, '.markdownlint-cli2.jsonc'))).toBe(false);
     });
 
     it('should compute packages to remove', async () => {
@@ -745,7 +743,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       expect(result).not.toContain('eslint');
       expect(result).not.toContain('prettier');
       expect(result).not.toContain('knip');
-      expect(result).toContain('markdownlint-cli2'); // Not installed, should be included
+      expect(result).toContain('eslint-plugin-safeword'); // Not installed, should be included
     });
 
     it('should include base packages regardless of git status', async () => {

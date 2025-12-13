@@ -146,32 +146,7 @@ describe('Test Suite 4: Setup - Linting (Integration)', () => {
     });
   });
 
-  describe('Test 4.9: Creates markdownlint config', () => {
-    it('should create .markdownlint-cli2.jsonc', async () => {
-      createTypeScriptPackageJson(temporaryDirectory);
-      initGitRepo(temporaryDirectory);
-
-      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
-
-      // Using markdownlint-cli2's preferred config filename
-      expect(fileExists(temporaryDirectory, '.markdownlint-cli2.jsonc')).toBe(true);
-    });
-  });
-
-  describe('Test 4.10: Adds lint:md script', () => {
-    it('should add lint:md script to package.json', async () => {
-      createTypeScriptPackageJson(temporaryDirectory);
-      initGitRepo(temporaryDirectory);
-
-      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
-
-      const packageJson = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
-      expect(packageJson.scripts?.['lint:md']).toBeDefined();
-      expect(packageJson.scripts?.['lint:md']).toContain('markdownlint');
-    });
-  });
-
-  describe('Test 4.11: Adds format:check script', () => {
+  describe('Test 4.9: Adds format:check script', () => {
     it('should add format:check script to package.json', async () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);

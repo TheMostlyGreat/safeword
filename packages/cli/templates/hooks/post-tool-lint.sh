@@ -30,16 +30,8 @@ case "$file" in
     npx prettier --write "$file" 2>/dev/null
     ;;
 
-  # Markdown - markdownlint first, then Prettier
-  *.md)
-    if ! errors=$(npx markdownlint-cli2 --fix "$file" 2>&1); then
-      [ -n "$errors" ] && echo "$errors"
-    fi
-    npx prettier --write "$file" 2>/dev/null
-    ;;
-
   # Other supported formats - prettier only
-  *.json|*.css|*.scss|*.html|*.yaml|*.yml|*.graphql)
+  *.md|*.json|*.css|*.scss|*.html|*.yaml|*.yml|*.graphql)
     npx prettier --write "$file" 2>/dev/null
     ;;
 

@@ -110,22 +110,19 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('ownedFiles', () => {
-    it('should have exactly 58 owned files', async () => {
+    it('should have exactly 57 owned files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(58);
+      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(57);
     });
 
     it('should have entry for every template file', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       const templateFiles = collectTemplateFiles(templatesDirectory);
 
-      // Exclude markdownlint-cli2.jsonc (it's a managedFile)
-      const ownedTemplateFiles = templateFiles.filter(f => f !== 'markdownlint-cli2.jsonc');
-
       const schemaFiles = Object.keys(SAFEWORD_SCHEMA.ownedFiles);
 
       // Check every template file has a schema entry
-      for (const templateFile of ownedTemplateFiles) {
+      for (const templateFile of templateFiles) {
         const hasEntry = schemaFiles.some(
           schemaPath =>
             schemaPath.endsWith(templateFile) ||
@@ -170,16 +167,15 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('managedFiles', () => {
-    it('should have exactly 4 managed files', async () => {
+    it('should have exactly 3 managed files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.managedFiles).length).toBe(4);
+      expect(Object.keys(SAFEWORD_SCHEMA.managedFiles).length).toBe(3);
     });
 
-    it('should include eslint.config.mjs, .prettierrc, .markdownlint-cli2.jsonc, tsconfig.json', async () => {
+    it('should include eslint.config.mjs, .prettierrc, tsconfig.json', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('eslint.config.mjs');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('.prettierrc');
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('.markdownlint-cli2.jsonc');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('tsconfig.json');
     });
   });
@@ -222,9 +218,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('packages', () => {
-    it('should have 5 base packages', async () => {
+    it('should have 4 base packages', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(5);
+      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(4);
     });
 
     it('should include all required base packages', async () => {
@@ -233,7 +229,6 @@ describe('Schema - Single Source of Truth', () => {
         'eslint',
         'prettier',
         'eslint-plugin-safeword', // bundles eslint-config-prettier
-        'markdownlint-cli2',
         'knip',
       ];
 

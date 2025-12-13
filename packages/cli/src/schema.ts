@@ -116,6 +116,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/guides/test-definitions-guide.md',
     // Boundaries config now project-specific (v0.9.0)
     '.safeword/eslint-boundaries.config.mjs',
+    // Markdown linting removed (v0.10.0)
+    '.markdownlint-cli2.jsonc',
+    '.safeword/scripts/lint-md.sh',
   ],
 
   // Packages to uninstall on upgrade (consolidated into eslint-plugin-safeword v0.9.0)
@@ -144,6 +147,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Pre-commit hooks no longer managed by safeword
     'husky',
     'lint-staged',
+    // Markdown linting removed (v0.10.0)
+    'markdownlint-cli2',
   ],
 
   // Directories to delete on upgrade (no longer managed by safeword)
@@ -208,13 +213,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/prompts/architecture.md': { template: 'prompts/architecture.md' },
     '.safeword/prompts/quality-review.md': { template: 'prompts/quality-review.md' },
 
-    // Scripts (4 files)
+    // Scripts (3 files)
     '.safeword/scripts/bisect-test-pollution.sh': { template: 'scripts/bisect-test-pollution.sh' },
     '.safeword/scripts/bisect-zombie-processes.sh': {
       template: 'scripts/bisect-zombie-processes.sh',
     },
     '.safeword/scripts/cleanup-zombies.sh': { template: 'scripts/cleanup-zombies.sh' },
-    '.safeword/scripts/lint-md.sh': { template: 'scripts/lint-md.sh' },
 
     // Claude skills and commands (9 files)
     '.claude/skills/safeword-brainstorming/SKILL.md': {
@@ -278,7 +282,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       generator: () => getEslintConfig(),
     },
     '.prettierrc': { generator: ctx => getPrettierConfig(ctx.projectType) },
-    '.markdownlint-cli2.jsonc': { template: 'markdownlint-cli2.jsonc' },
     // Minimal tsconfig for ESLint type-checked linting (only if missing)
     'tsconfig.json': {
       generator: ctx => {
@@ -310,13 +313,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // JSON files where we merge specific keys
   jsonMerges: {
     'package.json': {
-      keys: [
-        'scripts.lint',
-        'scripts.lint:md',
-        'scripts.format',
-        'scripts.format:check',
-        'scripts.knip',
-      ],
+      keys: ['scripts.lint', 'scripts.format', 'scripts.format:check', 'scripts.knip'],
       conditionalKeys: {
         publishableLibrary: ['scripts.publint'],
         shell: ['scripts.lint:sh'],
@@ -327,7 +324,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
         // Add scripts if not present
         if (!scripts.lint) scripts.lint = 'eslint .';
-        if (!scripts['lint:md']) scripts['lint:md'] = 'markdownlint-cli2 "**/*.md" "#node_modules"';
         if (!scripts.format) scripts.format = 'prettier --write .';
         if (!scripts['format:check']) scripts['format:check'] = 'prettier --check .';
         if (!scripts.knip) scripts.knip = 'knip';
@@ -351,7 +347,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         const scripts = { ...(existing.scripts as Record<string, string>) };
 
         // Remove safeword-specific scripts but preserve lint/format (useful standalone)
-        delete scripts['lint:md'];
         delete scripts['lint:sh'];
         delete scripts['format:check'];
         delete scripts.knip;
@@ -524,7 +519,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       // Safeword plugin (bundles eslint-config-prettier + all ESLint plugins)
       'eslint-plugin-safeword',
       // Non-ESLint tools
-      'markdownlint-cli2',
       'knip',
     ],
     conditional: {

@@ -72,8 +72,7 @@ export function getLintStagedConfig(projectType: ProjectType): Record<string, st
   const config: Record<string, string[]> = {
     '*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}': ['eslint --fix', 'prettier --write'],
     '*.astro': ['eslint --fix', 'prettier --write'],
-    '*.{json,css,scss,html,yaml,yml,graphql}': ['prettier --write'],
-    '*.md': ['markdownlint-cli2 --fix', 'prettier --write'],
+    '*.{json,css,scss,html,yaml,yml,graphql,md}': ['prettier --write'],
   };
 
   if (projectType.shell) {

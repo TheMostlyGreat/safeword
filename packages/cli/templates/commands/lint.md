@@ -17,10 +17,7 @@ npm run lint 2>&1 || true
 # 2. Prettier - format all files
 npm run format 2>&1 || true
 
-# 3. Markdownlint - fix markdown issues
-npm run lint:md 2>&1 || true
-
-# 4. TypeScript type check (if tsconfig.json exists)
+# 3. TypeScript type check (if tsconfig.json exists)
 [ -f tsconfig.json ] && npx tsc --noEmit 2>&1 || true
 ```
 

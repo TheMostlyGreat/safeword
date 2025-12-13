@@ -51,9 +51,8 @@ function printResetSummary(result: ReconcileResult, fullReset: boolean): void {
     info('\nPreserved (use --full to remove):');
     listItem('eslint.config.mjs');
     listItem('.prettierrc');
-    listItem('.markdownlint-cli2.jsonc');
-    listItem('package.json (scripts, lint-staged config)');
-    listItem('devDependencies (eslint, prettier, husky, lint-staged, etc.)');
+    listItem('package.json (scripts)');
+    listItem('devDependencies (eslint, prettier, etc.)');
   }
 
   success('\nSafeword configuration removed');
@@ -72,7 +71,11 @@ export async function reset(options: ResetOptions): Promise<void> {
   const mode = fullReset ? 'uninstall-full' : 'uninstall';
 
   header('Safeword Reset');
-  info(fullReset ? 'Performing full reset (including linting configuration)...' : 'Removing safeword configuration...');
+  info(
+    fullReset
+      ? 'Performing full reset (including linting configuration)...'
+      : 'Removing safeword configuration...',
+  );
 
   try {
     const ctx = createProjectContext(cwd);
