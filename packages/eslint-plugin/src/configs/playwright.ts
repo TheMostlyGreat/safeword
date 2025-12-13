@@ -21,12 +21,12 @@ import playwrightPlugin from 'eslint-plugin-playwright';
  * Exception: no-skipped-test stays at warn (legitimate TDD pattern).
  *
  * File patterns target only e2e tests to avoid vitest conflicts:
- * - Explicit e2e suffix: *.e2e.{ts,tsx,js,jsx}
- * - Files in e2e directories
+ * - Explicit e2e suffix (e.g., login.e2e.ts)
+ * - Test/spec files in e2e directories only
  */
 export const playwrightConfig: any[] = [
   {
-    files: ['**/*.e2e.{ts,tsx,js,jsx}', '**/e2e/**/*.{ts,tsx,js,jsx}'],
+    files: ['**/*.e2e.{ts,tsx,js,jsx}', '**/e2e/**/*.{test,spec}.{ts,tsx,js,jsx}'],
     plugins: {
       playwright: playwrightPlugin,
     },
