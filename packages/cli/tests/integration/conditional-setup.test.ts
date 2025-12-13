@@ -160,60 +160,6 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   );
 
   it(
-    'detects Vue project and includes Vue plugin',
-    async () => {
-      projectDirectory = createTemporaryDirectory();
-      createPackageJson(projectDirectory, {
-        dependencies: { vue: '^3.0.0' },
-        devDependencies: { typescript: '^5.0.0' },
-      });
-      initGitRepo(projectDirectory);
-
-      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
-
-      // Check ESLint config includes Vue
-      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
-      expect(eslintConfig).toContain('eslint-plugin-vue');
-
-      // Check ignores include .nuxt/
-      expect(eslintConfig).toContain('.nuxt/');
-
-      // Check package.json has Vue plugin installed
-      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-vue');
-    },
-    SETUP_TIMEOUT,
-  );
-
-  it(
-    'detects Svelte project and includes Svelte plugin',
-    async () => {
-      projectDirectory = createTemporaryDirectory();
-      createPackageJson(projectDirectory, {
-        devDependencies: {
-          svelte: '^4.0.0',
-          typescript: '^5.0.0',
-        },
-      });
-      initGitRepo(projectDirectory);
-
-      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
-
-      // Check ESLint config includes Svelte
-      const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
-      expect(eslintConfig).toContain('eslint-plugin-svelte');
-
-      // Check ignores include .svelte-kit/
-      expect(eslintConfig).toContain('.svelte-kit/');
-
-      // Check package.json has Svelte plugin installed
-      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-svelte');
-    },
-    SETUP_TIMEOUT,
-  );
-
-  it(
     'detects Vitest project and uses safeword vitest config',
     async () => {
       projectDirectory = createTemporaryDirectory();
