@@ -24,8 +24,8 @@ import safeword from "eslint-plugin-safeword";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 // Read package.json relative to this config file (not CWD)
-const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(readFileSync(nodePath.join(__dirname, "package.json"), "utf8"));
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, "package.json"), "utf8"));
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };
 
 // Helper for dynamic imports with actionable error messages

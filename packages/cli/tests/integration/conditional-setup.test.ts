@@ -42,7 +42,7 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   });
 
   it(
-    'detects TypeScript project and includes typescript-eslint',
+    'detects TypeScript project and uses safeword recommendedTypeScript config',
     async () => {
       projectDirectory = createTemporaryDirectory();
       createTypeScriptPackageJson(projectDirectory);
@@ -50,20 +50,20 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Check ESLint config includes TypeScript
+      // Check ESLint config uses safeword plugin with TypeScript config
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
-      expect(eslintConfig).toContain('typescript-eslint');
-      expect(eslintConfig).toContain('tseslint');
+      expect(eslintConfig).toContain('eslint-plugin-safeword');
+      expect(eslintConfig).toContain('safeword.configs.recommendedTypeScript');
 
-      // Check package.json has typescript-eslint installed
+      // Check package.json has eslint-plugin-safeword (bundles typescript-eslint)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-      expect(pkg.devDependencies).toHaveProperty('typescript-eslint');
+      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-safeword');
     },
     SETUP_TIMEOUT,
   );
 
   it(
-    'detects JavaScript-only project (no TypeScript plugins installed)',
+    'detects JavaScript-only project and uses safeword recommended config',
     async () => {
       projectDirectory = createTemporaryDirectory();
       createPackageJson(projectDirectory); // No TypeScript
@@ -71,20 +71,20 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // ESLint config is dynamic - contains conditional code but doesn't execute it for JS projects
+      // ESLint config is dynamic - uses safeword.configs.recommended for JS
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
-      expect(eslintConfig).toContain('readFileSync'); // Dynamic config
-      expect(eslintConfig).toContain('deps["typescript"]'); // Contains conditional
+      expect(eslintConfig).toContain('eslint-plugin-safeword');
+      expect(eslintConfig).toContain('safeword.configs.recommended'); // JS config
 
-      // Key check: typescript-eslint package is NOT installed in devDependencies
+      // eslint-plugin-safeword is installed (bundles everything)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-      expect(pkg.devDependencies).not.toHaveProperty('typescript-eslint');
+      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-safeword');
     },
     SETUP_TIMEOUT,
   );
 
   it(
-    'detects React project and includes React plugins',
+    'detects React project and uses safeword recommendedTypeScriptReact config',
     async () => {
       projectDirectory = createTemporaryDirectory();
       createReactPackageJson(projectDirectory, {
@@ -94,23 +94,20 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Check ESLint config includes React
+      // Check ESLint config uses safeword plugin with React config
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
-      expect(eslintConfig).toContain('eslint-plugin-react');
-      expect(eslintConfig).toContain('react-hooks');
-      expect(eslintConfig).toContain('jsx-a11y');
+      expect(eslintConfig).toContain('eslint-plugin-safeword');
+      expect(eslintConfig).toContain('safeword.configs.recommendedTypeScriptReact');
 
-      // Check package.json has React plugins installed
+      // Check package.json has eslint-plugin-safeword (bundles React plugins)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-react');
-      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-react-hooks');
-      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-jsx-a11y');
+      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-safeword');
     },
     SETUP_TIMEOUT,
   );
 
   it(
-    'detects Next.js project and includes Next.js plugin',
+    'detects Next.js project and uses safeword recommendedTypeScriptNext config',
     async () => {
       projectDirectory = createTemporaryDirectory();
       createNextJsPackageJson(projectDirectory, {
@@ -120,25 +117,23 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Check ESLint config includes Next.js
+      // Check ESLint config uses safeword plugin with Next.js config
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
-      expect(eslintConfig).toContain('@next/eslint-plugin-next');
-      expect(eslintConfig).toContain('nextPlugin');
-      // Next.js also implies React
-      expect(eslintConfig).toContain('eslint-plugin-react');
+      expect(eslintConfig).toContain('eslint-plugin-safeword');
+      expect(eslintConfig).toContain('safeword.configs.recommendedTypeScriptNext');
 
       // Check ignores include .next/
       expect(eslintConfig).toContain('.next/');
 
-      // Check package.json has Next.js plugin installed
+      // Check package.json has eslint-plugin-safeword (bundles Next.js plugin)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-      expect(pkg.devDependencies).toHaveProperty('@next/eslint-plugin-next');
+      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-safeword');
     },
     SETUP_TIMEOUT,
   );
 
   it(
-    'detects Astro project and includes Astro plugin',
+    'detects Astro project and uses safeword astro config',
     async () => {
       projectDirectory = createTemporaryDirectory();
       createPackageJson(projectDirectory, {
@@ -149,16 +144,17 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Check ESLint config includes Astro
+      // Check ESLint config uses safeword plugin with Astro config
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
-      expect(eslintConfig).toContain('eslint-plugin-astro');
+      expect(eslintConfig).toContain('eslint-plugin-safeword');
+      expect(eslintConfig).toContain('safeword.configs.astro');
 
       // Check ignores include .astro/
       expect(eslintConfig).toContain('.astro/');
 
-      // Check package.json has Astro plugin installed
+      // Check package.json has eslint-plugin-safeword (bundles Astro plugin)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-astro');
+      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-safeword');
     },
     SETUP_TIMEOUT,
   );
@@ -218,7 +214,7 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
   );
 
   it(
-    'detects Vitest project and includes Vitest plugin',
+    'detects Vitest project and uses safeword vitest config',
     async () => {
       projectDirectory = createTemporaryDirectory();
       createPackageJson(projectDirectory, {
@@ -231,13 +227,14 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Check ESLint config includes Vitest
+      // Check ESLint config uses safeword plugin with vitest config
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
-      expect(eslintConfig).toContain('@vitest/eslint-plugin');
+      expect(eslintConfig).toContain('eslint-plugin-safeword');
+      expect(eslintConfig).toContain('safeword.configs.vitest');
 
-      // Check package.json has Vitest plugin installed
+      // Check package.json has eslint-plugin-safeword (bundles Vitest plugin)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-      expect(pkg.devDependencies).toHaveProperty('@vitest/eslint-plugin');
+      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-safeword');
     },
     SETUP_TIMEOUT,
   );
@@ -423,8 +420,10 @@ describe('E2E: Conditional Setup - Git Integration', () => {
     }
   });
 
+  // Note: Husky/lint-staged are no longer managed by safeword (v0.9.0+)
+  // Users set up their own pre-commit hooks if desired
   it(
-    'creates Husky pre-commit hook in git repo',
+    'does not install husky or lint-staged (removed in v0.9.0)',
     async () => {
       projectDirectory = createTemporaryDirectory();
       createTypeScriptPackageJson(projectDirectory);
@@ -432,17 +431,22 @@ describe('E2E: Conditional Setup - Git Integration', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Husky should be configured
-      expect(fileExists(projectDirectory, '.husky/pre-commit')).toBe(true);
+      // Husky should NOT be configured by safeword
+      expect(fileExists(projectDirectory, '.husky')).toBe(false);
 
-      const preCommit = readTestFile(projectDirectory, '.husky/pre-commit');
-      expect(preCommit).toContain('lint-staged');
+      // husky and lint-staged should NOT be installed
+      const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
+      expect(pkg.devDependencies?.husky).toBeUndefined();
+      expect(pkg.devDependencies?.['lint-staged']).toBeUndefined();
+
+      // But eslint-plugin-safeword should be installed
+      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-safeword');
     },
     SETUP_TIMEOUT,
   );
 
   it(
-    'skips Husky setup in non-git directory',
+    'works in non-git directory',
     async () => {
       projectDirectory = createTemporaryDirectory();
       createTypeScriptPackageJson(projectDirectory);
@@ -456,45 +460,16 @@ describe('E2E: Conditional Setup - Git Integration', () => {
       // Setup should complete successfully
       expect(result.exitCode).toBe(0);
 
-      // Husky directory should not exist (no git = no husky)
-      expect(fileExists(projectDirectory, '.husky')).toBe(false);
-
-      // Should NOT have Husky pre-commit hook
-      expect(fileExists(projectDirectory, '.husky/pre-commit')).toBe(false);
-
-      // husky and lint-staged should NOT be installed in non-git projects
+      // Base packages should be installed
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-      expect(pkg.devDependencies?.husky).toBeUndefined();
-      expect(pkg.devDependencies?.['lint-staged']).toBeUndefined();
-      // But other base packages should be installed
       expect(pkg.devDependencies?.eslint).toBeDefined();
+      expect(pkg.devDependencies).toHaveProperty('eslint-plugin-safeword');
     },
     SETUP_TIMEOUT,
   );
 
-  it(
-    'pre-commit hook runs lint-staged successfully',
-    async () => {
-      projectDirectory = createTemporaryDirectory();
-      createTypeScriptPackageJson(projectDirectory);
-      initGitRepo(projectDirectory);
-
-      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
-
-      // Create a valid file, stage it, and commit
-      writeTestFile(projectDirectory, 'src/valid.ts', 'export const valid = 1;\n');
-
-      execSync('git add src/valid.ts', { cwd: projectDirectory });
-
-      // Commit should succeed (lint-staged passes)
-
-      execSync('git commit -m "test commit"', { cwd: projectDirectory, encoding: 'utf8' });
-
-      const log = execSync('git log --oneline -1', { cwd: projectDirectory, encoding: 'utf8' });
-      expect(log).toContain('test commit');
-    },
-    SETUP_TIMEOUT,
-  );
+  // Note: pre-commit hooks are no longer managed by safeword (v0.9.0+)
+  // Users can set up their own husky + lint-staged if desired
 });
 
 describe('E2E: Conditional Setup - Package.json Creation', () => {

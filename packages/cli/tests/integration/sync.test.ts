@@ -2,11 +2,13 @@
  * E2E Test: Sync Command
  *
  * Verifies that the sync command correctly:
- * - Detects missing ESLint plugins for frameworks
+ * - Detects missing ESLint plugins for frameworks NOT bundled in safeword (Vue, Svelte, Electron)
  * - Installs missing plugins
  * - Stages modified files with --stage flag
  * - Fast exits when nothing to install
- * - Works with Husky pre-commit integration
+ *
+ * Note: Most ESLint plugins are now bundled in eslint-plugin-safeword (v0.9.0+)
+ * Only Vue, Svelte, and Electron still need separate plugin installation.
  */
 
 import { execSync } from 'node:child_process';
@@ -53,46 +55,29 @@ describe('E2E: Sync Command', () => {
     expect(timeMs).toBeLessThan(2000);
   }, 180_000);
 
-  it('installs missing plugin when framework added', async () => {
+  it('installs missing plugin when framework added (Vue - not bundled)', async () => {
     projectDirectory = createTemporaryDirectory();
     createTypeScriptPackageJson(projectDirectory);
     initGitRepo(projectDirectory);
 
-    // Setup TypeScript project (no Astro)
+    // Setup TypeScript project (no Vue)
     await runCli(['setup', '--yes'], { cwd: projectDirectory });
 
-    // Add Astro to dependencies (simulating user adding framework)
+    // Add Vue to dependencies (Vue is NOT bundled in safeword, so sync installs plugin)
     const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-    pkg.dependencies = { ...pkg.dependencies, astro: '^4.0.0' };
+    pkg.dependencies = { ...pkg.dependencies, vue: '^3.0.0' };
     writeTestFile(projectDirectory, 'package.json', JSON.stringify(pkg, undefined, 2));
 
-    // Sync should detect and install Astro plugin
+    // Sync should detect and install Vue plugin
     await runCli(['sync'], { cwd: projectDirectory });
 
-    // Verify eslint-plugin-astro is now installed
+    // Verify eslint-plugin-vue is now installed (Vue is separate, not bundled)
     const updatedPackage = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-    expect(updatedPackage.devDependencies).toHaveProperty('eslint-plugin-astro');
+    expect(updatedPackage.devDependencies).toHaveProperty('eslint-plugin-vue');
   }, 180_000);
 
-  it('Husky pre-commit includes sync with --stage', async () => {
-    projectDirectory = createTemporaryDirectory();
-    createTypeScriptPackageJson(projectDirectory);
-    initGitRepo(projectDirectory);
-
-    await runCli(['setup', '--yes'], { cwd: projectDirectory });
-
-    // Read .husky/pre-commit
-    const preCommit = readTestFile(projectDirectory, '.husky/pre-commit');
-
-    // Should contain sync --quiet --stage before lint-staged
-    expect(preCommit).toContain('npx safeword sync --quiet --stage');
-    expect(preCommit).toContain('npx lint-staged');
-
-    // sync should come before lint-staged
-    const syncIndex = preCommit.indexOf('safeword sync');
-    const lintStagedIndex = preCommit.indexOf('lint-staged');
-    expect(syncIndex).toBeLessThan(lintStagedIndex);
-  }, 180_000);
+  // Note: Husky pre-commit is no longer managed by safeword (v0.9.0+)
+  // Users set up their own pre-commit hooks if desired
 
   it('--stage flag stages package.json after plugin install', async () => {
     projectDirectory = createTemporaryDirectory();
@@ -145,22 +130,22 @@ describe('E2E: Sync Command', () => {
     const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
     expect(eslintConfig).toContain('readFileSync');
     expect(eslintConfig).toContain('package.json');
-    expect(eslintConfig).toContain('await import');
+    expect(eslintConfig).toContain('await import'); // For Vue/Svelte dynamic imports
 
-    // Add Vitest to dependencies
+    // Add Svelte to dependencies (Svelte is NOT bundled, so it uses dynamic import)
     const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-    pkg.devDependencies = { ...pkg.devDependencies, vitest: '^1.0.0' };
+    pkg.devDependencies = { ...pkg.devDependencies, svelte: '^4.0.0' };
     writeTestFile(projectDirectory, 'package.json', JSON.stringify(pkg, undefined, 2));
 
-    // Run sync to install vitest plugin
+    // Run sync to install svelte plugin
     await runCli(['sync'], { cwd: projectDirectory });
 
-    // Verify vitest plugin is installed
+    // Verify svelte plugin is installed (Svelte is separate, not bundled)
     const updatedPackage = JSON.parse(readTestFile(projectDirectory, 'package.json'));
-    expect(updatedPackage.devDependencies).toHaveProperty('@vitest/eslint-plugin');
+    expect(updatedPackage.devDependencies).toHaveProperty('eslint-plugin-svelte');
   }, 180_000);
 
-  it('sync detects multiple frameworks and installs all plugins', async () => {
+  it('sync detects multiple unbundled frameworks and installs all plugins', async () => {
     projectDirectory = createTemporaryDirectory();
     createTypeScriptPackageJson(projectDirectory);
     initGitRepo(projectDirectory);
@@ -168,21 +153,24 @@ describe('E2E: Sync Command', () => {
     // Setup project (TypeScript only)
     await runCli(['setup', '--yes'], { cwd: projectDirectory });
 
-    // Add multiple frameworks at once
+    // Add multiple unbundled frameworks at once (Vue and Svelte are NOT bundled)
     const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
+    pkg.dependencies = {
+      ...pkg.dependencies,
+      vue: '^3.0.0',
+    };
     pkg.devDependencies = {
       ...pkg.devDependencies,
       svelte: '^4.0.0',
-      vitest: '^1.0.0',
     };
     writeTestFile(projectDirectory, 'package.json', JSON.stringify(pkg, undefined, 2));
 
     // Run sync to install missing plugins
     await runCli(['sync'], { cwd: projectDirectory });
 
-    // Verify both plugins were installed
+    // Verify both unbundled plugins were installed
     const finalPackage = JSON.parse(readTestFile(projectDirectory, 'package.json'));
+    expect(finalPackage.devDependencies).toHaveProperty('eslint-plugin-vue');
     expect(finalPackage.devDependencies).toHaveProperty('eslint-plugin-svelte');
-    expect(finalPackage.devDependencies).toHaveProperty('@vitest/eslint-plugin');
   }, 300_000); // Increased timeout - npm installs can be slow
 });
