@@ -4,7 +4,6 @@
  * Uses reconcile() with mode='upgrade' to update all managed files.
  */
 
-import { execSync } from 'node:child_process';
 import nodePath from 'node:path';
 
 import { reconcile } from '../reconcile.js';
@@ -17,26 +16,19 @@ import { VERSION } from '../version.js';
 import { sync } from './sync.js';
 
 /**
- * Uninstall deprecated packages that are now bundled in eslint-plugin-safeword.
- * @param packages - List of package names to uninstall
- * @param cwd - Working directory
+ * Print info about deprecated packages that can be removed.
+ * Does NOT auto-remove because user may have installed these independently.
+ * @param packages - List of package names that are deprecated
  */
-function uninstallDeprecatedPackages(packages: string[], cwd: string): void {
+function printDeprecatedPackagesInfo(packages: string[]): void {
   if (packages.length === 0) return;
 
-  info(`\nRemoving ${packages.length} deprecated package(s)...`);
+  warn(`\n${packages.length} package(s) are now bundled in eslint-plugin-safeword:`);
   for (const pkg of packages) {
     listItem(pkg);
   }
-
-  try {
-    const uninstallCommand = `npm uninstall ${packages.join(' ')}`;
-    execSync(uninstallCommand, { cwd, stdio: 'inherit' });
-    success('Removed deprecated packages (now bundled in eslint-plugin-safeword)');
-  } catch {
-    warn('Failed to remove some packages. Run manually:');
-    listItem(`npm uninstall ${packages.join(' ')}`);
-  }
+  info("\nIf you don't use these elsewhere, you can remove them:");
+  listItem(`npm uninstall ${packages.join(' ')}`);
 }
 
 /**
@@ -96,8 +88,8 @@ export async function upgrade(): Promise<void> {
       await sync();
     }
 
-    // Remove deprecated packages (now bundled in eslint-plugin-safeword)
-    uninstallDeprecatedPackages(result.packagesToRemove, cwd);
+    // Notify about deprecated packages (user may remove manually)
+    printDeprecatedPackagesInfo(result.packagesToRemove);
 
     success(`\nSafeword upgraded to v${VERSION}`);
   } catch (error_) {
