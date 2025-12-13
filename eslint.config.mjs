@@ -119,7 +119,6 @@ const configs = [
       'sonarjs/publicly-writable-directories': 'off',
       'sonarjs/no-alphabetical-sort': 'off',
       'regexp/no-dupe-disjunctions': 'off',
-      'playwright/no-standalone-expect': 'off',
     },
   },
 ];
