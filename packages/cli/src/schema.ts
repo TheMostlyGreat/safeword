@@ -279,7 +279,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     'eslint.config.mjs': {
       generator: () => getEslintConfig(),
     },
-    '.prettierrc': { generator: ctx => getPrettierConfig(ctx.projectType) },
     // Minimal tsconfig for ESLint type-checked linting (only if missing)
     'tsconfig.json': {
       generator: ctx => {
@@ -487,6 +486,46 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
           delete result.version;
         }
 
+        return result;
+      },
+    },
+
+    '.prettierrc': {
+      keys: ['plugins'],
+      merge: (existing, ctx) => {
+        const result = { ...existing } as Record<string, unknown>;
+
+        // Set defaults for styling options (only if not present)
+        // User customizations are preserved
+        if (result.semi === undefined) result.semi = true;
+        if (result.singleQuote === undefined) result.singleQuote = true;
+        if (result.tabWidth === undefined) result.tabWidth = 2;
+        if (result.trailingComma === undefined) result.trailingComma = 'all';
+        if (result.printWidth === undefined) result.printWidth = 100;
+        if (result.endOfLine === undefined) result.endOfLine = 'lf';
+        if (result.useTabs === undefined) result.useTabs = false;
+        if (result.bracketSpacing === undefined) result.bracketSpacing = true;
+        if (result.arrowParens === undefined) result.arrowParens = 'avoid';
+
+        // Always update plugins based on project type (safeword owns this)
+        const plugins: string[] = [];
+        if (ctx.projectType.astro) plugins.push('prettier-plugin-astro');
+        if (ctx.projectType.shell) plugins.push('prettier-plugin-sh');
+        // Tailwind must be last for proper class sorting
+        if (ctx.projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
+
+        if (plugins.length > 0) {
+          result.plugins = plugins;
+        } else {
+          delete result.plugins;
+        }
+
+        return result;
+      },
+      unmerge: existing => {
+        const result = { ...existing } as Record<string, unknown>;
+        // Only remove plugins (safeword-owned), keep user styling preferences
+        delete result.plugins;
         return result;
       },
     },

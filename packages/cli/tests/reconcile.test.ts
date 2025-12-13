@@ -542,7 +542,8 @@ describe('Reconcile - Reconciliation Engine', () => {
 
       // Managed files removed
       expect(existsSync(nodePath.join(temporaryDirectory, 'eslint.config.mjs'))).toBe(false);
-      expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(false);
+      // .prettierrc stays (user preferences preserved via jsonMerge, only plugins removed)
+      expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(true);
     });
 
     it('should compute packages to remove', async () => {

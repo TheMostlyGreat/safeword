@@ -167,32 +167,32 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('managedFiles', () => {
-    it('should have exactly 3 managed files', async () => {
+    it('should have exactly 2 managed files', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.managedFiles).length).toBe(3);
+      expect(Object.keys(SAFEWORD_SCHEMA.managedFiles).length).toBe(2);
     });
 
-    it('should include eslint.config.mjs, .prettierrc, tsconfig.json', async () => {
+    it('should include eslint.config.mjs and tsconfig.json', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('eslint.config.mjs');
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('.prettierrc');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('tsconfig.json');
     });
   });
 
   describe('jsonMerges', () => {
-    it('should have exactly 5 json merge definitions', async () => {
+    it('should have exactly 6 json merge definitions', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.jsonMerges).length).toBe(5);
+      expect(Object.keys(SAFEWORD_SCHEMA.jsonMerges).length).toBe(6);
     });
 
-    it('should include package.json, .claude/settings.json, .mcp.json, and Cursor configs', async () => {
+    it('should include package.json, .claude/settings.json, .mcp.json, Cursor configs, and .prettierrc', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('package.json');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.claude/settings.json');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.mcp.json');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.cursor/mcp.json');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.cursor/hooks.json');
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.prettierrc');
     });
   });
 
