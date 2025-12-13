@@ -56,16 +56,6 @@ program
     await reset(options);
   });
 
-program
-  .command('sync')
-  .description('Sync linting plugins with project dependencies')
-  .option('-q, --quiet', 'Suppress output except errors')
-  .option('-s, --stage', 'Stage modified files (for pre-commit hooks)')
-  .action(async options => {
-    const { sync } = await import('./commands/sync.js');
-    await sync(options);
-  });
-
 // Show help if no arguments provided
 if (process.argv.length === 2) {
   program.help();

@@ -49,7 +49,6 @@ export function getPrettierConfig(projectType: ProjectType): string {
   const plugins: string[] = [];
 
   if (projectType.astro) plugins.push('prettier-plugin-astro');
-  if (projectType.svelte) plugins.push('prettier-plugin-svelte');
   if (projectType.shell) plugins.push('prettier-plugin-sh');
   // Tailwind must be last for proper class sorting
   if (projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
@@ -72,7 +71,7 @@ export function getPrettierConfig(projectType: ProjectType): string {
 export function getLintStagedConfig(projectType: ProjectType): Record<string, string[]> {
   const config: Record<string, string[]> = {
     '*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}': ['eslint --fix', 'prettier --write'],
-    '*.{vue,svelte,astro}': ['eslint --fix', 'prettier --write'],
+    '*.astro': ['eslint --fix', 'prettier --write'],
     '*.{json,css,scss,html,yaml,yml,graphql}': ['prettier --write'],
     '*.md': ['markdownlint-cli2 --fix', 'prettier --write'],
   };

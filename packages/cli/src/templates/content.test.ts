@@ -13,11 +13,6 @@ const baseProjectType: ProjectType = {
   react: false,
   nextjs: false,
   astro: false,
-  vue: false,
-  nuxt: false,
-  svelte: false,
-  sveltekit: false,
-  electron: false,
   vitest: false,
   playwright: false,
   tailwind: false,
@@ -42,13 +37,6 @@ describe('getPrettierConfig', () => {
     expect(config.plugins).toContain('prettier-plugin-astro');
   });
 
-  it('should include prettier-plugin-svelte for Svelte projects', () => {
-    const projectType = { ...baseProjectType, svelte: true };
-    const config = JSON.parse(getPrettierConfig(projectType));
-
-    expect(config.plugins).toContain('prettier-plugin-svelte');
-  });
-
   it('should include prettier-plugin-tailwindcss for Tailwind projects', () => {
     const projectType = { ...baseProjectType, tailwind: true };
     const config = JSON.parse(getPrettierConfig(projectType));
@@ -57,16 +45,16 @@ describe('getPrettierConfig', () => {
   });
 
   it('should include multiple plugins for combined frameworks', () => {
-    const projectType = { ...baseProjectType, svelte: true, tailwind: true };
+    const projectType = { ...baseProjectType, astro: true, tailwind: true };
     const config = JSON.parse(getPrettierConfig(projectType));
 
-    expect(config.plugins).toContain('prettier-plugin-svelte');
+    expect(config.plugins).toContain('prettier-plugin-astro');
     expect(config.plugins).toContain('prettier-plugin-tailwindcss');
     expect(config.plugins).toHaveLength(2);
   });
 
   it('should put tailwind plugin last (required for proper class sorting)', () => {
-    const projectType = { ...baseProjectType, astro: true, svelte: true, tailwind: true };
+    const projectType = { ...baseProjectType, astro: true, shell: true, tailwind: true };
     const config = JSON.parse(getPrettierConfig(projectType));
 
     const tailwindIndex = config.plugins.indexOf('prettier-plugin-tailwindcss');
@@ -103,15 +91,6 @@ describe('getEslintConfig', () => {
 
     expect(config).toContain('import safeword from "eslint-plugin-safeword"');
     expect(config).toContain('safeword.configs');
-  });
-
-  it('should include tryImport helper for unsupported frameworks', () => {
-    const config = getEslintConfig();
-
-    // Must have tryImport helper for Vue/Svelte/Electron (not in safeword plugin)
-    expect(config).toContain('async function tryImport');
-    expect(config).toContain('ERR_MODULE_NOT_FOUND');
-    expect(config).toContain('npm install -D');
   });
 
   it('should include framework detection for safeword config selection', () => {

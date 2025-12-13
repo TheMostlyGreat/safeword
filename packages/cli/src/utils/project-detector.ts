@@ -25,11 +25,6 @@ export interface ProjectType {
   react: boolean;
   nextjs: boolean;
   astro: boolean;
-  vue: boolean;
-  nuxt: boolean;
-  svelte: boolean;
-  sveltekit: boolean;
-  electron: boolean;
   vitest: boolean;
   playwright: boolean;
   tailwind: boolean;
@@ -91,11 +86,6 @@ export function detectProjectType(packageJson: PackageJson, cwd?: string): Proje
   const hasReact = 'react' in deps || 'react' in developmentDeps;
   const hasNextJs = 'next' in deps;
   const hasAstro = 'astro' in deps || 'astro' in developmentDeps;
-  const hasVue = 'vue' in deps || 'vue' in developmentDeps;
-  const hasNuxt = 'nuxt' in deps;
-  const hasSvelte = 'svelte' in deps || 'svelte' in developmentDeps;
-  const hasSvelteKit = '@sveltejs/kit' in deps || '@sveltejs/kit' in developmentDeps;
-  const hasElectron = 'electron' in deps || 'electron' in developmentDeps;
   const hasVitest = 'vitest' in developmentDeps;
   const hasPlaywright = '@playwright/test' in developmentDeps;
   const hasTailwind = 'tailwindcss' in allDeps;
@@ -112,11 +102,6 @@ export function detectProjectType(packageJson: PackageJson, cwd?: string): Proje
     react: hasReact || hasNextJs, // Next.js implies React
     nextjs: hasNextJs,
     astro: hasAstro,
-    vue: hasVue || hasNuxt, // Nuxt implies Vue
-    nuxt: hasNuxt,
-    svelte: hasSvelte || hasSvelteKit, // SvelteKit implies Svelte
-    sveltekit: hasSvelteKit,
-    electron: hasElectron,
     vitest: hasVitest,
     playwright: hasPlaywright,
     tailwind: hasTailwind,

@@ -204,7 +204,7 @@ function reportHealthSummary(health: HealthStatus): void {
   if (health.missingPackages.length > 0) {
     header('Missing Packages');
     info(`${health.missingPackages.length} linting packages not installed`);
-    info('Run `safeword sync` to install missing packages');
+    info('Run `safeword upgrade` to install missing packages');
     return;
   }
 

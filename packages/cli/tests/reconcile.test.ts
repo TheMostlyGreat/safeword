@@ -59,12 +59,11 @@ describe('Reconcile - Reconciliation Engine', () => {
         react: false,
         nextjs: false,
         astro: false,
-        vue: false,
-        svelte: false,
-        electron: false,
         vitest: false,
+        playwright: false,
         tailwind: false,
         publishableLibrary: false,
+        shell: false,
         ...(overrides.projectType as Record<string, boolean>),
       },
       developmentDeps: (overrides.developmentDeps as Record<string, string>) ?? {},
@@ -220,12 +219,12 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
       createPackageJson();
-      const ctx = createContext({ projectType: { vue: true, tailwind: true } });
+      const ctx = createContext({ projectType: { astro: true, tailwind: true } });
 
       const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
 
-      // Vue and tailwind plugins are NOT bundled in eslint-plugin-safeword
-      expect(result.packagesToInstall).toContain('eslint-plugin-vue');
+      // Astro and tailwind prettier plugins are NOT bundled in eslint-plugin-safeword
+      expect(result.packagesToInstall).toContain('prettier-plugin-astro');
       expect(result.packagesToInstall).toContain('prettier-plugin-tailwindcss');
     });
 
@@ -658,12 +657,11 @@ describe('Reconcile - Reconciliation Engine', () => {
         react: false,
         nextjs: false,
         astro: false,
-        vue: false,
-        svelte: false,
-        electron: false,
         vitest: false,
+        playwright: false,
         tailwind: false,
         publishableLibrary: false,
+        shell: false,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -671,7 +669,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       expect(result).toEqual(SAFEWORD_SCHEMA.packages.base);
     });
 
-    it('should add conditional packages for vue', async () => {
+    it('should add conditional packages for astro', async () => {
       const { computePackagesToInstall } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
@@ -679,18 +677,17 @@ describe('Reconcile - Reconciliation Engine', () => {
         typescript: false,
         react: false,
         nextjs: false,
-        astro: false,
-        vue: true,
-        svelte: false,
-        electron: false,
+        astro: true,
         vitest: false,
+        playwright: false,
         tailwind: false,
         publishableLibrary: false,
+        shell: false,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
-      expect(result).toContain('eslint-plugin-vue');
+      expect(result).toContain('prettier-plugin-astro');
     });
 
     it('should add multiple conditional packages', async () => {
@@ -702,20 +699,17 @@ describe('Reconcile - Reconciliation Engine', () => {
         react: false,
         nextjs: false,
         astro: true,
-        vue: false,
-        svelte: true,
-        electron: false,
         vitest: false,
+        playwright: false,
         tailwind: true,
         publishableLibrary: true,
+        shell: false,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
       // Conditional packages NOT bundled in eslint-plugin-safeword
       expect(result).toContain('prettier-plugin-astro');
-      expect(result).toContain('eslint-plugin-svelte');
-      expect(result).toContain('prettier-plugin-svelte');
       expect(result).toContain('prettier-plugin-tailwindcss');
       expect(result).toContain('publint');
     });
@@ -729,12 +723,11 @@ describe('Reconcile - Reconciliation Engine', () => {
         react: false,
         nextjs: false,
         astro: false,
-        vue: false,
-        svelte: false,
-        electron: false,
         vitest: false,
+        playwright: false,
         tailwind: false,
         publishableLibrary: false,
+        shell: false,
       };
 
       const installedDevelopmentDeps = {
@@ -764,12 +757,11 @@ describe('Reconcile - Reconciliation Engine', () => {
         react: false,
         nextjs: false,
         astro: false,
-        vue: false,
-        svelte: false,
-        electron: false,
         vitest: false,
+        playwright: false,
         tailwind: false,
         publishableLibrary: false,
+        shell: false,
       };
 
       // isGitRepo = false

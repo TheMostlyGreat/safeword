@@ -132,73 +132,6 @@ describe('detectProjectType', () => {
       const result = detectProjectType(packageJson);
       expect(result.astro).toBe(true);
     });
-
-    it('should detect Vue project', () => {
-      const packageJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        dependencies: {
-          vue: '^3.0.0',
-        },
-      };
-
-      const result = detectProjectType(packageJson);
-      expect(result.vue).toBe(true);
-    });
-
-    it('should detect Nuxt project and imply Vue', () => {
-      const packageJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        dependencies: {
-          nuxt: '^3.0.0',
-        },
-      };
-
-      const result = detectProjectType(packageJson);
-      expect(result.nuxt).toBe(true);
-      expect(result.vue).toBe(true); // Nuxt implies Vue
-    });
-
-    it('should detect Svelte project', () => {
-      const packageJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        devDependencies: {
-          svelte: '^4.0.0',
-        },
-      };
-
-      const result = detectProjectType(packageJson);
-      expect(result.svelte).toBe(true);
-    });
-
-    it('should detect SvelteKit project and imply Svelte', () => {
-      const packageJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        devDependencies: {
-          '@sveltejs/kit': '^2.0.0',
-        },
-      };
-
-      const result = detectProjectType(packageJson);
-      expect(result.sveltekit).toBe(true);
-      expect(result.svelte).toBe(true); // SvelteKit implies Svelte
-    });
-
-    it('should detect Electron project', () => {
-      const packageJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        devDependencies: {
-          electron: '^28.0.0',
-        },
-      };
-
-      const result = detectProjectType(packageJson);
-      expect(result.electron).toBe(true);
-    });
   });
 
   describe('Detects Tailwind', () => {
@@ -301,11 +234,6 @@ describe('detectProjectType', () => {
       expect(result.react).toBe(false);
       expect(result.nextjs).toBe(false);
       expect(result.astro).toBe(false);
-      expect(result.vue).toBe(false);
-      expect(result.nuxt).toBe(false);
-      expect(result.svelte).toBe(false);
-      expect(result.sveltekit).toBe(false);
-      expect(result.electron).toBe(false);
       expect(result.tailwind).toBe(false);
       expect(result.publishableLibrary).toBe(false);
     });
@@ -321,7 +249,7 @@ describe('detectProjectType', () => {
         },
         devDependencies: {
           typescript: '^5.3.0',
-          electron: '^28.0.0',
+          vitest: '^1.0.0',
         },
       };
 
@@ -330,7 +258,7 @@ describe('detectProjectType', () => {
       expect(result.typescript).toBe(true);
       expect(result.react).toBe(true);
       expect(result.nextjs).toBe(true);
-      expect(result.electron).toBe(true);
+      expect(result.vitest).toBe(true);
       expect(result.astro).toBe(false);
     });
   });

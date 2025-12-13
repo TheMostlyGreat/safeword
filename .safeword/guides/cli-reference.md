@@ -4,14 +4,13 @@ Commands for managing safeword in projects.
 
 ## Commands
 
-| Command                       | Purpose                                        |
-| ----------------------------- | ---------------------------------------------- |
-| `npx safeword@latest setup`   | Install safeword in current project            |
-| `npx safeword@latest check`   | Check project health and versions              |
-| `npx safeword@latest upgrade` | Upgrade to latest version                      |
-| `npx safeword@latest diff`    | Preview changes before upgrading               |
-| `npx safeword sync`           | Sync linting plugins with project dependencies |
-| `npx safeword reset`          | Remove safeword from project                   |
+| Command                       | Purpose                           |
+| ----------------------------- | --------------------------------- |
+| `npx safeword@latest setup`   | Install safeword in current project |
+| `npx safeword@latest check`   | Check project health and versions |
+| `npx safeword@latest upgrade` | Upgrade to latest version         |
+| `npx safeword@latest diff`    | Preview changes before upgrading  |
+| `npx safeword reset`          | Remove safeword from project      |
 
 ## When to Use
 
@@ -21,7 +20,6 @@ Commands for managing safeword in projects.
 | Check if update available  | `npx safeword@latest check`   |
 | Update after CLI release   | `npx safeword@latest upgrade` |
 | See what upgrade changes   | `npx safeword@latest diff`    |
-| Added/removed framework    | `npx safeword sync`           |
 | Remove safeword completely | `npx safeword reset --full`   |
 
 ## Options
@@ -32,12 +30,12 @@ Common flags:
 
 - `-y, --yes` - Skip confirmations (setup, reset)
 - `-v, --verbose` - Show detailed output (diff)
-- `-q, --quiet` - Suppress output (sync)
+- `--offline` - Skip remote version check (check)
+- `--full` - Also remove linting config + packages (reset)
 
 ---
 
 ## Key Takeaways
 
 - Always use `@latest` for setup/check/upgrade/diff to get current CLI
-- Run `sync` after adding/removing frameworks to update linting plugins
 - Use `diff` before `upgrade` to preview changes

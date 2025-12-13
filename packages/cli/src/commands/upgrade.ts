@@ -13,7 +13,6 @@ import { exists, readFileSafe } from '../utils/fs.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { compareVersions } from '../utils/version.js';
 import { VERSION } from '../version.js';
-import { sync } from './sync.js';
 
 /**
  * Print info about deprecated packages that can be removed.
@@ -80,12 +79,6 @@ export async function upgrade(): Promise<void> {
       for (const file of result.updated) {
         listItem(file);
       }
-    }
-
-    // Auto-sync: install missing ESLint packages
-    if (result.packagesToInstall.length > 0) {
-      info(`\nSyncing ${result.packagesToInstall.length} package(s)...`);
-      await sync();
     }
 
     // Notify about deprecated packages (user may remove manually)

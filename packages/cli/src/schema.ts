@@ -71,40 +71,6 @@ export interface SafewordSchema {
 // SAFEWORD_SCHEMA - The Single Source of Truth
 // ============================================================================
 
-/**
- * Check if a package name is an ESLint-related package.
- * Used by sync command to filter packages for pre-commit installation.
- * @param pkg
- */
-function isEslintPackage(pkg: string): boolean {
-  return (
-    pkg.startsWith('eslint') ||
-    pkg.startsWith('@eslint/') ||
-    pkg.startsWith('@microsoft/eslint') ||
-    pkg.startsWith('@next/eslint') ||
-    pkg.startsWith('@vitest/eslint') ||
-    pkg.startsWith('@electron-toolkit/eslint') ||
-    pkg === 'typescript-eslint'
-  );
-}
-
-/**
- * Get ESLint packages from schema base packages.
- * Single source of truth - no separate list to maintain.
- */
-export function getBaseEslintPackages(): string[] {
-  return SAFEWORD_SCHEMA.packages.base.filter(pkg => isEslintPackage(pkg));
-}
-
-/**
- * Get conditional ESLint packages for a specific project type key.
- * @param key
- */
-export function getConditionalEslintPackages(key: string): string[] {
-  const deps = SAFEWORD_SCHEMA.packages.conditional[key];
-  return deps ? deps.filter(pkg => isEslintPackage(pkg)) : [];
-}
-
 export const SAFEWORD_SCHEMA: SafewordSchema = {
   version: VERSION,
 
@@ -555,18 +521,13 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       // Core tools
       'eslint',
       'prettier',
-      'eslint-config-prettier',
-      // Safeword plugin (bundles all ESLint plugins)
+      // Safeword plugin (bundles eslint-config-prettier + all ESLint plugins)
       'eslint-plugin-safeword',
       // Non-ESLint tools
       'markdownlint-cli2',
       'knip',
     ],
     conditional: {
-      // Frameworks NOT in eslint-plugin-safeword
-      vue: ['eslint-plugin-vue'],
-      svelte: ['eslint-plugin-svelte', 'prettier-plugin-svelte'],
-      electron: ['@electron-toolkit/eslint-config'],
       // Prettier plugins
       astro: ['prettier-plugin-astro'],
       tailwind: ['prettier-plugin-tailwindcss'],

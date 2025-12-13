@@ -222,78 +222,9 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('packages', () => {
-    it('should have 6 base packages', async () => {
+    it('should have 5 base packages', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(6);
-    });
-
-    describe('getBaseEslintPackages', () => {
-      it('should return only ESLint-related packages from base', async () => {
-        const { getBaseEslintPackages } = await import('../src/schema.js');
-        const eslintPackages = getBaseEslintPackages();
-
-        // Should include ESLint packages (eslint-plugin-safeword bundles everything)
-        expect(eslintPackages).toContain('eslint');
-        expect(eslintPackages).toContain('eslint-config-prettier');
-        expect(eslintPackages).toContain('eslint-plugin-safeword');
-
-        // Should NOT include non-ESLint packages
-        expect(eslintPackages).not.toContain('prettier');
-        expect(eslintPackages).not.toContain('markdownlint-cli2');
-        expect(eslintPackages).not.toContain('knip');
-      });
-
-      it('should return consistent results (single source of truth)', async () => {
-        const { getBaseEslintPackages, SAFEWORD_SCHEMA } = await import('../src/schema.js');
-        const eslintPackages = getBaseEslintPackages();
-
-        // All returned packages should be in base
-        for (const pkg of eslintPackages) {
-          expect(SAFEWORD_SCHEMA.packages.base).toContain(pkg);
-        }
-      });
-    });
-
-    describe('getConditionalEslintPackages', () => {
-      it('should return ESLint packages for vue (not in safeword plugin)', async () => {
-        const { getConditionalEslintPackages } = await import('../src/schema.js');
-        const vuePackages = getConditionalEslintPackages('vue');
-
-        expect(vuePackages).toContain('eslint-plugin-vue');
-      });
-
-      it('should return ESLint packages for svelte (not in safeword plugin)', async () => {
-        const { getConditionalEslintPackages } = await import('../src/schema.js');
-        const sveltePackages = getConditionalEslintPackages('svelte');
-
-        expect(sveltePackages).toContain('eslint-plugin-svelte');
-      });
-
-      it('should return ESLint packages for electron (not in safeword plugin)', async () => {
-        const { getConditionalEslintPackages } = await import('../src/schema.js');
-        const electronPackages = getConditionalEslintPackages('electron');
-
-        expect(electronPackages).toContain('@electron-toolkit/eslint-config');
-      });
-
-      it('should return empty array for unknown key', async () => {
-        const { getConditionalEslintPackages } = await import('../src/schema.js');
-        const unknown = getConditionalEslintPackages('unknown-framework');
-
-        expect(unknown).toEqual([]);
-      });
-
-      it('should filter out non-ESLint packages from conditional', async () => {
-        const { getConditionalEslintPackages, SAFEWORD_SCHEMA } = await import('../src/schema.js');
-
-        // tailwind conditional includes prettier-plugin-tailwindcss (not ESLint)
-        const tailwindEslint = getConditionalEslintPackages('tailwind');
-        const tailwindAll = SAFEWORD_SCHEMA.packages.conditional.tailwind;
-
-        // Should filter out non-ESLint packages
-        expect(tailwindAll).toContain('prettier-plugin-tailwindcss');
-        expect(tailwindEslint).not.toContain('prettier-plugin-tailwindcss');
-      });
+      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(5);
     });
 
     it('should include all required base packages', async () => {
@@ -301,8 +232,7 @@ describe('Schema - Single Source of Truth', () => {
       const required = [
         'eslint',
         'prettier',
-        'eslint-config-prettier',
-        'eslint-plugin-safeword',
+        'eslint-plugin-safeword', // bundles eslint-config-prettier
         'markdownlint-cli2',
         'knip',
       ];
@@ -316,9 +246,6 @@ describe('Schema - Single Source of Truth', () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       // These frameworks are NOT in eslint-plugin-safeword (or need prettier plugins)
       const requiredConditions = [
-        'vue', // eslint-plugin-vue
-        'svelte', // eslint-plugin-svelte + prettier-plugin-svelte
-        'electron', // @electron-toolkit/eslint-config
         'astro', // prettier-plugin-astro (ESLint rules are in safeword)
         'tailwind', // prettier-plugin-tailwindcss
         'publishableLibrary', // publint

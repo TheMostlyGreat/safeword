@@ -261,15 +261,15 @@ describe('Setup Command - Reconcile Integration', () => {
       const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
       const { createProjectContext } = await import('../../src/utils/context.js');
 
-      // Create package.json with Vue dependency
+      // Create package.json with Astro dependency
       writeFileSync(
         nodePath.join(temporaryDirectory, 'package.json'),
         JSON.stringify(
           {
             name: 'test',
             version: '1.0.0',
-            dependencies: {
-              vue: '^3.0.0',
+            devDependencies: {
+              astro: '^4.0.0',
             },
           },
           undefined,
@@ -280,8 +280,8 @@ describe('Setup Command - Reconcile Integration', () => {
       const ctx = createProjectContext(temporaryDirectory);
       const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx, { dryRun: true });
 
-      // Should include Vue-specific packages (NOT bundled in eslint-plugin-safeword)
-      expect(result.packagesToInstall).toContain('eslint-plugin-vue');
+      // Should include Astro prettier plugin (NOT bundled in eslint-plugin-safeword)
+      expect(result.packagesToInstall).toContain('prettier-plugin-astro');
     });
   });
 

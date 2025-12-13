@@ -65,12 +65,12 @@ Key directories created in your project:
 
 **Purpose**: Reusable methodology applicable to all projects
 
-| Guide                       | Purpose                                                         | When to Read            |
-| --------------------------- | --------------------------------------------------------------- | ----------------------- |
-| **code-philosophy.md**      | Core coding principles, TDD philosophy, self-review checklist   | Before writing code     |
-| **development-workflow.md** | TDD workflow (RED/GREEN/REFACTOR), test pyramid, decision trees | Starting any feature    |
-| **tdd-best-practices.md**   | User story + test definition patterns and examples              | Creating tests/stories  |
-| **learning-extraction.md**  | Extract learnings from debugging, recognition triggers          | After complex debugging |
+| Guide                      | Purpose                                                        | When to Read            |
+| -------------------------- | -------------------------------------------------------------- | ----------------------- |
+| **code-philosophy.md**     | Core coding principles, TDD philosophy, self-review checklist  | Before writing code     |
+| **planning-guide.md**      | Feature planning workflow, spec creation, TDD integration      | Starting any feature    |
+| **testing-guide.md**       | TDD workflow (RED/GREEN/REFACTOR), test pyramid, test types    | Writing tests           |
+| **learning-extraction.md** | Extract learnings from debugging, recognition triggers         | After complex debugging |
 
 ---
 
@@ -80,11 +80,10 @@ Key directories created in your project:
 
 | Guide                          | Purpose                                            | When to Read                   |
 | ------------------------------ | -------------------------------------------------- | ------------------------------ |
-| **user-story-guide.md**        | Writing effective user stories (INVEST criteria)   | Creating user stories          |
-| **test-definitions-guide.md**  | Writing test definitions (unit/integration/E2E)    | Planning test suites           |
 | **design-doc-guide.md**        | Design doc structure and best practices            | Designing complex features     |
 | **architecture-guide.md**      | Architecture decisions (tech choices, data models) | Making architectural decisions |
 | **data-architecture-guide.md** | Data model design (schemas, validation, flows)     | Database/schema design         |
+| **context-files-guide.md**     | CLAUDE.md/AGENTS.md structure and best practices   | Setting up project context     |
 
 ---
 
@@ -95,8 +94,8 @@ Key directories created in your project:
 | Guide                         | Purpose                                                                  | When to Read         |
 | ----------------------------- | ------------------------------------------------------------------------ | -------------------- |
 | **llm-guide.md**              | LLM integration (caching, evals) + writing docs for LLMs (13 principles) | Building AI features |
-| **context-files-guide.md**    | CLAUDE.md/CURSOR.md/AGENTS.md structure, anti-patterns, modular approach | Setting up projects  |
 | **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation                              | Managing dev servers |
+| **cli-reference.md**          | Safeword CLI command reference and usage                                 | Using CLI commands   |
 
 ---
 
@@ -104,11 +103,11 @@ Key directories created in your project:
 
 **Purpose**: Fillable structures for feature documentation
 
-| Template                        | Purpose                                          | Used By                   |
-| ------------------------------- | ------------------------------------------------ | ------------------------- |
-| **feature-spec-template.md**    | Feature spec (user stories + constraints)        | user-story-guide.md       |
-| **test-definitions-feature.md** | Test definition structure (suites, tests, steps) | test-definitions-guide.md |
-| **design-doc-template.md**      | Design doc structure (architecture, components)  | design-doc-guide.md       |
+| Template                        | Purpose                                          | Used By             |
+| ------------------------------- | ------------------------------------------------ | ------------------- |
+| **feature-spec-template.md**    | Feature spec (user stories + constraints)        | planning-guide.md   |
+| **test-definitions-feature.md** | Test definition structure (suites, tests, steps) | testing-guide.md    |
+| **design-doc-template.md**      | Design doc structure (architecture, components)  | design-doc-guide.md |
 
 ---
 
@@ -169,13 +168,19 @@ Each directory has an `archive/` subfolder for completed work.
 
 **Skills** (in `.claude/skills/`): Specialized agent capabilities
 
-- `safeword-quality-reviewer/` - Deep code quality review with web research
+- `safeword-brainstorming/` - Collaborative design through Socratic questioning
+- `safeword-debugging/` - Four-phase debugging (investigate before fixing)
+- `safeword-enforcing-tdd/` - RED → GREEN → REFACTOR discipline
+- `safeword-quality-reviewer/` - Deep code review with web research
+- `safeword-refactoring/` - Small-step refactoring with test verification
+- `safeword-writing-plans/` - Create detailed execution plans for agents
 
 **Commands** (in `.claude/commands/`): Slash commands
 
 - `/lint` - Run linters and formatters
 - `/architecture` - Review architecture guidelines
 - `/quality-review` - Deep code review with web research
+- `/cleanup-zombies` - Kill zombie processes on ports
 
 ---
 
@@ -196,11 +201,6 @@ npx safeword@latest upgrade
 # Preview changes before upgrading
 npx safeword@latest diff
 npx safeword@latest diff -v           # Show full diff output
-
-# Sync linting plugins with project dependencies
-npx safeword sync
-npx safeword sync -q           # Quiet mode
-npx safeword sync -s           # Stage modified files (for pre-commit)
 
 # Remove safeword from project
 npx safeword reset

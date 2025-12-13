@@ -86,6 +86,7 @@ Training data is stale. Follow this sequence:
 | Test definitions | `.safeword/planning/test-definitions/` | `feature-*.md` (L2 features only) |
 | Design docs      | `.safeword/planning/design/`           | Complex features (3+ components)  |
 | Issues           | `.safeword/planning/issues/`           | Issue tracking                    |
+| Execution plans  | `.safeword/planning/plans/`            | LLM-ready task breakdowns         |
 
 **Artifact Levels:**
 

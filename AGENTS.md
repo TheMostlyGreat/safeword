@@ -65,7 +65,7 @@ npm run eval:view      # Open web UI for results
 
 4. **Hook paths**: Always use `"$CLAUDE_PROJECT_DIR"/.safeword/hooks/...` format (quoted variable) for Claude Code hooks.
 
-5. **Publishing**: Always run `pnpm publish` from `packages/cli/` directory, not the monorepo root. Publishing from root publishes a different package.
+5. **Publishing**: Always run `npm publish` from `packages/cli/` directory, not the monorepo root. Publishing from root publishes a different package.
 
 6. **CLI Reference Drift**: `packages/cli/templates/guides/cli-reference.md` must stay in sync with `README.md` CLI documentation. When updating CLI commands in README, update cli-reference.md too.
 
@@ -93,6 +93,7 @@ The CLI installs matching skills for both Claude Code and Cursor IDEs.
 | `enforcing-tdd`    | 'implement', 'build', 'feature', 'refactor' |
 | `quality-reviewer` | 'double check', 'verify versions'           |
 | `refactoring`      | 'refactor', 'clean up', 'restructure'       |
+| `writing-plans`    | 'write plan', 'execution plan', 'tasks'     |
 
 **Note:** Cursor also gets `safeword-core.mdc` (core instructions, no Claude Code equivalent needed).
 
