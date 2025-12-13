@@ -51,6 +51,8 @@ export const basePlugins: any[] = [
       // Design constraints - forces LLMs to decompose code
       'max-depth': ['error', 4], // Forces early returns, avoids deep nesting
       'max-params': ['error', 5], // Forces object params or decomposition
+      complexity: ['error', 10], // Cyclomatic complexity - LLMs write dense, complex code
+      'max-nested-callbacks': ['error', 3], // Prevents callback hell in async code
       eqeqeq: ['error', 'always', { null: 'ignore' }], // === required, except x == null
     },
   },
