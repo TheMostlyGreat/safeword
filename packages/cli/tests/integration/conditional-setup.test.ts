@@ -3,7 +3,7 @@
  *
  * Verifies that safeword setup adapts to different project types:
  * - TypeScript vs JavaScript projects
- * - React/Next.js/Astro/Vue/Svelte detection
+ * - React/Next.js/Astro detection
  * - Existing config preservation (doesn't overwrite)
  * - Git vs non-git projects
  * - Publishable library detection
