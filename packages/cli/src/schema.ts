@@ -147,8 +147,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Pre-commit hooks no longer managed by safeword
     'husky',
     'lint-staged',
-    // Markdown linting removed (v0.10.0)
-    'markdownlint-cli2',
   ],
 
   // Directories to delete on upgrade (no longer managed by safeword)
