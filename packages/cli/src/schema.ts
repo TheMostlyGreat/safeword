@@ -8,7 +8,7 @@
  */
 
 import { CURSOR_HOOKS, getEslintConfig, SETTINGS_HOOKS } from './templates/config.js';
-import { AGENTS_MD_LINK, getPrettierConfig } from './templates/content.js';
+import { AGENTS_MD_LINK } from './templates/content.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';
 import { MCP_SERVERS } from './utils/install.js';
 import { type ProjectType } from './utils/project-detector.js';
