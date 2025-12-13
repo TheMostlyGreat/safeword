@@ -4,19 +4,43 @@
  * Uses reconcile() with mode='upgrade' to update all managed files.
  */
 
+import { execSync } from 'node:child_process';
 import nodePath from 'node:path';
 
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists, readFileSafe } from '../utils/fs.js';
-import { error, header, info, listItem, success } from '../utils/output.js';
+import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { compareVersions } from '../utils/version.js';
 import { VERSION } from '../version.js';
 import { sync } from './sync.js';
 
 /**
- *
+ * Uninstall deprecated packages that are now bundled in eslint-plugin-safeword.
+ * @param packages - List of package names to uninstall
+ * @param cwd - Working directory
+ */
+function uninstallDeprecatedPackages(packages: string[], cwd: string): void {
+  if (packages.length === 0) return;
+
+  info(`\nRemoving ${packages.length} deprecated package(s)...`);
+  for (const pkg of packages) {
+    listItem(pkg);
+  }
+
+  try {
+    const uninstallCommand = `npm uninstall ${packages.join(' ')}`;
+    execSync(uninstallCommand, { cwd, stdio: 'inherit' });
+    success('Removed deprecated packages (now bundled in eslint-plugin-safeword)');
+  } catch {
+    warn('Failed to remove some packages. Run manually:');
+    listItem(`npm uninstall ${packages.join(' ')}`);
+  }
+}
+
+/**
+ * Upgrade safeword configuration to the latest version.
  */
 export async function upgrade(): Promise<void> {
   const cwd = process.cwd();
@@ -71,6 +95,9 @@ export async function upgrade(): Promise<void> {
       info(`\nSyncing ${result.packagesToInstall.length} package(s)...`);
       await sync();
     }
+
+    // Remove deprecated packages (now bundled in eslint-plugin-safeword)
+    uninstallDeprecatedPackages(result.packagesToRemove, cwd);
 
     success(`\nSafeword upgraded to v${VERSION}`);
   } catch (error_) {
