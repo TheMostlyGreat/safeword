@@ -16,6 +16,12 @@ const __dirname = nodePath.dirname(__filename);
 export const CLI_PATH = nodePath.join(__dirname, '../dist/cli.js');
 
 /**
+ * Current eslint-plugin-safeword version for test mocks.
+ * Update this when bumping the plugin version.
+ */
+export const ESLINT_PLUGIN_VERSION = '^0.3.0';
+
+/**
  * Path to the CLI source (for ts-node execution during development)
  */
 export const CLI_SRC_PATH = nodePath.join(__dirname, '../src/cli.ts');
@@ -258,7 +264,7 @@ export async function createConfiguredProject(dir: string): Promise<void> {
       eslint: '^9.0.0',
       prettier: '^3.0.0',
       'eslint-config-prettier': '^9.0.0',
-      'eslint-plugin-safeword': '^0.3.0',
+      'eslint-plugin-safeword': ESLINT_PLUGIN_VERSION,
       knip: '^5.0.0',
     },
   });
