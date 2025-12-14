@@ -23,6 +23,9 @@
  *   // Astro projects
  *   export default [...safeword.configs.astro];
  *
+ *   // Tailwind CSS projects (add to existing config)
+ *   export default [...safeword.configs.recommendedTypeScriptReact, ...safeword.configs.tailwind];
+ *
  *   // Test files (add to existing config)
  *   export default [...safeword.configs.recommendedTypeScript, ...safeword.configs.vitest];
  *   export default [...safeword.configs.recommendedTypeScript, ...safeword.configs.playwright];
@@ -38,6 +41,7 @@ import { recommended } from './configs/recommended.js';
 import { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
 import { recommendedTypeScriptReact } from './configs/recommended-react.js';
 import { recommendedTypeScript } from './configs/recommended-typescript.js';
+import { tailwindConfig } from './configs/tailwind.js';
 import { vitestConfig } from './configs/vitest.js';
 import { rules } from './rules/index.js';
 
@@ -52,6 +56,7 @@ interface SafewordPlugin {
     recommendedTypeScriptReact: any[];
     recommendedTypeScriptNext: any[];
     astro: any[];
+    tailwind: any[];
     vitest: any[];
     playwright: any[];
   };
@@ -69,6 +74,7 @@ const plugin: SafewordPlugin = {
     recommendedTypeScriptReact,
     recommendedTypeScriptNext,
     astro: astroConfig,
+    tailwind: tailwindConfig,
     vitest: vitestConfig,
     playwright: playwrightConfig,
   },
@@ -83,4 +89,5 @@ export { recommended } from './configs/recommended.js';
 export { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
 export { recommendedTypeScriptReact } from './configs/recommended-react.js';
 export { recommendedTypeScript } from './configs/recommended-typescript.js';
+export { tailwindConfig } from './configs/tailwind.js';
 export { vitestConfig } from './configs/vitest.js';
