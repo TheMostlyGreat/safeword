@@ -18,6 +18,7 @@ import tailwindPlugin from 'eslint-plugin-tailwindcss';
  * Correctness rules:
  * - no-contradicting-classname: Catches conflicting classes (e.g., text-red-500 text-blue-500)
  * - no-custom-classname: Catches typos and hallucinated class names
+ *   (projects with custom utilities should configure tailwindcss.whitelist)
  * - no-unnecessary-arbitrary-value: Use standard utilities when they exist
  * - enforces-negative-arbitrary-values: Correct syntax for negative arbitrary values
  *
