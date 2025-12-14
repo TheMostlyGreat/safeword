@@ -259,7 +259,7 @@ export async function createConfiguredProject(dir: string): Promise<void> {
       eslint: '^9.0.0',
       prettier: '^3.0.0',
       'eslint-config-prettier': '^9.0.0',
-      'eslint-plugin-safeword': '^0.8.0',
+      'eslint-plugin-safeword': '^0.3.0',
       knip: '^5.0.0',
     },
   });
