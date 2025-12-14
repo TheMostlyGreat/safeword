@@ -255,7 +255,6 @@ export async function createConfiguredProject(dir: string): Promise<void> {
     devDependencies: {
       typescript: '^5.0.0',
       // Include safeword base packages to prevent sync attempts during upgrade tests
-      // (eslint-plugin-safeword isn't published yet)
       eslint: '^9.0.0',
       prettier: '^3.0.0',
       'eslint-config-prettier': '^9.0.0',
