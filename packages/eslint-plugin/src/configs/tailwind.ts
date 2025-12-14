@@ -13,7 +13,7 @@ import tailwindPlugin from 'eslint-plugin-tailwindcss';
  * Tailwind config
  *
  * Includes:
- * - 6 rules, all at error severity
+ * - 8 rules configured (6 enabled at error, 2 explicitly disabled)
  *
  * Correctness rules:
  * - no-contradicting-classname: Catches conflicting classes (e.g., text-red-500 text-blue-500)
@@ -35,6 +35,7 @@ export const tailwindConfig: any[] = [
 
   // Override with stricter rules at error level
   {
+    name: 'safeword/tailwind',
     rules: {
       // Correctness - catch LLM mistakes
       'tailwindcss/no-contradicting-classname': 'error',

@@ -4,17 +4,19 @@ import { describe, expect, it } from 'vitest';
 import { astroConfig } from '../astro.js';
 
 /**
- * Helper to get rule config from flat config array
+ * Helper to get effective rule config from flat config array.
+ * Returns the LAST match since ESLint flat config uses last-wins for rule resolution.
  * @param config
  * @param ruleId
  */
 function getRuleConfig(config: any[], ruleId: string): any {
-  for (const configObj of config) {
-    if (configObj.rules && ruleId in configObj.rules) {
-      return configObj.rules[ruleId];
+  let result: any;
+  for (const configObject of config) {
+    if (configObject.rules && ruleId in configObject.rules) {
+      result = configObject.rules[ruleId];
     }
   }
-  return undefined;
+  return result;
 }
 
 /**
@@ -35,9 +37,9 @@ function getSeverity(ruleConfig: any): number | string | undefined {
  */
 function getAllRules(config: any[]): Record<string, any> {
   const allRules: Record<string, any> = {};
-  for (const configObj of config) {
-    if (configObj.rules) {
-      Object.assign(allRules, configObj.rules);
+  for (const configObject of config) {
+    if (configObject.rules) {
+      Object.assign(allRules, configObject.rules);
     }
   }
   return allRules;
