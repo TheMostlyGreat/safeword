@@ -121,7 +121,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/scripts/lint-md.sh',
   ],
 
-  // Packages to uninstall on upgrade (consolidated into eslint-plugin-safeword v0.9.0)
+  // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
   deprecatedPackages: [
     // Individual ESLint plugins now bundled in eslint-plugin-safeword
     '@eslint/js',
