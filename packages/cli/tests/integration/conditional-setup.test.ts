@@ -261,21 +261,24 @@ describe('E2E: Conditional Setup - Existing Config Preservation', () => {
   );
 
   it(
-    'preserves existing Prettier config (does not overwrite)',
+    'preserves existing Prettier config values while adding defaults',
     async () => {
       projectDirectory = createTemporaryDirectory();
       createTypeScriptPackageJson(projectDirectory);
       initGitRepo(projectDirectory);
 
-      // Create existing Prettier config
+      // Create existing Prettier config with custom values
       const existingConfig = '{ "semi": false, "singleQuote": true }';
       writeTestFile(projectDirectory, '.prettierrc', existingConfig);
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Existing config should be preserved
-      const prettierConfig = readTestFile(projectDirectory, '.prettierrc');
-      expect(prettierConfig).toBe(existingConfig);
+      // User's custom values should be preserved, defaults added for missing options
+      const prettierConfig = JSON.parse(readTestFile(projectDirectory, '.prettierrc'));
+      expect(prettierConfig.semi).toBe(false); // User's value preserved
+      expect(prettierConfig.singleQuote).toBe(true); // User's value preserved
+      expect(prettierConfig.tabWidth).toBe(2); // Default added
+      expect(prettierConfig.printWidth).toBe(100); // Default added
     },
     SETUP_TIMEOUT,
   );
