@@ -8,7 +8,10 @@
 import { describe, expect, it } from 'vitest';
 
 // This import will fail until depcruise-config.ts is created (RED phase)
-import { generateDepCruiseConfigFile } from '../../src/utils/depcruise-config.js';
+import {
+  generateDepCruiseConfigFile,
+  generateDepCruiseMainConfig,
+} from '../../src/utils/depcruise-config.js';
 
 describe('DepCruise Config Generator', () => {
   describe('generateDepCruiseConfigFile', () => {
@@ -43,6 +46,41 @@ describe('DepCruise Config Generator', () => {
       expect(config).toContain("name: 'packages-cannot-import-apps'");
       expect(config).toContain("from: { path: '^packages/' }");
       expect(config).toContain("to: { path: '^apps/' }");
+    });
+
+    it('generates orphan detection rule', () => {
+      // Test 1.3: Config includes info-level orphan detection
+      const config = generateDepCruiseConfigFile({ elements: [], isMonorepo: false });
+
+      expect(config).toContain("name: 'no-orphans'");
+      expect(config).toContain("severity: 'info'");
+      expect(config).toContain('orphan: true');
+    });
+
+    it('includes doNotFollow for node_modules and .safeword', () => {
+      // Test 1.5: Generated options exclude irrelevant directories
+      const config = generateDepCruiseConfigFile({ elements: [], isMonorepo: false });
+
+      expect(config).toContain('doNotFollow');
+      expect(config).toContain('node_modules');
+      expect(config).toContain('.safeword');
+    });
+  });
+
+  describe('generateDepCruiseMainConfig', () => {
+    it('generates main config that imports generated', () => {
+      // Test 1.4: Main config imports and spreads generated rules
+      const config = generateDepCruiseMainConfig();
+
+      // Imports from .safeword
+      expect(config).toContain('./.safeword/depcruise-config.js');
+
+      // Spreads generated
+      expect(config).toContain('...generated.forbidden');
+      expect(config).toContain('...generated.options');
+
+      // Has comment for customization
+      expect(config).toContain('ADD YOUR CUSTOM RULES');
     });
   });
 });
