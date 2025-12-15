@@ -307,6 +307,18 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         );
       },
     },
+    // Knip config for dead code detection (used by /audit)
+    'knip.json': {
+      generator: () =>
+        JSON.stringify(
+          {
+            ignore: ['.safeword/**'],
+            ignoreDependencies: ['eslint-plugin-safeword'],
+          },
+          undefined,
+          2,
+        ),
+    },
   },
 
   // JSON files where we merge specific keys
@@ -557,7 +569,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       'prettier',
       // Safeword plugin (bundles eslint-config-prettier + all ESLint plugins)
       'eslint-plugin-safeword',
-      // Non-ESLint tools
+      // Architecture and dead code tools (used by /audit)
+      'dependency-cruiser',
       'knip',
     ],
     conditional: {
