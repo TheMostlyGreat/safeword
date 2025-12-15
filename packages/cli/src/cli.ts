@@ -56,6 +56,14 @@ program
     await reset(options);
   });
 
+program
+  .command('sync-config')
+  .description('Regenerate depcruise config from current project structure')
+  .action(async () => {
+    const { syncConfig } = await import('./commands/sync-config.js');
+    await syncConfig();
+  });
+
 // Show help if no arguments provided
 if (process.argv.length === 2) {
   program.help();
