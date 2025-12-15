@@ -41,4 +41,54 @@ describe('Sync Config Command', () => {
       expect(result.stdout + result.stderr).toMatch(/setup/i);
     });
   });
+
+  describe('Test 2.2: Writes generated config to .safeword/', () => {
+    it('should create depcruise-config.js in .safeword directory', async () => {
+      await createConfiguredProject(temporaryDirectory);
+
+      const result = await runCli(['sync-config'], { cwd: temporaryDirectory });
+
+      expect(result.exitCode).toBe(0);
+      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.js')).toBe(true);
+
+      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.js');
+      expect(config).toContain('module.exports');
+      expect(config).toContain('forbidden');
+    });
+  });
+
+  describe('Test 2.3: Creates main config if not exists', () => {
+    it('should create .dependency-cruiser.js at project root if missing', async () => {
+      await createConfiguredProject(temporaryDirectory);
+
+      const result = await runCli(['sync-config'], { cwd: temporaryDirectory });
+
+      expect(result.exitCode).toBe(0);
+      expect(fileExists(temporaryDirectory, '.dependency-cruiser.js')).toBe(true);
+
+      const config = readTestFile(temporaryDirectory, '.dependency-cruiser.js');
+      expect(config).toContain('.safeword/depcruise-config.js');
+    });
+  });
+
+  describe('Test 2.4: Does not overwrite existing main config', () => {
+    it('should preserve user customizations in .dependency-cruiser.js', async () => {
+      await createConfiguredProject(temporaryDirectory);
+
+      // Create custom main config
+      const customContent = `// Custom config\nmodule.exports = { custom: true };`;
+      writeTestFile(temporaryDirectory, '.dependency-cruiser.js', customContent);
+
+      const result = await runCli(['sync-config'], { cwd: temporaryDirectory });
+
+      expect(result.exitCode).toBe(0);
+
+      // Main config should be unchanged
+      const config = readTestFile(temporaryDirectory, '.dependency-cruiser.js');
+      expect(config).toBe(customContent);
+
+      // But generated config should exist
+      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.js')).toBe(true);
+    });
+  });
 });
