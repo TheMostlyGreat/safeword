@@ -91,4 +91,28 @@ describe('Sync Config Command', () => {
       expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.js')).toBe(true);
     });
   });
+
+  describe('Test 2.5: Uses detectArchitecture from boundaries.ts', () => {
+    it('should generate rules based on detected project structure', async () => {
+      await createConfiguredProject(temporaryDirectory);
+
+      // Create architecture directories
+      writeTestFile(temporaryDirectory, 'src/utils/helper.ts', 'export const x = 1;');
+      writeTestFile(
+        temporaryDirectory,
+        'src/components/Button.tsx',
+        'export const Button = () => null;',
+      );
+
+      const result = await runCli(['sync-config'], { cwd: temporaryDirectory });
+
+      expect(result.exitCode).toBe(0);
+
+      // Generated config should reflect detected architecture
+      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.js');
+      expect(config).toContain('forbidden');
+      // Should always have no-circular rule
+      expect(config).toContain('no-circular');
+    });
+  });
 });
