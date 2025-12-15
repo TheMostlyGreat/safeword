@@ -7,8 +7,13 @@
 **Feature Spec**: `.safeword/planning/specs/feature-architecture-audit.md`
 **Design Doc**: `.safeword/planning/design/architecture-audit.md`
 
-**Test File**: `packages/cli/src/utils/__tests__/depcruise-config.test.ts`
-**Total Tests**: 10 (9 passing, 0 skipped, 1 not implemented)
+**Test Files**:
+
+- `packages/cli/tests/utils/depcruise-config.test.ts`
+- `packages/cli/tests/commands/sync-config.test.ts`
+- `packages/cli/tests/commands/setup-architecture.test.ts`
+
+**Total Tests**: 15 (15 passing, 0 skipped, 0 not implemented)
 
 ---
 
@@ -16,9 +21,9 @@
 
 Tests for `generateDepCruiseConfigFile()` and `generateDepCruiseMainConfig()`.
 
-### Test 1.1: Generates circular dependency rule ✅
+### Test 1.1: Generates circular dependency rule
 
-**Status**: ✅ Passing
+**Status**: Passing
 **Description**: Config always includes no-circular rule regardless of architecture
 
 **Steps**:
@@ -35,9 +40,9 @@ Tests for `generateDepCruiseConfigFile()` and `generateDepCruiseMainConfig()`.
 
 ---
 
-### Test 1.2: Generates monorepo layer rules from workspaces ✅
+### Test 1.2: Generates monorepo layer rules from workspaces
 
-**Status**: ✅ Passing
+**Status**: Passing
 **Description**: Detects workspaces field and generates hierarchy rules
 
 **Steps**:
@@ -53,9 +58,9 @@ Tests for `generateDepCruiseConfigFile()` and `generateDepCruiseMainConfig()`.
 
 ---
 
-### Test 1.3: Generates orphan detection rule ❌
+### Test 1.3: Generates orphan detection rule
 
-**Status**: ❌ Not Implemented
+**Status**: Passing
 **Description**: Config includes info-level orphan detection
 
 **Steps**:
@@ -71,9 +76,9 @@ Tests for `generateDepCruiseConfigFile()` and `generateDepCruiseMainConfig()`.
 
 ---
 
-### Test 1.4: Generates main config that imports generated ❌
+### Test 1.4: Generates main config that imports generated
 
-**Status**: ❌ Not Implemented
+**Status**: Passing
 **Description**: Main config imports and spreads generated rules
 
 **Steps**:
@@ -90,9 +95,9 @@ Tests for `generateDepCruiseConfigFile()` and `generateDepCruiseMainConfig()`.
 
 ---
 
-### Test 1.5: Options include doNotFollow for node_modules and .safeword ❌
+### Test 1.5: Options include doNotFollow for node_modules and .safeword
 
-**Status**: ❌ Not Implemented
+**Status**: Passing
 **Description**: Generated options exclude irrelevant directories
 
 **Steps**:
@@ -111,9 +116,9 @@ Tests for `generateDepCruiseConfigFile()` and `generateDepCruiseMainConfig()`.
 
 Tests for `safeword sync-config` CLI command.
 
-### Test 2.1: Fails if .safeword directory missing ❌
+### Test 2.1: Fails if .safeword directory missing
 
-**Status**: ❌ Not Implemented
+**Status**: Passing
 **Description**: Command requires safeword to be set up first
 
 **Steps**:
@@ -128,9 +133,9 @@ Tests for `safeword sync-config` CLI command.
 
 ---
 
-### Test 2.2: Writes generated config to .safeword/depcruise-config.js ❌
+### Test 2.2: Writes generated config to .safeword/depcruise-config.js
 
-**Status**: ❌ Not Implemented
+**Status**: Passing
 **Description**: Command writes generated rules file
 
 **Steps**:
@@ -147,9 +152,9 @@ Tests for `safeword sync-config` CLI command.
 
 ---
 
-### Test 2.3: Creates main config if not exists ❌
+### Test 2.3: Creates main config if not exists
 
-**Status**: ❌ Not Implemented
+**Status**: Passing
 **Description**: Self-healing: creates `.dependency-cruiser.js` if missing
 
 **Steps**:
@@ -165,9 +170,9 @@ Tests for `safeword sync-config` CLI command.
 
 ---
 
-### Test 2.4: Does not overwrite existing main config ❌
+### Test 2.4: Does not overwrite existing main config
 
-**Status**: ❌ Not Implemented
+**Status**: Passing
 **Description**: User customizations preserved
 
 **Steps**:
@@ -184,9 +189,9 @@ Tests for `safeword sync-config` CLI command.
 
 ---
 
-### Test 2.5: Uses detectArchitecture from boundaries.ts ❌
+### Test 2.5: Uses detectArchitecture from boundaries.ts
 
-**Status**: ❌ Not Implemented
+**Status**: Passing
 **Description**: Reuses existing architecture detection logic
 
 **Steps**:
@@ -202,20 +207,96 @@ Tests for `safeword sync-config` CLI command.
 
 ---
 
+## Test Suite 3: Setup Architecture Integration
+
+Tests for automatic architecture detection during `safeword setup`.
+
+### Test 6.1: Generates depcruise config when architecture detected
+
+**Status**: Passing
+**Description**: Setup creates depcruise configs when architecture directories exist
+
+**Steps**:
+
+1. Create project with `src/utils/` directory
+2. Run `safeword setup --yes`
+3. Check for config files
+
+**Expected**:
+
+- `.safeword/depcruise-config.js` created
+- `.dependency-cruiser.js` created
+- Config contains `no-circular` rule
+
+---
+
+### Test 6.2: Skips depcruise config when no architecture
+
+**Status**: Passing
+**Description**: Setup does not create depcruise configs for simple projects
+
+**Steps**:
+
+1. Create simple project without architecture directories
+2. Run `safeword setup --yes`
+3. Check for config files
+
+**Expected**:
+
+- `.safeword/depcruise-config.js` NOT created
+- `.dependency-cruiser.js` NOT created
+
+---
+
+### Test 6.3: Logs detected architecture
+
+**Status**: Passing
+**Description**: Setup outputs what architecture was detected
+
+**Steps**:
+
+1. Create project with `src/utils/`, `src/components/`
+2. Run `safeword setup --yes`
+3. Check stdout
+
+**Expected**:
+
+- Output contains "architecture detected"
+
+---
+
+### Test 6.4: Includes arch files in setup summary
+
+**Status**: Passing
+**Description**: Setup summary lists depcruise files
+
+**Steps**:
+
+1. Create project with architecture directories
+2. Run `safeword setup --yes`
+3. Check summary output
+
+**Expected**:
+
+- Output lists `.dependency-cruiser.js` in created files
+
+---
+
 ## Summary
 
-**Total**: 10 tests
-**Passing**: 9 tests (90%)
+**Total**: 15 tests
+**Passing**: 15 tests (100%)
 **Skipped**: 0 tests (0%)
-**Not Implemented**: 1 test (10%)
+**Not Implemented**: 0 tests (0%)
 **Failing**: 0 tests (0%)
 
 ### Coverage by Feature
 
-| Feature          | Tests | Status  |
-| ---------------- | ----- | ------- |
-| Config Generator | 5/5   | ✅ 100% |
-| Sync Command     | 4/5   | ✅ 80%  |
+| Feature           | Tests | Status |
+| ----------------- | ----- | ------ |
+| Config Generator  | 5/5   | 100%   |
+| Sync Command      | 5/5   | 100%   |
+| Setup Integration | 5/5   | 100%   |
 
 ---
 
@@ -223,10 +304,12 @@ Tests for `safeword sync-config` CLI command.
 
 ```bash
 # Run all tests for this feature
-npm test -- --grep "depcruise"
+npm test -- -t "depcruise"
+npm test -- -t "Sync Config"
+npm test -- -t "Setup - Architecture"
 
 # Run specific test
-npm test -- --grep "Generates circular dependency rule"
+npm test -- -t "Generates circular dependency rule"
 ```
 
 ---
