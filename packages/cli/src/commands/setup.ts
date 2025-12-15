@@ -9,11 +9,13 @@ import nodePath from 'node:path';
 
 import { reconcile, type ReconcileResult } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
+import { detectArchitecture } from '../utils/boundaries.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists, writeJson } from '../utils/fs.js';
 import { isGitRepo } from '../utils/git.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { VERSION } from '../version.js';
+import { syncConfigCore } from './sync-config.js';
 
 export interface SetupOptions {
   yes?: boolean;
@@ -54,13 +56,18 @@ function installDependencies(cwd: string, packages: string[]): void {
   }
 }
 
-function printSetupSummary(result: ReconcileResult, packageJsonCreated: boolean): void {
+function printSetupSummary(
+  result: ReconcileResult,
+  packageJsonCreated: boolean,
+  archFiles: string[] = [],
+): void {
   header('Setup Complete');
 
-  if (result.created.length > 0 || packageJsonCreated) {
+  const allCreated = [...result.created, ...archFiles];
+  if (allCreated.length > 0 || packageJsonCreated) {
     info('\nCreated:');
     if (packageJsonCreated) listItem('package.json');
-    for (const file of result.created) listItem(file);
+    for (const file of allCreated) listItem(file);
   }
 
   if (result.updated.length > 0) {
@@ -96,15 +103,34 @@ export async function setup(options: SetupOptions): Promise<void> {
     const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
     success('Created .safeword directory and configuration');
 
+    // Detect architecture and generate depcruise configs if structure found
+    const arch = detectArchitecture(cwd);
+    const hasArchitecture = arch.elements.length > 0 || arch.isMonorepo;
+    const archFiles: string[] = [];
+
+    if (hasArchitecture) {
+      const syncResult = syncConfigCore(cwd, arch);
+      if (syncResult.generatedConfig) archFiles.push('.safeword/depcruise-config.js');
+      if (syncResult.createdMainConfig) archFiles.push('.dependency-cruiser.js');
+      const detected = arch.elements.map(element => element.location).join(', ');
+      info(`\nArchitecture detected: ${detected}`);
+      info('Generated dependency-cruiser config for /audit command');
+    }
+
     installDependencies(cwd, result.packagesToInstall);
 
     if (!isGitRepo(cwd)) {
       const isNonInteractive = options.yes || !process.stdin.isTTY;
-      warn(isNonInteractive ? 'Skipped Husky setup (no git repository)' : 'Skipped Husky setup (no .git directory)');
-      if (!isNonInteractive) info('Initialize git and run safeword upgrade to enable pre-commit hooks');
+      warn(
+        isNonInteractive
+          ? 'Skipped Husky setup (no git repository)'
+          : 'Skipped Husky setup (no .git directory)',
+      );
+      if (!isNonInteractive)
+        info('Initialize git and run safeword upgrade to enable pre-commit hooks');
     }
 
-    printSetupSummary(result, packageJsonCreated);
+    printSetupSummary(result, packageJsonCreated, archFiles);
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);

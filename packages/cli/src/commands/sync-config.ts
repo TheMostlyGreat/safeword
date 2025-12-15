@@ -7,7 +7,7 @@
 import { writeFileSync } from 'node:fs';
 import nodePath from 'node:path';
 
-import { detectArchitecture } from '../utils/boundaries.js';
+import { detectArchitecture, type DetectedArchitecture } from '../utils/boundaries.js';
 import {
   generateDepCruiseConfigFile,
   generateDepCruiseMainConfig,
@@ -15,8 +15,38 @@ import {
 import { exists } from '../utils/fs.js';
 import { error, info, success } from '../utils/output.js';
 
+export interface SyncConfigResult {
+  generatedConfig: boolean;
+  createdMainConfig: boolean;
+}
+
 /**
- * Sync depcruise config with current project structure
+ * Core sync logic - writes depcruise configs to disk
+ * Can be called from setup or as standalone command
+ */
+export function syncConfigCore(cwd: string, arch: DetectedArchitecture): SyncConfigResult {
+  const safewordDirectory = nodePath.join(cwd, '.safeword');
+  const result: SyncConfigResult = { generatedConfig: false, createdMainConfig: false };
+
+  // Generate and write .safeword/depcruise-config.js
+  const generatedConfigPath = nodePath.join(safewordDirectory, 'depcruise-config.js');
+  const generatedConfig = generateDepCruiseConfigFile(arch);
+  writeFileSync(generatedConfigPath, generatedConfig);
+  result.generatedConfig = true;
+
+  // Create main config if not exists (self-healing)
+  const mainConfigPath = nodePath.join(cwd, '.dependency-cruiser.js');
+  if (!exists(mainConfigPath)) {
+    const mainConfig = generateDepCruiseMainConfig();
+    writeFileSync(mainConfigPath, mainConfig);
+    result.createdMainConfig = true;
+  }
+
+  return result;
+}
+
+/**
+ * CLI command: Sync depcruise config with current project structure
  */
 export async function syncConfig(): Promise<void> {
   const cwd = process.cwd();
@@ -30,18 +60,12 @@ export async function syncConfig(): Promise<void> {
 
   // Detect current architecture
   const arch = detectArchitecture(cwd);
+  const result = syncConfigCore(cwd, arch);
 
-  // Generate and write .safeword/depcruise-config.js
-  const generatedConfigPath = nodePath.join(safewordDirectory, 'depcruise-config.js');
-  const generatedConfig = generateDepCruiseConfigFile(arch);
-  writeFileSync(generatedConfigPath, generatedConfig);
-  info('Generated .safeword/depcruise-config.js');
-
-  // Create main config if not exists (self-healing)
-  const mainConfigPath = nodePath.join(cwd, '.dependency-cruiser.js');
-  if (!exists(mainConfigPath)) {
-    const mainConfig = generateDepCruiseMainConfig();
-    writeFileSync(mainConfigPath, mainConfig);
+  if (result.generatedConfig) {
+    info('Generated .safeword/depcruise-config.js');
+  }
+  if (result.createdMainConfig) {
     info('Created .dependency-cruiser.js');
   }
 
