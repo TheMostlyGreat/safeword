@@ -8,7 +8,7 @@
 **Design Doc**: `.safeword/planning/design/architecture-audit.md`
 
 **Test File**: `packages/cli/src/utils/__tests__/depcruise-config.test.ts`
-**Total Tests**: 10 (0 passing, 0 skipped, 10 not implemented)
+**Total Tests**: 10 (9 passing, 0 skipped, 1 not implemented)
 
 ---
 
@@ -16,9 +16,9 @@
 
 Tests for `generateDepCruiseConfigFile()` and `generateDepCruiseMainConfig()`.
 
-### Test 1.1: Generates circular dependency rule ❌
+### Test 1.1: Generates circular dependency rule ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Config always includes no-circular rule regardless of architecture
 
 **Steps**:
@@ -35,9 +35,9 @@ Tests for `generateDepCruiseConfigFile()` and `generateDepCruiseMainConfig()`.
 
 ---
 
-### Test 1.2: Generates monorepo layer rules from workspaces ❌
+### Test 1.2: Generates monorepo layer rules from workspaces ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Detects workspaces field and generates hierarchy rules
 
 **Steps**:
@@ -205,17 +205,17 @@ Tests for `safeword sync-config` CLI command.
 ## Summary
 
 **Total**: 10 tests
-**Passing**: 0 tests (0%)
+**Passing**: 9 tests (90%)
 **Skipped**: 0 tests (0%)
-**Not Implemented**: 10 tests (100%)
+**Not Implemented**: 1 test (10%)
 **Failing**: 0 tests (0%)
 
 ### Coverage by Feature
 
-| Feature          | Tests | Status |
-| ---------------- | ----- | ------ |
-| Config Generator | 5/5   | ❌ 0%  |
-| Sync Command     | 5/5   | ❌ 0%  |
+| Feature          | Tests | Status  |
+| ---------------- | ----- | ------- |
+| Config Generator | 5/5   | ✅ 100% |
+| Sync Command     | 4/5   | ✅ 80%  |
 
 ---
 
