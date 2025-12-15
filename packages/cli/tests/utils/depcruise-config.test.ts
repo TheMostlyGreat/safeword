@@ -25,5 +25,24 @@ describe('DepCruise Config Generator', () => {
       expect(config).toContain("severity: 'error'");
       expect(config).toContain('circular: true');
     });
+
+    it('generates monorepo layer rules from workspaces', () => {
+      // Test 1.2: Detects workspaces and generates hierarchy rules
+      const config = generateDepCruiseConfigFile({
+        elements: [],
+        isMonorepo: true,
+        workspaces: ['packages/*', 'apps/*', 'libs/*'],
+      });
+
+      // libs cannot import packages or apps
+      expect(config).toContain("name: 'libs-cannot-import-packages-or-apps'");
+      expect(config).toContain("from: { path: '^libs/' }");
+      expect(config).toContain("to: { path: '^(packages|apps)/' }");
+
+      // packages cannot import apps
+      expect(config).toContain("name: 'packages-cannot-import-apps'");
+      expect(config).toContain("from: { path: '^packages/' }");
+      expect(config).toContain("to: { path: '^apps/' }");
+    });
   });
 });
