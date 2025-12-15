@@ -5,13 +5,18 @@
  * See: .safeword/planning/test-definitions/feature-architecture-audit.md
  */
 
-import { describe, expect, it } from 'vitest';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import nodePath from 'node:path';
 
-// This import will fail until depcruise-config.ts is created (RED phase)
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import {
+  detectWorkspaces,
   generateDepCruiseConfigFile,
   generateDepCruiseMainConfig,
 } from '../../src/utils/depcruise-config.js';
+import { removeTemporaryDirectory } from '../helpers.js';
 
 describe('DepCruise Config Generator', () => {
   describe('generateDepCruiseConfigFile', () => {
@@ -82,5 +87,69 @@ describe('DepCruise Config Generator', () => {
       // Has comment for customization
       expect(config).toContain('ADD YOUR CUSTOM RULES');
     });
+  });
+});
+
+describe('detectWorkspaces', () => {
+  let temporaryDirectory: string;
+
+  beforeEach(() => {
+    temporaryDirectory = nodePath.join(tmpdir(), `depcruise-test-${Date.now()}`);
+    mkdirSync(temporaryDirectory, { recursive: true });
+  });
+
+  afterEach(() => {
+    removeTemporaryDirectory(temporaryDirectory);
+  });
+
+  it('returns undefined when no package.json exists', () => {
+    const workspaces = detectWorkspaces(temporaryDirectory);
+    expect(workspaces).toBeUndefined();
+  });
+
+  it('returns undefined when package.json has no workspaces', () => {
+    writeFileSync(
+      nodePath.join(temporaryDirectory, 'package.json'),
+      JSON.stringify({ name: 'test', version: '1.0.0' }),
+    );
+
+    const workspaces = detectWorkspaces(temporaryDirectory);
+    expect(workspaces).toBeUndefined();
+  });
+
+  it('detects workspaces from array format', () => {
+    writeFileSync(
+      nodePath.join(temporaryDirectory, 'package.json'),
+      JSON.stringify({
+        name: 'test',
+        workspaces: ['packages/*', 'apps/*', 'libs/*'],
+      }),
+    );
+
+    const workspaces = detectWorkspaces(temporaryDirectory);
+    expect(workspaces).toEqual(['packages/*', 'apps/*', 'libs/*']);
+  });
+
+  it('detects workspaces from object format (yarn)', () => {
+    writeFileSync(
+      nodePath.join(temporaryDirectory, 'package.json'),
+      JSON.stringify({
+        name: 'test',
+        workspaces: { packages: ['packages/*', 'tools/*'] },
+      }),
+    );
+
+    const workspaces = detectWorkspaces(temporaryDirectory);
+    expect(workspaces).toEqual(['packages/*', 'tools/*']);
+  });
+
+  it('returns undefined for empty workspaces array', () => {
+    writeFileSync(
+      nodePath.join(temporaryDirectory, 'package.json'),
+      JSON.stringify({ name: 'test', workspaces: [] }),
+    );
+
+    const workspaces = detectWorkspaces(temporaryDirectory);
+    expect(workspaces).toBeUndefined();
   });
 });

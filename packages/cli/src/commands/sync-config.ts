@@ -9,6 +9,8 @@ import nodePath from 'node:path';
 
 import { detectArchitecture, type DetectedArchitecture } from '../utils/boundaries.js';
 import {
+  type DepCruiseArchitecture,
+  detectWorkspaces,
   generateDepCruiseConfigFile,
   generateDepCruiseMainConfig,
 } from '../utils/depcruise-config.js';
@@ -24,7 +26,7 @@ export interface SyncConfigResult {
  * Core sync logic - writes depcruise configs to disk
  * Can be called from setup or as standalone command
  */
-export function syncConfigCore(cwd: string, arch: DetectedArchitecture): SyncConfigResult {
+export function syncConfigCore(cwd: string, arch: DepCruiseArchitecture): SyncConfigResult {
   const safewordDirectory = nodePath.join(cwd, '.safeword');
   const result: SyncConfigResult = { generatedConfig: false, createdMainConfig: false };
 
@@ -46,6 +48,15 @@ export function syncConfigCore(cwd: string, arch: DetectedArchitecture): SyncCon
 }
 
 /**
+ * Build full architecture info by combining detected layers with workspaces
+ */
+function buildArchitecture(cwd: string): DepCruiseArchitecture {
+  const arch = detectArchitecture(cwd);
+  const workspaces = detectWorkspaces(cwd);
+  return { ...arch, workspaces };
+}
+
+/**
  * CLI command: Sync depcruise config with current project structure
  */
 export async function syncConfig(): Promise<void> {
@@ -58,8 +69,8 @@ export async function syncConfig(): Promise<void> {
     process.exit(1);
   }
 
-  // Detect current architecture
-  const arch = detectArchitecture(cwd);
+  // Detect current architecture and workspaces
+  const arch = buildArchitecture(cwd);
   const result = syncConfigCore(cwd, arch);
 
   if (result.generatedConfig) {

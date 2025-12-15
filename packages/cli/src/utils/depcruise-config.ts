@@ -5,10 +5,35 @@
  * Used by `safeword sync-config` command and `/audit` slash command.
  */
 
-import type { DetectedArchitecture } from './boundaries.js';
+import nodePath from 'node:path';
 
-interface DepCruiseArchitecture extends DetectedArchitecture {
+import type { DetectedArchitecture } from './boundaries.js';
+import { readJson } from './fs.js';
+
+export interface DepCruiseArchitecture extends DetectedArchitecture {
   workspaces?: string[];
+}
+
+interface PackageJson {
+  workspaces?: string[] | { packages?: string[] };
+}
+
+/**
+ * Detect workspaces from package.json
+ * Supports both array format and object format (yarn workspaces)
+ */
+export function detectWorkspaces(cwd: string): string[] | undefined {
+  const packageJsonPath = nodePath.join(cwd, 'package.json');
+  const packageJson = readJson(packageJsonPath) as PackageJson | undefined;
+
+  if (!packageJson?.workspaces) return undefined;
+
+  // Handle both formats: string[] or { packages: string[] }
+  const workspaces = Array.isArray(packageJson.workspaces)
+    ? packageJson.workspaces
+    : packageJson.workspaces.packages;
+
+  return workspaces && workspaces.length > 0 ? workspaces : undefined;
 }
 
 /**

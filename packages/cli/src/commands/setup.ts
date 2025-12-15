@@ -11,6 +11,7 @@ import { reconcile, type ReconcileResult } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { detectArchitecture } from '../utils/boundaries.js';
 import { createProjectContext } from '../utils/context.js';
+import { detectWorkspaces } from '../utils/depcruise-config.js';
 import { exists, writeJson } from '../utils/fs.js';
 import { isGitRepo } from '../utils/git.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
@@ -103,17 +104,27 @@ export async function setup(options: SetupOptions): Promise<void> {
     const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
     success('Created .safeword directory and configuration');
 
-    // Detect architecture and generate depcruise configs if structure found
+    // Detect architecture and workspaces, generate depcruise configs if found
     const arch = detectArchitecture(cwd);
-    const hasArchitecture = arch.elements.length > 0 || arch.isMonorepo;
+    const workspaces = detectWorkspaces(cwd);
+    const hasArchitecture =
+      arch.elements.length > 0 || arch.isMonorepo || (workspaces && workspaces.length > 0);
     const archFiles: string[] = [];
 
     if (hasArchitecture) {
-      const syncResult = syncConfigCore(cwd, arch);
+      const fullArch = { ...arch, workspaces };
+      const syncResult = syncConfigCore(cwd, fullArch);
       if (syncResult.generatedConfig) archFiles.push('.safeword/depcruise-config.js');
       if (syncResult.createdMainConfig) archFiles.push('.dependency-cruiser.js');
-      const detected = arch.elements.map(element => element.location).join(', ');
-      info(`\nArchitecture detected: ${detected}`);
+
+      const detected: string[] = [];
+      if (arch.elements.length > 0) {
+        detected.push(arch.elements.map(element => element.location).join(', '));
+      }
+      if (workspaces && workspaces.length > 0) {
+        detected.push(`workspaces: ${workspaces.join(', ')}`);
+      }
+      info(`\nArchitecture detected: ${detected.join('; ')}`);
       info('Generated dependency-cruiser config for /audit command');
     }
 
