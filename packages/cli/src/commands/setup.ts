@@ -9,14 +9,12 @@ import nodePath from 'node:path';
 
 import { reconcile, type ReconcileResult } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
-import { detectArchitecture } from '../utils/boundaries.js';
 import { createProjectContext } from '../utils/context.js';
-import { detectWorkspaces } from '../utils/depcruise-config.js';
 import { exists, writeJson } from '../utils/fs.js';
 import { isGitRepo } from '../utils/git.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { VERSION } from '../version.js';
-import { syncConfigCore } from './sync-config.js';
+import { buildArchitecture, hasArchitectureDetected, syncConfigCore } from './sync-config.js';
 
 export interface SetupOptions {
   yes?: boolean;
@@ -105,15 +103,11 @@ export async function setup(options: SetupOptions): Promise<void> {
     success('Created .safeword directory and configuration');
 
     // Detect architecture and workspaces, generate depcruise configs if found
-    const arch = detectArchitecture(cwd);
-    const workspaces = detectWorkspaces(cwd);
-    const hasArchitecture =
-      arch.elements.length > 0 || arch.isMonorepo || (workspaces && workspaces.length > 0);
+    const arch = buildArchitecture(cwd);
     const archFiles: string[] = [];
 
-    if (hasArchitecture) {
-      const fullArch = { ...arch, workspaces };
-      const syncResult = syncConfigCore(cwd, fullArch);
+    if (hasArchitectureDetected(arch)) {
+      const syncResult = syncConfigCore(cwd, arch);
       if (syncResult.generatedConfig) archFiles.push('.safeword/depcruise-config.js');
       if (syncResult.createdMainConfig) archFiles.push('.dependency-cruiser.js');
 
@@ -121,8 +115,8 @@ export async function setup(options: SetupOptions): Promise<void> {
       if (arch.elements.length > 0) {
         detected.push(arch.elements.map(element => element.location).join(', '));
       }
-      if (workspaces && workspaces.length > 0) {
-        detected.push(`workspaces: ${workspaces.join(', ')}`);
+      if (arch.workspaces && arch.workspaces.length > 0) {
+        detected.push(`workspaces: ${arch.workspaces.join(', ')}`);
       }
       info(`\nArchitecture detected: ${detected.join('; ')}`);
       info('Generated dependency-cruiser config for /audit command');

@@ -50,10 +50,17 @@ export function syncConfigCore(cwd: string, arch: DepCruiseArchitecture): SyncCo
 /**
  * Build full architecture info by combining detected layers with workspaces
  */
-function buildArchitecture(cwd: string): DepCruiseArchitecture {
+export function buildArchitecture(cwd: string): DepCruiseArchitecture {
   const arch = detectArchitecture(cwd);
   const workspaces = detectWorkspaces(cwd);
   return { ...arch, workspaces };
+}
+
+/**
+ * Check if architecture was detected (layers, monorepo structure, or workspaces)
+ */
+export function hasArchitectureDetected(arch: DepCruiseArchitecture): boolean {
+  return arch.elements.length > 0 || arch.isMonorepo || (arch.workspaces?.length ?? 0) > 0;
 }
 
 /**

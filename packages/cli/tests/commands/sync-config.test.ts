@@ -115,4 +115,24 @@ describe('Sync Config Command', () => {
       expect(config).toContain('no-circular');
     });
   });
+
+  describe('Test 2.6: Reads workspaces from package.json for monorepo rules', () => {
+    it('should generate monorepo layer rules from package.json workspaces', async () => {
+      await createConfiguredProject(temporaryDirectory);
+
+      // Update package.json with workspaces
+      const packageJson = JSON.parse(readTestFile(temporaryDirectory, 'package.json'));
+      packageJson.workspaces = ['packages/*', 'apps/*', 'libs/*'];
+      writeTestFile(temporaryDirectory, 'package.json', JSON.stringify(packageJson, null, 2));
+
+      const result = await runCli(['sync-config'], { cwd: temporaryDirectory });
+
+      expect(result.exitCode).toBe(0);
+
+      // Generated config should have monorepo hierarchy rules
+      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.js');
+      expect(config).toContain('libs-cannot-import-packages-or-apps');
+      expect(config).toContain('packages-cannot-import-apps');
+    });
+  });
 });
