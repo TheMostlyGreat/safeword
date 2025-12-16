@@ -46,4 +46,11 @@ describe('getEslintConfig', () => {
     expect(config).toContain('safeword.configs.vitest');
     expect(config).toContain('safeword.configs.playwright');
   });
+
+  it('should include tailwind and tanstackQuery configs', () => {
+    const config = getEslintConfig();
+
+    expect(config).toContain('safeword.configs.tailwind');
+    expect(config).toContain('safeword.configs.tanstackQuery');
+  });
 });

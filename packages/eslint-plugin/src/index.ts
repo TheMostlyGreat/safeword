@@ -26,6 +26,9 @@
  *   // Tailwind CSS projects (add to existing config)
  *   export default [...safeword.configs.recommendedTypeScriptReact, ...safeword.configs.tailwind];
  *
+ *   // TanStack Query projects (add to existing config)
+ *   export default [...safeword.configs.recommendedTypeScriptReact, ...safeword.configs.tanstackQuery];
+ *
  *   // Test files (add to existing config)
  *   export default [...safeword.configs.recommendedTypeScript, ...safeword.configs.vitest];
  *   export default [...safeword.configs.recommendedTypeScript, ...safeword.configs.playwright];
