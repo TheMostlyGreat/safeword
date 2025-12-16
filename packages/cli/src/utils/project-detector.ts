@@ -90,7 +90,11 @@ export function detectProjectType(packageJson: PackageJson, cwd?: string): Proje
   const hasAstro = 'astro' in deps || 'astro' in developmentDeps;
   const hasVitest = 'vitest' in developmentDeps;
   const hasPlaywright = '@playwright/test' in developmentDeps;
-  const hasTailwind = 'tailwindcss' in allDeps;
+  // Tailwind v4 can be installed via tailwindcss, @tailwindcss/vite, or @tailwindcss/postcss
+  const hasTailwind =
+    'tailwindcss' in allDeps ||
+    '@tailwindcss/vite' in allDeps ||
+    '@tailwindcss/postcss' in allDeps;
 
   // TanStack Query detection
   const tanstackQueryPackages = [

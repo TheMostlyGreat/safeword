@@ -160,6 +160,32 @@ describe('detectProjectType', () => {
       const result = detectProjectType(packageJson);
       expect(result.tailwind).toBe(true);
     });
+
+    it('should detect @tailwindcss/vite (Tailwind v4)', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        devDependencies: {
+          '@tailwindcss/vite': '^4.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.tailwind).toBe(true);
+    });
+
+    it('should detect @tailwindcss/postcss (Tailwind v4)', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        devDependencies: {
+          '@tailwindcss/postcss': '^4.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.tailwind).toBe(true);
+    });
   });
 
   describe('Detects publishable library', () => {

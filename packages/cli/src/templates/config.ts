@@ -70,7 +70,9 @@ if (deps["vitest"]) {
 if (deps["playwright"] || deps["@playwright/test"]) {
   configs.push(...safeword.configs.playwright);
 }
-if (deps["tailwindcss"]) {
+// Tailwind v4 can be installed via tailwindcss, @tailwindcss/vite, or @tailwindcss/postcss
+const hasTailwind = deps["tailwindcss"] || deps["@tailwindcss/vite"] || deps["@tailwindcss/postcss"];
+if (hasTailwind) {
   configs.push(...safeword.configs.tailwind);
 }
 const tanstackQueryPackages = [
@@ -140,7 +142,9 @@ if (deps.vitest) {
 if (deps.playwright || deps["@playwright/test"]) {
   configs.push(...safeword.configs.playwright);
 }
-if (deps.tailwindcss) {
+// Tailwind v4 can be installed via tailwindcss, @tailwindcss/vite, or @tailwindcss/postcss
+const hasTailwind = deps.tailwindcss || deps["@tailwindcss/vite"] || deps["@tailwindcss/postcss"];
+if (hasTailwind) {
   configs.push(...safeword.configs.tailwind);
 }
 const tanstackQueryPackages = [
