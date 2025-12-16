@@ -7,7 +7,7 @@
  * See: https://eslint.org/docs/latest/use/configure/configuration-files
  */
 
-import { TANSTACK_QUERY_PACKAGES } from '../utils/project-detector.js';
+import { TAILWIND_PACKAGES, TANSTACK_QUERY_PACKAGES } from '../utils/project-detector.js';
 
 /**
  * Helper function string for collecting all dependencies from workspace package.json files.
@@ -138,8 +138,8 @@ if (deps["playwright"] || deps["@playwright/test"]) {
   configs.push(...safeword.configs.playwright);
 }
 // Tailwind v4 can be installed via tailwindcss, @tailwindcss/vite, or @tailwindcss/postcss
-const hasTailwind = deps["tailwindcss"] || deps["@tailwindcss/vite"] || deps["@tailwindcss/postcss"];
-if (hasTailwind) {
+const tailwindPackages = ${JSON.stringify(TAILWIND_PACKAGES)};
+if (tailwindPackages.some(pkg => deps[pkg])) {
   configs.push(...safeword.configs.tailwind);
 }
 const tanstackQueryPackages = ${JSON.stringify(TANSTACK_QUERY_PACKAGES)};
@@ -204,8 +204,8 @@ if (deps["playwright"] || deps["@playwright/test"]) {
   configs.push(...safeword.configs.playwright);
 }
 // Tailwind v4 can be installed via tailwindcss, @tailwindcss/vite, or @tailwindcss/postcss
-const hasTailwind = deps["tailwindcss"] || deps["@tailwindcss/vite"] || deps["@tailwindcss/postcss"];
-if (hasTailwind) {
+const tailwindPackages = ${JSON.stringify(TAILWIND_PACKAGES)};
+if (tailwindPackages.some(pkg => deps[pkg])) {
   configs.push(...safeword.configs.tailwind);
 }
 const tanstackQueryPackages = ${JSON.stringify(TANSTACK_QUERY_PACKAGES)};

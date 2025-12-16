@@ -47,6 +47,16 @@ export const TANSTACK_QUERY_PACKAGES = [
 ] as const;
 
 /**
+ * Tailwind CSS package names (v3 and v4 installation methods).
+ * Single source of truth used by both project detection and ESLint config generation.
+ */
+export const TAILWIND_PACKAGES = [
+  'tailwindcss',
+  '@tailwindcss/vite',
+  '@tailwindcss/postcss',
+] as const;
+
+/**
  * Checks if a directory contains any .sh files up to specified depth.
  * Excludes node_modules and .git directories.
  * @param cwd
@@ -103,10 +113,7 @@ export function detectProjectType(packageJson: PackageJson, cwd?: string): Proje
   const hasVitest = 'vitest' in developmentDeps;
   const hasPlaywright = '@playwright/test' in developmentDeps;
   // Tailwind v4 can be installed via tailwindcss, @tailwindcss/vite, or @tailwindcss/postcss
-  const hasTailwind =
-    'tailwindcss' in allDeps ||
-    '@tailwindcss/vite' in allDeps ||
-    '@tailwindcss/postcss' in allDeps;
+  const hasTailwind = TAILWIND_PACKAGES.some(pkg => pkg in allDeps);
 
   // TanStack Query detection
   const hasTanstackQuery = TANSTACK_QUERY_PACKAGES.some(pkg => pkg in allDeps);
