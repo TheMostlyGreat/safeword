@@ -52,12 +52,18 @@ const configs = [
   ...baseConfig,
 ];
 
-// Add test configs if testing frameworks detected
+// Add configs for detected tools/frameworks
 if (deps["vitest"]) {
   configs.push(...safeword.configs.vitest);
 }
 if (deps["playwright"] || deps["@playwright/test"]) {
   configs.push(...safeword.configs.playwright);
+}
+if (deps["tailwindcss"]) {
+  configs.push(...safeword.configs.tailwind);
+}
+if (deps["@tanstack/react-query"] || deps["@tanstack/vue-query"] || deps["@tanstack/solid-query"] || deps["@tanstack/svelte-query"] || deps["@tanstack/angular-query-experimental"]) {
+  configs.push(...safeword.configs.tanstackQuery);
 }
 
 // eslint-config-prettier must be last to disable conflicting rules
