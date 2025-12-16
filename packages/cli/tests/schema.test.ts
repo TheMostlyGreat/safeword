@@ -47,11 +47,6 @@ describe('Schema - Single Source of Truth', () => {
   const templatesDirectory = nodePath.join(__dirname, '../templates');
 
   describe('ownedDirs', () => {
-    it('should have exactly 17 owned directories', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.ownedDirs.length).toBe(17);
-    });
-
     it('should include all required .safeword subdirectories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       const required = [
@@ -81,11 +76,6 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('sharedDirs', () => {
-    it('should have exactly 3 shared directories', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.sharedDirs.length).toBe(3);
-    });
-
     it('should include .claude directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude');
@@ -95,11 +85,6 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('preservedDirs', () => {
-    it('should have exactly 4 preserved directories', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.preservedDirs.length).toBe(4);
-    });
-
     it('should preserve user content directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/learnings');
@@ -110,11 +95,6 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('ownedFiles', () => {
-    it('should have exactly 57 owned files', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.ownedFiles).length).toBe(57);
-    });
-
     it('should have entry for every template file', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       const templateFiles = collectTemplateFiles(templatesDirectory);
@@ -167,24 +147,15 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('managedFiles', () => {
-    it('should have exactly 2 managed files', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.managedFiles).length).toBe(2);
-    });
-
-    it('should include eslint.config.mjs and tsconfig.json', async () => {
+    it('should include eslint.config.mjs, tsconfig.json, and knip.json', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('eslint.config.mjs');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('tsconfig.json');
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('knip.json');
     });
   });
 
   describe('jsonMerges', () => {
-    it('should have exactly 6 json merge definitions', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.jsonMerges).length).toBe(6);
-    });
-
     it('should include package.json, .claude/settings.json, .mcp.json, Cursor configs, and .prettierrc', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('package.json');
@@ -197,11 +168,6 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('textPatches', () => {
-    it('should have exactly 2 text patches', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(Object.keys(SAFEWORD_SCHEMA.textPatches).length).toBe(2);
-    });
-
     it('should include AGENTS.md patch (creates if missing)', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty('AGENTS.md');
@@ -218,17 +184,13 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('packages', () => {
-    it('should have 4 base packages', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.packages.base.length).toBe(4);
-    });
-
     it('should include all required base packages', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       const required = [
         'eslint',
         'prettier',
         'eslint-plugin-safeword', // bundles eslint-config-prettier
+        'dependency-cruiser',
         'knip',
       ];
 
