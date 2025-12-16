@@ -12,12 +12,12 @@
  *
  * The generated config uses safeword.detect utilities to detect frameworks
  * and select the appropriate config at lint time.
- * @param biomeCompatible - If true, generates a minimal config for use alongside Biome
+ * @param hasExistingFormatter - If true, generates a minimal config without Prettier
  * @returns ESLint config file content as a string
  */
-export function getEslintConfig(biomeCompatible = false): string {
-  if (biomeCompatible) {
-    return getBiomeCompatibleEslintConfig();
+export function getEslintConfig(hasExistingFormatter = false): string {
+  if (hasExistingFormatter) {
+    return getFormatterAgnosticEslintConfig();
   }
   return getStandardEslintConfig();
 }
@@ -58,11 +58,11 @@ export default [
 }
 
 /**
- * Biome-compatible ESLint config - minimal config for safeword rules only.
- * Used alongside Biome which handles formatting and basic linting.
- * Does not include eslint-config-prettier since Biome handles formatting.
+ * Formatter-agnostic ESLint config - minimal config for projects with existing formatter.
+ * Used alongside external formatters (Biome, dprint, etc.) that handle formatting.
+ * Does not include eslint-config-prettier since another tool handles formatting.
  */
-function getBiomeCompatibleEslintConfig(): string {
+function getFormatterAgnosticEslintConfig(): string {
   return `import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import safeword from "eslint-plugin-safeword";

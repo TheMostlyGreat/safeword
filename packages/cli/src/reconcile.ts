@@ -705,7 +705,7 @@ export function computePackagesToInstall(
     needed = needed.filter(pkg => !GIT_ONLY_PACKAGES.has(pkg));
   }
 
-  // Prettier-related packages that should be skipped for Biome projects
+  // Prettier-related packages that should be skipped for projects with existing formatter
   const prettierPackages = new Set([
     'prettier',
     'prettier-plugin-astro',
@@ -714,9 +714,9 @@ export function computePackagesToInstall(
   ]);
 
   for (const [key, deps] of Object.entries(schema.packages.conditional)) {
-    // "standard" means !biome - only install for non-Biome projects
+    // "standard" means !existingFormatter - only install for projects without existing formatter
     if (key === 'standard') {
-      if (!projectType.biome) {
+      if (!projectType.existingFormatter) {
         needed.push(...deps);
       }
       continue;
@@ -724,8 +724,8 @@ export function computePackagesToInstall(
 
     // Check if this condition is met
     if (projectType[key as keyof ProjectType]) {
-      // For Biome projects, skip prettier-related packages
-      if (projectType.biome) {
+      // For projects with existing formatter, skip prettier-related packages
+      if (projectType.existingFormatter) {
         needed.push(...deps.filter(pkg => !prettierPackages.has(pkg)));
       } else {
         needed.push(...deps);
@@ -749,7 +749,7 @@ function computePackagesToRemove(
 ): string[] {
   const safewordPackages = [...schema.packages.base];
 
-  // Prettier-related packages that should be skipped for Biome projects
+  // Prettier-related packages that should be skipped for projects with existing formatter
   const prettierPackages = new Set([
     'prettier',
     'prettier-plugin-astro',
@@ -758,17 +758,17 @@ function computePackagesToRemove(
   ]);
 
   for (const [key, deps] of Object.entries(schema.packages.conditional)) {
-    // "standard" means !biome - only applies to non-Biome projects
+    // "standard" means !existingFormatter - only applies to projects without existing formatter
     if (key === 'standard') {
-      if (!projectType.biome) {
+      if (!projectType.existingFormatter) {
         safewordPackages.push(...deps);
       }
       continue;
     }
 
     if (projectType[key as keyof ProjectType]) {
-      // For Biome projects, skip prettier-related packages
-      if (projectType.biome) {
+      // For projects with existing formatter, skip prettier-related packages
+      if (projectType.existingFormatter) {
         safewordPackages.push(...deps.filter(pkg => !prettierPackages.has(pkg)));
       } else {
         safewordPackages.push(...deps);

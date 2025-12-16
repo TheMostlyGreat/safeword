@@ -279,7 +279,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // Files created if missing, updated only if content matches current template
   managedFiles: {
     'eslint.config.mjs': {
-      generator: ctx => getEslintConfig(ctx.projectType.biome),
+      generator: ctx => getEslintConfig(ctx.projectType.existingFormatter),
     },
     // Minimal tsconfig for ESLint type-checked linting (only if missing)
     'tsconfig.json': {
@@ -326,7 +326,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     'package.json': {
       keys: ['scripts.lint', 'scripts.format', 'scripts.format:check', 'scripts.knip'],
       conditionalKeys: {
-        biome: ['scripts.lint:eslint'], // Biome projects get separate ESLint script
+        existingLinter: ['scripts.lint:eslint'], // Projects with existing linter get separate ESLint script
         publishableLibrary: ['scripts.publint'],
         shell: ['scripts.lint:sh'],
       },
@@ -334,14 +334,17 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         const scripts = { ...(existing.scripts as Record<string, string>) };
         const result = { ...existing };
 
-        if (ctx.projectType.biome) {
-          // Biome project: preserve their lint/format, add ESLint for safeword rules only
-          // Add lint:eslint for safeword-specific rules (runs alongside Biome)
+        if (ctx.projectType.existingLinter) {
+          // Project with existing linter: add lint:eslint for safeword-specific rules
           if (!scripts['lint:eslint']) scripts['lint:eslint'] = 'eslint .';
-          // Don't touch their existing lint/format scripts (Biome handles those)
+          // Don't touch their existing lint script
         } else {
-          // Standard setup: ESLint + Prettier
+          // No existing linter: ESLint is the primary linter
           if (!scripts.lint) scripts.lint = 'eslint .';
+        }
+
+        if (!ctx.projectType.existingFormatter) {
+          // No existing formatter: add Prettier
           if (!scripts.format) scripts.format = 'prettier --write .';
           if (!scripts['format:check']) scripts['format:check'] = 'prettier --check .';
         }
@@ -584,9 +587,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       'knip',
     ],
     conditional: {
-      // Prettier (only for non-Biome projects)
-      standard: ['prettier'], // "standard" = !biome
-      // Prettier plugins (only for non-Biome projects that need them)
+      // Prettier (only for projects without existing formatter)
+      standard: ['prettier'], // "standard" = !existingFormatter
+      // Prettier plugins (only for projects without existing formatter that need them)
       astro: ['prettier-plugin-astro'],
       tailwind: ['prettier-plugin-tailwindcss'],
       shell: ['prettier-plugin-sh'],

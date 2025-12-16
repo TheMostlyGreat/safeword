@@ -5,13 +5,20 @@
  * appropriate linting rules.
  */
 
-import { existsSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import { detect } from 'eslint-plugin-safeword';
 
 // Re-export detection constants from eslint-plugin-safeword (single source of truth)
-export const { TAILWIND_PACKAGES, TANSTACK_QUERY_PACKAGES, PLAYWRIGHT_PACKAGES } = detect;
+export const {
+  TAILWIND_PACKAGES,
+  TANSTACK_QUERY_PACKAGES,
+  PLAYWRIGHT_PACKAGES,
+  FORMATTER_CONFIG_FILES,
+  hasExistingLinter,
+  hasExistingFormatter,
+} = detect;
 
 export interface PackageJson {
   name?: string;
@@ -36,7 +43,10 @@ export interface ProjectType {
   tanstackQuery: boolean;
   publishableLibrary: boolean;
   shell: boolean;
-  biome: boolean;
+  /** True if project has existing lint script or linter config */
+  existingLinter: boolean;
+  /** True if project has existing format script or formatter config */
+  existingFormatter: boolean;
 }
 
 /**
@@ -79,15 +89,20 @@ export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
   return scan(cwd, 0);
 }
 
+export interface PackageJsonWithScripts extends PackageJson {
+  scripts?: Record<string, string>;
+}
+
 /**
  * Detects project type from package.json contents and optional file scanning
- * @param packageJson
- * @param cwd
+ * @param packageJson - Package.json contents including scripts
+ * @param cwd - Working directory for file-based detection
  */
-export function detectProjectType(packageJson: PackageJson, cwd?: string): ProjectType {
+export function detectProjectType(packageJson: PackageJsonWithScripts, cwd?: string): ProjectType {
   const deps = packageJson.dependencies || {};
   const developmentDeps = packageJson.devDependencies || {};
   const allDeps = { ...deps, ...developmentDeps };
+  const scripts = packageJson.scripts || {};
 
   const hasTypescript = 'typescript' in allDeps;
   const hasReact = 'react' in deps || 'react' in developmentDeps;
@@ -108,13 +123,9 @@ export function detectProjectType(packageJson: PackageJson, cwd?: string): Proje
   // Shell scripts: detected by scanning for .sh files
   const hasShell = cwd ? hasShellScripts(cwd) : false;
 
-  // Biome detection: check deps and config files
-  const hasBiomeDep = '@biomejs/biome' in allDeps || 'ultracite' in allDeps;
-  const hasBiomeConfig = cwd
-    ? existsSync(nodePath.join(cwd, 'biome.json')) ||
-      existsSync(nodePath.join(cwd, 'biome.jsonc'))
-    : false;
-  const hasBiome = hasBiomeDep || hasBiomeConfig;
+  // Generic tooling detection: detect intent, not specific tools
+  const hasLinter = hasExistingLinter(scripts);
+  const hasFormatter = cwd ? hasExistingFormatter(cwd, scripts) : 'format' in scripts;
 
   return {
     typescript: hasTypescript,
@@ -127,6 +138,7 @@ export function detectProjectType(packageJson: PackageJson, cwd?: string): Proje
     tanstackQuery: hasTanstackQuery,
     publishableLibrary: isPublishable,
     shell: hasShell,
-    biome: hasBiome,
+    existingLinter: hasLinter,
+    existingFormatter: hasFormatter,
   };
 }

@@ -250,42 +250,59 @@ describe('detectProjectType', () => {
     });
   });
 
-  describe('Detects Biome', () => {
-    it('should detect @biomejs/biome from devDependencies', () => {
-      const packageJson: PackageJson = {
+  describe('Detects existing linter', () => {
+    it('should detect existing linter from lint script', () => {
+      const packageJson = {
         name: 'test',
         version: '1.0.0',
-        devDependencies: {
-          '@biomejs/biome': '^1.0.0',
+        scripts: {
+          lint: 'biome check .',
         },
       };
 
       const result = detectProjectType(packageJson);
-      expect(result.biome).toBe(true);
+      expect(result.existingLinter).toBe(true);
     });
 
-    it('should detect ultracite (Biome wrapper)', () => {
-      const packageJson: PackageJson = {
+    it('should return false when no lint script exists', () => {
+      const packageJson = {
         name: 'test',
         version: '1.0.0',
-        devDependencies: {
-          ultracite: '^1.0.0',
+        scripts: {
+          build: 'tsc',
         },
       };
 
       const result = detectProjectType(packageJson);
-      expect(result.biome).toBe(true);
+      expect(result.existingLinter).toBe(false);
     });
+  });
 
-    it('should return false when Biome is not present', () => {
-      const packageJson: PackageJson = {
+  describe('Detects existing formatter', () => {
+    it('should detect existing formatter from format script', () => {
+      const packageJson = {
         name: 'test',
         version: '1.0.0',
-        dependencies: {},
+        scripts: {
+          format: 'biome format .',
+        },
       };
 
       const result = detectProjectType(packageJson);
-      expect(result.biome).toBe(false);
+      expect(result.existingFormatter).toBe(true);
+    });
+
+    it('should return false when no format script exists (without cwd)', () => {
+      const packageJson = {
+        name: 'test',
+        version: '1.0.0',
+        scripts: {
+          build: 'tsc',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.existingFormatter).toBe(false);
     });
   });
 
@@ -329,7 +346,8 @@ describe('detectProjectType', () => {
       expect(result.astro).toBe(false);
       expect(result.tailwind).toBe(false);
       expect(result.publishableLibrary).toBe(false);
-      expect(result.biome).toBe(false);
+      expect(result.existingLinter).toBe(false);
+      expect(result.existingFormatter).toBe(false);
       expect(result.tanstackQuery).toBe(false);
     });
 

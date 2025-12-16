@@ -60,13 +60,13 @@ describe('getEslintConfig', () => {
     expect(config).toContain('detect.getIgnores(deps)');
   });
 
-  it('should include eslint-config-prettier for standard config', () => {
+  it('should include eslint-config-prettier when no existing formatter', () => {
     const config = getEslintConfig(false);
 
     expect(config).toContain('eslintConfigPrettier');
   });
 
-  it('should NOT include eslint-config-prettier for biome config', () => {
+  it('should NOT include eslint-config-prettier when existing formatter present', () => {
     const config = getEslintConfig(true);
 
     expect(config).not.toContain('eslintConfigPrettier');

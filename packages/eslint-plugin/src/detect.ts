@@ -34,7 +34,33 @@ export const TAILWIND_PACKAGES = [
  */
 export const PLAYWRIGHT_PACKAGES = ['@playwright/test', 'playwright'] as const;
 
+/**
+ * Known formatter config files.
+ * If any exist, user likely has their own formatter setup.
+ */
+export const FORMATTER_CONFIG_FILES = [
+  // Biome
+  'biome.json',
+  'biome.jsonc',
+  // dprint
+  'dprint.json',
+  // Rome (legacy, now Biome)
+  'rome.json',
+  // Prettier (we check this too - if they have prettier config, don't reinstall)
+  '.prettierrc',
+  '.prettierrc.json',
+  '.prettierrc.yaml',
+  '.prettierrc.yml',
+  '.prettierrc.js',
+  '.prettierrc.cjs',
+  '.prettierrc.mjs',
+  'prettier.config.js',
+  'prettier.config.cjs',
+  'prettier.config.mjs',
+] as const;
+
 export type DepsRecord = Record<string, string | undefined>;
+export type ScriptsRecord = Record<string, string | undefined>;
 
 /**
  * Collect all dependencies from root and workspace package.json files.
@@ -147,6 +173,26 @@ export function getIgnores(deps: DepsRecord): string[] {
 }
 
 /**
+ * Check if project has an existing linter setup.
+ * True if package.json has a "lint" script.
+ */
+export function hasExistingLinter(scripts: ScriptsRecord): boolean {
+  return 'lint' in scripts;
+}
+
+/**
+ * Check if project has an existing formatter setup.
+ * True if package.json has a "format" script OR any formatter config file exists.
+ */
+export function hasExistingFormatter(cwd: string, scripts: ScriptsRecord): boolean {
+  // Check for format script
+  if ('format' in scripts) return true;
+
+  // Check for formatter config files
+  return FORMATTER_CONFIG_FILES.some(file => existsSync(join(cwd, file)));
+}
+
+/**
  * All detection utilities bundled together.
  */
 export const detect = {
@@ -154,6 +200,7 @@ export const detect = {
   TAILWIND_PACKAGES,
   TANSTACK_QUERY_PACKAGES,
   PLAYWRIGHT_PACKAGES,
+  FORMATTER_CONFIG_FILES,
 
   // Core utilities
   collectAllDeps,
@@ -165,6 +212,10 @@ export const detect = {
   hasTanstackQuery,
   hasVitest,
   hasPlaywright,
+
+  // Existing tooling detection
+  hasExistingLinter,
+  hasExistingFormatter,
 };
 
 export default detect;

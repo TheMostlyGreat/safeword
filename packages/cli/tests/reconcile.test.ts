@@ -662,7 +662,8 @@ describe('Reconcile - Reconciliation Engine', () => {
         tanstackQuery: false,
         publishableLibrary: false,
         shell: false,
-        biome: false, // non-Biome project gets prettier
+        existingLinter: false,
+        existingFormatter: false, // no existing formatter, gets prettier
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -690,7 +691,8 @@ describe('Reconcile - Reconciliation Engine', () => {
         tanstackQuery: false,
         publishableLibrary: false,
         shell: false,
-        biome: true, // Biome project doesn't get prettier
+        existingLinter: false,
+        existingFormatter: true, // Has existing formatter, doesn't get prettier
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -715,7 +717,8 @@ describe('Reconcile - Reconciliation Engine', () => {
         tanstackQuery: false,
         publishableLibrary: false,
         shell: false,
-        biome: false,
+        existingLinter: false,
+        existingFormatter: false,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -723,7 +726,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       expect(result).toContain('prettier-plugin-astro');
     });
 
-    it('should not add prettier plugins for Biome+Astro projects', async () => {
+    it('should not add prettier plugins for projects with existing formatter', async () => {
       const { computePackagesToInstall } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
@@ -738,7 +741,8 @@ describe('Reconcile - Reconciliation Engine', () => {
         tanstackQuery: false,
         publishableLibrary: false,
         shell: false,
-        biome: true, // Biome handles formatting
+        existingLinter: false,
+        existingFormatter: true, // Existing formatter handles formatting
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -762,7 +766,8 @@ describe('Reconcile - Reconciliation Engine', () => {
         tanstackQuery: false,
         publishableLibrary: true,
         shell: false,
-        biome: false,
+        existingLinter: false,
+        existingFormatter: false,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -788,7 +793,8 @@ describe('Reconcile - Reconciliation Engine', () => {
         tanstackQuery: false,
         publishableLibrary: false,
         shell: false,
-        biome: false,
+        existingLinter: false,
+        existingFormatter: false,
       };
 
       const installedDevelopmentDeps = {
@@ -824,7 +830,8 @@ describe('Reconcile - Reconciliation Engine', () => {
         tanstackQuery: false,
         publishableLibrary: false,
         shell: false,
-        biome: false,
+        existingLinter: false,
+        existingFormatter: false,
       };
 
       // isGitRepo = false
