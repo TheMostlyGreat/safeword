@@ -8,33 +8,10 @@
  */
 
 /**
- * Generates an ESLint config using eslint-plugin-safeword.
- *
- * The generated config reads package.json to detect frameworks and selects
- * the appropriate safeword config.
- * @param biomeCompatible - If true, generates a minimal config for use alongside Biome
- * @returns ESLint config file content as a string
+ * Helper function string for collecting all dependencies from workspace package.json files.
+ * Used in generated ESLint configs to detect frameworks in monorepos.
  */
-export function getEslintConfig(biomeCompatible = false): string {
-  if (biomeCompatible) {
-    return getBiomeCompatibleEslintConfig();
-  }
-  return getStandardEslintConfig();
-}
-
-/**
- * Standard ESLint config - full linting with Prettier
- */
-function getStandardEslintConfig(): string {
-  return `import { existsSync, readdirSync, readFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
-import safeword from "eslint-plugin-safeword";
-import eslintConfigPrettier from "eslint-config-prettier";
-
-// Read package.json relative to this config file (not CWD)
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
+const COLLECT_ALL_DEPS_HELPER = `
 /**
  * Collect all dependencies from root and workspace package.json files.
  * Supports npm/yarn workspaces and common monorepo patterns.
@@ -93,7 +70,36 @@ function collectAllDeps(rootDir) {
 
   return allDeps;
 }
+`;
 
+/**
+ * Generates an ESLint config using eslint-plugin-safeword.
+ *
+ * The generated config reads package.json to detect frameworks and selects
+ * the appropriate safeword config.
+ * @param biomeCompatible - If true, generates a minimal config for use alongside Biome
+ * @returns ESLint config file content as a string
+ */
+export function getEslintConfig(biomeCompatible = false): string {
+  if (biomeCompatible) {
+    return getBiomeCompatibleEslintConfig();
+  }
+  return getStandardEslintConfig();
+}
+
+/**
+ * Standard ESLint config - full linting with Prettier
+ */
+function getStandardEslintConfig(): string {
+  return `import { existsSync, readdirSync, readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+import safeword from "eslint-plugin-safeword";
+import eslintConfigPrettier from "eslint-config-prettier";
+
+// Read package.json relative to this config file (not CWD)
+const __dirname = dirname(fileURLToPath(import.meta.url));
+${COLLECT_ALL_DEPS_HELPER}
 const deps = collectAllDeps(__dirname);
 
 // Build dynamic ignores based on detected frameworks
@@ -165,66 +171,7 @@ import safeword from "eslint-plugin-safeword";
 
 // Read package.json relative to this config file (not CWD)
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-/**
- * Collect all dependencies from root and workspace package.json files.
- * Supports npm/yarn workspaces and common monorepo patterns.
- */
-function collectAllDeps(rootDir) {
-  const allDeps = {};
-
-  // Helper to merge deps from a package.json
-  const mergeDeps = (pkgPath) => {
-    try {
-      if (!existsSync(pkgPath)) return;
-      const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
-      Object.assign(allDeps, pkg.dependencies, pkg.devDependencies);
-    } catch {
-      // Ignore invalid package.json files
-    }
-  };
-
-  // Read root package.json
-  const rootPkgPath = join(rootDir, "package.json");
-  mergeDeps(rootPkgPath);
-
-  // Check for workspaces (npm/yarn/pnpm)
-  let workspacePatterns = [];
-  try {
-    const rootPkg = JSON.parse(readFileSync(rootPkgPath, "utf8"));
-    if (Array.isArray(rootPkg.workspaces)) {
-      workspacePatterns = rootPkg.workspaces;
-    } else if (rootPkg.workspaces?.packages) {
-      workspacePatterns = rootPkg.workspaces.packages;
-    }
-  } catch {
-    // No workspaces defined
-  }
-
-  // Also check common monorepo directories even without workspaces config
-  const commonPatterns = ["apps/*", "packages/*"];
-  const patterns = [...new Set([...workspacePatterns, ...commonPatterns])];
-
-  // Scan workspace directories (simple glob: only supports "dir/*" patterns)
-  for (const pattern of patterns) {
-    if (!pattern.endsWith("/*")) continue;
-    const baseDir = join(rootDir, pattern.slice(0, -2));
-    if (!existsSync(baseDir)) continue;
-    try {
-      const entries = readdirSync(baseDir, { withFileTypes: true });
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          mergeDeps(join(baseDir, entry.name, "package.json"));
-        }
-      }
-    } catch {
-      // Ignore read errors
-    }
-  }
-
-  return allDeps;
-}
-
+${COLLECT_ALL_DEPS_HELPER}
 const deps = collectAllDeps(__dirname);
 
 // Build dynamic ignores based on detected frameworks
