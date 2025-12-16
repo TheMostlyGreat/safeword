@@ -3,61 +3,49 @@
 **Status**: Planned (not yet implemented)
 **Priority**: High - widely used, catches real bugs
 
-- **Version**: ^5.91.2 (conditional - when @tanstack/react-query detected)
-- **Preset**: `flat/recommended` rules
+- **Version**: ^5.x required (v4 flat config broken - [#8679](https://github.com/TanStack/query/issues/8679))
 - **Weekly downloads**: 1.8M+
-- **Gotcha**: Flat config syntax changed in recent versions
+- **Bundled in**: `eslint-plugin-safeword` (not separate install)
 
-## Why This Plugin Matters for LLMs
+## Rule Configuration
 
-TanStack Query (React Query) is one of the most popular data fetching libraries. LLMs frequently make mistakes that this plugin catches:
+All 7 rules set to **error** - LLMs have no valid reason to violate these.
 
-| LLM Behavior                                     | Rule That Catches It            |
-| ------------------------------------------------ | ------------------------------- |
-| Missing query key dependencies                   | `exhaustive-deps`               |
-| Destructuring `data` rest properties incorrectly | `no-rest-destructuring`         |
-| Creating queryClient inside component            | `stable-query-client`           |
-| Unstable function references in options          | `no-unstable-deps`              |
-| Wrong property order in infinite queries         | `infinite-query-property-order` |
+| Rule                            | What It Catches                                  |
+| ------------------------------- | ------------------------------------------------ |
+| `exhaustive-deps`               | Missing query key deps → stale cached data       |
+| `stable-query-client`           | Client in component → infinite re-render loop    |
+| `no-void-query-fn`              | No return → `undefined` cached                   |
+| `no-rest-destructuring`         | `...rest` loses reactivity, stale UI state       |
+| `no-unstable-deps`              | New function each render → unnecessary refetches |
+| `infinite-query-property-order` | Wrong order → TypeScript can't infer types       |
+| `mutation-property-order`       | Wrong order → TypeScript can't infer types       |
 
-## Rule Severity Breakdown
-
-| Rule                            | Severity | Rationale                                                    |
-| ------------------------------- | -------- | ------------------------------------------------------------ |
-| `exhaustive-deps`               | error    | Query keys must include all dependencies for correct caching |
-| `no-rest-destructuring`         | warn     | Rest destructuring loses reactivity                          |
-| `stable-query-client`           | error    | Creating client in component causes infinite re-renders      |
-| `no-unstable-deps`              | warn     | Unstable refs cause unnecessary refetches                    |
-| `infinite-query-property-order` | warn     | Enforces consistent property ordering                        |
-
-## LLM-Specific Concerns
-
-### Common LLM Mistakes with React Query
+## Code Examples
 
 ```javascript
-// LLM mistake: missing dependency in query key
-function useUserPosts(userId) {
-  return useQuery({
-    queryKey: ['posts'], // Error! Missing userId
-    queryFn: () => fetchPosts(userId),
-  });
-}
+// exhaustive-deps: Missing userId in query key → stale cache
+useQuery({
+  queryKey: ['posts'],           // Error! Should be ['posts', userId]
+  queryFn: () => fetchPosts(userId),
+});
 
-// LLM mistake: creating client inside component
+// stable-query-client: Creating inside component → infinite re-renders
 function App() {
-  const queryClient = new QueryClient(); // Error! Recreated every render
+  const queryClient = new QueryClient(); // Error! Move outside component
   return <QueryClientProvider client={queryClient}>...</QueryClientProvider>;
 }
 
-// LLM mistake: rest destructuring
-const { data, ...rest } = useQuery({ queryKey: ['user'], queryFn: fetchUser });
-// 'rest' won't update when query state changes
-
-// LLM mistake: inline function in options
+// no-void-query-fn: Forgetting return → undefined cached
 useQuery({
-  queryKey: ['user', userId],
-  queryFn: () => fetchUser(userId),
-  select: data => data.name, // Warn: new function every render
+  queryKey: ['todos'],
+  queryFn: async () => { await api.todos.fetch(); }, // Error! Missing return
+});
+
+// mutation-property-order: Wrong order → TypeScript can't infer types
+useMutation({
+  onSuccess: data => console.log(data), // Error! 'data' type unknown
+  mutationFn: async (id: string) => api.delete(id), // Must come first
 });
 ```
 
@@ -68,31 +56,47 @@ useQuery({
 Add to project detection in `utils/project-detector.ts`:
 
 ```typescript
-tanstackQuery: Boolean(deps['@tanstack/react-query'] || deps['@tanstack/vue-query']),
+tanstackQuery: Boolean(
+  deps['@tanstack/react-query'] ||
+  deps['@tanstack/vue-query'] ||
+  deps['@tanstack/solid-query'] ||
+  deps['@tanstack/svelte-query'] ||
+  deps['@tanstack/angular-query-experimental']
+),
 tanstackRouter: Boolean(deps['@tanstack/react-router']),
 ```
 
-### ESLint Config
+### ESLint Config (in eslint-plugin-safeword)
 
 ```javascript
-// TanStack Query support (conditional)
+// TanStack Query support (conditional) - bundled in eslint-plugin-safeword
 if (deps.tanstackQuery) {
   const pluginQuery = await import('@tanstack/eslint-plugin-query');
-  configs.push(...pluginQuery.default.configs['flat/recommended']);
+  configs.push({
+    name: 'safeword/tanstack-query',
+    plugins: { '@tanstack/query': pluginQuery.default },
+    rules: {
+      '@tanstack/query/exhaustive-deps': 'error',
+      '@tanstack/query/stable-query-client': 'error',
+      '@tanstack/query/no-void-query-fn': 'error',
+      '@tanstack/query/no-rest-destructuring': 'error',
+      '@tanstack/query/no-unstable-deps': 'error',
+      '@tanstack/query/infinite-query-property-order': 'error',
+      '@tanstack/query/mutation-property-order': 'error',
+    },
+  });
 }
 ```
 
-### Package Installation
+### Package Changes
 
-Add to `schema.ts` conditional packages:
+**eslint-plugin-safeword/package.json** - add to dependencies:
 
-```typescript
-conditional: {
-  // ... existing
-  tanstackQuery: ['@tanstack/eslint-plugin-query'],
-  tanstackRouter: ['@tanstack/eslint-plugin-router'],
-}
+```json
+"@tanstack/eslint-plugin-query": "^5.0.0"
 ```
+
+No changes to `schema.ts` - plugin is bundled, not user-installed.
 
 ## TanStack Router (Secondary)
 
@@ -105,13 +109,12 @@ Also consider `@tanstack/eslint-plugin-router` for projects using TanStack Route
 
 Sources:
 
-- [TanStack Query ESLint Plugin Docs](https://tanstack.com/query/v4/docs/eslint/eslint-plugin-query)
-- [@tanstack/eslint-plugin-query on npm](https://www.npmjs.com/package/@tanstack/eslint-plugin-query)
-- [Flat Config Discussion](https://github.com/TanStack/query/discussions/6669)
+- [ESLint Plugin Docs](https://tanstack.com/query/latest/docs/eslint/eslint-plugin-query)
+- [npm package](https://www.npmjs.com/package/@tanstack/eslint-plugin-query)
 
 **Key findings**:
 
-- Plugin is mature with 1.8M weekly downloads
-- Flat config support available via `flat/recommended`
-- Rules catch common LLM mistakes with data fetching
-- Should be conditional based on @tanstack/react-query in dependencies
+- 1.8M weekly downloads, mature plugin
+- 7 rules catching common data-fetching mistakes
+- Requires plugin v5+ for flat config support
+- TanStack Form/Table/Virtual have no ESLint plugins
