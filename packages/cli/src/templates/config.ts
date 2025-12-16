@@ -62,7 +62,14 @@ if (deps["playwright"] || deps["@playwright/test"]) {
 if (deps["tailwindcss"]) {
   configs.push(...safeword.configs.tailwind);
 }
-if (deps["@tanstack/react-query"] || deps["@tanstack/vue-query"] || deps["@tanstack/solid-query"] || deps["@tanstack/svelte-query"] || deps["@tanstack/angular-query-experimental"]) {
+const tanstackQueryPackages = [
+  "@tanstack/react-query",
+  "@tanstack/vue-query",
+  "@tanstack/solid-query",
+  "@tanstack/svelte-query",
+  "@tanstack/angular-query-experimental",
+];
+if (tanstackQueryPackages.some(pkg => deps[pkg])) {
   configs.push(...safeword.configs.tanstackQuery);
 }
 

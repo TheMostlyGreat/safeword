@@ -23,6 +23,7 @@ import tanstackQueryPlugin from '@tanstack/eslint-plugin-query';
  */
 export const tanstackQueryConfig: any[] = [
   {
+    name: 'safeword/tanstack-query',
     plugins: {
       '@tanstack/query': tanstackQueryPlugin,
     },
