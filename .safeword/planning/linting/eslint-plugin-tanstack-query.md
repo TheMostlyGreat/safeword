@@ -1,6 +1,6 @@
 # @tanstack/eslint-plugin-query
 
-**Status**: Planned (not yet implemented)
+**Status**: Implemented
 **Priority**: High - widely used, catches real bugs
 
 - **Version**: ^5.x required (v4 flat config broken - [#8679](https://github.com/TanStack/query/issues/8679))

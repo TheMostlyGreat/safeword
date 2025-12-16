@@ -42,6 +42,7 @@ import { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
 import { recommendedTypeScriptReact } from './configs/recommended-react.js';
 import { recommendedTypeScript } from './configs/recommended-typescript.js';
 import { tailwindConfig } from './configs/tailwind.js';
+import { tanstackQueryConfig } from './configs/tanstack-query.js';
 import { vitestConfig } from './configs/vitest.js';
 import { rules } from './rules/index.js';
 
@@ -57,6 +58,7 @@ interface SafewordPlugin {
     recommendedTypeScriptNext: any[];
     astro: any[];
     tailwind: any[];
+    tanstackQuery: any[];
     vitest: any[];
     playwright: any[];
   };
@@ -75,6 +77,7 @@ const plugin: SafewordPlugin = {
     recommendedTypeScriptNext,
     astro: astroConfig,
     tailwind: tailwindConfig,
+    tanstackQuery: tanstackQueryConfig,
     vitest: vitestConfig,
     playwright: playwrightConfig,
   },
@@ -90,4 +93,5 @@ export { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
 export { recommendedTypeScriptReact } from './configs/recommended-react.js';
 export { recommendedTypeScript } from './configs/recommended-typescript.js';
 export { tailwindConfig } from './configs/tailwind.js';
+export { tanstackQueryConfig } from './configs/tanstack-query.js';
 export { vitestConfig } from './configs/vitest.js';
