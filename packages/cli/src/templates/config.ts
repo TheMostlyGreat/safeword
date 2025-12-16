@@ -176,19 +176,19 @@ const deps = collectAllDeps(__dirname);
 
 // Build dynamic ignores based on detected frameworks
 const ignores = ["**/node_modules/", "**/dist/", "**/build/", "**/coverage/"];
-if (deps.next) ignores.push(".next/");
-if (deps.astro) ignores.push(".astro/");
+if (deps["next"]) ignores.push(".next/");
+if (deps["astro"]) ignores.push(".astro/");
 
 // Select appropriate safeword config based on detected framework
 // Order matters: most specific first
 let baseConfig;
-if (deps.next) {
+if (deps["next"]) {
   baseConfig = safeword.configs.recommendedTypeScriptNext;
-} else if (deps.react) {
+} else if (deps["react"]) {
   baseConfig = safeword.configs.recommendedTypeScriptReact;
-} else if (deps.astro) {
+} else if (deps["astro"]) {
   baseConfig = safeword.configs.astro;
-} else if (deps.typescript || deps["typescript-eslint"]) {
+} else if (deps["typescript"] || deps["typescript-eslint"]) {
   baseConfig = safeword.configs.recommendedTypeScript;
 } else {
   baseConfig = safeword.configs.recommended;
@@ -201,14 +201,14 @@ const configs = [
 ];
 
 // Add configs for detected tools/frameworks
-if (deps.vitest) {
+if (deps["vitest"]) {
   configs.push(...safeword.configs.vitest);
 }
-if (deps.playwright || deps["@playwright/test"]) {
+if (deps["playwright"] || deps["@playwright/test"]) {
   configs.push(...safeword.configs.playwright);
 }
 // Tailwind v4 can be installed via tailwindcss, @tailwindcss/vite, or @tailwindcss/postcss
-const hasTailwind = deps.tailwindcss || deps["@tailwindcss/vite"] || deps["@tailwindcss/postcss"];
+const hasTailwind = deps["tailwindcss"] || deps["@tailwindcss/vite"] || deps["@tailwindcss/postcss"];
 if (hasTailwind) {
   configs.push(...safeword.configs.tailwind);
 }
@@ -219,7 +219,7 @@ const tanstackQueryPackages = [
   "@tanstack/svelte-query",
   "@tanstack/angular-query-experimental",
 ];
-if (tanstackQueryPackages.some(p => deps[p])) {
+if (tanstackQueryPackages.some(pkg => deps[pkg])) {
   configs.push(...safeword.configs.tanstackQuery);
 }
 
