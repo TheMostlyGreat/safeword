@@ -224,6 +224,73 @@ describe('detectProjectType', () => {
     });
   });
 
+  describe('Detects Biome', () => {
+    it('should detect @biomejs/biome from devDependencies', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        devDependencies: {
+          '@biomejs/biome': '^1.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.biome).toBe(true);
+    });
+
+    it('should detect ultracite (Biome wrapper)', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        devDependencies: {
+          ultracite: '^1.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.biome).toBe(true);
+    });
+
+    it('should return false when Biome is not present', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        dependencies: {},
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.biome).toBe(false);
+    });
+  });
+
+  describe('Detects TanStack Query', () => {
+    it('should detect @tanstack/react-query', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        dependencies: {
+          '@tanstack/react-query': '^5.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.tanstackQuery).toBe(true);
+    });
+
+    it('should detect @tanstack/vue-query', () => {
+      const packageJson: PackageJson = {
+        name: 'test',
+        version: '1.0.0',
+        dependencies: {
+          '@tanstack/vue-query': '^5.0.0',
+        },
+      };
+
+      const result = detectProjectType(packageJson);
+      expect(result.tanstackQuery).toBe(true);
+    });
+  });
+
   describe('Handles edge cases', () => {
     it('should handle empty package.json', () => {
       const packageJson: PackageJson = {};
@@ -236,6 +303,8 @@ describe('detectProjectType', () => {
       expect(result.astro).toBe(false);
       expect(result.tailwind).toBe(false);
       expect(result.publishableLibrary).toBe(false);
+      expect(result.biome).toBe(false);
+      expect(result.tanstackQuery).toBe(false);
     });
 
     it('should handle complex project with multiple frameworks', () => {

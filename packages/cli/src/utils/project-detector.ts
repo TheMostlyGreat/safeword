@@ -5,7 +5,7 @@
  * appropriate linting rules.
  */
 
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import nodePath from 'node:path';
 
 export interface PackageJson {
@@ -28,8 +28,10 @@ export interface ProjectType {
   vitest: boolean;
   playwright: boolean;
   tailwind: boolean;
+  tanstackQuery: boolean;
   publishableLibrary: boolean;
   shell: boolean;
+  biome: boolean;
 }
 
 /**
@@ -90,12 +92,30 @@ export function detectProjectType(packageJson: PackageJson, cwd?: string): Proje
   const hasPlaywright = '@playwright/test' in developmentDeps;
   const hasTailwind = 'tailwindcss' in allDeps;
 
+  // TanStack Query detection
+  const tanstackQueryPackages = [
+    '@tanstack/react-query',
+    '@tanstack/vue-query',
+    '@tanstack/solid-query',
+    '@tanstack/svelte-query',
+    '@tanstack/angular-query-experimental',
+  ];
+  const hasTanstackQuery = tanstackQueryPackages.some(pkg => pkg in allDeps);
+
   // Publishable library: has entry points and is not marked private
   const hasEntryPoints = !!(packageJson.main || packageJson.module || packageJson.exports);
   const isPublishable = hasEntryPoints && packageJson.private !== true;
 
   // Shell scripts: detected by scanning for .sh files
   const hasShell = cwd ? hasShellScripts(cwd) : false;
+
+  // Biome detection: check deps and config files
+  const hasBiomeDep = '@biomejs/biome' in allDeps || 'ultracite' in allDeps;
+  const hasBiomeConfig = cwd
+    ? existsSync(nodePath.join(cwd, 'biome.json')) ||
+      existsSync(nodePath.join(cwd, 'biome.jsonc'))
+    : false;
+  const hasBiome = hasBiomeDep || hasBiomeConfig;
 
   return {
     typescript: hasTypescript,
@@ -105,7 +125,9 @@ export function detectProjectType(packageJson: PackageJson, cwd?: string): Proje
     vitest: hasVitest,
     playwright: hasPlaywright,
     tailwind: hasTailwind,
+    tanstackQuery: hasTanstackQuery,
     publishableLibrary: isPublishable,
     shell: hasShell,
+    biome: hasBiome,
   };
 }

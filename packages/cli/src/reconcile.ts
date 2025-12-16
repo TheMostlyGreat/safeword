@@ -705,9 +705,31 @@ export function computePackagesToInstall(
     needed = needed.filter(pkg => !GIT_ONLY_PACKAGES.has(pkg));
   }
 
+  // Prettier-related packages that should be skipped for Biome projects
+  const prettierPackages = new Set([
+    'prettier',
+    'prettier-plugin-astro',
+    'prettier-plugin-tailwindcss',
+    'prettier-plugin-sh',
+  ]);
+
   for (const [key, deps] of Object.entries(schema.packages.conditional)) {
+    // "standard" means !biome - only install for non-Biome projects
+    if (key === 'standard') {
+      if (!projectType.biome) {
+        needed.push(...deps);
+      }
+      continue;
+    }
+
+    // Check if this condition is met
     if (projectType[key as keyof ProjectType]) {
-      needed.push(...deps);
+      // For Biome projects, skip prettier-related packages
+      if (projectType.biome) {
+        needed.push(...deps.filter(pkg => !prettierPackages.has(pkg)));
+      } else {
+        needed.push(...deps);
+      }
     }
   }
 
@@ -727,9 +749,30 @@ function computePackagesToRemove(
 ): string[] {
   const safewordPackages = [...schema.packages.base];
 
+  // Prettier-related packages that should be skipped for Biome projects
+  const prettierPackages = new Set([
+    'prettier',
+    'prettier-plugin-astro',
+    'prettier-plugin-tailwindcss',
+    'prettier-plugin-sh',
+  ]);
+
   for (const [key, deps] of Object.entries(schema.packages.conditional)) {
+    // "standard" means !biome - only applies to non-Biome projects
+    if (key === 'standard') {
+      if (!projectType.biome) {
+        safewordPackages.push(...deps);
+      }
+      continue;
+    }
+
     if (projectType[key as keyof ProjectType]) {
-      safewordPackages.push(...deps);
+      // For Biome projects, skip prettier-related packages
+      if (projectType.biome) {
+        safewordPackages.push(...deps.filter(pkg => !prettierPackages.has(pkg)));
+      } else {
+        safewordPackages.push(...deps);
+      }
     }
   }
 

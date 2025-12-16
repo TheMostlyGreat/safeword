@@ -279,7 +279,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // Files created if missing, updated only if content matches current template
   managedFiles: {
     'eslint.config.mjs': {
-      generator: () => getEslintConfig(),
+      generator: ctx => getEslintConfig(ctx.projectType.biome),
     },
     // Minimal tsconfig for ESLint type-checked linting (only if missing)
     'tsconfig.json': {
@@ -326,6 +326,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     'package.json': {
       keys: ['scripts.lint', 'scripts.format', 'scripts.format:check', 'scripts.knip'],
       conditionalKeys: {
+        biome: ['scripts.lint:eslint'], // Biome projects get separate ESLint script
         publishableLibrary: ['scripts.publint'],
         shell: ['scripts.lint:sh'],
       },
@@ -333,10 +334,19 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         const scripts = { ...(existing.scripts as Record<string, string>) };
         const result = { ...existing };
 
-        // Add scripts if not present
-        if (!scripts.lint) scripts.lint = 'eslint .';
-        if (!scripts.format) scripts.format = 'prettier --write .';
-        if (!scripts['format:check']) scripts['format:check'] = 'prettier --check .';
+        if (ctx.projectType.biome) {
+          // Biome project: preserve their lint/format, add ESLint for safeword rules only
+          // Add lint:eslint for safeword-specific rules (runs alongside Biome)
+          if (!scripts['lint:eslint']) scripts['lint:eslint'] = 'eslint .';
+          // Don't touch their existing lint/format scripts (Biome handles those)
+        } else {
+          // Standard setup: ESLint + Prettier
+          if (!scripts.lint) scripts.lint = 'eslint .';
+          if (!scripts.format) scripts.format = 'prettier --write .';
+          if (!scripts['format:check']) scripts['format:check'] = 'prettier --check .';
+        }
+
+        // Always add knip for dead code detection
         if (!scripts.knip) scripts.knip = 'knip';
 
         // Conditional: publint for publishable libraries
@@ -358,6 +368,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         const scripts = { ...(existing.scripts as Record<string, string>) };
 
         // Remove safeword-specific scripts but preserve lint/format (useful standalone)
+        delete scripts['lint:eslint']; // Biome hybrid mode
         delete scripts['lint:sh'];
         delete scripts['format:check'];
         delete scripts.knip;
@@ -564,9 +575,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // NPM packages to install
   packages: {
     base: [
-      // Core tools
+      // Core tools (always needed)
       'eslint',
-      'prettier',
       // Safeword plugin (bundles eslint-config-prettier + all ESLint plugins)
       'eslint-plugin-safeword',
       // Architecture and dead code tools (used by /audit)
@@ -574,12 +584,15 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       'knip',
     ],
     conditional: {
-      // Prettier plugins
+      // Prettier (only for non-Biome projects)
+      standard: ['prettier'], // "standard" = !biome
+      // Prettier plugins (only for non-Biome projects that need them)
       astro: ['prettier-plugin-astro'],
       tailwind: ['prettier-plugin-tailwindcss'],
+      shell: ['prettier-plugin-sh'],
       // Non-ESLint tools
       publishableLibrary: ['publint'],
-      shell: ['shellcheck', 'prettier-plugin-sh'],
+      shellcheck: ['shellcheck'], // Renamed from shell to avoid conflict with prettier-plugin-sh
     },
   },
 };

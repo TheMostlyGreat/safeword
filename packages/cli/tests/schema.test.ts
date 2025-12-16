@@ -188,7 +188,6 @@ describe('Schema - Single Source of Truth', () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       const required = [
         'eslint',
-        'prettier',
         'eslint-plugin-safeword', // bundles eslint-config-prettier
         'dependency-cruiser',
         'knip',
@@ -199,6 +198,12 @@ describe('Schema - Single Source of Truth', () => {
       }
     });
 
+    it('should have prettier in standard conditional (non-Biome projects)', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.packages.conditional).toHaveProperty('standard');
+      expect(SAFEWORD_SCHEMA.packages.conditional.standard).toContain('prettier');
+    });
+
     it('should have conditional packages for frameworks not in safeword plugin', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       // These frameworks are NOT in eslint-plugin-safeword (or need prettier plugins)
@@ -206,7 +211,7 @@ describe('Schema - Single Source of Truth', () => {
         'astro', // prettier-plugin-astro (ESLint rules are in safeword)
         'tailwind', // prettier-plugin-tailwindcss
         'publishableLibrary', // publint
-        'shell', // shellcheck + prettier-plugin-sh
+        'shellcheck', // shellcheck for shell scripts
       ];
 
       for (const condition of requiredConditions) {

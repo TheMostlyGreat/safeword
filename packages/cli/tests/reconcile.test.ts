@@ -659,13 +659,45 @@ describe('Reconcile - Reconciliation Engine', () => {
         vitest: false,
         playwright: false,
         tailwind: false,
+        tanstackQuery: false,
         publishableLibrary: false,
         shell: false,
+        biome: false, // non-Biome project gets prettier
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
-      expect(result).toEqual(SAFEWORD_SCHEMA.packages.base);
+      // Base packages + prettier (from "standard" conditional for non-Biome projects)
+      expect(result).toContain('eslint');
+      expect(result).toContain('eslint-plugin-safeword');
+      expect(result).toContain('dependency-cruiser');
+      expect(result).toContain('knip');
+      expect(result).toContain('prettier'); // standard conditional
+    });
+
+    it('should not include prettier for Biome projects', async () => {
+      const { computePackagesToInstall } = await import('../src/reconcile.js');
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      const projectType = {
+        typescript: false,
+        react: false,
+        nextjs: false,
+        astro: false,
+        vitest: false,
+        playwright: false,
+        tailwind: false,
+        tanstackQuery: false,
+        publishableLibrary: false,
+        shell: false,
+        biome: true, // Biome project doesn't get prettier
+      };
+
+      const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
+
+      expect(result).toContain('eslint');
+      expect(result).toContain('eslint-plugin-safeword');
+      expect(result).not.toContain('prettier');
     });
 
     it('should add conditional packages for astro', async () => {
@@ -680,13 +712,39 @@ describe('Reconcile - Reconciliation Engine', () => {
         vitest: false,
         playwright: false,
         tailwind: false,
+        tanstackQuery: false,
         publishableLibrary: false,
         shell: false,
+        biome: false,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
       expect(result).toContain('prettier-plugin-astro');
+    });
+
+    it('should not add prettier plugins for Biome+Astro projects', async () => {
+      const { computePackagesToInstall } = await import('../src/reconcile.js');
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+
+      const projectType = {
+        typescript: false,
+        react: false,
+        nextjs: false,
+        astro: true,
+        vitest: false,
+        playwright: false,
+        tailwind: false,
+        tanstackQuery: false,
+        publishableLibrary: false,
+        shell: false,
+        biome: true, // Biome handles formatting
+      };
+
+      const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
+
+      expect(result).not.toContain('prettier');
+      expect(result).not.toContain('prettier-plugin-astro');
     });
 
     it('should add multiple conditional packages', async () => {
@@ -701,8 +759,10 @@ describe('Reconcile - Reconciliation Engine', () => {
         vitest: false,
         playwright: false,
         tailwind: true,
+        tanstackQuery: false,
         publishableLibrary: true,
         shell: false,
+        biome: false,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -725,8 +785,10 @@ describe('Reconcile - Reconciliation Engine', () => {
         vitest: false,
         playwright: false,
         tailwind: false,
+        tanstackQuery: false,
         publishableLibrary: false,
         shell: false,
+        biome: false,
       };
 
       const installedDevelopmentDeps = {
@@ -759,8 +821,10 @@ describe('Reconcile - Reconciliation Engine', () => {
         vitest: false,
         playwright: false,
         tailwind: false,
+        tanstackQuery: false,
         publishableLibrary: false,
         shell: false,
+        biome: false,
       };
 
       // isGitRepo = false
