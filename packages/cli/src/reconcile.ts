@@ -36,6 +36,16 @@ import type { ProjectType } from './utils/project-detector.js';
 const HUSKY_DIR = '.husky';
 
 /**
+ * Prettier-related packages that should be skipped for projects with existing formatter.
+ */
+const PRETTIER_PACKAGES = new Set([
+  'prettier',
+  'prettier-plugin-astro',
+  'prettier-plugin-tailwindcss',
+  'prettier-plugin-sh',
+]);
+
+/**
  * Check if path should be skipped in non-git repos (husky files)
  * @param path
  * @param isGitRepo
@@ -705,14 +715,6 @@ export function computePackagesToInstall(
     needed = needed.filter(pkg => !GIT_ONLY_PACKAGES.has(pkg));
   }
 
-  // Prettier-related packages that should be skipped for projects with existing formatter
-  const prettierPackages = new Set([
-    'prettier',
-    'prettier-plugin-astro',
-    'prettier-plugin-tailwindcss',
-    'prettier-plugin-sh',
-  ]);
-
   for (const [key, deps] of Object.entries(schema.packages.conditional)) {
     // "standard" means !existingFormatter - only install for projects without existing formatter
     if (key === 'standard') {
@@ -726,7 +728,7 @@ export function computePackagesToInstall(
     if (projectType[key as keyof ProjectType]) {
       // For projects with existing formatter, skip prettier-related packages
       if (projectType.existingFormatter) {
-        needed.push(...deps.filter(pkg => !prettierPackages.has(pkg)));
+        needed.push(...deps.filter(pkg => !PRETTIER_PACKAGES.has(pkg)));
       } else {
         needed.push(...deps);
       }
@@ -749,14 +751,6 @@ function computePackagesToRemove(
 ): string[] {
   const safewordPackages = [...schema.packages.base];
 
-  // Prettier-related packages that should be skipped for projects with existing formatter
-  const prettierPackages = new Set([
-    'prettier',
-    'prettier-plugin-astro',
-    'prettier-plugin-tailwindcss',
-    'prettier-plugin-sh',
-  ]);
-
   for (const [key, deps] of Object.entries(schema.packages.conditional)) {
     // "standard" means !existingFormatter - only applies to projects without existing formatter
     if (key === 'standard') {
@@ -769,7 +763,7 @@ function computePackagesToRemove(
     if (projectType[key as keyof ProjectType]) {
       // For projects with existing formatter, skip prettier-related packages
       if (projectType.existingFormatter) {
-        safewordPackages.push(...deps.filter(pkg => !prettierPackages.has(pkg)));
+        safewordPackages.push(...deps.filter(pkg => !PRETTIER_PACKAGES.has(pkg)));
       } else {
         safewordPackages.push(...deps);
       }
