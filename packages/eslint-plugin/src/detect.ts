@@ -44,19 +44,31 @@ export const FORMATTER_CONFIG_FILES = [
   'biome.jsonc',
   // dprint
   'dprint.json',
+  '.dprint.json',
+  'dprint.jsonc',
+  '.dprint.jsonc',
   // Rome (legacy, now Biome)
   'rome.json',
-  // Prettier (we check this too - if they have prettier config, don't reinstall)
+  // Prettier - all supported config formats
+  // See: https://prettier.io/docs/en/configuration.html
   '.prettierrc',
   '.prettierrc.json',
+  '.prettierrc.json5',
   '.prettierrc.yaml',
   '.prettierrc.yml',
+  '.prettierrc.toml',
   '.prettierrc.js',
   '.prettierrc.cjs',
   '.prettierrc.mjs',
+  '.prettierrc.ts',
+  '.prettierrc.cts',
+  '.prettierrc.mts',
   'prettier.config.js',
   'prettier.config.cjs',
   'prettier.config.mjs',
+  'prettier.config.ts',
+  'prettier.config.cts',
+  'prettier.config.mts',
 ] as const;
 
 export type DepsRecord = Record<string, string | undefined>;
