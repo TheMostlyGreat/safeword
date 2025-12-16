@@ -34,7 +34,7 @@ Complete each phase before proceeding.
 
 **BEFORE attempting ANY fix:**
 
-**1. Read Error Messages Completely**
+#### 1. Read Error Messages Completely
 
 ```text
 Don't skip past errors. They often contain the exact solution.
@@ -43,7 +43,7 @@ Don't skip past errors. They often contain the exact solution.
 - Warnings that preceded the error
 ```
 
-**2. Reproduce Consistently**
+#### 2. Reproduce Consistently
 
 | Can reproduce?  | Action                                               |
 | --------------- | ---------------------------------------------------- |
@@ -51,7 +51,7 @@ Don't skip past errors. They often contain the exact solution.
 | Sometimes       | Gather more data - when does it happen vs not?       |
 | Never           | Cannot debug what you cannot reproduce - gather logs |
 
-**3. Check Recent Changes**
+#### 3. Check Recent Changes
 
 ```bash
 git diff HEAD~5          # Recent code changes
@@ -60,7 +60,7 @@ git log --oneline -10    # Recent commits
 
 What changed that could cause this? Dependencies? Config? Environment?
 
-**4. Trace Data Flow (Root Cause Tracing)**
+#### 4. Trace Data Flow (Root Cause Tracing)
 
 When error is deep in call stack:
 
@@ -78,7 +78,7 @@ Symptom: Error at line 50 in utils.js
 3. Trace up until you find the SOURCE
 4. Fix at source, not at symptom
 
-**5. Multi-Component Systems**
+#### 5. Multi-Component Systems
 
 When system has multiple layers (API → service → database):
 
@@ -93,11 +93,11 @@ Run once to find WHERE it breaks. Then investigate that layer.
 
 ### Phase 2: Pattern Analysis
 
-**1. Find Working Examples**
+#### 1. Find Working Examples
 
 Locate similar working code in same codebase. What works that's similar?
 
-**2. Identify Differences**
+#### 2. Identify Differences
 
 | Working code     | Broken code    | Could this matter? |
 | ---------------- | -------------- | ------------------ |
@@ -108,7 +108,7 @@ List ALL differences. Don't assume "that can't matter."
 
 ### Phase 3: Hypothesis Testing
 
-**1. Form Single Hypothesis**
+#### 1. Form Single Hypothesis
 
 Write it down: "I think X is the root cause because Y"
 
@@ -117,7 +117,7 @@ Be specific:
 - ❌ "Something's wrong with the database"
 - ✅ "Connection pool exhausted because connections aren't released in error path"
 
-**2. Test Minimally**
+#### 2. Test Minimally
 
 | Rule                     | Why                    |
 | ------------------------ | ---------------------- |
@@ -125,7 +125,7 @@ Be specific:
 | Smallest possible change | Avoid side effects     |
 | Don't bundle fixes       | Can't tell what helped |
 
-**3. Evaluate Result**
+#### 3. Evaluate Result
 
 | Result          | Action                                  |
 | --------------- | --------------------------------------- |
@@ -135,7 +135,7 @@ Be specific:
 
 ### Phase 4: Implementation
 
-**1. Create Failing Test**
+#### 1. Create Failing Test
 
 Before fixing, write test that fails due to the bug:
 
@@ -146,26 +146,26 @@ it('handles empty input without crashing', () => {
 });
 ```
 
-**2. Implement Fix**
+#### 2. Implement Fix
 
 - Address ROOT CAUSE identified in Phase 1
 - ONE change
 - No "while I'm here" improvements
 
-**3. Verify**
+#### 3. Verify
 
 - [ ] New test passes
 - [ ] Existing tests still pass
 - [ ] Issue actually resolved (not just test passing)
 
-**4. If Fix Doesn't Work**
+#### 4. If Fix Doesn't Work
 
 | Fix attempts | Action                                   |
 | ------------ | ---------------------------------------- |
 | 1-2          | Return to Phase 1 with new information   |
 | 3+           | STOP - Question architecture (see below) |
 
-**5. After 3+ Failed Fixes: Question Architecture**
+#### 5. After 3+ Failed Fixes: Question Architecture
 
 Pattern indicating architectural problem:
 
