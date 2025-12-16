@@ -32,7 +32,8 @@
     "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "eslint-plugin-safeword": "file:../eslint-plugin"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

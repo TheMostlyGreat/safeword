@@ -8,6 +8,11 @@
 import { existsSync, readdirSync } from 'node:fs';
 import nodePath from 'node:path';
 
+import { detect } from 'eslint-plugin-safeword';
+
+// Re-export detection constants from eslint-plugin-safeword (single source of truth)
+export const { TAILWIND_PACKAGES, TANSTACK_QUERY_PACKAGES, PLAYWRIGHT_PACKAGES } = detect;
+
 export interface PackageJson {
   name?: string;
   version?: string;
@@ -33,28 +38,6 @@ export interface ProjectType {
   shell: boolean;
   biome: boolean;
 }
-
-/**
- * TanStack Query package names across all supported frameworks.
- * Single source of truth used by both project detection and ESLint config generation.
- */
-export const TANSTACK_QUERY_PACKAGES = [
-  '@tanstack/react-query',
-  '@tanstack/vue-query',
-  '@tanstack/solid-query',
-  '@tanstack/svelte-query',
-  '@tanstack/angular-query-experimental',
-] as const;
-
-/**
- * Tailwind CSS package names (v3 and v4 installation methods).
- * Single source of truth used by both project detection and ESLint config generation.
- */
-export const TAILWIND_PACKAGES = [
-  'tailwindcss',
-  '@tailwindcss/vite',
-  '@tailwindcss/postcss',
-] as const;
 
 /**
  * Checks if a directory contains any .sh files up to specified depth.

@@ -47,6 +47,7 @@ import { recommendedTypeScript } from './configs/recommended-typescript.js';
 import { tailwindConfig } from './configs/tailwind.js';
 import { tanstackQueryConfig } from './configs/tanstack-query.js';
 import { vitestConfig } from './configs/vitest.js';
+import { detect } from './detect.js';
 import { rules } from './rules/index.js';
 
 interface SafewordPlugin {
@@ -65,6 +66,7 @@ interface SafewordPlugin {
     vitest: any[];
     playwright: any[];
   };
+  detect: typeof detect;
   rules: Record<string, Rule.RuleModule>;
 }
 
@@ -84,6 +86,7 @@ const plugin: SafewordPlugin = {
     vitest: vitestConfig,
     playwright: playwrightConfig,
   },
+  detect,
   rules,
 };
 
@@ -98,3 +101,4 @@ export { recommendedTypeScript } from './configs/recommended-typescript.js';
 export { tailwindConfig } from './configs/tailwind.js';
 export { tanstackQueryConfig } from './configs/tanstack-query.js';
 export { vitestConfig } from './configs/vitest.js';
+export { detect } from './detect.js';

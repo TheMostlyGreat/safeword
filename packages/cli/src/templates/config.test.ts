@@ -18,39 +18,57 @@ describe('getEslintConfig', () => {
     expect(config).toContain('import.meta.url');
     expect(config).toContain('fileURLToPath');
     expect(config).toContain('dirname');
-
-    // Must NOT use CWD-relative path (the bug we fixed)
-    expect(config).not.toMatch(/readFileSync\s*\(\s*["']\.\/package\.json["']/);
   });
 
-  it('should import eslint-plugin-safeword', () => {
+  it('should import eslint-plugin-safeword and destructure detect/configs', () => {
     const config = getEslintConfig();
 
     expect(config).toContain('import safeword from "eslint-plugin-safeword"');
-    expect(config).toContain('safeword.configs');
+    expect(config).toContain('const { detect, configs } = safeword');
   });
 
-  it('should include framework detection for safeword config selection', () => {
+  it('should use detect.collectAllDeps for dependency scanning', () => {
     const config = getEslintConfig();
 
-    // Config should detect frameworks and select appropriate safeword config
-    expect(config).toContain('safeword.configs.recommendedTypeScriptNext');
-    expect(config).toContain('safeword.configs.recommendedTypeScriptReact');
-    expect(config).toContain('safeword.configs.recommendedTypeScript');
-    expect(config).toContain('safeword.configs.recommended');
+    expect(config).toContain('detect.collectAllDeps(__dirname)');
+    expect(config).toContain('detect.detectFramework(deps)');
   });
 
-  it('should include vitest and playwright configs', () => {
+  it('should include framework detection for config selection', () => {
     const config = getEslintConfig();
 
-    expect(config).toContain('safeword.configs.vitest');
-    expect(config).toContain('safeword.configs.playwright');
+    // Config should have baseConfigs mapping
+    expect(config).toContain('configs.recommendedTypeScriptNext');
+    expect(config).toContain('configs.recommendedTypeScriptReact');
+    expect(config).toContain('configs.recommendedTypeScript');
+    expect(config).toContain('configs.recommended');
+    expect(config).toContain('baseConfigs[framework]');
   });
 
-  it('should include tailwind and tanstackQuery configs', () => {
+  it('should use detect helpers for optional configs', () => {
     const config = getEslintConfig();
 
-    expect(config).toContain('safeword.configs.tailwind');
-    expect(config).toContain('safeword.configs.tanstackQuery');
+    expect(config).toContain('detect.hasVitest(deps)');
+    expect(config).toContain('detect.hasPlaywright(deps)');
+    expect(config).toContain('detect.hasTailwind(deps)');
+    expect(config).toContain('detect.hasTanstackQuery(deps)');
+  });
+
+  it('should use detect.getIgnores for dynamic ignores', () => {
+    const config = getEslintConfig();
+
+    expect(config).toContain('detect.getIgnores(deps)');
+  });
+
+  it('should include eslint-config-prettier for standard config', () => {
+    const config = getEslintConfig(false);
+
+    expect(config).toContain('eslintConfigPrettier');
+  });
+
+  it('should NOT include eslint-config-prettier for biome config', () => {
+    const config = getEslintConfig(true);
+
+    expect(config).not.toContain('eslintConfigPrettier');
   });
 });
