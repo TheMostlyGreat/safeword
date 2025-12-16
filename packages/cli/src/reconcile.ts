@@ -46,6 +46,39 @@ const PRETTIER_PACKAGES = new Set([
 ]);
 
 /**
+ * Get conditional packages based on project type.
+ * Handles the "standard" key and prettier filtering for existing formatters.
+ */
+function getConditionalPackages(
+  conditionalPackages: Record<string, string[]>,
+  projectType: ProjectType,
+): string[] {
+  const packages: string[] = [];
+
+  for (const [key, deps] of Object.entries(conditionalPackages)) {
+    // "standard" means !existingFormatter - only for projects without existing formatter
+    if (key === 'standard') {
+      if (!projectType.existingFormatter) {
+        packages.push(...deps);
+      }
+      continue;
+    }
+
+    // Check if this condition is met
+    if (projectType[key as keyof ProjectType]) {
+      // For projects with existing formatter, skip prettier-related packages
+      if (projectType.existingFormatter) {
+        packages.push(...deps.filter(pkg => !PRETTIER_PACKAGES.has(pkg)));
+      } else {
+        packages.push(...deps);
+      }
+    }
+  }
+
+  return packages;
+}
+
+/**
  * Check if path should be skipped in non-git repos (husky files)
  * @param path
  * @param isGitRepo
@@ -715,25 +748,8 @@ export function computePackagesToInstall(
     needed = needed.filter(pkg => !GIT_ONLY_PACKAGES.has(pkg));
   }
 
-  for (const [key, deps] of Object.entries(schema.packages.conditional)) {
-    // "standard" means !existingFormatter - only install for projects without existing formatter
-    if (key === 'standard') {
-      if (!projectType.existingFormatter) {
-        needed.push(...deps);
-      }
-      continue;
-    }
-
-    // Check if this condition is met
-    if (projectType[key as keyof ProjectType]) {
-      // For projects with existing formatter, skip prettier-related packages
-      if (projectType.existingFormatter) {
-        needed.push(...deps.filter(pkg => !PRETTIER_PACKAGES.has(pkg)));
-      } else {
-        needed.push(...deps);
-      }
-    }
-  }
+  // Add conditional packages based on project type
+  needed.push(...getConditionalPackages(schema.packages.conditional, projectType));
 
   return needed.filter(pkg => !(pkg in installedDevelopmentDeps));
 }
@@ -749,26 +765,10 @@ function computePackagesToRemove(
   projectType: ProjectType,
   installedDevelopmentDeps: Record<string, string>,
 ): string[] {
-  const safewordPackages = [...schema.packages.base];
-
-  for (const [key, deps] of Object.entries(schema.packages.conditional)) {
-    // "standard" means !existingFormatter - only applies to projects without existing formatter
-    if (key === 'standard') {
-      if (!projectType.existingFormatter) {
-        safewordPackages.push(...deps);
-      }
-      continue;
-    }
-
-    if (projectType[key as keyof ProjectType]) {
-      // For projects with existing formatter, skip prettier-related packages
-      if (projectType.existingFormatter) {
-        safewordPackages.push(...deps.filter(pkg => !PRETTIER_PACKAGES.has(pkg)));
-      } else {
-        safewordPackages.push(...deps);
-      }
-    }
-  }
+  const safewordPackages = [
+    ...schema.packages.base,
+    ...getConditionalPackages(schema.packages.conditional, projectType),
+  ];
 
   // Only remove packages that are actually installed
   return safewordPackages.filter(pkg => pkg in installedDevelopmentDeps);
