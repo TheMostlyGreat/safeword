@@ -35,6 +35,18 @@ export interface ProjectType {
 }
 
 /**
+ * TanStack Query package names across all supported frameworks.
+ * Single source of truth used by both project detection and ESLint config generation.
+ */
+export const TANSTACK_QUERY_PACKAGES = [
+  '@tanstack/react-query',
+  '@tanstack/vue-query',
+  '@tanstack/solid-query',
+  '@tanstack/svelte-query',
+  '@tanstack/angular-query-experimental',
+] as const;
+
+/**
  * Checks if a directory contains any .sh files up to specified depth.
  * Excludes node_modules and .git directories.
  * @param cwd
@@ -97,14 +109,7 @@ export function detectProjectType(packageJson: PackageJson, cwd?: string): Proje
     '@tailwindcss/postcss' in allDeps;
 
   // TanStack Query detection
-  const tanstackQueryPackages = [
-    '@tanstack/react-query',
-    '@tanstack/vue-query',
-    '@tanstack/solid-query',
-    '@tanstack/svelte-query',
-    '@tanstack/angular-query-experimental',
-  ];
-  const hasTanstackQuery = tanstackQueryPackages.some(pkg => pkg in allDeps);
+  const hasTanstackQuery = TANSTACK_QUERY_PACKAGES.some(pkg => pkg in allDeps);
 
   // Publishable library: has entry points and is not marked private
   const hasEntryPoints = !!(packageJson.main || packageJson.module || packageJson.exports);

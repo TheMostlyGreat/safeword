@@ -7,6 +7,8 @@
  * See: https://eslint.org/docs/latest/use/configure/configuration-files
  */
 
+import { TANSTACK_QUERY_PACKAGES } from '../utils/project-detector.js';
+
 /**
  * Helper function string for collecting all dependencies from workspace package.json files.
  * Used in generated ESLint configs to detect frameworks in monorepos.
@@ -140,13 +142,7 @@ const hasTailwind = deps["tailwindcss"] || deps["@tailwindcss/vite"] || deps["@t
 if (hasTailwind) {
   configs.push(...safeword.configs.tailwind);
 }
-const tanstackQueryPackages = [
-  "@tanstack/react-query",
-  "@tanstack/vue-query",
-  "@tanstack/solid-query",
-  "@tanstack/svelte-query",
-  "@tanstack/angular-query-experimental",
-];
+const tanstackQueryPackages = ${JSON.stringify(TANSTACK_QUERY_PACKAGES)};
 if (tanstackQueryPackages.some(pkg => deps[pkg])) {
   configs.push(...safeword.configs.tanstackQuery);
 }
@@ -212,13 +208,7 @@ const hasTailwind = deps["tailwindcss"] || deps["@tailwindcss/vite"] || deps["@t
 if (hasTailwind) {
   configs.push(...safeword.configs.tailwind);
 }
-const tanstackQueryPackages = [
-  "@tanstack/react-query",
-  "@tanstack/vue-query",
-  "@tanstack/solid-query",
-  "@tanstack/svelte-query",
-  "@tanstack/angular-query-experimental",
-];
+const tanstackQueryPackages = ${JSON.stringify(TANSTACK_QUERY_PACKAGES)};
 if (tanstackQueryPackages.some(pkg => deps[pkg])) {
   configs.push(...safeword.configs.tanstackQuery);
 }
