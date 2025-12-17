@@ -19,7 +19,7 @@ export const CLI_PATH = nodePath.join(__dirname, '../dist/cli.js');
  * Current eslint-plugin-safeword version for test mocks.
  * Update this when bumping the plugin version.
  */
-export const ESLINT_PLUGIN_VERSION = '^0.3.0';
+export const ESLINT_PLUGIN_VERSION = '^0.4.0';
 
 /**
  * Path to the CLI source (for ts-node execution during development)
