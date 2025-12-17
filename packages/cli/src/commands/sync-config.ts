@@ -7,7 +7,7 @@
 import { writeFileSync } from 'node:fs';
 import nodePath from 'node:path';
 
-import { detectArchitecture, type DetectedArchitecture } from '../utils/boundaries.js';
+import { detectArchitecture } from '../utils/boundaries.js';
 import {
   type DepCruiseArchitecture,
   detectWorkspaces,

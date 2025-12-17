@@ -74,7 +74,6 @@ describe('Test Suite 1: Version and Help', () => {
   describe('Test 1.3: Bare command shows help', () => {
     it('should show help when run with no arguments', async () => {
       const bareResult = await runCli([]);
-      const helpResult = await runCli(['--help']);
 
       expect(bareResult.exitCode).toBe(0);
 

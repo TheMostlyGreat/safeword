@@ -11,7 +11,6 @@ import {
   createTemporaryDirectory,
   createTypeScriptPackageJson,
   fileExists,
-  initGitRepo,
   readTestFile,
   removeTemporaryDirectory,
   runCli,

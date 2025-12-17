@@ -11,8 +11,6 @@
  * Each test creates a fresh project to test specific conditions.
  */
 
-import { execSync } from 'node:child_process';
-
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {

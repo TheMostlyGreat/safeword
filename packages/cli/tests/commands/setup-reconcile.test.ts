@@ -303,7 +303,6 @@ describe('Setup Command - Reconcile Integration', () => {
         expect(result).toContain('Setup');
       } catch (error) {
         // Check if setup itself worked even if npm install timed out
-        const stderr = (error as { stderr?: string }).stderr || '';
         const stdout = (error as { stdout?: string }).stdout || '';
 
         // If we see setup output and .safeword exists, the reconcile worked

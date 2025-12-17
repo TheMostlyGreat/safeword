@@ -286,7 +286,6 @@ describe('Upgrade Command - Reconcile Integration', () => {
         expect(result).toContain('Upgrade');
       } catch (error) {
         // Check if upgrade itself worked even if npm install timed out
-        const stderr = (error as { stderr?: string }).stderr || '';
         const stdout = (error as { stdout?: string }).stdout || '';
 
         // If we see upgrade output, the reconcile worked

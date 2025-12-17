@@ -13,8 +13,6 @@ import {
   createConfiguredProject,
   createTemporaryDirectory,
   createTypeScriptPackageJson,
-  fileExists,
-  initGitRepo,
   readTestFile,
   removeTemporaryDirectory,
   runCli,

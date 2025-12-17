@@ -33,7 +33,6 @@ describe('Test Suite 9: Upgrade', () => {
       await createConfiguredProject(temporaryDirectory);
 
       // Modify a safeword file
-      const originalContent = readTestFile(temporaryDirectory, '.safeword/SAFEWORD.md');
       writeTestFile(temporaryDirectory, '.safeword/SAFEWORD.md', '# Modified content\n');
 
       await runCli(['upgrade'], { cwd: temporaryDirectory });
@@ -201,8 +200,6 @@ describe('Test Suite 9: Upgrade', () => {
 
       // Check for backup during upgrade (it may be deleted after success)
       // We verify by checking that upgrade succeeds without data loss
-      const originalSafeword = readTestFile(temporaryDirectory, '.safeword/SAFEWORD.md');
-
       await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       // After successful upgrade, backup should be deleted
