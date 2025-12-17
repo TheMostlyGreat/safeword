@@ -16,10 +16,16 @@ const __dirname = nodePath.dirname(__filename);
 export const CLI_PATH = nodePath.join(__dirname, '../dist/cli.js');
 
 /**
- * Current eslint-plugin-safeword version for test mocks.
- * Update this when bumping the plugin version.
+ * Path to the local eslint-plugin-safeword package (for file: references in tests)
  */
-export const ESLINT_PLUGIN_VERSION = '^0.4.0';
+export const ESLINT_PLUGIN_PATH = nodePath.join(__dirname, '../../eslint-plugin');
+
+/**
+ * eslint-plugin-safeword reference for test package.json files.
+ * Uses file: protocol to install the local built package instead of from npm.
+ * This ensures tests run against the current source code.
+ */
+export const ESLINT_PLUGIN_VERSION = `file:${ESLINT_PLUGIN_PATH}`;
 
 /**
  * Path to the CLI source (for ts-node execution during development)
