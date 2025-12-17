@@ -13,6 +13,9 @@ export default defineConfig({
     // Increase timeout for integration tests that spawn processes
     // Default 30s isn't enough for npm installs in some tests
     testTimeout: 60000,
+    // Increase hook timeout for afterEach cleanup (rmSync with retries)
+    // Default 10s isn't enough when npm has locked files
+    hookTimeout: 30000,
     // Run tests sequentially to avoid temp directory conflicts
     pool: 'forks',
     poolOptions: {

@@ -267,6 +267,10 @@ describe('Reset Command - Reconcile Integration', () => {
 
       createConfiguredProject();
 
+      // Remove .prettierrc so existingFormatter detection is false
+      // (otherwise prettier won't be included in packages to remove)
+      rmSync(nodePath.join(temporaryDirectory, '.prettierrc'), { force: true });
+
       // Add devDependencies to check removal
       writeFileSync(
         nodePath.join(temporaryDirectory, 'package.json'),
