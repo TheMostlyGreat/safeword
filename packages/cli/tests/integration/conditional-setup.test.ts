@@ -50,10 +50,12 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Check ESLint config uses safeword plugin with TypeScript config
+      // Check ESLint config uses safeword plugin with dynamic framework detection
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('eslint-plugin-safeword');
-      expect(eslintConfig).toContain('safeword.configs.recommendedTypeScript');
+      // Config is now dynamic - detects framework at runtime
+      expect(eslintConfig).toContain('configs.recommendedTypeScript');
+      expect(eslintConfig).toContain('baseConfigs[framework]');
 
       // Check package.json has eslint-plugin-safeword (bundles typescript-eslint)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
@@ -71,10 +73,12 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // ESLint config is dynamic - uses safeword.configs.recommended for JS
+      // ESLint config is dynamic - uses configs.recommended for JS
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('eslint-plugin-safeword');
-      expect(eslintConfig).toContain('safeword.configs.recommended'); // JS config
+      // Config is now dynamic - detects framework at runtime
+      expect(eslintConfig).toContain('javascript: configs.recommended');
+      expect(eslintConfig).toContain('baseConfigs[framework]');
 
       // eslint-plugin-safeword is installed (bundles everything)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
@@ -94,10 +98,12 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Check ESLint config uses safeword plugin with React config
+      // Check ESLint config uses safeword plugin with dynamic framework detection
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('eslint-plugin-safeword');
-      expect(eslintConfig).toContain('safeword.configs.recommendedTypeScriptReact');
+      // Config is now dynamic - detects framework at runtime
+      expect(eslintConfig).toContain('react: configs.recommendedTypeScriptReact');
+      expect(eslintConfig).toContain('baseConfigs[framework]');
 
       // Check package.json has eslint-plugin-safeword (bundles React plugins)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
@@ -117,13 +123,15 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Check ESLint config uses safeword plugin with Next.js config
+      // Check ESLint config uses safeword plugin with dynamic framework detection
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('eslint-plugin-safeword');
-      expect(eslintConfig).toContain('safeword.configs.recommendedTypeScriptNext');
+      // Config is now dynamic - detects framework at runtime
+      expect(eslintConfig).toContain('next: configs.recommendedTypeScriptNext');
+      expect(eslintConfig).toContain('baseConfigs[framework]');
 
-      // Check ignores include .next/
-      expect(eslintConfig).toContain('.next/');
+      // Check dynamic ignores (detect.getIgnores adds .next/ for Next.js projects)
+      expect(eslintConfig).toContain('detect.getIgnores(deps)');
 
       // Check package.json has eslint-plugin-safeword (bundles Next.js plugin)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
@@ -144,13 +152,15 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Check ESLint config uses safeword plugin with Astro config
+      // Check ESLint config uses safeword plugin with dynamic framework detection
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('eslint-plugin-safeword');
-      expect(eslintConfig).toContain('safeword.configs.astro');
+      // Config is now dynamic - Astro gets both TypeScript and Astro configs
+      expect(eslintConfig).toContain('astro: [...configs.recommendedTypeScript, ...configs.astro]');
+      expect(eslintConfig).toContain('baseConfigs[framework]');
 
-      // Check ignores include .astro/
-      expect(eslintConfig).toContain('.astro/');
+      // Check dynamic ignores (detect.getIgnores adds .astro/ for Astro projects)
+      expect(eslintConfig).toContain('detect.getIgnores(deps)');
 
       // Check package.json has eslint-plugin-safeword (bundles Astro plugin)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
@@ -173,10 +183,12 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
 
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });
 
-      // Check ESLint config uses safeword plugin with vitest config
+      // Check ESLint config uses safeword plugin with dynamic vitest detection
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('eslint-plugin-safeword');
-      expect(eslintConfig).toContain('safeword.configs.vitest');
+      // Config is now dynamic - Vitest config is conditionally included
+      expect(eslintConfig).toContain('detect.hasVitest(deps) ? configs.vitest');
+      expect(eslintConfig).toContain('baseConfigs[framework]');
 
       // Check package.json has eslint-plugin-safeword (bundles Vitest plugin)
       const pkg = JSON.parse(readTestFile(projectDirectory, 'package.json'));
