@@ -1,9 +1,11 @@
 {
   "name": "safeword",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "type": "module",
   "description": "",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write .",
