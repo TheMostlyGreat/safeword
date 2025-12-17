@@ -15,6 +15,7 @@ import {
   removeTemporaryDirectory,
   runCli,
   runCliSync,
+  TIMEOUT_SETUP,
 } from './helpers';
 
 describe('Test Suite 0: Technical Constraints', () => {
@@ -52,7 +53,7 @@ describe('Test Suite 0: Technical Constraints', () => {
       initGitRepo(temporaryDirectory);
 
       const { result, timeMs } = await measureTime(async () =>
-        runCli(['setup', '--yes'], { cwd: temporaryDirectory, timeout: 60_000 }),
+        runCli(['setup', '--yes'], { cwd: temporaryDirectory, timeout: TIMEOUT_SETUP }),
       );
 
       expect(result.exitCode).toBe(0);
@@ -84,7 +85,7 @@ describe('Test Suite 0: Technical Constraints', () => {
 
       const result = await runCli(['setup', '--yes'], {
         cwd: temporaryDirectory,
-        timeout: 60_000,
+        timeout: TIMEOUT_SETUP,
       });
 
       expect(result.exitCode).toBe(0);

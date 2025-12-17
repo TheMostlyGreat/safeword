@@ -18,6 +18,7 @@ import {
   readTestFile,
   removeTemporaryDirectory,
   runCli,
+  TIMEOUT_QUICK,
   writeTestFile,
 } from '../helpers';
 
@@ -95,7 +96,7 @@ describe('Test Suite 8: Health Check', () => {
       // Network mocking would be needed for full timeout simulation
       const result = await runCli(['check'], {
         cwd: temporaryDirectory,
-        timeout: 10_000,
+        timeout: TIMEOUT_QUICK,
       });
 
       expect(result.exitCode).toBe(0);

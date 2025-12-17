@@ -7,6 +7,19 @@ import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
 
+/**
+ * Timeout constants for test operations.
+ * Centralized to ensure consistency and easy adjustment.
+ */
+/** Quick operations that don't spawn processes (10s) */
+export const TIMEOUT_QUICK = 10_000;
+/** Sync CLI operations without npm install (30s) */
+export const TIMEOUT_SYNC = 30_000;
+/** Setup commands that may run npm install with warm cache (60s) */
+export const TIMEOUT_SETUP = 60_000;
+/** npm install operations under load or cold cache (120s) */
+export const TIMEOUT_NPM_INSTALL = 120_000;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = nodePath.dirname(__filename);
 
@@ -148,8 +161,7 @@ export async function runCli(
     timeout?: number;
   } = {},
 ): Promise<CliResult> {
-  // Increased timeout for setup command which now runs npm install
-  const { cwd = process.cwd(), input, env = {}, timeout = 120_000 } = options;
+  const { cwd = process.cwd(), input, env = {}, timeout = TIMEOUT_NPM_INSTALL } = options;
 
   const command = `node ${CLI_PATH} ${args.join(' ')}`;
 
@@ -192,7 +204,7 @@ export function runCliSync(
     timeout?: number;
   } = {},
 ): CliResult {
-  const { cwd = process.cwd(), env = {}, timeout = 30_000 } = options;
+  const { cwd = process.cwd(), env = {}, timeout = TIMEOUT_SYNC } = options;
 
   const command = `node ${CLI_PATH} ${args.join(' ')}`;
 

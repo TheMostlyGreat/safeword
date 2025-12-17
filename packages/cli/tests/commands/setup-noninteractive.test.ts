@@ -12,6 +12,7 @@ import {
   fileExists,
   removeTemporaryDirectory,
   runCli,
+  TIMEOUT_NPM_INSTALL,
 } from '../helpers';
 
 describe('Test Suite 6: Non-Interactive Setup', () => {
@@ -32,7 +33,7 @@ describe('Test Suite 6: Non-Interactive Setup', () => {
 
       const result = await runCli(['setup', '--yes'], {
         cwd: temporaryDirectory,
-        timeout: 120_000, // 120s - npm install can be slow under load
+        timeout: TIMEOUT_NPM_INSTALL,
       });
 
       expect(result.exitCode).toBe(0);
@@ -51,7 +52,7 @@ describe('Test Suite 6: Non-Interactive Setup', () => {
       // Force non-TTY by setting environment
       const result = await runCli(['setup'], {
         cwd: temporaryDirectory,
-        timeout: 120_000, // 120s - npm install can be slow under load
+        timeout: TIMEOUT_NPM_INSTALL,
         env: {
           CI: 'true', // Many tools detect CI and use non-interactive mode
           TERM: 'dumb',
