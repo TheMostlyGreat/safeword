@@ -20,8 +20,8 @@
  *   // Next.js projects
  *   export default [...safeword.configs.recommendedTypeScriptNext];
  *
- *   // Astro projects
- *   export default [...safeword.configs.astro];
+ *   // Astro projects (TypeScript + Astro components)
+ *   export default [...safeword.configs.recommendedTypeScript, ...safeword.configs.astro];
  *
  *   // Tailwind CSS projects (add to existing config)
  *   export default [...safeword.configs.recommendedTypeScriptReact, ...safeword.configs.tailwind];
@@ -73,7 +73,7 @@ interface SafewordPlugin {
 const plugin: SafewordPlugin = {
   meta: {
     name: 'eslint-plugin-safeword',
-    version: '0.1.0',
+    version: '0.4.0',
   },
   configs: {
     recommended,
