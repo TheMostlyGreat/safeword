@@ -37,10 +37,12 @@ const deps = detect.collectAllDeps(__dirname);
 const framework = detect.detectFramework(deps);
 
 // Map framework to base config
+// Note: Astro config only lints .astro files, so we combine it with TypeScript config
+// to also lint .ts files in Astro projects
 const baseConfigs = {
   next: configs.recommendedTypeScriptNext,
   react: configs.recommendedTypeScriptReact,
-  astro: configs.astro,
+  astro: [...configs.recommendedTypeScript, ...configs.astro],
   typescript: configs.recommendedTypeScript,
   javascript: configs.recommended,
 };
@@ -73,10 +75,12 @@ const deps = detect.collectAllDeps(__dirname);
 const framework = detect.detectFramework(deps);
 
 // Map framework to base config
+// Note: Astro config only lints .astro files, so we combine it with TypeScript config
+// to also lint .ts files in Astro projects
 const baseConfigs = {
   next: configs.recommendedTypeScriptNext,
   react: configs.recommendedTypeScriptReact,
-  astro: configs.astro,
+  astro: [...configs.recommendedTypeScript, ...configs.astro],
   typescript: configs.recommendedTypeScript,
   javascript: configs.recommended,
 };
