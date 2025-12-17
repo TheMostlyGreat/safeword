@@ -248,7 +248,7 @@ export function readTestFile(dir: string, relativePath: string): string {
  */
 export function writeTestFile(dir: string, relativePath: string, content: string): void {
   const fullPath = nodePath.join(dir, relativePath);
-  const parentDirectory = nodePath.join(fullPath, '..');
+  const parentDirectory = nodePath.dirname(fullPath);
   if (!existsSync(parentDirectory)) {
     mkdirSync(parentDirectory, { recursive: true });
   }
