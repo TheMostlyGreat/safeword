@@ -32,7 +32,7 @@ describe('Test Suite 6: Non-Interactive Setup', () => {
 
       const result = await runCli(['setup', '--yes'], {
         cwd: temporaryDirectory,
-        timeout: 30_000,
+        timeout: 120_000, // 120s - npm install can be slow under load
       });
 
       expect(result.exitCode).toBe(0);
@@ -51,7 +51,7 @@ describe('Test Suite 6: Non-Interactive Setup', () => {
       // Force non-TTY by setting environment
       const result = await runCli(['setup'], {
         cwd: temporaryDirectory,
-        timeout: 30_000,
+        timeout: 120_000, // 120s - npm install can be slow under load
         env: {
           CI: 'true', // Many tools detect CI and use non-interactive mode
           TERM: 'dumb',

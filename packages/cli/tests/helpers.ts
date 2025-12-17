@@ -43,10 +43,16 @@ export function createTemporaryDirectory(): string {
  * Removes a temporary directory and all contents.
  * Uses rmSync's built-in retry for ENOTEMPTY/EBUSY errors from
  * npm/git processes that haven't released file handles.
+ * Wrapped in try-catch to prevent cleanup failures from cascading to test failures.
  * @param dir
  */
 export function removeTemporaryDirectory(dir: string): void {
-  rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  try {
+    rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 500 });
+  } catch {
+    // Ignore cleanup failures - OS will clean temp directory eventually
+    // This prevents ENOTEMPTY race conditions from failing tests
+  }
 }
 
 /**
