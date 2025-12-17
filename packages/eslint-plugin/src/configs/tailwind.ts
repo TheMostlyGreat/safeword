@@ -1,13 +1,19 @@
 /**
  * ESLint configuration for Tailwind CSS projects
  *
- * Applies to JSX/TSX files using Tailwind classes.
+ * Applies to UI files using Tailwind classes: JSX, TSX, Astro, HTML.
  * Includes rules for correctness and style consistency.
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
 import tailwindPlugin from 'eslint-plugin-tailwindcss';
+
+/**
+ * File patterns for Tailwind rules.
+ * Targets files that contain Tailwind class names.
+ */
+export const TAILWIND_FILES = ['**/*.{jsx,tsx,astro,html}'];
 
 /**
  * Tailwind config
@@ -37,6 +43,7 @@ export const tailwindConfig: any[] = [
   // Override with stricter rules at error level
   {
     name: 'safeword/tailwind',
+    files: TAILWIND_FILES,
     rules: {
       // Correctness - catch LLM mistakes
       'tailwindcss/no-contradicting-classname': 'error',

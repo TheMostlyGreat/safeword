@@ -18,6 +18,43 @@ import unicorn from 'eslint-plugin-unicorn';
 import { rules as safewordRules } from '../rules/index.js';
 
 /**
+ * File patterns for base JS/TS rules
+ * Excludes .astro, .vue, .svelte which use different parsers
+ */
+export const JS_TS_FILES = ['**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}'];
+
+/**
+ * Add files restriction to config objects.
+ * Handles both single config objects and arrays of configs.
+ * Skips config objects that only have ignores (global ignores).
+ * Skips config objects that already have files set.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages
+function scopeConfigToFiles(config: any, files: string[]): any {
+  // Skip global ignores (config with only ignores property)
+  if (config.ignores && Object.keys(config).length === 1) {
+    return config;
+  }
+  // Skip configs that already have files set
+  if (config.files) {
+    return config;
+  }
+  // Add files restriction
+  return { ...config, files };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages
+function scopeToFiles(configs: any[], files: string[]): any[] {
+  return configs.flatMap((config) => {
+    // Handle arrays (third-party configs may be arrays)
+    if (Array.isArray(config)) {
+      return config.map((c) => scopeConfigToFiles(c, files));
+    }
+    return scopeConfigToFiles(config, files);
+  });
+}
+
+/**
  * Base plugins - shared between JS and TS configs
  * Does NOT include JSDoc (different config per language) or Prettier (must be last)
  *
@@ -25,7 +62,7 @@ import { rules as safewordRules } from '../rules/index.js';
  * Runtime validation by ESLint ensures correctness.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages
-export const basePlugins: any[] = [
+const basePluginsUnscoped: any[] = [
   // Default ignores - always skip these directories
   {
     ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.git/**'],
@@ -36,6 +73,7 @@ export const basePlugins: any[] = [
 
   // Code style and design rules - catches common LLM patterns
   {
+    name: 'safeword/code-style',
     rules: {
       'no-unneeded-ternary': 'error', // x ? true : false → x
       'prefer-template': 'error', // 'a' + b → `a${b}`
@@ -60,6 +98,7 @@ export const basePlugins: any[] = [
   // Import validation
   importX.flatConfigs.recommended,
   {
+    name: 'safeword/import-rules',
     settings: {
       'import-x/resolver-next': [createTypeScriptImportResolver()],
     },
@@ -76,6 +115,7 @@ export const basePlugins: any[] = [
   // Code quality / complexity
   sonarConfigs.recommended,
   {
+    name: 'safeword/sonarjs-rules',
     rules: {
       // Enable design rules (off by default but valuable for clean code)
       'sonarjs/no-collapsible-if': 'error', // if(a) { if(b) } → if(a && b)
@@ -88,6 +128,7 @@ export const basePlugins: any[] = [
   // Security - detect common vulnerabilities
   pluginSecurity.configs.recommended,
   {
+    name: 'safeword/security-rules',
     rules: {
       // Critical security rules at error (LLMs ignore warnings)
       'security/detect-bidi-characters': 'error', // Trojan Source attacks
@@ -111,6 +152,7 @@ export const basePlugins: any[] = [
   // Promise handling - catches floating promises (critical for LLM code)
   pluginPromise.configs['flat/recommended'],
   {
+    name: 'safeword/promise-rules',
     rules: {
       'promise/no-multiple-resolved': 'error', // Catches missing return after resolve
       // LLMs mix callback/promise paradigms - escalate to error
@@ -125,6 +167,7 @@ export const basePlugins: any[] = [
   // Regexp - catches ReDoS vulnerabilities and malformed regex
   regexpConfigs['flat/recommended'],
   {
+    name: 'safeword/regexp-rules',
     rules: {
       // Escalate warn rules to error (LLMs ignore warnings)
       'regexp/confusing-quantifier': 'error',
@@ -139,6 +182,7 @@ export const basePlugins: any[] = [
   // Modern JS enforcement - strict for agents
   unicorn.configs.recommended,
   {
+    name: 'safeword/unicorn-rules',
     rules: {
       // Keep off - legitimate use cases
       'unicorn/no-process-exit': 'off', // CLI apps use process.exit
@@ -184,6 +228,7 @@ export const basePlugins: any[] = [
 
   // Import sorting - auto-fixable, reduces noise
   {
+    name: 'safeword/import-sort',
     plugins: { 'simple-import-sort': simpleImportSort },
     rules: {
       'simple-import-sort/imports': 'error',
@@ -194,12 +239,20 @@ export const basePlugins: any[] = [
 
   // Safeword custom rules - LLM-specific patterns
   {
+    name: 'safeword/custom-rules',
     plugins: { safeword: { rules: safewordRules } },
     rules: {
       'safeword/no-incomplete-error-handling': 'error',
     },
   },
 ];
+
+/**
+ * Base plugins scoped to JS/TS files only.
+ * Prevents rules from running on .astro, .vue, .svelte files which use different parsers.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages
+export const basePlugins: any[] = scopeToFiles(basePluginsUnscoped, JS_TS_FILES);
 
 /**
  * Prettier config - must be last to disable conflicting rules

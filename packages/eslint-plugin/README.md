@@ -74,10 +74,34 @@ export default [
 | `recommendedTypeScriptReact` | React + TypeScript | TypeScript + React + Hooks |
 | `recommendedTypeScriptNext` | Next.js projects | React + Next.js plugin |
 | `astro` | Astro `.astro` files | Astro plugin only (standalone) |
-| `tailwind` | Tailwind CSS | Additive - combine with base config |
+| `tailwind` | Tailwind CSS | Additive - for `*.{jsx,tsx,astro,html}` files |
 | `tanstackQuery` | TanStack Query | Additive - combine with base config |
 | `vitest` | Vitest unit tests | Additive - for `*.test.*` and `*.spec.*` files |
 | `playwright` | Playwright E2E tests | Additive - for `*.e2e.*` and `e2e/**/*.{test,spec}.*` files |
+
+## File Scoping
+
+Configs are scoped to relevant file types to prevent conflicts in multi-framework projects:
+
+| Config | File Patterns |
+|--------|---------------|
+| Base plugins | `**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}` |
+| TypeScript rules | `**/*.{ts,tsx,mts,cts}` |
+| Astro | `**/*.astro` |
+| Tailwind | `**/*.{jsx,tsx,astro,html}` |
+| Vitest | `**/*.{test,spec}.*` |
+| Playwright | `**/*.e2e.*`, `**/e2e/**/*.{test,spec}.*` |
+
+This allows you to combine configs without conflicts:
+
+```javascript
+// Multi-framework project (Next.js + Astro)
+export default [
+  ...safeword.configs.recommendedTypeScriptNext,
+  ...safeword.configs.astro,
+  ...safeword.configs.tailwind,
+];
+```
 
 ## Bundled Plugins
 

@@ -24,6 +24,7 @@ export const astroConfig: any[] = [
 
   // Add LLM-critical rules
   {
+    name: 'safeword/astro',
     rules: {
       // XSS prevention - LLMs often use set:html for rendering user content
       'astro/no-set-html-directive': 'error',

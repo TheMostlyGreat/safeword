@@ -26,6 +26,7 @@ import playwrightPlugin from 'eslint-plugin-playwright';
  */
 export const playwrightConfig: any[] = [
   {
+    name: 'safeword/playwright',
     files: ['**/*.e2e.{ts,tsx,js,jsx}', '**/e2e/**/*.{test,spec}.{ts,tsx,js,jsx}'],
     plugins: {
       playwright: playwrightPlugin,

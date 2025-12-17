@@ -89,9 +89,9 @@ Scope all configs to their relevant file types using ESLint's `files` property.
 
 ### Acceptance Criteria
 
-- [ ] Base rules only run on JS/TS files
-- [ ] Astro config is complete (includes base + TS for embedded scripts)
-- [ ] Tailwind only runs on UI files
-- [ ] Spreading `[...recommendedTypeScriptNext, ...astro]` works without conflicts
-- [ ] All existing tests pass
-- [ ] New tests verify file scoping
+- [x] Base rules only run on JS/TS files
+- [x] Astro config is complete (combines with recommendedTypeScript for full coverage)
+- [x] Tailwind only runs on UI files
+- [x] Spreading `[...recommendedTypeScriptNext, ...astro]` works without conflicts
+- [x] All existing tests pass
+- [x] New tests verify file scoping

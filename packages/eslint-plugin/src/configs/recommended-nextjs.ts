@@ -28,6 +28,7 @@ export const recommendedTypeScriptNext: any[] = [
 
   // Escalate ALL remaining warn rules to error (LLMs ignore warnings)
   {
+    name: 'safeword/nextjs-rules',
     rules: {
       '@next/next/google-font-display': 'error',
       '@next/next/google-font-preconnect': 'error',

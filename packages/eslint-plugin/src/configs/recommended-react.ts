@@ -15,10 +15,19 @@ import reactHooksPluginImport from 'eslint-plugin-react-hooks';
 
 // Type assertion - react-hooks 7.x exports configs but types don't declare it
 const reactHooksPlugin = reactHooksPluginImport as unknown as {
-  configs: { flat: { 'recommended-latest': any } };
+  configs?: { flat?: { 'recommended-latest'?: any } };
 };
 
 import { recommendedTypeScript } from './recommended-typescript.js';
+
+// Runtime validation - ensure react-hooks 7.x with flat config support
+const reactHooksConfig = reactHooksPlugin.configs?.flat?.['recommended-latest'];
+if (!reactHooksConfig) {
+  throw new Error(
+    'eslint-plugin-safeword requires eslint-plugin-react-hooks >= 7.0.0 with flat config support. ' +
+      'Please upgrade react-hooks: npm install eslint-plugin-react-hooks@latest',
+  );
+}
 
 /**
  * React + TypeScript recommended config
@@ -39,10 +48,11 @@ export const recommendedTypeScriptReact: any[] = [
 
   // React Hooks + Compiler rules (v7.x flat config)
   // Using recommended-latest which includes void-use-memo
-  reactHooksPlugin.configs.flat['recommended-latest'],
+  reactHooksConfig,
 
   // Escalate warn rules to error + add LLM-critical rules
   {
+    name: 'safeword/react-hooks-rules',
     rules: {
       // Escalate default warns to error (LLMs ignore warnings)
       'react-hooks/exhaustive-deps': 'error', // Default: warn
@@ -57,6 +67,7 @@ export const recommendedTypeScriptReact: any[] = [
 
   // React rule overrides for TypeScript projects
   {
+    name: 'safeword/react-rules',
     rules: {
       // Turn off rules that are redundant with TypeScript
       'react/prop-types': 'off', // TS handles prop validation

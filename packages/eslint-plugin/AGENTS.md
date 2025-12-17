@@ -43,6 +43,21 @@ src/
 
 **Additive:** `eslint-plugin-tailwindcss`, `@tanstack/eslint-plugin-query`, `eslint-plugin-vitest`, `eslint-plugin-playwright`
 
+## File Scoping
+
+Configs are scoped to relevant file types to prevent conflicts in multi-framework projects:
+
+| Config | File Patterns |
+|--------|---------------|
+| Base plugins | `**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}` |
+| TypeScript rules | `**/*.{ts,tsx,mts,cts}` |
+| Astro | `**/*.astro` |
+| Tailwind | `**/*.{jsx,tsx,astro,html}` |
+| Vitest | `**/*.{test,spec}.*` |
+| Playwright | `**/*.e2e.*`, `**/e2e/**/*.{test,spec}.*` |
+
+This prevents base JS/TS rules from trying to parse `.astro` files (which use a different parser).
+
 ## Custom Rule
 
 **`safeword/no-incomplete-error-handling`** - Detects catch blocks that log errors but don't rethrow or return (error swallowing).

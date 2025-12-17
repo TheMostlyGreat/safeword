@@ -40,6 +40,7 @@ export const recommendedTypeScript: any[] = [
 
   // Enable projectService for type-checked rules (modern approach, auto-discovers tsconfig)
   {
+    name: 'safeword/typescript-parser-options',
     files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
     languageOptions: {
       parserOptions: {
@@ -53,6 +54,7 @@ export const recommendedTypeScript: any[] = [
 
   // TypeScript-specific rule overrides for LLM code
   {
+    name: 'safeword/typescript-rules',
     rules: {
       // Allow interface vs type - both are valid
       '@typescript-eslint/consistent-type-definitions': 'off',
@@ -88,6 +90,7 @@ export const recommendedTypeScript: any[] = [
 
   // Re-enable curly after prettier (prettier turns it off but we want braces for LLM code)
   {
+    name: 'safeword/post-prettier',
     rules: {
       curly: 'error', // Force braces on if/else/for/while - LLMs write unsafe single-line blocks
     },

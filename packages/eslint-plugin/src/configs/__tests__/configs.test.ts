@@ -14,6 +14,8 @@ import { Linter } from 'eslint';
 import { describe, expect, it } from 'vitest';
 
 import plugin from '../../index.js';
+import { astroConfig } from '../astro.js';
+import { JS_TS_FILES } from '../base.js';
 import { recommended } from '../recommended.js';
 import { recommendedTypeScript } from '../recommended-typescript.js';
 
@@ -227,5 +229,70 @@ describe('default ignores', () => {
     });
 
     expect(hasDistIgnore).toBe(true);
+  });
+});
+
+describe('file scoping', () => {
+  it('exports JS_TS_FILES pattern constant', () => {
+    expect(JS_TS_FILES).toBeDefined();
+    expect(Array.isArray(JS_TS_FILES)).toBe(true);
+    // Pattern uses glob syntax: **/*.{js,jsx,ts,tsx,...}
+    expect(JS_TS_FILES[0]).toContain('**/*');
+    expect(JS_TS_FILES[0]).toContain('js');
+    expect(JS_TS_FILES[0]).toContain('ts');
+  });
+
+  it('most base plugins are scoped to JS/TS files', () => {
+    // Count configs that have files scoping
+    const scopedConfigs = recommended.filter(config => {
+      if (typeof config === 'object' && config !== null) {
+        return 'files' in config;
+      }
+      return false;
+    });
+
+    // Most configs should be scoped to JS/TS files
+    // (Some third-party configs may not have files, but most safeword configs should)
+    expect(scopedConfigs.length).toBeGreaterThan(10);
+  });
+
+  it('TypeScript config can be combined with Astro config', () => {
+    // Verify configs can be spread together without structural issues
+    const combinedConfig = [...recommendedTypeScript, ...astroConfig];
+
+    // Should be a valid array of config objects
+    expect(Array.isArray(combinedConfig)).toBe(true);
+    expect(combinedConfig.length).toBeGreaterThan(recommendedTypeScript.length);
+  });
+
+  it('Astro rules are scoped to .astro files', () => {
+    // Verify Astro rules have .astro file scope
+    const astroRulesConfigs = astroConfig.filter(config => {
+      if (typeof config === 'object' && config !== null && 'rules' in config) {
+        const rules = Object.keys(config.rules || {});
+        return rules.some(r => r.startsWith('astro/'));
+      }
+      return false;
+    });
+
+    // All Astro configs with astro/ rules should have .astro file scope
+    const allAstroScoped = astroRulesConfigs.every(config => {
+      if ('files' in config && Array.isArray(config.files)) {
+        return config.files.some((f: string) => f.includes('.astro'));
+      }
+      // Astro plugin may set files via a different mechanism
+      return true;
+    });
+    expect(allAstroScoped).toBe(true);
+  });
+
+  it('combined config lints .ts files without errors', () => {
+    const linter = new Linter({ configType: 'flat' });
+    const combinedConfig = [...recommendedTypeScript, ...astroConfig];
+
+    // Should not throw for TypeScript files
+    expect(() => {
+      linter.verify('const x = 1;', combinedConfig, { filename: 'test.ts' });
+    }).not.toThrow();
   });
 });

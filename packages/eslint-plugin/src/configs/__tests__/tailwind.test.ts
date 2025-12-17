@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions, sonarjs/function-return-type, security/detect-object-injection, jsdoc/require-param-description, jsdoc/require-returns */
 import { describe, expect, it } from 'vitest';
 
-import { tailwindConfig } from '../tailwind.js';
+import { TAILWIND_FILES, tailwindConfig } from '../tailwind.js';
 
 /**
  * Helper to get effective rule config from flat config array.
@@ -56,6 +56,22 @@ describe('Tailwind config', () => {
       (config: any) => config.plugins && 'tailwindcss' in config.plugins,
     );
     expect(hasTailwindPlugin).toBe(true);
+  });
+
+  it('exports TAILWIND_FILES constant', () => {
+    expect(TAILWIND_FILES).toBeDefined();
+    expect(Array.isArray(TAILWIND_FILES)).toBe(true);
+    expect(TAILWIND_FILES[0]).toContain('jsx');
+    expect(TAILWIND_FILES[0]).toContain('tsx');
+    expect(TAILWIND_FILES[0]).toContain('astro');
+    expect(TAILWIND_FILES[0]).toContain('html');
+  });
+
+  it('scopes rules to UI files', () => {
+    const hasScopedConfig = tailwindConfig.some(
+      (config: any) => config.files && config.name === 'safeword/tailwind',
+    );
+    expect(hasScopedConfig).toBe(true);
   });
 
   describe('correctness rules (4 rules at error)', () => {

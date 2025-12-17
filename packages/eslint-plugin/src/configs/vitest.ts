@@ -17,6 +17,7 @@ import vitestPlugin from 'eslint-plugin-vitest';
  */
 export const vitestConfig: any[] = [
   {
+    name: 'safeword/vitest',
     files: ['**/*.test.{ts,tsx,js,jsx}', '**/*.spec.{ts,tsx,js,jsx}'],
     plugins: {
       vitest: vitestPlugin,
