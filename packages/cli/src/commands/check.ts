@@ -124,9 +124,18 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
   const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
 
   // Collect issues from write actions and text patches
+  // Filter out chmod (paths[] instead of path) and json-merge/unmerge (incompatible definition)
+  const actionsWithPath = result.actions.filter(
+    (
+      a,
+    ): a is Exclude<
+      (typeof result.actions)[number],
+      { type: 'chmod' } | { type: 'json-merge' } | { type: 'json-unmerge' }
+    > => a.type !== 'chmod' && a.type !== 'json-merge' && a.type !== 'json-unmerge',
+  );
   const issues: string[] = [
-    ...findMissingFiles(cwd, result.actions),
-    ...findMissingPatches(cwd, result.actions),
+    ...findMissingFiles(cwd, actionsWithPath),
+    ...findMissingPatches(cwd, actionsWithPath),
   ];
 
   // Check for missing .claude/settings.json

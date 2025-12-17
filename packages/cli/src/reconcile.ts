@@ -389,9 +389,9 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
 
   // 1. Create all directories
   const allDirectories = [...schema.ownedDirs, ...schema.sharedDirs, ...schema.preservedDirs];
-  const dirs = planMissingDirectories(allDirectories, ctx.cwd, ctx.isGitRepo);
-  actions.push(...dirs.actions);
-  wouldCreate.push(...dirs.created);
+  const directories = planMissingDirectories(allDirectories, ctx.cwd, ctx.isGitRepo);
+  actions.push(...directories.actions);
+  wouldCreate.push(...directories.created);
 
   // 2. Write owned files
   const owned = planOwnedFileWrites(schema.ownedFiles, ctx);
@@ -404,7 +404,12 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   wouldCreate.push(...managed.created);
 
   // 4. chmod hook/lib/scripts directories
-  const chmodPaths = ['.safeword/hooks', '.safeword/hooks/cursor', '.safeword/lib', '.safeword/scripts'];
+  const chmodPaths = [
+    '.safeword/hooks',
+    '.safeword/hooks/cursor',
+    '.safeword/lib',
+    '.safeword/scripts',
+  ];
   if (ctx.isGitRepo) chmodPaths.push(HUSKY_DIR);
   actions.push({ type: 'chmod', paths: chmodPaths });
 
@@ -419,9 +424,21 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   wouldCreate.push(...patches.created);
 
   // 7. Compute packages to install
-  const packagesToInstall = computePackagesToInstall(schema, ctx.projectType, ctx.developmentDeps, ctx.isGitRepo);
+  const packagesToInstall = computePackagesToInstall(
+    schema,
+    ctx.projectType,
+    ctx.developmentDeps,
+    ctx.isGitRepo,
+  );
 
-  return { actions, wouldCreate, wouldUpdate: [], wouldRemove: [], packagesToInstall, packagesToRemove: [] };
+  return {
+    actions,
+    wouldCreate,
+    wouldUpdate: [],
+    wouldRemove: [],
+    packagesToInstall,
+    packagesToRemove: [],
+  };
 }
 
 /**
@@ -642,35 +659,44 @@ function executeRmdir(cwd: string, path: string, result: ExecutionResult): void 
 
 function executeAction(action: Action, ctx: ProjectContext, result: ExecutionResult): void {
   switch (action.type) {
-    case 'mkdir':
+    case 'mkdir': {
       ensureDirectory(nodePath.join(ctx.cwd, action.path));
       result.created.push(action.path);
       break;
-    case 'rmdir':
+    }
+    case 'rmdir': {
       executeRmdir(ctx.cwd, action.path, result);
       break;
-    case 'write':
+    }
+    case 'write': {
       executeWrite(ctx.cwd, action.path, action.content, result);
       break;
-    case 'rm':
+    }
+    case 'rm': {
       remove(nodePath.join(ctx.cwd, action.path));
       result.removed.push(action.path);
       break;
-    case 'chmod':
+    }
+    case 'chmod': {
       executeChmod(ctx.cwd, action.paths);
       break;
-    case 'json-merge':
+    }
+    case 'json-merge': {
       executeJsonMerge(ctx.cwd, action.path, action.definition, ctx);
       break;
-    case 'json-unmerge':
+    }
+    case 'json-unmerge': {
       executeJsonUnmerge(ctx.cwd, action.path, action.definition);
       break;
-    case 'text-patch':
+    }
+    case 'text-patch': {
       executeTextPatch(ctx.cwd, action.path, action.definition);
       break;
-    case 'text-unpatch':
+    }
+    case 'text-unpatch': {
       executeTextUnpatch(ctx.cwd, action.path, action.definition);
       break;
+    }
   }
 }
 
@@ -788,7 +814,7 @@ function executeJsonMerge(
   ctx: ProjectContext,
 ): void {
   const fullPath = nodePath.join(cwd, path);
-  const existing = readJson<Record<string, unknown>>(fullPath) ?? {};
+  const existing = (readJson(fullPath) as Record<string, unknown>) ?? {};
   const merged = definition.merge(existing, ctx);
 
   // Skip write if content is unchanged (avoids formatting churn)
@@ -807,7 +833,7 @@ function executeJsonUnmerge(cwd: string, path: string, definition: JsonMergeDefi
   const fullPath = nodePath.join(cwd, path);
   if (!exists(fullPath)) return;
 
-  const existing = readJson<Record<string, unknown>>(fullPath);
+  const existing = readJson(fullPath) as Record<string, unknown> | undefined;
   if (!existing) return;
 
   const unmerged = definition.unmerge(existing);

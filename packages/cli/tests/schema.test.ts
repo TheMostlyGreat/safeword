@@ -13,6 +13,9 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+// Type guard for filtering out undefined values
+const isDefined = <T>(x: T | undefined): x is T => x !== undefined;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = nodePath.dirname(__filename);
 
@@ -228,13 +231,13 @@ describe('Schema - Single Source of Truth', () => {
       const claudeSkills = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
         .filter(path => path.startsWith('.claude/skills/safeword-'))
         .map(path => /safeword-([^/]+)/.exec(path)?.[1])
-        .filter(Boolean)
+        .filter(isDefined)
         .toSorted((a, b) => a.localeCompare(b));
 
       const cursorRules = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
         .filter(path => path.startsWith('.cursor/rules/safeword-') && !path.includes('core'))
         .map(path => /safeword-([^.]+)/.exec(path)?.[1])
-        .filter(Boolean)
+        .filter(isDefined)
         .toSorted((a, b) => a.localeCompare(b));
 
       // Both should have the same skills
@@ -248,13 +251,13 @@ describe('Schema - Single Source of Truth', () => {
       const claudeCommands = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
         .filter(path => path.startsWith('.claude/commands/'))
         .map(path => path.split('/').pop())
-        .filter(Boolean)
+        .filter(isDefined)
         .toSorted((a, b) => a.localeCompare(b));
 
       const cursorCommands = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
         .filter(path => path.startsWith('.cursor/commands/'))
         .map(path => path.split('/').pop())
-        .filter(Boolean)
+        .filter(isDefined)
         .toSorted((a, b) => a.localeCompare(b));
 
       // Both should have the same commands

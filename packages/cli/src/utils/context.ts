@@ -18,7 +18,7 @@ import { detectProjectType, type PackageJson } from './project-detector.js';
  * @param cwd
  */
 export function createProjectContext(cwd: string): ProjectContext {
-  const packageJson = readJson<PackageJson>(nodePath.join(cwd, 'package.json'));
+  const packageJson = readJson(nodePath.join(cwd, 'package.json')) as PackageJson | undefined;
 
   return {
     cwd,
