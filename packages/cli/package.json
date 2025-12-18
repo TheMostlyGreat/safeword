@@ -29,7 +29,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests",
     "clean": "rm -rf dist",
-    "prepublishOnly": "bun run build && bun test"
+    "prepublishOnly": "bun run build && bun run test"
   },
   "dependencies": {
     "commander": "^12.1.0",
