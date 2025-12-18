@@ -814,7 +814,12 @@ function executeJsonMerge(
   ctx: ProjectContext,
 ): void {
   const fullPath = nodePath.join(cwd, path);
-  const existing = (readJson(fullPath) as Record<string, unknown>) ?? {};
+  const rawExisting = readJson(fullPath) as Record<string, unknown> | undefined;
+
+  // Skip if file doesn't exist and skipIfMissing is set
+  if (!rawExisting && definition.skipIfMissing) return;
+
+  const existing = rawExisting ?? {};
   const merged = definition.merge(existing, ctx);
 
   // Skip write if content is unchanged (avoids formatting churn)

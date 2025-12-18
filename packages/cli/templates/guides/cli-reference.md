@@ -4,13 +4,13 @@ Commands for managing safeword in projects.
 
 ## Commands
 
-| Command                       | Purpose                           |
-| ----------------------------- | --------------------------------- |
+| Command                       | Purpose                             |
+| ----------------------------- | ----------------------------------- |
 | `npx safeword@latest setup`   | Install safeword in current project |
-| `npx safeword@latest check`   | Check project health and versions |
-| `npx safeword@latest upgrade` | Upgrade to latest version         |
-| `npx safeword@latest diff`    | Preview changes before upgrading  |
-| `npx safeword reset`          | Remove safeword from project      |
+| `npx safeword@latest check`   | Check project health and versions   |
+| `npx safeword@latest upgrade` | Upgrade to latest version           |
+| `npx safeword@latest diff`    | Preview changes before upgrading    |
+| `npx safeword reset`          | Remove safeword from project        |
 
 ## When to Use
 

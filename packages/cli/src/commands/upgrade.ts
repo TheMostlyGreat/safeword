@@ -34,7 +34,9 @@ function printUpgradeSummary(result: ReconcileResult, projectVersion: string): v
   }
 
   if (result.packagesToRemove.length > 0) {
-    warn(`\n${result.packagesToRemove.length} package(s) are now bundled in eslint-plugin-safeword:`);
+    warn(
+      `\n${result.packagesToRemove.length} package(s) are now bundled in eslint-plugin-safeword:`,
+    );
     for (const pkg of result.packagesToRemove) listItem(pkg);
     info("\nIf you don't use these elsewhere, you can remove them:");
     listItem(`npm uninstall ${result.packagesToRemove.join(' ')}`);

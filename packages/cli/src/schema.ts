@@ -40,6 +40,7 @@ export interface JsonMergeDefinition {
   merge: (existing: Record<string, unknown>, ctx: ProjectContext) => Record<string, unknown>;
   unmerge: (existing: Record<string, unknown>) => Record<string, unknown>;
   removeFileIfEmpty?: boolean; // Delete file if our keys were the only content
+  skipIfMissing?: boolean; // Don't create file if it doesn't exist (for optional integrations)
 }
 
 export interface TextPatchDefinition {
@@ -66,6 +67,66 @@ export interface SafewordSchema {
     conditional: Record<string, string[]>;
   };
 }
+
+// ============================================================================
+// Shared merge definitions
+// ============================================================================
+
+/**
+ * Biome config merge - adds safeword files to excludes list.
+ * Biome v2 uses `includes` with `!` prefix for exclusions.
+ */
+const BIOME_JSON_MERGE: JsonMergeDefinition = {
+  keys: ['files.includes'],
+  skipIfMissing: true, // Only modify if project already uses Biome
+  merge: existing => {
+    const files = (existing.files as Record<string, unknown>) ?? {};
+    const existingIncludes = Array.isArray(files.includes) ? files.includes : [];
+
+    // Add safeword exclusions (! prefix) if not already present
+    // Note: Biome v2.2.0+ doesn't need /** for folders
+    const safewordExcludes = ['!eslint.config.mjs', '!.safeword'];
+    const newIncludes = [...existingIncludes];
+    for (const exclude of safewordExcludes) {
+      if (!newIncludes.includes(exclude)) {
+        newIncludes.push(exclude);
+      }
+    }
+
+    return {
+      ...existing,
+      files: {
+        ...files,
+        includes: newIncludes,
+      },
+    };
+  },
+  unmerge: existing => {
+    const result = { ...existing };
+    const files = (existing.files as Record<string, unknown>) ?? {};
+    const existingIncludes = Array.isArray(files.includes) ? files.includes : [];
+
+    // Remove safeword exclusions from includes list
+    const safewordExcludes = new Set(['!eslint.config.mjs', '!.safeword', '!.safeword/**']);
+    const cleanedIncludes = existingIncludes.filter(
+      (entry: string) => !safewordExcludes.has(entry),
+    );
+
+    if (cleanedIncludes.length > 0) {
+      files.includes = cleanedIncludes;
+      result.files = files;
+    } else {
+      delete files.includes;
+      if (Object.keys(files).length > 0) {
+        result.files = files;
+      } else {
+        delete result.files;
+      }
+    }
+
+    return result;
+  },
+};
 
 // ============================================================================
 // SAFEWORD_SCHEMA - The Single Source of Truth
@@ -557,6 +618,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         return result;
       },
     },
+
+    // Biome excludes - add safeword files so they don't get linted by Biome/Ultracite
+    // Biome v2 uses `includes` with `!` prefix for exclusions (not a separate `ignore` key)
+    // Support both biome.json and biome.jsonc
+    'biome.json': BIOME_JSON_MERGE,
+    'biome.jsonc': BIOME_JSON_MERGE,
   },
 
   // Text files where we patch specific content

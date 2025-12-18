@@ -65,12 +65,12 @@ Key directories created in your project:
 
 **Purpose**: Reusable methodology applicable to all projects
 
-| Guide                      | Purpose                                                        | When to Read            |
-| -------------------------- | -------------------------------------------------------------- | ----------------------- |
-| **code-philosophy.md**     | Core coding principles, TDD philosophy, self-review checklist  | Before writing code     |
-| **planning-guide.md**      | Feature planning workflow, spec creation, TDD integration      | Starting any feature    |
-| **testing-guide.md**       | TDD workflow (RED/GREEN/REFACTOR), test pyramid, test types    | Writing tests           |
-| **learning-extraction.md** | Extract learnings from debugging, recognition triggers         | After complex debugging |
+| Guide                      | Purpose                                                       | When to Read            |
+| -------------------------- | ------------------------------------------------------------- | ----------------------- |
+| **code-philosophy.md**     | Core coding principles, TDD philosophy, self-review checklist | Before writing code     |
+| **planning-guide.md**      | Feature planning workflow, spec creation, TDD integration     | Starting any feature    |
+| **testing-guide.md**       | TDD workflow (RED/GREEN/REFACTOR), test pyramid, test types   | Writing tests           |
+| **learning-extraction.md** | Extract learnings from debugging, recognition triggers        | After complex debugging |
 
 ---
 
@@ -178,9 +178,15 @@ Each directory has an `archive/` subfolder for completed work.
 **Commands** (in `.claude/commands/`): Slash commands
 
 - `/lint` - Run linters and formatters
+- `/audit` - Run architecture and dead code analysis
 - `/architecture` - Review architecture guidelines
 - `/quality-review` - Deep code review with web research
 - `/cleanup-zombies` - Kill zombie processes on ports
+
+**MCP Servers** (in `.mcp.json` / `.cursor/mcp.json`): Auto-configured integrations
+
+- **context7** - Up-to-date library documentation lookup
+- **playwright** - Browser automation for testing
 
 ---
 

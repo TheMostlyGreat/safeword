@@ -29,12 +29,13 @@ A CLI tool that sets up AI coding agent configurations (guides, hooks, templates
 
 ## Tech Stack
 
-| Component | Technology                         |
-| --------- | ---------------------------------- |
-| CLI       | TypeScript, Commander.js, Node 18+ |
-| Build     | tsup (ESM-only output)             |
-| Tests     | Vitest, promptfoo (LLM evals)      |
-| Linting   | ESLint 9 + Prettier                |
+| Component | Technology                    |
+| --------- | ----------------------------- |
+| Runtime   | Bun (dev), Node 18+ (users)   |
+| CLI       | TypeScript, Commander.js      |
+| Build     | tsup (ESM-only output)        |
+| Tests     | Vitest, promptfoo (LLM evals) |
+| Linting   | ESLint 9 + Prettier           |
 
 **Linting for Agents:** Warnings are useless to coding agents. Only auto-fixable rules and errors matter. Warnings require human judgment and should be reviewed outside the agent's loop.
 
@@ -68,6 +69,8 @@ npm run eval:view      # Open web UI for results
 5. **Publishing**: Always run `npm publish` from `packages/cli/` directory, not the monorepo root. Publishing from root publishes a different package.
 
 6. **CLI Reference Drift**: `packages/cli/templates/guides/cli-reference.md` must stay in sync with `README.md` CLI documentation. When updating CLI commands in README, update cli-reference.md too.
+
+7. **README Feature Drift**: When adding commands, skills, or MCP servers to `schema.ts`, update the corresponding section in `README.md`.
 
 ---
 
