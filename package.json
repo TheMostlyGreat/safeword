@@ -1,8 +1,7 @@
 {
   "name": "safeword",
-  "version": "0.2.5",
+  "private": true,
   "type": "module",
-  "description": "",
   "workspaces": [
     "packages/*"
   ],
@@ -28,7 +27,7 @@
     "eslint-plugin-boundaries": "^5.3.1",
     "eslint-plugin-import-x": "^4.16.1",
     "eslint-plugin-playwright": "^2.4.0",
-    "eslint-plugin-safeword": "^0.4.0",
+    "eslint-plugin-safeword": "workspace:*",
     "eslint-plugin-sonarjs": "^3.0.5",
     "husky": "^9.1.7",
     "knip": "^5.72.0",
