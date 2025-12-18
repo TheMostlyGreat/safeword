@@ -25,22 +25,24 @@ import {
   writeTestFile,
 } from '../helpers';
 
+// Single setup for all hook tests - sharing avoids 3 separate npm installs (~9 min → 9 sec)
+// Tests must be idempotent or restore state after modification (see try/finally blocks)
+let projectDirectory: string;
+
+beforeAll(async () => {
+  projectDirectory = createTemporaryDirectory();
+  createTypeScriptPackageJson(projectDirectory);
+  initGitRepo(projectDirectory);
+  await runCli(['setup', '--yes'], { cwd: projectDirectory });
+}, 180_000);
+
+afterAll(() => {
+  if (projectDirectory) {
+    removeTemporaryDirectory(projectDirectory);
+  }
+});
+
 describe('E2E: SessionStart Hooks', () => {
-  let projectDirectory: string;
-
-  beforeAll(async () => {
-    projectDirectory = createTemporaryDirectory();
-    createTypeScriptPackageJson(projectDirectory);
-    initGitRepo(projectDirectory);
-    await runCli(['setup', '--yes'], { cwd: projectDirectory });
-  }, 180_000);
-
-  afterAll(() => {
-    if (projectDirectory) {
-      removeTemporaryDirectory(projectDirectory);
-    }
-  });
-
   describe('session-version.sh', () => {
     it('outputs version message for safeword project', () => {
       const output = execSync('bash .safeword/hooks/session-version.sh', {
@@ -213,21 +215,6 @@ describe('E2E: SessionStart Hooks', () => {
 });
 
 describe('E2E: UserPromptSubmit Hooks', () => {
-  let projectDirectory: string;
-
-  beforeAll(async () => {
-    projectDirectory = createTemporaryDirectory();
-    createTypeScriptPackageJson(projectDirectory);
-    initGitRepo(projectDirectory);
-    await runCli(['setup', '--yes'], { cwd: projectDirectory });
-  }, 180_000);
-
-  afterAll(() => {
-    if (projectDirectory) {
-      removeTemporaryDirectory(projectDirectory);
-    }
-  });
-
   describe('prompt-timestamp.sh', () => {
     it('outputs current timestamp in expected format', () => {
       const output = execSync('bash .safeword/hooks/prompt-timestamp.sh', {
@@ -297,27 +284,7 @@ describe('E2E: UserPromptSubmit Hooks', () => {
 });
 
 describe('E2E: Stop Hook', () => {
-  let projectDirectory: string;
-
-  beforeAll(async () => {
-    projectDirectory = createTemporaryDirectory();
-    createTypeScriptPackageJson(projectDirectory);
-    initGitRepo(projectDirectory);
-    await runCli(['setup', '--yes'], { cwd: projectDirectory });
-  }, 180_000);
-
-  afterAll(() => {
-    if (projectDirectory) {
-      removeTemporaryDirectory(projectDirectory);
-    }
-  });
-
   // Helper to create a mock transcript with an assistant message
-  /**
-   *
-   * @param targetDirectory
-   * @param assistantText
-   */
   function createMockTranscript(targetDirectory: string, assistantText: string): string {
     const transcriptPath = `${targetDirectory}/.safeword/test-transcript.jsonl`;
     const message = {
@@ -331,11 +298,6 @@ describe('E2E: Stop Hook', () => {
   }
 
   // Helper to run stop hook with mock transcript
-  /**
-   *
-   * @param targetDirectory
-   * @param transcriptPath
-   */
   function runStopHook(
     targetDirectory: string,
     transcriptPath: string,
