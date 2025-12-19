@@ -22,6 +22,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@microsoft/eslint-plugin-sdl": "^1.1.0",
+    "dependency-cruiser": "^17.3.4",
     "dotenv-cli": "^8.0.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
