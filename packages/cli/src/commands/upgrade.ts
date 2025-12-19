@@ -11,6 +11,7 @@ import { reconcile, type ReconcileResult } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists, readFileSafe } from '../utils/fs.js';
+import { detectPackageManager, getInstallCommand } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { compareVersions } from '../utils/version.js';
 import { VERSION } from '../version.js';
@@ -18,8 +19,10 @@ import { VERSION } from '../version.js';
 function installDependencies(cwd: string, packages: string[]): void {
   if (packages.length === 0) return;
 
+  const pm = detectPackageManager(cwd);
+  const installCmd = getInstallCommand(pm, packages);
+
   info('\nInstalling missing packages...');
-  const installCmd = `npm install -D ${packages.join(' ')}`;
   info(`Running: ${installCmd}`);
 
   try {

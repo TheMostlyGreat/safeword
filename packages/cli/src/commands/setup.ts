@@ -12,6 +12,7 @@ import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists, writeJson } from '../utils/fs.js';
 import { isGitRepo } from '../utils/git.js';
+import { detectPackageManager, getInstallCommand } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { VERSION } from '../version.js';
 import { buildArchitecture, hasArchitectureDetected, syncConfigCore } from './sync-config.js';
@@ -42,8 +43,10 @@ function ensurePackageJson(cwd: string): boolean {
 function installDependencies(cwd: string, packages: string[]): void {
   if (packages.length === 0) return;
 
+  const pm = detectPackageManager(cwd);
+  const installCmd = getInstallCommand(pm, packages);
+
   info('\nInstalling linting dependencies...');
-  const installCmd = `npm install -D ${packages.join(' ')}`;
   info(`Running: ${installCmd}`);
 
   try {
