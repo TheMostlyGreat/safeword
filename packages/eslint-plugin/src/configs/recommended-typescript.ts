@@ -49,12 +49,22 @@ export const recommendedTypeScript: any[] = [
     },
   },
 
+  // Disable type-checked rules for non-TS files (no type info available)
+  // Includes JS files and .astro files (which use astro-eslint-parser)
+  {
+    ...tseslintConfigs.disableTypeChecked,
+    name: 'safeword/disable-type-checked-for-non-ts',
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs', '**/*.jsx', '**/*.astro'],
+  },
+
   // No JSDoc for TypeScript - types > docs
   // TypeScript signatures provide better documentation than JSDoc
 
   // TypeScript-specific rule overrides for LLM code
+  // Only applies to TS files (JS files don't have type info for these rules)
   {
     name: 'safeword/typescript-rules',
+    files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
     rules: {
       // Allow interface vs type - both are valid
       '@typescript-eslint/consistent-type-definitions': 'off',

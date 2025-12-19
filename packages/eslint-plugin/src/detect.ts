@@ -92,17 +92,17 @@ export function collectAllDeps(rootDir: string): DepsRecord {
   };
 
   // Read root package.json
-  const rootPkgPath = join(rootDir, 'package.json');
-  mergeDeps(rootPkgPath);
+  const rootPackagePath = join(rootDir, 'package.json');
+  mergeDeps(rootPackagePath);
 
   // Check for workspaces (npm/yarn/pnpm)
   let workspacePatterns: string[] = [];
   try {
-    const rootPkg = JSON.parse(readFileSync(rootPkgPath, 'utf8'));
-    if (Array.isArray(rootPkg.workspaces)) {
-      workspacePatterns = rootPkg.workspaces;
-    } else if (rootPkg.workspaces?.packages) {
-      workspacePatterns = rootPkg.workspaces.packages;
+    const rootPackage = JSON.parse(readFileSync(rootPackagePath, 'utf8'));
+    if (Array.isArray(rootPackage.workspaces)) {
+      workspacePatterns = rootPackage.workspaces;
+    } else if (rootPackage.workspaces?.packages) {
+      workspacePatterns = rootPackage.workspaces.packages;
     }
   } catch {
     // No workspaces defined
@@ -179,8 +179,8 @@ export function detectFramework(
  */
 export function getIgnores(deps: DepsRecord): string[] {
   const ignores = ['**/node_modules/', '**/dist/', '**/build/', '**/coverage/'];
-  if ('next' in deps) ignores.push('.next/');
-  if ('astro' in deps) ignores.push('.astro/');
+  if ('next' in deps) ignores.push('**/.next/');
+  if ('astro' in deps) ignores.push('**/.astro/');
   return ignores;
 }
 

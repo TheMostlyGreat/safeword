@@ -28,16 +28,46 @@ function lintJs(code: string, ruleId: string) {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, security/detect-object-injection -- ESLint config types vary across plugins */
+
 /**
- * Get the final rule config from a flat config array.
+ * Check if a files pattern matches TypeScript files.
+ * Returns true if no files pattern (global) or if pattern includes TS.
+ */
+function matchesTypeScript(files: unknown): boolean {
+  if (!files) return true; // No files = global scope
+  const patterns = Array.isArray(files) ? files : [files];
+  // If empty array, return false (matches nothing)
+  if (patterns.length === 0) return false;
+  return patterns.some((p: unknown) => {
+    if (typeof p !== 'string') return false;
+    // Check for TypeScript extensions or truly global patterns
+    if (p.includes('.ts') || p.includes('.tsx') || p.includes('.mts') || p.includes('.cts')) {
+      return true;
+    }
+    // Check for global patterns that match all files (not extension-specific)
+    // e.g., "**/*" but not "**/*.js"
+    if (p === '**/*' || p === '*' || p === '**') {
+      return true;
+    }
+    return false;
+  });
+}
+
+/**
+ * Get the final rule config from a flat config array for TypeScript files.
+ * Skips config blocks that only apply to JS files.
  * @param config - Array of ESLint flat config objects
  * @param ruleId - Rule ID to find
  * @returns The rule configuration or undefined
  */
-function getRuleConfig(config: any[], ruleId: string): unknown {
+function getRuleConfigForTs(config: any[], ruleId: string): unknown {
   for (let i = config.length - 1; i >= 0; i--) {
     const c = config[i];
     if (c && typeof c === 'object' && 'rules' in c && c.rules && ruleId in c.rules) {
+      // Skip if this config only applies to JS files
+      if (!matchesTypeScript(c.files)) {
+        continue;
+      }
       return c.rules[ruleId];
     }
   }
@@ -45,12 +75,12 @@ function getRuleConfig(config: any[], ruleId: string): unknown {
 }
 
 /**
- * Assert a rule is configured at error severity in the config.
+ * Assert a rule is configured at error severity in the config for TypeScript files.
  * @param config - ESLint flat config array
  * @param ruleId - Rule ID to check
  */
 function expectErrorSeverity(config: any[], ruleId: string): void {
-  const ruleConfig = getRuleConfig(config, ruleId);
+  const ruleConfig = getRuleConfigForTs(config, ruleId);
   expect(ruleConfig).toBeDefined();
   const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
   expect(severity === 'error' || severity === ERROR).toBe(true);
