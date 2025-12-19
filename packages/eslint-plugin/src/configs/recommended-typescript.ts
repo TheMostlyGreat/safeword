@@ -19,6 +19,12 @@ import { configs as tseslintConfigs } from 'typescript-eslint';
 import { basePlugins, prettierConfig } from './base.js';
 
 /**
+ * File patterns for TypeScript files.
+ * Used for parser options and type-checked rules.
+ */
+const TS_FILES = ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'];
+
+/**
  * TypeScript recommended config - all base plugins + typescript-eslint strict
  *
  * Requires: tsconfig.json in project root (or configured via languageOptions)
@@ -41,7 +47,7 @@ export const recommendedTypeScript: any[] = [
   // Enable projectService for type-checked rules (modern approach, auto-discovers tsconfig)
   {
     name: 'safeword/typescript-parser-options',
-    files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
+    files: TS_FILES,
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -64,7 +70,7 @@ export const recommendedTypeScript: any[] = [
   // Only applies to TS files (JS files don't have type info for these rules)
   {
     name: 'safeword/typescript-rules',
-    files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
+    files: TS_FILES,
     rules: {
       // Allow interface vs type - both are valid
       '@typescript-eslint/consistent-type-definitions': 'off',
