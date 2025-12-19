@@ -11,7 +11,7 @@
     "eval": "dotenv -e .env -- promptfoo eval -c promptfoo.yaml",
     "eval:view": "promptfoo view",
     "eval:no-cache": "dotenv -e .env -- promptfoo eval -c promptfoo.yaml --no-cache",
-    "lint:md": "./.safeword/scripts/lint-md.sh \"**/*.md\" \"#**/node_modules\" \"#examples\" \"#dist\"",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#**/node_modules\" \"#examples\" \"#dist\"",
     "lint:sh": "shellcheck **/*.sh .safeword/hooks/* packages/cli/templates/hooks/* packages/cli/templates/scripts/* 2>/dev/null || true",
     "format:sh": "shfmt -w -i 2 -ci **/*.sh .safeword/hooks/* packages/cli/templates/hooks/* packages/cli/templates/scripts/* 2>/dev/null || echo 'shfmt not installed (brew install shfmt)'",
     "format:check": "prettier --check .",
