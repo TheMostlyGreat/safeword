@@ -4,6 +4,7 @@
  * Uses reconcile() with mode='upgrade' to update all managed files.
  */
 
+import { execSync } from 'node:child_process';
 import nodePath from 'node:path';
 
 import { reconcile, type ReconcileResult } from '../reconcile.js';
@@ -13,6 +14,22 @@ import { exists, readFileSafe } from '../utils/fs.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { compareVersions } from '../utils/version.js';
 import { VERSION } from '../version.js';
+
+function installDependencies(cwd: string, packages: string[]): void {
+  if (packages.length === 0) return;
+
+  info('\nInstalling missing packages...');
+  const installCmd = `npm install -D ${packages.join(' ')}`;
+  info(`Running: ${installCmd}`);
+
+  try {
+    execSync(installCmd, { cwd, stdio: 'inherit' });
+    success('Installed missing packages');
+  } catch {
+    warn('Failed to install packages. Run manually:');
+    listItem(installCmd);
+  }
+}
 
 function getProjectVersion(safewordDirectory: string): string {
   const versionPath = nodePath.join(safewordDirectory, 'version');
@@ -68,6 +85,7 @@ export async function upgrade(): Promise<void> {
   try {
     const ctx = createProjectContext(cwd);
     const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx);
+    installDependencies(cwd, result.packagesToInstall);
     printUpgradeSummary(result, projectVersion);
   } catch (error_) {
     error(`Upgrade failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);

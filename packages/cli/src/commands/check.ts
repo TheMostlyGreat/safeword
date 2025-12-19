@@ -10,7 +10,7 @@ import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists, readFileSafe } from '../utils/fs.js';
-import { header, info, keyValue, success, warn } from '../utils/output.js';
+import { header, info, keyValue, listItem, success, warn } from '../utils/output.js';
 import { isNewerVersion } from '../utils/version.js';
 import { VERSION } from '../version.js';
 
@@ -212,8 +212,8 @@ function reportHealthSummary(health: HealthStatus): void {
 
   if (health.missingPackages.length > 0) {
     header('Missing Packages');
-    info(`${health.missingPackages.length} linting packages not installed`);
-    info('Run `safeword upgrade` to install missing packages');
+    for (const pkg of health.missingPackages) listItem(pkg);
+    info('\nRun `safeword upgrade` to install missing packages');
     return;
   }
 

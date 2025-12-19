@@ -177,9 +177,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/guides/test-definitions-guide.md',
     // Boundaries config now project-specific (v0.9.0)
     '.safeword/eslint-boundaries.config.mjs',
-    // Markdown linting removed (v0.10.0)
-    '.markdownlint-cli2.jsonc',
-    '.safeword/scripts/lint-md.sh',
   ],
 
   // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
