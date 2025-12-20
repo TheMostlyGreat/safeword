@@ -4,7 +4,6 @@
  * Uses reconcile() with mode='install' to create all managed files.
  */
 
-import { execSync } from 'node:child_process';
 import nodePath from 'node:path';
 
 import { reconcile, type ReconcileResult } from '../reconcile.js';
@@ -12,7 +11,7 @@ import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists, writeJson } from '../utils/fs.js';
 import { isGitRepo } from '../utils/git.js';
-import { detectPackageManager, getInstallCommand } from '../utils/install.js';
+import { installDependencies } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { VERSION } from '../version.js';
 import { buildArchitecture, hasArchitectureDetected, syncConfigCore } from './sync-config.js';
@@ -38,24 +37,6 @@ function ensurePackageJson(cwd: string): boolean {
   const defaultPackageJson: PackageJson = { name: dirName, version: '0.1.0', scripts: {} };
   writeJson(packageJsonPath, defaultPackageJson);
   return true;
-}
-
-function installDependencies(cwd: string, packages: string[]): void {
-  if (packages.length === 0) return;
-
-  const pm = detectPackageManager(cwd);
-  const installCmd = getInstallCommand(pm, packages);
-
-  info('\nInstalling linting dependencies...');
-  info(`Running: ${installCmd}`);
-
-  try {
-    execSync(installCmd, { cwd, stdio: 'inherit' });
-    success('Installed linting dependencies');
-  } catch {
-    warn('Failed to install dependencies. Run manually:');
-    listItem(installCmd);
-  }
 }
 
 function printSetupSummary(
@@ -125,7 +106,7 @@ export async function setup(options: SetupOptions): Promise<void> {
       info('Generated dependency-cruiser config for /audit command');
     }
 
-    installDependencies(cwd, result.packagesToInstall);
+    installDependencies(cwd, result.packagesToInstall, 'linting dependencies');
 
     if (!isGitRepo(cwd)) {
       const isNonInteractive = options.yes || !process.stdin.isTTY;

@@ -5,8 +5,11 @@
  * Operations are handled by reconcile() in src/reconcile.ts.
  */
 
+import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { info, listItem, success, warn } from './output.js';
 
 export type PackageManager = 'npm' | 'yarn' | 'pnpm' | 'bun';
 
@@ -17,11 +20,25 @@ export function detectPackageManager(cwd: string): PackageManager {
   if (existsSync(join(cwd, 'bun.lockb')) || existsSync(join(cwd, 'bun.lock'))) return 'bun';
   if (existsSync(join(cwd, 'pnpm-lock.yaml'))) return 'pnpm';
   if (existsSync(join(cwd, 'yarn.lock'))) return 'yarn';
+  if (existsSync(join(cwd, 'package-lock.json'))) return 'npm';
   return 'npm';
 }
 
 /**
- * Get install command for package manager
+ * Get install command args for package manager
+ */
+function getInstallArguments(pm: PackageManager): string[] {
+  const args: Record<PackageManager, string[]> = {
+    npm: ['install', '-D'],
+    yarn: ['add', '-D'],
+    pnpm: ['add', '-D'],
+    bun: ['add', '-D'],
+  };
+  return args[pm];
+}
+
+/**
+ * Get display command for logging
  */
 export function getInstallCommand(pm: PackageManager, packages: string[]): string {
   const cmds: Record<PackageManager, string> = {
@@ -31,6 +48,32 @@ export function getInstallCommand(pm: PackageManager, packages: string[]): strin
     bun: `bun add -D ${packages.join(' ')}`,
   };
   return cmds[pm];
+}
+
+/**
+ * Install packages using detected package manager
+ */
+export function installDependencies(
+  cwd: string,
+  packages: string[],
+  label = 'packages',
+): void {
+  if (packages.length === 0) return;
+
+  const pm = detectPackageManager(cwd);
+  const displayCmd = getInstallCommand(pm, packages);
+
+  info(`\nInstalling ${label}...`);
+  info(`Running: ${displayCmd}`);
+
+  try {
+    const args = [...getInstallArguments(pm), ...packages];
+    execFileSync(pm, args, { cwd, stdio: 'inherit' });
+    success(`Installed ${label}`);
+  } catch {
+    warn(`Failed to install ${label}. Run manually:`);
+    listItem(displayCmd);
+  }
 }
 
 /**
