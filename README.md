@@ -142,11 +142,11 @@ Key directories created in your project:
 planning/
 ├── specs/              Feature and task specs
 ├── test-definitions/   Test definition documents
-├── design/            Design docs and research
-└── issues/            Issue capture and tracking
+├── design/             Design docs and research
+├── issues/             Issue capture and tracking
+├── plans/              LLM-ready execution plans
+└── archive/            Completed work
 ```
-
-Each directory has an `archive/` subfolder for completed work.
 
 **What goes here**:
 
