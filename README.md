@@ -160,15 +160,15 @@ planning/
 
 ## Hooks, Commands & Skills
 
-**Hooks** (in `.safeword/hooks/`): Automation scripts triggered by Claude Code events
+**Hooks** (in `.safeword/hooks/`): TypeScript automation scripts (Bun runtime)
 
-- `session-verify-agents.sh` - Verifies AGENTS.md link on session start
-- `session-version.sh` - Shows safeword version on session start
-- `session-lint-check.sh` - Checks for lint errors on session start
-- `prompt-timestamp.sh` - Injects timestamp into prompts
-- `prompt-questions.sh` - Reminds agent to ask clarifying questions
-- `post-tool-lint.sh` - Auto-lints after file edits
-- `stop-quality.sh` - Quality review prompt on stop
+- `session-verify-agents.ts` - Verifies AGENTS.md link on session start
+- `session-version.ts` - Shows safeword version on session start
+- `session-lint-check.ts` - Checks for lint errors on session start
+- `prompt-timestamp.ts` - Injects timestamp into prompts
+- `prompt-questions.ts` - Reminds agent to ask clarifying questions
+- `post-tool-lint.ts` - Auto-lints after file edits
+- `stop-quality.ts` - Quality review prompt on stop
 
 **Skills** (in `.claude/skills/`): Specialized agent capabilities
 
