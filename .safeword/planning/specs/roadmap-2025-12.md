@@ -402,6 +402,30 @@ Make safeword installable as a Claude Code plugin:
 - [ ] Understand relationship between: MCP servers, plugins, skills, hooks
 - [ ] Prototype safeword as a Claude Code plugin
 
+### Auto Upgrade
+
+Automatically check for and apply safeword updates:
+
+- [ ] Check for new version on session start (hook)
+- [ ] Prompt user to upgrade when new version available
+- [ ] Option for auto-upgrade without prompting
+- [ ] Respect user preference (never ask, always ask, auto-upgrade)
+- [ ] Store preference in `.safeword/config.json` or similar
+
+### Telemetry
+
+Anonymous usage telemetry to understand adoption and issues:
+
+- [ ] Define what to track (setup success/failure, upgrade events, feature usage)
+- [ ] Choose telemetry provider (PostHog, Mixpanel, custom)
+- [ ] Implement opt-in/opt-out (respect privacy, default OFF or prompt)
+- [ ] Add telemetry to key events:
+  - `safeword setup` completion
+  - `safeword upgrade` completion
+  - Hook execution counts
+  - Error events (anonymized)
+- [ ] Dashboard for viewing adoption metrics
+
 ### Arcade Integration
 
 Wire up Arcade properly with a setup wizard:
