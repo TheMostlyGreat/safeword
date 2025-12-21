@@ -366,14 +366,17 @@ describe('E2E: Stop Hook', () => {
       expect(result.stderr).toContain('still relevant after review');
     });
 
-    it('skips review when only askedQuestion is true (no changes)', () => {
+    it('triggers research prompt when only askedQuestion is true (no changes)', () => {
       const text =
         'What approach do you prefer?\n\n{"proposedChanges": false, "madeChanges": false, "askedQuestion": true}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
 
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode).toBe(2);
+      expect(result.stderr).toContain('Research Prompt');
+      expect(result.stderr).toContain('do your research and investigate');
+      expect(result.stderr).toContain('Think hard');
       expect(result.stderr).not.toContain('Quality Review');
     });
 

@@ -16,3 +16,15 @@ Assume you've never seen it before.
 - Ask me any non-obvious questions.
 - Avoid bloat.
 - If you asked a question above that's still relevant after review, re-ask it.`;
+
+export const QUESTION_RESEARCH_MESSAGE = `SAFEWORD Research Prompt:
+
+Before asking this question, do your research and investigate.
+Explore and debate the options.
+
+- What's most correct?
+- What's most elegant?
+- What's most in line with latest docs and best practices?
+- Think hard and avoid bloat.
+
+Then re-ask your question with the context you've gathered.`;

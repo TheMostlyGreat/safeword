@@ -5,7 +5,7 @@
 
 import { existsSync } from 'node:fs';
 
-import { QUALITY_REVIEW_MESSAGE } from './lib/quality.ts';
+import { QUALITY_REVIEW_MESSAGE, QUESTION_RESEARCH_MESSAGE } from './lib/quality.ts';
 
 interface HookInput {
   transcript_path?: string;
@@ -161,5 +161,11 @@ if (!summary) {
 // If either proposed or made changes, trigger quality review
 if (summary.proposedChanges || summary.madeChanges) {
   console.error(QUALITY_REVIEW_MESSAGE);
+  process.exit(2);
+}
+
+// If only asked a question (no changes), trigger research prompt
+if (summary.askedQuestion) {
+  console.error(QUESTION_RESEARCH_MESSAGE);
   process.exit(2);
 }
