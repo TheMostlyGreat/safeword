@@ -41,11 +41,14 @@ A CLI tool that sets up AI coding agent configurations (guides, hooks, templates
 
 ## Testing
 
+**Important:** Use `bun run test` (Vitest), NOT `bun test` (Bun's runner). They have different module resolution.
+
 | What | Command | Path |
 |------|---------|------|
-| All tests | `bun test` | `packages/cli/` |
-| Unit tests | `bun test tests/` | `packages/cli/` |
-| Integration | `bun test:integration` | `packages/cli/` |
+| All tests | `bun run test` | `packages/cli/` |
+| Single file | `npx vitest run tests/foo.test.ts` | `packages/cli/` |
+| Integration | `bun run test:integration` | `packages/cli/` |
+| Watch mode | `bun run test:watch` | `packages/cli/` |
 | LLM evals | `npm run eval` | `packages/cli/` |
 
 ---
