@@ -39,6 +39,17 @@ A CLI tool that sets up AI coding agent configurations (guides, hooks, templates
 
 **Linting for Agents:** Warnings are useless to coding agents. Only auto-fixable rules and errors matter. Warnings require human judgment and should be reviewed outside the agent's loop.
 
+## Testing
+
+| What | Command | Path |
+|------|---------|------|
+| All tests | `bun test` | `packages/cli/` |
+| Unit tests | `bun test tests/` | `packages/cli/` |
+| Integration | `bun test:integration` | `packages/cli/` |
+| LLM evals | `npm run eval` | `packages/cli/` |
+
+---
+
 ## Development Workflow
 
 ### Editing Source Templates

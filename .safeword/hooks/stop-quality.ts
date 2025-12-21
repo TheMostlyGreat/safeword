@@ -111,11 +111,6 @@ if (!summary) {
   process.exit(2);
 }
 
-// If asked a question, don't trigger review (waiting for user input)
-if (summary.askedQuestion) {
-  process.exit(0);
-}
-
 // If either proposed or made changes, trigger quality review
 if (summary.proposedChanges || summary.madeChanges) {
   console.error(QUALITY_REVIEW_MESSAGE);

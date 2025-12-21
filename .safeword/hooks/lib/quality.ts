@@ -14,4 +14,5 @@ Assume you've never seen it before.
 - Is it elegant?
 - Does it follow latest docs/best practices?
 - Ask me any non-obvious questions.
-- Avoid bloat.`;
+- Avoid bloat.
+- If you asked a question above that's still relevant after review, re-ask it.`;

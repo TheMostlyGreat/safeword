@@ -353,9 +353,22 @@ describe('E2E: Stop Hook', () => {
       expect(result.stderr).toContain('Quality Review');
     });
 
-    it('skips review when askedQuestion is true', () => {
+    it('triggers review even when askedQuestion is true if changes were made', () => {
       const text =
-        'What approach do you prefer?\n\n{"proposedChanges": true, "madeChanges": true, "askedQuestion": true}';
+        'Made changes. Ready to proceed?\n\n{"proposedChanges": false, "madeChanges": true, "askedQuestion": true}';
+      const transcriptPath = createMockTranscript(projectDirectory, text);
+
+      const result = runStopHook(projectDirectory, transcriptPath);
+
+      expect(result.exitCode).toBe(2);
+      expect(result.stderr).toContain('Quality Review');
+      // Should include guidance about re-asking questions
+      expect(result.stderr).toContain('still relevant after review');
+    });
+
+    it('skips review when only askedQuestion is true (no changes)', () => {
+      const text =
+        'What approach do you prefer?\n\n{"proposedChanges": false, "madeChanges": false, "askedQuestion": true}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
