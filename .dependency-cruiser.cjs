@@ -153,8 +153,8 @@ module.exports = {
 
     {
       name: 'no-deprecated-deps',
-      comment: 'Warn when importing deprecated npm packages',
-      severity: 'warn',
+      comment: 'Error when importing deprecated npm packages - fix immediately',
+      severity: 'error',
       from: {},
       to: { dependencyTypes: ['deprecated'] },
     },
@@ -171,8 +171,8 @@ module.exports = {
     // No orphan modules (files not imported by anything)
     {
       name: 'no-orphans',
-      comment: 'Warn about orphan modules (may be entry points - review manually)',
-      severity: 'warn',
+      comment: 'Error on orphan modules - dead code or missing export',
+      severity: 'error',
       from: {
         orphan: true,
         pathNot: [
