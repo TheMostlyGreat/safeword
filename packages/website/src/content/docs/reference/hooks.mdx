@@ -1,0 +1,46 @@
+---
+title: Hooks
+description: Safeword hooks reference
+---
+
+# Hooks
+
+Hooks are TypeScript scripts that run at specific points during AI coding sessions.
+
+## Available Hooks
+
+| Hook | Trigger | Purpose |
+|------|---------|---------|
+| `session-version.ts` | Session start | Display safeword version |
+| `session-verify-agents.ts` | Session start | Verify AGENTS.md exists |
+| `session-lint-check.ts` | Session start | Check for lint issues |
+| `prompt-timestamp.ts` | Prompt submit | Add timestamp to context |
+| `prompt-questions.ts` | Prompt submit | Remind about clarifying questions |
+| `post-tool-lint.ts` | After file edit | Lint changed files |
+| `stop-quality.ts` | Session end | Trigger quality review |
+
+## Hook Location
+
+Hooks live in `.safeword/hooks/` and are executed with Bun:
+
+```
+.safeword/hooks/
+├── lib/
+│   ├── lint.ts
+│   └── quality.ts
+├── post-tool-lint.ts
+├── prompt-questions.ts
+├── prompt-timestamp.ts
+├── session-lint-check.ts
+├── session-verify-agents.ts
+├── session-version.ts
+└── stop-quality.ts
+```
+
+## Customizing Hooks
+
+Hooks are "owned" files - they get overwritten on `safeword upgrade`. To customize:
+
+1. Copy the hook to a new name
+2. Modify as needed
+3. Update `.claude/settings.json` to use your hook

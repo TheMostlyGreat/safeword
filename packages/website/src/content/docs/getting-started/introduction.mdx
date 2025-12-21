@@ -1,0 +1,27 @@
+---
+title: Introduction
+description: What is Safeword and why you need it
+---
+
+# Safeword
+
+**AI coding agent guardrails** - hooks, skills, and quality controls for Claude Code, Cursor, and other AI coding assistants.
+
+## Why Safeword?
+
+AI coding agents are powerful but need guidance:
+
+- **Hooks** - Auto-lint on file changes, quality review on session end
+- **Skills** - Structured workflows for TDD, debugging, refactoring
+- **ESLint Plugin** - Catch common LLM mistakes (incomplete error handling, etc.)
+
+## Quick Install
+
+```bash
+npx safeword setup
+```
+
+This sets up:
+- `.safeword/` directory with hooks and guides
+- `.claude/` or `.cursor/` configuration
+- ESLint + Prettier with LLM-optimized rules

@@ -1,0 +1,60 @@
+---
+title: CLI Commands
+description: Safeword command-line interface reference
+---
+
+# CLI Commands
+
+## `safeword setup`
+
+Initialize safeword in a project.
+
+```bash
+npx safeword setup [options]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--yes`, `-y` | Skip confirmation prompts |
+| `--force` | Overwrite existing files |
+
+## `safeword upgrade`
+
+Update safeword files to latest version.
+
+```bash
+npx safeword upgrade [options]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--dry-run` | Show what would change without writing |
+| `--force` | Overwrite modified owned files |
+
+## `safeword check`
+
+Verify installation and report issues.
+
+```bash
+npx safeword check
+```
+
+## `safeword reset`
+
+Remove all safeword files.
+
+```bash
+npx safeword reset [options]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--yes`, `-y` | Skip confirmation |
+
+## `safeword diff`
+
+Show differences between local and template files.
+
+```bash
+npx safeword diff [file]
+```

@@ -1,0 +1,61 @@
+---
+title: Configuration
+description: Safeword configuration reference
+---
+
+# Configuration
+
+## File Categories
+
+Safeword manages two types of files:
+
+### Owned Files
+
+Overwritten on every `safeword upgrade`:
+
+- `.safeword/hooks/*`
+- `.claude/skills/*`
+- `.cursor/rules/*`
+- `.safeword/SAFEWORD.md`
+
+### Managed Files
+
+Only created if missing, never overwritten:
+
+- `eslint.config.mjs`
+- `.prettierrc`
+- `.claude/settings.json`
+
+## ESLint Configuration
+
+Safeword provides an ESLint plugin with multiple configs:
+
+```js
+// eslint.config.mjs
+import safeword from 'eslint-plugin-safeword';
+
+export default [
+  ...safeword.configs.recommendedTypeScript,
+  ...safeword.configs.react,
+  ...safeword.configs.vitest,
+];
+```
+
+## Claude Settings
+
+Hook configuration in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [...],
+    "UserPromptSubmit": [...],
+    "PostToolUse": [...],
+    "Stop": [...]
+  }
+}
+```
+
+## Version File
+
+`.safeword/version` tracks the installed version for upgrade logic.

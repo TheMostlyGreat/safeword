@@ -26,6 +26,7 @@ const boundariesConfig = {
     'boundaries/elements': [
       { type: 'cli', pattern: 'packages/cli/**', mode: 'full' },
       { type: 'plugin', pattern: 'packages/eslint-plugin/**', mode: 'full' },
+      { type: 'website', pattern: 'packages/website/**', mode: 'full' },
     ],
   },
   rules: {
@@ -34,10 +35,12 @@ const boundariesConfig = {
       {
         default: 'disallow',
         rules: [
-          // CLI can only import from CLI (not from plugin)
-          { from: ['cli'], allow: ['cli'] },
-          // Plugin can only import from plugin (not from CLI)
+          // CLI can import from CLI and plugin (for eslint-plugin-safeword dep)
+          { from: ['cli'], allow: ['cli', 'plugin'] },
+          // Plugin is a leaf - can only import from itself
           { from: ['plugin'], allow: ['plugin'] },
+          // Website is isolated - no cross-package imports
+          { from: ['website'], allow: ['website'] },
         ],
       },
     ],
@@ -119,6 +122,26 @@ const configs = [
       'sonarjs/publicly-writable-directories': 'off',
       'sonarjs/no-alphabetical-sort': 'off',
       'regexp/no-dupe-disjunctions': 'off',
+    },
+  },
+
+  // Website package overrides - Astro has virtual modules and special patterns
+  {
+    name: 'website-package-override',
+    files: ['packages/website/**/*.ts', 'packages/website/**/*.tsx', 'packages/website/**/*.astro', 'packages/website/**/*.mjs'],
+    rules: {
+      // Astro virtual modules (astro:content, @astrojs/starlight/*)
+      'import-x/no-unresolved': 'off',
+      // Astro uses dynamic patterns that TS-ESLint flags
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
+      '@typescript-eslint/strict-boolean-expressions': 'off',
     },
   },
 ];

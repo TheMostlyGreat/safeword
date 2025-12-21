@@ -1,0 +1,44 @@
+---
+title: Quick Start
+description: Get up and running with Safeword in 5 minutes
+---
+
+# Quick Start
+
+## 1. Install
+
+```bash
+npx safeword setup --yes
+```
+
+## 2. Start Coding
+
+Open your project in Claude Code or Cursor. Safeword hooks activate automatically:
+
+- **On file edit** → ESLint runs on changed files
+- **On prompt submit** → Questions are detected for clarification
+- **On session end** → Quality review suggests improvements
+
+## 3. Use Skills
+
+Invoke skills with slash commands:
+
+```
+/safeword-debugging     # Structured debugging workflow
+/safeword-enforcing-tdd # RED → GREEN → REFACTOR
+/safeword-refactoring   # Safe refactoring with tests
+```
+
+## 4. Check Status
+
+```bash
+npx safeword check
+```
+
+Verifies your setup is correct and reports any issues.
+
+## Next Steps
+
+- Read the [Hooks Reference](/reference/hooks) to customize behavior
+- Explore [Skills](/reference/skills) for structured workflows
+- Check the [Configuration Guide](/reference/configuration) for advanced setup

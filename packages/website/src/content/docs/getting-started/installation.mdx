@@ -1,0 +1,43 @@
+---
+title: Installation
+description: How to install and set up Safeword
+---
+
+# Installation
+
+## Prerequisites
+
+- Node.js 18+ or Bun
+- A JavaScript/TypeScript project with `package.json`
+
+## Quick Setup
+
+```bash
+npx safeword setup
+```
+
+Or with Bun:
+
+```bash
+bunx safeword setup
+```
+
+## What Gets Installed
+
+The setup command creates:
+
+| Path | Description |
+|------|-------------|
+| `.safeword/` | Hooks, guides, and templates |
+| `.claude/` | Claude Code settings and skills |
+| `.cursor/rules/` | Cursor AI rules |
+| `eslint.config.mjs` | ESLint with safeword plugin |
+| `.prettierrc` | Prettier configuration |
+
+## Upgrading
+
+```bash
+npx safeword upgrade
+```
+
+This updates owned files while preserving your customizations to managed files.

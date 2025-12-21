@@ -1,0 +1,46 @@
+---
+title: Skills
+description: Safeword skills reference
+---
+
+# Skills
+
+Skills are structured workflows that guide AI agents through specific tasks.
+
+## Available Skills
+
+| Skill | Trigger | Purpose |
+|-------|---------|---------|
+| `safeword-brainstorming` | "brainstorm", "explore options" | Collaborative design through questioning |
+| `safeword-debugging` | "debug", "fix error" | Four-phase debugging framework |
+| `safeword-enforcing-tdd` | "implement", "add feature" | RED → GREEN → REFACTOR cycle |
+| `safeword-quality-reviewer` | "review", "check quality" | Deep code review with web research |
+| `safeword-refactoring` | "refactor", "clean up" | Small-step refactoring discipline |
+| `safeword-writing-plans` | "write plan", "break down" | Detailed implementation plans |
+
+## Using Skills
+
+Invoke skills with slash commands in Claude Code:
+
+```
+/safeword-debugging
+```
+
+Or mention the trigger phrase in your prompt:
+
+```
+"Debug this test failure..."
+```
+
+## Skill Location
+
+Skills live in `.claude/skills/`:
+
+```
+.claude/skills/
+├── safeword-brainstorming/
+│   └── SKILL.md
+├── safeword-debugging/
+│   └── SKILL.md
+└── ...
+```

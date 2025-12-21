@@ -16,3 +16,4 @@ eval-results.json
 .claude/todos/
 .claude/shell-snapshots/
 .claude/mcp/arcade.json
+dependency-graph.svg
