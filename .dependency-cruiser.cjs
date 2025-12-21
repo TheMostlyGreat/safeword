@@ -38,6 +38,63 @@ module.exports = {
       to: { path: '^packages/eslint-plugin' },
     },
 
+    // =========================================================================
+    // CLI Internal Architecture Rules (Layered Architecture)
+    // =========================================================================
+    // Layer 1: utils/ (leaf - no upward imports)
+    // Layer 2: templates/ (depends on utils only)
+    // Layer 3: schema.ts, reconcile.ts (core - depends on utils, templates)
+    // Layer 4: commands/ (depends on core, utils, templates)
+    // Layer 5: cli.ts (entry - lazy loads commands only)
+    // =========================================================================
+
+    {
+      name: 'cli-utils-no-upward-imports',
+      comment: 'utils/ is a leaf layer - cannot import from commands, templates, or core (types OK)',
+      severity: 'error',
+      from: { path: '^packages/cli/src/utils/' },
+      to: {
+        dependencyTypesNot: ['type-only'], // Allow type-only imports
+        path: [
+          '^packages/cli/src/commands/',
+          '^packages/cli/src/templates/',
+          String.raw`^packages/cli/src/schema\.ts$`,
+          String.raw`^packages/cli/src/reconcile\.ts$`,
+          String.raw`^packages/cli/src/cli\.ts$`,
+        ],
+      },
+    },
+    {
+      name: 'cli-templates-no-upward-imports',
+      comment: 'templates/ cannot import from commands or core engine (types OK)',
+      severity: 'error',
+      from: { path: '^packages/cli/src/templates/' },
+      to: {
+        dependencyTypesNot: ['type-only'], // Allow type-only imports
+        path: [
+          '^packages/cli/src/commands/',
+          String.raw`^packages/cli/src/reconcile\.ts$`,
+          String.raw`^packages/cli/src/cli\.ts$`,
+        ],
+      },
+    },
+    {
+      name: 'cli-commands-no-entry-import',
+      comment: 'commands/ cannot import from cli.ts (entry point)',
+      severity: 'error',
+      from: { path: '^packages/cli/src/commands/' },
+      to: { path: String.raw`^packages/cli/src/cli\.ts$` },
+    },
+    {
+      name: 'cli-core-no-command-import',
+      comment: 'Core modules (schema, reconcile) cannot import from commands',
+      severity: 'error',
+      from: {
+        path: [String.raw`^packages/cli/src/schema\.ts$`, String.raw`^packages/cli/src/reconcile\.ts$`],
+      },
+      to: { path: '^packages/cli/src/commands/' },
+    },
+
     // Circular dependency detection
     {
       name: 'no-circular',
