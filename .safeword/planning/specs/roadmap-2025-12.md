@@ -471,6 +471,31 @@ Wire up Arcade properly with a setup wizard:
 - [ ] Create Arcade-specific templates or workflows
 - [ ] Document Arcade integration in guides
 
+### Planning & Config File Hygiene
+
+Cleanup and anti-drift logic for planning files and root agent configs:
+
+**Planning Files (`.safeword/planning/`):**
+- [ ] Detect stale specs (no updates in X days, still marked "Active")
+- [ ] Detect completed specs that should be archived
+- [ ] `safeword check` warns: "3 specs appear stale, consider archiving"
+- [ ] `safeword cleanup` command to archive/delete completed specs
+- [ ] Validate spec structure (required sections, frontmatter)
+
+**Root Agent Files (`AGENTS.md`, `CLAUDE.md`):**
+- [ ] Detect outdated references (e.g., paths that don't exist)
+- [ ] Detect conflicting instructions between files
+- [ ] Validate `@` file references resolve correctly
+- [ ] Check for common anti-patterns:
+  - Overly long files (recommend splitting)
+  - Duplicate instructions across files
+  - References to removed features/files
+- [ ] `safeword check` reports: "AGENTS.md references non-existent .agents/learnings/"
+
+**Session-Level Cleanup:**
+- [ ] Hook to remind about stale planning files at session start
+- [ ] Hook to validate CLAUDE.md references still resolve
+
 ### Astro Documentation Website
 
 Build a public documentation/marketing site for safeword:
