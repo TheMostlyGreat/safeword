@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 // Safeword: Auto Quality Review Stop Hook
 // Triggers quality review when changes are proposed or made
-// Looks for {"proposedChanges": ..., "madeChanges": ..., "askedQuestion": ...} JSON blob
+// Looks for {"proposedChanges": ..., "madeChanges": ...} JSON blob
 
 import { existsSync } from 'node:fs';
 
-import { QUALITY_REVIEW_MESSAGE, QUESTION_RESEARCH_MESSAGE } from './lib/quality.ts';
+import { QUALITY_REVIEW_MESSAGE } from './lib/quality.ts';
 
 interface HookInput {
   transcript_path?: string;
@@ -21,7 +21,6 @@ interface TranscriptMessage {
 interface ResponseSummary {
   proposedChanges: boolean;
   madeChanges: boolean;
-  askedQuestion: boolean;
 }
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
@@ -134,8 +133,7 @@ function isValidSummary(object: unknown): object is ResponseSummary {
     typeof object === 'object' &&
     object !== null &&
     typeof (object as ResponseSummary).proposedChanges === 'boolean' &&
-    typeof (object as ResponseSummary).madeChanges === 'boolean' &&
-    typeof (object as ResponseSummary).askedQuestion === 'boolean'
+    typeof (object as ResponseSummary).madeChanges === 'boolean'
   );
 }
 
@@ -152,20 +150,19 @@ for (const candidate of candidates) {
 }
 
 if (!summary) {
-  // No valid JSON blob found - remind about required format
-  console.error('SAFEWORD: Response missing required JSON summary. Add to end of response:');
-  console.error('{"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}');
-  process.exit(2);
+  // No valid JSON blob found - remind about required format (JSON stdout + exit 0 per Claude Code docs)
+  console.log(
+    JSON.stringify({
+      decision: 'block',
+      reason:
+        'SAFEWORD: Response missing required JSON summary. Add to end of response:\n{"proposedChanges": boolean, "madeChanges": boolean}',
+    })
+  );
+  process.exit(0);
 }
 
-// If either proposed or made changes, trigger quality review
+// If either proposed or made changes, trigger quality review (JSON stdout + exit 0 per Claude Code docs)
 if (summary.proposedChanges || summary.madeChanges) {
-  console.error(QUALITY_REVIEW_MESSAGE);
-  process.exit(2);
-}
-
-// If only asked a question (no changes), trigger research prompt
-if (summary.askedQuestion) {
-  console.error(QUESTION_RESEARCH_MESSAGE);
-  process.exit(2);
+  console.log(JSON.stringify({ decision: 'block', reason: QUALITY_REVIEW_MESSAGE }));
+  process.exit(0);
 }
