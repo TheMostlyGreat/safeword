@@ -53,22 +53,72 @@ describe('DepCruise Config Generator', () => {
       expect(config).toContain("to: { path: '^apps/' }");
     });
 
-    it('generates orphan detection rule', () => {
-      // Test 1.3: Config includes info-level orphan detection
+    it('generates orphan detection rule with comprehensive exclusions', () => {
       const config = generateDepCruiseConfigFile({ elements: [], isMonorepo: false });
 
       expect(config).toContain("name: 'no-orphans'");
-      expect(config).toContain("severity: 'info'");
+      expect(config).toContain("severity: 'warn'");
       expect(config).toContain('orphan: true');
+
+      // Should exclude common entry points and framework patterns
+      expect(config).toContain(String.raw`index\\.[tj]sx?$`);
+      expect(config).toContain(String.raw`cli\\.[tj]s$`);
+      expect(config).toContain('/src/pages/');
+      expect(config).toContain('/src/content/');
+      expect(config).toContain('/__tests__/');
+    });
+
+    it('generates no-deprecated-deps rule', () => {
+      const config = generateDepCruiseConfigFile({ elements: [], isMonorepo: false });
+
+      expect(config).toContain("name: 'no-deprecated-deps'");
+      expect(config).toContain("severity: 'error'");
+      expect(config).toContain("dependencyTypes: ['deprecated']");
+    });
+
+    it('generates no-dev-deps-in-src rule as warning', () => {
+      const config = generateDepCruiseConfigFile({ elements: [], isMonorepo: false });
+
+      expect(config).toContain("name: 'no-dev-deps-in-src'");
+      expect(config).toContain("severity: 'warn'");
+      expect(config).toContain("dependencyTypes: ['npm-dev']");
+      // Should exclude test files
+      expect(config).toContain('pathNot');
+      expect(config).toContain(String.raw`.test\\.[tj]sx?$`);
     });
 
     it('includes doNotFollow for node_modules and .safeword', () => {
-      // Test 1.5: Generated options exclude irrelevant directories
       const config = generateDepCruiseConfigFile({ elements: [], isMonorepo: false });
 
       expect(config).toContain('doNotFollow');
       expect(config).toContain('node_modules');
       expect(config).toContain('.safeword');
+    });
+
+    it('includes exclude patterns for build artifacts', () => {
+      const config = generateDepCruiseConfigFile({ elements: [], isMonorepo: false });
+
+      expect(config).toContain('exclude');
+      expect(config).toContain('dist');
+      expect(config).toContain('build');
+      expect(config).toContain('coverage');
+      // Also excludes TypeScript declaration files (regex pattern)
+      expect(config).toContain('ts$');
+    });
+
+    it('enables TypeScript pre-compilation deps analysis', () => {
+      const config = generateDepCruiseConfigFile({ elements: [], isMonorepo: false });
+
+      expect(config).toContain('tsPreCompilationDeps: true');
+    });
+
+    it('configures modern module resolution options', () => {
+      const config = generateDepCruiseConfigFile({ elements: [], isMonorepo: false });
+
+      expect(config).toContain('exportsFields');
+      expect(config).toContain('conditionNames');
+      expect(config).toContain('import');
+      expect(config).toContain('require');
     });
   });
 
