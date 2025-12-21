@@ -76,11 +76,58 @@ if (!messageText) {
   process.exit(0);
 }
 
-// Extract JSON blob containing our required fields
-// Note: This regex only matches flat objects (no nested braces).
-// The response summary is expected to be flat: {proposedChanges, madeChanges, askedQuestion}
-const jsonPattern = /\{[^{}]+\}/g;
-const candidates = messageText.match(jsonPattern) ?? [];
+/**
+ * Extract all JSON objects from text using brace-balanced scanning.
+ * Handles nested objects and braces inside strings correctly.
+ */
+function extractJsonObjects(text: string): string[] {
+  const results: string[] = [];
+  let i = 0;
+
+  while (i < text.length) {
+    if (text[i] === '{') {
+      let depth = 0;
+      let inString = false;
+      let escape = false;
+      const start = i;
+
+      for (let j = i; j < text.length; j++) {
+        const char = text[j];
+
+        if (escape) {
+          escape = false;
+          continue;
+        }
+
+        if (char === '\\' && inString) {
+          escape = true;
+          continue;
+        }
+
+        if (char === '"') {
+          inString = !inString;
+          continue;
+        }
+
+        if (!inString) {
+          if (char === '{') depth++;
+          if (char === '}') depth--;
+
+          if (depth === 0) {
+            results.push(text.slice(start, j + 1));
+            i = j;
+            break;
+          }
+        }
+      }
+    }
+    i++;
+  }
+
+  return results;
+}
+
+const candidates = extractJsonObjects(messageText);
 
 function isValidSummary(object: unknown): object is ResponseSummary {
   return (

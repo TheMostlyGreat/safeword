@@ -13,7 +13,13 @@ if (!existsSync(safewordDir)) {
 }
 
 // Read the user prompt from stdin
-const input = await Bun.stdin.text();
+let input: string;
+try {
+  input = await Bun.stdin.text();
+} catch (error) {
+  if (process.env.DEBUG) console.error('[prompt-questions] stdin read error:', error);
+  process.exit(0);
+}
 
 // Only trigger on substantial prompts (more than 20 chars)
 if (input.length < 20) {
