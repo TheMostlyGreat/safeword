@@ -402,6 +402,23 @@ Make safeword installable as a Claude Code plugin:
 - [ ] Understand relationship between: MCP servers, plugins, skills, hooks
 - [ ] Prototype safeword as a Claude Code plugin
 
+### Enhanced `check` Command
+
+Improve `safeword check` to detect configuration drift and issues:
+
+**Content Matching (owned files):**
+- [ ] Compare owned files (.safeword/hooks/*, skills, guides) to templates
+- [ ] Report "Modified: .safeword/hooks/stop-quality.ts" if content differs
+- [ ] Show diff with `--verbose` flag
+- [ ] Suggest `safeword upgrade` to restore
+
+**Config Validation (managed files):**
+- [ ] Verify `eslint.config.mjs` imports safeword plugin
+- [ ] Verify `.claude/settings.json` has required hooks configured
+- [ ] Verify `.prettierrc` has compatible settings
+- [ ] Verify `.mcp.json` has required MCP servers
+- [ ] Report specific issues: "eslint.config.mjs missing safeword import"
+
 ### Auto Upgrade
 
 Automatically check for and apply safeword updates:
