@@ -1,8 +1,7 @@
-# Safeword: Testing & Quality Roadmap
+# Safeword Roadmap - December 2025
 
-**Type:** L1 Task (Testing + Quality)
-**Status:** Draft
-**Created:** 2024-12-21
+**Status:** Active
+**Created:** 2025-12-21
 
 ---
 
@@ -402,6 +401,18 @@ Make safeword installable as a Claude Code plugin:
   - Updates via plugin system instead of `npx safeword upgrade`
 - [ ] Understand relationship between: MCP servers, plugins, skills, hooks
 - [ ] Prototype safeword as a Claude Code plugin
+
+### Arcade Integration
+
+Wire up Arcade properly with a setup wizard:
+
+- [ ] Research Arcade capabilities and API
+- [ ] Add Arcade to `safeword setup` wizard:
+  - Detect if user wants Arcade integration
+  - Configure Arcade connection/auth
+  - Set up Arcade-specific hooks or skills
+- [ ] Create Arcade-specific templates or workflows
+- [ ] Document Arcade integration in guides
 
 ---
 
