@@ -166,4 +166,3 @@ if (summary.proposedChanges || summary.madeChanges) {
   console.log(JSON.stringify({ decision: 'block', reason: QUALITY_REVIEW_MESSAGE }));
   process.exit(0);
 }
-

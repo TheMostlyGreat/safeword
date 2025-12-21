@@ -233,8 +233,7 @@ describe('E2E: UserPromptSubmit Hooks', () => {
   });
 
   describe('prompt-questions.ts', () => {
-    it('outputs question protocol for substantial prompts', () => {
-      // Pipe a substantial prompt (>20 chars)
+    it('outputs question guidance for prompts', () => {
       const output = execSync(
         'echo "Help me implement a new feature for user authentication" | bun .safeword/hooks/prompt-questions.ts',
         {
@@ -244,23 +243,11 @@ describe('E2E: UserPromptSubmit Hooks', () => {
         },
       );
 
-      expect(output).toContain('Question Protocol');
-      expect(output).toContain('clarifying questions');
-      expect(output).toContain('Scope boundaries');
-      expect(output).toContain('Technical constraints');
-      expect(output).toContain('Success criteria');
-    });
-
-    it('outputs nothing for short prompts', () => {
-      // Pipe a short prompt (<20 chars)
-      const output = execSync('echo "fix bug" | bun .safeword/hooks/prompt-questions.ts', {
-        cwd: projectDirectory,
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
-        encoding: 'utf8',
-      });
-
-      // Should be silent for short prompts
-      expect(output.trim()).toBe('');
+      expect(output).toContain('SAFEWORD');
+      expect(output).toContain('Research before asking');
+      expect(output).toContain('1-5 targeted questions');
+      expect(output).toContain('scope');
+      expect(output).toContain('constraints');
     });
 
     it('exits silently for non-safeword project', () => {
@@ -328,67 +315,58 @@ describe('E2E: Stop Hook', () => {
     }
   }
 
+  // Helper to parse JSON output from stop hook (new format: exit 0 + JSON stdout)
+  function parseStopOutput(result: {
+    stdout: string;
+    stderr: string;
+    exitCode: number;
+  }): { decision?: string; reason?: string } {
+    try {
+      return JSON.parse(result.stdout.trim());
+    } catch {
+      return {};
+    }
+  }
+
   describe('stop-quality.ts', () => {
     it('triggers quality review when madeChanges is true', () => {
       const text =
-        'I made some edits.\n\n{"proposedChanges": false, "madeChanges": true, "askedQuestion": false}';
+        'I made some edits.\n\n{"proposedChanges": false, "madeChanges": true}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
+      const output = parseStopOutput(result);
 
-      expect(result.exitCode).toBe(2);
-      expect(result.stderr).toContain('Quality Review');
-      expect(result.stderr).toContain("Assume you've never seen it before");
-      expect(result.stderr).toContain('Is it correct?');
+      expect(result.exitCode).toBe(0);
+      expect(output.decision).toBe('block');
+      expect(output.reason).toContain('Quality Review');
+      expect(output.reason).toContain("Assume you've never seen it before");
+      expect(output.reason).toContain('Is it correct?');
     });
 
     it('triggers quality review when proposedChanges is true', () => {
       const text =
-        'I propose these changes.\n\n{"proposedChanges": true, "madeChanges": false, "askedQuestion": false}';
+        'I propose these changes.\n\n{"proposedChanges": true, "madeChanges": false}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
+      const output = parseStopOutput(result);
 
-      expect(result.exitCode).toBe(2);
-      expect(result.stderr).toContain('Quality Review');
-    });
-
-    it('triggers review even when askedQuestion is true if changes were made', () => {
-      const text =
-        'Made changes. Ready to proceed?\n\n{"proposedChanges": false, "madeChanges": true, "askedQuestion": true}';
-      const transcriptPath = createMockTranscript(projectDirectory, text);
-
-      const result = runStopHook(projectDirectory, transcriptPath);
-
-      expect(result.exitCode).toBe(2);
-      expect(result.stderr).toContain('Quality Review');
-      // Should include guidance about re-asking questions
-      expect(result.stderr).toContain('still relevant after review');
-    });
-
-    it('triggers research prompt when only askedQuestion is true (no changes)', () => {
-      const text =
-        'What approach do you prefer?\n\n{"proposedChanges": false, "madeChanges": false, "askedQuestion": true}';
-      const transcriptPath = createMockTranscript(projectDirectory, text);
-
-      const result = runStopHook(projectDirectory, transcriptPath);
-
-      expect(result.exitCode).toBe(2);
-      expect(result.stderr).toContain('Research Prompt');
-      expect(result.stderr).toContain('do your research and investigate');
-      expect(result.stderr).toContain('Think hard');
-      expect(result.stderr).not.toContain('Quality Review');
+      expect(result.exitCode).toBe(0);
+      expect(output.decision).toBe('block');
+      expect(output.reason).toContain('Quality Review');
     });
 
     it('handles JSON fields in different order', () => {
-      const text =
-        'Done.\n\n{"madeChanges": true, "askedQuestion": false, "proposedChanges": false}';
+      const text = 'Done.\n\n{"madeChanges": true, "proposedChanges": false}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
+      const output = parseStopOutput(result);
 
-      expect(result.exitCode).toBe(2);
-      expect(result.stderr).toContain('Quality Review');
+      expect(result.exitCode).toBe(0);
+      expect(output.decision).toBe('block');
+      expect(output.reason).toContain('Quality Review');
     });
 
     it('blocks when JSON blob is missing', () => {
@@ -396,30 +374,35 @@ describe('E2E: Stop Hook', () => {
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
+      const output = parseStopOutput(result);
 
-      expect(result.exitCode).toBe(2);
-      expect(result.stderr).toContain('missing required JSON summary');
+      expect(result.exitCode).toBe(0);
+      expect(output.decision).toBe('block');
+      expect(output.reason).toContain('missing required JSON summary');
     });
 
     it('blocks when JSON blob has missing field', () => {
-      const text = 'Partial JSON.\n\n{"proposedChanges": true, "madeChanges": false}';
+      // Only has proposedChanges, missing madeChanges
+      const text = 'Partial JSON.\n\n{"proposedChanges": true}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
+      const output = parseStopOutput(result);
 
-      expect(result.exitCode).toBe(2);
-      expect(result.stderr).toContain('missing required JSON summary');
+      expect(result.exitCode).toBe(0);
+      expect(output.decision).toBe('block');
+      expect(output.reason).toContain('missing required JSON summary');
     });
 
     it('exits silently when no changes made or proposed', () => {
       const text =
-        'Just answered a question.\n\n{"proposedChanges": false, "madeChanges": false, "askedQuestion": false}';
+        'Just answered a question.\n\n{"proposedChanges": false, "madeChanges": false}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
 
       expect(result.exitCode).toBe(0);
-      expect(result.stderr).toBe('');
+      expect(result.stdout.trim()).toBe('');
     });
 
     it('exits silently for non-safeword project', () => {
@@ -441,14 +424,16 @@ describe('E2E: Stop Hook', () => {
     it('uses last valid JSON blob when multiple exist', () => {
       // First blob says no changes, second says changes made - should use second
       const text =
-        'First update: {"proposedChanges": false, "madeChanges": false, "askedQuestion": false}\n\n' +
-        'Then I made edits: {"proposedChanges": false, "madeChanges": true, "askedQuestion": false}';
+        'First update: {"proposedChanges": false, "madeChanges": false}\n\n' +
+        'Then I made edits: {"proposedChanges": false, "madeChanges": true}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
+      const output = parseStopOutput(result);
 
-      expect(result.exitCode).toBe(2);
-      expect(result.stderr).toContain('Quality Review');
+      expect(result.exitCode).toBe(0);
+      expect(output.decision).toBe('block');
+      expect(output.reason).toContain('Quality Review');
     });
   });
 });
