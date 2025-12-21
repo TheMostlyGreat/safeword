@@ -380,14 +380,36 @@ Spec templates should require clarifying questions and UAT criteria:
   - Dogfooding sessions with structured feedback
 - [ ] Run `safeword upgrade` to sync templates to local project
 
-### Linear Integration
+### Project Management Integration
 
-Most teams use Linear for project management. Planning files in `.safeword/planning/` should integrate:
+Connect planning files to external PM tools (GitHub Issues, Linear, Jira):
 
-- [ ] Research Linear API/CLI for syncing tasks
-- [ ] Define mapping: spec file → Linear issue/project
-- [ ] Consider: bi-directional sync vs one-way export
-- [ ] Consider: Linear as source of truth vs Git as source of truth
+**Supported Platforms:**
+- [ ] GitHub Issues (via `gh` CLI)
+- [ ] Linear (via Linear API/CLI)
+- [ ] Jira (via Jira REST API)
+
+**Core Features:**
+- [ ] `safeword sync` command to push/pull between specs and PM
+- [ ] Spec frontmatter links to external issue: `issue: LINEAR-123` or `issue: #45`
+- [ ] Create issue from spec: `safeword sync --create`
+- [ ] Update spec status from issue status
+- [ ] Define mapping: spec sections → issue fields (title, description, labels)
+
+**Sync Strategies:**
+- [ ] One-way export (spec → issue, Git is source of truth)
+- [ ] One-way import (issue → spec, PM is source of truth)
+- [ ] Bi-directional sync (conflict resolution needed)
+- [ ] Config to choose strategy per project
+
+**Integration Points:**
+- [ ] Hook: on spec create, offer to create issue
+- [ ] Hook: on session start, sync status from PM
+- [ ] `safeword check` warns if spec/issue status mismatch
+
+**Configuration:**
+- [ ] `.safeword/config.json` for PM connection settings
+- [ ] Support for multiple PM tools in same project (mono-repo use case)
 
 ### Claude Code Plugin Architecture
 
