@@ -95,6 +95,70 @@ module.exports = {
       to: { path: '^packages/cli/src/commands/' },
     },
 
+    // =========================================================================
+    // ESLint Plugin Internal Architecture Rules
+    // =========================================================================
+    // Layer 1: rules/ (leaf - custom ESLint rules)
+    // Layer 2: detect.ts (detection utilities)
+    // Layer 3: configs/ (compose rules + detect)
+    // Layer 4: index.ts (entry - exports everything)
+    // =========================================================================
+
+    {
+      name: 'plugin-rules-no-config-import',
+      comment: 'rules/ cannot import from configs/ (rules are low-level primitives)',
+      severity: 'error',
+      from: { path: '^packages/eslint-plugin/src/rules/' },
+      to: { path: '^packages/eslint-plugin/src/configs/' },
+    },
+    {
+      name: 'plugin-detect-no-config-import',
+      comment: 'detect.ts cannot import from configs/',
+      severity: 'error',
+      from: { path: String.raw`^packages/eslint-plugin/src/detect\.ts$` },
+      to: { path: '^packages/eslint-plugin/src/configs/' },
+    },
+
+    // =========================================================================
+    // Public API Enforcement
+    // =========================================================================
+    // External consumers should only import from package entry points (index.ts)
+    // This prevents accidental coupling to internal modules
+    // =========================================================================
+
+    {
+      name: 'cli-public-api-only',
+      comment: 'External imports to CLI should go through index.ts, not internal modules',
+      severity: 'error',
+      from: { pathNot: '^packages/cli/' },
+      to: {
+        path: '^packages/cli/src/',
+        pathNot: String.raw`^packages/cli/src/index\.ts$`,
+      },
+    },
+    {
+      name: 'plugin-public-api-only',
+      comment: 'External imports to plugin should go through index.ts, not internal modules',
+      severity: 'error',
+      from: { pathNot: '^packages/eslint-plugin/' },
+      to: {
+        path: '^packages/eslint-plugin/src/',
+        pathNot: String.raw`^packages/eslint-plugin/src/index\.ts$`,
+      },
+    },
+
+    // =========================================================================
+    // Deprecated Dependencies Detection
+    // =========================================================================
+
+    {
+      name: 'no-deprecated-deps',
+      comment: 'Warn when importing deprecated npm packages',
+      severity: 'warn',
+      from: {},
+      to: { dependencyTypes: ['deprecated'] },
+    },
+
     // Circular dependency detection
     {
       name: 'no-circular',
