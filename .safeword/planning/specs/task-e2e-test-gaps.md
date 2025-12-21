@@ -1,6 +1,6 @@
-# Task: E2E Test Coverage Gaps
+# Safeword: Testing & Quality Roadmap
 
-**Type:** L1 Task (Testing improvement)
+**Type:** L1 Task (Testing + Quality)
 **Status:** Draft
 **Created:** 2024-12-21
 
@@ -8,7 +8,85 @@
 
 ## Goal
 
-Fill E2E test coverage gaps across the safeword project.
+Define comprehensive testing strategy including:
+- E2E functional test coverage gaps
+- User Acceptance Tests (UATs) by persona
+- New language support (Go, Python)
+
+---
+
+## Target Personas
+
+| Persona | Description | Primary Tool |
+|---------|-------------|--------------|
+| **TypeScript Dev** | Modern TS developer, uses latest patterns | Cursor, Claude Code |
+| **Go Dev** | Backend/systems developer, values simplicity | Claude Code, Cursor |
+| **Python Dev** | Data/ML engineer or backend dev | Claude Code, Cursor |
+| **Team Lead** | Evaluating AI tooling for team adoption | Any |
+
+---
+
+## User Acceptance Tests (UATs)
+
+UATs are **dynamic per spec/ticket** - defined based on what's being built and who it's for.
+
+### UAT Framework
+
+Each spec should define:
+
+```markdown
+## UATs
+
+### [Persona Name]
+| Criteria | How to Evaluate |
+|----------|-----------------|
+| "[User says/feels X]" | [Concrete evaluation method] |
+```
+
+### Choosing Personas
+
+Pick personas relevant to the feature being built:
+
+| Persona | When to Include |
+|---------|-----------------|
+| TypeScript Dev | JS/TS tooling, ESLint, React/Next features |
+| Go Dev | Go linting, Go-specific hooks |
+| Python Dev | Python linting, pyproject.toml |
+| Team Lead | Onboarding, docs, setup UX |
+| Beginner | First-time users, error messages, recovery |
+| Power User | Advanced config, customization, escape hatches |
+
+### UAT Criteria Types
+
+| Type | Example | Evaluation |
+|------|---------|------------|
+| Speed/Friction | "Setup takes <2 min" | Time it, count retries |
+| Correctness | "Catches real issues, not noise" | Run on real projects, review output |
+| Feel/Polish | "Feels modern" | Compare to 2024/2025 DX trends |
+| Compatibility | "Works with my existing X" | Test with common configs |
+| Recommendation | "Would recommend to team" | Dogfooding, NPS-style feedback |
+
+### Example: This Spec's UATs
+
+For the E2E test gaps and Go/Python linting work:
+
+**TypeScript Dev (existing feature)**
+| Criteria | Evaluate |
+|----------|----------|
+| "ESLint plugin catches LLM mistakes" | Test `no-incomplete-error-handling` on real code |
+| "Hook errors don't break my flow" | Trigger error scenarios, check recovery |
+
+**Go Dev (new feature)**
+| Criteria | Evaluate |
+|----------|----------|
+| "safeword setup detects my Go project" | Run on Go monorepo |
+| "golangci-lint config catches unchecked errors" | Lint code with ignored errors |
+
+**Python Dev (new feature)**
+| Criteria | Evaluate |
+|----------|----------|
+| "ruff config works with my pyproject.toml" | Run on Python project with existing ruff |
+| "Catches unused imports without breaking my workflow" | Lint real Python code |
 
 ---
 
@@ -198,23 +276,132 @@ it('leaves project clean after interrupted setup', async () => {
 
 ---
 
+## Feature Gaps
+
+### 6. Go Linting Support
+
+**Goal:** Safeword detects Go projects and configures appropriate linting.
+
+| Component | Description |
+|-----------|-------------|
+| Detection | `detectFramework()` returns `'go'` when `go.mod` exists |
+| Config template | `.golangci.yml` with LLM-optimized rules |
+| Hook integration | `post-tool-lint.ts` runs `golangci-lint` for `.go` files |
+| Common LLM mistakes | Unchecked errors, unused variables, shadowing |
+
+**Tools to consider:** golangci-lint (wraps staticcheck, go vet, errcheck, etc.)
+
+**Tests needed:**
+- [ ] Detect Go project from `go.mod`
+- [ ] Generate valid `.golangci.yml`
+- [ ] Hook runs golangci-lint on Go file changes
+- [ ] Catches unchecked error returns
+
+---
+
+### 7. Python Linting Support
+
+**Goal:** Safeword detects Python projects and configures appropriate linting.
+
+| Component | Description |
+|-----------|-------------|
+| Detection | `detectFramework()` returns `'python'` when `pyproject.toml` or `requirements.txt` exists |
+| Config template | `ruff.toml` or `pyproject.toml [tool.ruff]` section |
+| Hook integration | `post-tool-lint.ts` runs `ruff` for `.py` files |
+| Type checking | Optional mypy/pyright integration |
+| Common LLM mistakes | Unused imports, type errors, f-string issues |
+
+**Tools to consider:** ruff (fast, replaces flake8/isort/black), mypy, pyright
+
+**Tests needed:**
+- [ ] Detect Python project from `pyproject.toml` or `requirements.txt`
+- [ ] Generate valid `ruff.toml`
+- [ ] Hook runs ruff on Python file changes
+- [ ] Catches unused imports, type annotation issues
+
+---
+
 ## Priority Order
 
+### E2E Test Gaps (Functional)
 1. **ESLint Plugin Tests** - Critical, no tests exist, most impactful
 2. **Hook Error Handling** - Important for robustness
 3. **Template Content Validation** - Ensures quality
 4. **Version Migration** - Important for upgrades
 5. **Partial Installation Recovery** - Edge case handling
 
+### Feature Gaps (New Capabilities)
+6. **Go Linting** - Expands to new language
+7. **Python Linting** - Expands to new language
+
 ---
 
 ## Success Criteria
 
+### Functional Tests
 - [ ] eslint-plugin has ≥20 tests covering: exports (5), custom rule (5), detect utilities (7), config integration (3)
 - [ ] Hook error scenarios covered (5 tests)
 - [ ] Template structure validated (5 tests)
 - [ ] Version migration tested for v0.11→v0.12
 - [ ] All tests pass in CI
+
+### UAT Validation (this spec)
+- [ ] TypeScript dev: ESLint plugin catches LLM mistakes, hook errors recoverable
+- [ ] Go dev: setup detects Go, golangci-lint catches unchecked errors
+- [ ] Python dev: ruff works with existing config, catches unused imports
+
+### New Language Support
+- [ ] Go detection and linting works
+- [ ] Python detection and linting works
+- [ ] Multi-language projects handled correctly
+
+---
+
+## Process TODOs
+
+### Evolve Spec Phase for UATs
+
+Spec templates should require clarifying questions and UAT criteria:
+
+- [ ] Update `feature-spec-template.md`:
+  - Add ⚠️ Clarifying Questions section (gate before implementation)
+  - Add Target Personas section
+  - Add UAT criteria per persona (evaluable)
+- [ ] Update `task-spec-template.md`:
+  - Add Clarifying Questions to L1 template
+  - Add Target Persona + UAT criteria
+  - Update examples to show completed questions
+- [ ] Update `planning-guide.md`:
+  - Add "Clarifying Questions (CRITICAL)" section
+  - Add "User Acceptance Tests (UATs)" section
+  - Add Quick Reference red flags for both
+- [ ] Define how to "run" UAT evaluations:
+  - LLM evals with persona prompts (promptfoo)
+  - Manual review checklists
+  - Dogfooding sessions with structured feedback
+- [ ] Run `safeword upgrade` to sync templates to local project
+
+### Linear Integration
+
+Most teams use Linear for project management. Planning files in `.safeword/planning/` should integrate:
+
+- [ ] Research Linear API/CLI for syncing tasks
+- [ ] Define mapping: spec file → Linear issue/project
+- [ ] Consider: bi-directional sync vs one-way export
+- [ ] Consider: Linear as source of truth vs Git as source of truth
+
+### Claude Code Plugin Architecture
+
+Make safeword installable as a Claude Code plugin:
+
+- [ ] Research Claude Code plugin architecture (how do plugins work?)
+- [ ] Add Claude Code's official front-end dev plugin to safeword's recommended plugins
+- [ ] Define what "safeword as a plugin" means:
+  - One-command install (`claude plugin install safeword`?)
+  - Auto-configures hooks, skills, guides
+  - Updates via plugin system instead of `npx safeword upgrade`
+- [ ] Understand relationship between: MCP servers, plugins, skills, hooks
+- [ ] Prototype safeword as a Claude Code plugin
 
 ---
 
@@ -223,3 +410,4 @@ it('leaves project clean after interrupted setup', async () => {
 - Slash commands and skills cannot be E2E tested (Claude Code runs them)
 - MCP servers are external processes (test config only)
 - Focus on what WE control: hooks, templates, CLI, plugin
+- UATs require human/LLM evaluation, not just automated tests
