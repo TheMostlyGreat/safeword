@@ -171,8 +171,8 @@ module.exports = {
     // No orphan modules (files not imported by anything)
     {
       name: 'no-orphans',
-      comment: 'Error on orphan modules - dead code or missing export',
-      severity: 'error',
+      comment: 'Warn on orphan modules - allows WIP files during development',
+      severity: 'warn',
       from: {
         orphan: true,
         pathNot: [

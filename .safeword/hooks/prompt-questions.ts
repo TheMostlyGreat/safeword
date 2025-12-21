@@ -29,4 +29,6 @@ if (input.length < 20) {
 console.log(`SAFEWORD Question Protocol: For ambiguous or complex requests, ask 1-5 clarifying questions before proceeding. Focus on:
 - Scope boundaries (what's included/excluded)
 - Technical constraints (frameworks, patterns, compatibility)
-- Success criteria (how will we know it's done)`);
+- Success criteria (how will we know it's done)
+
+Before asking questions, do your research first. Explore and debate the options. Think about what's most correct, elegant, and in line with latest docs/best practices. Then ask targeted questions with the context you've gathered.`);
