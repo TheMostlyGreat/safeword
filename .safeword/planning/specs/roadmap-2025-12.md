@@ -419,6 +419,22 @@ Improve `safeword check` to detect configuration drift and issues:
 - [ ] Verify `.mcp.json` has required MCP servers
 - [ ] Report specific issues: "eslint.config.mjs missing safeword import"
 
+**Cross-Tool Parity (Cursor ↔ Claude):**
+- [ ] Add `.safeword/parity.json` manifest defining expected parity:
+  ```json
+  {
+    "skills": {
+      "shared": ["brainstorming", "debugging", "enforcing-tdd", ...],
+      "cursorOnly": ["core"],
+      "claudeOnly": []
+    }
+  }
+  ```
+- [ ] Validate Cursor rules exist for all `shared` items
+- [ ] Validate Claude skills exist for all `shared` items
+- [ ] Report missing items: "Missing Claude skill: core (expected cursorOnly)"
+- [ ] Warn on unexpected items not in manifest
+
 ### Auto Upgrade
 
 Automatically check for and apply safeword updates:
@@ -454,6 +470,30 @@ Wire up Arcade properly with a setup wizard:
   - Set up Arcade-specific hooks or skills
 - [ ] Create Arcade-specific templates or workflows
 - [ ] Document Arcade integration in guides
+
+### Single-Source Skill Generation
+
+Generate Cursor rules and Claude skills from a single canonical source to eliminate drift:
+
+**Architecture:**
+- [ ] Create `templates/skills-source/` with canonical `.md` files
+- [ ] Each source file contains: description, triggers, instructions, examples
+- [ ] Build step generates tool-specific formats:
+  - Cursor: `.mdc` files with YAML frontmatter
+  - Claude: `SKILL.md` files with metadata block
+- [ ] Remove manually-maintained `cursor/rules/` and `skills/` directories
+
+**Benefits:**
+- Single place to edit skill content
+- Guaranteed parity (same source = same behavior)
+- Easier to add new tools (Windsurf, Zed, etc.)
+
+**Implementation:**
+- [ ] Define source format (Markdown + frontmatter)
+- [ ] Write generator script (`scripts/generate-skills.ts`)
+- [ ] Add to build pipeline (`bun run build` generates skills)
+- [ ] Update `setup` to use generated output
+- [ ] Migrate existing skills to source format
 
 ---
 
