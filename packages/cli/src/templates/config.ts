@@ -99,8 +99,8 @@ export default [
 // Cursor hooks configuration (.cursor/hooks.json format)
 // See: https://cursor.com/docs/agent/hooks
 export const CURSOR_HOOKS = {
-  afterFileEdit: [{ command: './.safeword/hooks/cursor/after-file-edit.sh' }],
-  stop: [{ command: './.safeword/hooks/cursor/stop.sh' }],
+  afterFileEdit: [{ command: 'bun ./.safeword/hooks/cursor/after-file-edit.ts' }],
+  stop: [{ command: 'bun ./.safeword/hooks/cursor/stop.ts' }],
 };
 
 // Claude Code hooks configuration (.claude/settings.json format)
@@ -110,7 +110,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-verify-agents.sh',
+          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-verify-agents.ts',
         },
       ],
     },
@@ -118,7 +118,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-version.sh',
+          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-version.ts',
         },
       ],
     },
@@ -126,7 +126,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-lint-check.sh',
+          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-lint-check.ts',
         },
       ],
     },
@@ -136,7 +136,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/prompt-timestamp.sh',
+          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/prompt-timestamp.ts',
         },
       ],
     },
@@ -144,7 +144,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/prompt-questions.sh',
+          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/prompt-questions.ts',
         },
       ],
     },
@@ -154,7 +154,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/stop-quality.sh',
+          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/stop-quality.ts',
         },
       ],
     },
@@ -165,7 +165,7 @@ export const SETTINGS_HOOKS = {
       hooks: [
         {
           type: 'command',
-          command: '"$CLAUDE_PROJECT_DIR"/.safeword/hooks/post-tool-lint.sh',
+          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/post-tool-lint.ts',
         },
       ],
     },

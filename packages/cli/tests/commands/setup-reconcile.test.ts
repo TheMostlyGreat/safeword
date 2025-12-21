@@ -117,9 +117,9 @@ describe('Setup Command - Reconcile Integration', () => {
 
       // Check hook files
       expect(
-        existsSync(nodePath.join(temporaryDirectory, '.safeword/hooks/session-verify-agents.sh')),
+        existsSync(nodePath.join(temporaryDirectory, '.safeword/hooks/session-verify-agents.ts')),
       ).toBe(true);
-      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/hooks/stop-quality.sh'))).toBe(
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/hooks/stop-quality.ts'))).toBe(
         true,
       );
 

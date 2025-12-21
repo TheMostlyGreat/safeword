@@ -43,9 +43,9 @@ afterAll(() => {
 });
 
 describe('E2E: SessionStart Hooks', () => {
-  describe('session-version.sh', () => {
+  describe('session-version.ts', () => {
     it('outputs version message for safeword project', () => {
-      const output = execSync('bash .safeword/hooks/session-version.sh', {
+      const output = execSync('bun .safeword/hooks/session-version.ts', {
         cwd: projectDirectory,
         env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
         encoding: 'utf8',
@@ -60,7 +60,7 @@ describe('E2E: SessionStart Hooks', () => {
       const nonSafewordDirectory = createTemporaryDirectory();
       try {
         // Run in a directory without .safeword
-        const output = execSync('bash .safeword/hooks/session-version.sh', {
+        const output = execSync('bun .safeword/hooks/session-version.ts', {
           cwd: projectDirectory, // Script is here
           env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDirectory }, // But points to non-safeword dir
           encoding: 'utf8',
@@ -74,13 +74,13 @@ describe('E2E: SessionStart Hooks', () => {
     });
   });
 
-  describe('session-verify-agents.sh', () => {
+  describe('session-verify-agents.ts', () => {
     it('creates AGENTS.md if missing', () => {
       // Remove AGENTS.md
       execSync('rm -f AGENTS.md', { cwd: projectDirectory });
       expect(fileExists(projectDirectory, 'AGENTS.md')).toBe(false);
 
-      const output = execSync('bash .safeword/hooks/session-verify-agents.sh', {
+      const output = execSync('bun .safeword/hooks/session-verify-agents.ts', {
         cwd: projectDirectory,
         env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
         encoding: 'utf8',
@@ -97,7 +97,7 @@ describe('E2E: SessionStart Hooks', () => {
       // Overwrite AGENTS.md without the link
       writeTestFile(projectDirectory, 'AGENTS.md', '# My Project\n\nSome content\n');
 
-      const output = execSync('bash .safeword/hooks/session-verify-agents.sh', {
+      const output = execSync('bun .safeword/hooks/session-verify-agents.ts', {
         cwd: projectDirectory,
         env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
         encoding: 'utf8',
@@ -115,7 +115,7 @@ describe('E2E: SessionStart Hooks', () => {
       const originalContent = readTestFile(projectDirectory, 'AGENTS.md');
       expect(originalContent).toContain('.safeword/SAFEWORD.md');
 
-      const output = execSync('bash .safeword/hooks/session-verify-agents.sh', {
+      const output = execSync('bun .safeword/hooks/session-verify-agents.ts', {
         cwd: projectDirectory,
         env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
         encoding: 'utf8',
@@ -132,7 +132,7 @@ describe('E2E: SessionStart Hooks', () => {
     it('exits silently for non-safeword project', () => {
       const nonSafewordDirectory = createTemporaryDirectory();
       try {
-        const output = execSync('bash .safeword/hooks/session-verify-agents.sh', {
+        const output = execSync('bun .safeword/hooks/session-verify-agents.ts', {
           cwd: projectDirectory,
           env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDirectory },
           encoding: 'utf8',
@@ -145,13 +145,13 @@ describe('E2E: SessionStart Hooks', () => {
     });
   });
 
-  describe('session-lint-check.sh', () => {
+  describe('session-lint-check.ts', () => {
     it('outputs no warnings when lint configs exist', () => {
       // Project should have eslint and prettier after setup
       expect(fileExists(projectDirectory, 'eslint.config.mjs')).toBe(true);
       expect(fileExists(projectDirectory, '.prettierrc')).toBe(true);
 
-      const output = execSync('bash .safeword/hooks/session-lint-check.sh', {
+      const output = execSync('bun .safeword/hooks/session-lint-check.ts', {
         cwd: projectDirectory,
         env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
         encoding: 'utf8',
@@ -166,7 +166,7 @@ describe('E2E: SessionStart Hooks', () => {
       execSync('mv eslint.config.mjs eslint.config.mjs.bak', { cwd: projectDirectory });
 
       try {
-        const output = execSync('bash .safeword/hooks/session-lint-check.sh', {
+        const output = execSync('bun .safeword/hooks/session-lint-check.ts', {
           cwd: projectDirectory,
           env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
           encoding: 'utf8',
@@ -184,7 +184,7 @@ describe('E2E: SessionStart Hooks', () => {
       execSync('mv .prettierrc .prettierrc.bak', { cwd: projectDirectory });
 
       try {
-        const output = execSync('bash .safeword/hooks/session-lint-check.sh', {
+        const output = execSync('bun .safeword/hooks/session-lint-check.ts', {
           cwd: projectDirectory,
           env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
           encoding: 'utf8',
@@ -200,7 +200,7 @@ describe('E2E: SessionStart Hooks', () => {
     it('exits silently for non-safeword project', () => {
       const nonSafewordDirectory = createTemporaryDirectory();
       try {
-        const output = execSync('bash .safeword/hooks/session-lint-check.sh', {
+        const output = execSync('bun .safeword/hooks/session-lint-check.ts', {
           cwd: projectDirectory,
           env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDirectory },
           encoding: 'utf8',
@@ -215,9 +215,9 @@ describe('E2E: SessionStart Hooks', () => {
 });
 
 describe('E2E: UserPromptSubmit Hooks', () => {
-  describe('prompt-timestamp.sh', () => {
+  describe('prompt-timestamp.ts', () => {
     it('outputs current timestamp in expected format', () => {
-      const output = execSync('bash .safeword/hooks/prompt-timestamp.sh', {
+      const output = execSync('bun .safeword/hooks/prompt-timestamp.ts', {
         cwd: projectDirectory,
         encoding: 'utf8',
       });
@@ -225,18 +225,18 @@ describe('E2E: UserPromptSubmit Hooks', () => {
       expect(output).toContain('Current time:');
       // Check for natural language format (day of week, month, date, year)
       expect(output).toMatch(/\w+, \w+ \d{2}, \d{4}/);
-      // Check for ISO format
-      expect(output).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/);
+      // Check for ISO format (with milliseconds)
+      expect(output).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/);
       // Check for local time
       expect(output).toMatch(/Local: \d{2}:\d{2}/);
     });
   });
 
-  describe('prompt-questions.sh', () => {
+  describe('prompt-questions.ts', () => {
     it('outputs question protocol for substantial prompts', () => {
       // Pipe a substantial prompt (>20 chars)
       const output = execSync(
-        'echo "Help me implement a new feature for user authentication" | bash .safeword/hooks/prompt-questions.sh',
+        'echo "Help me implement a new feature for user authentication" | bun .safeword/hooks/prompt-questions.ts',
         {
           cwd: projectDirectory,
           env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
@@ -253,7 +253,7 @@ describe('E2E: UserPromptSubmit Hooks', () => {
 
     it('outputs nothing for short prompts', () => {
       // Pipe a short prompt (<20 chars)
-      const output = execSync('echo "fix bug" | bash .safeword/hooks/prompt-questions.sh', {
+      const output = execSync('echo "fix bug" | bun .safeword/hooks/prompt-questions.ts', {
         cwd: projectDirectory,
         env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
         encoding: 'utf8',
@@ -267,7 +267,7 @@ describe('E2E: UserPromptSubmit Hooks', () => {
       const nonSafewordDirectory = createTemporaryDirectory();
       try {
         const output = execSync(
-          'echo "Help me implement a new feature for user authentication" | bash .safeword/hooks/prompt-questions.sh',
+          'echo "Help me implement a new feature for user authentication" | bun .safeword/hooks/prompt-questions.ts',
           {
             cwd: projectDirectory,
             env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDirectory },
@@ -306,7 +306,7 @@ describe('E2E: Stop Hook', () => {
     try {
       const result = spawnSync(
         'bash',
-        ['-c', `echo '${input}' | bash .safeword/hooks/stop-quality.sh`],
+        ['-c', `echo '${input}' | bun .safeword/hooks/stop-quality.ts`],
         {
           cwd: targetDirectory,
           env: { ...process.env, CLAUDE_PROJECT_DIR: targetDirectory },
@@ -328,7 +328,7 @@ describe('E2E: Stop Hook', () => {
     }
   }
 
-  describe('stop-quality.sh', () => {
+  describe('stop-quality.ts', () => {
     it('triggers quality review when madeChanges is true', () => {
       const text =
         'I made some edits.\n\n{"proposedChanges": false, "madeChanges": true, "askedQuestion": false}';
@@ -410,7 +410,7 @@ describe('E2E: Stop Hook', () => {
       const nonSafewordDirectory = createTemporaryDirectory();
       try {
         const input = JSON.stringify({ transcript_path: '/tmp/fake.jsonl' });
-        const output = execSync(`echo '${input}' | bash .safeword/hooks/stop-quality.sh`, {
+        const output = execSync(`echo '${input}' | bun .safeword/hooks/stop-quality.ts`, {
           cwd: projectDirectory,
           env: { ...process.env, CLAUDE_PROJECT_DIR: nonSafewordDirectory },
           encoding: 'utf8',

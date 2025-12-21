@@ -3,12 +3,12 @@
   "hooks": {
     "afterFileEdit": [
       {
-        "command": "./.safeword/hooks/cursor/after-file-edit.sh"
+        "command": "bun ./.safeword/hooks/cursor/after-file-edit.ts"
       }
     ],
     "stop": [
       {
-        "command": "./.safeword/hooks/cursor/stop.sh"
+        "command": "bun ./.safeword/hooks/cursor/stop.ts"
       }
     ]
   }

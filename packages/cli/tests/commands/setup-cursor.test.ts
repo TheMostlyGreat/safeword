@@ -89,10 +89,10 @@ describe('Test Suite: Setup - Cursor IDE Support', () => {
 
       await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      expect(fileExists(temporaryDirectory, '.safeword/hooks/cursor/after-file-edit.sh')).toBe(
+      expect(fileExists(temporaryDirectory, '.safeword/hooks/cursor/after-file-edit.ts')).toBe(
         true,
       );
-      expect(fileExists(temporaryDirectory, '.safeword/hooks/cursor/stop.sh')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword/hooks/cursor/stop.ts')).toBe(true);
     });
 
     it('should reference correct hook script paths in hooks.json', async () => {
@@ -103,9 +103,9 @@ describe('Test Suite: Setup - Cursor IDE Support', () => {
 
       const hooksConfig = JSON.parse(readTestFile(temporaryDirectory, '.cursor/hooks.json'));
       expect(hooksConfig.hooks.afterFileEdit[0].command).toBe(
-        './.safeword/hooks/cursor/after-file-edit.sh',
+        'bun ./.safeword/hooks/cursor/after-file-edit.ts',
       );
-      expect(hooksConfig.hooks.stop[0].command).toBe('./.safeword/hooks/cursor/stop.sh');
+      expect(hooksConfig.hooks.stop[0].command).toBe('bun ./.safeword/hooks/cursor/stop.ts');
     });
   });
 

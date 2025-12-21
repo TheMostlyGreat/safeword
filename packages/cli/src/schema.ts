@@ -140,7 +140,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword',
     '.safeword/hooks',
     '.safeword/hooks/cursor',
-    '.safeword/lib',
+    '.safeword/hooks/lib',
     '.safeword/guides',
     '.safeword/templates',
     '.safeword/prompts',
@@ -177,6 +177,19 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/guides/test-definitions-guide.md',
     // Boundaries config now project-specific (v0.9.0)
     '.safeword/eslint-boundaries.config.mjs',
+    // Shell hooks replaced with TypeScript/Bun (v0.13.0)
+    '.safeword/hooks/session-verify-agents.sh',
+    '.safeword/hooks/session-version.sh',
+    '.safeword/hooks/session-lint-check.sh',
+    '.safeword/hooks/prompt-timestamp.sh',
+    '.safeword/hooks/prompt-questions.sh',
+    '.safeword/hooks/post-tool-lint.sh',
+    '.safeword/hooks/stop-quality.sh',
+    '.safeword/hooks/cursor/after-file-edit.sh',
+    '.safeword/hooks/cursor/stop.sh',
+    // Shell libraries no longer needed with Bun
+    '.safeword/lib/common.sh',
+    '.safeword/lib/jq-fallback.sh',
   ],
 
   // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
@@ -210,6 +223,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // Directories to delete on upgrade (no longer managed by safeword)
   deprecatedDirs: [
     '.husky', // Pre-commit hooks no longer managed by safeword
+    '.safeword/lib', // Shell libraries no longer needed with Bun (v0.13.0)
   ],
 
   // Files owned by safeword (overwritten on upgrade if content changed)
@@ -218,18 +232,18 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/SAFEWORD.md': { template: 'SAFEWORD.md' },
     '.safeword/version': { content: () => VERSION },
 
-    // Hooks (7 files)
-    '.safeword/hooks/session-verify-agents.sh': { template: 'hooks/session-verify-agents.sh' },
-    '.safeword/hooks/session-version.sh': { template: 'hooks/session-version.sh' },
-    '.safeword/hooks/session-lint-check.sh': { template: 'hooks/session-lint-check.sh' },
-    '.safeword/hooks/prompt-timestamp.sh': { template: 'hooks/prompt-timestamp.sh' },
-    '.safeword/hooks/prompt-questions.sh': { template: 'hooks/prompt-questions.sh' },
-    '.safeword/hooks/post-tool-lint.sh': { template: 'hooks/post-tool-lint.sh' },
-    '.safeword/hooks/stop-quality.sh': { template: 'hooks/stop-quality.sh' },
+    // Hooks shared library (2 files) - TypeScript with Bun runtime
+    '.safeword/hooks/lib/lint.ts': { template: 'hooks/lib/lint.ts' },
+    '.safeword/hooks/lib/quality.ts': { template: 'hooks/lib/quality.ts' },
 
-    // Lib (2 files)
-    '.safeword/lib/common.sh': { template: 'lib/common.sh' },
-    '.safeword/lib/jq-fallback.sh': { template: 'lib/jq-fallback.sh' },
+    // Hooks (7 files) - TypeScript with Bun runtime
+    '.safeword/hooks/session-verify-agents.ts': { template: 'hooks/session-verify-agents.ts' },
+    '.safeword/hooks/session-version.ts': { template: 'hooks/session-version.ts' },
+    '.safeword/hooks/session-lint-check.ts': { template: 'hooks/session-lint-check.ts' },
+    '.safeword/hooks/prompt-timestamp.ts': { template: 'hooks/prompt-timestamp.ts' },
+    '.safeword/hooks/prompt-questions.ts': { template: 'hooks/prompt-questions.ts' },
+    '.safeword/hooks/post-tool-lint.ts': { template: 'hooks/post-tool-lint.ts' },
+    '.safeword/hooks/stop-quality.ts': { template: 'hooks/stop-quality.ts' },
 
     // Guides (11 files)
     '.safeword/guides/architecture-guide.md': { template: 'guides/architecture-guide.md' },
@@ -329,9 +343,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.cursor/commands/lint.md': { template: 'commands/lint.md' },
     '.cursor/commands/quality-review.md': { template: 'commands/quality-review.md' },
 
-    // Cursor hooks adapters (2 files)
-    '.safeword/hooks/cursor/after-file-edit.sh': { template: 'hooks/cursor/after-file-edit.sh' },
-    '.safeword/hooks/cursor/stop.sh': { template: 'hooks/cursor/stop.sh' },
+    // Cursor hooks adapters (2 files) - TypeScript with Bun runtime
+    '.safeword/hooks/cursor/after-file-edit.ts': { template: 'hooks/cursor/after-file-edit.ts' },
+    '.safeword/hooks/cursor/stop.ts': { template: 'hooks/cursor/stop.ts' },
   },
 
   // Files created if missing, updated only if content matches current template

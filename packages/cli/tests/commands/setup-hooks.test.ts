@@ -190,11 +190,11 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
       expect(timestampHookEntry).toBeDefined();
 
       // Hook script should exist
-      expect(fileExists(temporaryDirectory, '.safeword/hooks/prompt-timestamp.sh')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword/hooks/prompt-timestamp.ts')).toBe(true);
 
       // Script should contain timestamp output
-      const scriptContent = readTestFile(temporaryDirectory, '.safeword/hooks/prompt-timestamp.sh');
-      expect(scriptContent).toContain('date');
+      const scriptContent = readTestFile(temporaryDirectory, '.safeword/hooks/prompt-timestamp.ts');
+      expect(scriptContent).toContain('Date');
     });
   });
 
@@ -218,18 +218,18 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
   });
 
   describe('Test 3.7: Installs lib scripts', () => {
-    it('should install shared library scripts to .safeword/lib/', async () => {
+    it('should install shared library scripts to .safeword/hooks/lib/', async () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
       await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      // Lib directory should exist with shell scripts
-      expect(fileExists(temporaryDirectory, '.safeword/lib')).toBe(true);
+      // Lib directory should exist with TypeScript modules
+      expect(fileExists(temporaryDirectory, '.safeword/hooks/lib')).toBe(true);
 
-      const libraryDirectory = nodePath.join(temporaryDirectory, '.safeword/lib');
-      const shFiles = readdirSync(libraryDirectory).filter(f => f.endsWith('.sh'));
-      expect(shFiles.length).toBeGreaterThan(0);
+      const libraryDirectory = nodePath.join(temporaryDirectory, '.safeword/hooks/lib');
+      const tsFiles = readdirSync(libraryDirectory).filter(f => f.endsWith('.ts'));
+      expect(tsFiles.length).toBeGreaterThan(0);
     });
   });
 

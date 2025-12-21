@@ -25,17 +25,17 @@ import {
  * @param dir
  */
 function runSelfHealingHook(dir: string): { stdout: string; exitCode: number } {
-  // The hook script location: .safeword/hooks/session-verify-agents.sh
-  const hookPath = nodePath.join(dir, '.safeword/hooks/session-verify-agents.sh');
+  // The hook script location: .safeword/hooks/session-verify-agents.ts
+  const hookPath = nodePath.join(dir, '.safeword/hooks/session-verify-agents.ts');
 
-  if (!fileExists(dir, '.safeword/hooks/session-verify-agents.sh')) {
+  if (!fileExists(dir, '.safeword/hooks/session-verify-agents.ts')) {
     // Hook may have different name - check for any agents-related hook
     // For now, return a placeholder
     return { stdout: '', exitCode: 0 };
   }
 
   try {
-    const stdout = execSync(`bash "${hookPath}"`, {
+    const stdout = execSync(`bun "${hookPath}"`, {
       cwd: dir,
       encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'pipe'],

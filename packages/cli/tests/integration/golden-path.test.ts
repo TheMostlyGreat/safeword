@@ -82,7 +82,7 @@ describe('E2E: Golden Path', () => {
     });
 
     // Run the hook
-    execSync(`echo '${hookInput}' | bash .safeword/hooks/post-tool-lint.sh`, {
+    execSync(`echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`, {
       cwd: projectDirectory,
       env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
       encoding: 'utf8',

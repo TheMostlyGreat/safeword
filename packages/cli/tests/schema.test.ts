@@ -56,7 +56,7 @@ describe('Schema - Single Source of Truth', () => {
         '.safeword',
         '.safeword/hooks',
         '.safeword/hooks/cursor',
-        '.safeword/lib',
+        '.safeword/hooks/lib',
         '.safeword/scripts',
         '.safeword/guides',
         '.safeword/templates',

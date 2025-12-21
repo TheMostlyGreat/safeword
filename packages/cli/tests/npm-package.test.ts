@@ -41,7 +41,6 @@ describe('NPM Package Structure', () => {
       'prompts',
       'skills',
       'commands',
-      'lib',
     ];
     for (const item of required) {
       expect(existsSync(nodePath.join(templatesPath, item))).toBe(true);
@@ -53,21 +52,22 @@ describe('NPM Package Structure', () => {
     const files = readdirSync(hooksPath);
 
     // Session hooks
-    expect(files).toContain('session-verify-agents.sh');
-    expect(files).toContain('session-version.sh');
-    expect(files).toContain('session-lint-check.sh');
+    expect(files).toContain('session-verify-agents.ts');
+    expect(files).toContain('session-version.ts');
+    expect(files).toContain('session-lint-check.ts');
 
     // Prompt hooks
-    expect(files).toContain('prompt-timestamp.sh');
-    expect(files).toContain('prompt-questions.sh');
+    expect(files).toContain('prompt-timestamp.ts');
+    expect(files).toContain('prompt-questions.ts');
 
     // Stop hook
-    expect(files).toContain('stop-quality.sh');
+    expect(files).toContain('stop-quality.ts');
 
     // Post-tool hook
-    expect(files).toContain('post-tool-lint.sh');
+    expect(files).toContain('post-tool-lint.ts');
 
-    // Note: git pre-commit hook is created by Husky at setup time, not from templates
+    // Shared lib
+    expect(files).toContain('lib');
   });
 
   it('should have templates/guides with methodology files', () => {
