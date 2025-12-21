@@ -471,6 +471,29 @@ Wire up Arcade properly with a setup wizard:
 - [ ] Create Arcade-specific templates or workflows
 - [ ] Document Arcade integration in guides
 
+### Astro Documentation Website
+
+Build a public documentation/marketing site for safeword:
+
+**Site Structure:**
+- [ ] Landing page with value prop and quick start
+- [ ] Installation guide (npm, bun, manual)
+- [ ] Configuration reference (hooks, skills, configs)
+- [ ] Guides section (migrated from `.safeword/guides/`)
+- [ ] Templates section (spec templates, design docs)
+- [ ] Changelog / releases
+
+**Technical:**
+- [ ] Use Astro with Starlight theme (docs-focused)
+- [ ] Deploy to Vercel or Cloudflare Pages
+- [ ] Auto-generate API docs from CLI `--help` output
+- [ ] Sync guides from `templates/guides/` to site content
+
+**Nice to have:**
+- [ ] Interactive playground (try safeword setup in browser)
+- [ ] Search (Algolia or Pagefind)
+- [ ] Version selector for docs
+
 ### Single-Source Skill Generation
 
 Generate Cursor rules and Claude skills from a single canonical source to eliminate drift:
