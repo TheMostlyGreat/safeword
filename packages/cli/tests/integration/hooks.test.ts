@@ -285,6 +285,29 @@ describe('E2E: Stop Hook', () => {
     return transcriptPath;
   }
 
+  // Helper to create a multi-message transcript (JSONL format)
+  function createMultiMessageTranscript(
+    targetDirectory: string,
+    messages: { text?: string; toolUse?: string }[],
+  ): string {
+    const transcriptPath = `${targetDirectory}/.safeword/test-transcript.jsonl`;
+    const lines = messages.map(message => {
+      const content: { type: string; text?: string; name?: string }[] = [];
+      if (message.text) {
+        content.push({ type: 'text', text: message.text });
+      }
+      if (message.toolUse) {
+        content.push({ type: 'tool_use', name: message.toolUse });
+      }
+      return JSON.stringify({
+        type: 'assistant',
+        message: { content },
+      });
+    });
+    writeTestFile(targetDirectory, '.safeword/test-transcript.jsonl', lines.join('\n'));
+    return transcriptPath;
+  }
+
   // Helper to run stop hook with mock transcript
   function runStopHook(
     targetDirectory: string,
@@ -422,7 +445,7 @@ describe('E2E: Stop Hook', () => {
       }
     });
 
-    it('uses last valid JSON blob when multiple exist', () => {
+    it('uses last valid JSON blob when multiple exist in same message', () => {
       // First blob says no changes, second says changes made - should use second
       const text =
         'First update: {"proposedChanges": false, "madeChanges": false}\n\n' +
@@ -435,6 +458,35 @@ describe('E2E: Stop Hook', () => {
       expect(result.exitCode).toBe(0);
       expect(output.decision).toBe('block');
       expect(output.reason).toContain('Quality Review');
+    });
+
+    it('only uses JSON from the last assistant message, ignoring older messages', () => {
+      // First message says changes made, but second (last) message says no changes
+      // Should NOT trigger because only last message is checked
+      const transcriptPath = createMultiMessageTranscript(projectDirectory, [
+        { text: 'Made some edits.\n\n{"proposedChanges": false, "madeChanges": true}' },
+        { text: 'Just a question.\n\n{"proposedChanges": false, "madeChanges": false}' },
+      ]);
+
+      const result = runStopHook(projectDirectory, transcriptPath);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout.trim()).toBe(''); // Silent exit, no block
+    });
+
+    it('detects edit tools from recent messages even without JSON summary', () => {
+      // Edit tool in first message, no JSON in either message
+      const transcriptPath = createMultiMessageTranscript(projectDirectory, [
+        { text: 'Let me edit that file.', toolUse: 'Edit' },
+        { text: 'Done with the changes.' },
+      ]);
+
+      const result = runStopHook(projectDirectory, transcriptPath);
+      const output = parseStopOutput(result);
+
+      expect(result.exitCode).toBe(0);
+      expect(output.decision).toBe('block');
+      expect(output.reason).toContain('edit tools were detected');
     });
   });
 });
