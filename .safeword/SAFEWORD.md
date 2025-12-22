@@ -249,13 +249,14 @@ status: in_progress
 End every response with:
 
 ```json
-{"proposedChanges": boolean, "madeChanges": boolean}
+{"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}
 ```
 
-| Field           | True when...                                |
-| --------------- | ------------------------------------------- |
-| proposedChanges | Suggested changes to files in this response |
-| madeChanges     | Modified files using Write/Edit tools       |
+| Field           | True when...                                    |
+| --------------- | ----------------------------------------------- |
+| proposedChanges | Suggested changes to files in this response     |
+| madeChanges     | Modified files using Write/Edit tools           |
+| askedQuestion   | Asked question, need response before proceeding |
 
 ---
 

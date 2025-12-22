@@ -320,6 +320,53 @@ it('leaves project clean after interrupted setup', async () => {
 
 ---
 
+### 8. PurgeCSS Integration (Dead CSS Removal)
+
+**Goal:** Safeword detects CSS framework projects and configures PurgeCSS for unused CSS removal.
+
+| Component | Description |
+|-----------|-------------|
+| Detection | Detect CSS frameworks (Bootstrap, Bulma), Tailwind version, CSS-in-JS |
+| Config template | `.safeword/purgecss.config.js` with framework-aware defaults |
+| PostCSS integration | Merge into `postcss.config.js` (production only) |
+| Safelist defaults | Greedy patterns for dynamic classes (`/^bg-.+/`, `/^text-.+/`) |
+
+**Conditional logic:**
+
+| Project Type | Action |
+|--------------|--------|
+| Tailwind v2 + custom CSS | ✅ Enable PurgeCSS |
+| Bootstrap/Bulma/Materialize | ✅ Enable PurgeCSS |
+| Tailwind v3+ | ❌ Skip (JIT handles this via `content` config) |
+| CSS-in-JS (styled-components, emotion) | ❌ Skip (incompatible) |
+| No CSS framework detected | ❌ Skip |
+
+**Detection additions to `project-detector.ts`:**
+```typescript
+hasCSSFramework: boolean;    // Bootstrap, Bulma, etc.
+hasCSSInJS: boolean;         // styled-components, emotion
+tailwindVersion?: 2 | 3;     // Which Tailwind version
+```
+
+**Generated files:**
+- `.safeword/purgecss.config.js` - Configuration with safelist
+- Updated `postcss.config.js` - Plugin integration (production only)
+
+**Tests needed:**
+- [ ] Detect Bootstrap/Bulma/Materialize from deps
+- [ ] Detect styled-components/emotion (skip PurgeCSS)
+- [ ] Detect Tailwind v2 vs v3 (skip v3+)
+- [ ] Generate valid purgecss.config.js
+- [ ] Merge into postcss.config.js correctly
+- [ ] Safelist prevents false positives for dynamic classes
+
+**Blockers/Concerns:**
+- Dynamic classes (`'btn-' + color`) require safelist patterns
+- CMS/external content not in filesystem needs documentation
+- Must not break existing PostCSS setups
+
+---
+
 ## Priority Order
 
 ### E2E Test Gaps (Functional)
@@ -332,6 +379,7 @@ it('leaves project clean after interrupted setup', async () => {
 ### Feature Gaps (New Capabilities)
 6. **Go Linting** - Expands to new language
 7. **Python Linting** - Expands to new language
+8. **PurgeCSS Integration** - Dead CSS removal for CSS framework projects
 
 ---
 
@@ -353,6 +401,12 @@ it('leaves project clean after interrupted setup', async () => {
 - [ ] Go detection and linting works
 - [ ] Python detection and linting works
 - [ ] Multi-language projects handled correctly
+
+### CSS Optimization
+- [ ] CSS framework detection works (Bootstrap, Bulma, Tailwind v2)
+- [ ] CSS-in-JS detection skips PurgeCSS (styled-components, emotion)
+- [ ] Tailwind v3+ detection skips PurgeCSS (uses native JIT)
+- [ ] Generated purgecss.config.js works with PostCSS pipeline
 
 ---
 
@@ -492,6 +546,54 @@ Wire up Arcade properly with a setup wizard:
   - Set up Arcade-specific hooks or skills
 - [ ] Create Arcade-specific templates or workflows
 - [ ] Document Arcade integration in guides
+
+### Atomic Decomposition & Nested TDD Loops
+
+Break problems into small, testable units **before** implementation, with TDD cycles that nest within larger verification cycles.
+
+**Pre-Work Decomposition:**
+- [ ] Define what "atomic unit" means (granularity TBD - could be single test, single function, or single commit)
+- [ ] Add decomposition step to planning workflow: spec → decomposition → TDD
+- [ ] Create checklist for validating decomposition quality before starting
+- [ ] Document how to identify unit boundaries (cohesion, single responsibility)
+
+**Nested Loop Structure:**
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│ Feature Loop (Acceptance Tests)                             │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ Slice Loop (Integration Tests)                         │ │
+│  │  ┌───────────────────────────────────────────────────┐ │ │
+│  │  │ Unit Loop                                         │ │ │
+│  │  │   RED → GREEN → REFACTOR → COMMIT                 │ │ │
+│  │  └───────────────────────────────────────────────────┘ │ │
+│  │  (repeat for each atomic unit)                         │ │
+│  │  → Verify slice integration before moving on           │ │
+│  └────────────────────────────────────────────────────────┘ │
+│  (repeat for each slice)                                    │
+│  → Verify acceptance criteria before marking complete       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Guide Updates (after spec is finalized):**
+- [ ] Update `testing-guide.md`: Add nested loop section showing how unit TDD cycles roll up
+- [ ] Update `planning-guide.md`: Add decomposition phase between spec and implementation
+- [ ] Add examples showing a feature decomposed into slices → units
+- [ ] Define "zoom out" checkpoints: when to verify integration between units
+
+**Key Principles (to refine):**
+- Each atomic unit is independently testable
+- Complete one unit's full loop before starting the next
+- Verify integration at slice boundaries
+- Acceptance tests run at feature completion, not continuously
+- Decomposition happens during planning, not during TDD
+
+**Open Questions:**
+- How granular is "atomic"? (single assertion vs. single function vs. single commit)
+- Should decomposition be part of the spec template or a separate artifact?
+- How to handle units that turn out to be mis-sized mid-implementation?
+- What triggers "zoom out" to verify integration?
 
 ### Planning & Config File Hygiene
 

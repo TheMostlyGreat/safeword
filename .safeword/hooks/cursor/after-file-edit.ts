@@ -16,8 +16,7 @@ interface CursorInput {
 let input: CursorInput;
 try {
   input = await Bun.stdin.json();
-} catch (error) {
-  if (process.env.DEBUG) console.error('[cursor/after-file-edit] stdin parse error:', error);
+} catch {
   process.exit(0);
 }
 
@@ -41,7 +40,8 @@ if (!existsSync('.safeword')) {
 }
 
 // Set marker file for stop hook to know edits were made
-await Bun.write(`/tmp/safeword-cursor-edited-${convId}`, '');
+const markerFile = `/tmp/safeword-cursor-edited-${convId}`;
+await Bun.write(markerFile, '');
 
 // Lint the file
 await lintFile(file, process.cwd());

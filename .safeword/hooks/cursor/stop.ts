@@ -12,7 +12,6 @@ interface CursorInput {
   workspace_roots?: string[];
   conversation_id?: string;
   status?: string;
-  loop_count?: number;
 }
 
 interface StopOutput {
@@ -23,8 +22,7 @@ interface StopOutput {
 let input: CursorInput;
 try {
   input = await Bun.stdin.json();
-} catch (error) {
-  if (process.env.DEBUG) console.error('[cursor/stop] stdin parse error:', error);
+} catch {
   console.log('{}');
   process.exit(0);
 }
@@ -48,13 +46,7 @@ if (input.status !== 'completed') {
   process.exit(0);
 }
 
-// Get loop_count to prevent infinite review loops
-// When review is triggered, agent runs again with loop_count >= 1
-const loopCount = input.loop_count ?? 0;
-if (loopCount >= 1) {
-  console.log('{}');
-  process.exit(0);
-}
+// Cursor enforces max 5 auto-submissions, no additional limit needed
 
 // Check if any file edits occurred in this session by looking for marker file
 const convId = input.conversation_id ?? 'default';

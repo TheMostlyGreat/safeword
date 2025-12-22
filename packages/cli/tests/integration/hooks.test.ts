@@ -274,8 +274,9 @@ describe('E2E: Stop Hook', () => {
   // Helper to create a mock transcript with an assistant message
   function createMockTranscript(targetDirectory: string, assistantText: string): string {
     const transcriptPath = `${targetDirectory}/.safeword/test-transcript.jsonl`;
+    // Use 'type' at top level to match actual Claude Code transcript format
     const message = {
-      role: 'assistant',
+      type: 'assistant',
       message: {
         content: [{ type: 'text', text: assistantText }],
       },

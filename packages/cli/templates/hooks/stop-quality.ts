@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // Safeword: Auto Quality Review Stop Hook
 // Triggers quality review when changes are proposed or made
-// Looks for {"proposedChanges": ..., "madeChanges": ...} JSON blob
+// Uses JSON summary if available, falls back to detecting edit tool usage
 
 import { existsSync } from 'node:fs';
 
@@ -11,10 +11,17 @@ interface HookInput {
   transcript_path?: string;
 }
 
+interface ContentItem {
+  type: string;
+  text?: string;
+  name?: string; // for tool_use
+}
+
 interface TranscriptMessage {
-  role: string;
+  type: string; // "assistant" | "user" | etc at top level
   message?: {
-    content?: { type: string; text?: string }[];
+    role?: string;
+    content?: ContentItem[];
   };
 }
 
@@ -22,6 +29,8 @@ interface ResponseSummary {
   proposedChanges: boolean;
   madeChanges: boolean;
 }
+
+const EDIT_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const safewordDir = `${projectDir}/.safeword`;
@@ -35,8 +44,7 @@ if (!existsSync(safewordDir)) {
 let input: HookInput;
 try {
   input = await Bun.stdin.json();
-} catch (error) {
-  if (process.env.DEBUG) console.error('[stop-quality] stdin parse error:', error);
+} catch {
   process.exit(0);
 }
 
@@ -54,16 +62,28 @@ if (!(await transcriptFile.exists())) {
 const transcriptText = await transcriptFile.text();
 const lines = transcriptText.trim().split('\n');
 
-// Find last assistant message with text content (search backwards)
-let messageText: string | null = null;
-for (let i = lines.length - 1; i >= 0; i--) {
+// Collect text from recent assistant messages and detect edit tool usage
+// The JSON summary might not be in the very last message if tool calls followed
+const recentTexts: string[] = [];
+let editToolsUsed = false;
+const maxMessages = 20; // Check more messages for tool detection
+let messagesChecked = 0;
+
+for (let i = lines.length - 1; i >= 0 && messagesChecked < maxMessages; i--) {
   try {
     const message: TranscriptMessage = JSON.parse(lines[i]);
-    if (message.role === 'assistant' && message.message?.content) {
-      const textContent = message.message.content.find(c => c.type === 'text' && c.text);
-      if (textContent?.text) {
-        messageText = textContent.text;
-        break;
+    if (message.type === 'assistant' && message.message?.content) {
+      messagesChecked++;
+
+      for (const item of message.message.content) {
+        // Collect text content (limit to 10)
+        if (item.type === 'text' && item.text && recentTexts.length < 10) {
+          recentTexts.push(item.text);
+        }
+        // Detect edit tool usage
+        if (item.type === 'tool_use' && item.name && EDIT_TOOLS.has(item.name)) {
+          editToolsUsed = true;
+        }
       }
     }
   } catch {
@@ -71,9 +91,12 @@ for (let i = lines.length - 1; i >= 0; i--) {
   }
 }
 
-if (!messageText) {
+if (recentTexts.length === 0 && !editToolsUsed) {
   process.exit(0);
 }
+
+// Combine all recent texts to search for JSON summary
+const combinedText = recentTexts.join('\n');
 
 /**
  * Extract all JSON objects from text using brace-balanced scanning.
@@ -126,7 +149,7 @@ function extractJsonObjects(text: string): string[] {
   return results;
 }
 
-const candidates = extractJsonObjects(messageText);
+const candidates = extractJsonObjects(combinedText);
 
 function isValidSummary(object: unknown): object is ResponseSummary {
   return (
@@ -143,14 +166,35 @@ for (const candidate of candidates) {
     const parsed = JSON.parse(candidate);
     if (isValidSummary(parsed)) {
       summary = parsed;
+      // Don't break - use last valid summary (most recent in conversation)
     }
   } catch {
     // Not valid JSON, skip
   }
 }
 
-if (!summary) {
-  // No valid JSON blob found - remind about required format (JSON stdout + exit 0 per Claude Code docs)
+// Decision logic:
+// 1. If valid summary found → use it
+// 2. If no summary but edit tools used → trigger review (safety net)
+// 3. If no summary and no edit tools → remind about required format
+
+if (summary) {
+  // Use reported summary
+  if (summary.proposedChanges || summary.madeChanges) {
+    console.log(JSON.stringify({ decision: 'block', reason: QUALITY_REVIEW_MESSAGE }));
+    process.exit(0);
+  }
+} else if (editToolsUsed) {
+  // Fallback: edit tools detected but no summary - trigger review anyway
+  console.log(
+    JSON.stringify({
+      decision: 'block',
+      reason: `${QUALITY_REVIEW_MESSAGE}\n\n(Note: JSON summary was missing but edit tools were detected)`,
+    })
+  );
+  process.exit(0);
+} else {
+  // No summary and no edit tools - remind about required format
   console.log(
     JSON.stringify({
       decision: 'block',
@@ -158,11 +202,5 @@ if (!summary) {
         'SAFEWORD: Response missing required JSON summary. Add to end of response:\n{"proposedChanges": boolean, "madeChanges": boolean}',
     })
   );
-  process.exit(0);
-}
-
-// If either proposed or made changes, trigger quality review (JSON stdout + exit 0 per Claude Code docs)
-if (summary.proposedChanges || summary.madeChanges) {
-  console.log(JSON.stringify({ decision: 'block', reason: QUALITY_REVIEW_MESSAGE }));
   process.exit(0);
 }
