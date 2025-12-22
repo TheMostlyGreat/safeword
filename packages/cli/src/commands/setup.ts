@@ -4,12 +4,13 @@
  * Uses reconcile() with mode='install' to create all managed files.
  */
 
+import { readdirSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import { reconcile, type ReconcileResult } from '../reconcile.js';
-import { SAFEWORD_SCHEMA } from '../schema.js';
+import { type ProjectContext,SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
-import { exists, writeJson } from '../utils/fs.js';
+import { exists, readJson, writeJson } from '../utils/fs.js';
 import { isGitRepo } from '../utils/git.js';
 import { installDependencies } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
@@ -27,6 +28,84 @@ interface PackageJson {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   'lint-staged'?: Record<string, string[]>;
+  workspaces?: string[] | { packages?: string[] };
+}
+
+/**
+ * Add format scripts to workspace packages that don't have them.
+ * Only runs if root project uses Prettier (not an existing formatter like Biome).
+ */
+function setupWorkspaceFormatScripts(cwd: string, ctx: ProjectContext): string[] {
+  // Skip if root uses an existing formatter (Biome, dprint, etc.)
+  if (ctx.projectType.existingFormatter) return [];
+
+  const packageJsonPath = nodePath.join(cwd, 'package.json');
+  const rootPackageJson = readJson(packageJsonPath) as PackageJson | undefined;
+  if (!rootPackageJson?.workspaces) return [];
+
+  // Resolve workspace patterns to paths
+  const workspacePatterns = Array.isArray(rootPackageJson.workspaces)
+    ? rootPackageJson.workspaces
+    : rootPackageJson.workspaces.packages ?? [];
+
+  const updated: string[] = [];
+
+  for (const pattern of workspacePatterns) {
+    // Handle both explicit paths and simple glob patterns like "packages/*"
+    const workspacePath = pattern.endsWith('/*')
+      ? pattern.slice(0, -2) // Remove /* suffix, we'll scan the directory
+      : pattern;
+
+    const fullPath = nodePath.join(cwd, workspacePath);
+
+    if (pattern.endsWith('/*')) {
+      // Scan directory for subdirectories
+      if (!exists(fullPath)) continue;
+      try {
+        const entries = readdirSync(fullPath, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.isDirectory() && !entry.name.startsWith('.')) {
+            const pkgPath = nodePath.join(fullPath, entry.name);
+            if (addFormatScriptIfMissing(pkgPath)) {
+              updated.push(nodePath.join(workspacePath, entry.name, 'package.json'));
+            }
+          }
+        }
+      } catch {
+        // Directory not readable, skip
+      }
+    } else {
+      // Explicit path
+      if (addFormatScriptIfMissing(fullPath)) {
+        updated.push(nodePath.join(workspacePath, 'package.json'));
+      }
+    }
+  }
+
+  return updated;
+}
+
+/**
+ * Add format script to a package if it doesn't have one.
+ * Returns true if the script was added.
+ */
+function addFormatScriptIfMissing(packageDir: string): boolean {
+  const packageJsonPath = nodePath.join(packageDir, 'package.json');
+  if (!exists(packageJsonPath)) return false;
+
+  const packageJson = readJson(packageJsonPath) as PackageJson | undefined;
+  if (!packageJson) return false;
+
+  // Skip if format script already exists
+  if (packageJson.scripts?.format) return false;
+
+  // Add format script
+  const scripts = packageJson.scripts ?? {};
+  scripts.format = 'prettier --write .';
+  packageJson.scripts = scripts;
+  writeJson(packageJsonPath, packageJson);
+
+  return true;
 }
 
 function ensurePackageJson(cwd: string): boolean {
@@ -43,6 +122,7 @@ function printSetupSummary(
   result: ReconcileResult,
   packageJsonCreated: boolean,
   archFiles: string[] = [],
+  workspaceUpdates: string[] = [],
 ): void {
   header('Setup Complete');
 
@@ -53,9 +133,10 @@ function printSetupSummary(
     for (const file of allCreated) listItem(file);
   }
 
-  if (result.updated.length > 0) {
+  const allUpdated = [...result.updated, ...workspaceUpdates];
+  if (allUpdated.length > 0) {
     info('\nModified:');
-    for (const file of result.updated) listItem(file);
+    for (const file of allUpdated) listItem(file);
   }
 
   info('\nNext steps:');
@@ -106,6 +187,12 @@ export async function setup(options: SetupOptions): Promise<void> {
       info('Generated dependency-cruiser config for /audit command');
     }
 
+    // Add format scripts to workspace packages (monorepo support)
+    const workspaceUpdates = setupWorkspaceFormatScripts(cwd, ctx);
+    if (workspaceUpdates.length > 0) {
+      info(`\nAdded format scripts to ${workspaceUpdates.length} workspace package(s)`);
+    }
+
     installDependencies(cwd, result.packagesToInstall, 'linting dependencies');
 
     if (!isGitRepo(cwd)) {
@@ -119,7 +206,7 @@ export async function setup(options: SetupOptions): Promise<void> {
         info('Initialize git and run safeword upgrade to enable pre-commit hooks');
     }
 
-    printSetupSummary(result, packageJsonCreated, archFiles);
+    printSetupSummary(result, packageJsonCreated, archFiles, workspaceUpdates);
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);
