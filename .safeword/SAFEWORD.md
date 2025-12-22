@@ -252,11 +252,13 @@ End every response with:
 {"proposedChanges": boolean, "madeChanges": boolean, "askedQuestion": boolean}
 ```
 
-| Field           | True when...                                    |
-| --------------- | ----------------------------------------------- |
-| proposedChanges | Suggested changes to files in this response     |
-| madeChanges     | Modified files using Write/Edit tools           |
-| askedQuestion   | Asked question, need response before proceeding |
+| Field           | True when...                                                   |
+| --------------- | -------------------------------------------------------------- |
+| proposedChanges | Suggested changes to files in this response                    |
+| madeChanges     | Used Edit, Write, MultiEdit, or NotebookEdit tools (not Read)  |
+| askedQuestion   | Asked question, need response before proceeding                |
+
+Quality reviews, test runs, research, discussion = `madeChanges: false`
 
 ---
 
