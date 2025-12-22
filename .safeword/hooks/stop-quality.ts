@@ -62,29 +62,29 @@ if (!(await transcriptFile.exists())) {
 const transcriptText = await transcriptFile.text();
 const lines = transcriptText.trim().split('\n');
 
-// Collect text from recent assistant messages and detect edit tool usage
-// The JSON summary might not be in the very last message if tool calls followed
+// Only look at the LAST assistant message for JSON summary
+// But scan recent messages for edit tool detection
 const recentTexts: string[] = [];
 let editToolsUsed = false;
-const maxMessages = 20; // Check more messages for tool detection
-let messagesChecked = 0;
+let foundFirstAssistant = false;
 
-for (let i = lines.length - 1; i >= 0 && messagesChecked < maxMessages; i--) {
+for (let i = lines.length - 1; i >= 0; i--) {
   try {
     const message: TranscriptMessage = JSON.parse(lines[i]);
     if (message.type === 'assistant' && message.message?.content) {
-      messagesChecked++;
-
       for (const item of message.message.content) {
-        // Collect text content (limit to 10)
-        if (item.type === 'text' && item.text && recentTexts.length < 10) {
+        // Only collect text from the FIRST (most recent) assistant message
+        if (!foundFirstAssistant && item.type === 'text' && item.text) {
           recentTexts.push(item.text);
         }
-        // Detect edit tool usage
+        // Detect edit tool usage in recent messages (within last 5)
         if (item.type === 'tool_use' && item.name && EDIT_TOOLS.has(item.name)) {
           editToolsUsed = true;
         }
       }
+      foundFirstAssistant = true;
+      // Stop scanning after checking a few messages for edit tools
+      if (i < lines.length - 5) break;
     }
   } catch {
     // Skip invalid JSON lines
