@@ -16,7 +16,7 @@ interface HookEntry {
  * Type guard to check if a value is a hook entry with hooks array
  * @param h
  */
-export function isHookEntry(h: unknown): h is HookEntry {
+function isHookEntry(h: unknown): h is HookEntry {
   return (
     typeof h === 'object' && h !== null && 'hooks' in h && Array.isArray((h as HookEntry).hooks)
   );
