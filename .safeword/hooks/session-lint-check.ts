@@ -22,7 +22,7 @@ const eslintConfigs = [
   '.eslintrc.js',
 ];
 const hasEslint = await Promise.all(
-  eslintConfigs.map(f => Bun.file(`${projectDir}/${f}`).exists()),
+  eslintConfigs.map(f => Bun.file(`${projectDir}/${f}`).exists().catch(() => false)),
 );
 if (!hasEslint.some(Boolean)) {
   warnings.push("ESLint config not found - run 'npm run lint' may fail");
@@ -31,7 +31,7 @@ if (!hasEslint.some(Boolean)) {
 // Check for Prettier config
 const prettierConfigs = ['.prettierrc', '.prettierrc.json', 'prettier.config.js'];
 const hasPrettier = await Promise.all(
-  prettierConfigs.map(f => Bun.file(`${projectDir}/${f}`).exists()),
+  prettierConfigs.map(f => Bun.file(`${projectDir}/${f}`).exists().catch(() => false)),
 );
 if (!hasPrettier.some(Boolean)) {
   warnings.push('Prettier config not found - formatting may be inconsistent');
