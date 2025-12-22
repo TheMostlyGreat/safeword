@@ -15,7 +15,7 @@ Run these npm scripts in order. Each script is configured in package.json by `sa
 npm run lint 2>&1 || true
 
 # 2. Prettier - format all files
-npm run format 2>&1 || true
+npm run format --if-present 2>&1 || true
 
 # 3. TypeScript type check (if tsconfig.json exists)
 [ -f tsconfig.json ] && npx tsc --noEmit 2>&1 || true
