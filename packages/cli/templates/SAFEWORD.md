@@ -254,9 +254,16 @@ End every response with:
 
 | Field           | True when...                                                   |
 | --------------- | -------------------------------------------------------------- |
-| proposedChanges | Suggested changes to files in this response                    |
+| proposedChanges | NEW or MODIFIED proposal in THIS response                      |
 | madeChanges     | Used Edit, Write, MultiEdit, or NotebookEdit tools (not Read)  |
 | askedQuestion   | Asked question, need response before proceeding                |
+
+**After quality review fires:**
+
+- Proposal CHANGED after review → `proposedChanges: true`
+- Proposal UNCHANGED after review → `proposedChanges: false`
+
+This breaks the review loop when your proposal stabilizes.
 
 Quality reviews, test runs, research, discussion = `madeChanges: false`
 
