@@ -36,6 +36,17 @@ import type { ProjectType } from './utils/project-detector.js';
 const HUSKY_DIR = '.husky';
 
 /**
+ * Directories containing executable scripts that need chmod +x.
+ * Used by both install and upgrade plans.
+ */
+const CHMOD_PATHS = [
+  '.safeword/hooks',
+  '.safeword/hooks/cursor',
+  '.safeword/lib',
+  '.safeword/scripts',
+];
+
+/**
  * Prettier-related packages that should be skipped for projects with existing formatter.
  */
 const PRETTIER_PACKAGES = new Set([
@@ -404,12 +415,7 @@ function computeInstallPlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   wouldCreate.push(...managed.created);
 
   // 4. chmod hook/lib/scripts directories
-  const chmodPaths = [
-    '.safeword/hooks',
-    '.safeword/hooks/cursor',
-    '.safeword/lib',
-    '.safeword/scripts',
-  ];
+  const chmodPaths = [...CHMOD_PATHS];
   if (ctx.isGitRepo) chmodPaths.push(HUSKY_DIR);
   actions.push({ type: 'chmod', paths: chmodPaths });
 
@@ -498,13 +504,7 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   wouldRemove.push(...deprecatedDirectories.removed);
 
   // 5. chmod
-  const chmodPathsUpgrade = [
-    '.safeword/hooks',
-    '.safeword/hooks/cursor',
-    '.safeword/lib',
-    '.safeword/scripts',
-  ];
-  actions.push({ type: 'chmod', paths: chmodPathsUpgrade });
+  actions.push({ type: 'chmod', paths: CHMOD_PATHS });
 
   // 6. JSON merges (always apply to ensure keys are present)
   for (const [filePath, definition] of Object.entries(schema.jsonMerges)) {
