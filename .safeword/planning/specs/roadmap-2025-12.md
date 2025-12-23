@@ -478,6 +478,53 @@ Make safeword installable as a Claude Code plugin:
 - [ ] Understand relationship between: MCP servers, plugins, skills, hooks
 - [ ] Prototype safeword as a Claude Code plugin
 
+### State-Aware Quality Hook
+
+Make the quality review hook context-aware so it provides relevant prompts based on what Claude is working on:
+
+**Problem:**
+The current quality hook fires the same "double check your work" prompt regardless of context:
+- Writing user stories → code review prompt is irrelevant
+- Doing research → code review prompt is irrelevant
+- Writing specs → should review spec quality, not code quality
+- Implementing code → current prompt is appropriate
+
+**Solution Options:**
+
+1. **Detect context from response content:**
+   - [ ] Parse response for markers (spec structure, story format, code blocks)
+   - [ ] Choose appropriate review prompt based on detected content
+   - [ ] Maintain library of context-specific prompts
+
+2. **Track conversation state:**
+   - [ ] Use `askedQuestion` field to detect research/discussion mode
+   - [ ] Track file types being edited (`.md` vs `.ts`)
+   - [ ] Infer mode from tool usage patterns
+
+3. **Explicit mode declaration:**
+   - [ ] Add optional `mode` field to response JSON: `"mode": "spec" | "impl" | "research"`
+   - [ ] Hook uses mode to select appropriate prompt
+   - [ ] Default to current behavior if mode not specified
+
+**Context-Specific Prompts:**
+
+| Context | Review Focus |
+|---------|--------------|
+| Spec writing | Completeness, clarity, acceptance criteria |
+| User stories | Value prop, testability, scope creep |
+| Implementation | Correctness, elegance, best practices |
+| Research | Skip review (no changes to review) |
+| Planning | Dependencies, risks, missing steps |
+
+**Implementation:**
+- [ ] Research: analyze transcript to detect context patterns
+- [ ] Define prompt templates per context
+- [ ] Update `stop-quality.ts` with context detection
+- [ ] Add `lib/quality-prompts.ts` with prompt library
+- [ ] Test: verify correct prompt selected per context
+
+---
+
 ### Enhanced `check` Command
 
 Improve `safeword check` to detect configuration drift and issues:
