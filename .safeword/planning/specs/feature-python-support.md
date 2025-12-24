@@ -32,6 +32,27 @@ Since Claude Code runs on Node.js, the Node dependency is not a concern - users 
 - [ ] mypy for type checking
 - [ ] No new npm dependencies for Python detection
 
+### Ruff Rule Selection (mirrors ESLint philosophy)
+
+```toml
+[tool.ruff.lint]
+select = [
+  "E",      # pycodestyle errors (matches @eslint/js)
+  "F",      # pyflakes (matches @eslint/js)
+  "B",      # bugbear (matches sonarjs)
+  "S",      # bandit security (matches eslint-plugin-security)
+  "SIM",    # simplify (matches sonarjs + unicorn)
+  "UP",     # pyupgrade (matches unicorn)
+  "I",      # isort (matches import-x)
+  "ASYNC",  # async rules (matches promise plugin)
+  "C90",    # complexity (matches max-complexity)
+  "PT",     # pytest style (matches vitest)
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+```
+
 ### Design
 
 - [ ] Config generation deferred to Phase 2 (users bring their own ruff.toml initially)
@@ -80,8 +101,9 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 - [ ] Detect file extension in lint hook
 - [ ] Run `ruff check --fix` for .py files
 - [ ] Run `ruff format` for .py files
-- [ ] Continue running ESLint for .js/.ts files
-- [ ] Skip linting gracefully if Ruff not installed
+- [ ] Continue running ESLint for .js/.ts files (polyglot support)
+- [ ] Skip Ruff gracefully if not installed
+- [ ] Skip ESLint gracefully if not installed (Python-only projects)
 
 **Implementation Status**: ❌ Not Started
 **Tests**: `packages/cli/tests/integration/hooks.test.ts`
@@ -103,7 +125,8 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 **Acceptance Criteria**:
 
 - [ ] Skip ESLint/Prettier install for Python-only projects
-- [ ] Show Python-appropriate next steps
+- [ ] Skip package.json creation for Python-only projects
+- [ ] Show Python-appropriate next steps (e.g., "pip install ruff mypy")
 - [ ] Still create .safeword directory with guides/templates
 - [ ] Still create Claude hooks
 
@@ -113,6 +136,7 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 **Files**:
 - `packages/cli/src/commands/setup.ts`
 - `packages/cli/src/utils/install.ts`
+- `packages/cli/src/utils/context.ts` (may need updates)
 
 ---
 
