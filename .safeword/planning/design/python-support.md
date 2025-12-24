@@ -113,8 +113,9 @@ function hasEslint(projectDir: string): Promise<boolean>;
 **Interface**:
 
 ```typescript
-// Modify ensurePackageJson to be conditional
-function ensurePackageJson(cwd: string, languages: Languages): boolean;
+// ensurePackageJson unchanged - caller skips it for Python-only
+// (see Setup Flow: only called if languages.javascript)
+function ensurePackageJson(cwd: string): boolean;
 
 // Add Python-specific next steps
 function printSetupSummary(
@@ -141,9 +142,9 @@ The `/lint` command template already contains bash commands. Extend it to:
 
 | Language   | Commands                                      |
 |------------|-----------------------------------------------|
-| Python     | `ruff check --fix .`, `ruff format .`, `mypy .` |
-| JavaScript | `eslint --fix .`, `prettier --write .`, `tsc --noEmit` |
-| Polyglot   | All of the above                              |
+| Python     | `ruff check --fix .`, `ruff format .`, `mypy .` (direct) |
+| JavaScript | `npm run lint`, `npm run format`, `npx tsc` (existing pattern) |
+| Polyglot   | Both sets of commands                         |
 
 **Dependencies**: Shell commands (Ruff, mypy, ESLint, Prettier, tsc)
 **Tests**: Test Suite 4 (Tests 4.1-4.4)
@@ -206,10 +207,10 @@ lintFile(file, projectDir)
       → else: skip silently
   → else if JS_EXTENSIONS.has(extension):
       → if hasEslint(projectDir):
-          → eslint --fix ${file}
-          → prettier --write ${file}
+          → npx eslint --fix ${file}
+          → npx prettier --write ${file}
       → else: skip silently
-  → else: existing behavior (prettier, shellcheck)
+  → else: existing behavior (npx prettier, shellcheck)
 ```
 
 ## User Flow
