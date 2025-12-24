@@ -37,6 +37,13 @@ Since Claude Code runs on Node.js, the Node dependency is not a concern - users 
 - [ ] Config generation deferred to Phase 2 (users bring their own ruff.toml initially)
 - [ ] Reuse existing reconcile/schema patterns
 
+### Architecture Note
+
+Current code assumes package.json exists (`ensurePackageJson()` creates one, `detectProjectType()` requires `PackageJson` input). For Python-only projects:
+- Detect language before assuming JS tooling
+- Skip package.json creation for Python-only projects
+- Add `detectLanguages()` layer above `detectProjectType()`
+
 ---
 
 ## Story 1: Detect Python Projects
@@ -52,6 +59,7 @@ Since Claude Code runs on Node.js, the Node dependency is not a concern - users 
 - [ ] Add `python: boolean` to ProjectType interface
 - [ ] Detect framework: django, flask, fastapi, or null
 - [ ] Detect package manager: poetry, uv, pip
+- [ ] Work without package.json (Python-only projects)
 
 **Implementation Status**: ❌ Not Started
 **Tests**: `packages/cli/src/utils/project-detector.test.ts`
