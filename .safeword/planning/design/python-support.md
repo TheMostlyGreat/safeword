@@ -52,7 +52,13 @@ export async function lintFile(file: string, projectDir: string): Promise<void>;
 **Interface**:
 
 ```typescript
-function printSetupSummary(result, packageJsonCreated, languages, ...): void;
+function printSetupSummary(
+  result: ReconcileResult,
+  packageJsonCreated: boolean,
+  languages: Languages,
+  archFiles?: string[],
+  workspaceUpdates?: string[]
+): void;
 ```
 
 **Tests**: Suite 3 (Tests 3.1-3.6)

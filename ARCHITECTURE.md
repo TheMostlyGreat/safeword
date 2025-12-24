@@ -2,7 +2,7 @@
 
 **Version:** 1.0
 **Last Updated:** 2025-12-24
-**Status:** Production
+**Status:** Proposed
 
 ---
 
