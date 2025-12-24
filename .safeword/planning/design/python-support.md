@@ -181,15 +181,17 @@ interface PyprojectToml {
 
 ```text
 setup()
-  → detectLanguages(cwd)           # First: what languages?
+  → detectLanguages(cwd)           # NEW: First detect languages
   → if languages.javascript:
       → ensurePackageJson()        # Only create if JS project
-      → detectProjectType()
+  → createProjectContext(cwd, languages)  # Modified to use languages
+  → reconcile(schema)              # Always: .safeword dir, hooks, guides
+  → buildArchitecture()            # Existing: detect layers/workspaces
+  → if languages.javascript:
       → installDependencies()      # ESLint, Prettier, etc.
   → if languages.python:
-      → detectPythonType()
       → printPythonGuidance()      # "pip install ruff mypy"
-  → reconcile(schema)              # Always: .safeword dir, hooks, guides
+  → printSetupSummary(languages)   # Include language info
 ```
 
 **Lint Hook Flow:**
