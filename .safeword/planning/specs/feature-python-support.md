@@ -173,12 +173,21 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 - Story 3: Conditional setup
 - Story 4: Lint command
 
-### Phase 2: Future (Out of Scope)
+### Phase 2: Tooling Parity (Out of Scope)
 
 - Config generation (add `[tool.ruff]` to pyproject.toml)
 - Pre-commit.yaml generation (replaces Husky + lint-staged)
 - import-linter config (architecture validation, replaces dependency-cruiser)
 - Vulture integration (dead code detection, replaces Knip)
 - Python framework-specific configs (Django, FastAPI)
+
+### Phase 3: Rule Optimization (Out of Scope)
+
+- Analyze which Ruff rules catch the most LLM-generated issues
+- Remove rules with high false-positive rates
+- Add new rules as Ruff evolves (track releases)
+- Tune severity levels based on real-world usage
+- Cross-pollinate insights between ESLint and Ruff rule sets
+- Document rule selection rationale (like `.safeword/planning/linting/`)
 
 **Next Steps**: Implement Story 1 (Python detection)
