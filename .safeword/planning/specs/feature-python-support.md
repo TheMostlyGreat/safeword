@@ -144,7 +144,9 @@ Since Claude Code runs on Node.js, the Node dependency is not a concern - users 
 ### Phase 2: Future (Out of Scope)
 
 - Config generation (add `[tool.ruff]` to pyproject.toml)
-- Pre-commit.yaml generation
+- Pre-commit.yaml generation (replaces Husky + lint-staged)
+- import-linter config (architecture validation, replaces dependency-cruiser)
+- Vulture integration (dead code detection, replaces Knip)
 - Python framework-specific configs (Django, FastAPI)
 
 **Next Steps**: Implement Story 1 (Python detection)
