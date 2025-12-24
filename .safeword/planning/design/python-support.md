@@ -64,7 +64,8 @@ export interface PythonProjectType {
 export function detectLanguages(cwd: string): Languages;
 
 /**
- * Detect Python framework and package manager from pyproject.toml.
+ * Detect Python framework and package manager.
+ * Checks pyproject.toml for [tool.poetry], [tool.uv], and uv.lock file.
  * Only called if detectLanguages().python is true.
  */
 export function detectPythonType(cwd: string): PythonProjectType;
@@ -90,14 +91,14 @@ const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 export async function lintFile(file: string, projectDir: string): Promise<void>;
 
 /**
- * Check if Ruff is available in PATH or project.
- * Skip gracefully if not installed.
+ * Check if Ruff is available in PATH.
+ * Result cached for session (avoids repeated `which ruff` calls).
  */
 function hasRuff(): Promise<boolean>;
 
 /**
- * Check if ESLint is available (node_modules or global).
- * Skip gracefully for Python-only projects.
+ * Check if ESLint is available (node_modules).
+ * Result cached per projectDir.
  */
 function hasEslint(projectDir: string): Promise<boolean>;
 ```
@@ -130,32 +131,28 @@ function printSetupSummary(
 
 ### Component 4: LintCommand
 
-**What**: Extends /lint command to run Python tooling
+**What**: Extends /lint skill to run Python tooling
 **Where**: `packages/cli/templates/commands/lint.md`
-**Interface**:
+**Behavior**:
 
-```markdown
-# Command behavior (pseudo-code in markdown template)
+The `/lint` command template already contains bash commands. Extend it to:
+1. Detect project type (Python, JS, or both)
+2. Run appropriate toolchain based on detection
 
-1. Detect languages (detectLanguages)
-2. If Python:
-   - Run: ruff check --fix .
-   - Run: ruff format .
-   - Run: mypy .
-3. If JavaScript:
-   - Run: eslint --fix .
-   - Run: prettier --write .
-   - Run: tsc --noEmit
-4. If polyglot: run both
-```
+| Language   | Commands                                      |
+|------------|-----------------------------------------------|
+| Python     | `ruff check --fix .`, `ruff format .`, `mypy .` |
+| JavaScript | `eslint --fix .`, `prettier --write .`, `tsc --noEmit` |
+| Polyglot   | All of the above                              |
 
-**Dependencies**: LanguageDetector, shell commands
+**Dependencies**: Shell commands (Ruff, mypy, ESLint, Prettier, tsc)
 **Tests**: Test Suite 4 (Tests 4.1-4.4)
 
 ## Data Model
 
 ```typescript
 // Extended ProjectContext (packages/cli/src/utils/context.ts)
+// Uses Languages and PythonProjectType from Component 1
 export interface ProjectContext {
   cwd: string;
   packageJson?: PackageJson;       // Optional for Python-only
@@ -164,26 +161,14 @@ export interface ProjectContext {
   pythonType?: PythonProjectType;  // Only if languages.python
 }
 
-// Language detection result
-interface Languages {
-  javascript: boolean;
-  python: boolean;
-}
-
-// Python-specific detection
-interface PythonProjectType {
-  framework: 'django' | 'flask' | 'fastapi' | null;
-  packageManager: 'poetry' | 'uv' | 'pip';
-}
-
 // Pyproject.toml structure (partial, for parsing)
 interface PyprojectToml {
   project?: {
-    dependencies?: string[];
+    dependencies?: string[];       // PEP 621 format: ["django>=4.0"]
   };
   tool?: {
     poetry?: {
-      dependencies?: Record<string, string>;
+      dependencies?: Record<string, string>;  // Poetry format: {"django": "^4.0"}
     };
     uv?: Record<string, unknown>;
   };
