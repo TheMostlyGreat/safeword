@@ -5,6 +5,8 @@
 
 **Related**: Spec: `.safeword/planning/specs/feature-python-support.md` | Tests: `.safeword/planning/test-definitions/feature-python-support.md` | Architecture: `ARCHITECTURE.md`
 
+**TDD Note**: This design implements tests from Test Definitions. Each component references its test suite.
+
 ---
 
 ## Architecture
@@ -30,6 +32,7 @@ detectProjectType  detectPythonType  Both
 **What**: Detects JavaScript/Python from project files
 **Where**: `packages/cli/src/utils/project-detector.ts`
 **Interface**: See `ARCHITECTURE.md` → Language Detection
+**Dependencies**: Node.js `fs` module
 **Tests**: Suite 1 (Tests 1.1-1.10)
 
 ### Component 2: ExtendedLintHook
@@ -43,6 +46,7 @@ const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 export async function lintFile(file: string, projectDir: string): Promise<void>;
 ```
 
+**Dependencies**: Bun shell (`$`), Ruff CLI, ESLint
 **Tests**: Suite 2 (Tests 2.1-2.6)
 
 ### Component 3: ConditionalSetup
@@ -61,6 +65,7 @@ function printSetupSummary(
 ): void;
 ```
 
+**Dependencies**: LanguageDetector (Component 1)
 **Tests**: Suite 3 (Tests 3.1-3.6)
 
 ### Component 4: LintCommand
@@ -74,6 +79,7 @@ function printSetupSummary(
 | Python     | `ruff check --fix .`, `ruff format .`, `mypy .` |
 | JavaScript | `npm run lint`, `npm run format`, `npx tsc` |
 
+**Dependencies**: Shell commands (Ruff, mypy, npm scripts)
 **Tests**: Suite 4 (Tests 4.1-4.4)
 
 ---
