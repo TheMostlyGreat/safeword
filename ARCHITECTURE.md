@@ -13,6 +13,7 @@
 - [Language Detection](#language-detection)
 - [Key Decisions](#key-decisions)
 - [Best Practices](#best-practices)
+- [Migration Strategy](#migration-strategy)
 
 ---
 
@@ -84,7 +85,7 @@ interface PythonProjectType {
 
 ### Graceful Linter Fallback
 
-**Status:** Active
+**Status:** Proposed
 **Date:** 2025-12-24
 
 | Field        | Value |
@@ -96,7 +97,7 @@ interface PythonProjectType {
 
 ### TOML Parsing Without Dependencies
 
-**Status:** Active
+**Status:** Proposed
 **Date:** 2025-12-24
 
 | Field        | Value |
@@ -108,7 +109,7 @@ interface PythonProjectType {
 
 ### Ruff in Hook, mypy in Command Only
 
-**Status:** Active
+**Status:** Proposed
 **Date:** 2025-12-24
 
 | Field        | Value |
@@ -139,6 +140,22 @@ const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 **What:** Cache `hasRuff()` and `hasEslint()` results per session
 **Why:** Avoid repeated `which` calls on every file
 **Example:** Module-level boolean, checked once per hook invocation
+
+---
+
+## Migration Strategy
+
+### From JS-Only to Polyglot Support
+
+**Trigger:** Implementation of Python support feature
+
+**Steps:**
+1. Add `detectLanguages()` layer above `detectProjectType()`
+2. Extend lint hook with Python extension routing
+3. Make setup command conditional on detected languages
+4. Update /lint command template with Python tooling
+
+**Rollback:** Revert to previous version; no breaking changes to JS-only projects
 
 ---
 
