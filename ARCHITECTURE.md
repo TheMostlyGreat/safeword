@@ -75,6 +75,17 @@ interface PythonProjectType {
   framework: 'django' | 'flask' | 'fastapi' | null;
   packageManager: 'poetry' | 'uv' | 'pip';
 }
+
+// Extended ProjectContext (packages/cli/src/schema.ts)
+// Note: projectType stays REQUIRED - returns all-false for Python-only projects
+interface ProjectContext {
+  cwd: string;
+  projectType: ProjectType;       // Unchanged - handles missing package.json
+  developmentDeps: Record<string, string>;
+  isGitRepo: boolean;
+  languages: Languages;           // NEW
+  pythonType?: PythonProjectType; // NEW - only if languages.python
+}
 ```
 
 **Implementation:** `packages/cli/src/utils/project-detector.ts`
