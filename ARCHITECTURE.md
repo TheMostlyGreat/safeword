@@ -146,11 +146,18 @@ const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 // Route to ESLint or Ruff based on extension
 ```
 
-### Caching Linter Availability
+### Silent Linter Execution
 
-**What:** Cache `hasRuff()` and `hasEslint()` results per session
-**Why:** Avoid repeated `which` calls on every file
-**Example:** Module-level boolean, checked once per hook invocation
+**What:** Run linters with `.nothrow().quiet()` (Bun shell pattern)
+**Why:** Matches current ESLint behavior; tool missing = silent skip, no explicit `which` check needed
+**Example:** `await $\`ruff check --fix ${file}\`.nothrow().quiet();`
+
+### Schema Language Awareness
+
+**What:** Schema generators check `ctx.languages.javascript` before creating JS-specific files
+**Why:** Prevents eslint.config.mjs, knip.json, package.json merges for Python-only projects
+**Files affected:**
+- `packages/cli/src/schema.ts` - managedFiles generators, jsonMerges, packages.base
 
 ---
 

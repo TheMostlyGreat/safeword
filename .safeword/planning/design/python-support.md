@@ -34,6 +34,7 @@ detectProjectType  detectPythonType  Both
 **Interface**: See `ARCHITECTURE.md` → Language Detection
 **Dependencies**: Node.js `fs` module
 **Tests**: Suite 1 (Tests 1.1-1.10)
+**Integration**: Called in `setup()` before `createProjectContext(cwd, languages)`
 
 ### Component 2: ExtendedLintHook
 
@@ -52,7 +53,7 @@ export async function lintFile(file: string, projectDir: string): Promise<void>;
 ### Component 3: ConditionalSetup
 
 **What**: Skips JS tooling for Python-only projects
-**Where**: `packages/cli/src/commands/setup.ts`
+**Where**: `packages/cli/src/commands/setup.ts`, `packages/cli/src/schema.ts`
 **Interface**:
 
 ```typescript
@@ -67,6 +68,12 @@ function printSetupSummary(
 
 **Dependencies**: LanguageDetector (Component 1)
 **Tests**: Suite 3 (Tests 3.1-3.6)
+
+**Schema Modifications** (in `schema.ts`):
+- `managedFiles['eslint.config.mjs']` - return empty if `!ctx.languages.javascript`
+- `managedFiles['knip.json']` - return empty if `!ctx.languages.javascript`
+- `jsonMerges['package.json']` - add `skipIfMissing: true`
+- `packages.base` - move JS tools to `conditional.javascript`
 
 ### Component 4: LintCommand
 
@@ -90,20 +97,20 @@ function printSetupSummary(
 
 ```text
 setup()
-  → detectLanguages(cwd)
-  → if javascript: ensurePackageJson()
-  → createProjectContext(cwd, languages)
-  → reconcile(schema)
-  → if javascript: installDependencies()
-  → if python: printPythonGuidance()
+  → languages = detectLanguages(cwd)
+  → if languages.javascript: ensurePackageJson()
+  → ctx = createProjectContext(cwd, languages)  // adds languages to ctx
+  → reconcile(schema, ctx)                       // schema checks ctx.languages
+  → if languages.javascript: installDependencies()
+  → printSetupSummary(..., languages)            // shows Python guidance if languages.python
 ```
 
 **Lint Hook Flow:**
 
 ```text
 lintFile(file)
-  → PYTHON_EXTENSIONS? → hasRuff() → ruff check && ruff format
-  → JS_EXTENSIONS? → hasEslint() → npx eslint && npx prettier
+  → PYTHON_EXTENSIONS? → ruff check --fix && ruff format (with .nothrow().quiet())
+  → JS_EXTENSIONS? → npx eslint --fix && npx prettier (existing behavior)
   → else: existing behavior
 ```
 
