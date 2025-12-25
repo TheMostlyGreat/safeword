@@ -1,19 +1,14 @@
 # Design: Python Support
 
-**Guide**: `.safeword/guides/design-doc-guide.md`
-**Template**: `.safeword/templates/design-doc-template.md`
-
 **Related**: Spec: `.safeword/planning/specs/feature-python-support.md` | Tests: `.safeword/planning/test-definitions/feature-python-support.md` | Architecture: `ARCHITECTURE.md`
 
-**TDD Note**: This design implements tests from Test Definitions. Each component references its test suite.
+**TDD Note**: Each component references its test suite from Test Definitions.
 
 ---
 
 ## Architecture
 
-Extends safeword to support Python projects via Ruff + mypy. See `ARCHITECTURE.md` for language detection pattern and key decisions.
-
-**Diagram**:
+Extends safeword to support Python projects via Ruff + mypy. See `ARCHITECTURE.md` for data model (`Languages`, `PythonProjectType`, `ProjectContext`) and key decisions.
 
 ```text
 detectLanguages() → JavaScript | Python | Polyglot
@@ -31,10 +26,9 @@ detectProjectType  detectPythonType  Both
 
 **What**: Detects JavaScript/Python from project files
 **Where**: `packages/cli/src/utils/project-detector.ts`
-**Interface**: See `ARCHITECTURE.md` → Language Detection
+**Interface**: `detectLanguages(cwd: string): Languages` (see `ARCHITECTURE.md`)
 **Dependencies**: Node.js `fs` module
 **Tests**: Suite 1 (Tests 1.1-1.10)
-**Integration**: Called in `setup()` before `createProjectContext(cwd, languages)`
 
 ### Component 2: ExtendedLintHook
 
@@ -54,38 +48,21 @@ export async function lintFile(file: string, projectDir: string): Promise<void>;
 
 **What**: Skips JS tooling for Python-only projects
 **Where**: `packages/cli/src/commands/setup.ts`, `packages/cli/src/schema.ts`
-**Interface**:
-
-```typescript
-function printSetupSummary(
-  result: ReconcileResult,
-  packageJsonCreated: boolean,
-  languages: Languages,
-  archFiles?: string[],
-  workspaceUpdates?: string[]
-): void;
-```
-
+**Interface**: `printSetupSummary(result, packageJsonCreated, languages, archFiles?, workspaceUpdates?)`
 **Dependencies**: LanguageDetector (Component 1)
 **Tests**: Suite 3 (Tests 3.1-3.6)
 
-**Schema Modifications** (in `schema.ts`):
-- `managedFiles['eslint.config.mjs']` - return empty if `!ctx.languages.javascript`
-- `managedFiles['knip.json']` - return empty if `!ctx.languages.javascript`
-- `jsonMerges['package.json']` - add `skipIfMissing: true`
-- `packages.base` - move JS tools to `conditional.javascript`
+**Schema Modifications** (`schema.ts`):
+- `managedFiles['eslint.config.mjs']` → return empty if `!ctx.languages.javascript`
+- `managedFiles['knip.json']` → return empty if `!ctx.languages.javascript`
+- `jsonMerges['package.json']` → add `skipIfMissing: true`
+- `packages.base` → move JS tools to `conditional.javascript`
 
 ### Component 4: LintCommand
 
 **What**: Extends /lint to run Python tooling
 **Where**: `packages/cli/templates/commands/lint.md`
-**Behavior**:
-
-| Language   | Commands |
-|------------|----------|
-| Python     | `ruff check --fix .`, `ruff format .`, `mypy .` |
-| JavaScript | `npm run lint`, `npm run format`, `npx tsc` |
-
+**Behavior**: Python → `ruff check --fix .`, `ruff format .`, `mypy .`; JavaScript → `npm run lint`, `npm run format`, `npx tsc`
 **Dependencies**: Shell commands (Ruff, mypy, npm scripts)
 **Tests**: Suite 4 (Tests 4.1-4.4)
 
@@ -99,19 +76,19 @@ function printSetupSummary(
 setup()
   → languages = detectLanguages(cwd)
   → if languages.javascript: ensurePackageJson()
-  → ctx = createProjectContext(cwd, languages)  // adds languages to ctx
-  → reconcile(schema, ctx)                       // schema checks ctx.languages
+  → ctx = createProjectContext(cwd, languages)
+  → reconcile(schema, ctx)  // schema checks ctx.languages
   → if languages.javascript: installDependencies()
-  → printSetupSummary(..., languages)            // shows Python guidance if languages.python
+  → printSetupSummary(..., languages)
 ```
 
 **Lint Hook Flow:**
 
 ```text
 lintFile(file)
-  → PYTHON_EXTENSIONS? → ruff check --fix && ruff format (with .nothrow().quiet())
-  → JS_EXTENSIONS? → npx eslint --fix && npx prettier (existing behavior)
-  → else: existing behavior
+  → PYTHON_EXTENSIONS? → ruff check --fix && ruff format (.nothrow().quiet())
+  → JS_EXTENSIONS? → npx eslint --fix && npx prettier (existing)
+  → else: skip
 ```
 
 ---
@@ -137,7 +114,7 @@ lintFile(file)
 
 **Constraints**: No new npm deps for detection; hooks < 1 second
 
-**Error Handling**: Missing linters skip silently (see `ARCHITECTURE.md`)
+**Error Handling**: Missing linters skip silently via `.nothrow().quiet()` (see `ARCHITECTURE.md` → Graceful Linter Fallback)
 
 **Gotchas**:
 - Check both `uv.lock` and `[tool.uv]` for uv detection

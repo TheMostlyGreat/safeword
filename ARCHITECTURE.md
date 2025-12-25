@@ -1,7 +1,7 @@
 # Safeword Architecture
 
 **Version:** 1.0
-**Last Updated:** 2025-12-24
+**Last Updated:** 2025-12-25
 **Status:** Proposed
 
 ---
@@ -99,36 +99,39 @@ interface ProjectContext {
 **Status:** Proposed
 **Date:** 2025-12-24
 
-| Field        | Value |
-|--------------|-------|
-| What         | Skip linter silently if not installed, rather than error |
-| Why          | Hook should never block Claude's workflow; users may not have tools installed immediately |
-| Trade-off    | User may not realize linting is skipped |
-| Alternatives | Error on missing linter (rejected: blocks Claude), warn always (rejected: noisy) |
+| Field          | Value |
+|----------------|-------|
+| What           | Skip linter silently if not installed, rather than error |
+| Why            | Hook should never block Claude's workflow; users may not have tools installed immediately |
+| Trade-off      | User may not realize linting is skipped |
+| Alternatives   | Error on missing linter (rejected: blocks Claude), warn always (rejected: noisy) |
+| Implementation | `packages/cli/templates/hooks/lib/lint.ts` - uses `.nothrow().quiet()` |
 
 ### TOML Parsing Without Dependencies
 
 **Status:** Proposed
 **Date:** 2025-12-24
 
-| Field        | Value |
-|--------------|-------|
-| What         | Use line-based extraction for pyproject.toml instead of full TOML parser |
-| Why          | No new npm dependencies; only need section detection (`[tool.poetry]`, `[tool.uv]`) |
-| Trade-off    | May fail on complex TOML edge cases |
-| Alternatives | @iarna/toml (rejected: adds dependency), toml-js (rejected: adds dependency) |
+| Field          | Value |
+|----------------|-------|
+| What           | Use line-based extraction for pyproject.toml instead of full TOML parser |
+| Why            | No new npm dependencies; only need section detection (`[tool.poetry]`, `[tool.uv]`) |
+| Trade-off      | May fail on complex TOML edge cases |
+| Alternatives   | @iarna/toml (rejected: adds dependency), toml-js (rejected: adds dependency) |
+| Implementation | `packages/cli/src/utils/project-detector.ts` - TBD |
 
 ### Ruff in Hook, mypy in Command Only
 
 **Status:** Proposed
 **Date:** 2025-12-24
 
-| Field        | Value |
-|--------------|-------|
-| What         | Lint hook runs Ruff (fast); /lint command runs mypy (slow) |
-| Why          | Ruff: ms per file, safe for hooks. mypy: seconds for whole project, would block Claude |
-| Trade-off    | Type errors not caught until explicit /lint run |
-| Alternatives | mypy in hook with caching (rejected: still too slow), skip mypy entirely (rejected: loses value) |
+| Field          | Value |
+|----------------|-------|
+| What           | Lint hook runs Ruff (fast); /lint command runs mypy (slow) |
+| Why            | Ruff: ms per file, safe for hooks. mypy: seconds for whole project, would block Claude |
+| Trade-off      | Type errors not caught until explicit /lint run |
+| Alternatives   | mypy in hook with caching (rejected: still too slow), skip mypy entirely (rejected: loses value) |
+| Implementation | Hook: `packages/cli/templates/hooks/lib/lint.ts`; Command: `packages/cli/templates/commands/lint.md` - TBD |
 
 ---
 
