@@ -5,7 +5,7 @@
 
 **Feature**: Enable safeword to work with Python projects using Ruff + mypy
 
-**Status**: 🚧 In Progress (2/4 stories complete)
+**Status**: 🚧 In Progress (3/4 stories complete)
 
 ---
 
@@ -98,15 +98,15 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 
 **Acceptance Criteria**:
 
-- [ ] Detect file extension in lint hook
-- [ ] Run `ruff check --fix` for .py files
-- [ ] Run `ruff format` for .py files
-- [ ] Continue running ESLint for .js/.ts files (polyglot support)
-- [ ] Skip Ruff gracefully if not installed
-- [ ] Skip ESLint gracefully if not installed (Python-only projects)
+- [x] Detect file extension in lint hook
+- [x] Run `ruff check --fix` for .py files
+- [x] Run `ruff format` for .py files
+- [x] Continue running ESLint for .js/.ts files (polyglot support)
+- [x] Skip Ruff gracefully if not installed
+- [x] Skip ESLint gracefully if not installed (Python-only projects)
 
-**Implementation Status**: ❌ Not Started
-**Tests**: `packages/cli/tests/integration/hooks.test.ts`
+**Implementation Status**: ✅ Complete (pre-existing)
+**Tests**: Manual verification
 
 **Files**:
 - `packages/cli/templates/hooks/lib/lint.ts`
@@ -164,13 +164,13 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 
 ## Summary
 
-**Completed**: 2/4 stories (50%)
-**Remaining**: 2/4 stories (50%)
+**Completed**: 3/4 stories (75%)
+**Remaining**: 1/4 stories (25%)
 
 ### Phase 1: MVP (Stories 1-4)
 
 - Story 1: Python detection ✅
-- Story 2: Lint hook with Ruff
+- Story 2: Lint hook with Ruff ✅
 - Story 3: Conditional setup ✅
 - Story 4: Lint command
 
