@@ -57,20 +57,24 @@ Language detection runs FIRST, before any framework-specific detection. This pre
 ```text
 detectLanguages(cwd)     →  Languages { javascript, python }
        ↓
-detectProjectType()      →  JS framework details (if javascript)
-detectPythonType()       →  Python framework details (if python)
+detectProjectType()      →  ProjectType (if javascript)
+detectPythonType()       →  PythonProjectType (if python)
 ```
 
 ### Data Model
 
 ```typescript
+// Detection functions
+function detectLanguages(cwd: string): Languages;
+function detectPythonType(cwd: string): PythonProjectType | undefined;
+
 // Language detection result
 interface Languages {
   javascript: boolean;  // package.json exists
   python: boolean;      // pyproject.toml OR requirements.txt exists
 }
 
-// Python-specific detection
+// Python-specific detection (returned only if languages.python)
 interface PythonProjectType {
   framework: 'django' | 'flask' | 'fastapi' | null;
   packageManager: 'poetry' | 'uv' | 'pip';

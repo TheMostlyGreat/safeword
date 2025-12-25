@@ -26,7 +26,11 @@ detectProjectType  detectPythonType  Both
 
 **What**: Detects JavaScript/Python from project files
 **Where**: `packages/cli/src/utils/project-detector.ts`
-**Interface**: `detectLanguages(cwd: string): Languages` (see `ARCHITECTURE.md`)
+**Interface**:
+```typescript
+function detectLanguages(cwd: string): Languages;
+function detectPythonType(cwd: string): PythonProjectType | undefined;
+```
 **Dependencies**: Node.js `fs` module
 **Tests**: Suite 1 (Tests 1.1-1.10)
 
