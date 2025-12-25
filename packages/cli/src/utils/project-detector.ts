@@ -50,6 +50,51 @@ export interface ProjectType {
 }
 
 /**
+ * Language detection result
+ * @see ARCHITECTURE.md → Language Detection
+ */
+export interface Languages {
+  javascript: boolean; // package.json exists
+  python: boolean; // pyproject.toml OR requirements.txt exists
+}
+
+/**
+ * Python-specific detection (returned only if languages.python)
+ * @see ARCHITECTURE.md → Language Detection
+ */
+export interface PythonProjectType {
+  framework: 'django' | 'flask' | 'fastapi' | null;
+  packageManager: 'poetry' | 'uv' | 'pip';
+}
+
+/**
+ * Detects which languages are used in the project
+ * @param cwd - Working directory to scan
+ * @returns Languages object indicating which languages are present
+ * @see ARCHITECTURE.md → Language Detection
+ */
+export function detectLanguages(_cwd: string): Languages {
+  // TODO: Implement Python support (Story 1)
+  // Currently returns defaults that will fail tests
+  return {
+    javascript: false,
+    python: false,
+  };
+}
+
+/**
+ * Detects Python project type (framework and package manager)
+ * @param cwd - Working directory to scan
+ * @returns PythonProjectType or undefined if not a Python project
+ * @see ARCHITECTURE.md → Language Detection
+ */
+export function detectPythonType(_cwd: string): PythonProjectType | undefined {
+  // TODO: Implement Python support (Story 1)
+  // Currently returns undefined that will fail tests
+  return undefined;
+}
+
+/**
  * Checks if a directory contains any .sh files up to specified depth.
  * Excludes node_modules and .git directories.
  * @param cwd

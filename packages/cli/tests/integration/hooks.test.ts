@@ -490,3 +490,106 @@ describe('E2E: Stop Hook', () => {
     });
   });
 });
+
+/**
+ * Test Suite 2: Python-Aware Lint Hook
+ * Tests for Story 2 - running Ruff on Python files in the post-tool lint hook.
+ */
+describe('E2E: Python Lint Hook', () => {
+  describe('Test 2.1: Runs Ruff check on .py files', () => {
+    it('should run ruff check --fix for Python files', () => {
+      // Create a Python file with linting issues
+      writeTestFile(projectDirectory, 'test.py', 'import os\nimport sys\nx=1\n');
+
+      // Run the lint hook
+      const output = execSync(
+        `bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.py"`,
+        {
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+          encoding: 'utf8',
+        },
+      );
+
+      // Should complete without error (ruff would fix issues)
+      expect(output).not.toContain('error');
+    });
+  });
+
+  describe('Test 2.3: Continues running ESLint for .js/.ts files', () => {
+    it('should run ESLint for TypeScript files in polyglot project', () => {
+      // Create a TypeScript file
+      writeTestFile(projectDirectory, 'test.ts', 'const x = 1\n');
+
+      // Run the lint hook
+      const output = execSync(
+        `bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.ts"`,
+        {
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+          encoding: 'utf8',
+        },
+      );
+
+      // Should complete (ESLint runs)
+      expect(output).toBeDefined();
+    });
+  });
+
+  describe('Test 2.4: Skips Ruff gracefully if not installed', () => {
+    it('should not error when Ruff is missing', () => {
+      // Create a Python file
+      writeTestFile(projectDirectory, 'test.py', 'print("hello")\n');
+
+      // Run in environment without ruff in PATH
+      const result = spawnSync(
+        'bash',
+        ['-c', `PATH=/bin:/usr/bin bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.py"`],
+        {
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory, PATH: '/bin:/usr/bin' },
+          encoding: 'utf8',
+        },
+      );
+
+      // Should exit 0 (graceful skip)
+      expect(result.status).toBe(0);
+    });
+  });
+
+  describe('Test 2.6: Detects file extension correctly', () => {
+    it('should route .py files to Ruff', () => {
+      writeTestFile(projectDirectory, 'test.py', 'x = 1\n');
+
+      // This test checks that Python files are recognized
+      // The lint hook should attempt to run Ruff (even if it fails gracefully)
+      const result = spawnSync(
+        'bash',
+        ['-c', `bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.py"`],
+        {
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+          encoding: 'utf8',
+        },
+      );
+
+      expect(result.status).toBe(0);
+    });
+
+    it('should route .pyi stub files to Ruff', () => {
+      writeTestFile(projectDirectory, 'test.pyi', 'def foo() -> int: ...\n');
+
+      const result = spawnSync(
+        'bash',
+        ['-c', `bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.pyi"`],
+        {
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+          encoding: 'utf8',
+        },
+      );
+
+      expect(result.status).toBe(0);
+    });
+  });
+});

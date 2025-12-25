@@ -4,10 +4,14 @@
  * These are pure unit tests for the detectProjectType function.
  */
 
-import { describe, expect, it } from 'vitest';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import nodePath from 'node:path';
 
-import type { PackageJson } from './project-detector';
-import { detectProjectType } from './project-detector';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import type { Languages, PackageJson, PythonProjectType } from './project-detector';
+import { detectLanguages, detectProjectType, detectPythonType } from './project-detector';
 
 describe('detectProjectType', () => {
   describe('Test 4.1: Detects TypeScript project', () => {
@@ -373,6 +377,165 @@ describe('detectProjectType', () => {
       expect(result.nextjs).toBe(true);
       expect(result.vitest).toBe(true);
       expect(result.astro).toBe(false);
+    });
+  });
+});
+
+/**
+ * Test Suite 1: Python Project Detection
+ * Tests for Story 1 - detecting Python projects and their characteristics.
+ */
+
+/** Helper to create a temp directory */
+function createTempDir(): string {
+  return mkdtempSync(nodePath.join(tmpdir(), 'safeword-detector-test-'));
+}
+
+/** Helper to write a file in a directory */
+function writeFile(dir: string, filename: string, content: string): void {
+  writeFileSync(nodePath.join(dir, filename), content);
+}
+
+/** Helper to clean up temp directory */
+function cleanupTempDir(dir: string): void {
+  try {
+    rmSync(dir, { recursive: true, force: true });
+  } catch {
+    // Ignore cleanup errors
+  }
+}
+
+describe('detectLanguages', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+  });
+
+  afterEach(() => {
+    cleanupTempDir(tempDir);
+  });
+
+  describe('Test 1.1: Detects pyproject.toml as Python project', () => {
+    it('should detect python from pyproject.toml', () => {
+      writeFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
+
+      const result: Languages = detectLanguages(tempDir);
+
+      expect(result.python).toBe(true);
+      expect(result.javascript).toBe(false);
+    });
+  });
+
+  describe('Test 1.2: Detects requirements.txt as Python fallback', () => {
+    it('should detect python from requirements.txt when pyproject.toml absent', () => {
+      writeFile(tempDir, 'requirements.txt', 'django>=4.0\n');
+
+      const result: Languages = detectLanguages(tempDir);
+
+      expect(result.python).toBe(true);
+    });
+  });
+
+  describe('Test 1.9: Detects polyglot project (JS + Python)', () => {
+    it('should detect both languages when package.json and pyproject.toml exist', () => {
+      writeFile(tempDir, 'package.json', '{"name": "test"}');
+      writeFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
+
+      const result: Languages = detectLanguages(tempDir);
+
+      expect(result.python).toBe(true);
+      expect(result.javascript).toBe(true);
+    });
+  });
+
+  describe('Test 1.10: Works without package.json', () => {
+    it('should complete detection without package.json', () => {
+      writeFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
+
+      const result: Languages = detectLanguages(tempDir);
+
+      expect(result.python).toBe(true);
+      expect(result.javascript).toBe(false);
+    });
+  });
+});
+
+describe('detectPythonType', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+  });
+
+  afterEach(() => {
+    cleanupTempDir(tempDir);
+  });
+
+  describe('Test 1.3: Detects Django framework', () => {
+    it('should detect django from pyproject.toml dependencies', () => {
+      writeFile(tempDir, 'pyproject.toml', '[project]\ndependencies = ["django>=4.0"]\n');
+
+      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+
+      expect(result).toBeDefined();
+      expect(result?.framework).toBe('django');
+    });
+  });
+
+  describe('Test 1.4: Detects Flask framework', () => {
+    it('should detect flask from pyproject.toml dependencies', () => {
+      writeFile(tempDir, 'pyproject.toml', '[project]\ndependencies = ["flask>=2.0"]\n');
+
+      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+
+      expect(result).toBeDefined();
+      expect(result?.framework).toBe('flask');
+    });
+  });
+
+  describe('Test 1.5: Detects FastAPI framework', () => {
+    it('should detect fastapi from pyproject.toml dependencies', () => {
+      writeFile(tempDir, 'pyproject.toml', '[project]\ndependencies = ["fastapi>=0.100"]\n');
+
+      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+
+      expect(result).toBeDefined();
+      expect(result?.framework).toBe('fastapi');
+    });
+  });
+
+  describe('Test 1.6: Detects Poetry package manager', () => {
+    it('should detect poetry from [tool.poetry] section', () => {
+      writeFile(tempDir, 'pyproject.toml', '[tool.poetry]\nname = "test"\n');
+
+      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+
+      expect(result).toBeDefined();
+      expect(result?.packageManager).toBe('poetry');
+    });
+  });
+
+  describe('Test 1.7: Detects uv package manager', () => {
+    it('should detect uv from uv.lock file', () => {
+      writeFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
+      writeFile(tempDir, 'uv.lock', '# uv lockfile\n');
+
+      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+
+      expect(result).toBeDefined();
+      expect(result?.packageManager).toBe('uv');
+    });
+  });
+
+  describe('Test 1.8: Defaults to pip package manager', () => {
+    it('should default to pip when no other manager detected', () => {
+      writeFile(tempDir, 'requirements.txt', 'requests>=2.0\n');
+
+      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+
+      expect(result).toBeDefined();
+      expect(result?.packageManager).toBe('pip');
     });
   });
 });
