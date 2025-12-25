@@ -14,7 +14,7 @@ import { exists, readJson, writeJson } from '../utils/fs.js';
 import { isGitRepo } from '../utils/git.js';
 import { installDependencies } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
-import { detectLanguages } from '../utils/project-detector.js';
+import { detectLanguages, type Languages } from '../utils/project-detector.js';
 import { VERSION } from '../version.js';
 import { buildArchitecture, hasArchitectureDetected, syncConfigCore } from './sync-config.js';
 
@@ -180,7 +180,8 @@ export async function setup(options: SetupOptions): Promise<void> {
   try {
     info('\nCreating safeword configuration...');
     const ctx = createProjectContext(cwd);
-    const isPythonOnly = ctx.languages.python && !ctx.languages.javascript;
+    const languages = ctx.languages ?? { javascript: false, python: false };
+    const isPythonOnly = languages.python && !languages.javascript;
     if (isPythonOnly) info('Python project detected (skipping JS tooling)');
     const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
     success('Created .safeword directory and configuration');
@@ -230,7 +231,7 @@ export async function setup(options: SetupOptions): Promise<void> {
         info('Initialize git and run safeword upgrade to enable pre-commit hooks');
     }
 
-    printSetupSummary(result, packageJsonCreated, ctx.languages, archFiles, workspaceUpdates);
+    printSetupSummary(result, packageJsonCreated, languages, archFiles, workspaceUpdates);
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);
