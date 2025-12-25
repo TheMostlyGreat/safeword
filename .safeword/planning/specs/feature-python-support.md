@@ -5,7 +5,7 @@
 
 **Feature**: Enable safeword to work with Python projects using Ruff + mypy
 
-**Status**: 🚧 In Progress (1/4 stories complete)
+**Status**: 🚧 In Progress (2/4 stories complete)
 
 ---
 
@@ -124,19 +124,20 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 
 **Acceptance Criteria**:
 
-- [ ] Skip ESLint/Prettier install for Python-only projects
-- [ ] Skip package.json creation for Python-only projects
-- [ ] Show Python-appropriate next steps (e.g., "pip install ruff mypy")
-- [ ] Still create .safeword directory with guides/templates
-- [ ] Still create Claude hooks
+- [x] Skip ESLint/Prettier install for Python-only projects
+- [x] Skip package.json creation for Python-only projects
+- [x] Show Python-appropriate next steps (e.g., "pip install ruff mypy")
+- [x] Still create .safeword directory with guides/templates
+- [x] Still create Claude hooks
 
-**Implementation Status**: ❌ Not Started
-**Tests**: `packages/cli/tests/commands/setup-python.test.ts`
+**Implementation Status**: ✅ Complete
+**Tests**: `packages/cli/tests/commands/setup-python.test.ts` (6 tests)
 
 **Files**:
 - `packages/cli/src/commands/setup.ts`
-- `packages/cli/src/utils/install.ts`
-- `packages/cli/src/utils/context.ts` (may need updates)
+- `packages/cli/src/schema.ts` (generators return null for Python-only)
+- `packages/cli/src/reconcile.ts` (null check for generators)
+- `packages/cli/src/utils/context.ts` (auto-detects languages)
 
 ---
 
@@ -163,14 +164,14 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 
 ## Summary
 
-**Completed**: 1/4 stories (25%)
-**Remaining**: 3/4 stories (75%)
+**Completed**: 2/4 stories (50%)
+**Remaining**: 2/4 stories (50%)
 
 ### Phase 1: MVP (Stories 1-4)
 
-- Story 1: Python detection
+- Story 1: Python detection ✅
 - Story 2: Lint hook with Ruff
-- Story 3: Conditional setup
+- Story 3: Conditional setup ✅
 - Story 4: Lint command
 
 ### Phase 2: Tooling Parity (Out of Scope)
