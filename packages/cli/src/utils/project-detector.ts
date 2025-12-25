@@ -5,7 +5,7 @@
  * appropriate linting rules.
  */
 
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import { detect } from 'eslint-plugin-safeword';
@@ -19,6 +19,14 @@ export const {
   hasExistingLinter,
   hasExistingFormatter,
 } = detect;
+
+// Python project file markers
+const PYPROJECT_TOML = 'pyproject.toml';
+const REQUIREMENTS_TXT = 'requirements.txt';
+const UV_LOCK = 'uv.lock';
+
+// Python frameworks to detect (order matters - first match wins)
+const PYTHON_FRAMEWORKS = ['django', 'flask', 'fastapi'] as const;
 
 export interface PackageJson {
   name?: string;
@@ -73,12 +81,14 @@ export interface PythonProjectType {
  * @returns Languages object indicating which languages are present
  * @see ARCHITECTURE.md → Language Detection
  */
-export function detectLanguages(_cwd: string): Languages {
-  // TODO: Implement Python support (Story 1)
-  // Currently returns defaults that will fail tests
+export function detectLanguages(cwd: string): Languages {
+  const hasPackageJson = existsSync(nodePath.join(cwd, 'package.json'));
+  const hasPyproject = existsSync(nodePath.join(cwd, PYPROJECT_TOML));
+  const hasRequirements = existsSync(nodePath.join(cwd, REQUIREMENTS_TXT));
+
   return {
-    javascript: false,
-    python: false,
+    javascript: hasPackageJson,
+    python: hasPyproject || hasRequirements,
   };
 }
 
@@ -88,10 +98,36 @@ export function detectLanguages(_cwd: string): Languages {
  * @returns PythonProjectType or undefined if not a Python project
  * @see ARCHITECTURE.md → Language Detection
  */
-export function detectPythonType(_cwd: string): PythonProjectType | undefined {
-  // TODO: Implement Python support (Story 1)
-  // Currently returns undefined that will fail tests
-  return undefined;
+export function detectPythonType(cwd: string): PythonProjectType | undefined {
+  const pyprojectPath = nodePath.join(cwd, PYPROJECT_TOML);
+  const requirementsPath = nodePath.join(cwd, REQUIREMENTS_TXT);
+  const uvLockPath = nodePath.join(cwd, UV_LOCK);
+
+  const hasPyproject = existsSync(pyprojectPath);
+  const hasRequirements = existsSync(requirementsPath);
+
+  if (!hasPyproject && !hasRequirements) {
+    return undefined;
+  }
+
+  // Read project file for dependency/tool detection
+  const content = hasPyproject
+    ? readFileSync(pyprojectPath, 'utf8')
+    : readFileSync(requirementsPath, 'utf8');
+
+  // Detect package manager (priority: poetry > uv > pip)
+  let packageManager: PythonProjectType['packageManager'] = 'pip';
+  if (hasPyproject && content.includes('[tool.poetry]')) {
+    packageManager = 'poetry';
+  } else if (existsSync(uvLockPath)) {
+    packageManager = 'uv';
+  }
+
+  // Detect framework (first match wins)
+  const contentLower = content.toLowerCase();
+  const framework = PYTHON_FRAMEWORKS.find(fw => contentLower.includes(fw)) ?? null;
+
+  return { framework, packageManager };
 }
 
 /**

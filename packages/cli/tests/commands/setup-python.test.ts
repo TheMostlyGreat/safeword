@@ -11,6 +11,8 @@ import {
   initGitRepo,
   removeTemporaryDirectory,
   runCli,
+  TIMEOUT_NPM_INSTALL,
+  TIMEOUT_SETUP,
   writeTestFile,
 } from '../helpers';
 
@@ -78,7 +80,7 @@ describe('Test Suite 3: Conditional Setup for Python Projects', () => {
       // Should NOT have node_modules with eslint
       expect(fileExists(projectDirectory, 'node_modules/eslint')).toBe(false);
       expect(fileExists(projectDirectory, 'node_modules/prettier')).toBe(false);
-    }, 60_000);
+    }, TIMEOUT_SETUP);
   });
 
   describe('Test 3.2: Skips package.json creation for Python-only', () => {
@@ -90,7 +92,7 @@ describe('Test Suite 3: Conditional Setup for Python Projects', () => {
 
       // package.json should NOT be created
       expect(fileExists(projectDirectory, 'package.json')).toBe(false);
-    }, 60_000);
+    }, TIMEOUT_SETUP);
   });
 
   describe('Test 3.3: Shows Python-appropriate next steps', () => {
@@ -104,7 +106,7 @@ describe('Test Suite 3: Conditional Setup for Python Projects', () => {
       expect(result.stdout).toMatch(/pip install|ruff|mypy/i);
       // Should NOT mention npm install for dependencies
       expect(result.stdout).not.toMatch(/npm install.*eslint/i);
-    }, 60_000);
+    }, TIMEOUT_SETUP);
   });
 
   describe('Test 3.4: Still creates .safeword directory', () => {
@@ -118,7 +120,7 @@ describe('Test Suite 3: Conditional Setup for Python Projects', () => {
       expect(fileExists(projectDirectory, '.safeword')).toBe(true);
       expect(fileExists(projectDirectory, '.safeword/SAFEWORD.md')).toBe(true);
       expect(fileExists(projectDirectory, '.safeword/guides')).toBe(true);
-    }, 60_000);
+    }, TIMEOUT_SETUP);
   });
 
   describe('Test 3.5: Still creates Claude hooks', () => {
@@ -130,7 +132,7 @@ describe('Test Suite 3: Conditional Setup for Python Projects', () => {
 
       // Hooks should exist
       expect(fileExists(projectDirectory, '.safeword/hooks')).toBe(true);
-    }, 60_000);
+    }, TIMEOUT_SETUP);
   });
 
   describe('Test 3.6: Installs both toolchains for polyglot projects', () => {
@@ -145,6 +147,6 @@ describe('Test Suite 3: Conditional Setup for Python Projects', () => {
 
       // Should mention Python tooling guidance
       expect(result.stdout).toMatch(/ruff|python/i);
-    }, 120_000);
+    }, TIMEOUT_NPM_INSTALL);
   });
 });

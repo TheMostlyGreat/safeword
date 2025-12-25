@@ -7,12 +7,16 @@ import { $ } from 'bun';
 
 // File extensions for different linting strategies
 const JS_EXTENSIONS = new Set(['js', 'jsx', 'ts', 'tsx', 'mjs', 'mts', 'cjs', 'cts', 'vue', 'svelte', 'astro']);
+const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
+const SHELL_EXTENSIONS = new Set(['sh']);
 const PRETTIER_EXTENSIONS = new Set(['md', 'json', 'css', 'scss', 'html', 'yaml', 'yml', 'graphql']);
 
 /**
  * Lint a file based on its extension.
- * Runs ESLint + Prettier for JS/TS, Prettier only for other formats,
- * and shellcheck + Prettier for shell scripts.
+ * - JS/TS: ESLint + Prettier
+ * - Python: Ruff check + Ruff format
+ * - Shell: shellcheck + Prettier
+ * - Other: Prettier only
  *
  * @param file - Path to the file to lint
  * @param projectDir - Project root directory (for finding prettier-plugin-sh)
@@ -30,6 +34,14 @@ export async function lintFile(file: string, projectDir: string): Promise<void> 
     return;
   }
 
+  // Python files - Ruff check (fix code), then Ruff format
+  // Skips gracefully if ruff is not installed
+  if (PYTHON_EXTENSIONS.has(extension)) {
+    await $`ruff check --fix ${file}`.nothrow().quiet();
+    await $`ruff format ${file}`.nothrow().quiet();
+    return;
+  }
+
   // Other supported formats - prettier only
   if (PRETTIER_EXTENSIONS.has(extension)) {
     await $`npx prettier --write ${file}`.nothrow().quiet();
@@ -37,7 +49,7 @@ export async function lintFile(file: string, projectDir: string): Promise<void> 
   }
 
   // Shell scripts - shellcheck (if available), then Prettier (if plugin installed)
-  if (extension === 'sh') {
+  if (SHELL_EXTENSIONS.has(extension)) {
     const shellcheckResult = await $`npx shellcheck ${file}`.nothrow().quiet();
     if (shellcheckResult.exitCode !== 0 && shellcheckResult.stderr.length > 0) {
       console.log(shellcheckResult.stderr.toString());

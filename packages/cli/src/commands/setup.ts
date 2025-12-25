@@ -14,6 +14,7 @@ import { exists, readJson, writeJson } from '../utils/fs.js';
 import { isGitRepo } from '../utils/git.js';
 import { installDependencies } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
+import { detectLanguages } from '../utils/project-detector.js';
 import { VERSION } from '../version.js';
 import { buildArchitecture, hasArchitectureDetected, syncConfigCore } from './sync-config.js';
 
@@ -108,9 +109,17 @@ function addFormatScriptIfMissing(packageDir: string): boolean {
   return true;
 }
 
+/**
+ * Create package.json if missing, unless Python-only project.
+ * Returns true if created, false if already exists or skipped.
+ */
 function ensurePackageJson(cwd: string): boolean {
   const packageJsonPath = nodePath.join(cwd, 'package.json');
   if (exists(packageJsonPath)) return false;
+
+  // Skip for Python-only projects (no JS tooling needed)
+  const languages = detectLanguages(cwd);
+  if (languages.python && !languages.javascript) return false;
 
   const dirName = nodePath.basename(cwd) || 'project';
   const defaultPackageJson: PackageJson = { name: dirName, version: '0.1.0', scripts: {} };
@@ -121,6 +130,7 @@ function ensurePackageJson(cwd: string): boolean {
 function printSetupSummary(
   result: ReconcileResult,
   packageJsonCreated: boolean,
+  languages: Languages,
   archFiles: string[] = [],
   workspaceUpdates: string[] = [],
 ): void {
@@ -141,6 +151,12 @@ function printSetupSummary(
 
   info('\nNext steps:');
   listItem('Run `safeword check` to verify setup');
+
+  // Python-specific guidance
+  if (languages.python) {
+    listItem('Install Python tooling: pip install ruff mypy');
+  }
+
   listItem('Commit the new files to git');
 
   success(`\nSafeword ${VERSION} installed successfully!`);
@@ -164,36 +180,44 @@ export async function setup(options: SetupOptions): Promise<void> {
   try {
     info('\nCreating safeword configuration...');
     const ctx = createProjectContext(cwd);
+    const isPythonOnly = ctx.languages.python && !ctx.languages.javascript;
+    if (isPythonOnly) info('Python project detected (skipping JS tooling)');
     const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
     success('Created .safeword directory and configuration');
 
     // Detect architecture and workspaces, generate depcruise configs if found
-    const arch = buildArchitecture(cwd);
+    // (only for JS projects)
     const archFiles: string[] = [];
+    let workspaceUpdates: string[] = [];
 
-    if (hasArchitectureDetected(arch)) {
-      const syncResult = syncConfigCore(cwd, arch);
-      if (syncResult.generatedConfig) archFiles.push('.safeword/depcruise-config.js');
-      if (syncResult.createdMainConfig) archFiles.push('.dependency-cruiser.js');
+    if (!isPythonOnly) {
+      const arch = buildArchitecture(cwd);
 
-      const detected: string[] = [];
-      if (arch.elements.length > 0) {
-        detected.push(arch.elements.map(element => element.location).join(', '));
+      if (hasArchitectureDetected(arch)) {
+        const syncResult = syncConfigCore(cwd, arch);
+        if (syncResult.generatedConfig) archFiles.push('.safeword/depcruise-config.js');
+        if (syncResult.createdMainConfig) archFiles.push('.dependency-cruiser.js');
+
+        const detected: string[] = [];
+        if (arch.elements.length > 0) {
+          detected.push(arch.elements.map(element => element.location).join(', '));
+        }
+        if (arch.workspaces && arch.workspaces.length > 0) {
+          detected.push(`workspaces: ${arch.workspaces.join(', ')}`);
+        }
+        info(`\nArchitecture detected: ${detected.join('; ')}`);
+        info('Generated dependency-cruiser config for /audit command');
       }
-      if (arch.workspaces && arch.workspaces.length > 0) {
-        detected.push(`workspaces: ${arch.workspaces.join(', ')}`);
+
+      // Add format scripts to workspace packages (monorepo support)
+      workspaceUpdates = setupWorkspaceFormatScripts(cwd, ctx);
+      if (workspaceUpdates.length > 0) {
+        info(`\nAdded format scripts to ${workspaceUpdates.length} workspace package(s)`);
       }
-      info(`\nArchitecture detected: ${detected.join('; ')}`);
-      info('Generated dependency-cruiser config for /audit command');
-    }
 
-    // Add format scripts to workspace packages (monorepo support)
-    const workspaceUpdates = setupWorkspaceFormatScripts(cwd, ctx);
-    if (workspaceUpdates.length > 0) {
-      info(`\nAdded format scripts to ${workspaceUpdates.length} workspace package(s)`);
+      // Install JS dependencies (ESLint, Prettier, etc.)
+      installDependencies(cwd, result.packagesToInstall, 'linting dependencies');
     }
-
-    installDependencies(cwd, result.packagesToInstall, 'linting dependencies');
 
     if (!isGitRepo(cwd)) {
       const isNonInteractive = options.yes || !process.stdin.isTTY;
@@ -206,7 +230,7 @@ export async function setup(options: SetupOptions): Promise<void> {
         info('Initialize git and run safeword upgrade to enable pre-commit hooks');
     }
 
-    printSetupSummary(result, packageJsonCreated, archFiles, workspaceUpdates);
+    printSetupSummary(result, packageJsonCreated, ctx.languages, archFiles, workspaceUpdates);
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);

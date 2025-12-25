@@ -5,7 +5,7 @@
 
 **Feature**: Enable safeword to work with Python projects using Ruff + mypy
 
-**Status**: ❌ Not Started (0/4 stories complete)
+**Status**: 🚧 In Progress (1/4 stories complete)
 
 ---
 
@@ -75,14 +75,14 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 
 **Acceptance Criteria**:
 
-- [ ] Detect pyproject.toml as Python project
-- [ ] Detect requirements.txt as fallback indicator
-- [ ] Add `python: boolean` to ProjectType interface
-- [ ] Detect framework: django, flask, fastapi, or null
-- [ ] Detect package manager: poetry, uv, pip
-- [ ] Work without package.json (Python-only projects)
+- [x] Detect pyproject.toml as Python project
+- [x] Detect requirements.txt as fallback indicator
+- [x] Add `python: boolean` to Languages interface
+- [x] Detect framework: django, flask, fastapi, or null
+- [x] Detect package manager: poetry, uv, pip
+- [x] Work without package.json (Python-only projects)
 
-**Implementation Status**: ❌ Not Started
+**Implementation Status**: ✅ Complete
 **Tests**: `packages/cli/src/utils/project-detector.test.ts`
 
 **Files**:
@@ -163,8 +163,8 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 
 ## Summary
 
-**Completed**: 0/4 stories (0%)
-**Remaining**: 4/4 stories (100%)
+**Completed**: 1/4 stories (25%)
+**Remaining**: 3/4 stories (75%)
 
 ### Phase 1: MVP (Stories 1-4)
 
@@ -190,4 +190,4 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 - Cross-pollinate insights between ESLint and Ruff rule sets
 - Document rule selection rationale (like `.safeword/planning/linting/`)
 
-**Next Steps**: Implement Story 1 (Python detection)
+**Next Steps**: Implement Story 2 (Python-aware lint hook)

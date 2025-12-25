@@ -4,12 +4,13 @@
  * These are pure unit tests for the detectProjectType function.
  */
 
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import nodePath from 'node:path';
-
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import {
+  createTemporaryDirectory,
+  removeTemporaryDirectory,
+  writeTestFile,
+} from '../../tests/helpers';
 import type { Languages, PackageJson, PythonProjectType } from './project-detector';
 import { detectLanguages, detectProjectType, detectPythonType } from './project-detector';
 
@@ -386,39 +387,20 @@ describe('detectProjectType', () => {
  * Tests for Story 1 - detecting Python projects and their characteristics.
  */
 
-/** Helper to create a temp directory */
-function createTempDir(): string {
-  return mkdtempSync(nodePath.join(tmpdir(), 'safeword-detector-test-'));
-}
-
-/** Helper to write a file in a directory */
-function writeFile(dir: string, filename: string, content: string): void {
-  writeFileSync(nodePath.join(dir, filename), content);
-}
-
-/** Helper to clean up temp directory */
-function cleanupTempDir(dir: string): void {
-  try {
-    rmSync(dir, { recursive: true, force: true });
-  } catch {
-    // Ignore cleanup errors
-  }
-}
-
 describe('detectLanguages', () => {
   let tempDir: string;
 
   beforeEach(() => {
-    tempDir = createTempDir();
+    tempDir = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    cleanupTempDir(tempDir);
+    removeTemporaryDirectory(tempDir);
   });
 
   describe('Test 1.1: Detects pyproject.toml as Python project', () => {
     it('should detect python from pyproject.toml', () => {
-      writeFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
+      writeTestFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
 
       const result: Languages = detectLanguages(tempDir);
 
@@ -429,7 +411,7 @@ describe('detectLanguages', () => {
 
   describe('Test 1.2: Detects requirements.txt as Python fallback', () => {
     it('should detect python from requirements.txt when pyproject.toml absent', () => {
-      writeFile(tempDir, 'requirements.txt', 'django>=4.0\n');
+      writeTestFile(tempDir, 'requirements.txt', 'django>=4.0\n');
 
       const result: Languages = detectLanguages(tempDir);
 
@@ -439,8 +421,8 @@ describe('detectLanguages', () => {
 
   describe('Test 1.9: Detects polyglot project (JS + Python)', () => {
     it('should detect both languages when package.json and pyproject.toml exist', () => {
-      writeFile(tempDir, 'package.json', '{"name": "test"}');
-      writeFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
+      writeTestFile(tempDir, 'package.json', '{"name": "test"}');
+      writeTestFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
 
       const result: Languages = detectLanguages(tempDir);
 
@@ -451,7 +433,7 @@ describe('detectLanguages', () => {
 
   describe('Test 1.10: Works without package.json', () => {
     it('should complete detection without package.json', () => {
-      writeFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
+      writeTestFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
 
       const result: Languages = detectLanguages(tempDir);
 
@@ -465,16 +447,16 @@ describe('detectPythonType', () => {
   let tempDir: string;
 
   beforeEach(() => {
-    tempDir = createTempDir();
+    tempDir = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    cleanupTempDir(tempDir);
+    removeTemporaryDirectory(tempDir);
   });
 
   describe('Test 1.3: Detects Django framework', () => {
     it('should detect django from pyproject.toml dependencies', () => {
-      writeFile(tempDir, 'pyproject.toml', '[project]\ndependencies = ["django>=4.0"]\n');
+      writeTestFile(tempDir, 'pyproject.toml', '[project]\ndependencies = ["django>=4.0"]\n');
 
       const result: PythonProjectType | undefined = detectPythonType(tempDir);
 
@@ -485,7 +467,7 @@ describe('detectPythonType', () => {
 
   describe('Test 1.4: Detects Flask framework', () => {
     it('should detect flask from pyproject.toml dependencies', () => {
-      writeFile(tempDir, 'pyproject.toml', '[project]\ndependencies = ["flask>=2.0"]\n');
+      writeTestFile(tempDir, 'pyproject.toml', '[project]\ndependencies = ["flask>=2.0"]\n');
 
       const result: PythonProjectType | undefined = detectPythonType(tempDir);
 
@@ -496,7 +478,7 @@ describe('detectPythonType', () => {
 
   describe('Test 1.5: Detects FastAPI framework', () => {
     it('should detect fastapi from pyproject.toml dependencies', () => {
-      writeFile(tempDir, 'pyproject.toml', '[project]\ndependencies = ["fastapi>=0.100"]\n');
+      writeTestFile(tempDir, 'pyproject.toml', '[project]\ndependencies = ["fastapi>=0.100"]\n');
 
       const result: PythonProjectType | undefined = detectPythonType(tempDir);
 
@@ -507,7 +489,7 @@ describe('detectPythonType', () => {
 
   describe('Test 1.6: Detects Poetry package manager', () => {
     it('should detect poetry from [tool.poetry] section', () => {
-      writeFile(tempDir, 'pyproject.toml', '[tool.poetry]\nname = "test"\n');
+      writeTestFile(tempDir, 'pyproject.toml', '[tool.poetry]\nname = "test"\n');
 
       const result: PythonProjectType | undefined = detectPythonType(tempDir);
 
@@ -518,8 +500,8 @@ describe('detectPythonType', () => {
 
   describe('Test 1.7: Detects uv package manager', () => {
     it('should detect uv from uv.lock file', () => {
-      writeFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
-      writeFile(tempDir, 'uv.lock', '# uv lockfile\n');
+      writeTestFile(tempDir, 'pyproject.toml', '[project]\nname = "test"\n');
+      writeTestFile(tempDir, 'uv.lock', '# uv lockfile\n');
 
       const result: PythonProjectType | undefined = detectPythonType(tempDir);
 
@@ -530,7 +512,7 @@ describe('detectPythonType', () => {
 
   describe('Test 1.8: Defaults to pip package manager', () => {
     it('should default to pip when no other manager detected', () => {
-      writeFile(tempDir, 'requirements.txt', 'requests>=2.0\n');
+      writeTestFile(tempDir, 'requirements.txt', 'requests>=2.0\n');
 
       const result: PythonProjectType | undefined = detectPythonType(tempDir);
 

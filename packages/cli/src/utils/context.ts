@@ -9,13 +9,13 @@ import nodePath from 'node:path';
 import type { ProjectContext } from '../schema.js';
 import { readJson } from './fs.js';
 import { isGitRepo } from './git.js';
-import { detectProjectType, type PackageJson } from './project-detector.js';
+import { detectLanguages, detectProjectType, type PackageJson } from './project-detector.js';
 
 /**
  * Create a ProjectContext from the current working directory.
  *
- * Reads package.json and detects project type for use with reconcile().
- * @param cwd
+ * Reads package.json, detects project type and languages for use with reconcile().
+ * @param cwd - Working directory
  */
 export function createProjectContext(cwd: string): ProjectContext {
   const packageJson = readJson(nodePath.join(cwd, 'package.json')) as PackageJson | undefined;
@@ -25,5 +25,6 @@ export function createProjectContext(cwd: string): ProjectContext {
     projectType: detectProjectType(packageJson ?? {}, cwd),
     developmentDeps: packageJson?.devDependencies ?? {},
     isGitRepo: isGitRepo(cwd),
+    languages: detectLanguages(cwd),
   };
 }

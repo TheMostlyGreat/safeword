@@ -11,7 +11,7 @@ import { CURSOR_HOOKS, getEslintConfig, SETTINGS_HOOKS } from './templates/confi
 import { AGENTS_MD_LINK } from './templates/content.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';
 import { MCP_SERVERS } from './utils/install.js';
-import { type ProjectType } from './utils/project-detector.js';
+import { type Languages, type ProjectType } from './utils/project-detector.js';
 import { VERSION } from './version.js';
 
 // ============================================================================
@@ -23,12 +23,14 @@ export interface ProjectContext {
   projectType: ProjectType;
   developmentDeps: Record<string, string>;
   isGitRepo: boolean;
+  /** Languages detected in project (for conditional file generation) */
+  languages?: Languages;
 }
 
 export interface FileDefinition {
   template?: string; // Path in templates/ dir
   content?: string | (() => string); // Static content or factory
-  generator?: (ctx: ProjectContext) => string; // Dynamic generator needing context
+  generator?: (ctx: ProjectContext) => string | null; // Dynamic generator, null = skip file
 }
 
 // managedFiles: created if missing, updated only if content === current template output
@@ -351,14 +353,17 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // Files created if missing, updated only if content matches current template
   managedFiles: {
     'eslint.config.mjs': {
-      generator: ctx => getEslintConfig(ctx.projectType.existingFormatter),
+      generator: ctx =>
+        ctx.languages?.javascript ? getEslintConfig(ctx.projectType.existingFormatter) : null,
     },
     // Minimal tsconfig for ESLint type-checked linting (only if missing)
     'tsconfig.json': {
       generator: ctx => {
+        // Skip for non-JS projects (Python-only)
+        if (!ctx.languages?.javascript) return null;
         // Only create for TypeScript projects
         if (!ctx.developmentDeps.typescript && !ctx.developmentDeps['typescript-eslint']) {
-          return ''; // Empty = skip this file
+          return null;
         }
         return JSON.stringify(
           {
@@ -381,15 +386,17 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     // Knip config for dead code detection (used by /audit)
     'knip.json': {
-      generator: () =>
-        JSON.stringify(
-          {
-            ignore: ['.safeword/**'],
-            ignoreDependencies: ['eslint-plugin-safeword'],
-          },
-          undefined,
-          2,
-        ),
+      generator: ctx =>
+        ctx.languages?.javascript
+          ? JSON.stringify(
+              {
+                ignore: ['.safeword/**'],
+                ignoreDependencies: ['eslint-plugin-safeword'],
+              },
+              undefined,
+              2,
+            )
+          : null,
     },
   },
 
@@ -397,6 +404,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   jsonMerges: {
     'package.json': {
       keys: ['scripts.lint', 'scripts.format', 'scripts.format:check', 'scripts.knip'],
+      skipIfMissing: true, // Don't create for Python-only projects (no JS tooling)
       conditionalKeys: {
         existingLinter: ['scripts.lint:eslint'], // Projects with existing linter get separate ESLint script
         publishableLibrary: ['scripts.publint'],
