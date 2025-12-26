@@ -133,4 +133,27 @@ describe('Test Suite 2: Setup - Core Files', () => {
       expect(result.stdout).toMatch(/\.safeword|safeword/i);
     });
   });
+
+  // ==========================================================================
+  // Language Packs Tracking (Feature: Language Packs)
+  // Test Definitions: .safeword/planning/test-definitions/feature-language-packs.md
+  // ==========================================================================
+
+  describe('Test 2.1: Setup tracks installed packs in config', () => {
+    it.skip('should write installedPacks to config.json', async () => {
+      createTypeScriptPackageJson(temporaryDirectory);
+      writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
+      initGitRepo(temporaryDirectory);
+
+      await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
+
+      // Config should exist with installedPacks
+      const config = JSON.parse(readTestFile(temporaryDirectory, '.safeword/config.json'));
+      expect(config.installedPacks).toBeDefined();
+      expect(Array.isArray(config.installedPacks)).toBe(true);
+
+      // Should have python pack installed (detected from pyproject.toml)
+      expect(config.installedPacks).toContain('python');
+    });
+  });
 });

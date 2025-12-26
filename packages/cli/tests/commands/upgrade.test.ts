@@ -216,4 +216,60 @@ describe('Test Suite 9: Upgrade', () => {
       // Skipped as it requires mocking internal failures
     });
   });
+
+  // ==========================================================================
+  // Language Packs Installation (Feature: Language Packs)
+  // Test Definitions: .safeword/planning/test-definitions/feature-language-packs.md
+  // ==========================================================================
+
+  describe('Test 4.1: Installs packs for newly detected languages', () => {
+    it.skip('should install Python pack when pyproject.toml detected', async () => {
+      await createConfiguredProject(temporaryDirectory);
+
+      // Add Python project marker
+      writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
+
+      // Write config with empty installedPacks
+      writeTestFile(
+        temporaryDirectory,
+        '.safeword/config.json',
+        JSON.stringify({ version: '0.15.0', installedPacks: [] }),
+      );
+
+      const result = await runCli(['upgrade'], { cwd: temporaryDirectory });
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toMatch(/installed.*python.*pack/i);
+
+      // Config should now have python in installedPacks
+      const config = JSON.parse(readTestFile(temporaryDirectory, '.safeword/config.json'));
+      expect(config.installedPacks).toContain('python');
+    });
+  });
+
+  describe('Test 4.2: Skips already-installed packs silently', () => {
+    it.skip('should not re-install existing packs', async () => {
+      await createConfiguredProject(temporaryDirectory);
+
+      // Add Python project marker
+      writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
+
+      // Write config with python already installed
+      writeTestFile(
+        temporaryDirectory,
+        '.safeword/config.json',
+        JSON.stringify({ version: '0.15.0', installedPacks: ['python'] }),
+      );
+
+      const result = await runCli(['upgrade'], { cwd: temporaryDirectory });
+
+      expect(result.exitCode).toBe(0);
+      // Should NOT say it installed the pack
+      expect(result.stdout).not.toMatch(/installed.*python.*pack/i);
+
+      // Config should be unchanged
+      const config = JSON.parse(readTestFile(temporaryDirectory, '.safeword/config.json'));
+      expect(config.installedPacks).toEqual(['python']);
+    });
+  });
 });
