@@ -64,11 +64,35 @@ export async function lintFile(file: string, projectDir: string): Promise<void>;
 
 ### Component 4: LintCommand
 
-**What**: Extends /lint to run Python tooling
+**What**: Extends /lint skill to run Python and/or JS tooling based on project detection
 **Where**: `packages/cli/templates/commands/lint.md`
-**Behavior**: Python → `ruff check --fix .`, `ruff format .`, `mypy .`; JavaScript → `npm run lint`, `npm run format`, `npx tsc`
-**Dependencies**: Shell commands (Ruff, mypy, npm scripts)
-**Tests**: Suite 4 (Tests 4.1-4.4)
+
+**Detection Logic**:
+```bash
+# Python detected if: pyproject.toml OR requirements.txt exists
+# JS detected if: package.json exists
+# Polyglot: runs BOTH toolchains (not either/or)
+```
+
+**Behavior**:
+```bash
+# Python linting (if Python project detected)
+([ -f pyproject.toml ] || [ -f requirements.txt ]) && {
+  ruff check --fix . 2>&1 || true
+  ruff format . 2>&1 || true
+  mypy . 2>&1 || true
+}
+
+# JS/TS linting (if JS project detected)
+[ -f package.json ] && {
+  npm run lint 2>&1 || true
+  npm run format --if-present 2>&1 || true
+  [ -f tsconfig.json ] && npx tsc --noEmit 2>&1 || true
+}
+```
+
+**Dependencies**: Shell commands (Ruff, mypy, npm scripts, tsc)
+**Tests**: Suite 4 (Tests 4.1-4.6)
 
 ---
 
@@ -86,13 +110,24 @@ setup()
   → printSetupSummary(..., languages)
 ```
 
-**Lint Hook Flow:**
+**Lint Hook Flow** (per-file, fast):
 
 ```text
 lintFile(file)
   → PYTHON_EXTENSIONS? → ruff check --fix && ruff format (.nothrow().quiet())
   → JS_EXTENSIONS? → npx eslint --fix && npx prettier (existing)
   → else: skip
+```
+
+**Lint Command Flow** (full project, thorough):
+
+```text
+/lint skill invoked
+  → [ -f pyproject.toml ] || [ -f requirements.txt ]?
+      → YES: ruff check --fix . && ruff format . && mypy .
+  → [ -f package.json ]?
+      → YES: npm run lint && npm run format && tsc --noEmit
+  → Polyglot? → runs BOTH (no early exit)
 ```
 
 ---
