@@ -15,6 +15,7 @@ import { isGitRepo } from '../utils/git.js';
 import { installDependencies } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { detectLanguages, type Languages } from '../utils/project-detector.js';
+import { setupPythonTooling } from '../utils/python-setup.js';
 import { VERSION } from '../version.js';
 import { buildArchitecture, hasArchitectureDetected, syncConfigCore } from './sync-config.js';
 
@@ -133,17 +134,18 @@ function printSetupSummary(
   languages: Languages,
   archFiles: string[] = [],
   workspaceUpdates: string[] = [],
+  pythonFiles: string[] = [],
 ): void {
   header('Setup Complete');
 
-  const allCreated = [...result.created, ...archFiles];
+  const allCreated = [...result.created, ...archFiles, ...pythonFiles.filter(f => f !== 'pyproject.toml')];
   if (allCreated.length > 0 || packageJsonCreated) {
     info('\nCreated:');
     if (packageJsonCreated) listItem('package.json');
     for (const file of allCreated) listItem(file);
   }
 
-  const allUpdated = [...result.updated, ...workspaceUpdates];
+  const allUpdated = [...result.updated, ...workspaceUpdates, ...pythonFiles.filter(f => f === 'pyproject.toml')];
   if (allUpdated.length > 0) {
     info('\nModified:');
     for (const file of allUpdated) listItem(file);
@@ -220,6 +222,26 @@ export async function setup(options: SetupOptions): Promise<void> {
       installDependencies(cwd, result.packagesToInstall, 'linting dependencies');
     }
 
+    // Python-specific setup (Ruff config, pre-commit, import-linter)
+    let pythonFiles: string[] = [];
+    if (languages.python) {
+      const pythonResult = setupPythonTooling(cwd, isGitRepo(cwd));
+      pythonFiles = pythonResult.files;
+
+      if (pythonFiles.length > 0) {
+        info('\nPython tooling configured:');
+        if (pythonFiles.includes('pyproject.toml')) {
+          info('  Added [tool.ruff] config to pyproject.toml');
+        }
+        if (pythonResult.preCommit) {
+          info('  Created .pre-commit-config.yaml');
+        }
+        if (pythonResult.importLinter) {
+          info('  Added [tool.importlinter] layer contracts');
+        }
+      }
+    }
+
     if (!isGitRepo(cwd)) {
       const isNonInteractive = options.yes || !process.stdin.isTTY;
       warn(
@@ -231,7 +253,7 @@ export async function setup(options: SetupOptions): Promise<void> {
         info('Initialize git and run safeword upgrade to enable pre-commit hooks');
     }
 
-    printSetupSummary(result, packageJsonCreated, languages, archFiles, workspaceUpdates);
+    printSetupSummary(result, packageJsonCreated, languages, archFiles, workspaceUpdates, pythonFiles);
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);

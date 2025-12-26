@@ -4,16 +4,17 @@
 **Template**: `.safeword/templates/test-definitions-feature.md`
 
 **Feature**: Bring Python tooling to parity with JS
-**Status**: Not Started (Out of Scope for MVP)
-**Total Tests**: 5 (0 passing, 5 not implemented)
+**Status**: RED Phase (tests written, implementation pending)
+**Total Tests**: 8 (2 passing, 6 failing)
+**Test File**: `packages/cli/tests/commands/setup-python-phase2.test.ts`
 
 ---
 
 ## Test Suite 1: Ruff Config Generation
 
-### Test 1.1: Generates [tool.ruff] section ❌
+### Test 1.1: Generates [tool.ruff] section 🔴
 
-**Status**: ❌ Not Implemented
+**Status**: 🔴 RED (failing)
 **Description**: Setup adds Ruff config to pyproject.toml
 
 **Steps**:
@@ -30,9 +31,9 @@
 
 ## Test Suite 2: Pre-commit Integration
 
-### Test 2.1: Generates .pre-commit-config.yaml ❌
+### Test 2.1: Generates .pre-commit-config.yaml 🔴
 
-**Status**: ❌ Not Implemented
+**Status**: 🔴 RED (failing)
 **Description**: Setup creates pre-commit config for Python
 
 **Steps**:
@@ -48,9 +49,9 @@
 
 ## Test Suite 3: Architecture Validation
 
-### Test 3.1: Generates import-linter config ❌
+### Test 3.1: Generates import-linter config 🔴
 
-**Status**: ❌ Not Implemented
+**Status**: 🔴 RED (failing)
 **Description**: Setup adds import-linter contracts to pyproject.toml
 
 **Steps**:
@@ -66,9 +67,9 @@
 
 ## Test Suite 4: Dead Code Detection
 
-### Test 4.1: /audit runs deadcode ❌
+### Test 4.1: /audit runs deadcode 🔴
 
-**Status**: ❌ Not Implemented
+**Status**: 🔴 RED (failing)
 **Description**: Audit command includes deadcode for Python
 
 **Steps**:
@@ -84,9 +85,9 @@
 
 ## Test Suite 5: Copy/Paste Detection
 
-### Test 5.1: /audit runs jscpd ❌
+### Test 5.1: /audit runs jscpd 🔴
 
-**Status**: ❌ Not Implemented
+**Status**: 🔴 RED (failing)
 **Description**: Audit command includes jscpd for all languages
 
 **Steps**:
@@ -102,16 +103,17 @@
 
 ## Summary
 
-**Total**: 5 tests
-**Not Implemented**: 5 tests (100%)
+**Total**: 8 tests (6 positive + 2 negative)
+**RED**: 6 tests (75%)
+**Passing**: 2 tests (negative tests)
 
 | Tool | Tests | Status |
 |------|-------|--------|
-| Ruff config | 1 | ❌ |
-| pre-commit | 1 | ❌ |
-| import-linter | 1 | ❌ |
-| deadcode | 1 | ❌ |
-| jscpd | 1 | ❌ |
+| Ruff config | 2 | 🔴 RED |
+| pre-commit | 2 | 🔴 RED (1 negative passes) |
+| import-linter | 2 | 🔴 RED (1 negative passes) |
+| deadcode | 1 | 🔴 RED |
+| jscpd | 1 | 🔴 RED |
 
 ---
 
