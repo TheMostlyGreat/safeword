@@ -222,7 +222,7 @@ describe('Test Suite 9: Upgrade', () => {
   // Test Definitions: .safeword/planning/test-definitions/feature-language-packs.md
   // ==========================================================================
 
-  describe('Test 4.1: Installs packs for newly detected languages', () => {
+  describe('Installs packs for newly detected languages', () => {
     it.skip('should install Python pack when pyproject.toml detected', async () => {
       await createConfiguredProject(temporaryDirectory);
 
@@ -247,7 +247,7 @@ describe('Test Suite 9: Upgrade', () => {
     });
   });
 
-  describe('Test 4.2: Skips already-installed packs silently', () => {
+  describe('Skips already-installed packs silently', () => {
     it.skip('should not re-install existing packs', async () => {
       await createConfiguredProject(temporaryDirectory);
 

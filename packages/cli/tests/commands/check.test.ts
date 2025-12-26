@@ -133,7 +133,7 @@ describe('Test Suite 8: Health Check', () => {
   // Test Definitions: .safeword/planning/test-definitions/feature-language-packs.md
   // ==========================================================================
 
-  describe('Test 3.1: Warns when detected language has no installed pack', () => {
+  describe('Warns when detected language has no installed pack', () => {
     it.skip('should warn about missing Python pack', async () => {
       // Create Python project
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
@@ -155,7 +155,7 @@ describe('Test Suite 8: Health Check', () => {
     });
   });
 
-  describe('Test 3.2: Passes when all detected languages have packs', () => {
+  describe('Passes when all detected languages have packs', () => {
     it.skip('should pass when Python pack is installed', async () => {
       // Create Python project
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
