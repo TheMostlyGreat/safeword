@@ -95,7 +95,7 @@
 
 ## Integration Tests
 
-**File**: `packages/cli/tests/commands/setup.test.ts` (extend existing)
+**File**: `packages/cli/tests/commands/setup-core.test.ts` (extend existing)
 
 ### Test 2.1: Setup tracks installed packs in config ❌
 
@@ -194,7 +194,7 @@
 | File | Tests | Focus |
 |------|-------|-------|
 | `packs/packs.test.ts` | 5 | `findPackForExtension`, `detectLanguages`, config helpers, `installPack` |
-| `commands/setup.test.ts` | 1 | Config tracking after setup |
+| `commands/setup-core.test.ts` | 1 | Config tracking after setup |
 | `commands/check.test.ts` | 2 | Missing pack detection |
 | `commands/upgrade.test.ts` | 2 | Auto-install missing packs |
 
@@ -211,7 +211,7 @@
 bun run test packages/cli/tests/packs/packs.test.ts
 
 # Integration tests (run with existing command tests)
-bun run test packages/cli/tests/commands/setup.test.ts
+bun run test packages/cli/tests/commands/setup-core.test.ts
 bun run test packages/cli/tests/commands/check.test.ts
 bun run test packages/cli/tests/commands/upgrade.test.ts
 ```
