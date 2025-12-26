@@ -1,0 +1,66 @@
+/**
+ * Pack Config Tracking
+ *
+ * Helpers to read/write installedPacks in .safeword/config.json
+ */
+
+import nodePath from 'node:path';
+
+import { exists, readFileSafe, writeFile } from '../utils/fs.js';
+
+const CONFIG_PATH = '.safeword/config.json';
+
+interface SafewordConfig {
+  version: string;
+  installedPacks: string[];
+}
+
+function readConfig(cwd: string): SafewordConfig | null {
+  const configPath = nodePath.join(cwd, CONFIG_PATH);
+  const content = readFileSafe(configPath);
+  if (!content) return null;
+  return JSON.parse(content) as SafewordConfig;
+}
+
+function writeConfig(cwd: string, config: SafewordConfig): void {
+  const configPath = nodePath.join(cwd, CONFIG_PATH);
+  writeFile(configPath, JSON.stringify(config, null, 2));
+}
+
+/**
+ * Get the list of installed packs from config.
+ *
+ * @param cwd - Project root directory
+ * @returns Array of installed pack IDs, or empty array if no config
+ */
+export function getInstalledPacks(cwd: string): string[] {
+  const config = readConfig(cwd);
+  return config?.installedPacks ?? [];
+}
+
+/**
+ * Check if a specific pack is installed.
+ *
+ * @param cwd - Project root directory
+ * @param packId - Pack ID to check
+ * @returns true if pack is in installedPacks
+ */
+export function isPackInstalled(cwd: string, packId: string): boolean {
+  return getInstalledPacks(cwd).includes(packId);
+}
+
+/**
+ * Add a pack to the installed packs list.
+ * Creates config.json if it doesn't exist.
+ *
+ * @param cwd - Project root directory
+ * @param packId - Pack ID to add
+ */
+export function addInstalledPack(cwd: string, packId: string): void {
+  const config = readConfig(cwd) ?? { version: '0.15.0', installedPacks: [] };
+
+  if (!config.installedPacks.includes(packId)) {
+    config.installedPacks.push(packId);
+    writeConfig(cwd, config);
+  }
+}
