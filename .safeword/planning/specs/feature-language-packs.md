@@ -63,11 +63,7 @@ Installed packs tracked in `.safeword/config.json`:
 ```json
 {
   "version": "0.14.2",
-  "installedPacks": ["python", "typescript"],
-  "packVersions": {
-    "python": "1.0.0",
-    "typescript": "1.0.0"
-  }
+  "installedPacks": ["python", "typescript"]
 }
 ```
 
@@ -240,6 +236,4 @@ if (pack && !isPackInstalled(pack.id)) {
 
 ## Open Questions
 
-- [ ] Should pack version be tracked separately from safeword version?
-- [ ] How to handle pack config updates when pack version changes?
 - [ ] Should we support user-defined packs in future? (probably not initially)
