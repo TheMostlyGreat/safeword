@@ -8,7 +8,7 @@
 
 ## Unit Tests
 
-**File**: `packages/cli/tests/packs/registry.test.ts`
+**File**: `packages/cli/tests/packs/packs.test.ts`
 
 ### Test 1.1: Maps file extensions to language packs ❌
 
@@ -183,7 +183,7 @@
 **Expected**:
 
 - Output does NOT contain: `Installed Python pack`
-- Pack's `setup()` NOT called
+- Config unchanged
 
 ---
 
@@ -193,7 +193,7 @@
 
 | File | Tests | Focus |
 |------|-------|-------|
-| `tests/packs/registry.test.ts` | 5 | `findPackForExtension`, `detectLanguages`, config helpers, `installPack` |
+| `tests/packs/packs.test.ts` | 5 | `findPackForExtension`, `detectLanguages`, config helpers, `installPack` |
 | `tests/commands/setup.test.ts` | 1 | Config tracking after setup |
 | `tests/commands/check.test.ts` | 2 | Missing pack detection |
 | `tests/commands/upgrade.test.ts` | 2 | Auto-install missing packs |
@@ -206,7 +206,7 @@
 
 ```bash
 # Unit tests
-bun run test packages/cli/tests/packs/registry.test.ts
+bun run test packages/cli/tests/packs/packs.test.ts
 
 # Integration tests (run with existing command tests)
 bun run test packages/cli/tests/commands/setup.test.ts
