@@ -18,9 +18,9 @@
 
 Tests for Story 1 - detecting Python projects and their characteristics.
 
-### Test 1.1: Detects pyproject.toml as Python project ❌
+### Test 1.1: Detects pyproject.toml as Python project ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies that presence of pyproject.toml indicates a Python project
 
 **Steps**:
@@ -36,9 +36,9 @@ Tests for Story 1 - detecting Python projects and their characteristics.
 
 ---
 
-### Test 1.2: Detects requirements.txt as Python fallback ❌
+### Test 1.2: Detects requirements.txt as Python fallback ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies that requirements.txt indicates Python when pyproject.toml is absent
 
 **Steps**:
@@ -54,9 +54,9 @@ Tests for Story 1 - detecting Python projects and their characteristics.
 
 ---
 
-### Test 1.3: Detects Django framework ❌
+### Test 1.3: Detects Django framework ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies Django detection from pyproject.toml dependencies
 
 **Steps**:
@@ -71,9 +71,9 @@ Tests for Story 1 - detecting Python projects and their characteristics.
 
 ---
 
-### Test 1.4: Detects Flask framework ❌
+### Test 1.4: Detects Flask framework ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies Flask detection from pyproject.toml dependencies
 
 **Steps**:
@@ -88,9 +88,9 @@ Tests for Story 1 - detecting Python projects and their characteristics.
 
 ---
 
-### Test 1.5: Detects FastAPI framework ❌
+### Test 1.5: Detects FastAPI framework ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies FastAPI detection from pyproject.toml dependencies
 
 **Steps**:
@@ -105,9 +105,9 @@ Tests for Story 1 - detecting Python projects and their characteristics.
 
 ---
 
-### Test 1.6: Detects Poetry package manager ❌
+### Test 1.6: Detects Poetry package manager ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies Poetry detection from pyproject.toml [tool.poetry] section
 
 **Steps**:
@@ -122,9 +122,9 @@ Tests for Story 1 - detecting Python projects and their characteristics.
 
 ---
 
-### Test 1.7: Detects uv package manager ❌
+### Test 1.7: Detects uv package manager ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies uv detection from uv.lock or [tool.uv] section
 
 **Steps**:
@@ -139,9 +139,9 @@ Tests for Story 1 - detecting Python projects and their characteristics.
 
 ---
 
-### Test 1.8: Defaults to pip package manager ❌
+### Test 1.8: Defaults to pip package manager ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies pip is default when no other manager detected
 
 **Steps**:
@@ -156,9 +156,9 @@ Tests for Story 1 - detecting Python projects and their characteristics.
 
 ---
 
-### Test 1.9: Detects polyglot project (JS + Python) ❌
+### Test 1.9: Detects polyglot project (JS + Python) ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies detection of projects with both package.json and pyproject.toml
 
 **Steps**:
@@ -175,9 +175,9 @@ Tests for Story 1 - detecting Python projects and their characteristics.
 
 ---
 
-### Test 1.10: Works without package.json ❌
+### Test 1.10: Works without package.json ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies Python detection works for Python-only projects
 
 **Steps**:
