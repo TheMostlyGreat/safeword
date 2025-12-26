@@ -18,7 +18,15 @@ npx depcruise --output-type err --config .dependency-cruiser.js . 2>&1 || true
 # 3. Dead code check + auto-fix (unused exports, deps)
 npx knip --fix 2>&1 || true
 
-# 4. Outdated packages (informational)
+# 4. Python dead code check (if Python project)
+([ -f pyproject.toml ] || [ -f requirements.txt ]) && {
+  deadcode . 2>&1 || true
+}
+
+# 5. Copy/paste detection (all languages)
+npx jscpd . --reporters console 2>&1 || true
+
+# 6. Outdated packages (informational)
 npm outdated 2>&1 || true
 ```
 
@@ -34,8 +42,10 @@ After running, report in this format:
 
 - [Circular dependencies - show the cycle path]
 - [Layer violations - show the invalid import]
+- [Python dead code - unused functions/classes from deadcode]
 
 **Info:**
 
 - [Unused files to review - may be intentional]
+- [Code duplicates - blocks detected by jscpd]
 - [Outdated packages - optional to update]
