@@ -58,13 +58,6 @@ function readPyprojectToml(dir: string): string {
 }
 
 /**
- * Helper to read .pre-commit-config.yaml content
- */
-function readPreCommitConfig(dir: string): string {
-  return readTestFile(dir, '.pre-commit-config.yaml');
-}
-
-/**
  * Helper to read the audit.md template content
  */
 function readAuditTemplate(): string {
@@ -150,7 +143,7 @@ describe('Suite 2: Pre-commit Integration', () => {
 
       // Assert
       expect(fileExists(projectDirectory, '.pre-commit-config.yaml')).toBe(true);
-      const preCommitContent = readPreCommitConfig(projectDirectory);
+      const preCommitContent = readTestFile(projectDirectory, '.pre-commit-config.yaml');
       expect(preCommitContent).toContain('ruff-pre-commit');
       expect(preCommitContent).toContain('ruff-check');
       expect(preCommitContent).toContain('ruff-format');
