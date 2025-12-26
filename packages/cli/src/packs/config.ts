@@ -16,16 +16,16 @@ interface SafewordConfig {
   installedPacks: string[];
 }
 
-function readConfig(cwd: string): SafewordConfig | null {
+function readConfig(cwd: string): SafewordConfig | undefined {
   const configPath = nodePath.join(cwd, CONFIG_PATH);
   const content = readFileSafe(configPath);
-  if (!content) return null;
+  if (!content) return undefined;
   return JSON.parse(content) as SafewordConfig;
 }
 
 function writeConfig(cwd: string, config: SafewordConfig): void {
   const configPath = nodePath.join(cwd, CONFIG_PATH);
-  writeFile(configPath, JSON.stringify(config, null, 2));
+  writeFile(configPath, JSON.stringify(config, undefined, 2));
 }
 
 /**

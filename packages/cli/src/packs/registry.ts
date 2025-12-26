@@ -20,15 +20,15 @@ export const LANGUAGE_PACKS: Record<string, LanguagePack> = {
  * Find the language pack for a file extension.
  *
  * @param ext - File extension including dot (e.g., '.py')
- * @returns The matching pack or null
+ * @returns The matching pack or undefined
  */
-export function findPackForExtension(extension: string): LanguagePack | null {
+export function findPackForExtension(extension: string): LanguagePack | undefined {
   for (const pack of Object.values(LANGUAGE_PACKS)) {
     if (pack.extensions.includes(extension)) {
       return pack;
     }
   }
-  return null;
+  return undefined;
 }
 
 /**

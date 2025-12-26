@@ -47,12 +47,12 @@ describe('Pack Registry', () => {
   it('Test 1.1: Maps file extensions to language packs', () => {
     // Python extensions → python pack
     const pyPack = findPackForExtension('.py');
-    expect(pyPack).not.toBeNull();
+    expect(pyPack).toBeDefined();
     expect(pyPack?.id).toBe('python');
 
     // TypeScript/JS extensions → typescript pack
     const tsPack = findPackForExtension('.ts');
-    expect(tsPack).not.toBeNull();
+    expect(tsPack).toBeDefined();
     expect(tsPack?.id).toBe('typescript');
 
     const tsxPack = findPackForExtension('.tsx');
@@ -61,9 +61,9 @@ describe('Pack Registry', () => {
     const jsPack = findPackForExtension('.js');
     expect(jsPack?.id).toBe('typescript');
 
-    // Unknown extensions → null
+    // Unknown extensions → undefined
     const unknownPack = findPackForExtension('.xyz');
-    expect(unknownPack).toBeNull();
+    expect(unknownPack).toBeUndefined();
   });
 
   it('Test 1.2: Detects languages from project markers', () => {
