@@ -233,4 +233,69 @@ describe('Suite 5: Copy/Paste Detection', () => {
     const auditTemplate = readAuditTemplate();
     expect(auditTemplate).toContain('jscpd');
   });
+
+  it('Test 5.2: jscpd uses --gitignore flag', () => {
+    const auditTemplate = readAuditTemplate();
+    expect(auditTemplate).toContain('--gitignore');
+  });
+
+  it('Test 5.3: jscpd uses --min-lines 10', () => {
+    const auditTemplate = readAuditTemplate();
+    expect(auditTemplate).toMatch(/--min-lines\s+10/);
+  });
+});
+
+// =============================================================================
+// Test Suite 6: mypy Configuration
+// =============================================================================
+
+describe('Suite 6: mypy Configuration', () => {
+  it(
+    'Test 6.1: Generates [tool.mypy] section',
+    async () => {
+      // Arrange
+      createPythonProject(projectDirectory);
+      initGitRepo(projectDirectory);
+
+      // Act
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+
+      // Assert
+      const pyprojectContent = readPyprojectToml(projectDirectory);
+      expect(pyprojectContent).toContain('[tool.mypy]');
+      expect(pyprojectContent).toContain('ignore_missing_imports = true');
+      expect(pyprojectContent).toContain('show_error_codes = true');
+      expect(pyprojectContent).toContain('pretty = true');
+    },
+    TIMEOUT_SETUP,
+  );
+
+  it(
+    'Test 6.2: Does not overwrite existing [tool.mypy]',
+    async () => {
+      // Arrange
+      writeTestFile(
+        projectDirectory,
+        'pyproject.toml',
+        `[project]
+name = "test"
+
+[tool.mypy]
+strict = true
+`,
+      );
+      initGitRepo(projectDirectory);
+
+      // Act
+      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+
+      // Assert
+      const pyprojectContent = readPyprojectToml(projectDirectory);
+      // Should preserve user's strict setting
+      expect(pyprojectContent).toContain('strict = true');
+      // Should NOT add our defaults
+      expect(pyprojectContent).not.toContain('ignore_missing_imports');
+    },
+    TIMEOUT_SETUP,
+  );
 });
