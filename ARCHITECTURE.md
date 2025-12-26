@@ -60,8 +60,11 @@ interface LanguagePack {
   name: string;                        // e.g., 'Python', 'TypeScript'
   extensions: string[];                // e.g., ['.py', '.pyi']
   detect: (cwd: string) => boolean;    // Is this language present?
-  setup: (cwd: string) => SetupResult; // Generate configs
+  setup: (cwd: string, ctx: SetupContext) => SetupResult;
 }
+
+interface SetupContext { isGitRepo: boolean; }
+interface SetupResult { files: string[]; }
 
 // Registry
 const LANGUAGE_PACKS: Record<string, LanguagePack> = {
