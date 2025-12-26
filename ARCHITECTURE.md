@@ -88,7 +88,7 @@ interface ProjectContext {
   developmentDeps: Record<string, string>;
   isGitRepo: boolean;
   languages: Languages;           // NEW
-  pythonType?: PythonProjectType; // NEW - only if languages.python
+  // pythonType?: PythonProjectType; // Phase 2 - for framework-specific configs
 }
 ```
 
