@@ -65,17 +65,10 @@ function readPreCommitConfig(dir: string): string {
 }
 
 /**
- * Helper to get the audit.md template path
- */
-function getAuditTemplatePath(): string {
-  return nodePath.join(__dirname, '../../templates/commands/audit.md');
-}
-
-/**
  * Helper to read the audit.md template content
  */
 function readAuditTemplate(): string {
-  return readFileSync(getAuditTemplatePath(), 'utf-8');
+  return readFileSync(nodePath.join(__dirname, '../../templates/commands/audit.md'), 'utf-8');
 }
 
 // =============================================================================
