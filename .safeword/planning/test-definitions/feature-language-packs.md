@@ -193,10 +193,12 @@
 
 | File | Tests | Focus |
 |------|-------|-------|
-| `tests/packs/packs.test.ts` | 5 | `findPackForExtension`, `detectLanguages`, config helpers, `installPack` |
-| `tests/commands/setup.test.ts` | 1 | Config tracking after setup |
-| `tests/commands/check.test.ts` | 2 | Missing pack detection |
-| `tests/commands/upgrade.test.ts` | 2 | Auto-install missing packs |
+| `packs/packs.test.ts` | 5 | `findPackForExtension`, `detectLanguages`, config helpers, `installPack` |
+| `commands/setup.test.ts` | 1 | Config tracking after setup |
+| `commands/check.test.ts` | 2 | Missing pack detection |
+| `commands/upgrade.test.ts` | 2 | Auto-install missing packs |
+
+*All paths relative to `packages/cli/tests/`*
 
 **Note**: Stories 2 & 3 (refactoring Python/TS to packs) covered by existing tests. If they pass after refactor, behavior is preserved.
 
