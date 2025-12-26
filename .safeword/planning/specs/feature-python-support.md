@@ -176,11 +176,15 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 
 ### Phase 2: Tooling Parity (Out of Scope)
 
-- Config generation (add `[tool.ruff]` to pyproject.toml)
-- Pre-commit.yaml generation (replaces Husky + lint-staged)
-- import-linter config (architecture validation, replaces dependency-cruiser)
-- Vulture integration (dead code detection, replaces Knip)
-- Python framework-specific configs (Django, FastAPI)
+| Tool | Purpose | JS Equivalent |
+|------|---------|---------------|
+| [Ruff](https://docs.astral.sh/ruff/) | Config generation (`[tool.ruff]`) | eslint.config.mjs |
+| [pre-commit](https://pre-commit.com/) | Git hooks | Husky + lint-staged |
+| [import-linter](https://github.com/seddonym/import-linter) | Architecture validation | dependency-cruiser |
+| [deadcode](https://github.com/albertas/deadcode) | Dead code detection (has `--fix`) | Knip |
+| [jscpd](https://github.com/kucherenko/jscpd) | Copy/paste detection | (also jscpd) |
+
+**Note:** deadcode has `--fix` for auto-removal, aligning with safeword's philosophy.
 
 ### Phase 3: Rule Optimization (Out of Scope)
 
@@ -190,5 +194,3 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 - Tune severity levels based on real-world usage
 - Cross-pollinate insights between ESLint and Ruff rule sets
 - Document rule selection rationale (like `.safeword/planning/linting/`)
-
-**Next Steps**: Implement Story 2 (Python-aware lint hook)
