@@ -3,6 +3,7 @@
  *
  * Handles Python tooling configuration during safeword setup:
  * - Ruff config in pyproject.toml
+ * - mypy config in pyproject.toml
  * - Pre-commit hooks
  * - Import-linter layer contracts
  */
