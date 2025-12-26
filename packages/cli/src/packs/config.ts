@@ -6,7 +6,8 @@
 
 import nodePath from 'node:path';
 
-import { exists, readFileSafe, writeFile } from '../utils/fs.js';
+import { readFileSafe, writeFile } from '../utils/fs.js';
+import { VERSION } from '../version.js';
 
 const CONFIG_PATH = '.safeword/config.json';
 
@@ -57,7 +58,7 @@ export function isPackInstalled(cwd: string, packId: string): boolean {
  * @param packId - Pack ID to add
  */
 export function addInstalledPack(cwd: string, packId: string): void {
-  const config = readConfig(cwd) ?? { version: '0.15.0', installedPacks: [] };
+  const config = readConfig(cwd) ?? { version: VERSION, installedPacks: [] };
 
   if (!config.installedPacks.includes(packId)) {
     config.installedPacks.push(packId);

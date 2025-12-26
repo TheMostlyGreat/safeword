@@ -29,7 +29,6 @@ export function installPack(packId: string, cwd: string): void {
     throw new Error(`Unknown pack: ${packId}`);
   }
 
-  const ctx = { isGitRepo: isGitRepo(cwd) };
-  pack.setup(cwd, ctx);
+  pack.setup(cwd, { isGitRepo: isGitRepo(cwd) });
   addInstalledPack(cwd, packId);
 }
