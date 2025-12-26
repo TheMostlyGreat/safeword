@@ -60,7 +60,7 @@ function readPyprojectToml(dir: string): string {
  * Helper to read the audit.md template content
  */
 function readAuditTemplate(): string {
-  return readFileSync(nodePath.join(__dirname, '../../templates/commands/audit.md'), 'utf-8');
+  return readFileSync(nodePath.join(__dirname, '../../templates/commands/audit.md'), 'utf8');
 }
 
 // =============================================================================
