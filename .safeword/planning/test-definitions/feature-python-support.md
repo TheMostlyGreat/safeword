@@ -10,7 +10,7 @@
 - `packages/cli/tests/integration/hooks.test.ts` (Story 2)
 - `packages/cli/tests/commands/setup-python.test.ts` (Story 3)
 
-**Total Tests**: 26 (16 passing, 6 manual/not-impl for Story 4, 2 constraints verified)
+**Total Tests**: 30 (16 passing, 6 manual for Story 4, 6 manual for Story 2, 2 constraints)
 
 ---
 
