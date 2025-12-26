@@ -145,19 +145,19 @@ Tests for config.json pack tracking.
 
 ---
 
-## Test Suite 3: Pack Installation Logic
+## Test Suite 3: Pack Installation
 
-Tests for `ensurePackInstalled(extension, cwd)` - the internal function hooks call.
+Tests for `installPack(packId, cwd)` - installs a pack and updates config.
 
-### Test 3.1: ensurePackInstalled installs missing pack ❌
+### Test 3.1: installPack runs pack setup and updates config ❌
 
 **Status**: ❌ Not Implemented
-**Description**: Installs pack when not already installed
+**Description**: Installs pack and tracks in config.json
 
 **Steps**:
 
 1. Create project with no pack installed
-2. Call `ensurePackInstalled('.py', cwd)`
+2. Call `installPack('python', cwd)`
 3. Check config.json
 
 **Expected**:
@@ -167,36 +167,20 @@ Tests for `ensurePackInstalled(extension, cwd)` - the internal function hooks ca
 
 ---
 
-### Test 3.2: ensurePackInstalled skips when already installed ❌
+### Test 3.2: installPack is idempotent ❌
 
 **Status**: ❌ Not Implemented
-**Description**: No redundant install when pack already installed
+**Description**: Re-installing already installed pack is safe
 
 **Steps**:
 
 1. Create project with Python pack already installed
-2. Call `ensurePackInstalled('.py', cwd)`
+2. Call `installPack('python', cwd)`
 
 **Expected**:
 
-- Pack's `setup()` NOT called
-- Returns without error
-
----
-
-### Test 3.3: ensurePackInstalled ignores unknown extensions ❌
-
-**Status**: ❌ Not Implemented
-**Description**: Unknown file types don't cause errors
-
-**Steps**:
-
-1. Call `ensurePackInstalled('.xyz', cwd)`
-
-**Expected**:
-
-- No error thrown
-- Returns without action
+- Pack's `setup()` NOT called again
+- No error, no duplicate in config
 
 ---
 
@@ -278,14 +262,14 @@ Tests for `safeword upgrade` pack installation.
 
 ## Summary
 
-**Total**: 13 tests
-**Not Implemented**: 13 tests (100%)
+**Total**: 12 tests
+**Not Implemented**: 12 tests (100%)
 
 | Suite | Tests | Focus |
 |-------|-------|-------|
 | Pack Registry | 5 | `findPackForExtension`, `detectLanguages` |
 | Installed Packs Tracking | 3 | config.json, `isPackInstalled`, `getInstalledPacks` |
-| Pack Installation Logic | 3 | `ensurePackInstalled` (hook internals) |
+| Pack Installation | 2 | `installPack(packId, cwd)` |
 | Check Command Detection | 2 | Missing pack warnings |
 | Upgrade Command Installation | 2 | Auto-install missing packs |
 
