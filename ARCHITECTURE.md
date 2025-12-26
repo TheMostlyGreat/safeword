@@ -48,6 +48,43 @@ packages/cli/
 
 ---
 
+## Language Packs
+
+### Pattern: Modular Language Support
+
+Language-specific tooling (detection, config generation, setup) is encapsulated in **language packs**. Each pack implements a standard interface, enabling consistent multi-language support.
+
+```typescript
+interface LanguagePack {
+  id: string;                          // e.g., 'python', 'typescript'
+  name: string;                        // e.g., 'Python', 'TypeScript'
+  extensions: string[];                // e.g., ['.py', '.pyi']
+  detect: (cwd: string) => boolean;    // Is this language present?
+  setup: (cwd: string) => SetupResult; // Generate configs
+}
+
+// Registry
+const LANGUAGE_PACKS: Record<string, LanguagePack> = {
+  python: pythonPack,
+  typescript: typescriptPack,
+};
+```
+
+**Implementation:** `packages/cli/src/packs/`
+
+### Config Schema
+
+Installed packs tracked in `.safeword/config.json`:
+
+```json
+{
+  "version": "0.15.0",
+  "installedPacks": ["python", "typescript"]
+}
+```
+
+---
+
 ## Language Detection
 
 ### Pattern: Detect Languages Before Framework
@@ -137,6 +174,19 @@ interface ProjectContext {
 | Alternatives   | mypy in hook with caching (rejected: still too slow), skip mypy entirely (rejected: loses value) |
 | Implementation | Hook: `packages/cli/templates/hooks/lib/lint.ts`; Command: `packages/cli/templates/commands/lint.md` |
 
+### Bundled Language Packs (No External Packages)
+
+**Status:** Proposed
+**Date:** 2025-12-26
+
+| Field          | Value |
+|----------------|-------|
+| What           | Language packs are bundled in safeword core, not separate npm packages |
+| Why            | Simpler distribution, no version matrix, always in sync with CLI |
+| Trade-off      | Can't add languages without safeword release |
+| Alternatives   | Separate npm packages (rejected: version coordination complexity), user-defined packs (deferred: YAGNI) |
+| Implementation | `packages/cli/src/packs/*.ts` |
+
 ---
 
 ## Best Practices
@@ -186,8 +236,8 @@ const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 
 ## References
 
-- Feature Spec: `.safeword/planning/specs/feature-python-support.md`
-- Design Doc (Phase 1): `.safeword/planning/design/python-support.md`
-- Design Doc (Phase 2): `.safeword/planning/design/phase2-python-tooling.md`
+- Feature Spec (Python): `.safeword/planning/specs/feature-python-support.md`
+- Feature Spec (Language Packs): `.safeword/planning/specs/feature-language-packs.md`
+- Design Doc (Language Packs): `.safeword/planning/design/language-packs.md`
 - Ruff docs: https://docs.astral.sh/ruff/
 - PEP 621: https://peps.python.org/pep-0621/
