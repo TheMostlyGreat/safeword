@@ -7,6 +7,8 @@
 import { readdirSync } from 'node:fs';
 import nodePath from 'node:path';
 
+import { addInstalledPack } from '../packs/config.js';
+import { detectLanguages as detectLanguagePacks } from '../packs/registry.js';
 import { reconcile, type ReconcileResult } from '../reconcile.js';
 import { type ProjectContext,SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
@@ -251,6 +253,12 @@ export async function setup(options: SetupOptions): Promise<void> {
       );
       if (!isNonInteractive)
         info('Initialize git and run safeword upgrade to enable pre-commit hooks');
+    }
+
+    // Track installed packs in config.json
+    const detectedPacks = detectLanguagePacks(cwd);
+    for (const packId of detectedPacks) {
+      addInstalledPack(cwd, packId);
     }
 
     printSetupSummary(result, packageJsonCreated, languages, archFiles, workspaceUpdates, pythonFiles);

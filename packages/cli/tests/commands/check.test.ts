@@ -124,7 +124,7 @@ describe('Test Suite 8: Health Check', () => {
 
       const result = await runCli(['check'], { cwd: temporaryDirectory });
 
-      expect(result.exitCode).toBe(0); // Warning, not failure
+      expect(result.exitCode).toBe(1); // Issues should cause non-zero exit
       expect(result.stdout.toLowerCase()).toMatch(/missing|issue|repair|upgrade/i);
     });
   });
@@ -135,10 +135,12 @@ describe('Test Suite 8: Health Check', () => {
   // ==========================================================================
 
   describe('Warns when detected language has no installed pack', () => {
-    it.skip('should warn about missing Python pack', async () => {
+    it('should warn about missing Python pack', async () => {
+      await createConfiguredProject(temporaryDirectory);
+      // Add Python detection file
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
-      writeSafewordConfig(temporaryDirectory, { installedPacks: [] });
-      writeTestFile(temporaryDirectory, '.safeword/version', '0.15.0');
+      // TypeScript is installed (from setup), but Python is missing
+      writeSafewordConfig(temporaryDirectory, { installedPacks: ['typescript'] });
 
       const result = await runCli(['check'], { cwd: temporaryDirectory });
 
@@ -149,10 +151,12 @@ describe('Test Suite 8: Health Check', () => {
   });
 
   describe('Passes when all detected languages have packs', () => {
-    it.skip('should pass when Python pack is installed', async () => {
+    it('should pass when Python pack is installed', async () => {
+      await createConfiguredProject(temporaryDirectory);
+      // Add Python detection file
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
-      writeSafewordConfig(temporaryDirectory, { installedPacks: ['python'] });
-      writeTestFile(temporaryDirectory, '.safeword/version', '0.15.0');
+      // Both TypeScript and Python are installed
+      writeSafewordConfig(temporaryDirectory, { installedPacks: ['typescript', 'python'] });
 
       const result = await runCli(['check'], { cwd: temporaryDirectory });
 

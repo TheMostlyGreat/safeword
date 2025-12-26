@@ -6,6 +6,8 @@
 
 import nodePath from 'node:path';
 
+import { getInstalledPacks } from '../packs/config.js';
+import { detectLanguages as detectLanguagePacks } from '../packs/registry.js';
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
@@ -67,6 +69,7 @@ interface HealthStatus {
   latestVersion: string | undefined;
   issues: string[];
   missingPackages: string[];
+  missingPacks: string[];
 }
 
 /**
@@ -112,6 +115,7 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
       latestVersion: undefined,
       issues: [],
       missingPackages: [],
+      missingPacks: [],
     };
   }
 
@@ -143,6 +147,11 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
     issues.push('Missing: .claude/settings.json');
   }
 
+  // Check for missing language packs
+  const detectedPacks = detectLanguagePacks(cwd);
+  const installedPacks = getInstalledPacks(cwd);
+  const missingPacks = detectedPacks.filter(pack => !installedPacks.includes(pack));
+
   return {
     configured: true,
     projectVersion,
@@ -151,6 +160,7 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
     latestVersion: undefined,
     issues,
     missingPackages: result.packagesToInstall,
+    missingPacks,
   };
 }
 
@@ -199,25 +209,36 @@ function reportVersionMismatch(health: HealthStatus): void {
 /**
  * Report issues or success
  * @param health
+ * @returns true if there are issues requiring attention
  */
-function reportHealthSummary(health: HealthStatus): void {
+function reportHealthSummary(health: HealthStatus): boolean {
   if (health.issues.length > 0) {
     header('Issues Found');
     for (const issue of health.issues) {
       warn(issue);
     }
     info('\nRun `safeword upgrade` to repair configuration');
-    return;
+    return true;
   }
 
   if (health.missingPackages.length > 0) {
     header('Missing Packages');
     for (const pkg of health.missingPackages) listItem(pkg);
     info('\nRun `safeword upgrade` to install missing packages');
-    return;
+    return true;
+  }
+
+  if (health.missingPacks.length > 0) {
+    header('Missing Language Packs');
+    for (const pack of health.missingPacks) {
+      listItem(`${pack} pack not installed`);
+    }
+    info('\nRun `safeword upgrade` to install missing packs');
+    return true;
   }
 
   success('\nConfiguration is healthy');
+  return false;
 }
 
 /**
@@ -249,5 +270,9 @@ export async function check(options: CheckOptions): Promise<void> {
   }
 
   reportVersionMismatch(health);
-  reportHealthSummary(health);
+  const hasIssues = reportHealthSummary(health);
+
+  if (hasIssues) {
+    process.exit(1);
+  }
 }

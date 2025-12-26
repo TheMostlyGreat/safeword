@@ -141,7 +141,7 @@ describe('Test Suite 2: Setup - Core Files', () => {
   // ==========================================================================
 
   describe('Setup tracks installed packs in config', () => {
-    it.skip('should write installedPacks to config.json', async () => {
+    it('should write installedPacks to config.json', async () => {
       createTypeScriptPackageJson(temporaryDirectory);
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
       initGitRepo(temporaryDirectory);

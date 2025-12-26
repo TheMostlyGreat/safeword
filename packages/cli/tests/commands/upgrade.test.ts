@@ -225,10 +225,11 @@ describe('Test Suite 9: Upgrade', () => {
   // ==========================================================================
 
   describe('Installs packs for newly detected languages', () => {
-    it.skip('should install Python pack when pyproject.toml detected', async () => {
+    it('should install Python pack when pyproject.toml detected', async () => {
       await createConfiguredProject(temporaryDirectory);
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
-      writeSafewordConfig(temporaryDirectory, { installedPacks: [] });
+      // TypeScript already installed (from setup), Python missing
+      writeSafewordConfig(temporaryDirectory, { installedPacks: ['typescript'] });
 
       const result = await runCli(['upgrade'], { cwd: temporaryDirectory });
 
@@ -239,16 +240,17 @@ describe('Test Suite 9: Upgrade', () => {
   });
 
   describe('Skips already-installed packs silently', () => {
-    it.skip('should not re-install existing packs', async () => {
+    it('should not re-install existing packs', async () => {
       await createConfiguredProject(temporaryDirectory);
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
-      writeSafewordConfig(temporaryDirectory, { installedPacks: ['python'] });
+      // Both TypeScript and Python already installed
+      writeSafewordConfig(temporaryDirectory, { installedPacks: ['typescript', 'python'] });
 
       const result = await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).not.toMatch(/installed.*python.*pack/i);
-      expect(readSafewordConfig(temporaryDirectory).installedPacks).toEqual(['python']);
+      expect(readSafewordConfig(temporaryDirectory).installedPacks).toContain('python');
     });
   });
 });
