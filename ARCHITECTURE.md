@@ -1,8 +1,8 @@
 # Safeword Architecture
 
 **Version:** 1.0
-**Last Updated:** 2025-12-25
-**Status:** Proposed
+**Last Updated:** 2025-12-26
+**Status:** Production
 
 ---
 
@@ -122,7 +122,7 @@ interface ProjectContext {
 | Why            | No new npm dependencies; only need section detection (`[tool.poetry]`, `[tool.uv]`) |
 | Trade-off      | May fail on complex TOML edge cases |
 | Alternatives   | @iarna/toml (rejected: adds dependency), toml-js (rejected: adds dependency) |
-| Implementation | `packages/cli/src/utils/project-detector.ts` - TBD |
+| Implementation | `packages/cli/src/utils/project-detector.ts` |
 
 ### Ruff in Hook, mypy in Command Only
 
@@ -135,7 +135,7 @@ interface ProjectContext {
 | Why            | Ruff: ms per file, safe for hooks. mypy: seconds for whole project, would block Claude |
 | Trade-off      | Type errors not caught until explicit /lint run |
 | Alternatives   | mypy in hook with caching (rejected: still too slow), skip mypy entirely (rejected: loses value) |
-| Implementation | Hook: `packages/cli/templates/hooks/lib/lint.ts`; Command: `packages/cli/templates/commands/lint.md` - TBD |
+| Implementation | Hook: `packages/cli/templates/hooks/lib/lint.ts`; Command: `packages/cli/templates/commands/lint.md` |
 
 ---
 
@@ -187,6 +187,7 @@ const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 ## References
 
 - Feature Spec: `.safeword/planning/specs/feature-python-support.md`
-- Design Doc: `.safeword/planning/design/python-support.md`
+- Design Doc (Phase 1): `.safeword/planning/design/python-support.md`
+- Design Doc (Phase 2): `.safeword/planning/design/phase2-python-tooling.md`
 - Ruff docs: https://docs.astral.sh/ruff/
 - PEP 621: https://peps.python.org/pep-0621/

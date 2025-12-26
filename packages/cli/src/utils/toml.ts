@@ -14,7 +14,9 @@
  */
 export function hasTomlSection(content: string, section: string): boolean {
   // Match exact section header at start of line
+  // Section comes from our own templates (e.g., '[tool.ruff]'), properly escaped
   const escapedSection = section.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+  // eslint-disable-next-line security/detect-non-literal-regexp -- Input is trusted and escaped
   const regex = new RegExp(String.raw`^${escapedSection}\s*$`, 'm');
   return regex.test(content);
 }

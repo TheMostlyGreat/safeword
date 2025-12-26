@@ -70,7 +70,8 @@ export function detectRootPackage(cwd: string): string {
 
   if (content) {
     // Try to extract name from [project] section
-    const nameMatch = /^\s*name\s*=\s*["']([^"']+)["']/m.exec(content);
+    // Using simple pattern to avoid regex backtracking
+    const nameMatch = /^name\s*=\s*"([^"]+)"/m.exec(content);
     if (nameMatch) {
       // Convert kebab-case to snake_case for Python imports
       return nameMatch[1].replaceAll('-', '_');

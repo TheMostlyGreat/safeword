@@ -180,7 +180,7 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 |------|---------|---------------|
 | [Ruff](https://docs.astral.sh/ruff/) | Config generation (`[tool.ruff]`) | eslint.config.mjs |
 | [pre-commit](https://pre-commit.com/) | Git hooks | Husky + lint-staged |
-| [import-linter](https://github.com/seddonym/import-linter) | Architecture validation | dependency-cruiser |
+| [import-linter](https://github.com/seddonym/import-linter) | Architecture validation (requires Python ≥3.10) | dependency-cruiser |
 | [deadcode](https://github.com/albertas/deadcode) | Dead code detection (has `--fix`, requires Python ≥3.10) | Knip |
 | [jscpd](https://github.com/kucherenko/jscpd) | Copy/paste detection | (also jscpd) |
 
