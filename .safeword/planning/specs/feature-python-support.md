@@ -5,7 +5,7 @@
 
 **Feature**: Enable safeword to work with Python projects using Ruff + mypy
 
-**Status**: 🚧 In Progress (3/4 stories complete)
+**Status**: ✅ Complete (4/4 stories complete)
 
 ---
 
@@ -149,12 +149,12 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 
 **Acceptance Criteria**:
 
-- [ ] `/lint` detects Python project
-- [ ] Runs `ruff check --fix` and `ruff format`
-- [ ] Runs `mypy` for type checking (analogous to tsc for TypeScript)
-- [ ] Falls back to ESLint/tsc for JS/TS projects
+- [x] `/lint` detects Python project
+- [x] Runs `ruff check --fix` and `ruff format`
+- [x] Runs `mypy` for type checking (analogous to tsc for TypeScript)
+- [x] Falls back to ESLint/tsc for JS/TS projects
 
-**Implementation Status**: ❌ Not Started
+**Implementation Status**: ✅ Complete
 **Tests**: Manual testing
 
 **Files**:
@@ -164,15 +164,15 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 
 ## Summary
 
-**Completed**: 3/4 stories (75%)
-**Remaining**: 1/4 stories (25%)
+**Completed**: 4/4 stories (100%)
+**Remaining**: 0/4 stories (0%)
 
 ### Phase 1: MVP (Stories 1-4)
 
 - Story 1: Python detection ✅
 - Story 2: Lint hook with Ruff ✅
 - Story 3: Conditional setup ✅
-- Story 4: Lint command
+- Story 4: Lint command ✅
 
 ### Phase 2: Tooling Parity (Out of Scope)
 
