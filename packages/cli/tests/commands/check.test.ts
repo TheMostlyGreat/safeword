@@ -17,6 +17,7 @@ import {
   removeTemporaryDirectory,
   runCli,
   TIMEOUT_QUICK,
+  writeSafewordConfig,
   writeTestFile,
 } from '../helpers';
 
@@ -135,21 +136,13 @@ describe('Test Suite 8: Health Check', () => {
 
   describe('Warns when detected language has no installed pack', () => {
     it.skip('should warn about missing Python pack', async () => {
-      // Create Python project
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
-
-      // Write config with empty installedPacks
-      writeTestFile(
-        temporaryDirectory,
-        '.safeword/config.json',
-        JSON.stringify({ version: '0.15.0', installedPacks: [] }),
-      );
+      writeSafewordConfig(temporaryDirectory, { installedPacks: [] });
       writeTestFile(temporaryDirectory, '.safeword/version', '0.15.0');
 
       const result = await runCli(['check'], { cwd: temporaryDirectory });
 
-      // Should warn about missing pack
-      expect(result.exitCode).not.toBe(0); // Non-zero for warnings
+      expect(result.exitCode).not.toBe(0);
       expect(result.stdout).toMatch(/python.*pack.*not installed/i);
       expect(result.stdout).toMatch(/safeword upgrade/i);
     });
@@ -157,20 +150,12 @@ describe('Test Suite 8: Health Check', () => {
 
   describe('Passes when all detected languages have packs', () => {
     it.skip('should pass when Python pack is installed', async () => {
-      // Create Python project
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
-
-      // Write config with Python pack installed
-      writeTestFile(
-        temporaryDirectory,
-        '.safeword/config.json',
-        JSON.stringify({ version: '0.15.0', installedPacks: ['python'] }),
-      );
+      writeSafewordConfig(temporaryDirectory, { installedPacks: ['python'] });
       writeTestFile(temporaryDirectory, '.safeword/version', '0.15.0');
 
       const result = await runCli(['check'], { cwd: temporaryDirectory });
 
-      // Should pass without pack warnings
       expect(result.exitCode).toBe(0);
       expect(result.stdout).not.toMatch(/pack.*not installed/i);
     });

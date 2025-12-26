@@ -12,6 +12,7 @@ import {
   createTypeScriptPackageJson,
   fileExists,
   initGitRepo,
+  readSafewordConfig,
   readTestFile,
   removeTemporaryDirectory,
   runCli,
@@ -147,12 +148,7 @@ describe('Test Suite 2: Setup - Core Files', () => {
 
       await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
-      // Config should exist with installedPacks
-      const config = JSON.parse(readTestFile(temporaryDirectory, '.safeword/config.json'));
-      expect(config.installedPacks).toBeDefined();
-      expect(Array.isArray(config.installedPacks)).toBe(true);
-
-      // Should have python pack installed (detected from pyproject.toml)
+      const config = readSafewordConfig(temporaryDirectory);
       expect(config.installedPacks).toContain('python');
     });
   });

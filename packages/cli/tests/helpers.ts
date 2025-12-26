@@ -319,6 +319,29 @@ export function measureTimeSync<T>(fn: () => T): { result: T; timeMs: number } {
 }
 
 /**
+ * Writes .safeword/config.json for Language Packs tests
+ * @param dir
+ * @param config
+ * @param config.installedPacks - Array of installed pack IDs
+ * @param config.version - Config version (defaults to '0.15.0')
+ */
+export function writeSafewordConfig(
+  dir: string,
+  config: { installedPacks?: string[]; version?: string } = {},
+): void {
+  const { installedPacks = [], version = '0.15.0' } = config;
+  writeTestFile(dir, '.safeword/config.json', JSON.stringify({ version, installedPacks }));
+}
+
+/**
+ * Reads and parses .safeword/config.json
+ * @param dir
+ */
+export function readSafewordConfig(dir: string): { version: string; installedPacks: string[] } {
+  return JSON.parse(readTestFile(dir, '.safeword/config.json'));
+}
+
+/**
  * Creates a Python-only project with pyproject.toml
  * @param dir
  * @param options

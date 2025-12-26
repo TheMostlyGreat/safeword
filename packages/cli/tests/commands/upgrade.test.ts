@@ -11,9 +11,11 @@ import {
   createTemporaryDirectory,
   createTypeScriptPackageJson,
   fileExists,
+  readSafewordConfig,
   readTestFile,
   removeTemporaryDirectory,
   runCli,
+  writeSafewordConfig,
   writeTestFile,
 } from '../helpers';
 
@@ -225,51 +227,28 @@ describe('Test Suite 9: Upgrade', () => {
   describe('Installs packs for newly detected languages', () => {
     it.skip('should install Python pack when pyproject.toml detected', async () => {
       await createConfiguredProject(temporaryDirectory);
-
-      // Add Python project marker
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
-
-      // Write config with empty installedPacks
-      writeTestFile(
-        temporaryDirectory,
-        '.safeword/config.json',
-        JSON.stringify({ version: '0.15.0', installedPacks: [] }),
-      );
+      writeSafewordConfig(temporaryDirectory, { installedPacks: [] });
 
       const result = await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toMatch(/installed.*python.*pack/i);
-
-      // Config should now have python in installedPacks
-      const config = JSON.parse(readTestFile(temporaryDirectory, '.safeword/config.json'));
-      expect(config.installedPacks).toContain('python');
+      expect(readSafewordConfig(temporaryDirectory).installedPacks).toContain('python');
     });
   });
 
   describe('Skips already-installed packs silently', () => {
     it.skip('should not re-install existing packs', async () => {
       await createConfiguredProject(temporaryDirectory);
-
-      // Add Python project marker
       writeTestFile(temporaryDirectory, 'pyproject.toml', `[project]\nname = "test"\n`);
-
-      // Write config with python already installed
-      writeTestFile(
-        temporaryDirectory,
-        '.safeword/config.json',
-        JSON.stringify({ version: '0.15.0', installedPacks: ['python'] }),
-      );
+      writeSafewordConfig(temporaryDirectory, { installedPacks: ['python'] });
 
       const result = await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
-      // Should NOT say it installed the pack
       expect(result.stdout).not.toMatch(/installed.*python.*pack/i);
-
-      // Config should be unchanged
-      const config = JSON.parse(readTestFile(temporaryDirectory, '.safeword/config.json'));
-      expect(config.installedPacks).toEqual(['python']);
+      expect(readSafewordConfig(temporaryDirectory).installedPacks).toEqual(['python']);
     });
   });
 });

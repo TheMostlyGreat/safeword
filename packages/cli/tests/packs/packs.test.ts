@@ -21,9 +21,10 @@ import {
   createPythonProject,
   createTemporaryDirectory,
   initGitRepo,
+  readSafewordConfig,
   readTestFile,
   removeTemporaryDirectory,
-  writeTestFile,
+  writeSafewordConfig,
 } from '../helpers.js';
 
 let testDir: string;
@@ -87,25 +88,13 @@ describe('Pack Registry', () => {
 
 describe('Config Tracking', () => {
   it('Test 1.3: Reads installed packs from config', () => {
-    // Create .safeword directory
-    writeTestFile(testDir, '.safeword/config.json', JSON.stringify({
-      version: '0.15.0',
-      installedPacks: [],
-    }));
-
     // Empty config → empty array
+    writeSafewordConfig(testDir, { installedPacks: [] });
     expect(getInstalledPacks(testDir)).toEqual([]);
-
-    // Not installed → false
     expect(isPackInstalled(testDir, 'python')).toBe(false);
 
-    // Write config with installed pack
-    writeTestFile(testDir, '.safeword/config.json', JSON.stringify({
-      version: '0.15.0',
-      installedPacks: ['python'],
-    }));
-
-    // Now should return the pack
+    // With installed pack
+    writeSafewordConfig(testDir, { installedPacks: ['python'] });
     expect(getInstalledPacks(testDir)).toEqual(['python']);
     expect(isPackInstalled(testDir, 'python')).toBe(true);
     expect(isPackInstalled(testDir, 'go')).toBe(false);
@@ -118,47 +107,34 @@ describe('Config Tracking', () => {
 
 describe('Pack Installation', () => {
   it('Test 1.4: Installs pack and updates config', () => {
-    // Create Python project with empty config
     createPythonProject(testDir);
     initGitRepo(testDir);
-    writeTestFile(testDir, '.safeword/config.json', JSON.stringify({
-      version: '0.15.0',
-      installedPacks: [],
-    }));
+    writeSafewordConfig(testDir, { installedPacks: [] });
 
-    // Install Python pack
     installPack('python', testDir);
 
-    // Config should now contain python
-    const config = JSON.parse(readTestFile(testDir, '.safeword/config.json'));
+    // Config updated
+    const config = readSafewordConfig(testDir);
     expect(config.installedPacks).toContain('python');
 
-    // Python pack should have created pyproject.toml configs
+    // Pack setup ran (added ruff config)
     const pyproject = readTestFile(testDir, 'pyproject.toml');
     expect(pyproject).toContain('[tool.ruff]');
   });
 
   it('Test 1.5: Skips already-installed packs', () => {
-    // Create Python project with pack already installed
     createPythonProject(testDir);
     initGitRepo(testDir);
-    writeTestFile(testDir, '.safeword/config.json', JSON.stringify({
-      version: '0.15.0',
-      installedPacks: ['python'],
-    }));
-
-    // Get initial pyproject.toml state
+    writeSafewordConfig(testDir, { installedPacks: ['python'] });
     const initialPyproject = readTestFile(testDir, 'pyproject.toml');
 
-    // Install again (should be idempotent)
     installPack('python', testDir);
 
-    // Config should be unchanged (no duplicates)
-    const config = JSON.parse(readTestFile(testDir, '.safeword/config.json'));
+    // Config unchanged
+    const config = readSafewordConfig(testDir);
     expect(config.installedPacks).toEqual(['python']);
 
-    // pyproject.toml should be unchanged (setup not called again)
-    const finalPyproject = readTestFile(testDir, 'pyproject.toml');
-    expect(finalPyproject).toBe(initialPyproject);
+    // Setup not called (pyproject unchanged)
+    expect(readTestFile(testDir, 'pyproject.toml')).toBe(initialPyproject);
   });
 });
