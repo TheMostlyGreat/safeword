@@ -1,290 +1,217 @@
 # Test Definitions: Language Packs
 
 **Guide**: `.safeword/guides/testing-guide.md`
-**Template**: `.safeword/templates/test-definitions-feature.md`
-
-**Feature**: Modular language support with bundled language packs
 **Spec**: `.safeword/planning/specs/feature-language-packs.md`
 **Status**: ❌ Not Implemented
-**Test File**: `packages/cli/tests/packs/language-packs.test.ts`
 
 ---
 
-## Test Suite 1: Pack Registry
+## Unit Tests
 
-Tests for pack interface and registry helpers.
+**File**: `packages/cli/tests/packs/registry.test.ts`
 
-### Test 1.1: findPackForExtension returns Python pack ❌
+### Test 1.1: Maps file extensions to language packs ❌
 
-**Status**: ❌ Not Implemented
-**Description**: Registry maps .py extension to Python pack
+**Description**: Registry correctly maps extensions to packs, returns null for unknown
 
 **Steps**:
 
-1. Call `findPackForExtension('.py')`
+1. Call `findPackForExtension()` with `.py`, `.ts`, `.tsx`, `.js`, `.xyz`
 
 **Expected**:
 
-- Returns pack with `id: 'python'`
+- `.py` → pack with `id: 'python'`
+- `.ts`, `.tsx`, `.js` → pack with `id: 'typescript'`
+- `.xyz` → `null`
 
 ---
 
-### Test 1.2: findPackForExtension returns TypeScript pack ❌
+### Test 1.2: Detects languages from project markers ❌
 
-**Status**: ❌ Not Implemented
-**Description**: Registry maps .ts extension to TypeScript pack
-
-**Steps**:
-
-1. Call `findPackForExtension('.ts')`
-
-**Expected**:
-
-- Returns pack with `id: 'typescript'`
-
----
-
-### Test 1.3: findPackForExtension returns null for unknown ❌
-
-**Status**: ❌ Not Implemented
-**Description**: Unknown extensions return null
+**Description**: Scans project for language markers and returns detected pack IDs
 
 **Steps**:
 
-1. Call `findPackForExtension('.xyz')`
-
-**Expected**:
-
-- Returns `null`
-
----
-
-### Test 1.4: detectLanguages finds Python ❌
-
-**Status**: ❌ Not Implemented
-**Description**: Detects Python when pyproject.toml exists
-
-**Steps**:
-
-1. Create temp dir with `pyproject.toml`
+1. Create temp dir with `pyproject.toml` and `package.json` (with `typescript` dep)
 2. Call `detectLanguages(cwd)`
 
 **Expected**:
 
-- Returns array containing `'python'`
+- Returns `['python', 'typescript']` (order doesn't matter)
 
 ---
 
-### Test 1.5: detectLanguages finds TypeScript ❌
+### Test 1.3: Reads and writes installed packs from config ❌
 
-**Status**: ❌ Not Implemented
-**Description**: Detects TypeScript when package.json with TS deps exists
+**Description**: Config helpers correctly read/write installedPacks array
 
 **Steps**:
 
-1. Create temp dir with `package.json` containing `typescript` dep
-2. Call `detectLanguages(cwd)`
+1. Call `getInstalledPacks()` on empty config → `[]`
+2. Call `isPackInstalled('python')` → `false`
+3. Write config with `installedPacks: ['python']`
+4. Call `getInstalledPacks()` → `['python']`
+5. Call `isPackInstalled('python')` → `true`
+6. Call `isPackInstalled('go')` → `false`
 
 **Expected**:
 
-- Returns array containing `'typescript'`
+- All assertions pass
 
 ---
 
-## Test Suite 2: Installed Packs Tracking
+### Test 1.4: Installs pack and updates config ❌
 
-Tests for config.json pack tracking.
-
-### Test 2.1: Setup writes installedPacks to config ❌
-
-**Status**: ❌ Not Implemented
-**Description**: After setup, config.json contains installed pack IDs
+**Description**: `installPack()` runs pack setup and records in config
 
 **Steps**:
 
-1. Create Python project
-2. Run `safeword setup`
+1. Create project with no packs installed
+2. Call `installPack('python', cwd)`
+3. Read config
+
+**Expected**:
+
+- Python pack's `setup()` was called
+- Config contains `installedPacks: ['python']`
+
+---
+
+### Test 1.5: Skips already-installed packs ❌
+
+**Description**: `installPack()` is idempotent - no duplicate work
+
+**Steps**:
+
+1. Create project with `installedPacks: ['python']`
+2. Call `installPack('python', cwd)`
+
+**Expected**:
+
+- Pack's `setup()` NOT called
+- Config unchanged (no duplicate entries)
+
+---
+
+## Integration Tests
+
+**File**: `packages/cli/tests/commands/setup.test.ts` (extend existing)
+
+### Test 2.1: Setup tracks installed packs in config ❌
+
+**Description**: After setup, config.json records which packs were installed
+
+**Steps**:
+
+1. Create Python project with `pyproject.toml`
+2. Run `safeword setup --yes`
 3. Read `.safeword/config.json`
 
 **Expected**:
 
-- `installedPacks` array contains `'python'`
+- `installedPacks` contains `'python'`
 
 ---
 
-### Test 2.2: isPackInstalled returns correct status ❌
+**File**: `packages/cli/tests/commands/check.test.ts` (extend existing)
 
-**Status**: ❌ Not Implemented
-**Description**: Helper correctly checks installed status
+### Test 3.1: Warns when detected language has no installed pack ❌
+
+**Description**: Check command detects language/pack mismatch
 
 **Steps**:
 
-1. Create config with `installedPacks: ['python']`
-2. Call `isPackInstalled('python')` and `isPackInstalled('go')`
+1. Create project with `pyproject.toml`
+2. Write config with `installedPacks: []`
+3. Run `safeword check`
 
 **Expected**:
 
-- Returns `true` for installed pack
-- Returns `false` for uninstalled pack
+- Exit code: non-zero (warning)
+- Output contains: `Python files detected but pack not installed`
+- Output contains: `safeword upgrade`
 
 ---
 
-### Test 2.3: getInstalledPacks returns all installed ❌
+### Test 3.2: Passes when all detected languages have packs ❌
 
-**Status**: ❌ Not Implemented
-**Description**: Helper returns complete list of installed packs
+**Description**: No warnings when everything is in sync
 
 **Steps**:
 
-1. Create config with `installedPacks: ['python', 'typescript']`
-2. Call `getInstalledPacks()`
+1. Create Python project
+2. Write config with `installedPacks: ['python']`
+3. Run `safeword check`
 
 **Expected**:
 
-- Returns `['python', 'typescript']`
+- Exit code: 0
+- No pack-related warnings in output
 
 ---
 
-## Test Suite 3: Pack Installation
+**File**: `packages/cli/tests/commands/upgrade.test.ts` (extend existing)
 
-Tests for `installPack(packId, cwd)` - installs a pack and updates config.
+### Test 4.1: Installs packs for newly detected languages ❌
 
-### Test 3.1: installPack runs pack setup and updates config ❌
-
-**Status**: ❌ Not Implemented
-**Description**: Installs pack and tracks in config.json
+**Description**: Upgrade command auto-installs missing packs
 
 **Steps**:
 
-1. Create project with no pack installed
-2. Call `installPack('python', cwd)`
-3. Check config.json
+1. Create Python project with `pyproject.toml`
+2. Write config with `installedPacks: []`
+3. Run `safeword upgrade`
+4. Read config
 
 **Expected**:
 
-- Pack's `setup()` called
-- `installedPacks` now contains `'python'`
+- Output contains: `Installed Python pack`
+- Config now has `installedPacks: ['python']`
 
 ---
 
-### Test 3.2: installPack is idempotent ❌
+### Test 4.2: Skips already-installed packs silently ❌
 
-**Status**: ❌ Not Implemented
-**Description**: Re-installing already installed pack is safe
-
-**Steps**:
-
-1. Create project with Python pack already installed
-2. Call `installPack('python', cwd)`
-
-**Expected**:
-
-- Pack's `setup()` NOT called again
-- No error, no duplicate in config
-
----
-
-## Test Suite 4: Check Command Detection
-
-Tests for `safeword check` pack detection.
-
-### Test 4.1: Check warns about missing pack with upgrade suggestion ❌
-
-**Status**: ❌ Not Implemented
-**Description**: Check detects missing pack and tells user how to fix
+**Description**: No redundant work or noise for existing packs
 
 **Steps**:
 
-1. Create project with `pyproject.toml` but no pack in config
-2. Run `safeword check`
+1. Create Python project
+2. Write config with `installedPacks: ['python']`
+3. Run `safeword upgrade`
 
 **Expected**:
 
-- Warning about missing Python pack
-- Message suggests "Run `safeword upgrade`"
-
----
-
-### Test 4.2: Check passes when all packs installed ❌
-
-**Status**: ❌ Not Implemented
-**Description**: No warnings when packs match detected languages
-
-**Steps**:
-
-1. Create Python project with pack installed
-2. Run `safeword check`
-
-**Expected**:
-
-- No pack-related warnings
-
----
-
-## Test Suite 5: Upgrade Command Installation
-
-Tests for `safeword upgrade` pack installation.
-
-### Test 5.1: Upgrade installs missing packs and reports ❌
-
-**Status**: ❌ Not Implemented
-**Description**: Upgrade adds packs for detected languages and tells user
-
-**Steps**:
-
-1. Create Python project without pack installed
-2. Run `safeword upgrade`
-3. Read config.json
-
-**Expected**:
-
-- `installedPacks` now contains `'python'`
-- Output contains "Installed Python pack"
-
----
-
-### Test 5.2: Upgrade skips already installed packs ❌
-
-**Status**: ❌ Not Implemented
-**Description**: No redundant work for existing packs
-
-**Steps**:
-
-1. Create Python project with pack already installed
-2. Run `safeword upgrade`
-
-**Expected**:
-
-- Pack setup NOT called again
-- No "Installed Python pack" message
+- Output does NOT contain: `Installed Python pack`
+- Pack's `setup()` NOT called
 
 ---
 
 ## Summary
 
-**Total**: 12 tests
-**Not Implemented**: 12 tests (100%)
+**Total**: 9 tests (5 unit, 4 integration)
 
-| Suite | Tests | Focus |
-|-------|-------|-------|
-| Pack Registry | 5 | `findPackForExtension`, `detectLanguages` |
-| Installed Packs Tracking | 3 | config.json, `isPackInstalled`, `getInstalledPacks` |
-| Pack Installation | 2 | `installPack(packId, cwd)` |
-| Check Command Detection | 2 | Missing pack warnings |
-| Upgrade Command Installation | 2 | Auto-install missing packs |
+| File | Tests | Focus |
+|------|-------|-------|
+| `tests/packs/registry.test.ts` | 5 | `findPackForExtension`, `detectLanguages`, config helpers, `installPack` |
+| `tests/commands/setup.test.ts` | 1 | Config tracking after setup |
+| `tests/commands/check.test.ts` | 2 | Missing pack detection |
+| `tests/commands/upgrade.test.ts` | 2 | Auto-install missing packs |
 
-**Note**: Stories 2 & 3 (refactoring Python/TS to packs) are covered by existing tests in `setup-python-phase2.test.ts` and `setup.test.ts`. No new tests needed - if existing tests pass after refactor, behavior is preserved.
+**Note**: Stories 2 & 3 (refactoring Python/TS to packs) covered by existing tests. If they pass after refactor, behavior is preserved.
 
 ---
 
 ## Test Execution
 
 ```bash
-# Run all Language Packs tests
-bun run test packages/cli/tests/packs/language-packs.test.ts
+# Unit tests
+bun run test packages/cli/tests/packs/registry.test.ts
 
-# Run specific suite
-bun run test --grep "Pack Registry"
+# Integration tests (run with existing command tests)
+bun run test packages/cli/tests/commands/setup.test.ts
+bun run test packages/cli/tests/commands/check.test.ts
+bun run test packages/cli/tests/commands/upgrade.test.ts
 ```
 
 ---
