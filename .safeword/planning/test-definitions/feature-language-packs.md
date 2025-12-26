@@ -91,33 +91,11 @@ Tests for pack interface and registry helpers.
 
 ---
 
-## Test Suite 2: Pack Refactoring (Regression)
-
-Existing tests verify behavior still works after refactoring.
-
-### Test 2.1: Python pack setup matches existing behavior ✅
-
-**Status**: ✅ Covered by existing tests
-**Description**: Python pack produces same output as current implementation
-
-**Reference**: `tests/commands/setup-python-phase2.test.ts` - 18 tests
-
----
-
-### Test 2.2: TypeScript pack setup matches existing behavior ✅
-
-**Status**: ✅ Covered by existing tests
-**Description**: TS pack produces same output as current implementation
-
-**Reference**: `tests/commands/setup.test.ts` - ESLint config tests
-
----
-
-## Test Suite 3: Installed Packs Tracking
+## Test Suite 2: Installed Packs Tracking
 
 Tests for config.json pack tracking.
 
-### Test 3.1: Setup writes installedPacks to config ❌
+### Test 2.1: Setup writes installedPacks to config ❌
 
 **Status**: ❌ Not Implemented
 **Description**: After setup, config.json contains installed pack IDs
@@ -134,39 +112,24 @@ Tests for config.json pack tracking.
 
 ---
 
-### Test 3.2: isPackInstalled returns true after setup ❌
+### Test 2.2: isPackInstalled returns correct status ❌
 
 **Status**: ❌ Not Implemented
 **Description**: Helper correctly checks installed status
 
 **Steps**:
 
-1. Run setup in Python project
-2. Call `isPackInstalled('python')`
+1. Create config with `installedPacks: ['python']`
+2. Call `isPackInstalled('python')` and `isPackInstalled('go')`
 
 **Expected**:
 
-- Returns `true`
+- Returns `true` for installed pack
+- Returns `false` for uninstalled pack
 
 ---
 
-### Test 3.3: isPackInstalled returns false when not installed ❌
-
-**Status**: ❌ Not Implemented
-**Description**: Helper returns false for uninstalled packs
-
-**Steps**:
-
-1. Create empty config.json
-2. Call `isPackInstalled('python')`
-
-**Expected**:
-
-- Returns `false`
-
----
-
-### Test 3.4: getInstalledPacks returns all installed ❌
+### Test 2.3: getInstalledPacks returns all installed ❌
 
 **Status**: ❌ Not Implemented
 **Description**: Helper returns complete list of installed packs
@@ -182,29 +145,29 @@ Tests for config.json pack tracking.
 
 ---
 
-## Test Suite 4: Hook Pack Verification
+## Test Suite 3: Pack Installation Logic
 
-Tests for hook-triggered pack installation.
+Tests for `ensurePackInstalled(extension, cwd)` - the internal function hooks call.
 
-### Test 4.1: Hook triggers install for missing pack ❌
+### Test 3.1: ensurePackInstalled installs missing pack ❌
 
 **Status**: ❌ Not Implemented
-**Description**: Editing .py file triggers Python pack install if not installed
+**Description**: Installs pack when not already installed
 
 **Steps**:
 
-1. Create project with Python file but no pack installed
-2. Simulate hook trigger for `.py` file change
+1. Create project with no pack installed
+2. Call `ensurePackInstalled('.py', cwd)`
 3. Check config.json
 
 **Expected**:
 
-- Pack's `setup()` called (blocking)
+- Pack's `setup()` called
 - `installedPacks` now contains `'python'`
 
 ---
 
-### Test 4.2: Hook skips install when pack exists ❌
+### Test 3.2: ensurePackInstalled skips when already installed ❌
 
 **Status**: ❌ Not Implemented
 **Description**: No redundant install when pack already installed
@@ -212,39 +175,39 @@ Tests for hook-triggered pack installation.
 **Steps**:
 
 1. Create project with Python pack already installed
-2. Simulate hook trigger for `.py` file change
+2. Call `ensurePackInstalled('.py', cwd)`
 
 **Expected**:
 
 - Pack's `setup()` NOT called
-- Linting proceeds immediately
+- Returns without error
 
 ---
 
-### Test 4.3: Hook handles unknown extension gracefully ❌
+### Test 3.3: ensurePackInstalled ignores unknown extensions ❌
 
 **Status**: ❌ Not Implemented
 **Description**: Unknown file types don't cause errors
 
 **Steps**:
 
-1. Simulate hook trigger for `.xyz` file change
+1. Call `ensurePackInstalled('.xyz', cwd)`
 
 **Expected**:
 
 - No error thrown
-- Linting skipped for this file type
+- Returns without action
 
 ---
 
-## Test Suite 5: Check Command Detection
+## Test Suite 4: Check Command Detection
 
 Tests for `safeword check` pack detection.
 
-### Test 5.1: Check warns about missing pack ❌
+### Test 4.1: Check warns about missing pack with upgrade suggestion ❌
 
 **Status**: ❌ Not Implemented
-**Description**: Check detects Python files without installed pack
+**Description**: Check detects missing pack and tells user how to fix
 
 **Steps**:
 
@@ -253,27 +216,12 @@ Tests for `safeword check` pack detection.
 
 **Expected**:
 
-- Warning: "Detected Python files but Python pack not installed"
+- Warning about missing Python pack
+- Message suggests "Run `safeword upgrade`"
 
 ---
 
-### Test 5.2: Check suggests upgrade command ❌
-
-**Status**: ❌ Not Implemented
-**Description**: Check tells user how to fix missing pack
-
-**Steps**:
-
-1. Create project with missing pack
-2. Run `safeword check`
-
-**Expected**:
-
-- Message contains "Run `safeword upgrade`"
-
----
-
-### Test 5.3: Check passes when all packs installed ❌
+### Test 4.2: Check passes when all packs installed ❌
 
 **Status**: ❌ Not Implemented
 **Description**: No warnings when packs match detected languages
@@ -289,14 +237,14 @@ Tests for `safeword check` pack detection.
 
 ---
 
-## Test Suite 6: Upgrade Command Installation
+## Test Suite 5: Upgrade Command Installation
 
 Tests for `safeword upgrade` pack installation.
 
-### Test 6.1: Upgrade installs missing packs ❌
+### Test 5.1: Upgrade installs missing packs and reports ❌
 
 **Status**: ❌ Not Implemented
-**Description**: Upgrade adds packs for detected languages
+**Description**: Upgrade adds packs for detected languages and tells user
 
 **Steps**:
 
@@ -307,26 +255,11 @@ Tests for `safeword upgrade` pack installation.
 **Expected**:
 
 - `installedPacks` now contains `'python'`
-
----
-
-### Test 6.2: Upgrade reports installed packs ❌
-
-**Status**: ❌ Not Implemented
-**Description**: User sees what was installed
-
-**Steps**:
-
-1. Create Python project without pack installed
-2. Run `safeword upgrade`
-
-**Expected**:
-
 - Output contains "Installed Python pack"
 
 ---
 
-### Test 6.3: Upgrade skips already installed packs ❌
+### Test 5.2: Upgrade skips already installed packs ❌
 
 **Status**: ❌ Not Implemented
 **Description**: No redundant work for existing packs
@@ -345,18 +278,18 @@ Tests for `safeword upgrade` pack installation.
 
 ## Summary
 
-**Total**: 18 tests
-**Not Implemented**: 16 tests (89%)
-**Covered by Existing**: 2 tests (11%)
+**Total**: 13 tests
+**Not Implemented**: 13 tests (100%)
 
-| Suite | Tests | Status |
-|-------|-------|--------|
-| Pack Registry | 5 | ❌ Not Implemented |
-| Pack Refactoring | 2 | ✅ Covered |
-| Installed Packs Tracking | 4 | ❌ Not Implemented |
-| Hook Pack Verification | 3 | ❌ Not Implemented |
-| Check Command Detection | 3 | ❌ Not Implemented |
-| Upgrade Command Installation | 3 | ❌ Not Implemented |
+| Suite | Tests | Focus |
+|-------|-------|-------|
+| Pack Registry | 5 | `findPackForExtension`, `detectLanguages` |
+| Installed Packs Tracking | 3 | config.json, `isPackInstalled`, `getInstalledPacks` |
+| Pack Installation Logic | 3 | `ensurePackInstalled` (hook internals) |
+| Check Command Detection | 2 | Missing pack warnings |
+| Upgrade Command Installation | 2 | Auto-install missing packs |
+
+**Note**: Stories 2 & 3 (refactoring Python/TS to packs) are covered by existing tests in `setup-python-phase2.test.ts` and `setup.test.ts`. No new tests needed - if existing tests pass after refactor, behavior is preserved.
 
 ---
 
