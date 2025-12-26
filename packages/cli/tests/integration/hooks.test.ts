@@ -533,8 +533,9 @@ describe('E2E: Python Lint Hook', () => {
     it('should not error when Ruff is missing from PATH', () => {
       writeTestFile(projectDirectory, 'test.py', 'print("hello")\n');
 
-      // Get bun's directory to include in restricted PATH
-      const bunDir = dirname(process.execPath);
+      // Find actual bun path (process.execPath gives node when running via vitest)
+      const bunPath = execSync('which bun', { encoding: 'utf8' }).trim();
+      const bunDir = dirname(bunPath);
 
       // Run with PATH that has bun but likely not ruff
       const result = spawnSync(
