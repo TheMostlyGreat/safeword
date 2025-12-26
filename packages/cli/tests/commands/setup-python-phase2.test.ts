@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
+  createPythonProject,
   createTemporaryDirectory,
   fileExists,
   initGitRepo,
@@ -36,20 +37,6 @@ afterEach(() => {
     removeTemporaryDirectory(projectDirectory);
   }
 });
-
-/**
- * Helper to create a Python project with pyproject.toml
- */
-function createPythonProject(dir: string): void {
-  writeTestFile(
-    dir,
-    'pyproject.toml',
-    `[project]
-name = "test-python-project"
-version = "0.1.0"
-`,
-  );
-}
 
 /**
  * Helper to create a Python project with layer structure
