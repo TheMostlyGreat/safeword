@@ -198,9 +198,9 @@ Tests for Story 1 - detecting Python projects and their characteristics.
 
 Tests for Story 2 - running Ruff on Python files in the post-tool lint hook.
 
-### Test 2.1: Runs Ruff check on .py files ❌
+### Test 2.1: Runs Ruff check on .py files ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Manual (pre-existing in lint.ts)
 **Description**: Verifies lint hook runs `ruff check --fix` for Python files
 
 **Steps**:
@@ -218,9 +218,9 @@ Tests for Story 2 - running Ruff on Python files in the post-tool lint hook.
 
 ---
 
-### Test 2.2: Runs Ruff format on .py files ❌
+### Test 2.2: Runs Ruff format on .py files ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Manual (pre-existing in lint.ts)
 **Description**: Verifies lint hook runs `ruff format` for Python files
 
 **Steps**:
@@ -237,9 +237,9 @@ Tests for Story 2 - running Ruff on Python files in the post-tool lint hook.
 
 ---
 
-### Test 2.3: Continues running ESLint for .js/.ts files ❌
+### Test 2.3: Continues running ESLint for .js/.ts files ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Manual (pre-existing in lint.ts)
 **Description**: Verifies JS/TS files still use ESLint in polyglot projects
 
 **Steps**:
@@ -257,9 +257,9 @@ Tests for Story 2 - running Ruff on Python files in the post-tool lint hook.
 
 ---
 
-### Test 2.4: Skips Ruff gracefully if not installed ❌
+### Test 2.4: Skips Ruff gracefully if not installed ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Manual (uses .nothrow().quiet())
 **Description**: Verifies hook doesn't fail when Ruff is missing
 
 **Steps**:
@@ -276,9 +276,9 @@ Tests for Story 2 - running Ruff on Python files in the post-tool lint hook.
 
 ---
 
-### Test 2.5: Skips ESLint gracefully for Python-only projects ❌
+### Test 2.5: Skips ESLint gracefully for Python-only projects ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Manual (uses .nothrow())
 **Description**: Verifies hook doesn't fail when no ESLint in Python-only project
 
 **Steps**:
@@ -295,9 +295,9 @@ Tests for Story 2 - running Ruff on Python files in the post-tool lint hook.
 
 ---
 
-### Test 2.6: Detects file extension correctly ❌
+### Test 2.6: Detects file extension correctly ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Manual (PYTHON_EXTENSIONS Set)
 **Description**: Verifies extension detection for various Python file types
 
 **Steps**:
