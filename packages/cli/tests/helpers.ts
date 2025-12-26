@@ -317,3 +317,34 @@ export function measureTimeSync<T>(fn: () => T): { result: T; timeMs: number } {
   const timeMs = performance.now() - start;
   return { result, timeMs };
 }
+
+/**
+ * Creates a Python-only project with pyproject.toml
+ * @param dir
+ * @param options
+ * @param options.framework - Optional framework dependency (django, flask, fastapi)
+ * @param options.manager - Package manager indicator (poetry, uv, pip)
+ */
+export function createPythonProject(
+  dir: string,
+  options: { framework?: string; manager?: 'poetry' | 'uv' | 'pip' } = {},
+): void {
+  const { framework, manager = 'pip' } = options;
+
+  let content = `[project]
+name = "test-python-project"
+version = "0.1.0"
+`;
+
+  if (framework) {
+    content += `dependencies = ["${framework}"]\n`;
+  }
+
+  if (manager === 'poetry') {
+    content += `\n[tool.poetry]\nname = "test-python-project"\n`;
+  } else if (manager === 'uv') {
+    content += `\n[tool.uv]\n`;
+  }
+
+  writeTestFile(dir, 'pyproject.toml', content);
+}
