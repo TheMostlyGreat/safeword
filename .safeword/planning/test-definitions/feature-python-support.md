@@ -318,9 +318,9 @@ Tests for Story 2 - running Ruff on Python files in the post-tool lint hook.
 
 Tests for Story 3 - setup behavior for Python-only projects.
 
-### Test 3.1: Skips ESLint install for Python-only projects ❌
+### Test 3.1: Skips ESLint install for Python-only projects ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies ESLint/Prettier not installed when only Python detected
 
 **Steps**:
@@ -337,9 +337,9 @@ Tests for Story 3 - setup behavior for Python-only projects.
 
 ---
 
-### Test 3.2: Skips package.json creation for Python-only ❌
+### Test 3.2: Skips package.json creation for Python-only ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies package.json not created for pure Python projects
 
 **Steps**:
@@ -355,9 +355,9 @@ Tests for Story 3 - setup behavior for Python-only projects.
 
 ---
 
-### Test 3.3: Shows Python-appropriate next steps ❌
+### Test 3.3: Shows Python-appropriate next steps ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies setup output mentions pip/Ruff instead of npm/ESLint
 
 **Steps**:
@@ -374,9 +374,9 @@ Tests for Story 3 - setup behavior for Python-only projects.
 
 ---
 
-### Test 3.4: Still creates .safeword directory ❌
+### Test 3.4: Still creates .safeword directory ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies guides and templates still created for Python projects
 
 **Steps**:
@@ -393,9 +393,9 @@ Tests for Story 3 - setup behavior for Python-only projects.
 
 ---
 
-### Test 3.5: Still creates Claude hooks ❌
+### Test 3.5: Still creates Claude hooks ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies hooks created for Python projects
 
 **Steps**:
@@ -412,9 +412,9 @@ Tests for Story 3 - setup behavior for Python-only projects.
 
 ---
 
-### Test 3.6: Installs both toolchains for polyglot projects ❌
+### Test 3.6: Installs both toolchains for polyglot projects ✅
 
-**Status**: ❌ Not Implemented
+**Status**: ✅ Passing
 **Description**: Verifies both ESLint and Ruff setup for mixed projects
 
 **Steps**:
@@ -600,11 +600,10 @@ Tests for non-functional requirements from the spec.
 
 ## Summary
 
-**Total**: 26 tests
-**Passing**: 16 tests (62%) - Stories 1, 2, 3 implemented
-**Skipped**: 0 tests (0%)
-**Not Implemented**: 8 tests (31%) - Story 4 + constraints
-**Manual Only**: 2 tests (8%) - Story 2 (hooks)
+**Total**: 30 tests
+**Passing**: 22 tests (73%) - Stories 1, 2, 3 complete
+**Manual**: 6 tests (20%) - Story 4 (not yet implemented)
+**Constraints**: 2 tests (7%) - verified during implementation
 
 ### Coverage by Story
 
