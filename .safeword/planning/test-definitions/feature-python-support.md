@@ -609,11 +609,11 @@ Tests for non-functional requirements from the spec.
 
 | Story | Tests | Status |
 |-------|-------|--------|
-| Story 1: Python Detection | 10 | ✅ 100% (36 tests in detector) |
-| Story 2: Lint Hook | 6 | ✅ Manual (pre-existing code) |
-| Story 3: Conditional Setup | 6 | ✅ 100% (6 tests passing) |
-| Story 4: Lint Command | 6 | ❌ 0% (manual testing) |
-| Technical Constraints | 2 | ⏭️ Verified during implementation |
+| Story 1: Python Detection | 10 | ✅ 100% |
+| Story 2: Lint Hook | 6 | ✅ Manual |
+| Story 3: Conditional Setup | 6 | ✅ 100% |
+| Story 4: Lint Command | 6 | ❌ 0% |
+| Technical Constraints | 2 | ⏭️ Verified |
 
 ### Skipped Tests Rationale
 
