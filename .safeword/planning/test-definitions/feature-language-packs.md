@@ -41,9 +41,9 @@
 
 ---
 
-### Test 1.3: Reads and writes installed packs from config ❌
+### Test 1.3: Reads installed packs from config ❌
 
-**Description**: Config helpers correctly read/write installedPacks array
+**Description**: Config helpers correctly read installedPacks array
 
 **Steps**:
 

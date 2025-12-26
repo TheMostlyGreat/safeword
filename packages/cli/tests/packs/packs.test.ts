@@ -12,7 +12,6 @@ import {
   isPackInstalled,
 } from '../../src/packs/config.js';
 import { installPack } from '../../src/packs/install.js';
-// These imports will fail until implementation exists
 import {
   detectLanguages,
   findPackForExtension,
@@ -87,7 +86,7 @@ describe('Pack Registry', () => {
 // =============================================================================
 
 describe('Config Tracking', () => {
-  it('Test 1.3: Reads and writes installed packs from config', () => {
+  it('Test 1.3: Reads installed packs from config', () => {
     // Create .safeword directory
     writeTestFile(testDir, '.safeword/config.json', JSON.stringify({
       version: '0.15.0',
@@ -157,7 +156,6 @@ describe('Pack Installation', () => {
     // Config should be unchanged (no duplicates)
     const config = JSON.parse(readTestFile(testDir, '.safeword/config.json'));
     expect(config.installedPacks).toEqual(['python']);
-    expect(config.installedPacks.filter((p: string) => p === 'python')).toHaveLength(1);
 
     // pyproject.toml should be unchanged (setup not called again)
     const finalPyproject = readTestFile(testDir, 'pyproject.toml');
