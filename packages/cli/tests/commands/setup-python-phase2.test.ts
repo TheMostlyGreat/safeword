@@ -23,8 +23,7 @@ import {
   writeTestFile,
 } from '../helpers';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = nodePath.dirname(__filename);
+const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
 
 let projectDirectory: string;
 
