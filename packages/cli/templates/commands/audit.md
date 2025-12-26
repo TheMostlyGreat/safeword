@@ -24,7 +24,7 @@ npx knip --fix 2>&1 || true
 }
 
 # 5. Copy/paste detection (all languages)
-npx jscpd . --reporters console 2>&1 || true
+npx jscpd . --gitignore --min-lines 10 --reporters console 2>&1 || true
 
 # 6. Outdated packages (informational)
 npm outdated 2>&1 || true

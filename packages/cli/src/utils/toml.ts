@@ -99,3 +99,14 @@ layers = [
 ${layerList}
 ]`;
 }
+
+/**
+ * Generate mypy configuration section for pyproject.toml.
+ * Minimal config to make mypy usable without being too strict.
+ */
+export function generateMypyConfig(): string {
+  return `[tool.mypy]
+ignore_missing_imports = true
+show_error_codes = true
+pretty = true`;
+}

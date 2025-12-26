@@ -13,6 +13,7 @@ import { exists, readFileSafe, writeFile } from './fs.js';
 import {
   appendTomlSection,
   generateImportLinterConfig,
+  generateMypyConfig,
   generatePreCommitConfig,
   generateRuffConfig,
 } from './toml.js';
@@ -148,6 +149,16 @@ export function setupPythonTooling(cwd: string, isGitRepo: boolean): PythonSetup
         }
         result.importLinter = true;
       }
+    }
+  }
+
+  // 4. Add mypy config to pyproject.toml
+  const mypyConfig = generateMypyConfig();
+  const withMypy = appendTomlSection(pyprojectContent, mypyConfig);
+  if (withMypy !== pyprojectContent) {
+    pyprojectContent = withMypy;
+    if (!result.files.includes('pyproject.toml')) {
+      result.files.push('pyproject.toml');
     }
   }
 
