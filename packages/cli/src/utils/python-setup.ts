@@ -98,6 +98,18 @@ export interface PythonSetupResult {
 }
 
 /**
+ * Add a TOML config section and track file modification.
+ * Returns updated content.
+ */
+function addTomlConfig(content: string, config: string, files: string[]): string {
+  const updated = appendTomlSection(content, config);
+  if (updated !== content && !files.includes('pyproject.toml')) {
+    files.push('pyproject.toml');
+  }
+  return updated;
+}
+
+/**
  * Set up Python tooling configuration.
  *
  * @param cwd - Project root directory
@@ -118,18 +130,11 @@ export function setupPythonTooling(cwd: string, isGitRepo: boolean): PythonSetup
   let pyprojectContent = readFileSafe(pyprojectPath) ?? '';
 
   // 1. Add Ruff config to pyproject.toml
-  const ruffConfig = generateRuffConfig();
-  const newPyprojectContent = appendTomlSection(pyprojectContent, ruffConfig);
-
-  if (newPyprojectContent !== pyprojectContent) {
-    pyprojectContent = newPyprojectContent;
-    result.files.push('pyproject.toml');
-  }
+  pyprojectContent = addTomlConfig(pyprojectContent, generateRuffConfig(), result.files);
 
   // 2. Create .pre-commit-config.yaml (only for git repos)
   if (isGitRepo && !exists(preCommitPath)) {
-    const preCommitContent = generatePreCommitConfig();
-    writeFile(preCommitPath, preCommitContent);
+    writeFile(preCommitPath, generatePreCommitConfig());
     result.files.push('.pre-commit-config.yaml');
     result.preCommit = true;
   }
@@ -137,30 +142,16 @@ export function setupPythonTooling(cwd: string, isGitRepo: boolean): PythonSetup
   // 3. Detect layers and add import-linter config
   const layers = detectPythonLayers(cwd);
   if (layers.length >= 2) {
-    const rootPackage = detectRootPackage(cwd);
-    const importLinterConfig = generateImportLinterConfig(layers, rootPackage);
-
+    const importLinterConfig = generateImportLinterConfig(layers, detectRootPackage(cwd));
     if (importLinterConfig) {
-      const withImportLinter = appendTomlSection(pyprojectContent, importLinterConfig);
-      if (withImportLinter !== pyprojectContent) {
-        pyprojectContent = withImportLinter;
-        if (!result.files.includes('pyproject.toml')) {
-          result.files.push('pyproject.toml');
-        }
-        result.importLinter = true;
-      }
+      const before = pyprojectContent;
+      pyprojectContent = addTomlConfig(pyprojectContent, importLinterConfig, result.files);
+      if (pyprojectContent !== before) result.importLinter = true;
     }
   }
 
   // 4. Add mypy config to pyproject.toml
-  const mypyConfig = generateMypyConfig();
-  const withMypy = appendTomlSection(pyprojectContent, mypyConfig);
-  if (withMypy !== pyprojectContent) {
-    pyprojectContent = withMypy;
-    if (!result.files.includes('pyproject.toml')) {
-      result.files.push('pyproject.toml');
-    }
-  }
+  pyprojectContent = addTomlConfig(pyprojectContent, generateMypyConfig(), result.files);
 
   // Write pyproject.toml if modified
   if (result.files.includes('pyproject.toml')) {
