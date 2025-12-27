@@ -172,13 +172,6 @@ export function getPythonInstallCommand(cwd: string, tools: string[] = ['ruff'])
 }
 
 /**
- * @deprecated Use getPythonInstallCommand instead
- */
-export function getRuffInstallCommand(cwd: string): string {
-  return getPythonInstallCommand(cwd, ['ruff']);
-}
-
-/**
  * Install Python development dependencies using detected package manager.
  * Matches TypeScript parity where we auto-install ESLint/Prettier.
  *
