@@ -158,7 +158,7 @@ function printSetupSummary(
 
   // Python-specific guidance
   if (languages.python) {
-    listItem('Install Python tooling: pip install ruff mypy');
+    listItem('Install Ruff for linting: pip install ruff (or uv tool install ruff)');
   }
 
   listItem('Commit the new files to git');
