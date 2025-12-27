@@ -135,6 +135,54 @@ function ensurePackageJson(cwd: string): boolean {
   return true;
 }
 
+interface PythonSetupStatus {
+  files: string[];
+  installFailed: boolean;
+}
+
+/**
+ * Configure Python tooling and install dependencies.
+ * Returns files modified and whether install failed.
+ */
+function setupPython(cwd: string): PythonSetupStatus {
+  const pythonResult = setupPythonTooling(cwd);
+  const files = pythonResult.files;
+  let installFailed = false;
+
+  if (files.length > 0) {
+    info('\nPython tooling configured:');
+    if (files.includes('pyproject.toml')) {
+      info('  Added [tool.ruff] config to pyproject.toml');
+    }
+    if (pythonResult.importLinter) {
+      info('  Added [tool.importlinter] layer contracts');
+    }
+  }
+
+  // Install Python tools if not already in dependencies
+  if (!hasRuffDependency(cwd)) {
+    const tools = ['ruff', 'mypy'];
+    if (pythonResult.importLinter) {
+      tools.push('import-linter');
+    }
+
+    const pm = detectPythonPackageManager(cwd);
+    if (pm === 'pip') {
+      installFailed = true;
+    } else {
+      info(`\nInstalling Python tools (${tools.join(', ')})...`);
+      const installed = installPythonDependencies(cwd, tools);
+      if (installed) {
+        success('Python tools installed');
+      } else {
+        installFailed = true;
+      }
+    }
+  }
+
+  return { files, installFailed };
+}
+
 interface SetupSummaryOptions {
   cwd: string;
   result: ReconcileResult;
@@ -244,44 +292,9 @@ export async function setup(options: SetupOptions): Promise<void> {
     }
 
     // Python-specific setup (Ruff config, import-linter)
-    let pythonFiles: string[] = [];
-    let pythonInstallFailed = false;
-    if (languages.python) {
-      const pythonResult = setupPythonTooling(cwd);
-      pythonFiles = pythonResult.files;
-
-      if (pythonFiles.length > 0) {
-        info('\nPython tooling configured:');
-        if (pythonFiles.includes('pyproject.toml')) {
-          info('  Added [tool.ruff] config to pyproject.toml');
-        }
-        if (pythonResult.importLinter) {
-          info('  Added [tool.importlinter] layer contracts');
-        }
-      }
-
-      // Install Python tools if not already in dependencies (matches TypeScript parity)
-      if (!hasRuffDependency(cwd)) {
-        const tools = ['ruff', 'mypy'];
-        if (pythonResult.importLinter) {
-          tools.push('import-linter');
-        }
-
-        const pm = detectPythonPackageManager(cwd);
-        if (pm === 'pip') {
-          // pip projects need manual install due to PEP 668
-          pythonInstallFailed = true;
-        } else {
-          info(`\nInstalling Python tools (${tools.join(', ')})...`);
-          const installed = installPythonDependencies(cwd, tools);
-          if (installed) {
-            success('Python tools installed');
-          } else {
-            pythonInstallFailed = true;
-          }
-        }
-      }
-    }
+    const pythonStatus = languages.python
+      ? setupPython(cwd)
+      : { files: [], installFailed: false };
 
     // Track installed packs in config.json
     const detectedPacks = detectLanguagePacks(cwd);
@@ -296,8 +309,8 @@ export async function setup(options: SetupOptions): Promise<void> {
       languages,
       archFiles,
       workspaceUpdates,
-      pythonFiles,
-      pythonInstallFailed,
+      pythonFiles: pythonStatus.files,
+      pythonInstallFailed: pythonStatus.installFailed,
     });
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
