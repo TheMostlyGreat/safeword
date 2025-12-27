@@ -135,16 +135,28 @@ function ensurePackageJson(cwd: string): boolean {
   return true;
 }
 
-function printSetupSummary(
-  cwd: string,
-  result: ReconcileResult,
-  packageJsonCreated: boolean,
-  languages: Languages,
-  archFiles: string[] = [],
-  workspaceUpdates: string[] = [],
-  pythonFiles: string[] = [],
-  pythonInstallFailed = false,
-): void {
+interface SetupSummaryOptions {
+  cwd: string;
+  result: ReconcileResult;
+  packageJsonCreated: boolean;
+  languages: Languages;
+  archFiles?: string[];
+  workspaceUpdates?: string[];
+  pythonFiles?: string[];
+  pythonInstallFailed?: boolean;
+}
+
+function printSetupSummary(options: SetupSummaryOptions): void {
+  const {
+    cwd,
+    result,
+    packageJsonCreated,
+    languages,
+    archFiles = [],
+    workspaceUpdates = [],
+    pythonFiles = [],
+    pythonInstallFailed = false,
+  } = options;
   header('Setup Complete');
 
   const allCreated = [...result.created, ...archFiles, ...pythonFiles.filter(f => f !== 'pyproject.toml')];
@@ -277,7 +289,16 @@ export async function setup(options: SetupOptions): Promise<void> {
       addInstalledPack(cwd, packId);
     }
 
-    printSetupSummary(cwd, result, packageJsonCreated, languages, archFiles, workspaceUpdates, pythonFiles, pythonInstallFailed);
+    printSetupSummary({
+      cwd,
+      result,
+      packageJsonCreated,
+      languages,
+      archFiles,
+      workspaceUpdates,
+      pythonFiles,
+      pythonInstallFailed,
+    });
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);
