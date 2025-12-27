@@ -4,6 +4,7 @@
  * Central registry of language packs with lookup helpers.
  */
 
+import { getInstalledPacks } from './config.js';
 import { pythonPack } from './python.js';
 import type { LanguagePack } from './types.js';
 import { typescriptPack } from './typescript.js';
@@ -47,4 +48,16 @@ export function detectLanguages(cwd: string): string[] {
   }
 
   return detected;
+}
+
+/**
+ * Get pack IDs for detected languages that aren't installed.
+ *
+ * @param cwd - Project root directory
+ * @returns Array of missing pack IDs
+ */
+export function getMissingPacks(cwd: string): string[] {
+  const detected = detectLanguages(cwd);
+  const installed = getInstalledPacks(cwd);
+  return detected.filter(packId => !installed.includes(packId));
 }
