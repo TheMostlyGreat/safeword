@@ -355,15 +355,41 @@ export function isRuffInstalled(): boolean {
 }
 
 /**
+ * Check if uv is installed on the system.
+ * Used by Python-related tests to skip auto-install tests when uv isn't available.
+ */
+export function isUvInstalled(): boolean {
+  try {
+    const result = execSync('uv --version', { encoding: 'utf8', stdio: 'pipe' });
+    return result.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if Poetry is installed on the system.
+ * Used by Python-related tests to skip auto-install tests when Poetry isn't available.
+ */
+export function isPoetryInstalled(): boolean {
+  try {
+    const result = execSync('poetry --version', { encoding: 'utf8', stdio: 'pipe' });
+    return result.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Creates a Python-only project with pyproject.toml
  * @param dir
  * @param options
  * @param options.framework - Optional framework dependency (django, flask, fastapi)
- * @param options.manager - Package manager indicator (poetry, uv, pip)
+ * @param options.manager - Package manager indicator (poetry, uv, pip, pipenv)
  */
 export function createPythonProject(
   dir: string,
-  options: { framework?: string; manager?: 'poetry' | 'uv' | 'pip' } = {},
+  options: { framework?: string; manager?: 'poetry' | 'uv' | 'pip' | 'pipenv' } = {},
 ): void {
   const { framework, manager = 'pip' } = options;
 
@@ -376,10 +402,39 @@ version = "0.1.0"
     content += `dependencies = ["${framework}"]\n`;
   }
 
-  if (manager === 'poetry') {
+  // Add manager-specific config and lockfiles for proper detection
+  // Detection logic in python-setup.ts checks lockfiles first
+  switch (manager) {
+  case 'poetry': {
     content += `\n[tool.poetry]\nname = "test-python-project"\n`;
-  } else if (manager === 'uv') {
-    content += `\n[tool.uv]\n`;
+    // Create minimal poetry.lock for detection
+    writeTestFile(dir, 'poetry.lock', '# poetry lockfile\npackage = []\n');
+
+  break;
+  }
+  case 'uv': {
+    // uv requires requires-python in pyproject.toml
+    content += `requires-python = ">=3.10"\n`;
+    // Create valid minimal uv.lock for detection (must match pyproject.toml requires-python)
+    writeTestFile(dir, 'uv.lock', `version = 1
+revision = 2
+requires-python = ">=3.10"
+
+[[package]]
+name = "test-python-project"
+version = "0.1.0"
+source = { virtual = "." }
+`);
+
+  break;
+  }
+  case 'pipenv': {
+    // Create Pipfile for detection
+    writeTestFile(dir, 'Pipfile', '[[source]]\nurl = "https://pypi.org/simple"\n');
+
+  break;
+  }
+  // No default
   }
 
   writeTestFile(dir, 'pyproject.toml', content);
