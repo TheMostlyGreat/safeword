@@ -148,7 +148,7 @@ export function detectPythonPackageManager(cwd: string): PythonPackageManager {
  * Get the install command for Python tools based on package manager.
  *
  * @param cwd - Project root directory
- * @param tools - Tools to install (defaults to ['ruff'] for backwards compatibility)
+ * @param tools - Tools to install (defaults to ['ruff'])
  */
 export function getPythonInstallCommand(cwd: string, tools: string[] = ['ruff']): string {
   const pm = detectPythonPackageManager(cwd);
