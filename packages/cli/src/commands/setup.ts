@@ -19,7 +19,7 @@ import { error, header, info, listItem, success, warn } from '../utils/output.js
 import { detectLanguages, type Languages } from '../utils/project-detector.js';
 import {
   detectPythonPackageManager,
-  getRuffInstallCommand,
+  getPythonInstallCommand,
   hasRuffDependency,
   installPythonDependencies,
   setupPythonTooling,
@@ -166,7 +166,7 @@ function printSetupSummary(
 
   // Python-specific guidance: show install command only if auto-install failed
   if (languages.python && pythonInstallFailed) {
-    listItem(`Install Python tools: ${getRuffInstallCommand(cwd).replace('ruff', 'ruff mypy import-linter')}`);
+    listItem(`Install Python tools: ${getPythonInstallCommand(cwd, ['ruff', 'mypy', 'import-linter'])}`);
   }
 
   listItem('Commit the new files to git');

@@ -145,26 +145,37 @@ export function detectPythonPackageManager(cwd: string): PythonPackageManager {
 }
 
 /**
- * Get the appropriate Ruff install command based on package manager.
+ * Get the install command for Python tools based on package manager.
+ *
+ * @param cwd - Project root directory
+ * @param tools - Tools to install (defaults to ['ruff'] for backwards compatibility)
  */
-export function getRuffInstallCommand(cwd: string): string {
+export function getPythonInstallCommand(cwd: string, tools: string[] = ['ruff']): string {
   const pm = detectPythonPackageManager(cwd);
+  const toolList = tools.join(' ');
 
   switch (pm) {
     case 'uv': {
-      return 'uv add --dev ruff';
+      return `uv add --dev ${toolList}`;
     }
     case 'poetry': {
-      return 'poetry add --group dev ruff';
+      return `poetry add --group dev ${toolList}`;
     }
     case 'pipenv': {
-      return 'pipenv install --dev ruff';
+      return `pipenv install --dev ${toolList}`;
     }
     case 'pip':
     default: {
-      return 'pip install ruff (or pipx install ruff for global access)';
+      return `pip install ${toolList}`;
     }
   }
+}
+
+/**
+ * @deprecated Use getPythonInstallCommand instead
+ */
+export function getRuffInstallCommand(cwd: string): string {
+  return getPythonInstallCommand(cwd, ['ruff']);
 }
 
 /**
