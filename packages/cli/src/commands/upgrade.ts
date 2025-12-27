@@ -6,9 +6,8 @@
 
 import nodePath from 'node:path';
 
-import { getInstalledPacks } from '../packs/config.js';
 import { installPack } from '../packs/install.js';
-import { detectLanguages as detectLanguagePacks } from '../packs/registry.js';
+import { getMissingPacks } from '../packs/registry.js';
 import { reconcile, type ReconcileResult } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
@@ -78,11 +77,7 @@ export async function upgrade(): Promise<void> {
     installDependencies(cwd, result.packagesToInstall, 'missing packages');
 
     // Install missing language packs
-    const detectedPacks = detectLanguagePacks(cwd);
-    const installedPacks = getInstalledPacks(cwd);
-    const missingPacks = detectedPacks.filter(pack => !installedPacks.includes(pack));
-
-    for (const packId of missingPacks) {
+    for (const packId of getMissingPacks(cwd)) {
       installPack(packId, cwd);
       info(`Installed ${packId} pack`);
     }
