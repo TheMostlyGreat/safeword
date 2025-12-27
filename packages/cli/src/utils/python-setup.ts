@@ -189,35 +189,14 @@ export function getRuffInstallCommand(cwd: string): string {
 export function installPythonDependencies(cwd: string, tools: string[]): boolean {
   if (tools.length === 0) return true;
 
+  // pip projects need manual install due to PEP 668
   const pm = detectPythonPackageManager(cwd);
-  const toolList = tools.join(' ');
-
-  let command: string;
-  switch (pm) {
-    case 'uv': {
-      command = `uv add --dev ${toolList}`;
-      break;
-    }
-    case 'poetry': {
-      command = `poetry add --group dev ${toolList}`;
-      break;
-    }
-    case 'pipenv': {
-      command = `pipenv install --dev ${toolList}`;
-      break;
-    }
-    case 'pip':
-    default: {
-      // For pip, fall back to showing message - global install has PEP 668 issues
-      return false;
-    }
-  }
+  if (pm === 'pip') return false;
 
   try {
-    execSync(command, { cwd, stdio: 'pipe' });
+    execSync(getPythonInstallCommand(cwd, tools), { cwd, stdio: 'pipe' });
     return true;
   } catch {
-    // Installation failed - caller should show manual instructions
     return false;
   }
 }
