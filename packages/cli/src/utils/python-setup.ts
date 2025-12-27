@@ -4,8 +4,8 @@
  * Handles Python tooling configuration during safeword setup:
  * - Ruff config in pyproject.toml
  * - mypy config in pyproject.toml
- * - Pre-commit hooks
  * - Import-linter layer contracts
+ * - Package manager detection for install guidance
  */
 
 import nodePath from 'node:path';
@@ -93,6 +93,77 @@ export interface PythonSetupResult {
   files: string[];
   /** Whether import-linter was configured */
   importLinter: boolean;
+}
+
+export type PythonPackageManager = 'uv' | 'poetry' | 'pipenv' | 'pip';
+
+/**
+ * Check if ruff is already declared as a dependency in pyproject.toml.
+ * Only checks dependency sections, not [tool.ruff] config.
+ */
+export function hasRuffDependency(cwd: string): boolean {
+  const pyprojectPath = nodePath.join(cwd, 'pyproject.toml');
+  const content = readFileSafe(pyprojectPath);
+  if (!content) return false;
+
+  // Check for ruff in dependency arrays or Poetry table format:
+  // - PEP 621: "ruff", "ruff>=0.1", 'ruff' (quoted in array)
+  // - Poetry: ruff = "^0.8.0" (unquoted key)
+  // Does NOT match: [tool.ruff]
+  return /["']ruff[^"']*["']/.test(content) || /^ruff\s*=/m.test(content);
+}
+
+/**
+ * Detect the Python package manager used by the project.
+ */
+export function detectPythonPackageManager(cwd: string): PythonPackageManager {
+  // Check for uv (uv.lock or .python-version with uv markers)
+  if (exists(nodePath.join(cwd, 'uv.lock'))) {
+    return 'uv';
+  }
+
+  // Check for Poetry
+  if (exists(nodePath.join(cwd, 'poetry.lock'))) {
+    return 'poetry';
+  }
+
+  // Check for poetry in pyproject.toml
+  const pyprojectPath = nodePath.join(cwd, 'pyproject.toml');
+  const pyprojectContent = readFileSafe(pyprojectPath);
+  if (pyprojectContent?.includes('[tool.poetry]')) {
+    return 'poetry';
+  }
+
+  // Check for Pipenv
+  if (exists(nodePath.join(cwd, 'Pipfile'))) {
+    return 'pipenv';
+  }
+
+  // Default to pip
+  return 'pip';
+}
+
+/**
+ * Get the appropriate Ruff install command based on package manager.
+ */
+export function getRuffInstallCommand(cwd: string): string {
+  const pm = detectPythonPackageManager(cwd);
+
+  switch (pm) {
+    case 'uv': {
+      return 'uv add --dev ruff';
+    }
+    case 'poetry': {
+      return 'poetry add --group dev ruff';
+    }
+    case 'pipenv': {
+      return 'pipenv install --dev ruff';
+    }
+    case 'pip':
+    default: {
+      return 'pip install ruff (or pipx install ruff for global access)';
+    }
+  }
 }
 
 /**

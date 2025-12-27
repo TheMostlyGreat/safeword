@@ -17,7 +17,11 @@ import { isGitRepo } from '../utils/git.js';
 import { installDependencies } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { detectLanguages, type Languages } from '../utils/project-detector.js';
-import { setupPythonTooling } from '../utils/python-setup.js';
+import {
+  getRuffInstallCommand,
+  hasRuffDependency,
+  setupPythonTooling,
+} from '../utils/python-setup.js';
 import { VERSION } from '../version.js';
 import { buildArchitecture, hasArchitectureDetected, syncConfigCore } from './sync-config.js';
 
@@ -131,6 +135,7 @@ function ensurePackageJson(cwd: string): boolean {
 }
 
 function printSetupSummary(
+  cwd: string,
   result: ReconcileResult,
   packageJsonCreated: boolean,
   languages: Languages,
@@ -156,9 +161,9 @@ function printSetupSummary(
   info('\nNext steps:');
   listItem('Run `safeword check` to verify setup');
 
-  // Python-specific guidance
-  if (languages.python) {
-    listItem('Install Ruff for linting: pip install ruff (or uv tool install ruff)');
+  // Python-specific guidance: show install command if ruff not already in dependencies
+  if (languages.python && !hasRuffDependency(cwd)) {
+    listItem(`Install Ruff: ${getRuffInstallCommand(cwd)}`);
   }
 
   listItem('Commit the new files to git');
@@ -247,7 +252,7 @@ export async function setup(options: SetupOptions): Promise<void> {
       addInstalledPack(cwd, packId);
     }
 
-    printSetupSummary(result, packageJsonCreated, languages, archFiles, workspaceUpdates, pythonFiles);
+    printSetupSummary(cwd, result, packageJsonCreated, languages, archFiles, workspaceUpdates, pythonFiles);
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);
