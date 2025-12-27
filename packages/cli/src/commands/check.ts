@@ -6,8 +6,7 @@
 
 import nodePath from 'node:path';
 
-import { getInstalledPacks } from '../packs/config.js';
-import { detectLanguages as detectLanguagePacks } from '../packs/registry.js';
+import { getMissingPacks } from '../packs/registry.js';
 import { reconcile } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
@@ -148,9 +147,7 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
   }
 
   // Check for missing language packs
-  const detectedPacks = detectLanguagePacks(cwd);
-  const installedPacks = getInstalledPacks(cwd);
-  const missingPacks = detectedPacks.filter(pack => !installedPacks.includes(pack));
+  const missingPacks = getMissingPacks(cwd);
 
   return {
     configured: true,
