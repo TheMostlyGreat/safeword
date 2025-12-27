@@ -18,8 +18,10 @@ import { installDependencies } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 import { detectLanguages, type Languages } from '../utils/project-detector.js';
 import {
+  detectPythonPackageManager,
   getRuffInstallCommand,
   hasRuffDependency,
+  installPythonDependencies,
   setupPythonTooling,
 } from '../utils/python-setup.js';
 import { VERSION } from '../version.js';
@@ -142,6 +144,7 @@ function printSetupSummary(
   archFiles: string[] = [],
   workspaceUpdates: string[] = [],
   pythonFiles: string[] = [],
+  pythonInstallFailed = false,
 ): void {
   header('Setup Complete');
 
@@ -161,9 +164,9 @@ function printSetupSummary(
   info('\nNext steps:');
   listItem('Run `safeword check` to verify setup');
 
-  // Python-specific guidance: show install command if ruff not already in dependencies
-  if (languages.python && !hasRuffDependency(cwd)) {
-    listItem(`Install Ruff: ${getRuffInstallCommand(cwd)}`);
+  // Python-specific guidance: show install command only if auto-install failed
+  if (languages.python && pythonInstallFailed) {
+    listItem(`Install Python tools: ${getRuffInstallCommand(cwd).replace('ruff', 'ruff mypy import-linter')}`);
   }
 
   listItem('Commit the new files to git');
@@ -231,6 +234,7 @@ export async function setup(options: SetupOptions): Promise<void> {
 
     // Python-specific setup (Ruff config, import-linter)
     let pythonFiles: string[] = [];
+    let pythonInstallFailed = false;
     if (languages.python) {
       const pythonResult = setupPythonTooling(cwd);
       pythonFiles = pythonResult.files;
@@ -244,6 +248,28 @@ export async function setup(options: SetupOptions): Promise<void> {
           info('  Added [tool.importlinter] layer contracts');
         }
       }
+
+      // Install Python tools if not already in dependencies (matches TypeScript parity)
+      if (!hasRuffDependency(cwd)) {
+        const tools = ['ruff', 'mypy'];
+        if (pythonResult.importLinter) {
+          tools.push('import-linter');
+        }
+
+        const pm = detectPythonPackageManager(cwd);
+        if (pm === 'pip') {
+          // pip projects need manual install due to PEP 668
+          pythonInstallFailed = true;
+        } else {
+          info(`\nInstalling Python tools (${tools.join(', ')})...`);
+          const installed = installPythonDependencies(cwd, tools);
+          if (installed) {
+            success('Python tools installed');
+          } else {
+            pythonInstallFailed = true;
+          }
+        }
+      }
     }
 
     // Track installed packs in config.json
@@ -252,7 +278,7 @@ export async function setup(options: SetupOptions): Promise<void> {
       addInstalledPack(cwd, packId);
     }
 
-    printSetupSummary(cwd, result, packageJsonCreated, languages, archFiles, workspaceUpdates, pythonFiles);
+    printSetupSummary(cwd, result, packageJsonCreated, languages, archFiles, workspaceUpdates, pythonFiles, pythonInstallFailed);
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);

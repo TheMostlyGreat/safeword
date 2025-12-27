@@ -8,6 +8,7 @@
  * - Package manager detection for install guidance
  */
 
+import { execSync } from 'node:child_process';
 import nodePath from 'node:path';
 
 import { exists, readFileSafe, writeFile } from './fs.js';
@@ -163,6 +164,50 @@ export function getRuffInstallCommand(cwd: string): string {
     default: {
       return 'pip install ruff (or pipx install ruff for global access)';
     }
+  }
+}
+
+/**
+ * Install Python development dependencies using detected package manager.
+ * Matches TypeScript parity where we auto-install ESLint/Prettier.
+ *
+ * @param cwd - Project root directory
+ * @param tools - Tools to install (e.g., ['ruff', 'mypy', 'import-linter'])
+ * @returns true if installation succeeded, false otherwise
+ */
+export function installPythonDependencies(cwd: string, tools: string[]): boolean {
+  if (tools.length === 0) return true;
+
+  const pm = detectPythonPackageManager(cwd);
+  const toolList = tools.join(' ');
+
+  let command: string;
+  switch (pm) {
+    case 'uv': {
+      command = `uv add --dev ${toolList}`;
+      break;
+    }
+    case 'poetry': {
+      command = `poetry add --group dev ${toolList}`;
+      break;
+    }
+    case 'pipenv': {
+      command = `pipenv install --dev ${toolList}`;
+      break;
+    }
+    case 'pip':
+    default: {
+      // For pip, fall back to showing message - global install has PEP 668 issues
+      return false;
+    }
+  }
+
+  try {
+    execSync(command, { cwd, stdio: 'pipe' });
+    return true;
+  } catch {
+    // Installation failed - caller should show manual instructions
+    return false;
   }
 }
 
