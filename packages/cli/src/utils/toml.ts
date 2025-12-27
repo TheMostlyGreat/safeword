@@ -64,21 +64,6 @@ max-complexity = 10`;
 }
 
 /**
- * Generate pre-commit configuration for Python projects.
- * Uses Ruff for linting and formatting.
- */
-export function generatePreCommitConfig(): string {
-  return `repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.6
-    hooks:
-      - id: ruff-check
-        args: [--fix]
-      - id: ruff-format
-`;
-}
-
-/**
  * Generate import-linter configuration for pyproject.toml.
  *
  * @param layers - Detected layers (e.g., ['domain', 'services', 'api'])

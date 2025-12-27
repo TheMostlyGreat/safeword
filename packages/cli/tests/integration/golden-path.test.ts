@@ -3,8 +3,8 @@
  *
  * Verifies that a safeword-configured project actually works:
  * - ESLint config runs and catches issues
- * - Hook scripts execute correctly
- * - Git pre-commit hook triggers lint-staged
+ * - Prettier formats files correctly
+ * - Claude Code hook scripts execute correctly
  *
  * Uses a single project setup (expensive) shared across all tests.
  */
@@ -91,18 +91,5 @@ describe('E2E: Golden Path', () => {
     // File should be formatted (Prettier adds semicolon and spaces)
     const result = readTestFile(projectDirectory, 'src/hook-test.ts');
     expect(result.trim()).toBe('const x = 1;');
-  });
-
-  it('git commit succeeds with husky pre-commit hook', () => {
-    // Create a valid file
-    writeTestFile(projectDirectory, 'src/commit-test.ts', 'export const commitTest = 1;\n');
-
-    // Stage and commit - pre-commit hook (lint-staged) should run and pass
-    execSync('git add src/commit-test.ts', { cwd: projectDirectory });
-    execSync('git commit -m "test commit"', { cwd: projectDirectory, encoding: 'utf8' });
-
-    // Verify commit was made (proves pre-commit hook passed)
-    const log = execSync('git log --oneline -1', { cwd: projectDirectory, encoding: 'utf8' });
-    expect(log).toContain('test commit');
   });
 });

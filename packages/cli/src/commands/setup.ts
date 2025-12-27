@@ -224,10 +224,10 @@ export async function setup(options: SetupOptions): Promise<void> {
       installDependencies(cwd, result.packagesToInstall, 'linting dependencies');
     }
 
-    // Python-specific setup (Ruff config, pre-commit, import-linter)
+    // Python-specific setup (Ruff config, import-linter)
     let pythonFiles: string[] = [];
     if (languages.python) {
-      const pythonResult = setupPythonTooling(cwd, isGitRepo(cwd));
+      const pythonResult = setupPythonTooling(cwd);
       pythonFiles = pythonResult.files;
 
       if (pythonFiles.length > 0) {
@@ -235,24 +235,10 @@ export async function setup(options: SetupOptions): Promise<void> {
         if (pythonFiles.includes('pyproject.toml')) {
           info('  Added [tool.ruff] config to pyproject.toml');
         }
-        if (pythonResult.preCommit) {
-          info('  Created .pre-commit-config.yaml');
-        }
         if (pythonResult.importLinter) {
           info('  Added [tool.importlinter] layer contracts');
         }
       }
-    }
-
-    if (!isGitRepo(cwd)) {
-      const isNonInteractive = options.yes || !process.stdin.isTTY;
-      warn(
-        isNonInteractive
-          ? 'Skipped Husky setup (no git repository)'
-          : 'Skipped Husky setup (no .git directory)',
-      );
-      if (!isNonInteractive)
-        info('Initialize git and run safeword upgrade to enable pre-commit hooks');
     }
 
     // Track installed packs in config.json

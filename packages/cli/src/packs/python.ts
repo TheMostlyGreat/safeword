@@ -19,8 +19,8 @@ export const pythonPack: LanguagePack = {
     return exists(nodePath.join(cwd, 'pyproject.toml'));
   },
 
-  setup(cwd: string, ctx: SetupContext): SetupResult {
-    const result = setupPythonTooling(cwd, ctx.isGitRepo);
+  setup(cwd: string): SetupResult {
+    const result = setupPythonTooling(cwd);
     return { files: result.files };
   },
 };

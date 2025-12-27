@@ -15,7 +15,6 @@ import {
   appendTomlSection,
   generateImportLinterConfig,
   generateMypyConfig,
-  generatePreCommitConfig,
   generateRuffConfig,
 } from './toml.js';
 
@@ -92,8 +91,6 @@ export function detectRootPackage(cwd: string): string {
 export interface PythonSetupResult {
   /** Files created or modified */
   files: string[];
-  /** Whether pre-commit was set up */
-  preCommit: boolean;
   /** Whether import-linter was configured */
   importLinter: boolean;
 }
@@ -114,18 +111,15 @@ function addTomlConfig(content: string, config: string, files: string[]): string
  * Set up Python tooling configuration.
  *
  * @param cwd - Project root directory
- * @param isGitRepo - Whether project is a git repository
  * @returns Result with created/modified files
  */
-export function setupPythonTooling(cwd: string, isGitRepo: boolean): PythonSetupResult {
+export function setupPythonTooling(cwd: string): PythonSetupResult {
   const result: PythonSetupResult = {
     files: [],
-    preCommit: false,
     importLinter: false,
   };
 
   const pyprojectPath = nodePath.join(cwd, 'pyproject.toml');
-  const preCommitPath = nodePath.join(cwd, '.pre-commit-config.yaml');
 
   // Read existing pyproject.toml
   let pyprojectContent = readFileSafe(pyprojectPath) ?? '';
@@ -133,14 +127,7 @@ export function setupPythonTooling(cwd: string, isGitRepo: boolean): PythonSetup
   // 1. Add Ruff config to pyproject.toml
   pyprojectContent = addTomlConfig(pyprojectContent, generateRuffConfig(), result.files);
 
-  // 2. Create .pre-commit-config.yaml (only for git repos)
-  if (isGitRepo && !exists(preCommitPath)) {
-    writeFile(preCommitPath, generatePreCommitConfig());
-    result.files.push('.pre-commit-config.yaml');
-    result.preCommit = true;
-  }
-
-  // 3. Detect layers and add import-linter config
+  // 2. Detect layers and add import-linter config
   const layers = detectPythonLayers(cwd);
   if (layers.length >= 2) {
     const importLinterConfig = generateImportLinterConfig(layers, detectRootPackage(cwd));
@@ -151,7 +138,7 @@ export function setupPythonTooling(cwd: string, isGitRepo: boolean): PythonSetup
     }
   }
 
-  // 4. Add mypy config to pyproject.toml
+  // 3. Add mypy config to pyproject.toml
   pyprojectContent = addTomlConfig(pyprojectContent, generateMypyConfig(), result.files);
 
   // Write pyproject.toml if modified

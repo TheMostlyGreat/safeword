@@ -1,6 +1,6 @@
 /**
  * Test Suite: Python Tooling Parity (Phase 2)
- * Tests for Phase 2 components - Ruff config, pre-commit, import-linter, deadcode, jscpd
+ * Tests for Phase 2 components - Ruff config, import-linter, deadcode, jscpd, mypy
  *
  * Test Definitions: .safeword/planning/test-definitions/phase2-python-tooling.md
  */
@@ -126,54 +126,12 @@ testpaths = ["tests"]
 });
 
 // =============================================================================
-// Test Suite 2: Pre-commit Integration
+// Test Suite 2: Architecture Validation (import-linter)
 // =============================================================================
 
-describe('Suite 2: Pre-commit Integration', () => {
+describe('Suite 2: Architecture Validation', () => {
   it(
-    'Test 2.1: Generates .pre-commit-config.yaml',
-    async () => {
-      // Arrange
-      createPythonProject(projectDirectory);
-      initGitRepo(projectDirectory);
-
-      // Act
-      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
-
-      // Assert
-      expect(fileExists(projectDirectory, '.pre-commit-config.yaml')).toBe(true);
-      const preCommitContent = readTestFile(projectDirectory, '.pre-commit-config.yaml');
-      expect(preCommitContent).toContain('ruff-pre-commit');
-      expect(preCommitContent).toContain('ruff-check');
-      expect(preCommitContent).toContain('ruff-format');
-    },
-    TIMEOUT_SETUP,
-  );
-
-  it(
-    'Test 2.1b: Does not create pre-commit config without git',
-    async () => {
-      // Arrange
-      createPythonProject(projectDirectory);
-      // Note: NOT initializing git
-
-      // Act
-      await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
-
-      // Assert
-      expect(fileExists(projectDirectory, '.pre-commit-config.yaml')).toBe(false);
-    },
-    TIMEOUT_SETUP,
-  );
-});
-
-// =============================================================================
-// Test Suite 3: Architecture Validation (import-linter)
-// =============================================================================
-
-describe('Suite 3: Architecture Validation', () => {
-  it(
-    'Test 3.1: Generates import-linter config',
+    'Test 2.1: Generates import-linter config',
     async () => {
       // Arrange
       createPythonProjectWithLayers(projectDirectory);
@@ -192,7 +150,7 @@ describe('Suite 3: Architecture Validation', () => {
   );
 
   it(
-    'Test 3.1b: Does not generate import-linter without layer structure',
+    'Test 2.1b: Does not generate import-linter without layer structure',
     async () => {
       // Arrange
       createPythonProject(projectDirectory); // No layers
@@ -210,11 +168,11 @@ describe('Suite 3: Architecture Validation', () => {
 });
 
 // =============================================================================
-// Test Suite 4: Dead Code Detection
+// Test Suite 3: Dead Code Detection
 // =============================================================================
 
-describe('Suite 4: Dead Code Detection', () => {
-  it('Test 4.1: /audit template includes deadcode for Python', () => {
+describe('Suite 3: Dead Code Detection', () => {
+  it('Test 3.1: /audit template includes deadcode for Python', () => {
     // Assert: audit.md template contains deadcode command
     const auditTemplate = readAuditTemplate();
     expect(auditTemplate).toContain('deadcode');
@@ -224,34 +182,34 @@ describe('Suite 4: Dead Code Detection', () => {
 });
 
 // =============================================================================
-// Test Suite 5: Copy/Paste Detection
+// Test Suite 4: Copy/Paste Detection
 // =============================================================================
 
-describe('Suite 5: Copy/Paste Detection', () => {
-  it('Test 5.1: /audit template includes jscpd', () => {
+describe('Suite 4: Copy/Paste Detection', () => {
+  it('Test 4.1: /audit template includes jscpd', () => {
     // Assert: audit.md template contains jscpd command
     const auditTemplate = readAuditTemplate();
     expect(auditTemplate).toContain('jscpd');
   });
 
-  it('Test 5.2: jscpd uses --gitignore flag', () => {
+  it('Test 4.2: jscpd uses --gitignore flag', () => {
     const auditTemplate = readAuditTemplate();
     expect(auditTemplate).toContain('--gitignore');
   });
 
-  it('Test 5.3: jscpd uses --min-lines 10', () => {
+  it('Test 4.3: jscpd uses --min-lines 10', () => {
     const auditTemplate = readAuditTemplate();
     expect(auditTemplate).toMatch(/--min-lines\s+10/);
   });
 });
 
 // =============================================================================
-// Test Suite 6: mypy Configuration
+// Test Suite 5: mypy Configuration
 // =============================================================================
 
-describe('Suite 6: mypy Configuration', () => {
+describe('Suite 5: mypy Configuration', () => {
   it(
-    'Test 6.1: Generates [tool.mypy] section',
+    'Test 5.1: Generates [tool.mypy] section',
     async () => {
       // Arrange
       createPythonProject(projectDirectory);
@@ -271,7 +229,7 @@ describe('Suite 6: mypy Configuration', () => {
   );
 
   it(
-    'Test 6.2: Does not overwrite existing [tool.mypy]',
+    'Test 5.2: Does not overwrite existing [tool.mypy]',
     async () => {
       // Arrange
       writeTestFile(
