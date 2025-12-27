@@ -342,6 +342,19 @@ export function readSafewordConfig(dir: string): { version: string; installedPac
 }
 
 /**
+ * Check if Ruff is installed on the system.
+ * Used by Python-related tests to skip tests when Ruff isn't available.
+ */
+export function isRuffInstalled(): boolean {
+  try {
+    const result = execSync('ruff --version', { encoding: 'utf8', stdio: 'pipe' });
+    return result.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Creates a Python-only project with pyproject.toml
  * @param dir
  * @param options

@@ -20,11 +20,14 @@ import {
   createTypeScriptPackageJson,
   fileExists,
   initGitRepo,
+  isRuffInstalled,
   readTestFile,
   removeTemporaryDirectory,
   runCli,
   writeTestFile,
 } from '../helpers';
+
+const RUFF_AVAILABLE = isRuffInstalled();
 
 // Single setup for all hook tests - sharing avoids 3 separate npm installs (~9 min → 9 sec)
 // Tests must be idempotent or restore state after modification (see try/finally blocks)
@@ -550,6 +553,58 @@ describe('E2E: Python Lint Hook', () => {
 
       // Should exit 0 (graceful skip via .nothrow())
       expect(result.status).toBe(0);
+    });
+  });
+
+  describe('Test 2.4: Ruff fixes Python files via lint hook', () => {
+    /** Helper to run post-tool-lint hook via JSON input (actually executes the lint) */
+    function runPostToolLint(filePath: string) {
+      const hookInput = JSON.stringify({
+        session_id: 'test-session',
+        hook_event_name: 'PostToolUse',
+        tool_name: 'Write',
+        tool_input: { file_path: filePath },
+      });
+
+      return spawnSync(
+        'bash',
+        ['-c', `echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`],
+        {
+          cwd: projectDirectory,
+          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+          encoding: 'utf8',
+        },
+      );
+    }
+
+    it.skipIf(!RUFF_AVAILABLE)('should format Python files when run through lint hook', () => {
+      // Create badly formatted Python file
+      const badCode = 'x=1;y=2';
+      writeTestFile(projectDirectory, 'format-test.py', badCode);
+
+      // Run lint hook on the file
+      const result = runPostToolLint(`${projectDirectory}/format-test.py`);
+      expect(result.status).toBe(0);
+
+      // File should now be formatted
+      const formatted = readTestFile(projectDirectory, 'format-test.py');
+      expect(formatted).toContain('x = 1');
+      expect(formatted).toContain('y = 2');
+    });
+
+    it.skipIf(!RUFF_AVAILABLE)('should fix auto-fixable lint issues', () => {
+      // Create file with unused import (auto-fixable with --fix)
+      const codeWithUnusedImport = 'import os\nx = 1\n';
+      writeTestFile(projectDirectory, 'fix-test.py', codeWithUnusedImport);
+
+      // Run lint hook on the file
+      const result = runPostToolLint(`${projectDirectory}/fix-test.py`);
+      expect(result.status).toBe(0);
+
+      // Unused import should be removed
+      const fixed = readTestFile(projectDirectory, 'fix-test.py');
+      expect(fixed).not.toContain('import os');
+      expect(fixed).toContain('x = 1');
     });
   });
 });
