@@ -14,7 +14,7 @@ import { type ProjectContext,SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists, readJson, writeJson } from '../utils/fs.js';
 import { installDependencies } from '../utils/install.js';
-import { error, header, info, listItem, success, warn } from '../utils/output.js';
+import { error, header, info, listItem, success } from '../utils/output.js';
 import { detectLanguages, type Languages } from '../utils/project-detector.js';
 import {
   detectPythonPackageManager,
