@@ -18,7 +18,7 @@ interface LanguagePack {
 
 ## Integration Points (Checklist)
 
-### 1. Pack File (`src/packs/{lang}.ts`)
+### 1. Pack File (`src/packs/{lang}/index.ts`)
 
 ```typescript
 export const {lang}Pack: LanguagePack = {
@@ -42,7 +42,7 @@ export const {lang}Pack: LanguagePack = {
 ### 2. Registry (`src/packs/registry.ts`)
 
 ```typescript
-import { {lang}Pack } from './{lang}.js';
+import { {lang}Pack } from './{lang}/index.js';
 
 export const LANGUAGE_PACKS: Record<string, LanguagePack> = {
   // ...existing
@@ -150,9 +150,9 @@ export function get{Lang}InstallCommand(cwd: string, tools: string[]): string {
 }
 ```
 
-## Utils File Pattern (`src/utils/{lang}-setup.ts`)
+## Setup File Pattern (`src/packs/{lang}/setup.ts`)
 
-Complex languages need a dedicated utils file:
+Complex languages need a dedicated setup file in their pack directory:
 
 ```typescript
 // Detection functions

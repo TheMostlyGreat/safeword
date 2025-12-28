@@ -5,9 +5,9 @@
  */
 
 import { getInstalledPacks } from './config.js';
-import { pythonPack } from './python.js';
+import { pythonPack } from './python/index.js';
 import type { LanguagePack } from './types.js';
-import { typescriptPack } from './typescript.js';
+import { typescriptPack } from './typescript/index.js';
 
 /**
  * All registered language packs.

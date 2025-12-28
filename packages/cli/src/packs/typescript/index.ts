@@ -8,8 +8,8 @@
 
 import nodePath from 'node:path';
 
-import { exists } from '../utils/fs.js';
-import type { LanguagePack, SetupResult } from './types.js';
+import { exists } from '../../utils/fs.js';
+import type { LanguagePack, SetupResult } from '../types.js';
 
 export const typescriptPack: LanguagePack = {
   id: 'typescript',

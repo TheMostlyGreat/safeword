@@ -8,6 +8,13 @@ import { readdirSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import { addInstalledPack } from '../packs/config.js';
+import {
+  detectPythonPackageManager,
+  getPythonInstallCommand,
+  hasRuffDependency,
+  installPythonDependencies,
+  setupPythonTooling,
+} from '../packs/python/setup.js';
 import { detectLanguages as detectLanguagePacks } from '../packs/registry.js';
 import { reconcile, type ReconcileResult } from '../reconcile.js';
 import { type ProjectContext,SAFEWORD_SCHEMA } from '../schema.js';
@@ -16,13 +23,6 @@ import { exists, readJson, writeJson } from '../utils/fs.js';
 import { installDependencies } from '../utils/install.js';
 import { error, header, info, listItem, success } from '../utils/output.js';
 import { detectLanguages, type Languages } from '../utils/project-detector.js';
-import {
-  detectPythonPackageManager,
-  getPythonInstallCommand,
-  hasRuffDependency,
-  installPythonDependencies,
-  setupPythonTooling,
-} from '../utils/python-setup.js';
 import { VERSION } from '../version.js';
 import { buildArchitecture, hasArchitectureDetected, syncConfigCore } from './sync-config.js';
 

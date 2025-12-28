@@ -1,14 +1,14 @@
 /**
  * Python Language Pack
  *
- * Wraps existing python-setup.ts functionality in the LanguagePack interface.
+ * Wraps existing setup.ts functionality in the LanguagePack interface.
  */
 
 import nodePath from 'node:path';
 
-import { exists } from '../utils/fs.js';
-import { setupPythonTooling } from '../utils/python-setup.js';
-import type { LanguagePack, SetupContext, SetupResult } from './types.js';
+import { exists } from '../../utils/fs.js';
+import type { LanguagePack, SetupResult } from '../types.js';
+import { setupPythonTooling } from './setup.js';
 
 export const pythonPack: LanguagePack = {
   id: 'python',

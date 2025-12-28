@@ -10,7 +10,7 @@ import {
   detectPythonPackageManager,
   hasRuffDependency,
   installPythonDependencies,
-} from '../../src/utils/python-setup.js';
+} from '../../src/packs/python/setup.js';
 import {
   createPythonProject,
   createTemporaryDirectory,

@@ -11,13 +11,13 @@
 import { execSync } from 'node:child_process';
 import nodePath from 'node:path';
 
-import { exists, readFileSafe, writeFile } from './fs.js';
+import { exists, readFileSafe, writeFile } from '../../utils/fs.js';
 import {
   appendTomlSection,
   generateImportLinterConfig,
   generateMypyConfig,
   generateRuffConfig,
-} from './toml.js';
+} from '../../utils/toml.js';
 
 /**
  * Python layer patterns for architecture detection.
