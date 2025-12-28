@@ -141,6 +141,13 @@ interface PythonSetupStatus {
   importLinter: boolean;
 }
 
+/** Base Python tools to install. Import-linter added when layers detected. */
+function getPythonTools(includeImportLinter: boolean): string[] {
+  const tools = ['ruff', 'mypy', 'deadcode'];
+  if (includeImportLinter) tools.push('import-linter');
+  return tools;
+}
+
 /**
  * Configure Python tooling and install dependencies.
  * Returns files modified and whether install failed.
@@ -162,11 +169,7 @@ function setupPython(cwd: string): PythonSetupStatus {
 
   // Install Python tools if not already in dependencies
   if (!hasRuffDependency(cwd)) {
-    const tools = ['ruff', 'mypy', 'deadcode'];
-    if (pythonResult.importLinter) {
-      tools.push('import-linter');
-    }
-
+    const tools = getPythonTools(pythonResult.importLinter);
     const pm = detectPythonPackageManager(cwd);
     if (pm === 'pip') {
       installFailed = true;
@@ -228,9 +231,7 @@ function printSetupSummary(options: SetupSummaryOptions): void {
 
   // Python-specific guidance: show install command only if auto-install failed
   if (languages.python && pythonInstallFailed) {
-    const tools = ['ruff', 'mypy', 'deadcode'];
-    if (pythonImportLinter) tools.push('import-linter');
-    listItem(`Install Python tools: ${getPythonInstallCommand(cwd, tools)}`);
+    listItem(`Install Python tools: ${getPythonInstallCommand(cwd, getPythonTools(pythonImportLinter))}`);
   }
 
   listItem('Commit the new files to git');
