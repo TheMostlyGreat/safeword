@@ -101,26 +101,35 @@ export function setupGoTooling(cwd: string): SetupResult {
 version: "2"
 
 linters:
-  default: standard
-  enable:
-    - gocritic       # Opinionated checks
-    - gosec          # Security scanner
-    - misspell       # Spelling mistakes
-    - unconvert      # Unnecessary type conversions
-    - unparam        # Unused function parameters
+  default: all       # Maximum strictness (matches ESLint/ruff philosophy)
   settings:
+    cyclop:
+      max-complexity: 10  # Match ESLint/ruff complexity threshold
     gocritic:
       enabled-tags:
         - diagnostic
         - style
         - performance
+    depguard:
+      rules:
+        main:
+          deny:
+            - pkg: "io/ioutil"
+              desc: "Deprecated: use io and os packages instead"
 
 formatters:
   enable:
     - gofumpt        # Stricter gofmt
 ```
 
-**Note:** If 2+ architecture layers detected, `depguard` linter is added with import rules (see Architecture Detection).
+**Key linters enabled by `default: all`:**
+- `cyclop` - Cyclomatic complexity (threshold: 10)
+- `nestif` - Nesting depth checks
+- `gosec` - Security scanner
+- `gocritic` - Opinionated style/performance checks
+- `depguard` - Import restrictions
+
+**Note:** If 2+ architecture layers detected, additional `depguard` rules are added for layer boundaries.
 
 ### Architecture Detection
 
