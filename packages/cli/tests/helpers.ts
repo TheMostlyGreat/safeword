@@ -381,6 +381,19 @@ export function isPoetryInstalled(): boolean {
 }
 
 /**
+ * Check if mypy is installed on the system.
+ * Used by Python-related tests to skip mypy tests when not available.
+ */
+export function isMypyInstalled(): boolean {
+  try {
+    const result = execSync('mypy --version', { encoding: 'utf8', stdio: 'pipe' });
+    return result.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Creates a Python-only project with pyproject.toml
  * @param dir
  * @param options
