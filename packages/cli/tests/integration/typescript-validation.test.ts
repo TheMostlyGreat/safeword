@@ -9,7 +9,7 @@
  * These tests validate that configuration leads to working enforcement.
  */
 
-import { execSync, spawnSync } from 'node:child_process';
+import { execSync } from 'node:child_process';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -22,6 +22,7 @@ import {
   readTestFile,
   removeTemporaryDirectory,
   runCli,
+  runEslint,
   TIMEOUT_SETUP,
   writeTestFile,
 } from '../helpers';
@@ -108,10 +109,7 @@ export function main(): void {
 `,
     );
 
-    const result = spawnSync('npx', ['eslint', 'src/valid.ts'], {
-      cwd: projectDirectory,
-      encoding: 'utf8',
-    });
+    const result = runEslint(projectDirectory, 'src/valid.ts');
 
     expect(result.status).toBe(0);
   });
@@ -130,10 +128,7 @@ export function main() {
 `,
     );
 
-    const result = spawnSync('npx', ['eslint', 'src/floating-promise.ts'], {
-      cwd: projectDirectory,
-      encoding: 'utf8',
-    });
+    const result = runEslint(projectDirectory, 'src/floating-promise.ts');
 
     // Should fail due to no-floating-promises
     expect(result.status).not.toBe(0);
@@ -157,10 +152,7 @@ export function main() {
 `,
     );
 
-    const result = spawnSync('npx', ['eslint', 'src/misused-promise.ts'], {
-      cwd: projectDirectory,
-      encoding: 'utf8',
-    });
+    const result = runEslint(projectDirectory, 'src/misused-promise.ts');
 
     // Should fail due to no-misused-promises
     expect(result.status).not.toBe(0);
@@ -179,10 +171,7 @@ export function main() {
 `,
     );
 
-    const result = spawnSync('npx', ['eslint', 'src/await-non-promise.ts'], {
-      cwd: projectDirectory,
-      encoding: 'utf8',
-    });
+    const result = runEslint(projectDirectory, 'src/await-non-promise.ts');
 
     // Should fail due to await-thenable
     expect(result.status).not.toBe(0);
@@ -224,10 +213,7 @@ describe('E2E: JavaScript-Only Project', () => {
     // Install deps and run ESLint
     execSync('npm install', { cwd: projectDirectory, stdio: 'pipe' });
 
-    const result = spawnSync('npx', ['eslint', 'src/index.js'], {
-      cwd: projectDirectory,
-      encoding: 'utf8',
-    });
+    const result = runEslint(projectDirectory, 'src/index.js');
 
     // Should run without crashing: 0=success, 1=lint errors, 2=fatal, null=spawn failed
     expect(result.status === 0 || result.status === 1).toBe(true);

@@ -1,4 +1,4 @@
-import { exec, execSync } from 'node:child_process';
+import { exec, execSync, spawnSync, type SpawnSyncReturns } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import nodePath from 'node:path';
@@ -432,4 +432,22 @@ source = { virtual = "." }
   }
 
   writeTestFile(dir, 'pyproject.toml', content);
+}
+
+/**
+ * Runs ESLint on a file and returns the spawn result.
+ * Provides consistent interface for linting tests.
+ * @param dir - Project directory with eslint.config.mjs
+ * @param file - File path relative to project directory
+ * @param extraArgs - Additional CLI arguments (e.g., ['--rule', 'some-rule: error'])
+ */
+export function runEslint(
+  dir: string,
+  file: string,
+  extraArguments: string[] = [],
+): SpawnSyncReturns<string> {
+  return spawnSync('npx', ['eslint', file, ...extraArguments], {
+    cwd: dir,
+    encoding: 'utf8',
+  });
 }

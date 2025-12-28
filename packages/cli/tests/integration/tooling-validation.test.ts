@@ -22,6 +22,7 @@ import {
   readTestFile,
   removeTemporaryDirectory,
   runCli,
+  runEslint,
   TIMEOUT_SETUP,
   writeTestFile,
 } from '../helpers';
@@ -261,10 +262,10 @@ export function ConditionalHook({ enabled }: { enabled: boolean }) {
 `,
     );
 
-    const result = spawnSync('npx', ['eslint', '--rule', '{"react-hooks/rules-of-hooks": "error"}', 'src/conditional-hook.tsx'], {
-      cwd: projectDirectory,
-      encoding: 'utf8',
-    });
+    const result = runEslint(projectDirectory, 'src/conditional-hook.tsx', [
+      '--rule',
+      '{"react-hooks/rules-of-hooks": "error"}',
+    ]);
 
     // Should fail due to rules-of-hooks violation
     expect(result.status).not.toBe(0);
