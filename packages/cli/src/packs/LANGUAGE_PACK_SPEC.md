@@ -37,6 +37,17 @@ interface LanguagePack {
 
 **Why:** LLMs write dense, complex code. These constraints force decomposition and improve maintainability.
 
+**Rule Categories (Required):** Every language pack SHOULD enable rules for:
+
+| Category | ESLint | Ruff | golangci-lint |
+|----------|--------|------|---------------|
+| Security | `eslint-plugin-security` | `S` (bandit) | `gosec` |
+| Import cycles | `import-x/no-cycle` | - | `depguard` |
+| Async/Promise | `eslint-plugin-promise` | `ASYNC` | N/A |
+| Regex safety | `eslint-plugin-regexp` | - | - |
+
+**Severity:** Use `error` not `warn`. LLMs ignore warnings—only errors stop code generation.
+
 ## Integration Points (Checklist)
 
 ### 1. Pack File (`src/packs/{lang}/index.ts`)
