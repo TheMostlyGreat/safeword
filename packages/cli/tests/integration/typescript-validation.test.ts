@@ -229,8 +229,7 @@ describe('E2E: JavaScript-Only Project', () => {
       encoding: 'utf8',
     });
 
-    // Should run without crashing (exit 0 or lint errors, not crashes)
-    // We're checking it doesn't crash due to missing tsconfig
-    expect(result.status).not.toBe(null);
+    // Should run without crashing: 0=success, 1=lint errors, 2=fatal, null=spawn failed
+    expect(result.status === 0 || result.status === 1).toBe(true);
   });
 });
