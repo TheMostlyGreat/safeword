@@ -390,7 +390,7 @@ describe('Commands Validation (Claude Code Format)', () => {
       it('should have markdown body (not just frontmatter)', () => {
         if (parsed) {
           expect(parsed.body, 'Command needs content after frontmatter').not.toBe('');
-          expect(parsed.body?.length, 'Body should have content').toBeGreaterThan(10);
+          expect(parsed.body?.length, 'Body should have content').toBeGreaterThan(MIN_BODY_LENGTH);
         }
       });
 
