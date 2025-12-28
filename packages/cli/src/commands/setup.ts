@@ -161,7 +161,7 @@ function setupPython(cwd: string): PythonSetupStatus {
 
   // Install Python tools if not already in dependencies
   if (!hasRuffDependency(cwd)) {
-    const tools = ['ruff', 'mypy'];
+    const tools = ['ruff', 'mypy', 'deadcode'];
     if (pythonResult.importLinter) {
       tools.push('import-linter');
     }
@@ -225,7 +225,7 @@ function printSetupSummary(options: SetupSummaryOptions): void {
 
   // Python-specific guidance: show install command only if auto-install failed
   if (languages.python && pythonInstallFailed) {
-    listItem(`Install Python tools: ${getPythonInstallCommand(cwd, ['ruff', 'mypy', 'import-linter'])}`);
+    listItem(`Install Python tools: ${getPythonInstallCommand(cwd, ['ruff', 'mypy', 'deadcode', 'import-linter'])}`);
   }
 
   listItem('Commit the new files to git');
