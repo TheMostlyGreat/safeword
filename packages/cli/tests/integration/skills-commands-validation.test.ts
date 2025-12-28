@@ -165,6 +165,26 @@ function readAndParseFrontmatter(filePath: string): {
   }
 }
 
+/**
+ * Find broken markdown file links in content
+ * Returns array of broken link strings for error messages
+ */
+function findBrokenMarkdownLinks(body: string, baseDir: string): string[] {
+  const links = extractMarkdownLinks(body);
+  const brokenLinks: string[] = [];
+
+  for (const link of links) {
+    if (link.path.endsWith('.md')) {
+      const fullPath = join(baseDir, link.path);
+      if (!existsSync(fullPath)) {
+        brokenLinks.push(`[${link.text}](${link.path})`);
+      }
+    }
+  }
+
+  return brokenLinks;
+}
+
 describe('Skills Validation (Claude Code Format)', () => {
   const skillDirectories = getSkillDirectories();
 
@@ -289,19 +309,7 @@ describe('Skills Validation (Claude Code Format)', () => {
       // File reference validation
       it('should have valid markdown file references in body', () => {
         if (parsed?.body) {
-          const links = extractMarkdownLinks(parsed.body);
-          const brokenLinks: string[] = [];
-
-          for (const link of links) {
-            // Only check .md file references (not images, not code blocks)
-            if (link.path.endsWith('.md')) {
-              const fullPath = join(SKILLS_DIR, skillDir, link.path);
-              if (!existsSync(fullPath)) {
-                brokenLinks.push(`[${link.text}](${link.path})`);
-              }
-            }
-          }
-
+          const brokenLinks = findBrokenMarkdownLinks(parsed.body, join(SKILLS_DIR, skillDir));
           expect(
             brokenLinks,
             `Broken markdown links: ${brokenLinks.join(', ')}`,
@@ -465,18 +473,7 @@ describe('Commands Validation (Claude Code Format)', () => {
       // File reference validation for commands
       it('should have valid markdown file references in body', () => {
         if (parsed?.body) {
-          const links = extractMarkdownLinks(parsed.body);
-          const brokenLinks: string[] = [];
-
-          for (const link of links) {
-            if (link.path.endsWith('.md')) {
-              const fullPath = join(COMMANDS_DIR, link.path);
-              if (!existsSync(fullPath)) {
-                brokenLinks.push(`[${link.text}](${link.path})`);
-              }
-            }
-          }
-
+          const brokenLinks = findBrokenMarkdownLinks(parsed.body, COMMANDS_DIR);
           expect(
             brokenLinks,
             `Broken markdown links: ${brokenLinks.join(', ')}`,
