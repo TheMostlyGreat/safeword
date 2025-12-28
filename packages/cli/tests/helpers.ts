@@ -342,55 +342,36 @@ export function readSafewordConfig(dir: string): { version: string; installedPac
 }
 
 /**
- * Check if Ruff is installed on the system.
- * Used by Python-related tests to skip tests when Ruff isn't available.
+ * Check if a command-line tool is available on the system.
+ * Used by tests to conditionally skip when tools aren't installed.
  */
+function isCommandAvailable(command: string): boolean {
+  try {
+    const result = execSync(`${command} --version`, { encoding: 'utf8', stdio: 'pipe' });
+    return result.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Check if Ruff is installed (for Python linting tests) */
 export function isRuffInstalled(): boolean {
-  try {
-    const result = execSync('ruff --version', { encoding: 'utf8', stdio: 'pipe' });
-    return result.length > 0;
-  } catch {
-    return false;
-  }
+  return isCommandAvailable('ruff');
 }
 
-/**
- * Check if uv is installed on the system.
- * Used by Python-related tests to skip auto-install tests when uv isn't available.
- */
+/** Check if uv is installed (for Python package manager tests) */
 export function isUvInstalled(): boolean {
-  try {
-    const result = execSync('uv --version', { encoding: 'utf8', stdio: 'pipe' });
-    return result.length > 0;
-  } catch {
-    return false;
-  }
+  return isCommandAvailable('uv');
 }
 
-/**
- * Check if Poetry is installed on the system.
- * Used by Python-related tests to skip auto-install tests when Poetry isn't available.
- */
+/** Check if Poetry is installed (for Python package manager tests) */
 export function isPoetryInstalled(): boolean {
-  try {
-    const result = execSync('poetry --version', { encoding: 'utf8', stdio: 'pipe' });
-    return result.length > 0;
-  } catch {
-    return false;
-  }
+  return isCommandAvailable('poetry');
 }
 
-/**
- * Check if mypy is installed on the system.
- * Used by Python-related tests to skip mypy tests when not available.
- */
+/** Check if mypy is installed (for Python type checking tests) */
 export function isMypyInstalled(): boolean {
-  try {
-    const result = execSync('mypy --version', { encoding: 'utf8', stdio: 'pipe' });
-    return result.length > 0;
-  } catch {
-    return false;
-  }
+  return isCommandAvailable('mypy');
 }
 
 /**
