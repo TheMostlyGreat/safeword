@@ -41,6 +41,8 @@ interface ParsedFrontmatter {
   model?: string;
   'argument-hint'?: string;
   'disable-model-invocation'?: boolean;
+  // Cursor-specific fields
+  alwaysApply?: boolean;
 }
 
 /**
@@ -582,7 +584,7 @@ describe('Cursor Rules Validation (.mdc Format)', () => {
       });
 
       it('should have alwaysApply as boolean', () => {
-        const alwaysApply = parsed?.frontmatter['alwaysApply' as keyof typeof parsed.frontmatter];
+        const alwaysApply = parsed?.frontmatter.alwaysApply;
         expect(alwaysApply, 'alwaysApply field is required').toBeDefined();
         expect(
           typeof alwaysApply,
