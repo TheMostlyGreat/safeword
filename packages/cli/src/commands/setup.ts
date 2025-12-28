@@ -138,6 +138,7 @@ function ensurePackageJson(cwd: string): boolean {
 interface PythonSetupStatus {
   files: string[];
   installFailed: boolean;
+  importLinter: boolean;
 }
 
 /**
@@ -180,7 +181,7 @@ function setupPython(cwd: string): PythonSetupStatus {
     }
   }
 
-  return { files, installFailed };
+  return { files, installFailed, importLinter: pythonResult.importLinter };
 }
 
 interface SetupSummaryOptions {
@@ -192,6 +193,7 @@ interface SetupSummaryOptions {
   workspaceUpdates?: string[];
   pythonFiles?: string[];
   pythonInstallFailed?: boolean;
+  pythonImportLinter?: boolean;
 }
 
 function printSetupSummary(options: SetupSummaryOptions): void {
@@ -204,6 +206,7 @@ function printSetupSummary(options: SetupSummaryOptions): void {
     workspaceUpdates = [],
     pythonFiles = [],
     pythonInstallFailed = false,
+    pythonImportLinter = false,
   } = options;
   header('Setup Complete');
 
@@ -225,7 +228,9 @@ function printSetupSummary(options: SetupSummaryOptions): void {
 
   // Python-specific guidance: show install command only if auto-install failed
   if (languages.python && pythonInstallFailed) {
-    listItem(`Install Python tools: ${getPythonInstallCommand(cwd, ['ruff', 'mypy', 'deadcode', 'import-linter'])}`);
+    const tools = ['ruff', 'mypy', 'deadcode'];
+    if (pythonImportLinter) tools.push('import-linter');
+    listItem(`Install Python tools: ${getPythonInstallCommand(cwd, tools)}`);
   }
 
   listItem('Commit the new files to git');
@@ -294,7 +299,7 @@ export async function setup(options: SetupOptions): Promise<void> {
     // Python-specific setup (Ruff config, import-linter)
     const pythonStatus = languages.python
       ? setupPython(cwd)
-      : { files: [], installFailed: false };
+      : { files: [], installFailed: false, importLinter: false };
 
     // Track installed packs in config.json
     const detectedPacks = detectLanguagePacks(cwd);
@@ -311,6 +316,7 @@ export async function setup(options: SetupOptions): Promise<void> {
       workspaceUpdates,
       pythonFiles: pythonStatus.files,
       pythonInstallFailed: pythonStatus.installFailed,
+      pythonImportLinter: pythonStatus.importLinter,
     });
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
