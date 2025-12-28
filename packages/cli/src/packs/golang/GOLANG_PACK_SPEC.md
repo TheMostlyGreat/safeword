@@ -109,8 +109,6 @@ linters:
     - unconvert      # Unnecessary type conversions
     - unparam        # Unused function parameters
   settings:
-    gocyclo:
-      min-complexity: 15
     gocritic:
       enabled-tags:
         - diagnostic
