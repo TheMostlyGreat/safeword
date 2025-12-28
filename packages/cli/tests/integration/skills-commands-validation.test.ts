@@ -18,6 +18,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_DIR = join(__dirname, '../../templates');
 const SKILLS_DIR = join(TEMPLATES_DIR, 'skills');
 const COMMANDS_DIR = join(TEMPLATES_DIR, 'commands');
+const CURSOR_RULES_DIR = join(TEMPLATES_DIR, 'cursor/rules');
 
 // Claude Code validation constants
 const SKILL_NAME_MAX_LENGTH = 64;
@@ -118,6 +119,18 @@ function getCommandFiles(): string[] {
   try {
     return readdirSync(COMMANDS_DIR)
       .filter(f => f.endsWith('.md'));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get all cursor rule files (.mdc)
+ */
+function getCursorRuleFiles(): string[] {
+  try {
+    return readdirSync(CURSOR_RULES_DIR)
+      .filter(f => f.endsWith('.mdc'));
   } catch {
     return [];
   }
@@ -540,4 +553,114 @@ describe('Skills and Commands Cross-Validation', () => {
     const duplicates = names.filter((name, index) => names.indexOf(name) !== index);
     expect(duplicates, `Duplicate command names: ${duplicates.join(', ')}`).toHaveLength(0);
   });
+});
+
+describe('Cursor Rules Validation (.mdc Format)', () => {
+  const ruleFiles = getCursorRuleFiles();
+
+  it('should have at least one cursor rule', () => {
+    expect(ruleFiles.length).toBeGreaterThan(0);
+  });
+
+  for (const ruleFile of ruleFiles) {
+    describe(`rule: ${ruleFile}`, () => {
+      const rulePath = join(CURSOR_RULES_DIR, ruleFile);
+      const ruleName = basename(ruleFile, '.mdc');
+      const { content, parsed } = readAndParseFrontmatter(rulePath);
+
+      it('should have content', () => {
+        expect(content).not.toBe('');
+      });
+
+      it('should have lowercase filename with hyphens', () => {
+        expect(ruleFile, 'Filename should be lowercase').toBe(ruleFile.toLowerCase());
+        expect(ruleName, 'Name should only contain a-z, 0-9, -').toMatch(/^[a-z0-9-]+$/);
+      });
+
+      it('should have valid frontmatter', () => {
+        expect(parsed, 'Frontmatter must start with --- on line 1').not.toBeNull();
+      });
+
+      it('should have alwaysApply as boolean', () => {
+        const alwaysApply = parsed?.frontmatter['alwaysApply' as keyof typeof parsed.frontmatter];
+        expect(alwaysApply, 'alwaysApply field is required').toBeDefined();
+        expect(
+          typeof alwaysApply,
+          `alwaysApply should be boolean, got ${typeof alwaysApply}`,
+        ).toBe('boolean');
+      });
+
+      it('should have description as string if present', () => {
+        const description = parsed?.frontmatter.description;
+        if (description !== undefined) {
+          expect(typeof description, 'description should be string').toBe('string');
+          expect(description, 'description should not be empty').not.toBe('');
+        }
+      });
+
+      it('should not use tabs in frontmatter', () => {
+        const firstSectionEnd = content.indexOf('---', 3);
+        if (firstSectionEnd > 0) {
+          const frontmatterSection = content.slice(0, firstSectionEnd);
+          expect(frontmatterSection, 'Frontmatter contains tabs').not.toContain('\t');
+        }
+      });
+
+      it('should have markdown body content', () => {
+        expect(parsed?.body, 'No content after frontmatter').not.toBe('');
+        expect(parsed?.body?.length, 'Body should have content').toBeGreaterThan(MIN_BODY_LENGTH);
+      });
+    });
+  }
+});
+
+describe('Skills-Cursor Parity', () => {
+  it('each safeword skill should have corresponding cursor rule', () => {
+    const skillDirectories = getSkillDirectories().filter(d => d.startsWith('safeword-'));
+    const ruleFiles = new Set(getCursorRuleFiles().map(f => basename(f, '.mdc')));
+
+    const missingRules: string[] = [];
+    for (const skillDir of skillDirectories) {
+      if (!ruleFiles.has(skillDir)) {
+        missingRules.push(skillDir);
+      }
+    }
+
+    expect(
+      missingRules,
+      `Skills missing cursor rules: ${missingRules.join(', ')}`,
+    ).toHaveLength(0);
+  });
+
+  it('each safeword cursor rule should have corresponding skill', () => {
+    const skillDirectories = getSkillDirectories();
+    // safeword-core is a special entry point rule, not a skill
+    const ruleFiles = getCursorRuleFiles()
+      .map(f => basename(f, '.mdc'))
+      .filter(name => name.startsWith('safeword-') && name !== 'safeword-core');
+
+    const orphanRules: string[] = [];
+    for (const rule of ruleFiles) {
+      if (!skillDirectories.includes(rule)) {
+        orphanRules.push(rule);
+      }
+    }
+
+    expect(
+      orphanRules,
+      `Cursor rules without skills: ${orphanRules.join(', ')}`,
+    ).toHaveLength(0);
+  });
+
+  it('should not have duplicate cursor rule names', () => {
+    const ruleFiles = getCursorRuleFiles();
+    const names = ruleFiles.map(f => basename(f, '.mdc'));
+    const duplicates = names.filter((name, index) => names.indexOf(name) !== index);
+    expect(duplicates, `Duplicate cursor rule names: ${duplicates.join(', ')}`).toHaveLength(0);
+  });
+
+  // Note: We intentionally don't compare body content because:
+  // - Claude skills have extra sections (work logs, related links) not needed for Cursor
+  // - Cursor rules are condensed versions optimized for that platform
+  // - Parity is enforced by existence checks above
 });
