@@ -168,7 +168,7 @@ function isGerundName(name: string): boolean {
 /**
  * Find invalid argument patterns in content.
  * Valid: $1, $2, $ARGUMENTS, $CLAUDE_*
- * Invalid: $0, $arg, $myVar, etc.
+ * Invalid: $arg, $myVar, etc. (Note: $0 is checked separately)
  */
 function findInvalidArgumentPatterns(content: string): string[] {
   const patterns = content.match(/\$[a-z_]\w*/gi) || [];
