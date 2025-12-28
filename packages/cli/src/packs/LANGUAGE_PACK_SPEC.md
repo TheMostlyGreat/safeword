@@ -65,7 +65,7 @@ export const {lang}Pack: LanguagePack = {
 **Note:** TypeScript is special-cased—its setup lives in `schema.ts` (ESLint/tsconfig generation) not `setup()`. New languages should put setup logic in `setup()` or a dedicated `utils/{lang}-setup.ts`.
 
 **Detection heuristic:** Check for the language's manifest file:
-- Python → `pyproject.toml`
+- Python → `pyproject.toml` OR `requirements.txt`
 - TypeScript/JS → `package.json`
 - Go → `go.mod`
 - Rust → `Cargo.toml`
@@ -99,6 +99,26 @@ if ({LANG}_EXTENSIONS.has(extension)) {
 ```
 
 **Pattern:** `linter --fix` then `formatter`. Use `.nothrow().quiet()` to skip gracefully if tools not installed.
+
+**Error output:** For tools that should show errors (ESLint, shellcheck), print stderr on failure:
+```typescript
+const result = await $`npx eslint --fix ${file}`.nothrow().quiet();
+if (result.exitCode !== 0 && result.stderr.length > 0) {
+  console.log(result.stderr.toString());
+}
+```
+
+**Shell scripts:** Handled as a special case (not a full language pack):
+```typescript
+const SHELL_EXTENSIONS = new Set(['sh']);
+
+if (SHELL_EXTENSIONS.has(extension)) {
+  await $`npx shellcheck ${file}`.nothrow().quiet();
+  if (existsSync(`${projectDir}/node_modules/prettier-plugin-sh`)) {
+    await $`npx prettier --write ${file}`.nothrow().quiet();
+  }
+}
+```
 
 ### 4. Project Detector (`src/utils/project-detector.ts`)
 
@@ -171,6 +191,11 @@ export function create{Lang}Project(dir: string, options?: {...}): void {
   // Include minimal valid source file if needed
   writeTestFile(dir, 'main.{ext}', '...');
 }
+
+// Linter execution (for TypeScript/ESLint)
+export function runEslint(dir: string, file: string, extraArgs: string[] = []): SpawnSyncReturns<string> {
+  return spawnSync('npx', ['eslint', file, ...extraArgs], { cwd: dir, encoding: 'utf8' });
+}
 ```
 
 ### 7. Golden Path Test (`tests/integration/{lang}-golden-path.test.ts`)
@@ -238,7 +263,7 @@ describe('E2E: {Tool} Type Error Detection', () => {
 
 ## Package Manager Detection (Optional)
 
-Only needed if the language has multiple package managers (Python: pip/poetry/uv). Skip for languages with one PM (Go: `go mod`).
+Only needed if the language has multiple package managers (Python: pip/poetry/uv/pipenv). Skip for languages with one PM (Go: `go mod`).
 
 ```typescript
 export function detect{Lang}PackageManager(cwd: string): '{pm1}' | '{pm2}' | '{pm3}' {
@@ -259,6 +284,71 @@ export function get{Lang}InstallCommand(cwd: string, tools: string[]): string {
   }
 }
 ```
+
+## Dependency Installation (Optional)
+
+Languages with package managers should auto-install tooling dependencies during setup:
+
+```typescript
+export function install{Lang}Dependencies(cwd: string, tools: string[]): boolean {
+  const pm = detect{Lang}PackageManager(cwd);
+
+  // Skip if package manager doesn't support dev dependencies well (e.g., pip with PEP 668)
+  if (pm === 'pip') return false;
+
+  try {
+    execSync(get{Lang}InstallCommand(cwd, tools), { cwd, stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+```
+
+| Language | Auto-Install | Reason |
+|----------|--------------|--------|
+| TypeScript | ✓ via npm/yarn/pnpm | Standard dev dependency workflow |
+| Python | ✓ via uv/poetry | pip skipped (PEP 668 externally-managed) |
+| Go | ✗ | Tools installed globally via `go install` |
+
+## Type Checking Config (Optional)
+
+Languages with separate type checkers should configure them during setup:
+
+| Language | Type Checker | Config Location |
+|----------|--------------|-----------------|
+| TypeScript | tsc | `tsconfig.json` (user-managed) |
+| Python | mypy | `[tool.mypy]` in pyproject.toml |
+| Go | N/A | Built into compiler |
+
+```typescript
+// Example: Python mypy config
+export function generateMypyConfig(): string {
+  return `[tool.mypy]
+ignore_missing_imports = true
+show_error_codes = true
+pretty = true`;
+}
+```
+
+## Existing Tooling Detection (Optional)
+
+For languages with established ecosystems, detect if the project already has linting/formatting configured:
+
+```typescript
+// In project-detector.ts or {lang}-setup.ts
+export function hasExisting{Lang}Linter(cwd: string): boolean {
+  // Check for config files, scripts, or dependencies
+}
+```
+
+| Language | Linter Detection | Formatter Detection |
+|----------|------------------|---------------------|
+| TypeScript | ESLint config files, `lint` script | Prettier/Biome configs, `format` script |
+| Python | `[tool.ruff]` section | Ruff format, Black configs |
+| Go | N/A (go vet is built-in) | N/A (gofmt is built-in) |
+
+**Usage:** Skip auto-configuration if tooling already exists to avoid conflicts.
 
 ## Setup File Pattern (`src/packs/{lang}/setup.ts`)
 
@@ -402,11 +492,19 @@ Before shipping a new language pack, verify:
 **Test Helpers:**
 - [ ] `is{Tool}Installed()` for each tool
 - [ ] `create{Lang}Project(dir, options?)` with package manager variants
+- [ ] `run{Linter}(dir, file)` for linter execution (if applicable)
 
 **Project Types:**
 - [ ] Pure {lang} project (no package.json) works end-to-end
 - [ ] Mixed project (JS + {lang}) works correctly
 - [ ] Existing tool configs are preserved (not clobbered)
+
+**Optional Integrations:**
+- [ ] Package manager detection (if language has multiple)
+- [ ] Auto-install dependencies (if package manager supports dev deps)
+- [ ] Type checking config (if separate type checker exists)
+- [ ] Existing tooling detection (if ecosystem has established tools)
+- [ ] Architecture/layer detection (if import enforcement tools exist)
 
 **Research Before Implementation:**
 - [ ] Verify linter default preset (what's enabled out-of-the-box)
