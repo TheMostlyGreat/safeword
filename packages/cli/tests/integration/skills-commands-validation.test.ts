@@ -166,6 +166,16 @@ function isGerundName(name: string): boolean {
 }
 
 /**
+ * Find invalid argument patterns in content.
+ * Valid: $1, $2, $ARGUMENTS, $CLAUDE_*
+ * Invalid: $0, $arg, $myVar, etc.
+ */
+function findInvalidArgumentPatterns(content: string): string[] {
+  const patterns = content.match(/\$[a-z_]\w*/gi) || [];
+  return patterns.filter(p => p !== '$ARGUMENTS' && !p.startsWith('$CLAUDE_'));
+}
+
+/**
  * Read file and parse frontmatter, returning defaults on error
  */
 function readAndParseFrontmatter(filePath: string): {
@@ -472,15 +482,10 @@ describe('Commands Validation (Claude Code Format)', () => {
           content.includes('$ARGUMENTS');
 
         if (usesArguments) {
-          // Ensure only valid patterns are used (not $0, not $arg, etc.)
-          const invalidPatterns = content.match(/\$[a-z_]\w*/gi) || [];
-          const filtered = invalidPatterns.filter(
-            p => p !== '$ARGUMENTS' && !p.startsWith("$CLAUDE_"),
-          );
-
+          const invalidPatterns = findInvalidArgumentPatterns(content);
           expect(
-            filtered,
-            `Invalid argument patterns: ${filtered.join(', ')}. Use $1, $2, or $ARGUMENTS`,
+            invalidPatterns,
+            `Invalid argument patterns: ${invalidPatterns.join(', ')}. Use $1, $2, or $ARGUMENTS`,
           ).toHaveLength(0);
         }
       });
@@ -746,20 +751,14 @@ describe('Validation Logic Tests', () => {
 
     it('detects invalid argument patterns', () => {
       const content = 'Use $arg and $myVar';
-      const invalidPatterns = content.match(/\$[a-z_]\w*/gi) || [];
-      const filtered = invalidPatterns.filter(
-        p => p !== '$ARGUMENTS' && !p.startsWith('$CLAUDE_'),
-      );
-      expect(filtered.length).toBeGreaterThan(0);
+      const invalidPatterns = findInvalidArgumentPatterns(content);
+      expect(invalidPatterns.length).toBeGreaterThan(0);
     });
 
     it('allows valid argument patterns', () => {
       const content = 'Use $1 and $ARGUMENTS and $CLAUDE_PROJECT_DIR';
-      const invalidPatterns = content.match(/\$[a-z_]\w*/gi) || [];
-      const filtered = invalidPatterns.filter(
-        p => p !== '$ARGUMENTS' && !p.startsWith('$CLAUDE_'),
-      );
-      expect(filtered).toHaveLength(0);
+      const invalidPatterns = findInvalidArgumentPatterns(content);
+      expect(invalidPatterns).toHaveLength(0);
     });
   });
 

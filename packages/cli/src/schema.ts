@@ -7,11 +7,13 @@
  * Adding a new file? Add it here and it will be handled by setup/upgrade/reset.
  */
 
+import { generateGolangciConfig } from './packs/golang/setup.js';
 import { CURSOR_HOOKS, getEslintConfig, SETTINGS_HOOKS } from './templates/config.js';
 import { AGENTS_MD_LINK } from './templates/content.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';
 import { MCP_SERVERS } from './utils/install.js';
 import { type Languages, type ProjectType } from './utils/project-detector.js';
+import { generateRuffBaseConfig } from './utils/toml.js';
 import { VERSION } from './version.js';
 
 // ============================================================================
@@ -234,6 +236,11 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/SAFEWORD.md': { template: 'SAFEWORD.md' },
     '.safeword/version': { content: () => VERSION },
 
+    // Language-specific configs (generated only if language detected)
+    '.safeword/ruff.toml': {
+      generator: ctx => (ctx.languages?.python ? generateRuffBaseConfig() : null),
+    },
+
     // Hooks shared library (2 files) - TypeScript with Bun runtime
     '.safeword/hooks/lib/lint.ts': { template: 'hooks/lib/lint.ts' },
     '.safeword/hooks/lib/quality.ts': { template: 'hooks/lib/quality.ts' },
@@ -397,6 +404,10 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
               2,
             )
           : null,
+    },
+    // Go linter config (created if missing, not updated if user customized)
+    '.golangci.yml': {
+      generator: ctx => (ctx.languages?.golang ? generateGolangciConfig() : null),
     },
   },
 
