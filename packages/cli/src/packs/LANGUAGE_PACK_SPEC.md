@@ -68,7 +68,64 @@ if ({LANG}_EXTENSIONS.has(extension)) {
 
 **Pattern:** `linter --fix` then `formatter`. Use `.nothrow().quiet()` to skip gracefully if tools not installed.
 
-### 4. Test Helpers (`tests/helpers.ts`)
+### 4. Project Detector (`src/utils/project-detector.ts`)
+
+Add language to detection:
+
+```typescript
+// Add to GO_MOD constant area
+const {LANG}_MANIFEST = '{manifest}';
+
+// Update Languages interface
+export interface Languages {
+  javascript: boolean;
+  python: boolean;
+  golang: boolean;
+  {lang}: boolean;  // Add new language
+}
+
+// Update detectLanguages()
+export function detectLanguages(cwd: string): Languages {
+  // ...existing...
+  const has{Lang}Manifest = existsSync(nodePath.join(cwd, {LANG}_MANIFEST));
+
+  return {
+    // ...existing...
+    {lang}: has{Lang}Manifest,
+  };
+}
+```
+
+### 5. Setup Command (`src/commands/setup.ts`)
+
+Integrate language setup into the main flow:
+
+```typescript
+// Import setup function
+import { setup{Lang}Tooling } from '../packs/{lang}/setup.js';
+
+// In setup():
+// 1. Update isNonJsOnly check
+const isNonJsOnly = (languages.python || languages.golang || languages.{lang}) && !languages.javascript;
+
+// 2. Add detection message
+if (languages.{lang} && !languages.javascript) info('{Lang} project detected (skipping JS tooling)');
+
+// 3. Call language setup (after Python setup block)
+const {lang}Files: string[] = [];
+if (languages.{lang}) {
+  const {lang}Result = setup{Lang}Tooling(cwd);
+  {lang}Files.push(...{lang}Result.files);
+  if ({lang}Result.files.length > 0) {
+    info('\n{Lang} tooling configured:');
+    info('  Created {config-file}');
+  }
+}
+
+// 4. Add to printSetupSummary options interface and call
+```
+
+### 6. Test Helpers (`tests/helpers.ts`)
 
 ```typescript
 // Tool availability check
@@ -79,10 +136,12 @@ export function is{Tool}Installed(): boolean {
 // Project scaffolding
 export function create{Lang}Project(dir: string, options?: {...}): void {
   writeTestFile(dir, '{manifest}', '...');
+  // Include minimal valid source file if needed
+  writeTestFile(dir, 'main.{ext}', '...');
 }
 ```
 
-### 5. Golden Path Test (`tests/integration/{lang}-golden-path.test.ts`)
+### 7. Golden Path Test (`tests/integration/{lang}-golden-path.test.ts`)
 
 ```typescript
 const TOOL_AVAILABLE = is{Tool}Installed();
@@ -116,7 +175,26 @@ describe('E2E: {Lang} Golden Path', () => {
 });
 ```
 
-### 6. Tooling Validation Test (`tests/integration/tooling-validation.test.ts`)
+**Tip: Violation Tests Must Use Actual Caught Violations**
+
+Test code must trigger linters that are actually enabled. Research what your linter catches:
+
+```typescript
+// ❌ Go: unused functions in `package main` are NOT caught (golangci-lint)
+writeTestFile(dir, 'bad.go', `package main
+func unused() {} // NOT detected!
+`);
+
+// ✅ Go: unused imports ARE caught by 'unused' linter
+writeTestFile(dir, 'bad.go', `package main
+import "fmt" // unused import - DETECTED
+func bad() { println("not using fmt") }
+`);
+```
+
+Research the default linter set before writing violation tests.
+
+### 8. Tooling Validation Test (`tests/integration/tooling-validation.test.ts`)
 
 Add a suite if the language has type checking or framework-specific rules:
 
@@ -201,6 +279,13 @@ TypeScript does this at **lint time** via `safeword.detect()` in eslint.config.m
 ## Additional Test Files
 
 Beyond golden-path and tooling-validation, add:
+
+**File Naming Convention:** Create language-specific test files rather than adding to existing generic files:
+- `mixed-project-{lang}.test.ts` (not adding to `mixed-project.test.ts`)
+- `add-language-{lang}.test.ts` (not adding to `add-language.test.ts`)
+- `setup-{lang}.test.ts` (not adding to `setup.test.ts`)
+
+This keeps test files focused and makes it easy to run language-specific tests.
 
 ### Unit Tests (`tests/utils/{lang}-setup.test.ts`)
 
@@ -290,3 +375,9 @@ Before shipping a new language pack, verify:
 - [ ] Pure {lang} project (no package.json) works end-to-end
 - [ ] Mixed project (JS + {lang}) works correctly
 - [ ] Existing tool configs are preserved (not clobbered)
+
+**Research Before Implementation:**
+- [ ] Verify linter default preset (what's enabled out-of-the-box)
+- [ ] Test violation detection manually (don't assume what gets caught)
+- [ ] Check config format version (e.g., golangci-lint v1 vs v2 syntax)
+- [ ] Confirm formatter integration (separate tool or linter flag?)
