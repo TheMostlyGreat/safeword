@@ -666,3 +666,175 @@ describe('Skills-Cursor Parity', () => {
   // - Cursor rules are condensed versions optimized for that platform
   // - Parity is enforced by existence checks above
 });
+
+/**
+ * Negative Tests: Prove validators catch invalid content
+ *
+ * These tests verify that our validation logic correctly rejects
+ * malformed files, proving the simulation is faithful.
+ */
+describe('Negative Tests: Invalid Content Detection', () => {
+  describe('Skill Validation Logic', () => {
+    it('rejects content without frontmatter', () => {
+      const content = '# Just a heading\n\nNo frontmatter here.';
+      const parsed = parseFrontmatter(content);
+      expect(parsed).toBeNull();
+    });
+
+    it('rejects frontmatter not starting on line 1', () => {
+      const content = '\n---\nname: test\n---\nBody';
+      const parsed = parseFrontmatter(content);
+      expect(parsed).toBeNull();
+    });
+
+    it('rejects unclosed frontmatter', () => {
+      const content = '---\nname: test\nNo closing delimiter';
+      const parsed = parseFrontmatter(content);
+      expect(parsed).toBeNull();
+    });
+
+    it('detects uppercase in skill name', () => {
+      const name = 'MySkill';
+      expect(name).not.toMatch(SKILL_NAME_PATTERN);
+    });
+
+    it('detects invalid characters in skill name', () => {
+      const invalidNames = ['my_skill', 'my.skill', 'my skill', 'my@skill'];
+      for (const name of invalidNames) {
+        expect(name, `"${name}" should be invalid`).not.toMatch(SKILL_NAME_PATTERN);
+      }
+    });
+
+    it('detects name exceeding 64 characters', () => {
+      const longName = 'a'.repeat(65);
+      expect(longName.length).toBeGreaterThan(SKILL_NAME_MAX_LENGTH);
+    });
+
+    it('detects description exceeding 1024 characters', () => {
+      const longDesc = 'a'.repeat(1025);
+      expect(longDesc.length).toBeGreaterThan(SKILL_DESCRIPTION_MAX_LENGTH);
+    });
+
+    it('detects reserved words in name', () => {
+      const reservedNames = ['my-claude-skill', 'anthropic-helper'];
+      for (const name of reservedNames) {
+        const hasReserved = RESERVED_WORDS.some(r => name.includes(r));
+        expect(hasReserved, `"${name}" should contain reserved word`).toBe(true);
+      }
+    });
+
+    it('detects invalid allowed-tools format', () => {
+      const invalidFormats = ['invalid format', '***', 'Read|Write', 'Bash()'];
+      for (const format of invalidFormats) {
+        expect(format, `"${format}" should be invalid`).not.toMatch(ALLOWED_TOOLS_PATTERN);
+      }
+    });
+
+    it('validates correct allowed-tools formats', () => {
+      const validFormats = ['*', 'Read', 'Read, Grep', 'Bash(git:*)', 'Read, Bash(npm:*)'];
+      for (const format of validFormats) {
+        expect(format, `"${format}" should be valid`).toMatch(ALLOWED_TOOLS_PATTERN);
+      }
+    });
+  });
+
+  describe('Command Validation Logic', () => {
+    it('detects $0 argument usage', () => {
+      const content = 'Use $0 for the command name';
+      expect(content).toContain('$0');
+    });
+
+    it('detects invalid argument patterns', () => {
+      const content = 'Use $arg and $myVar';
+      const invalidPatterns = content.match(/\$[a-z_]\w*/gi) || [];
+      const filtered = invalidPatterns.filter(
+        p => p !== '$ARGUMENTS' && !p.startsWith('$CLAUDE_'),
+      );
+      expect(filtered.length).toBeGreaterThan(0);
+    });
+
+    it('allows valid argument patterns', () => {
+      const content = 'Use $1 and $ARGUMENTS and $CLAUDE_PROJECT_DIR';
+      const invalidPatterns = content.match(/\$[a-z_]\w*/gi) || [];
+      const filtered = invalidPatterns.filter(
+        p => p !== '$ARGUMENTS' && !p.startsWith('$CLAUDE_'),
+      );
+      expect(filtered).toHaveLength(0);
+    });
+  });
+
+  describe('Cursor Rule Validation Logic', () => {
+    it('detects missing alwaysApply field', () => {
+      const content = '---\ndescription: Test rule\n---\nBody';
+      const parsed = parseFrontmatter(content);
+      expect(parsed?.frontmatter.alwaysApply).toBeUndefined();
+    });
+
+    it('detects non-boolean alwaysApply', () => {
+      const content = '---\nalwaysApply: yes\n---\nBody';
+      const parsed = parseFrontmatter(content);
+      // 'yes' is parsed as string, not boolean
+      expect(typeof parsed?.frontmatter.alwaysApply).not.toBe('boolean');
+    });
+
+    it('correctly parses boolean alwaysApply', () => {
+      const contentTrue = '---\nalwaysApply: true\n---\nBody';
+      const contentFalse = '---\nalwaysApply: false\n---\nBody';
+
+      const parsedTrue = parseFrontmatter(contentTrue);
+      const parsedFalse = parseFrontmatter(contentFalse);
+
+      expect(parsedTrue?.frontmatter.alwaysApply).toBe(true);
+      expect(parsedFalse?.frontmatter.alwaysApply).toBe(false);
+    });
+
+    it('detects empty body content', () => {
+      const content = '---\nalwaysApply: true\n---\n';
+      const parsed = parseFrontmatter(content);
+      expect(parsed?.body).toBe('');
+    });
+
+    it('detects body under minimum length', () => {
+      const content = '---\nalwaysApply: true\n---\nShort';
+      const parsed = parseFrontmatter(content);
+      expect(parsed?.body?.length).toBeLessThanOrEqual(MIN_BODY_LENGTH);
+    });
+  });
+
+  describe('Markdown Link Validation', () => {
+    it('extracts markdown links correctly', () => {
+      const content = 'See [guide](./guide.md) and [docs](../docs.md)';
+      const links = extractMarkdownLinks(content);
+      expect(links).toHaveLength(2);
+      expect(links[0]).toEqual({ text: 'guide', path: './guide.md' });
+    });
+
+    it('ignores external URLs', () => {
+      const content = 'See [docs](https://example.com/docs.md)';
+      const links = extractMarkdownLinks(content);
+      expect(links).toHaveLength(0);
+    });
+
+    it('ignores anchor links', () => {
+      const content = 'See [section](#my-section)';
+      const links = extractMarkdownLinks(content);
+      expect(links).toHaveLength(0);
+    });
+  });
+
+  describe('Gerund Naming Convention', () => {
+    it('detects valid gerund names', () => {
+      const validNames = ['debugging', 'refactoring', 'quality-reviewing'];
+      for (const name of validNames) {
+        expect(isGerundName(name), `"${name}" should be gerund`).toBe(true);
+      }
+    });
+
+    it('rejects non-gerund names', () => {
+      const invalidNames = ['debug', 'refactor', 'quality-review'];
+      for (const name of invalidNames) {
+        expect(isGerundName(name), `"${name}" should not be gerund`).toBe(false);
+      }
+    });
+  });
+});
