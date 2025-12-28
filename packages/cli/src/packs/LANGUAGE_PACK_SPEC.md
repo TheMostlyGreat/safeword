@@ -16,6 +16,27 @@ interface LanguagePack {
 }
 ```
 
+## Linter Philosophy
+
+**Strictness:** Enable ALL rules by default, then selectively disable noisy/conflicting ones.
+
+| Language | Strictness Setting | Exclusions |
+|----------|-------------------|------------|
+| TypeScript | ESLint: multiple strict plugins | Minimal (Prettier conflicts) |
+| Python | `select = ["ALL"]` | `D`, `ANN`, formatter conflicts |
+| Go | `default: all` | `std-error-handling`, `common-false-positives` |
+
+**Design Constraints (Required):** Every language pack MUST enforce:
+
+| Constraint | ESLint | Ruff | golangci-lint |
+|------------|--------|------|---------------|
+| Cyclomatic complexity ≤10 | `complexity: 10` | `C901` + `max-complexity = 10` | `cyclop` (default: 10) |
+| Max nesting depth ≤4 | `max-depth: 4` | - | `nestif: min-complexity: 4` |
+| Max function params ≤5 | `max-params: 5` | - | - |
+| Max callback nesting ≤3 | `max-nested-callbacks: 3` | - | - |
+
+**Why:** LLMs write dense, complex code. These constraints force decomposition and improve maintainability.
+
 ## Integration Points (Checklist)
 
 ### 1. Pack File (`src/packs/{lang}/index.ts`)

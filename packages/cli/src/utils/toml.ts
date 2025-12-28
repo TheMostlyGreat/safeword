@@ -48,16 +48,29 @@ export function appendTomlSection(content: string, section: string): string {
 
 /**
  * Generate Ruff configuration section for pyproject.toml.
- * Mirrors ESLint rule philosophy.
  *
- * @see .safeword/planning/specs/feature-python-support.md → Ruff Rule Selection
+ * Uses ALL rules for maximum strictness, matching ESLint/golangci-lint philosophy.
+ * Ignores noisy rules that conflict with formatters or are redundant with mypy.
+ *
+ * Design constraints (matching ESLint):
+ * - C901: max-complexity 10
  */
 export function generateRuffConfig(): string {
   return `[tool.ruff]
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "S", "SIM", "UP", "I", "ASYNC", "C90", "PT"]
+select = ["ALL"]
+ignore = [
+    "D",      # pydocstyle - too noisy for LLM code
+    "ANN",    # flake8-annotations - mypy handles this
+    "COM812", # missing trailing comma - conflicts with formatter
+    "ISC001", # single-line-implicit-string-concatenation - conflicts with formatter
+    "E501",   # line too long - formatter handles this
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]  # allow assert in tests
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10`;
