@@ -331,4 +331,48 @@ dev = ["ruff>=0.8.0"]
     },
     TIMEOUT_SETUP,
   );
+
+  it(
+    'Test 6.4: Shows poetry install command for poetry projects',
+    async () => {
+      // Arrange - poetry project (pip fallback to show message)
+      writeTestFile(
+        projectDirectory,
+        'pyproject.toml',
+        `[project]
+name = "test"
+version = "0.1.0"
+
+[tool.poetry]
+name = "test"
+`,
+      );
+      // Note: No poetry.lock, so install will fail and show fallback message
+      initGitRepo(projectDirectory);
+
+      // Act
+      const result = await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+
+      // Assert - Poetry project detected, shows poetry command in fallback
+      // (install fails without poetry.lock, so fallback shown)
+      expect(result.stdout).toMatch(/poetry add/);
+    },
+    TIMEOUT_SETUP,
+  );
+
+  it(
+    'Test 6.5: Shows pipenv install command for pipenv projects',
+    async () => {
+      // Arrange - pipenv project
+      createPythonProject(projectDirectory, { manager: 'pipenv' });
+      initGitRepo(projectDirectory);
+
+      // Act
+      const result = await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+
+      // Assert - Pipenv project detected
+      expect(result.stdout).toMatch(/pipenv install/);
+    },
+    TIMEOUT_SETUP,
+  );
 });
