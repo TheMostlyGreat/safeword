@@ -203,5 +203,5 @@ For L2: Update test definition status (✅/⏭️/❌/🔴) as tests pass.
 | Scenario                | Handoff           |
 | ----------------------- | ----------------- |
 | Test fails unexpectedly | → debugging skill |
-| Review needed           | → quality-reviewer    |
+| Review needed           | → quality-reviewing   |
 | Scope expanding         | → Update spec first   |

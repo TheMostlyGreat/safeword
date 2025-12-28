@@ -58,7 +58,7 @@ describe('Reset Command - Reconcile Integration', () => {
 
     // .claude directory
     mkdirSync(nodePath.join(temporaryDirectory, '.claude/commands'), { recursive: true });
-    mkdirSync(nodePath.join(temporaryDirectory, '.claude/skills/safeword-quality-reviewer'), {
+    mkdirSync(nodePath.join(temporaryDirectory, '.claude/skills/safeword-quality-reviewing'), {
       recursive: true,
     });
     writeFileSync(
@@ -78,7 +78,7 @@ describe('Reset Command - Reconcile Integration', () => {
     );
     writeFileSync(nodePath.join(temporaryDirectory, '.claude/commands/lint.md'), '# Lint');
     writeFileSync(
-      nodePath.join(temporaryDirectory, '.claude/skills/safeword-quality-reviewer/SKILL.md'),
+      nodePath.join(temporaryDirectory, '.claude/skills/safeword-quality-reviewing/SKILL.md'),
       '# Skill',
     );
 
@@ -125,7 +125,7 @@ describe('Reset Command - Reconcile Integration', () => {
 
       // .claude/skills/safeword-* should be removed
       expect(
-        existsSync(nodePath.join(temporaryDirectory, '.claude/skills/safeword-quality-reviewer')),
+        existsSync(nodePath.join(temporaryDirectory, '.claude/skills/safeword-quality-reviewing')),
       ).toBe(false);
     });
 

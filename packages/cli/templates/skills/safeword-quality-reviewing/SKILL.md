@@ -1,9 +1,10 @@
 ---
-description: Deep code quality review with web research. Use when user explicitly requests verification against latest docs ('double check against latest', 'verify versions', 'check security'), needs deeper analysis beyond automatic hook, or is working on projects without SAFEWORD.md/CLAUDE.md. Fetches current documentation, checks latest versions, and provides deep analysis (performance, security, alternatives).
-alwaysApply: false
+name: quality-reviewing
+description: Deep code review with web research to verify against latest ecosystem. Use when user says 'double check against latest', 'verify versions', 'check security', 'review against docs', or needs deep analysis beyond automatic quality hook.
+allowed-tools: '*'
 ---
 
-# Quality Reviewer
+# Quality Reviewing
 
 Deep quality review with web research to verify code against the latest ecosystem state.
 
@@ -15,7 +16,6 @@ Deep quality review with web research to verify code against the latest ecosyste
 - **Deep dive needed**: User wants analysis beyond automatic hook (performance, architecture alternatives, trade-offs)
 - **No SAFEWORD.md/CLAUDE.md**: Projects without context files (automatic hook won't run, manual review needed)
 - **Pre-change review**: User wants review before making changes (automatic hook only triggers after changes)
-- **Model-invoked**: Claude determines web research would be valuable
 
 **Relationship to automatic quality hook**:
 
@@ -42,7 +42,6 @@ Read relevant standards:
 
 - `CLAUDE.md` or `SAFEWORD.md` - Project-specific guidelines
 - `ARCHITECTURE.md` - Architectural principles
-- `@./.safeword/guides/code-philosophy.md` - Core coding principles
 
 ### 3. Evaluate Correctness
 
@@ -91,13 +90,12 @@ Read relevant standards:
 - Are we using libraries correctly?
 - Are we following official documentation?
 
-### 7. Verify Latest Versions
+### 7. Verify Latest Versions - PRIMARY VALUE
 
 **CRITICAL**: This is your main differentiator from automatic hook. ALWAYS check versions.
 
-Search for:
-- "[library name] latest stable version 2025"
-- "[library name] security vulnerabilities"
+Search for: "[library name] latest stable version 2025"
+Search for: "[library name] security vulnerabilities"
 
 **Flag if outdated:**
 
@@ -106,19 +104,19 @@ Search for:
 - Security vulnerabilities → CRITICAL (must upgrade)
 - Using latest → Confirm
 
-### 8. Verify Latest Documentation
+**Common libraries**: React, TypeScript, Vite, Next.js, Node.js, Vitest, Playwright, Jest, esbuild
+
+### 8. Verify Latest Documentation - PRIMARY VALUE
 
 **CRITICAL**: This is your main differentiator from automatic hook. ALWAYS verify against current docs.
 
-Fetch documentation from official sources:
-- https://react.dev (for React)
-- https://vitejs.dev (for Vite)
+Fetch and check official documentation sites for the libraries in use.
 
 **Look for:**
 
 - Are we using deprecated APIs?
 - Are there newer, better patterns?
-- Did the library's recommendations change since training data?
+- Did the library's recommendations change recently?
 
 ## Output Format
 
@@ -137,8 +135,8 @@ Fetch documentation from official sources:
 **Anti-Bloat:** [✓/⚠️/❌] [Brief assessment]
 **Elegance:** [✓/⚠️/❌] [Brief assessment]
 **Standards:** [✓/⚠️/❌] [Brief assessment]
-**Versions:** [✓/⚠️/❌] [Latest version check with WebSearch]
-**Documentation:** [✓/⚠️/❌] [Current docs check with WebFetch]
+**Versions:** [✓/⚠️/❌] [Latest version check]
+**Documentation:** [✓/⚠️/❌] [Current docs check]
 
 **Verdict:** [APPROVE / REQUEST CHANGES / NEEDS DISCUSSION]
 
@@ -156,3 +154,4 @@ Fetch documentation from official sources:
 6. **Be thorough but concise** - Cover all areas but keep explanations brief
 7. **Provide actionable feedback** - Specific line numbers, concrete suggestions
 8. **Clear verdict** - Always end with APPROVE/REQUEST CHANGES/NEEDS DISCUSSION
+9. **Separate critical vs nice-to-have** - User needs to know what's blocking vs optional

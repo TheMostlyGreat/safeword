@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { getEslintConfig } from './config';
+import { getEslintConfig, SETTINGS_HOOKS } from './config';
 
 describe('getEslintConfig', () => {
   it('should use import.meta.url for config-relative path resolution (not CWD)', () => {
@@ -70,5 +70,53 @@ describe('getEslintConfig', () => {
     const config = getEslintConfig(true);
 
     expect(config).not.toContain('eslintConfigPrettier');
+  });
+});
+
+describe('SETTINGS_HOOKS', () => {
+  it('should define all required hook types', () => {
+    expect(SETTINGS_HOOKS).toHaveProperty('SessionStart');
+    expect(SETTINGS_HOOKS).toHaveProperty('UserPromptSubmit');
+    expect(SETTINGS_HOOKS).toHaveProperty('Stop');
+    expect(SETTINGS_HOOKS).toHaveProperty('PostToolUse');
+  });
+
+  it('should have valid PostToolUse matcher that targets edit tools', () => {
+    const matcher = SETTINGS_HOOKS.PostToolUse[0].matcher;
+
+    // Must be valid regex
+    expect(() => new RegExp(matcher)).not.toThrow();
+
+    // Claude Code uses unanchored regex matching
+    const regex = new RegExp(matcher);
+
+    // Should match file-modifying tools
+    expect(regex.test('Write')).toBe(true);
+    expect(regex.test('Edit')).toBe(true);
+    expect(regex.test('MultiEdit')).toBe(true);
+    expect(regex.test('NotebookEdit')).toBe(true);
+
+    // Should NOT match read-only tools
+    expect(regex.test('Read')).toBe(false);
+    expect(regex.test('Bash')).toBe(false);
+    expect(regex.test('Grep')).toBe(false);
+  });
+
+  it('should have all commands reference $CLAUDE_PROJECT_DIR', () => {
+    const commands: string[] = [];
+    for (const entries of Object.values(SETTINGS_HOOKS)) {
+      for (const entry of entries) {
+        for (const hook of entry.hooks) {
+          if (hook.type === 'command') {
+            commands.push(hook.command);
+          }
+        }
+      }
+    }
+
+    expect(commands.length).toBeGreaterThan(0);
+    for (const command of commands) {
+      expect(command, `Command missing $CLAUDE_PROJECT_DIR: ${command}`).toContain('$CLAUDE_PROJECT_DIR');
+    }
   });
 });

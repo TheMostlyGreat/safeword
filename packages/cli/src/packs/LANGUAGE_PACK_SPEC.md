@@ -30,10 +30,10 @@ interface LanguagePack {
 
 | Constraint | ESLint | Ruff | golangci-lint |
 |------------|--------|------|---------------|
-| Cyclomatic complexity ≤10 | `complexity: 10` | `C901` + `max-complexity = 10` | `cyclop` (default: 10) |
-| Max nesting depth ≤4 | `max-depth: 4` | - | `nestif: min-complexity: 4` |
-| Max function params ≤5 | `max-params: 5` | - | - |
-| Max callback nesting ≤3 | `max-nested-callbacks: 3` | - | - |
+| Cyclomatic complexity ≤10 | `complexity: 10` | `C901` (max-complexity=10) | `cyclop` (default: 10) |
+| Max nesting depth ≤4 | `max-depth: 4` | N/A | `nestif` (min-complexity=4) |
+| Max function params ≤5 | `max-params: 5` | `PLR0913` (default: 5) | N/A |
+| Max callback nesting ≤3 | `max-nested-callbacks: 3` | N/A | N/A |
 
 **Why:** LLMs write dense, complex code. These constraints force decomposition and improve maintainability.
 

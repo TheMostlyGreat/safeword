@@ -302,8 +302,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/skills/safeword-enforcing-tdd/SKILL.md': {
       template: 'skills/safeword-enforcing-tdd/SKILL.md',
     },
-    '.claude/skills/safeword-quality-reviewer/SKILL.md': {
-      template: 'skills/safeword-quality-reviewer/SKILL.md',
+    '.claude/skills/safeword-quality-reviewing/SKILL.md': {
+      template: 'skills/safeword-quality-reviewing/SKILL.md',
     },
     '.claude/skills/safeword-refactoring/SKILL.md': {
       template: 'skills/safeword-refactoring/SKILL.md',
@@ -328,8 +328,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.cursor/rules/safeword-enforcing-tdd.mdc': {
       template: 'cursor/rules/safeword-enforcing-tdd.mdc',
     },
-    '.cursor/rules/safeword-quality-reviewer.mdc': {
-      template: 'cursor/rules/safeword-quality-reviewer.mdc',
+    '.cursor/rules/safeword-quality-reviewing.mdc': {
+      template: 'cursor/rules/safeword-quality-reviewing.mdc',
     },
     '.cursor/rules/safeword-refactoring.mdc': {
       template: 'cursor/rules/safeword-refactoring.mdc',

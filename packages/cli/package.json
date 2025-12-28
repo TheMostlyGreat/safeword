@@ -24,7 +24,6 @@
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:integration": "vitest run tests/integration/",
-    "test:e2e": "vitest run tests/e2e/",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",

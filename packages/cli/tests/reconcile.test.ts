@@ -436,7 +436,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       expect(existsSync(nodePath.join(temporaryDirectory, '.claude/commands/lint.md'))).toBe(false);
       expect(
         existsSync(
-          nodePath.join(temporaryDirectory, '.claude/skills/safeword-quality-reviewer/SKILL.md'),
+          nodePath.join(temporaryDirectory, '.claude/skills/safeword-quality-reviewing/SKILL.md'),
         ),
       ).toBe(false);
       expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'))).toBe(false);
