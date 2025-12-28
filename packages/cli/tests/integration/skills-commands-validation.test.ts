@@ -668,12 +668,12 @@ describe('Skills-Cursor Parity', () => {
 });
 
 /**
- * Negative Tests: Prove validators catch invalid content
+ * Validation Logic Tests: Prove validators correctly accept/reject content
  *
  * These tests verify that our validation logic correctly rejects
- * malformed files, proving the simulation is faithful.
+ * malformed files AND accepts valid files, proving the simulation is faithful.
  */
-describe('Negative Tests: Invalid Content Detection', () => {
+describe('Validation Logic Tests', () => {
   describe('Skill Validation Logic', () => {
     it('rejects content without frontmatter', () => {
       const content = '# Just a heading\n\nNo frontmatter here.';
