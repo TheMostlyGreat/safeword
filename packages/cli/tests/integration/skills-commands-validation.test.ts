@@ -150,6 +150,21 @@ function isGerundName(name: string): boolean {
   return parts.some(part => part.endsWith('ing'));
 }
 
+/**
+ * Read file and parse frontmatter, returning defaults on error
+ */
+function readAndParseFrontmatter(filePath: string): {
+  content: string;
+  parsed: ReturnType<typeof parseFrontmatter>;
+} {
+  try {
+    const content = readFileSync(filePath, 'utf8');
+    return { content, parsed: parseFrontmatter(content) };
+  } catch {
+    return { content: '', parsed: null };
+  }
+}
+
 describe('Skills Validation (Claude Code Format)', () => {
   const skillDirectories = getSkillDirectories();
 
@@ -160,16 +175,7 @@ describe('Skills Validation (Claude Code Format)', () => {
   for (const skillDir of skillDirectories) {
     describe(`skill: ${skillDir}`, () => {
       const skillPath = join(SKILLS_DIR, skillDir, 'SKILL.md');
-      let content: string;
-      let parsed: ReturnType<typeof parseFrontmatter>;
-
-      try {
-        content = readFileSync(skillPath, 'utf8');
-        parsed = parseFrontmatter(content);
-      } catch {
-        content = '';
-        parsed = null;
-      }
+      const { content, parsed } = readAndParseFrontmatter(skillPath);
 
       it('should have SKILL.md file', () => {
         expect(content).not.toBe('');
@@ -344,16 +350,7 @@ describe('Commands Validation (Claude Code Format)', () => {
     describe(`command: ${commandFile}`, () => {
       const commandPath = join(COMMANDS_DIR, commandFile);
       const commandName = basename(commandFile, '.md');
-      let content: string;
-      let parsed: ReturnType<typeof parseFrontmatter>;
-
-      try {
-        content = readFileSync(commandPath, 'utf8');
-        parsed = parseFrontmatter(content);
-      } catch {
-        content = '';
-        parsed = null;
-      }
+      const { content, parsed } = readAndParseFrontmatter(commandPath);
 
       it('should have content', () => {
         expect(content).not.toBe('');
