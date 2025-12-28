@@ -8,6 +8,7 @@ import { readdirSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import { addInstalledPack } from '../packs/config.js';
+import { setupGoTooling } from '../packs/golang/setup.js';
 import {
   detectPythonPackageManager,
   getPythonInstallCommand,
@@ -118,16 +119,17 @@ function addFormatScriptIfMissing(packageDir: string): boolean {
 }
 
 /**
- * Create package.json if missing, unless Python-only project.
+ * Create package.json if missing, unless non-JS-only project (Python, Go).
  * Returns true if created, false if already exists or skipped.
  */
 function ensurePackageJson(cwd: string): boolean {
   const packageJsonPath = nodePath.join(cwd, 'package.json');
   if (exists(packageJsonPath)) return false;
 
-  // Skip for Python-only projects (no JS tooling needed)
+  // Skip for non-JS-only projects (no JS tooling needed)
   const languages = detectLanguages(cwd);
-  if (languages.python && !languages.javascript) return false;
+  const hasNonJs = languages.python || languages.golang;
+  if (hasNonJs && !languages.javascript) return false;
 
   const dirName = nodePath.basename(cwd) || 'project';
   const defaultPackageJson: PackageJson = { name: dirName, version: '0.1.0', scripts: {} };
@@ -197,6 +199,7 @@ interface SetupSummaryOptions {
   pythonFiles?: string[];
   pythonInstallFailed?: boolean;
   pythonImportLinter?: boolean;
+  goFiles?: string[];
 }
 
 function printSetupSummary(options: SetupSummaryOptions): void {
@@ -210,10 +213,11 @@ function printSetupSummary(options: SetupSummaryOptions): void {
     pythonFiles = [],
     pythonInstallFailed = false,
     pythonImportLinter = false,
+    goFiles = [],
   } = options;
   header('Setup Complete');
 
-  const allCreated = [...result.created, ...archFiles, ...pythonFiles.filter(f => f !== 'pyproject.toml')];
+  const allCreated = [...result.created, ...archFiles, ...pythonFiles.filter(f => f !== 'pyproject.toml'), ...goFiles];
   if (allCreated.length > 0 || packageJsonCreated) {
     info('\nCreated:');
     if (packageJsonCreated) listItem('package.json');
@@ -232,6 +236,11 @@ function printSetupSummary(options: SetupSummaryOptions): void {
   // Python-specific guidance: show install command only if auto-install failed
   if (languages.python && pythonInstallFailed) {
     listItem(`Install Python tools: ${getPythonInstallCommand(cwd, getPythonTools(pythonImportLinter))}`);
+  }
+
+  // Go-specific guidance: always show since Go tools are installed globally
+  if (languages.golang && goFiles.length > 0) {
+    listItem('Install Go tools: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest');
   }
 
   listItem('Commit the new files to git');
@@ -257,9 +266,10 @@ export async function setup(options: SetupOptions): Promise<void> {
   try {
     info('\nCreating safeword configuration...');
     const ctx = createProjectContext(cwd);
-    const languages = ctx.languages ?? { javascript: false, python: false };
-    const isPythonOnly = languages.python && !languages.javascript;
-    if (isPythonOnly) info('Python project detected (skipping JS tooling)');
+    const languages = ctx.languages ?? { javascript: false, python: false, golang: false };
+    const isNonJsOnly = (languages.python || languages.golang) && !languages.javascript;
+    if (languages.python && !languages.javascript) info('Python project detected (skipping JS tooling)');
+    if (languages.golang && !languages.javascript) info('Go project detected (skipping JS tooling)');
     const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
     success('Created .safeword directory and configuration');
 
@@ -268,7 +278,7 @@ export async function setup(options: SetupOptions): Promise<void> {
     const archFiles: string[] = [];
     let workspaceUpdates: string[] = [];
 
-    if (!isPythonOnly) {
+    if (!isNonJsOnly) {
       const arch = buildArchitecture(cwd);
 
       if (hasArchitectureDetected(arch)) {
@@ -302,6 +312,17 @@ export async function setup(options: SetupOptions): Promise<void> {
       ? setupPython(cwd)
       : { files: [], installFailed: false, importLinter: false };
 
+    // Go-specific setup (golangci-lint config)
+    const goFiles: string[] = [];
+    if (languages.golang) {
+      const goResult = setupGoTooling(cwd);
+      goFiles.push(...goResult.files);
+      if (goResult.files.length > 0) {
+        info('\nGo tooling configured:');
+        info('  Created .golangci.yml');
+      }
+    }
+
     // Track installed packs in config.json
     const detectedPacks = detectLanguagePacks(cwd);
     for (const packId of detectedPacks) {
@@ -318,6 +339,7 @@ export async function setup(options: SetupOptions): Promise<void> {
       pythonFiles: pythonStatus.files,
       pythonInstallFailed: pythonStatus.installFailed,
       pythonImportLinter: pythonStatus.importLinter,
+      goFiles,
     });
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);

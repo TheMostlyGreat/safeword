@@ -374,6 +374,11 @@ export function isMypyInstalled(): boolean {
   return isCommandAvailable('mypy');
 }
 
+/** Check if golangci-lint is installed (for Go linting tests) */
+export function isGolangciLintInstalled(): boolean {
+  return isCommandAvailable('golangci-lint');
+}
+
 /**
  * Creates a Python-only project with pyproject.toml
  * @param dir
@@ -432,6 +437,36 @@ source = { virtual = "." }
   }
 
   writeTestFile(dir, 'pyproject.toml', content);
+}
+
+/**
+ * Creates a Go project with go.mod and main.go
+ * @param dir
+ * @param options
+ * @param options.module - Module name (defaults to 'example.com/test-project')
+ */
+export function createGoProject(dir: string, options: { module?: string } = {}): void {
+  const module = options.module ?? 'example.com/test-project';
+
+  writeTestFile(
+    dir,
+    'go.mod',
+    `module ${module}
+
+go 1.22
+`,
+  );
+
+  writeTestFile(
+    dir,
+    'main.go',
+    `package main
+
+func main() {
+	println("hello")
+}
+`,
+  );
 }
 
 /**

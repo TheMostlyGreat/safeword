@@ -25,6 +25,9 @@ const PYPROJECT_TOML = 'pyproject.toml';
 const REQUIREMENTS_TXT = 'requirements.txt';
 const UV_LOCK = 'uv.lock';
 
+// Go project file markers
+const GO_MOD = 'go.mod';
+
 // Python frameworks to detect (order matters - first match wins)
 const PYTHON_FRAMEWORKS = ['django', 'flask', 'fastapi'] as const;
 
@@ -64,6 +67,7 @@ export interface ProjectType {
 export interface Languages {
   javascript: boolean; // package.json exists
   python: boolean; // pyproject.toml OR requirements.txt exists
+  golang: boolean; // go.mod exists
 }
 
 /**
@@ -85,10 +89,12 @@ export function detectLanguages(cwd: string): Languages {
   const hasPackageJson = existsSync(nodePath.join(cwd, 'package.json'));
   const hasPyproject = existsSync(nodePath.join(cwd, PYPROJECT_TOML));
   const hasRequirements = existsSync(nodePath.join(cwd, REQUIREMENTS_TXT));
+  const hasGoModule = existsSync(nodePath.join(cwd, GO_MOD));
 
   return {
     javascript: hasPackageJson,
     python: hasPyproject || hasRequirements,
+    golang: hasGoModule,
   };
 }
 

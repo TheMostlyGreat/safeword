@@ -8,6 +8,7 @@ import { $ } from 'bun';
 // File extensions for different linting strategies
 const JS_EXTENSIONS = new Set(['js', 'jsx', 'ts', 'tsx', 'mjs', 'mts', 'cjs', 'cts', 'vue', 'svelte', 'astro']);
 const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
+const GO_EXTENSIONS = new Set(['go']);
 const SHELL_EXTENSIONS = new Set(['sh']);
 const PRETTIER_EXTENSIONS = new Set(['md', 'json', 'css', 'scss', 'html', 'yaml', 'yml', 'graphql']);
 
@@ -15,6 +16,7 @@ const PRETTIER_EXTENSIONS = new Set(['md', 'json', 'css', 'scss', 'html', 'yaml'
  * Lint a file based on its extension.
  * - JS/TS: ESLint + Prettier
  * - Python: Ruff check + Ruff format
+ * - Go: golangci-lint run --fix + golangci-lint fmt
  * - Shell: shellcheck + Prettier
  * - Other: Prettier only
  *
@@ -39,6 +41,14 @@ export async function lintFile(file: string, projectDir: string): Promise<void> 
   if (PYTHON_EXTENSIONS.has(extension)) {
     await $`ruff check --fix ${file}`.nothrow().quiet();
     await $`ruff format ${file}`.nothrow().quiet();
+    return;
+  }
+
+  // Go files - golangci-lint run (fix code), then golangci-lint fmt (format)
+  // Skips gracefully if golangci-lint is not installed
+  if (GO_EXTENSIONS.has(extension)) {
+    await $`golangci-lint run --fix ${file}`.nothrow().quiet();
+    await $`golangci-lint fmt ${file}`.nothrow().quiet();
     return;
   }
 
