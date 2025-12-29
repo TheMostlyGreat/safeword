@@ -14,7 +14,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   createPythonProject,
   createTemporaryDirectory,
-  fileExists,
   initGitRepo,
   isUvInstalled,
   readTestFile,
@@ -81,13 +80,16 @@ describe('Suite 1: Ruff Config Generation', () => {
 
       // Assert
       const pyprojectContent = readPyprojectToml(projectDirectory);
+      // pyproject.toml uses extend to reference base config
       expect(pyprojectContent).toContain('[tool.ruff]');
-      expect(pyprojectContent).toContain('[tool.ruff.lint]');
-      expect(pyprojectContent).toContain('select = [');
-      // Verify specific rules from spec
-      expect(pyprojectContent).toMatch(/"E"/); // pycodestyle errors
-      expect(pyprojectContent).toMatch(/"F"/); // pyflakes
-      expect(pyprojectContent).toMatch(/"B"/); // bugbear
+      expect(pyprojectContent).toContain('extend = ".safeword/ruff.toml"');
+
+      // Actual rules are in .safeword/ruff.toml
+      const ruffToml = readTestFile(projectDirectory, '.safeword/ruff.toml');
+      expect(ruffToml).toContain('[lint]');
+      expect(ruffToml).toContain('select = [');
+      // Verify ALL is selected (includes E, F, B)
+      expect(ruffToml).toMatch(/"ALL"/);
     },
     TIMEOUT_SETUP,
   );

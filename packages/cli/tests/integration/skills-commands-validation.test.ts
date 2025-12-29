@@ -46,6 +46,19 @@ interface ParsedFrontmatter {
 }
 
 /**
+ * Parse a YAML value string, handling booleans and quoted strings.
+ */
+function parseYamlValue(raw: string): string | boolean {
+  if (raw === 'true') return true;
+  if (raw === 'false') return false;
+  // Remove surrounding quotes
+  if ((raw.startsWith("'") && raw.endsWith("'")) || (raw.startsWith('"') && raw.endsWith('"'))) {
+    return raw.slice(1, -1);
+  }
+  return raw;
+}
+
+/**
  * Parse YAML frontmatter from markdown file content.
  * Returns null if no valid frontmatter found.
  */
@@ -80,20 +93,7 @@ function parseFrontmatter(content: string): { frontmatter: ParsedFrontmatter; bo
     if (colonIndex === -1) continue;
 
     const key = line.slice(0, colonIndex).trim();
-    let value: string | boolean = line.slice(colonIndex + 1).trim();
-
-    // Handle boolean values
-    if (value === 'true') value = true as unknown as string;
-    if (value === 'false') value = false as unknown as string;
-
-    // Remove quotes if present
-    if (typeof value === 'string' && value.startsWith("'") && value.endsWith("'")) {
-      value = value.slice(1, -1);
-    }
-    if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
-      value = value.slice(1, -1);
-    }
-
+    const value = parseYamlValue(line.slice(colonIndex + 1).trim());
     (frontmatter as Record<string, unknown>)[key] = value;
   }
 

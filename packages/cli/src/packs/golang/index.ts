@@ -1,7 +1,7 @@
 /**
  * Go Language Pack
  *
- * Detects Go projects and sets up golangci-lint configuration.
+ * Detects Go projects. Config file (.golangci.yml) is created by schema.
  */
 
 import nodePath from 'node:path';
@@ -19,7 +19,8 @@ export const golangPack: LanguagePack = {
     return exists(nodePath.join(cwd, 'go.mod'));
   },
 
-  setup(cwd: string): SetupResult {
-    return setupGoTooling(cwd);
+  setup(): SetupResult {
+    // .golangci.yml is created by schema.ts (managedFiles)
+    return setupGoTooling();
   },
 };

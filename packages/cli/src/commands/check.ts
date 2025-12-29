@@ -209,12 +209,13 @@ function reportVersionMismatch(health: HealthStatus): void {
  * @returns true if there are issues requiring attention
  */
 function reportHealthSummary(health: HealthStatus): boolean {
-  if (health.issues.length > 0) {
-    header('Issues Found');
-    for (const issue of health.issues) {
-      warn(issue);
+  // Check missing packs first (highest priority - explains missing files)
+  if (health.missingPacks.length > 0) {
+    header('Missing Language Packs');
+    for (const pack of health.missingPacks) {
+      listItem(`${pack} pack not installed`);
     }
-    info('\nRun `safeword upgrade` to repair configuration');
+    info('\nRun `safeword upgrade` to install missing packs');
     return true;
   }
 
@@ -225,12 +226,12 @@ function reportHealthSummary(health: HealthStatus): boolean {
     return true;
   }
 
-  if (health.missingPacks.length > 0) {
-    header('Missing Language Packs');
-    for (const pack of health.missingPacks) {
-      listItem(`${pack} pack not installed`);
+  if (health.issues.length > 0) {
+    header('Issues Found');
+    for (const issue of health.issues) {
+      warn(issue);
     }
-    info('\nRun `safeword upgrade` to install missing packs');
+    info('\nRun `safeword upgrade` to repair configuration');
     return true;
   }
 

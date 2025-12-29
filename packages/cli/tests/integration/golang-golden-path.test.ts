@@ -54,7 +54,7 @@ describe('E2E: Go Golden Path', () => {
     // Check essential golangci-lint v2 settings
     expect(config).toContain('version: "2"');
     expect(config).toContain('linters:');
-    expect(config).toContain('default: standard');
+    expect(config).toContain('default: all'); // Use all linters for maximum strictness
     expect(config).toContain('formatters:');
     expect(config).toContain('gofumpt');
   });

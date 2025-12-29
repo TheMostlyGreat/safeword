@@ -199,7 +199,6 @@ interface SetupSummaryOptions {
   pythonFiles?: string[];
   pythonInstallFailed?: boolean;
   pythonImportLinter?: boolean;
-  goFiles?: string[];
 }
 
 function printSetupSummary(options: SetupSummaryOptions): void {
@@ -213,11 +212,11 @@ function printSetupSummary(options: SetupSummaryOptions): void {
     pythonFiles = [],
     pythonInstallFailed = false,
     pythonImportLinter = false,
-    goFiles = [],
   } = options;
   header('Setup Complete');
 
-  const allCreated = [...result.created, ...archFiles, ...pythonFiles.filter(f => f !== 'pyproject.toml'), ...goFiles];
+  // Schema-created files (including .golangci.yml, .safeword/ruff.toml) are in result.created
+  const allCreated = [...result.created, ...archFiles, ...pythonFiles.filter(f => f !== 'pyproject.toml')];
   if (allCreated.length > 0 || packageJsonCreated) {
     info('\nCreated:');
     if (packageJsonCreated) listItem('package.json');
@@ -238,8 +237,8 @@ function printSetupSummary(options: SetupSummaryOptions): void {
     listItem(`Install Python tools: ${getPythonInstallCommand(cwd, getPythonTools(pythonImportLinter))}`);
   }
 
-  // Go-specific guidance: always show since Go tools are installed globally
-  if (languages.golang && goFiles.length > 0) {
+  // Go-specific guidance: show if .golangci.yml was created (Go tools are installed globally)
+  if (languages.golang && result.created.includes('.golangci.yml')) {
     listItem('Install Go tools: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest');
   }
 
@@ -248,7 +247,7 @@ function printSetupSummary(options: SetupSummaryOptions): void {
   success(`\nSafeword ${VERSION} installed successfully!`);
 }
 
-export async function setup(options: SetupOptions): Promise<void> {
+export async function setup(_options: SetupOptions): Promise<void> {
   const cwd = process.cwd();
   const safewordDirectory = nodePath.join(cwd, '.safeword');
 
@@ -307,20 +306,16 @@ export async function setup(options: SetupOptions): Promise<void> {
       installDependencies(cwd, result.packagesToInstall, 'linting dependencies');
     }
 
-    // Python-specific setup (Ruff config, import-linter)
+    // Python-specific setup (extend reference + import-linter + mypy in pyproject.toml)
+    // Note: .safeword/ruff.toml is created by reconcile (ownedFiles)
     const pythonStatus = languages.python
       ? setupPython(cwd)
       : { files: [], installFailed: false, importLinter: false };
 
-    // Go-specific setup (golangci-lint config)
-    const goFiles: string[] = [];
+    // Go-specific setup (future: layer detection for depguard)
+    // Note: .golangci.yml is created by reconcile (managedFiles)
     if (languages.golang) {
-      const goResult = setupGoTooling(cwd);
-      goFiles.push(...goResult.files);
-      if (goResult.files.length > 0) {
-        info('\nGo tooling configured:');
-        info('  Created .golangci.yml');
-      }
+      setupGoTooling(); // Currently no-op, kept for future layer detection
     }
 
     // Track installed packs in config.json
@@ -339,7 +334,6 @@ export async function setup(options: SetupOptions): Promise<void> {
       pythonFiles: pythonStatus.files,
       pythonInstallFailed: pythonStatus.installFailed,
       pythonImportLinter: pythonStatus.importLinter,
-      goFiles,
     });
   } catch (error_) {
     error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);

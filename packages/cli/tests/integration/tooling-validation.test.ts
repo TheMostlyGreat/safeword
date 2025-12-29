@@ -66,10 +66,14 @@ requires-python = ">=3.10"
     expect(fileExists(projectDirectory, '.safeword')).toBe(true);
   });
 
-  it('adds Ruff config to pyproject.toml', () => {
+  it('adds Ruff config via extend pattern', () => {
     const config = readTestFile(projectDirectory, 'pyproject.toml');
     expect(config).toContain('[tool.ruff]');
-    expect(config).toContain('[tool.ruff.lint]');
+    expect(config).toContain('extend = ".safeword/ruff.toml"');
+
+    // Actual rules in .safeword/ruff.toml
+    const ruffToml = readTestFile(projectDirectory, '.safeword/ruff.toml');
+    expect(ruffToml).toContain('[lint]');
   });
 
   it('adds mypy config to pyproject.toml', () => {

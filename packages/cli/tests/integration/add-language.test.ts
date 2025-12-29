@@ -79,10 +79,14 @@ version = "0.1.0"
       expect(config.installedPacks).toContain('python');
     });
 
-    it('adds Ruff config to pyproject.toml', () => {
+    it('adds Ruff config via extend pattern', () => {
       const pyprojectConfig = readTestFile(projectDirectory, 'pyproject.toml');
       expect(pyprojectConfig).toContain('[tool.ruff]');
-      expect(pyprojectConfig).toContain('line-length');
+      expect(pyprojectConfig).toContain('extend = ".safeword/ruff.toml"');
+
+      // Actual rules in .safeword/ruff.toml
+      const ruffToml = readTestFile(projectDirectory, '.safeword/ruff.toml');
+      expect(ruffToml).toContain('line-length');
     });
 
     it.skipIf(!RUFF_AVAILABLE)('Ruff works on Python files', () => {

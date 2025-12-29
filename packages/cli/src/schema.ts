@@ -235,6 +235,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Core files
     '.safeword/SAFEWORD.md': { template: 'SAFEWORD.md' },
     '.safeword/version': { content: () => VERSION },
+    // config.json is created by packs system but needs to be registered for cleanup on uninstall
+    // Generator returns null = never created/updated by schema, but still deleted on uninstall
+    '.safeword/config.json': { generator: () => null },
 
     // Language-specific configs (generated only if language detected)
     '.safeword/ruff.toml': {
