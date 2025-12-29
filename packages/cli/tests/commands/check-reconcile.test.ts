@@ -95,13 +95,13 @@ describe('Check Command - Reconcile Integration', () => {
       // Run actual setup (this is an integration test)
       const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
-        execSync(`npx tsx ${cliPath} setup --yes`, {
+        execSync(`bunx tsx ${cliPath} setup --yes`, {
           cwd: temporaryDirectory,
           stdio: 'pipe',
           timeout: 60_000,
         });
       } catch {
-        // May fail due to npm install timeout, but files should be created
+        // May fail due to bun install timeout, but files should be created
       }
 
       const ctx = createProjectContext(temporaryDirectory);

@@ -85,7 +85,7 @@ describe('E2E: Type-Checked ESLint Rules', () => {
     await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
 
     // Install dependencies so ESLint can run with type checking
-    execSync('npm install', { cwd: projectDirectory, stdio: 'pipe' });
+    execSync('bun install', { cwd: projectDirectory, stdio: 'pipe' });
   }, 180_000);
 
   afterAll(() => {
@@ -211,7 +211,7 @@ describe('E2E: JavaScript-Only Project', () => {
 
   it('ESLint works on JavaScript files', () => {
     // Install deps and run ESLint
-    execSync('npm install', { cwd: projectDirectory, stdio: 'pipe' });
+    execSync('bun install', { cwd: projectDirectory, stdio: 'pipe' });
 
     const result = runEslint(projectDirectory, 'src/index.js');
 

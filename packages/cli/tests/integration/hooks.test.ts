@@ -29,7 +29,7 @@ import {
 
 const RUFF_AVAILABLE = isRuffInstalled();
 
-// Single setup for all hook tests - sharing avoids 3 separate npm installs (~9 min → 9 sec)
+// Single setup for all hook tests - sharing avoids 3 separate bun installs
 // Tests must be idempotent or restore state after modification (see try/finally blocks)
 let projectDirectory: string;
 

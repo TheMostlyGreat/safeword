@@ -345,7 +345,7 @@ Project-specific gotchas in `.safeword/learnings/`:
 
 **File:** `.safeword/learnings/archive/electron-build-forgotten.md`
 
-**Note:** Short gotcha goes in SAFEWORD.md: "Electron tests use built files - run `npm run build` first"
+**Note:** Short gotcha goes in SAFEWORD.md: "Electron tests use built files - run `bun run build` first"
 
 ---
 

@@ -236,7 +236,7 @@ describe('E2E: React ESLint Violation Detection', () => {
     await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
 
     // Install dependencies so ESLint can run
-    execSync('npm install', { cwd: projectDirectory, stdio: 'pipe' });
+    execSync('bun install', { cwd: projectDirectory, stdio: 'pipe' });
   }, 180_000);
 
   afterAll(() => {

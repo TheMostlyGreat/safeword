@@ -294,7 +294,7 @@ describe('Setup Command - Reconcile Integration', () => {
 
       const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
-        const result = execSync(`npx tsx ${cliPath} setup --yes`, {
+        const result = execSync(`bunx tsx ${cliPath} setup --yes`, {
           cwd: temporaryDirectory,
           encoding: 'utf8',
           timeout: 60_000,
@@ -302,7 +302,7 @@ describe('Setup Command - Reconcile Integration', () => {
 
         expect(result).toContain('Setup');
       } catch (error) {
-        // Check if setup itself worked even if npm install timed out
+        // Check if setup itself worked even if bun install timed out
         const stdout = (error as { stdout?: string }).stdout || '';
 
         // If we see setup output and .safeword exists, the reconcile worked
@@ -328,7 +328,7 @@ describe('Setup Command - Reconcile Integration', () => {
 
       const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
-        execSync(`npx tsx ${cliPath} setup --yes`, {
+        execSync(`bunx tsx ${cliPath} setup --yes`, {
           cwd: temporaryDirectory,
           encoding: 'utf8',
           timeout: 30_000,

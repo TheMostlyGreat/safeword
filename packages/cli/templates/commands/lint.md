@@ -24,11 +24,11 @@ Run these commands based on project type. Both Python and JS commands run for po
 # JS/TS linting (if package.json exists)
 [ -f package.json ] && {
   # ESLint - fix code quality issues
-  npm run lint 2>&1 || true
+  bun run lint 2>&1 || true
   # Prettier - format all files
-  npm run format --if-present 2>&1 || true
+  bun run format --if-present 2>&1 || true
   # TypeScript type check (if tsconfig.json exists)
-  [ -f tsconfig.json ] && npx tsc --noEmit 2>&1 || true
+  [ -f tsconfig.json ] && bunx tsc --noEmit 2>&1 || true
 }
 ```
 

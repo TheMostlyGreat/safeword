@@ -1,6 +1,6 @@
 # Promptfoo eval config for SAFEWORD guide quality
-# Run with: npm run eval
-# View results: npm run eval:view
+# Run with: bun run eval
+# View results: bun run eval:view
 
 description: 'SAFEWORD Guide Quality Evals'
 
@@ -371,7 +371,7 @@ tests:
         ### Enforcement with eslint-plugin-boundaries
 
         **Setup:**
-        1. Install: `npm install --save-dev eslint-plugin-boundaries`
+        1. Install: `bun add -D eslint-plugin-boundaries`
         2. Add to `eslint.config.mjs` with boundaries/element-types rules
         3. Define layers in `ARCHITECTURE.md`
         4. Errors appear in IDE + CI automatically
@@ -1171,7 +1171,7 @@ tests:
         2. **Use port-based cleanup first** - Simplest and safest
         3. **Create project cleanup scripts** - Reusable, documented
         4. **Never `killall node`** - Too broad when working on multiple projects
-        5. **Clean up before starting** - Run cleanup script before `npm run dev`
+        5. **Clean up before starting** - Run cleanup script before `bun run dev`
     assert:
       - type: llm-rubric
         value: |

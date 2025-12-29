@@ -7,8 +7,8 @@
  * Adding a new file? Add it here and it will be handled by setup/upgrade/reset.
  */
 
-import { generateGolangciConfig } from './packs/golang/setup.js';
-import { CURSOR_HOOKS, getEslintConfig, SETTINGS_HOOKS } from './templates/config.js';
+import { generateGolangciConfig, generateSafewordGolangciConfig } from './packs/golang/setup.js';
+import { CURSOR_HOOKS, getEslintConfig, getSafewordEslintConfig, SETTINGS_HOOKS } from './templates/config.js';
 import { AGENTS_MD_LINK } from './templates/content.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';
 import { MCP_SERVERS } from './utils/install.js';
@@ -239,9 +239,26 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Generator returns null = never created/updated by schema, but still deleted on uninstall
     '.safeword/config.json': { generator: () => null },
 
-    // Language-specific configs (generated only if language detected)
+    // Language-specific safeword configs for hooks (extend project configs if they exist)
+    // These configs are used by hooks for LLM enforcement with stricter rules
+    '.safeword/eslint.config.mjs': {
+      generator: ctx =>
+        ctx.languages?.javascript
+          ? getSafewordEslintConfig(
+              ctx.projectType.existingEslintConfig,
+              ctx.projectType.existingFormatter,
+            )
+          : null,
+    },
     '.safeword/ruff.toml': {
-      generator: ctx => (ctx.languages?.python ? generateRuffBaseConfig() : null),
+      generator: ctx =>
+        ctx.languages?.python ? generateRuffBaseConfig(ctx.projectType.existingRuffConfig) : null,
+    },
+    '.safeword/.golangci.yml': {
+      generator: ctx =>
+        ctx.languages?.golang
+          ? generateSafewordGolangciConfig(ctx.projectType.existingGolangciConfig, ctx.cwd)
+          : null,
     },
 
     // Hooks shared library (2 files) - TypeScript with Bun runtime
@@ -362,9 +379,14 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
   // Files created if missing, updated only if content matches current template
   managedFiles: {
+    // Project-level ESLint config (created only if no existing ESLint config)
     'eslint.config.mjs': {
-      generator: ctx =>
-        ctx.languages?.javascript ? getEslintConfig(ctx.projectType.existingFormatter) : null,
+      generator: ctx => {
+        // Skip if project already has ESLint config (safeword will use .safeword/eslint.config.mjs)
+        if (ctx.projectType.existingEslintConfig) return null;
+        if (!ctx.languages?.javascript) return null;
+        return getEslintConfig(ctx.projectType.existingFormatter);
+      },
     },
     // Minimal tsconfig for ESLint type-checked linting (only if missing)
     'tsconfig.json': {
@@ -408,9 +430,14 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
             )
           : null,
     },
-    // Go linter config (created if missing, not updated if user customized)
+    // Project-level Go linter config (created only if no existing golangci config)
     '.golangci.yml': {
-      generator: ctx => (ctx.languages?.golang ? generateGolangciConfig() : null),
+      generator: ctx => {
+        // Skip if project already has golangci config (safeword will use .safeword/.golangci.yml)
+        if (ctx.projectType.existingGolangciConfig) return null;
+        if (!ctx.languages?.golang) return null;
+        return generateGolangciConfig();
+      },
     },
   },
 
@@ -696,6 +723,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       // Non-ESLint tools
       publishableLibrary: ['publint'],
       shellcheck: ['shellcheck'], // Renamed from shell to avoid conflict with prettier-plugin-sh
+      // Legacy ESLint config compat (needed when extending .eslintrc.* configs)
+      legacyEslint: ['@eslint/eslintrc'],
     },
   },
 };

@@ -13,7 +13,7 @@ import {
   readTestFile,
   removeTemporaryDirectory,
   runCli,
-  TIMEOUT_NPM_INSTALL,
+  TIMEOUT_BUN_INSTALL,
   TIMEOUT_SETUP,
   writeTestFile,
 } from '../helpers';
@@ -150,7 +150,7 @@ describe('Test Suite: Conditional Setup for Go Projects', () => {
 
       // Should have golangci-lint configured (Go tooling)
       expect(fileExists(projectDirectory, '.golangci.yml')).toBe(true);
-    }, TIMEOUT_NPM_INSTALL);
+    }, TIMEOUT_BUN_INSTALL);
   });
 
   describe('Test: Preserves existing .golangci.yml', () => {

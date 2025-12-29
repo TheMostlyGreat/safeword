@@ -14,7 +14,7 @@
 
 ```bash
 cd /path/to/your/project
-npx safeword@latest setup
+bunx safeword@latest setup
 ```
 
 **2. Verify installation:**
@@ -198,24 +198,24 @@ planning/
 
 ```bash
 # Set up safeword in current project
-npx safeword@latest setup
-npx safeword@latest setup -y   # Non-interactive mode
+bunx safeword@latest setup
+bunx safeword@latest setup -y   # Non-interactive mode
 
 # Check project health and versions
-npx safeword@latest check
-npx safeword@latest check --offline   # Skip remote version check
+bunx safeword@latest check
+bunx safeword@latest check --offline   # Skip remote version check
 
 # Upgrade to latest version
-npx safeword@latest upgrade
+bunx safeword@latest upgrade
 
 # Preview changes before upgrading
-npx safeword@latest diff
-npx safeword@latest diff -v           # Show full diff output
+bunx safeword@latest diff
+bunx safeword@latest diff -v           # Show full diff output
 
 # Remove safeword from project
-npx safeword reset
-npx safeword reset -y          # Skip confirmation
-npx safeword reset --full      # Also remove linting config + packages
+bunx safeword reset
+bunx safeword reset -y          # Skip confirmation
+bunx safeword reset --full      # Also remove linting config + packages
 ```
 
 **Auto-detection**: Detects project type from `package.json` and installs relevant ESLint/Prettier plugins:
@@ -283,13 +283,13 @@ Commit `.safeword/` and `.claude/` in your project repo for team consistency.
 
 ```bash
 # Run all eval tests
-npm run eval
+bun run eval
 
 # Run without cache (fresh API calls)
-npm run eval:no-cache
+bun run eval:no-cache
 
 # Open web UI to view results
-npm run eval:view
+bun run eval:view
 ```
 
 ### What's Tested

@@ -249,7 +249,7 @@ Isolate persistent dev instances from test instances to avoid port conflicts.
 // playwright.config.ts
 export default defineConfig({
   webServer: {
-    command: 'npm run dev:test',
+    command: 'bun run dev:test',
     port: 4000,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,

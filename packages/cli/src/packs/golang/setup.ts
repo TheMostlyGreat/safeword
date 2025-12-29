@@ -7,6 +7,11 @@
  * Future: Layer detection for depguard import rules.
  */
 
+import { existsSync, readFileSync } from 'node:fs';
+import nodePath from 'node:path';
+
+import YAML from 'yaml';
+
 import type { SetupResult } from '../types.js';
 
 /**
@@ -40,6 +45,167 @@ formatters:
   enable:
     - gofumpt
 `;
+}
+
+/**
+ * Generate safeword golangci-lint configuration for .safeword/.golangci.yml.
+ *
+ * If project has existing config, merges it with safeword rules (safeword wins).
+ * Handles both v1 and v2 config formats.
+ *
+ * @param existingConfig - Path to existing config (e.g., '.golangci.yml') or null
+ * @param cwd - Project directory
+ */
+export function generateSafewordGolangciConfig(existingConfig: string | null, cwd: string): string {
+  if (!existingConfig) {
+    // No existing config - generate standalone
+    return getSafewordGolangciStandalone();
+  }
+
+  const configPath = nodePath.join(cwd, existingConfig);
+  if (!existsSync(configPath)) {
+    return getSafewordGolangciStandalone();
+  }
+
+  try {
+    const projectContent = readFileSync(configPath, 'utf8');
+    const projectConfig = YAML.parse(projectContent) as Record<string, unknown> | null;
+
+    if (!projectConfig) {
+      return getSafewordGolangciStandalone();
+    }
+
+    // Detect if project uses v1 or v2 format
+    const isV2 = projectConfig.version === '2';
+
+    return isV2 ? getSafewordGolangciMergedV2(projectConfig) : getSafewordGolangciMergedV1(projectConfig);
+  } catch {
+    // YAML parse error - fall back to standalone
+    console.warn(`Safeword: Could not parse ${existingConfig}, using standalone config`);
+    return getSafewordGolangciStandalone();
+  }
+}
+
+/**
+ * Standalone safeword golangci-lint config (v2 format)
+ */
+function getSafewordGolangciStandalone(): string {
+  return `# Safeword golangci-lint config - standalone (no project config to merge)
+# Used by hooks for LLM enforcement.
+
+version: "2"
+
+linters:
+  default: all
+  exclusions:
+    presets:
+      - std-error-handling
+      - common-false-positives
+  settings:
+    nestif:
+      min-complexity: 4
+
+formatters:
+  enable:
+    - gofumpt
+`;
+}
+
+/**
+ * Merge project v2 config with safeword rules (safeword wins)
+ */
+function getSafewordGolangciMergedV2(projectConfig: Record<string, unknown>): string {
+  // Start with project config, override with safeword settings
+  const merged: Record<string, unknown> = {
+    ...projectConfig,
+    version: '2',
+  };
+
+  // Merge linters section - safeword rules take precedence
+  const projectLinters = (projectConfig.linters as Record<string, unknown>) || {};
+  const safewordLinters: Record<string, unknown> = {
+    default: 'all',
+    exclusions: {
+      presets: ['std-error-handling', 'common-false-positives'],
+    },
+    settings: {
+      nestif: { 'min-complexity': 4 },
+    },
+  };
+
+  // Deep merge linters (safeword wins on conflict)
+  merged.linters = deepMerge(projectLinters, safewordLinters);
+
+  // Ensure formatters includes gofumpt
+  const projectFormatters = (projectConfig.formatters as Record<string, unknown>) || {};
+  const projectFormatterEnable = (projectFormatters.enable as string[]) || [];
+  const formatterEnable = projectFormatterEnable.includes('gofumpt')
+    ? projectFormatterEnable
+    : [...projectFormatterEnable, 'gofumpt'];
+
+  merged.formatters = { ...projectFormatters, enable: formatterEnable };
+
+  const header = `# Safeword golangci-lint config - merged with project config
+# Used by hooks for LLM enforcement. Human pre-commits use project config.
+# Source: ${projectConfig.version === '2' ? 'v2' : 'v1'} project config + safeword rules
+# Re-run \`safeword upgrade\` to regenerate after project config changes.
+
+`;
+
+  return header + YAML.stringify(merged);
+}
+
+/**
+ * Merge project v1 config with safeword rules (safeword wins), output v1 format
+ */
+function getSafewordGolangciMergedV1(projectConfig: Record<string, unknown>): string {
+  // For v1, we generate v1-compatible output
+  const merged: Record<string, unknown> = { ...projectConfig };
+
+  // Merge linters section - safeword rules take precedence
+  const projectLinters = (projectConfig.linters as Record<string, unknown>) || {};
+  merged.linters = {
+    ...projectLinters,
+    'enable-all': true,
+    // Keep any project disable list, but ensure our strict rules
+  };
+
+  // Merge linters-settings
+  const projectSettings = (projectConfig['linters-settings'] as Record<string, unknown>) || {};
+  merged['linters-settings'] = deepMerge(projectSettings, {
+    nestif: { 'min-complexity': 4 },
+    gofumpt: { 'extra-rules': true },
+  });
+
+  const header = `# Safeword golangci-lint config - merged with project config (v1 format)
+# Used by hooks for LLM enforcement. Human pre-commits use project config.
+# NOTE: Consider migrating to golangci-lint v2 format.
+# Re-run \`safeword upgrade\` to regenerate after project config changes.
+
+`;
+
+  return header + YAML.stringify(merged);
+}
+
+/**
+ * Deep merge objects where second object wins on conflict.
+ */
+function deepMerge(
+  base: Record<string, unknown>,
+  override: Record<string, unknown>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...base };
+
+  for (const [key, value] of Object.entries(override)) {
+    result[key] = value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      result[key] &&
+      typeof result[key] === 'object' &&
+      !Array.isArray(result[key]) ? deepMerge(result[key] as Record<string, unknown>, value as Record<string, unknown>) : value;
+  }
+
+  return result;
 }
 
 /**

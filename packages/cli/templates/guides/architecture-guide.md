@@ -329,7 +329,7 @@ project/
 
 **Setup:**
 
-1. Install: `npm install --save-dev eslint-plugin-boundaries`
+1. Install: `bun add -D eslint-plugin-boundaries`
 
 2. Add to `eslint.config.mjs`:
 

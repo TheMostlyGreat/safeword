@@ -11,7 +11,7 @@ A CLI tool that sets up AI coding agent configurations (guides, hooks, templates
 
 ## Project Purpose
 
-**What:** `npx safeword setup` installs a `.safeword/` directory with guides, templates, and hooks into user projects.
+**What:** `bunx safeword setup` installs a `.safeword/` directory with guides, templates, and hooks into user projects.
 
 **This repo is safeword's source code AND uses safeword itself (dogfooding).**
 
@@ -19,7 +19,7 @@ A CLI tool that sets up AI coding agent configurations (guides, hooks, templates
 
 | Directory                       | Role                                                                                      |
 | ------------------------------- | ----------------------------------------------------------------------------------------- |
-| `packages/cli/`                 | **CLI source** - The `npx safeword` tool itself                                           |
+| `packages/cli/`                 | **CLI source** - The `bunx safeword` tool itself                                          |
 | `packages/cli/templates/`       | **Source templates** - What the CLI copies to user projects                               |
 | `packages/cli/src/schema.ts`    | **Single source of truth** - All managed files/dirs defined here                          |
 | `packages/cli/src/reconcile.ts` | **Reconciliation engine** - Computes install/upgrade/uninstall plans                      |
@@ -46,10 +46,10 @@ A CLI tool that sets up AI coding agent configurations (guides, hooks, templates
 | What | Command | Path |
 |------|---------|------|
 | All tests | `bun run test` | `packages/cli/` |
-| Single file | `npx vitest run tests/foo.test.ts` | `packages/cli/` |
+| Single file | `bunx vitest run tests/foo.test.ts` | `packages/cli/` |
 | Integration | `bun run test:integration` | `packages/cli/` |
 | Watch mode | `bun run test:watch` | `packages/cli/` |
-| LLM evals | `npm run eval` | `packages/cli/` |
+| LLM evals | `bun run eval` | `packages/cli/` |
 
 ---
 
@@ -58,21 +58,21 @@ A CLI tool that sets up AI coding agent configurations (guides, hooks, templates
 ### Editing Source Templates
 
 1. Edit in `packages/cli/templates/` (source of truth)
-2. Run `npx safeword upgrade` to sync to `.safeword/`
-3. Run evals: `npm run eval`
+2. Run `bunx safeword upgrade` to sync to `.safeword/`
+3. Run evals: `bun run eval`
 
 ### Running LLM Evals
 
 ```bash
-npm run eval           # Run all tests
-npm run eval:view      # Open web UI for results
+bun run eval           # Run all tests
+bun run eval:view      # Open web UI for results
 ```
 
 **Requires:** `ANTHROPIC_API_KEY` environment variable
 
 ## Common Gotchas
 
-1. **packages/cli/templates/ vs .safeword/**: Edit `packages/cli/templates/` first, then run `npx safeword upgrade` to sync.
+1. **packages/cli/templates/ vs .safeword/**: Edit `packages/cli/templates/` first, then run `bunx safeword upgrade` to sync.
 
 2. **Eval failures**: Usually means the guide needs clearer instructions, not that the test is wrong.
 
@@ -80,7 +80,7 @@ npm run eval:view      # Open web UI for results
 
 4. **Hook paths**: Always use `"$CLAUDE_PROJECT_DIR"/.safeword/hooks/...` format (quoted variable) for Claude Code hooks.
 
-5. **Publishing**: Always run `npm publish` from `packages/cli/` directory, not the monorepo root. Publishing from root publishes a different package.
+5. **Publishing**: Always run `npm publish` from `packages/cli/` directory, not the monorepo root. Publishing from root publishes a different package. (Note: npm publish is still used for npm registry publishing.)
 
 6. **CLI Reference Drift**: `packages/cli/templates/guides/cli-reference.md` must stay in sync with `README.md` CLI documentation. When updating CLI commands in README, update cli-reference.md too.
 
@@ -118,8 +118,8 @@ The CLI installs matching skills for both Claude Code and Cursor IDEs.
 
 1. Edit templates in `packages/cli/templates/skills/` (Claude) and `packages/cli/templates/cursor/rules/` (Cursor)
 2. Update `packages/cli/src/schema.ts` if adding/removing skills
-3. Run parity tests: `npm test -- --testNamePattern="parity"`
-4. Run `npx safeword upgrade` to sync to local project
+3. Run parity tests: `bun run test -- --testNamePattern="parity"`
+4. Run `bunx safeword upgrade` to sync to local project
 
 ---
 

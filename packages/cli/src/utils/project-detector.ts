@@ -28,6 +28,21 @@ const UV_LOCK = 'uv.lock';
 // Go project file markers
 const GO_MOD = 'go.mod';
 
+// ESLint config file markers (flat config and legacy)
+const ESLINT_CONFIG_FILES = [
+  'eslint.config.mjs',
+  'eslint.config.js',
+  'eslint.config.cjs',
+  '.eslintrc.js',
+  '.eslintrc.cjs',
+  '.eslintrc.json',
+  '.eslintrc.yml',
+  '.eslintrc.yaml',
+] as const;
+
+// golangci-lint config file markers
+const GOLANGCI_CONFIG_FILES = ['.golangci.yml', '.golangci.yaml', '.golangci.toml', '.golangci.json'];
+
 // Python frameworks to detect (order matters - first match wins)
 const PYTHON_FRAMEWORKS = ['django', 'flask', 'fastapi'] as const;
 
@@ -58,6 +73,14 @@ export interface ProjectType {
   existingLinter: boolean;
   /** True if project has existing format script or formatter config */
   existingFormatter: boolean;
+  /** Path to existing ESLint config if present (e.g., 'eslint.config.mjs' or '.eslintrc.json') */
+  existingEslintConfig: string | null;
+  /** True if existing ESLint config is legacy format (.eslintrc.*) requiring FlatCompat */
+  legacyEslint: boolean;
+  /** True if project has [tool.ruff] in pyproject.toml */
+  existingRuffConfig: boolean;
+  /** Path to existing golangci-lint config if present (e.g., '.golangci.yml') */
+  existingGolangciConfig: string | null;
 }
 
 /**
@@ -181,6 +204,50 @@ export interface PackageJsonWithScripts extends PackageJson {
 }
 
 /**
+ * Check if project has existing ESLint config.
+ * @param cwd - Working directory to scan
+ * @returns The config file path if found, null otherwise.
+ */
+export function findExistingEslintConfig(cwd: string): string | null {
+  for (const config of ESLINT_CONFIG_FILES) {
+    if (existsSync(nodePath.join(cwd, config))) {
+      return config;
+    }
+  }
+  return null;
+}
+
+/**
+ * Check if project has existing Ruff config in pyproject.toml.
+ * @param cwd - Working directory to scan
+ * @returns True if [tool.ruff] section exists in pyproject.toml
+ */
+export function hasExistingRuffConfig(cwd: string): boolean {
+  const pyprojectPath = nodePath.join(cwd, PYPROJECT_TOML);
+  if (!existsSync(pyprojectPath)) return false;
+  try {
+    const content = readFileSync(pyprojectPath, 'utf8');
+    return content.includes('[tool.ruff]');
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if project has existing golangci-lint config.
+ * @param cwd - Working directory to scan
+ * @returns The config file path if found, null otherwise.
+ */
+export function findExistingGolangciConfig(cwd: string): string | null {
+  for (const config of GOLANGCI_CONFIG_FILES) {
+    if (existsSync(nodePath.join(cwd, config))) {
+      return config;
+    }
+  }
+  return null;
+}
+
+/**
  * Detects project type from package.json contents and optional file scanning
  * @param packageJson - Package.json contents including scripts
  * @param cwd - Working directory for file-based detection
@@ -214,6 +281,10 @@ export function detectProjectType(packageJson: PackageJsonWithScripts, cwd?: str
   const hasLinter = hasExistingLinter(scripts);
   const hasFormatter = cwd ? hasExistingFormatter(cwd, scripts) : 'format' in scripts;
 
+  // Detect existing ESLint config and whether it's legacy format
+  const eslintConfig = cwd ? findExistingEslintConfig(cwd) : null;
+  const isLegacyEslint = eslintConfig?.startsWith('.eslintrc') ?? false;
+
   return {
     typescript: hasTypescript,
     react: hasReact || hasNextJs, // Next.js implies React
@@ -227,5 +298,9 @@ export function detectProjectType(packageJson: PackageJsonWithScripts, cwd?: str
     shell: hasShell,
     existingLinter: hasLinter,
     existingFormatter: hasFormatter,
+    existingEslintConfig: eslintConfig,
+    legacyEslint: isLegacyEslint,
+    existingRuffConfig: cwd ? hasExistingRuffConfig(cwd) : false,
+    existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : null,
   };
 }

@@ -88,8 +88,8 @@ describe('Reset Command - Reconcile Integration', () => {
       JSON.stringify(
         {
           mcpServers: {
-            context7: { command: 'npx' },
-            playwright: { command: 'npx' },
+            context7: { command: 'bunx' },
+            playwright: { command: 'bunx' },
             custom: { command: 'echo' },
           },
         },
@@ -305,7 +305,7 @@ describe('Reset Command - Reconcile Integration', () => {
 
       const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
-        const result = execSync(`npx tsx ${cliPath} reset --yes`, {
+        const result = execSync(`bunx tsx ${cliPath} reset --yes`, {
           cwd: temporaryDirectory,
           encoding: 'utf8',
           timeout: 30_000,
@@ -334,7 +334,7 @@ describe('Reset Command - Reconcile Integration', () => {
       );
 
       const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
-      const result = execSync(`npx tsx ${cliPath} reset --yes`, {
+      const result = execSync(`bunx tsx ${cliPath} reset --yes`, {
         cwd: temporaryDirectory,
         encoding: 'utf8',
         timeout: 30_000,

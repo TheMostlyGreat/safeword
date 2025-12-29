@@ -277,7 +277,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
       const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
-        const result = execSync(`npx tsx ${cliPath} upgrade`, {
+        const result = execSync(`bunx tsx ${cliPath} upgrade`, {
           cwd: temporaryDirectory,
           encoding: 'utf8',
           timeout: 30_000,
@@ -285,12 +285,12 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
         expect(result).toContain('Upgrade');
       } catch (error) {
-        // Check if upgrade itself worked even if npm install timed out
+        // Check if upgrade itself worked even if bun install timed out
         const stdout = (error as { stdout?: string }).stdout || '';
 
         // If we see upgrade output, the reconcile worked
         if (stdout.includes('Upgrade') || stdout.includes('Upgrading')) {
-          // Upgrade ran, might have failed on npm install
+          // Upgrade ran, might have failed on bun install
           expect(true).toBe(true);
         } else {
           throw error;
@@ -303,7 +303,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
       const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
-        execSync(`npx tsx ${cliPath} upgrade`, {
+        execSync(`bunx tsx ${cliPath} upgrade`, {
           cwd: temporaryDirectory,
           encoding: 'utf8',
           timeout: 30_000,
@@ -325,7 +325,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
       const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
       try {
-        execSync(`npx tsx ${cliPath} upgrade`, {
+        execSync(`bunx tsx ${cliPath} upgrade`, {
           cwd: temporaryDirectory,
           encoding: 'utf8',
           timeout: 30_000,

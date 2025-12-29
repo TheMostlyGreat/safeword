@@ -172,7 +172,7 @@ tmux kill-session -t project-name
 2. **Use port-based cleanup first** - Simplest and safest
 3. **Create project cleanup scripts** - Reusable, documented
 4. **Never `killall node`** - Too broad when working on multiple projects
-5. **Clean up before starting** - Run cleanup script before `npm run dev`
+5. **Clean up before starting** - Run cleanup script before `bun run dev`
 6. **Check what's running** - Use `lsof -i:PORT` to see what's using a port
 
 ---

@@ -12,7 +12,7 @@ import {
   initGitRepo,
   removeTemporaryDirectory,
   runCli,
-  TIMEOUT_NPM_INSTALL,
+  TIMEOUT_BUN_INSTALL,
   TIMEOUT_SETUP,
   writeTestFile,
 } from '../helpers';
@@ -124,6 +124,6 @@ describe('Test Suite 3: Conditional Setup for Python Projects', () => {
 
       // Should mention Python tooling guidance
       expect(result.stdout).toMatch(/ruff|python/i);
-    }, TIMEOUT_NPM_INSTALL);
+    }, TIMEOUT_BUN_INSTALL);
   });
 });

@@ -96,6 +96,212 @@ export default [
 `;
 }
 
+/**
+ * Generates an ESLint config for .safeword/eslint.config.mjs
+ * This config is used by hooks for LLM enforcement with stricter rules.
+ *
+ * @param existingConfig - Path to existing ESLint config (e.g., 'eslint.config.mjs' or '.eslintrc.json')
+ * @param hasExistingFormatter - If true, skip eslint-config-prettier
+ * @returns ESLint config file content as a string
+ */
+export function getSafewordEslintConfig(
+  existingConfig: string | null,
+  hasExistingFormatter = false,
+): string {
+  if (existingConfig) {
+    // Check if it's a legacy config (.eslintrc.*)
+    if (existingConfig.startsWith('.eslintrc')) {
+      return getSafewordEslintConfigLegacy(existingConfig, hasExistingFormatter);
+    }
+    return getSafewordEslintConfigExtending(existingConfig, hasExistingFormatter);
+  }
+
+  // No existing config - generate standalone (same as project-level)
+  return getSafewordEslintConfigStandalone(hasExistingFormatter);
+}
+
+/**
+ * Safeword ESLint config that extends a flat config (eslint.config.mjs)
+ */
+function getSafewordEslintConfigExtending(existingConfig: string, hasExistingFormatter: boolean): string {
+  const prettierImport = hasExistingFormatter ? '' : 'import eslintConfigPrettier from "eslint-config-prettier";';
+  const prettierConfig = hasExistingFormatter ? '' : '  eslintConfigPrettier,';
+
+  return `// Safeword ESLint config - extends project config with stricter rules
+// Used by hooks for LLM enforcement. Human pre-commits use project config.
+// Re-run \`safeword upgrade\` to regenerate after project config changes.
+${prettierImport}
+
+let projectConfig = [];
+try {
+  projectConfig = (await import("../${existingConfig}")).default;
+  // Ensure it's an array
+  if (!Array.isArray(projectConfig)) {
+    projectConfig = [projectConfig];
+  }
+} catch (e) {
+  console.warn("Safeword: Could not load project ESLint config, using defaults only");
+}
+
+// Safeword strict rules - applied after project rules (win on conflict)
+const safewordStrictRules = {
+  rules: {
+    // Prevent common LLM mistakes
+    "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+    "no-undef": "error",
+    "no-unreachable": "error",
+    "no-constant-condition": "error",
+    "no-empty": "error",
+    "no-extra-semi": "error",
+    "no-func-assign": "error",
+    "no-import-assign": "error",
+    "no-invalid-regexp": "error",
+    "no-irregular-whitespace": "error",
+    "no-loss-of-precision": "error",
+    "no-misleading-character-class": "error",
+    "no-prototype-builtins": "error",
+    "no-unexpected-multiline": "error",
+    "no-unsafe-finally": "error",
+    "no-unsafe-negation": "error",
+    "use-isnan": "error",
+    "valid-typeof": "error",
+    // Strict code quality
+    "eqeqeq": ["error", "always", { null: "ignore" }],
+    "no-var": "error",
+    "prefer-const": "error",
+  },
+};
+
+export default [
+  ...projectConfig,
+  safewordStrictRules,
+${prettierConfig}
+];
+`;
+}
+
+/**
+ * Safeword ESLint config that extends a legacy config (.eslintrc.*)
+ */
+function getSafewordEslintConfigLegacy(existingConfig: string, hasExistingFormatter: boolean): string {
+  const prettierImport = hasExistingFormatter ? '' : 'import eslintConfigPrettier from "eslint-config-prettier";';
+  const prettierConfig = hasExistingFormatter ? '' : '  eslintConfigPrettier,';
+
+  return `// Safeword ESLint config - extends legacy project config with stricter rules
+// Used by hooks for LLM enforcement. Human pre-commits use project config.
+// NOTE: Legacy .eslintrc.* format is deprecated. Consider migrating to eslint.config.mjs
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { FlatCompat } from "@eslint/eslintrc";
+${prettierImport}
+
+console.warn("Safeword: Legacy .eslintrc.* detected. Consider migrating to eslint.config.mjs");
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+// baseDirectory is .safeword/, so ../${existingConfig} resolves to project root
+const compat = new FlatCompat({ baseDirectory: __dirname });
+
+let projectConfig = [];
+try {
+  projectConfig = compat.extends("../${existingConfig}");
+} catch (e) {
+  console.warn("Safeword: Could not load project ESLint config, using defaults only");
+}
+
+// Safeword strict rules - applied after project rules (win on conflict)
+const safewordStrictRules = {
+  rules: {
+    // Prevent common LLM mistakes
+    "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+    "no-undef": "error",
+    "no-unreachable": "error",
+    "no-constant-condition": "error",
+    "no-empty": "error",
+    "no-extra-semi": "error",
+    "no-func-assign": "error",
+    "no-import-assign": "error",
+    "no-invalid-regexp": "error",
+    "no-irregular-whitespace": "error",
+    "no-loss-of-precision": "error",
+    "no-misleading-character-class": "error",
+    "no-prototype-builtins": "error",
+    "no-unexpected-multiline": "error",
+    "no-unsafe-finally": "error",
+    "no-unsafe-negation": "error",
+    "use-isnan": "error",
+    "valid-typeof": "error",
+    // Strict code quality
+    "eqeqeq": ["error", "always", { null: "ignore" }],
+    "no-var": "error",
+    "prefer-const": "error",
+  },
+};
+
+export default [
+  ...projectConfig,
+  safewordStrictRules,
+${prettierConfig}
+];
+`;
+}
+
+/**
+ * Standalone safeword ESLint config (no project config to extend)
+ */
+function getSafewordEslintConfigStandalone(hasExistingFormatter: boolean): string {
+  const prettierImport = hasExistingFormatter ? '' : 'import eslintConfigPrettier from "eslint-config-prettier";';
+  const prettierConfig = hasExistingFormatter ? '' : '  eslintConfigPrettier,';
+
+  return `// Safeword ESLint config - standalone (no project config to extend)
+// Used by hooks for LLM enforcement.
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import safeword from "eslint-plugin-safeword";
+${prettierImport}
+
+const { detect, configs } = safeword;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+// Look in parent directory for deps (this file is in .safeword/)
+const deps = detect.collectAllDeps(dirname(__dirname));
+const framework = detect.detectFramework(deps);
+
+const baseConfigs = {
+  next: configs.recommendedTypeScriptNext,
+  react: configs.recommendedTypeScriptReact,
+  astro: [...configs.recommendedTypeScript, ...configs.astro],
+  typescript: configs.recommendedTypeScript,
+  javascript: configs.recommended,
+};
+
+// Safeword strict rules - additional rules for LLM enforcement
+const safewordStrictRules = {
+  rules: {
+    // Prevent common LLM mistakes
+    "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+    "no-undef": "error",
+    "no-unreachable": "error",
+    "no-constant-condition": "error",
+    "no-empty": "error",
+    // Strict code quality
+    "eqeqeq": ["error", "always", { null: "ignore" }],
+    "no-var": "error",
+    "prefer-const": "error",
+  },
+};
+
+export default [
+  { ignores: detect.getIgnores(deps) },
+  ...baseConfigs[framework],
+  ...(detect.hasVitest(deps) ? configs.vitest : []),
+  ...(detect.hasPlaywright(deps) ? configs.playwright : []),
+  ...(detect.hasTailwind(deps) ? configs.tailwind : []),
+  ...(detect.hasTanstackQuery(deps) ? configs.tanstackQuery : []),
+  safewordStrictRules,
+${prettierConfig}
+];
+`;
+}
+
 // Cursor hooks configuration (.cursor/hooks.json format)
 // See: https://cursor.com/docs/agent/hooks
 export const CURSOR_HOOKS = {

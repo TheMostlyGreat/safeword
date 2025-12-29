@@ -67,7 +67,11 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false,
-        ...(overrides.projectType as Record<string, boolean>),
+        existingEslintConfig: null,
+        legacyEslint: false,
+        existingRuffConfig: false,
+        existingGolangciConfig: null,
+        ...(overrides.projectType as Record<string, unknown>),
       },
       developmentDeps: (overrides.developmentDeps as Record<string, string>) ?? {},
       isGitRepo: (overrides.isGitRepo as boolean) ?? true,
@@ -673,6 +677,10 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false, // no existing formatter, gets prettier
+        existingEslintConfig: null,
+        legacyEslint: false,
+        existingRuffConfig: false,
+        existingGolangciConfig: null,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -702,6 +710,10 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: true, // Has existing formatter, doesn't get prettier
+        existingEslintConfig: null,
+        legacyEslint: false,
+        existingRuffConfig: false,
+        existingGolangciConfig: null,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -728,6 +740,10 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false,
+        existingEslintConfig: null,
+        legacyEslint: false,
+        existingRuffConfig: false,
+        existingGolangciConfig: null,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -752,6 +768,10 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: true, // Existing formatter handles formatting
+        existingEslintConfig: null,
+        legacyEslint: false,
+        existingRuffConfig: false,
+        existingGolangciConfig: null,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -777,6 +797,10 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false,
+        existingEslintConfig: null,
+        legacyEslint: false,
+        existingRuffConfig: false,
+        existingGolangciConfig: null,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -804,6 +828,10 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false,
+        existingEslintConfig: null,
+        legacyEslint: false,
+        existingRuffConfig: false,
+        existingGolangciConfig: null,
       };
 
       const installedDevelopmentDeps = {
@@ -841,6 +869,10 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false,
+        existingEslintConfig: null,
+        legacyEslint: false,
+        existingRuffConfig: false,
+        existingGolangciConfig: null,
       };
 
       // isGitRepo = false

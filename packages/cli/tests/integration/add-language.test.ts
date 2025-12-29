@@ -103,7 +103,7 @@ version = "0.1.0"
     it('ESLint still works on TypeScript files', () => {
       writeTestFile(projectDirectory, 'test.ts', 'export const x = 1;\n');
 
-      const result = spawnSync('npx', ['eslint', 'test.ts'], {
+      const result = spawnSync('bunx', ['eslint', 'test.ts'], {
         cwd: projectDirectory,
         encoding: 'utf8',
       });

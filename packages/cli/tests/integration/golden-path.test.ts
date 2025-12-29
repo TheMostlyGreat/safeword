@@ -32,7 +32,7 @@ describe('E2E: Golden Path', () => {
     createTypeScriptPackageJson(projectDirectory);
     initGitRepo(projectDirectory);
     await runCli(['setup', '--yes'], { cwd: projectDirectory });
-  }, 180_000); // 3 min timeout for npm install
+  }, 180_000); // 3 min timeout for bun install
 
   afterAll(() => {
     if (projectDirectory) {
@@ -44,7 +44,7 @@ describe('E2E: Golden Path', () => {
     writeTestFile(projectDirectory, 'src/valid.ts', 'export const x = 1;\n');
 
     // Should not throw - config is valid
-    const result = execSync('npx eslint src/valid.ts', { cwd: projectDirectory, encoding: 'utf8' });
+    const result = execSync('bunx eslint src/valid.ts', { cwd: projectDirectory, encoding: 'utf8' });
     expect(result).toBeDefined();
   });
 
@@ -54,14 +54,14 @@ describe('E2E: Golden Path', () => {
 
     // Should throw because of lint errors
     expect(() => {
-      execSync('npx eslint src/bad.ts', { cwd: projectDirectory, encoding: 'utf8' });
+      execSync('bunx eslint src/bad.ts', { cwd: projectDirectory, encoding: 'utf8' });
     }).toThrow();
   });
 
   it('prettier formats files', () => {
     writeTestFile(projectDirectory, 'src/ugly.ts', 'const x=1;const y=2;\n');
 
-    execSync('npx prettier --write src/ugly.ts', { cwd: projectDirectory });
+    execSync('bunx prettier --write src/ugly.ts', { cwd: projectDirectory });
 
     const formatted = readTestFile(projectDirectory, 'src/ugly.ts');
     // Prettier adds spaces and may split lines

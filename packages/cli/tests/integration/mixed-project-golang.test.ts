@@ -101,7 +101,7 @@ func main() {
     writeTestFile(projectDirectory, 'src/valid.ts', 'export const x = 1;\n');
 
     // Should not throw
-    const result = execSync('npx eslint src/valid.ts', {
+    const result = execSync('bunx eslint src/valid.ts', {
       cwd: projectDirectory,
       encoding: 'utf8',
     });
@@ -112,7 +112,7 @@ func main() {
     writeTestFile(projectDirectory, 'src/bad.ts', 'var unused = 1;\n');
 
     expect(() => {
-      execSync('npx eslint src/bad.ts', { cwd: projectDirectory, encoding: 'utf8' });
+      execSync('bunx eslint src/bad.ts', { cwd: projectDirectory, encoding: 'utf8' });
     }).toThrow();
   });
 

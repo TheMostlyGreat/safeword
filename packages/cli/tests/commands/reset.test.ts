@@ -279,8 +279,8 @@ describe('Test Suite 11: Reset', () => {
       // Overwrite with only safeword servers
       const mcpConfig = {
         mcpServers: {
-          context7: { command: 'npx', args: ['@context7/mcp'] },
-          playwright: { command: 'npx', args: ['@playwright/mcp'] },
+          context7: { command: 'bunx', args: ['@context7/mcp'] },
+          playwright: { command: 'bunx', args: ['@playwright/mcp'] },
         },
       };
       writeTestFile(temporaryDirectory, '.mcp.json', JSON.stringify(mcpConfig, undefined, 2));

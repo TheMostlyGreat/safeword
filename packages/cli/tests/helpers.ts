@@ -13,12 +13,12 @@ const execAsync = promisify(exec);
  */
 /** Quick operations that don't spawn processes (10s) */
 export const TIMEOUT_QUICK = 10_000;
-/** Sync CLI operations without npm install (30s) */
+/** Sync CLI operations without bun install (30s) */
 export const TIMEOUT_SYNC = 30_000;
-/** Setup commands that may run npm install with warm cache (60s) */
+/** Setup commands that may run bun install with warm cache (60s) */
 export const TIMEOUT_SETUP = 60_000;
-/** npm install operations under load or cold cache (120s) */
-export const TIMEOUT_NPM_INSTALL = 120_000;
+/** bun install operations under load or cold cache (120s) */
+export const TIMEOUT_BUN_INSTALL = 120_000;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = nodePath.dirname(__filename);
@@ -161,7 +161,7 @@ export async function runCli(
     timeout?: number;
   } = {},
 ): Promise<CliResult> {
-  const { cwd = process.cwd(), input, env = {}, timeout = TIMEOUT_NPM_INSTALL } = options;
+  const { cwd = process.cwd(), input, env = {}, timeout = TIMEOUT_BUN_INSTALL } = options;
 
   const command = `node ${CLI_PATH} ${args.join(' ')}`;
 
@@ -481,7 +481,7 @@ export function runEslint(
   file: string,
   extraArguments: string[] = [],
 ): SpawnSyncReturns<string> {
-  return spawnSync('npx', ['eslint', file, ...extraArguments], {
+  return spawnSync('bunx', ['eslint', file, ...extraArguments], {
     cwd: dir,
     encoding: 'utf8',
   });

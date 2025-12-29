@@ -25,7 +25,7 @@ const hasEslint = await Promise.all(
   eslintConfigs.map(f => Bun.file(`${projectDir}/${f}`).exists().catch(() => false)),
 );
 if (!hasEslint.some(Boolean)) {
-  warnings.push("ESLint config not found - run 'npm run lint' may fail");
+  warnings.push("ESLint config not found - run 'bun run lint' may fail");
 }
 
 // Check for Prettier config
@@ -43,10 +43,10 @@ if (await pkgJsonFile.exists()) {
   try {
     const pkgJson = await pkgJsonFile.text();
     if (!pkgJson.includes('"eslint"')) {
-      warnings.push("ESLint not in package.json - run 'npm install -D eslint'");
+      warnings.push("ESLint not in package.json - run 'bun add -D eslint'");
     }
     if (!pkgJson.includes('"prettier"')) {
-      warnings.push("Prettier not in package.json - run 'npm install -D prettier'");
+      warnings.push("Prettier not in package.json - run 'bun add -D prettier'");
     }
   } catch (error) {
     if (process.env.DEBUG) console.error('[session-lint-check] package.json parse error:', error);

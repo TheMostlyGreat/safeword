@@ -102,7 +102,7 @@ if ({LANG}_EXTENSIONS.has(extension)) {
 
 **Error output:** For tools that should show errors (ESLint, shellcheck), print stderr on failure:
 ```typescript
-const result = await $`npx eslint --fix ${file}`.nothrow().quiet();
+const result = await $`bunx eslint --fix ${file}`.nothrow().quiet();
 if (result.exitCode !== 0 && result.stderr.length > 0) {
   console.log(result.stderr.toString());
 }
@@ -113,9 +113,9 @@ if (result.exitCode !== 0 && result.stderr.length > 0) {
 const SHELL_EXTENSIONS = new Set(['sh']);
 
 if (SHELL_EXTENSIONS.has(extension)) {
-  await $`npx shellcheck ${file}`.nothrow().quiet();
+  await $`bunx shellcheck ${file}`.nothrow().quiet();
   if (existsSync(`${projectDir}/node_modules/prettier-plugin-sh`)) {
-    await $`npx prettier --write ${file}`.nothrow().quiet();
+    await $`bunx prettier --write ${file}`.nothrow().quiet();
   }
 }
 ```
@@ -194,7 +194,7 @@ export function create{Lang}Project(dir: string, options?: {...}): void {
 
 // Linter execution (for TypeScript/ESLint)
 export function runEslint(dir: string, file: string, extraArgs: string[] = []): SpawnSyncReturns<string> {
-  return spawnSync('npx', ['eslint', file, ...extraArgs], { cwd: dir, encoding: 'utf8' });
+  return spawnSync('bunx', ['eslint', file, ...extraArgs], { cwd: dir, encoding: 'utf8' });
 }
 ```
 

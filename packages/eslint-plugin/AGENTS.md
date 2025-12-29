@@ -110,10 +110,10 @@ safeword.rules                              // { 'no-incomplete-error-handling':
 ## Development
 
 ```bash
-npm run build        # Build with tsup
-npm run dev          # Watch mode
-npm run test         # Run Vitest
-npm run typecheck    # Type check
+bun run build        # Build with tsup
+bun run dev          # Watch mode
+bun run test         # Run Vitest
+bun run typecheck    # Type check
 ```
 
 ## Testing Strategy

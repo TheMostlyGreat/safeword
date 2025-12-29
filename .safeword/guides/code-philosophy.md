@@ -21,7 +21,7 @@ At the end of EVERY response, include a JSON summary with this exact structure:
 Where (all fields describe **this response only**, not cumulative):
 
 - `proposedChanges`: `true` if you suggested/proposed changes to specific files **in this response**
-- `madeChanges`: `true` if you used Edit, Write, MultiEdit, or NotebookEdit tools (not Read)
+- `madeChanges`: `true` if you **modified files in this response** using Write/Edit tools
 - `askedQuestion`: `true` if you asked the user a question and need their response before proceeding
 
 Examples:

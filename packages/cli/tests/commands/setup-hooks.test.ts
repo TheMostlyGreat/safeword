@@ -297,7 +297,7 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
   });
 
   describe('Test 3.11: MCP servers work out of the box', () => {
-    it('should configure context7 with correct npx command', async () => {
+    it('should configure context7 with correct bunx command', async () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
@@ -307,13 +307,13 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
 
       const mcpConfig = JSON.parse(readTestFile(temporaryDirectory, '.mcp.json'));
 
-      // Context7 should use npx with the correct package
+      // Context7 should use bunx with the correct package
       expect(mcpConfig.mcpServers.context7).toBeDefined();
-      expect(mcpConfig.mcpServers.context7.command).toBe('npx');
+      expect(mcpConfig.mcpServers.context7.command).toBe('bunx');
       expect(mcpConfig.mcpServers.context7.args).toContain('@upstash/context7-mcp@latest');
     });
 
-    it('should configure playwright with correct npx command', async () => {
+    it('should configure playwright with correct bunx command', async () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
@@ -321,37 +321,38 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
 
       const mcpConfig = JSON.parse(readTestFile(temporaryDirectory, '.mcp.json'));
 
-      // Playwright should use npx with the correct package
+      // Playwright should use bunx with the correct package
       expect(mcpConfig.mcpServers.playwright).toBeDefined();
-      expect(mcpConfig.mcpServers.playwright.command).toBe('npx');
+      expect(mcpConfig.mcpServers.playwright.command).toBe('bunx');
       expect(mcpConfig.mcpServers.playwright.args).toEqual(
         expect.arrayContaining([expect.stringContaining('@playwright/mcp')]),
       );
     });
 
-    it('should have MCP packages that can be resolved by npx', async () => {
-      // Verify the packages exist on npm (can be resolved)
-      // This is a lightweight check - just verify npm can find the packages
+    it('should have MCP packages that can be resolved by bunx', async () => {
+      // Verify the packages exist on npm (can be resolved by bunx)
+      // This is a lightweight check - just verify the packages exist
+      // Note: Using npm info since we're checking npm registry (bunx also uses npm registry)
       const { execSync } = await import('node:child_process');
 
       // Check context7 package exists
       try {
-        execSync('npm view @upstash/context7-mcp version', {
+        execSync('npm info @upstash/context7-mcp', {
           encoding: 'utf8',
           timeout: 10_000,
         });
       } catch {
-        expect.fail('@upstash/context7-mcp package not found on npm');
+        expect.fail('@upstash/context7-mcp package not found');
       }
 
       // Check playwright package exists
       try {
-        execSync('npm view @playwright/mcp version', {
+        execSync('npm info @playwright/mcp', {
           encoding: 'utf8',
           timeout: 10_000,
         });
       } catch {
-        expect.fail('@playwright/mcp package not found on npm');
+        expect.fail('@playwright/mcp package not found');
       }
     });
   });

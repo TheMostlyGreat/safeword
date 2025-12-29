@@ -3,7 +3,7 @@
  *
  * Tests for the "self-contained templates" feature.
  * The CLI should bundle full methodology files (not stubs) so
- * `npx safeword setup` works without external dependencies.
+ * `bunx safeword setup` works without external dependencies.
  *
  * First 3 tests FAIL until Story 1 is implemented.
  */

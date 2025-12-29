@@ -27,7 +27,7 @@ import {
   writeTestFile,
 } from '../helpers';
 
-/** Setup timeout: 10 minutes - npm install can take 7+ minutes */
+/** Setup timeout: 10 minutes - bun install can take time under load */
 const SETUP_TIMEOUT = 600_000;
 
 describe('E2E: Conditional Setup - Project Type Detection', () => {

@@ -81,11 +81,11 @@ export function installDependencies(
  */
 export const MCP_SERVERS = {
   context7: {
-    command: 'npx',
-    args: ['-y', '@upstash/context7-mcp@latest'],
+    command: 'bunx',
+    args: ['@upstash/context7-mcp@latest'],
   },
   playwright: {
-    command: 'npx',
+    command: 'bunx',
     args: ['@playwright/mcp@latest'],
   },
 } as const;
