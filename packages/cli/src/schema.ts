@@ -7,8 +7,15 @@
  * Adding a new file? Add it here and it will be handled by setup/upgrade/reset.
  */
 
-import { generateGolangciConfig, generateSafewordGolangciConfig } from './packs/golang/setup.js';
-import { CURSOR_HOOKS, getEslintConfig, getSafewordEslintConfig, SETTINGS_HOOKS } from './templates/config.js';
+import { golangManagedFiles } from './packs/golang/files.js';
+import { generateSafewordGolangciConfig } from './packs/golang/setup.js';
+import {
+  typescriptJsonMerges,
+  typescriptManagedFiles,
+  typescriptOwnedFiles,
+  typescriptPackages,
+} from './packs/typescript/files.js';
+import { CURSOR_HOOKS, SETTINGS_HOOKS } from './templates/config.js';
 import { AGENTS_MD_LINK } from './templates/content.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';
 import { MCP_SERVERS } from './utils/install.js';
@@ -73,59 +80,37 @@ export interface SafewordSchema {
 }
 
 // ============================================================================
-// Shared merge definitions
+// Shared JSON Merge Definitions
 // ============================================================================
 
 /**
- * Biome config merge - adds safeword files to excludes list.
- * Biome v2 uses `includes` with `!` prefix for exclusions.
+ * MCP servers JSON merge - shared between .mcp.json and .cursor/mcp.json
  */
-const BIOME_JSON_MERGE: JsonMergeDefinition = {
-  keys: ['files.includes'],
-  skipIfMissing: true, // Only modify if project already uses Biome
+const MCP_JSON_MERGE: JsonMergeDefinition = {
+  keys: ['mcpServers.context7', 'mcpServers.playwright'],
+  removeFileIfEmpty: true,
   merge: existing => {
-    const files = (existing.files as Record<string, unknown>) ?? {};
-    const existingIncludes = Array.isArray(files.includes) ? files.includes : [];
-
-    // Add safeword exclusions (! prefix) if not already present
-    // Note: Biome v2.2.0+ doesn't need /** for folders
-    const safewordExcludes = ['!eslint.config.mjs', '!.safeword'];
-    const newIncludes = [...existingIncludes];
-    for (const exclude of safewordExcludes) {
-      if (!newIncludes.includes(exclude)) {
-        newIncludes.push(exclude);
-      }
-    }
-
+    const mcpServers = (existing.mcpServers as Record<string, unknown>) ?? {};
     return {
       ...existing,
-      files: {
-        ...files,
-        includes: newIncludes,
+      mcpServers: {
+        ...mcpServers,
+        context7: MCP_SERVERS.context7,
+        playwright: MCP_SERVERS.playwright,
       },
     };
   },
   unmerge: existing => {
     const result = { ...existing };
-    const files = (existing.files as Record<string, unknown>) ?? {};
-    const existingIncludes = Array.isArray(files.includes) ? files.includes : [];
+    const mcpServers = { ...(existing.mcpServers as Record<string, unknown>) };
 
-    // Remove safeword exclusions from includes list
-    const safewordExcludes = new Set(['!eslint.config.mjs', '!.safeword', '!.safeword/**']);
-    const cleanedIncludes = existingIncludes.filter(
-      (entry: string) => !safewordExcludes.has(entry),
-    );
+    delete mcpServers.context7;
+    delete mcpServers.playwright;
 
-    if (cleanedIncludes.length > 0) {
-      files.includes = cleanedIncludes;
-      result.files = files;
+    if (Object.keys(mcpServers).length > 0) {
+      result.mcpServers = mcpServers;
     } else {
-      delete files.includes;
-      if (Object.keys(files).length > 0) {
-        result.files = files;
-      } else {
-        delete result.files;
-      }
+      delete result.mcpServers;
     }
 
     return result;
@@ -240,16 +225,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/config.json': { generator: () => null },
 
     // Language-specific safeword configs for hooks (extend project configs if they exist)
-    // These configs are used by hooks for LLM enforcement with stricter rules
-    '.safeword/eslint.config.mjs': {
-      generator: ctx =>
-        ctx.languages?.javascript
-          ? getSafewordEslintConfig(
-              ctx.projectType.existingEslintConfig,
-              ctx.projectType.existingFormatter,
-            )
-          : null,
-    },
+    // TypeScript/JavaScript configs are in typescriptOwnedFiles
     '.safeword/ruff.toml': {
       generator: ctx =>
         ctx.languages?.python ? generateRuffBaseConfig(ctx.projectType.existingRuffConfig) : null,
@@ -260,6 +236,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
           ? generateSafewordGolangciConfig(ctx.projectType.existingGolangciConfig, ctx.cwd)
           : null,
     },
+
+    // TypeScript/JavaScript owned files (ESLint, Prettier configs)
+    ...typescriptOwnedFiles,
 
     // Hooks shared library (2 files) - TypeScript with Bun runtime
     '.safeword/hooks/lib/lint.ts': { template: 'hooks/lib/lint.ts' },
@@ -379,135 +358,18 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
   // Files created if missing, updated only if content matches current template
   managedFiles: {
-    // Project-level ESLint config (created only if no existing ESLint config)
-    'eslint.config.mjs': {
-      generator: ctx => {
-        // Skip if project already has ESLint config (safeword will use .safeword/eslint.config.mjs)
-        if (ctx.projectType.existingEslintConfig) return null;
-        if (!ctx.languages?.javascript) return null;
-        return getEslintConfig(ctx.projectType.existingFormatter);
-      },
-    },
-    // Minimal tsconfig for ESLint type-checked linting (only if missing)
-    'tsconfig.json': {
-      generator: ctx => {
-        // Skip for non-JS projects (Python-only)
-        if (!ctx.languages?.javascript) return null;
-        // Only create for TypeScript projects
-        if (!ctx.developmentDeps.typescript && !ctx.developmentDeps['typescript-eslint']) {
-          return null;
-        }
-        return JSON.stringify(
-          {
-            compilerOptions: {
-              target: 'ES2022',
-              module: 'NodeNext',
-              moduleResolution: 'NodeNext',
-              strict: true,
-              esModuleInterop: true,
-              skipLibCheck: true,
-              noEmit: true,
-            },
-            include: ['**/*.ts', '**/*.tsx'],
-            exclude: ['node_modules', 'dist', 'build'],
-          },
-          undefined,
-          2,
-        );
-      },
-    },
-    // Knip config for dead code detection (used by /audit)
-    'knip.json': {
-      generator: ctx =>
-        ctx.languages?.javascript
-          ? JSON.stringify(
-              {
-                ignore: ['.safeword/**'],
-                ignoreDependencies: ['eslint-plugin-safeword'],
-              },
-              undefined,
-              2,
-            )
-          : null,
-    },
-    // Project-level Go linter config (created only if no existing golangci config)
-    '.golangci.yml': {
-      generator: ctx => {
-        // Skip if project already has golangci config (safeword will use .safeword/.golangci.yml)
-        if (ctx.projectType.existingGolangciConfig) return null;
-        if (!ctx.languages?.golang) return null;
-        return generateGolangciConfig();
-      },
-    },
+    // TypeScript/JavaScript managed files (ESLint, tsconfig, Knip, Prettier configs)
+    ...typescriptManagedFiles,
+    // Go managed files (.golangci.yml)
+    ...golangManagedFiles,
   },
 
   // JSON files where we merge specific keys
   jsonMerges: {
-    'package.json': {
-      keys: ['scripts.lint', 'scripts.format', 'scripts.format:check', 'scripts.knip'],
-      skipIfMissing: true, // Don't create for Python-only projects (no JS tooling)
-      conditionalKeys: {
-        existingLinter: ['scripts.lint:eslint'], // Projects with existing linter get separate ESLint script
-        publishableLibrary: ['scripts.publint'],
-        shell: ['scripts.lint:sh'],
-      },
-      merge: (existing, ctx) => {
-        const scripts = { ...(existing.scripts as Record<string, string>) };
-        const result = { ...existing };
+    // TypeScript/JavaScript JSON merges (package.json, .prettierrc, biome.json)
+    ...typescriptJsonMerges,
 
-        if (ctx.projectType.existingLinter) {
-          // Project with existing linter: add lint:eslint for safeword-specific rules
-          if (!scripts['lint:eslint']) scripts['lint:eslint'] = 'eslint .';
-          // Don't touch their existing lint script
-        } else {
-          // No existing linter: ESLint is the primary linter
-          if (!scripts.lint) scripts.lint = 'eslint .';
-        }
-
-        if (!ctx.projectType.existingFormatter) {
-          // No existing formatter: add Prettier
-          if (!scripts.format) scripts.format = 'prettier --write .';
-          if (!scripts['format:check']) scripts['format:check'] = 'prettier --check .';
-        }
-
-        // Always add knip for dead code detection
-        if (!scripts.knip) scripts.knip = 'knip';
-
-        // Conditional: publint for publishable libraries
-        if (ctx.projectType.publishableLibrary && !scripts.publint) {
-          scripts.publint = 'publint';
-        }
-
-        // Conditional: lint:sh for projects with shell scripts
-        if (ctx.projectType.shell && !scripts['lint:sh']) {
-          scripts['lint:sh'] = 'shellcheck **/*.sh';
-        }
-
-        result.scripts = scripts;
-
-        return result;
-      },
-      unmerge: existing => {
-        const result = { ...existing };
-        const scripts = { ...(existing.scripts as Record<string, string>) };
-
-        // Remove safeword-specific scripts but preserve lint/format (useful standalone)
-        delete scripts['lint:eslint']; // Biome hybrid mode
-        delete scripts['lint:sh'];
-        delete scripts['format:check'];
-        delete scripts.knip;
-        delete scripts.publint;
-
-        if (Object.keys(scripts).length > 0) {
-          result.scripts = scripts;
-        } else {
-          delete result.scripts;
-        }
-
-        return result;
-      },
-    },
-
+    // Language-agnostic JSON merges
     '.claude/settings.json': {
       keys: ['hooks'],
       merge: existing => {
@@ -545,67 +407,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       },
     },
 
-    '.mcp.json': {
-      keys: ['mcpServers.context7', 'mcpServers.playwright'],
-      removeFileIfEmpty: true,
-      merge: existing => {
-        const mcpServers = (existing.mcpServers as Record<string, unknown>) ?? {};
-        return {
-          ...existing,
-          mcpServers: {
-            ...mcpServers,
-            context7: MCP_SERVERS.context7,
-            playwright: MCP_SERVERS.playwright,
-          },
-        };
-      },
-      unmerge: existing => {
-        const result = { ...existing };
-        const mcpServers = { ...(existing.mcpServers as Record<string, unknown>) };
-
-        delete mcpServers.context7;
-        delete mcpServers.playwright;
-
-        if (Object.keys(mcpServers).length > 0) {
-          result.mcpServers = mcpServers;
-        } else {
-          delete result.mcpServers;
-        }
-
-        return result;
-      },
-    },
-
-    '.cursor/mcp.json': {
-      keys: ['mcpServers.context7', 'mcpServers.playwright'],
-      removeFileIfEmpty: true,
-      merge: existing => {
-        const mcpServers = (existing.mcpServers as Record<string, unknown>) ?? {};
-        return {
-          ...existing,
-          mcpServers: {
-            ...mcpServers,
-            context7: MCP_SERVERS.context7,
-            playwright: MCP_SERVERS.playwright,
-          },
-        };
-      },
-      unmerge: existing => {
-        const result = { ...existing };
-        const mcpServers = { ...(existing.mcpServers as Record<string, unknown>) };
-
-        delete mcpServers.context7;
-        delete mcpServers.playwright;
-
-        if (Object.keys(mcpServers).length > 0) {
-          result.mcpServers = mcpServers;
-        } else {
-          delete result.mcpServers;
-        }
-
-        return result;
-      },
-    },
+    '.mcp.json': MCP_JSON_MERGE,
+    '.cursor/mcp.json': MCP_JSON_MERGE,
 
     '.cursor/hooks.json': {
       keys: ['version', 'hooks.afterFileEdit', 'hooks.stop'],
@@ -638,52 +441,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
         return result;
       },
     },
-
-    '.prettierrc': {
-      keys: ['plugins'],
-      merge: (existing, ctx) => {
-        const result = { ...existing } as Record<string, unknown>;
-
-        // Set defaults for styling options (only if not present)
-        // User customizations are preserved
-        if (result.semi === undefined) result.semi = true;
-        if (result.singleQuote === undefined) result.singleQuote = true;
-        if (result.tabWidth === undefined) result.tabWidth = 2;
-        if (result.trailingComma === undefined) result.trailingComma = 'all';
-        if (result.printWidth === undefined) result.printWidth = 100;
-        if (result.endOfLine === undefined) result.endOfLine = 'lf';
-        if (result.useTabs === undefined) result.useTabs = false;
-        if (result.bracketSpacing === undefined) result.bracketSpacing = true;
-        if (result.arrowParens === undefined) result.arrowParens = 'avoid';
-
-        // Always update plugins based on project type (safeword owns this)
-        const plugins: string[] = [];
-        if (ctx.projectType.astro) plugins.push('prettier-plugin-astro');
-        if (ctx.projectType.shell) plugins.push('prettier-plugin-sh');
-        // Tailwind must be last for proper class sorting
-        if (ctx.projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
-
-        if (plugins.length > 0) {
-          result.plugins = plugins;
-        } else {
-          delete result.plugins;
-        }
-
-        return result;
-      },
-      unmerge: existing => {
-        const result = { ...existing } as Record<string, unknown>;
-        // Only remove plugins (safeword-owned), keep user styling preferences
-        delete result.plugins;
-        return result;
-      },
-    },
-
-    // Biome excludes - add safeword files so they don't get linted by Biome/Ultracite
-    // Biome v2 uses `includes` with `!` prefix for exclusions (not a separate `ignore` key)
-    // Support both biome.json and biome.jsonc
-    'biome.json': BIOME_JSON_MERGE,
-    'biome.jsonc': BIOME_JSON_MERGE,
   },
 
   // Text files where we patch specific content
@@ -702,29 +459,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
   },
 
-  // NPM packages to install
-  packages: {
-    base: [
-      // Core tools (always needed)
-      'eslint',
-      // Safeword plugin (bundles eslint-config-prettier + all ESLint plugins)
-      'eslint-plugin-safeword',
-      // Architecture and dead code tools (used by /audit)
-      'dependency-cruiser',
-      'knip',
-    ],
-    conditional: {
-      // Prettier (only for projects without existing formatter)
-      standard: ['prettier'], // "standard" = !existingFormatter
-      // Prettier plugins (only for projects without existing formatter that need them)
-      astro: ['prettier-plugin-astro'],
-      tailwind: ['prettier-plugin-tailwindcss'],
-      shell: ['prettier-plugin-sh'],
-      // Non-ESLint tools
-      publishableLibrary: ['publint'],
-      shellcheck: ['shellcheck'], // Renamed from shell to avoid conflict with prettier-plugin-sh
-      // Legacy ESLint config compat (needed when extending .eslintrc.* configs)
-      legacyEslint: ['@eslint/eslintrc'],
-    },
-  },
+  // NPM packages to install (JS/TS specific packages from typescript pack)
+  packages: typescriptPackages,
 };

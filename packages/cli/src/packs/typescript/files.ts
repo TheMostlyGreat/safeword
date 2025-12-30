@@ -1,0 +1,304 @@
+/**
+ * TypeScript/JavaScript Language Pack - Schema Definitions
+ *
+ * All JS/TS specific file definitions, JSON merges, and packages.
+ * Imported by schema.ts and spread into SAFEWORD_SCHEMA.
+ */
+
+import type { FileDefinition, JsonMergeDefinition, ManagedFileDefinition } from '../../schema.js';
+import { getEslintConfig, getSafewordEslintConfig } from '../../templates/config.js';
+
+// ============================================================================
+// Shared Definitions
+// ============================================================================
+
+/**
+ * Prettier styling defaults - shared between .safeword/.prettierrc and root .prettierrc
+ */
+export const PRETTIER_DEFAULTS = {
+  semi: true,
+  singleQuote: true,
+  tabWidth: 2,
+  trailingComma: 'all',
+  printWidth: 100,
+  endOfLine: 'lf',
+  useTabs: false,
+  bracketSpacing: true,
+  arrowParens: 'avoid',
+} as const;
+
+/**
+ * Biome config merge - adds safeword files to excludes list.
+ * Biome v2 uses `includes` with `!` prefix for exclusions.
+ */
+const BIOME_JSON_MERGE: JsonMergeDefinition = {
+  keys: ['files.includes'],
+  skipIfMissing: true, // Only modify if project already uses Biome
+  merge: existing => {
+    const files = (existing.files as Record<string, unknown>) ?? {};
+    const existingIncludes = Array.isArray(files.includes) ? files.includes : [];
+
+    // Add safeword exclusions (! prefix) if not already present
+    // Note: Biome v2.2.0+ doesn't need /** for folders
+    const safewordExcludes = ['!eslint.config.mjs', '!.safeword'];
+    const newIncludes = [...existingIncludes];
+    for (const exclude of safewordExcludes) {
+      if (!newIncludes.includes(exclude)) {
+        newIncludes.push(exclude);
+      }
+    }
+
+    return {
+      ...existing,
+      files: {
+        ...files,
+        includes: newIncludes,
+      },
+    };
+  },
+  unmerge: existing => {
+    const result = { ...existing };
+    const files = (existing.files as Record<string, unknown>) ?? {};
+    const existingIncludes = Array.isArray(files.includes) ? files.includes : [];
+
+    // Remove safeword exclusions from includes list
+    const safewordExcludes = new Set(['!eslint.config.mjs', '!.safeword', '!.safeword/**']);
+    const cleanedIncludes = existingIncludes.filter(
+      (entry: string) => !safewordExcludes.has(entry),
+    );
+
+    if (cleanedIncludes.length > 0) {
+      files.includes = cleanedIncludes;
+      result.files = files;
+    } else {
+      delete files.includes;
+      if (Object.keys(files).length > 0) {
+        result.files = files;
+      } else {
+        delete result.files;
+      }
+    }
+
+    return result;
+  },
+};
+
+// ============================================================================
+// Owned Files (overwritten on upgrade)
+// ============================================================================
+
+export const typescriptOwnedFiles: Record<string, FileDefinition> = {
+  // Language-specific safeword configs for hooks (extend project configs if they exist)
+  // These configs are used by hooks for LLM enforcement with stricter rules
+  '.safeword/eslint.config.mjs': {
+    generator: ctx =>
+      ctx.languages?.javascript
+        ? getSafewordEslintConfig(
+            ctx.projectType.existingEslintConfig,
+            ctx.projectType.existingFormatter,
+          )
+        : null,
+  },
+  '.safeword/.prettierrc': {
+    generator: ctx => {
+      // Skip for non-JS projects or projects with existing formatter (they use Biome, etc.)
+      if (!ctx.languages?.javascript) return null;
+      if (ctx.projectType.existingFormatter) return null;
+      // Add plugins based on project type
+      const plugins: string[] = [];
+      if (ctx.projectType.astro) plugins.push('prettier-plugin-astro');
+      if (ctx.projectType.shell) plugins.push('prettier-plugin-sh');
+      // Tailwind must be last for proper class sorting
+      if (ctx.projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
+      const config = plugins.length > 0 ? { ...PRETTIER_DEFAULTS, plugins } : PRETTIER_DEFAULTS;
+      return JSON.stringify(config, undefined, 2);
+    },
+  },
+};
+
+// ============================================================================
+// Managed Files (create if missing, update if matches template)
+// ============================================================================
+
+export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
+  // Project-level ESLint config (created only if no existing ESLint config)
+  'eslint.config.mjs': {
+    generator: ctx => {
+      // Skip if project already has ESLint config (safeword will use .safeword/eslint.config.mjs)
+      if (ctx.projectType.existingEslintConfig) return null;
+      if (!ctx.languages?.javascript) return null;
+      return getEslintConfig(ctx.projectType.existingFormatter);
+    },
+  },
+  // Minimal tsconfig for ESLint type-checked linting (only if missing)
+  'tsconfig.json': {
+    generator: ctx => {
+      // Skip for non-JS projects (Python-only)
+      if (!ctx.languages?.javascript) return null;
+      // Only create for TypeScript projects
+      if (!ctx.developmentDeps.typescript && !ctx.developmentDeps['typescript-eslint']) {
+        return null;
+      }
+      return JSON.stringify(
+        {
+          compilerOptions: {
+            target: 'ES2022',
+            module: 'NodeNext',
+            moduleResolution: 'NodeNext',
+            strict: true,
+            esModuleInterop: true,
+            skipLibCheck: true,
+            noEmit: true,
+          },
+          include: ['**/*.ts', '**/*.tsx'],
+          exclude: ['node_modules', 'dist', 'build'],
+        },
+        undefined,
+        2,
+      );
+    },
+  },
+  // Knip config for dead code detection (used by /audit)
+  'knip.json': {
+    generator: ctx =>
+      ctx.languages?.javascript
+        ? JSON.stringify(
+            {
+              ignore: ['.safeword/**'],
+              ignoreDependencies: ['eslint-plugin-safeword'],
+            },
+            undefined,
+            2,
+          )
+        : null,
+  },
+  // Project-level Prettier config (created only if no existing formatter)
+  '.prettierrc': {
+    generator: ctx => {
+      // Skip for non-JS projects or projects with existing formatter
+      if (!ctx.languages?.javascript) return null;
+      if (ctx.projectType.existingFormatter) return null;
+      // Create base config with styling defaults (no plugins - those are in .safeword/.prettierrc)
+      return JSON.stringify(PRETTIER_DEFAULTS, undefined, 2);
+    },
+  },
+};
+
+// ============================================================================
+// JSON Merges
+// ============================================================================
+
+export const typescriptJsonMerges: Record<string, JsonMergeDefinition> = {
+  'package.json': {
+    keys: ['scripts.lint', 'scripts.format', 'scripts.format:check', 'scripts.knip'],
+    skipIfMissing: true, // Don't create for Python-only projects (no JS tooling)
+    conditionalKeys: {
+      existingLinter: ['scripts.lint:eslint'], // Projects with existing linter get separate ESLint script
+      publishableLibrary: ['scripts.publint'],
+      shell: ['scripts.lint:sh'],
+    },
+    merge: (existing, ctx) => {
+      const scripts = { ...(existing.scripts as Record<string, string>) };
+      const result = { ...existing };
+
+      if (ctx.projectType.existingLinter) {
+        // Project with existing linter: add lint:eslint for safeword-specific rules
+        if (!scripts['lint:eslint']) scripts['lint:eslint'] = 'eslint .';
+        // Don't touch their existing lint script
+      } else {
+        // No existing linter: ESLint is the primary linter
+        if (!scripts.lint) scripts.lint = 'eslint .';
+      }
+
+      if (!ctx.projectType.existingFormatter) {
+        // No existing formatter: add Prettier
+        if (!scripts.format) scripts.format = 'prettier --write .';
+        if (!scripts['format:check']) scripts['format:check'] = 'prettier --check .';
+      }
+
+      // Always add knip for dead code detection
+      if (!scripts.knip) scripts.knip = 'knip';
+
+      // Conditional: publint for publishable libraries
+      if (ctx.projectType.publishableLibrary && !scripts.publint) {
+        scripts.publint = 'publint';
+      }
+
+      // Conditional: lint:sh for projects with shell scripts
+      if (ctx.projectType.shell && !scripts['lint:sh']) {
+        scripts['lint:sh'] = 'shellcheck **/*.sh';
+      }
+
+      result.scripts = scripts;
+
+      return result;
+    },
+    unmerge: existing => {
+      const result = { ...existing };
+      const scripts = { ...(existing.scripts as Record<string, string>) };
+
+      // Remove safeword-specific scripts but preserve lint/format (useful standalone)
+      delete scripts['lint:eslint']; // Biome hybrid mode
+      delete scripts['lint:sh'];
+      delete scripts['format:check'];
+      delete scripts.knip;
+      delete scripts.publint;
+
+      if (Object.keys(scripts).length > 0) {
+        result.scripts = scripts;
+      } else {
+        delete result.scripts;
+      }
+
+      return result;
+    },
+  },
+
+  // Prettier plugins cleanup - only used on uninstall to remove plugins we may have added
+  // This handles cleanup for users upgrading from older safeword versions
+  '.prettierrc': {
+    keys: ['plugins'],
+    skipIfMissing: true,
+    merge: existing => existing, // No changes on install/upgrade
+    unmerge: existing => {
+      const result = { ...existing } as Record<string, unknown>;
+      delete result.plugins; // Remove plugins on uninstall (packages being removed)
+      return result;
+    },
+  },
+
+  // Biome excludes - add safeword files so they don't get linted by Biome/Ultracite
+  // Biome v2 uses `includes` with `!` prefix for exclusions (not a separate `ignore` key)
+  // Support both biome.json and biome.jsonc
+  'biome.json': BIOME_JSON_MERGE,
+  'biome.jsonc': BIOME_JSON_MERGE,
+};
+
+// ============================================================================
+// Packages
+// ============================================================================
+
+export const typescriptPackages = {
+  base: [
+    // Core tools (always needed for JS/TS)
+    'eslint',
+    // Safeword plugin (bundles eslint-config-prettier + all ESLint plugins)
+    'eslint-plugin-safeword',
+    // Architecture and dead code tools (used by /audit)
+    'dependency-cruiser',
+    'knip',
+  ],
+  conditional: {
+    // Prettier (only for projects without existing formatter)
+    standard: ['prettier'], // "standard" = !existingFormatter
+    // Prettier plugins (only for projects without existing formatter that need them)
+    astro: ['prettier-plugin-astro'],
+    tailwind: ['prettier-plugin-tailwindcss'],
+    shell: ['prettier-plugin-sh'],
+    // Non-ESLint tools
+    publishableLibrary: ['publint'],
+    shellcheck: ['shellcheck'], // Renamed from shell to avoid conflict with prettier-plugin-sh
+    // Legacy ESLint config compat (needed when extending .eslintrc.* configs)
+    legacyEslint: ['@eslint/eslintrc'],
+  },
+};
