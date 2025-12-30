@@ -43,13 +43,13 @@ A CLI tool that sets up AI coding agent configurations (guides, hooks, templates
 
 **Important:** Use `bun run test` (Vitest), NOT `bun test` (Bun's runner). They have different module resolution.
 
-| What | Command | Path |
-|------|---------|------|
-| All tests | `bun run test` | `packages/cli/` |
+| What        | Command                             | Path            |
+| ----------- | ----------------------------------- | --------------- |
+| All tests   | `bun run test`                      | `packages/cli/` |
 | Single file | `bunx vitest run tests/foo.test.ts` | `packages/cli/` |
-| Integration | `bun run test:integration` | `packages/cli/` |
-| Watch mode | `bun run test:watch` | `packages/cli/` |
-| LLM evals | `bun run eval` | `packages/cli/` |
+| Integration | `bun run test:integration`          | `packages/cli/` |
+| Watch mode  | `bun run test:watch`                | `packages/cli/` |
+| LLM evals   | `bun run eval`                      | `packages/cli/` |
 
 ---
 
@@ -64,8 +64,8 @@ A CLI tool that sets up AI coding agent configurations (guides, hooks, templates
 ### Running LLM Evals
 
 ```bash
-bun run eval           # Run all tests
-bun run eval:view      # Open web UI for results
+bun run eval      # Run all tests
+bun run eval:view # Open web UI for results
 ```
 
 **Requires:** `ANTHROPIC_API_KEY` environment variable
@@ -80,7 +80,7 @@ bun run eval:view      # Open web UI for results
 
 4. **Hook paths**: Always use `"$CLAUDE_PROJECT_DIR"/.safeword/hooks/...` format (quoted variable) for Claude Code hooks.
 
-5. **Publishing**: Always run `npm publish` from `packages/cli/` directory, not the monorepo root. Publishing from root publishes a different package. (Note: npm publish is still used for npm registry publishing.)
+5. **Publishing**: Always run `bun publish` from `packages/cli/` directory, not the monorepo root. Publishing from root publishes a different package.
 
 6. **CLI Reference Drift**: `packages/cli/templates/guides/cli-reference.md` must stay in sync with `README.md` CLI documentation. When updating CLI commands in README, update cli-reference.md too.
 

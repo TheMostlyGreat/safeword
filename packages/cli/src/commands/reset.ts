@@ -25,7 +25,7 @@ function uninstallPackages(cwd: string, packages: string[]): void {
   if (packages.length === 0) return;
 
   info('\nUninstalling devDependencies...');
-  const uninstallCmd = `npm uninstall ${packages.join(' ')}`;
+  const uninstallCmd = `bun remove ${packages.join(' ')}`;
   info(`Running: ${uninstallCmd}`);
 
   try {

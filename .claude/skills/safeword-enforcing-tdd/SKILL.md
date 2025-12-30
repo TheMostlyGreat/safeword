@@ -145,7 +145,7 @@ Before starting Phase 1, create or open a work log:
 ```text
 ✅ CORRECT                          ❌ WRONG
 ─────────────────────────────────   ─────────────────────────────────
-Run: npm test                       "Tests should pass now"
+Run: bun run test                   "Tests should pass now"
 Output: ✓ 34/34 tests pass          "I'm confident this works"
 Claim: "All tests pass"             "Tests pass" (no output shown)
 ```

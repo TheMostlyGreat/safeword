@@ -203,13 +203,13 @@ Which approach?
 
 ## Anti-Patterns
 
-| Don't                          | Do                                 |
-| ------------------------------ | ---------------------------------- |
-| "Add error handling"           | Show exact try/catch code          |
-| "Create test file"             | Show complete test with assertions |
-| "Run tests"                    | `npm test -- path/to/file.test.ts` |
-| Combine 3 features in one task | One feature per task               |
-| Skip verification step         | Always: Run X, expect Y            |
+| Don't                          | Do                                  |
+| ------------------------------ | ----------------------------------- |
+| "Add error handling"           | Show exact try/catch code           |
+| "Create test file"             | Show complete test with assertions  |
+| "Run tests"                    | `bun run test path/to/file.test.ts` |
+| Combine 3 features in one task | One feature per task                |
+| Skip verification step         | Always: Run X, expect Y             |
 
 ---
 

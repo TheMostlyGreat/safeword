@@ -179,7 +179,7 @@ async function reportUpdateStatus(health: HealthStatus): Promise<void> {
 
   if (health.updateAvailable) {
     warn(`Update available: v${latestVersion}`);
-    info('Run `npm install -g safeword` to upgrade');
+    info('Run `bunx safeword@latest upgrade` to upgrade');
   } else {
     success('CLI is up to date');
   }
