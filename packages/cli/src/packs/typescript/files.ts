@@ -57,7 +57,6 @@ const BIOME_JSON_MERGE: JsonMergeDefinition = {
     };
   },
   unmerge: existing => {
-    const result = { ...existing };
     const files = (existing.files as Record<string, unknown>) ?? {};
     const existingIncludes = Array.isArray(files.includes) ? files.includes : [];
 
@@ -67,19 +66,21 @@ const BIOME_JSON_MERGE: JsonMergeDefinition = {
       (entry: string) => !safewordExcludes.has(entry),
     );
 
+    // Build cleaned files object
+    const cleanedFiles = { ...files };
     if (cleanedIncludes.length > 0) {
-      files.includes = cleanedIncludes;
-      result.files = files;
+      cleanedFiles.includes = cleanedIncludes;
     } else {
-      delete files.includes;
-      if (Object.keys(files).length > 0) {
-        result.files = files;
-      } else {
-        delete result.files;
-      }
+      delete cleanedFiles.includes;
     }
 
-    return result;
+    // Remove files key entirely if empty
+    if (Object.keys(cleanedFiles).length === 0) {
+      const { files: _, ...rest } = existing;
+      return rest;
+    }
+
+    return { ...existing, files: cleanedFiles };
   },
 };
 
