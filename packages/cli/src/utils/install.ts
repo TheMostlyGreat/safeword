@@ -51,13 +51,22 @@ export function getInstallCommand(pm: PackageManager, packages: string[]): strin
 }
 
 /**
+ * Get uninstall command for package manager
+ */
+export function getUninstallCommand(pm: PackageManager, packages: string[]): string {
+  const cmds: Record<PackageManager, string> = {
+    npm: `npm uninstall ${packages.join(' ')}`,
+    yarn: `yarn remove ${packages.join(' ')}`,
+    pnpm: `pnpm remove ${packages.join(' ')}`,
+    bun: `bun remove ${packages.join(' ')}`,
+  };
+  return cmds[pm];
+}
+
+/**
  * Install packages using detected package manager
  */
-export function installDependencies(
-  cwd: string,
-  packages: string[],
-  label = 'packages',
-): void {
+export function installDependencies(cwd: string, packages: string[], label = 'packages'): void {
   if (packages.length === 0) return;
 
   const pm = detectPackageManager(cwd);

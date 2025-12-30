@@ -50,7 +50,7 @@ program
   .command('reset')
   .description('Remove safeword configuration from project')
   .option('-y, --yes', 'Skip confirmation prompt')
-  .option('--full', 'Also remove linting config and uninstall npm packages')
+  .option('--full', 'Also remove linting config and uninstall packages')
   .action(async options => {
     const { reset } = await import('./commands/reset.js');
     await reset(options);

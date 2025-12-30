@@ -4,7 +4,7 @@
  * Uses reconcile() with mode='uninstall' or 'uninstall-full' to remove configuration.
  *
  * By default, preserves linting configuration (eslint, prettier, etc.)
- * Use --full to also remove linting config and uninstall npm packages
+ * Use --full to also remove linting config and uninstall packages
  */
 
 import { execSync } from 'node:child_process';
@@ -14,6 +14,7 @@ import { reconcile, type ReconcileResult } from '../reconcile.js';
 import { SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists } from '../utils/fs.js';
+import { detectPackageManager, getUninstallCommand } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 
 export interface ResetOptions {
@@ -24,8 +25,10 @@ export interface ResetOptions {
 function uninstallPackages(cwd: string, packages: string[]): void {
   if (packages.length === 0) return;
 
+  const pm = detectPackageManager(cwd);
+  const uninstallCmd = getUninstallCommand(pm, packages);
+
   info('\nUninstalling devDependencies...');
-  const uninstallCmd = `bun remove ${packages.join(' ')}`;
   info(`Running: ${uninstallCmd}`);
 
   try {
