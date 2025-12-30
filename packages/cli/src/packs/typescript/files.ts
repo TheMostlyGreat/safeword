@@ -255,12 +255,35 @@ export const typescriptJsonMerges: Record<string, JsonMergeDefinition> = {
     },
   },
 
-  // Prettier plugins cleanup - only used on uninstall to remove plugins we may have added
-  // This handles cleanup for users upgrading from older safeword versions
+  // Prettier config - add defaults while preserving user customizations
   '.prettierrc': {
     keys: ['plugins'],
     skipIfMissing: true,
-    merge: existing => existing, // No changes on install/upgrade
+    merge: (existing, ctx) => {
+      const result = { ...existing } as Record<string, unknown>;
+
+      // Add defaults for missing styling options (preserves user customizations)
+      for (const [key, value] of Object.entries(PRETTIER_DEFAULTS)) {
+        if (result[key] === undefined) {
+          result[key] = value;
+        }
+      }
+
+      // Always update plugins based on project type (safeword owns this)
+      const plugins: string[] = [];
+      if (ctx.projectType.astro) plugins.push('prettier-plugin-astro');
+      if (ctx.projectType.shell) plugins.push('prettier-plugin-sh');
+      // Tailwind must be last for proper class sorting
+      if (ctx.projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
+
+      if (plugins.length > 0) {
+        result.plugins = plugins;
+      } else {
+        delete result.plugins;
+      }
+
+      return result;
+    },
     unmerge: existing => {
       const result = { ...existing } as Record<string, unknown>;
       delete result.plugins; // Remove plugins on uninstall (packages being removed)
