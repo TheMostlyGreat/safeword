@@ -1,7 +1,7 @@
 # Safeword Architecture
 
-**Version:** 1.0
-**Last Updated:** 2025-12-26
+**Version:** 1.1
+**Last Updated:** 2025-12-31
 **Status:** Production
 
 ---
@@ -10,6 +10,7 @@
 
 - [Overview](#overview)
 - [CLI Structure](#cli-structure)
+- [Language Packs](#language-packs)
 - [Language Detection](#language-detection)
 - [Key Decisions](#key-decisions)
 - [Best Practices](#best-practices)
@@ -19,17 +20,18 @@
 
 ## Overview
 
-Safeword is a CLI tool that configures linting, hooks, and development guides for Claude Code projects. It supports JavaScript/TypeScript projects (ESLint, Prettier) and Python projects (Ruff, mypy).
+Safeword is a CLI tool that configures linting, hooks, and development guides for Claude Code projects. It supports JavaScript/TypeScript projects (ESLint, Prettier), Python projects (Ruff, mypy), and Go projects (golangci-lint).
 
 ### Tech Stack
 
-| Category        | Choice     | Rationale                              |
-| --------------- | ---------- | -------------------------------------- |
-| Runtime         | Bun        | Fast startup, TypeScript native        |
-| Package Manager | npm/bun    | Standard for JS ecosystem              |
-| JS Linting      | ESLint     | Industry standard, extensive rule set  |
-| Python Linting  | Ruff       | Fast, replaces flake8/black/isort      |
-| Type Checking   | tsc / mypy | Native type checkers for each language |
+| Category        | Choice        | Rationale                              |
+| --------------- | ------------- | -------------------------------------- |
+| Runtime         | Bun           | Fast startup, TypeScript native        |
+| Package Manager | npm/bun       | Standard for JS ecosystem              |
+| JS Linting      | ESLint        | Industry standard, extensive rule set  |
+| Python Linting  | Ruff          | Fast, replaces flake8/black/isort      |
+| Go Linting      | golangci-lint | Aggregates 100+ linters, fast          |
+| Type Checking   | tsc / mypy    | Native type checkers for each language |
 
 ---
 
@@ -39,7 +41,10 @@ Safeword is a CLI tool that configures linting, hooks, and development guides fo
 packages/cli/
 ├── src/
 │   ├── commands/       # CLI commands (setup, upgrade, check)
+│   ├── packs/          # Language packs (typescript, python, golang)
+│   │   └── {lang}/     # index.ts, files.ts, setup.ts
 │   ├── utils/          # Detection, file ops, git
+│   ├── schema.ts       # Single source of truth for all managed files
 │   └── reconcile.ts    # Schema-based file management
 ├── templates/
 │   ├── hooks/          # Claude Code hooks
@@ -56,26 +61,40 @@ Language-specific tooling (detection, config generation, setup) is encapsulated 
 
 ```typescript
 interface LanguagePack {
-  id: string; // e.g., 'python', 'typescript'
-  name: string; // e.g., 'Python', 'TypeScript'
+  id: string; // e.g., 'python', 'typescript', 'golang'
+  name: string; // e.g., 'Python', 'TypeScript', 'Go'
   extensions: string[]; // e.g., ['.py', '.pyi']
   detect: (cwd: string) => boolean; // Is this language present?
   setup: (cwd: string, ctx: SetupContext) => SetupResult;
-}
-
-interface SetupContext {
-  isGitRepo: boolean;
-}
-interface SetupResult {
-  files: string[];
 }
 
 // Registry
 const LANGUAGE_PACKS: Record<string, LanguagePack> = {
   python: pythonPack,
   typescript: typescriptPack,
+  golang: golangPack,
 };
 ```
+
+### Pack File Structure (3-file pattern)
+
+Each language pack uses a consistent 3-file pattern:
+
+```text
+packs/{lang}/
+├── index.ts   # LanguagePack interface implementation
+├── files.ts   # ownedFiles, managedFiles, jsonMerges exports
+└── setup.ts   # Setup utilities (language-specific tooling)
+```
+
+**Exports from files.ts:**
+
+- `{lang}OwnedFiles` - Files overwritten on upgrade
+- `{lang}ManagedFiles` - Files created if missing
+- `{lang}JsonMerges` - JSON keys to merge (TypeScript only)
+- `{lang}Packages` - NPM packages to install (TypeScript only)
+
+These exports are spread into `schema.ts` for the reconciliation engine.
 
 **Implementation:** `packages/cli/src/packs/`
 
@@ -86,7 +105,7 @@ Installed packs tracked in `.safeword/config.json`:
 ```json
 {
   "version": "0.15.0",
-  "installedPacks": ["python", "typescript"]
+  "installedPacks": ["python", "typescript", "golang"]
 }
 ```
 
@@ -99,7 +118,7 @@ Installed packs tracked in `.safeword/config.json`:
 Language detection runs FIRST, before any framework-specific detection. This prevents side effects like creating package.json for Python-only projects.
 
 ```text
-detectLanguages(cwd)     →  Languages { javascript, python }
+detectLanguages(cwd)     →  Languages { javascript, python, golang }
        ↓
 detectProjectType()      →  ProjectType (if javascript)
 detectPythonType()       →  PythonProjectType (if python)
@@ -116,6 +135,7 @@ function detectPythonType(cwd: string): PythonProjectType | undefined;
 interface Languages {
   javascript: boolean; // package.json exists
   python: boolean; // pyproject.toml OR requirements.txt exists
+  golang: boolean; // go.mod exists
 }
 
 // Python-specific detection (returned only if languages.python)
@@ -144,7 +164,7 @@ interface ProjectContext {
 
 ### Graceful Linter Fallback
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2025-12-24
 
 | Field          | Value                                                                                     |
@@ -157,7 +177,7 @@ interface ProjectContext {
 
 ### TOML Parsing Without Dependencies
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2025-12-24
 
 | Field          | Value                                                                               |
@@ -170,7 +190,7 @@ interface ProjectContext {
 
 ### Ruff in Hook, mypy in Command Only
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2025-12-24
 
 | Field          | Value                                                                                                |
@@ -183,7 +203,7 @@ interface ProjectContext {
 
 ### Bundled Language Packs (No External Packages)
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2025-12-26
 
 | Field          | Value                                                                                                   |
@@ -201,13 +221,14 @@ interface ProjectContext {
 ### File Extension Routing
 
 **What:** Route files to correct linter based on extension
-**Why:** Polyglot projects need both ESLint and Ruff
+**Why:** Polyglot projects need ESLint, Ruff, and golangci-lint
 **Example:** See `packages/cli/templates/hooks/lib/lint.ts`
 
 ```typescript
 const JS_EXTENSIONS = new Set(['js', 'jsx', 'ts', 'tsx', ...]);
 const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
-// Route to ESLint or Ruff based on extension
+const GO_EXTENSIONS = new Set(['go']);
+// Route to ESLint, Ruff, or golangci-lint based on extension
 ```
 
 ### Silent Linter Execution
@@ -248,5 +269,7 @@ const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 - Feature Spec (Python): `.safeword/planning/specs/feature-python-support.md`
 - Feature Spec (Language Packs): `.safeword/planning/specs/feature-language-packs.md`
 - Design Doc (Language Packs): `.safeword/planning/design/language-packs.md`
+- Language Pack Spec: `packages/cli/src/packs/LANGUAGE_PACK_SPEC.md`
 - Ruff docs: https://docs.astral.sh/ruff/
+- golangci-lint docs: https://golangci-lint.run/
 - PEP 621: https://peps.python.org/pep-0621/
