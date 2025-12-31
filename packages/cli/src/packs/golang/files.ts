@@ -12,7 +12,7 @@ import nodePath from 'node:path';
 
 import YAML from 'yaml';
 
-import type { ManagedFileDefinition } from '../../schema.js';
+import type { FileDefinition, ManagedFileDefinition } from '../../schema.js';
 
 // ============================================================================
 // Shared Configuration Constants
@@ -211,6 +211,24 @@ function deepMerge(
 
   return result;
 }
+
+// ============================================================================
+// Owned Files (overwritten on upgrade)
+// ============================================================================
+
+/**
+ * Go owned files for .safeword/ directory.
+ * These are overwritten on upgrade if content changed.
+ */
+export const golangOwnedFiles: Record<string, FileDefinition> = {
+  // golangci-lint config for hooks (merges with project config if exists)
+  '.safeword/.golangci.yml': {
+    generator: ctx =>
+      ctx.languages?.golang
+        ? generateSafewordGolangciConfig(ctx.projectType.existingGolangciConfig, ctx.cwd)
+        : null,
+  },
+};
 
 // ============================================================================
 // Managed Files (create if missing, update if matches template)

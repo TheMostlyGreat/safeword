@@ -7,7 +7,7 @@
  * Mirrors the structure of typescript/files.ts and golang/files.ts for consistency.
  */
 
-import type { ManagedFileDefinition } from '../../schema.js';
+import type { FileDefinition, ManagedFileDefinition } from '../../schema.js';
 import { detectPythonLayers, detectRootPackage } from './setup.js';
 
 // ============================================================================
@@ -78,6 +78,22 @@ line-length = 100
 ${RUFF_LINT_RULES}
 `;
 }
+
+// ============================================================================
+// Owned Files (overwritten on upgrade)
+// ============================================================================
+
+/**
+ * Python owned files for .safeword/ directory.
+ * These are overwritten on upgrade if content changed.
+ */
+export const pythonOwnedFiles: Record<string, FileDefinition> = {
+  // Ruff config for hooks (extends project config if exists)
+  '.safeword/ruff.toml': {
+    generator: ctx =>
+      ctx.languages?.python ? generateRuffBaseConfig(ctx.projectType.existingRuffConfig) : null,
+  },
+};
 
 // ============================================================================
 // Config Generators for project root (managedFiles)

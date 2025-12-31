@@ -7,8 +7,8 @@
  * Adding a new file? Add it here and it will be handled by setup/upgrade/reset.
  */
 
-import { generateSafewordGolangciConfig, golangManagedFiles } from './packs/golang/files.js';
-import { generateRuffBaseConfig, pythonManagedFiles } from './packs/python/files.js';
+import { golangManagedFiles, golangOwnedFiles } from './packs/golang/files.js';
+import { pythonManagedFiles, pythonOwnedFiles } from './packs/python/files.js';
 import {
   typescriptJsonMerges,
   typescriptManagedFiles,
@@ -224,20 +224,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/config.json': { generator: () => null },
 
     // Language-specific safeword configs for hooks (extend project configs if they exist)
-    // TypeScript/JavaScript configs are in typescriptOwnedFiles
-    '.safeword/ruff.toml': {
-      generator: ctx =>
-        ctx.languages?.python ? generateRuffBaseConfig(ctx.projectType.existingRuffConfig) : null,
-    },
-    '.safeword/.golangci.yml': {
-      generator: ctx =>
-        ctx.languages?.golang
-          ? generateSafewordGolangciConfig(ctx.projectType.existingGolangciConfig, ctx.cwd)
-          : null,
-    },
-
-    // TypeScript/JavaScript owned files (ESLint, Prettier configs)
     ...typescriptOwnedFiles,
+    ...pythonOwnedFiles,
+    ...golangOwnedFiles,
 
     // Hooks shared library (2 files) - TypeScript with Bun runtime
     '.safeword/hooks/lib/lint.ts': { template: 'hooks/lib/lint.ts' },

@@ -19,8 +19,8 @@ export const pythonPack: LanguagePack = {
     return exists(nodePath.join(cwd, 'pyproject.toml'));
   },
 
-  setup(cwd: string, _ctx: SetupContext): SetupResult {
-    const result = setupPythonTooling(cwd);
-    return { files: result.files };
+  setup(_cwd: string, _ctx: SetupContext): SetupResult {
+    // Config files created by schema.ts (ownedFiles/managedFiles)
+    return setupPythonTooling();
   },
 };
