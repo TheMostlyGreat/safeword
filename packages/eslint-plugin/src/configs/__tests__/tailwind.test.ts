@@ -51,9 +51,9 @@ describe('Tailwind config', () => {
     expect(tailwindConfig.length).toBeGreaterThan(0);
   });
 
-  it('includes eslint-plugin-tailwindcss', () => {
+  it('includes eslint-plugin-better-tailwindcss', () => {
     const hasTailwindPlugin = tailwindConfig.some(
-      (config: any) => config.plugins && 'tailwindcss' in config.plugins,
+      (config: any) => config.plugins && 'better-tailwindcss' in config.plugins,
     );
     expect(hasTailwindPlugin).toBe(true);
   });
@@ -74,67 +74,92 @@ describe('Tailwind config', () => {
     expect(hasScopedConfig).toBe(true);
   });
 
-  describe('correctness rules (4 rules at error)', () => {
-    it('tailwindcss/no-contradicting-classname is error', () => {
+  describe('correctness rules (3 rules at error)', () => {
+    it('better-tailwindcss/no-conflicting-classes is error', () => {
       const severity = getSeverity(
-        getRuleConfig(tailwindConfig, 'tailwindcss/no-contradicting-classname'),
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/no-conflicting-classes'),
       );
       expect(severity).toBe('error');
     });
 
-    it('tailwindcss/no-custom-classname is error', () => {
+    it('better-tailwindcss/no-unregistered-classes is error', () => {
       const severity = getSeverity(
-        getRuleConfig(tailwindConfig, 'tailwindcss/no-custom-classname'),
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/no-unregistered-classes'),
       );
       expect(severity).toBe('error');
     });
 
-    it('tailwindcss/no-unnecessary-arbitrary-value is error', () => {
+    it('better-tailwindcss/no-restricted-classes is error', () => {
       const severity = getSeverity(
-        getRuleConfig(tailwindConfig, 'tailwindcss/no-unnecessary-arbitrary-value'),
-      );
-      expect(severity).toBe('error');
-    });
-
-    it('tailwindcss/enforces-negative-arbitrary-values is error', () => {
-      const severity = getSeverity(
-        getRuleConfig(tailwindConfig, 'tailwindcss/enforces-negative-arbitrary-values'),
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/no-restricted-classes'),
       );
       expect(severity).toBe('error');
     });
   });
 
-  describe('style rules (2 rules at error)', () => {
-    it('tailwindcss/classnames-order is error', () => {
-      const severity = getSeverity(getRuleConfig(tailwindConfig, 'tailwindcss/classnames-order'));
-      expect(severity).toBe('error');
-    });
-
-    it('tailwindcss/enforces-shorthand is error', () => {
-      const severity = getSeverity(getRuleConfig(tailwindConfig, 'tailwindcss/enforces-shorthand'));
-      expect(severity).toBe('error');
-    });
-  });
-
-  describe('disabled rules', () => {
-    it('tailwindcss/migration-from-tailwind-2 is off', () => {
+  describe('style rules (8 rules at error)', () => {
+    it('better-tailwindcss/enforce-consistent-class-order is error', () => {
       const severity = getSeverity(
-        getRuleConfig(tailwindConfig, 'tailwindcss/migration-from-tailwind-2'),
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/enforce-consistent-class-order'),
       );
-      expect(severity).toBe('off');
+      expect(severity).toBe('error');
     });
 
-    it('tailwindcss/no-arbitrary-value is off', () => {
-      const severity = getSeverity(getRuleConfig(tailwindConfig, 'tailwindcss/no-arbitrary-value'));
-      expect(severity).toBe('off');
+    it('better-tailwindcss/enforce-shorthand-classes is error', () => {
+      const severity = getSeverity(
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/enforce-shorthand-classes'),
+      );
+      expect(severity).toBe('error');
+    });
+
+    it('better-tailwindcss/no-duplicate-classes is error', () => {
+      const severity = getSeverity(
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/no-duplicate-classes'),
+      );
+      expect(severity).toBe('error');
+    });
+
+    it('better-tailwindcss/no-deprecated-classes is error', () => {
+      const severity = getSeverity(
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/no-deprecated-classes'),
+      );
+      expect(severity).toBe('error');
+    });
+
+    it('better-tailwindcss/enforce-consistent-line-wrapping is error', () => {
+      const severity = getSeverity(
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/enforce-consistent-line-wrapping'),
+      );
+      expect(severity).toBe('error');
+    });
+
+    it('better-tailwindcss/no-unnecessary-whitespace is error', () => {
+      const severity = getSeverity(
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/no-unnecessary-whitespace'),
+      );
+      expect(severity).toBe('error');
+    });
+
+    it('better-tailwindcss/enforce-consistent-variable-syntax is error', () => {
+      const severity = getSeverity(
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/enforce-consistent-variable-syntax'),
+      );
+      expect(severity).toBe('error');
+    });
+
+    it('better-tailwindcss/enforce-consistent-important-position is error', () => {
+      const severity = getSeverity(
+        getRuleConfig(tailwindConfig, 'better-tailwindcss/enforce-consistent-important-position'),
+      );
+      expect(severity).toBe('error');
     });
   });
 
   describe('no warn rules (LLMs ignore warnings)', () => {
-    it('no tailwindcss rules are at warn severity', () => {
+    it('no better-tailwindcss rules are at warn severity', () => {
       const allRules = getAllRules(tailwindConfig);
       const tailwindRules = Object.entries(allRules).filter(([name]) =>
-        name.startsWith('tailwindcss/'),
+        name.startsWith('better-tailwindcss/'),
       );
 
       const warnRules = tailwindRules.filter(([, config]) => {
@@ -147,12 +172,14 @@ describe('Tailwind config', () => {
   });
 
   describe('total rule count', () => {
-    it('has exactly 8 tailwindcss rules configured', () => {
+    it('has exactly 11 better-tailwindcss rules configured', () => {
       const allRules = getAllRules(tailwindConfig);
-      const tailwindRules = Object.keys(allRules).filter(name => name.startsWith('tailwindcss/'));
+      const tailwindRules = Object.keys(allRules).filter(name =>
+        name.startsWith('better-tailwindcss/'),
+      );
 
-      // 6 enabled + 2 explicitly disabled = 8 total
-      expect(tailwindRules.length).toBe(8);
+      // 3 correctness + 8 stylistic = 11 total
+      expect(tailwindRules.length).toBe(11);
     });
   });
 });

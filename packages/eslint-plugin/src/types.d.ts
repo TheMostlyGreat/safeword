@@ -20,12 +20,10 @@ declare module 'eslint-plugin-security' {
   export default plugin;
 }
 
-declare module 'eslint-plugin-tailwindcss' {
-  import type { ESLint, Linter } from 'eslint';
+declare module 'eslint-plugin-better-tailwindcss' {
+  import type { ESLint } from 'eslint';
   const plugin: ESLint.Plugin & {
-    configs: {
-      'flat/recommended': Linter.Config[];
-    };
+    configs: Record<string, { rules: Record<string, unknown> }>;
   };
   export default plugin;
 }
