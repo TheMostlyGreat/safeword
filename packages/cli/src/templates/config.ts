@@ -16,6 +16,23 @@
  * These rules are applied after project rules (safeword wins on conflict).
  * Used by: getSafewordEslintConfigExtending, getSafewordEslintConfigLegacy
  */
+/**
+ * Get Prettier-related imports and config entries based on whether project has existing formatter.
+ * Avoids repetition across ESLint config generators.
+ */
+function getPrettierConfig(hasExistingFormatter: boolean): {
+  import: string;
+  configEntry: string;
+} {
+  if (hasExistingFormatter) {
+    return { import: '', configEntry: '' };
+  }
+  return {
+    import: 'import eslintConfigPrettier from "eslint-config-prettier";',
+    configEntry: '  eslintConfigPrettier,',
+  };
+}
+
 const SAFEWORD_STRICT_RULES_FULL = `// Safeword strict rules - applied after project rules (win on conflict)
 const safewordStrictRules = {
   rules: {
@@ -143,7 +160,7 @@ export default [
  * @returns ESLint config file content as a string
  */
 export function getSafewordEslintConfig(
-  existingConfig: string | null,
+  existingConfig: string | undefined,
   hasExistingFormatter = false,
 ): string {
   if (existingConfig) {
@@ -165,15 +182,12 @@ function getSafewordEslintConfigExtending(
   existingConfig: string,
   hasExistingFormatter: boolean,
 ): string {
-  const prettierImport = hasExistingFormatter
-    ? ''
-    : 'import eslintConfigPrettier from "eslint-config-prettier";';
-  const prettierConfig = hasExistingFormatter ? '' : '  eslintConfigPrettier,';
+  const prettier = getPrettierConfig(hasExistingFormatter);
 
   return `// Safeword ESLint config - extends project config with stricter rules
 // Used by hooks for LLM enforcement. Human pre-commits use project config.
 // Re-run \`safeword upgrade\` to regenerate after project config changes.
-${prettierImport}
+${prettier.import}
 
 let projectConfig = [];
 try {
@@ -191,7 +205,7 @@ ${SAFEWORD_STRICT_RULES_FULL}
 export default [
   ...projectConfig,
   safewordStrictRules,
-${prettierConfig}
+${prettier.configEntry}
 ];
 `;
 }
@@ -203,10 +217,7 @@ function getSafewordEslintConfigLegacy(
   existingConfig: string,
   hasExistingFormatter: boolean,
 ): string {
-  const prettierImport = hasExistingFormatter
-    ? ''
-    : 'import eslintConfigPrettier from "eslint-config-prettier";';
-  const prettierConfig = hasExistingFormatter ? '' : '  eslintConfigPrettier,';
+  const prettier = getPrettierConfig(hasExistingFormatter);
 
   return `// Safeword ESLint config - extends legacy project config with stricter rules
 // Used by hooks for LLM enforcement. Human pre-commits use project config.
@@ -214,7 +225,7 @@ function getSafewordEslintConfigLegacy(
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { FlatCompat } from "@eslint/eslintrc";
-${prettierImport}
+${prettier.import}
 
 console.warn("Safeword: Legacy .eslintrc.* detected. Consider migrating to eslint.config.mjs");
 
@@ -234,7 +245,7 @@ ${SAFEWORD_STRICT_RULES_FULL}
 export default [
   ...projectConfig,
   safewordStrictRules,
-${prettierConfig}
+${prettier.configEntry}
 ];
 `;
 }
@@ -243,17 +254,14 @@ ${prettierConfig}
  * Standalone safeword ESLint config (no project config to extend)
  */
 function getSafewordEslintConfigStandalone(hasExistingFormatter: boolean): string {
-  const prettierImport = hasExistingFormatter
-    ? ''
-    : 'import eslintConfigPrettier from "eslint-config-prettier";';
-  const prettierConfig = hasExistingFormatter ? '' : '  eslintConfigPrettier,';
+  const prettier = getPrettierConfig(hasExistingFormatter);
 
   return `// Safeword ESLint config - standalone (no project config to extend)
 // Used by hooks for LLM enforcement.
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import safeword from "eslint-plugin-safeword";
-${prettierImport}
+${prettier.import}
 
 const { detect, configs } = safeword;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -293,7 +301,7 @@ export default [
   ...(detect.hasTailwind(deps) ? configs.tailwind : []),
   ...(detect.hasTanstackQuery(deps) ? configs.tanstackQuery : []),
   safewordStrictRules,
-${prettierConfig}
+${prettier.configEntry}
 ];
 `;
 }
