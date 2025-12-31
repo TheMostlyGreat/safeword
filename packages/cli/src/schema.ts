@@ -7,8 +7,7 @@
  * Adding a new file? Add it here and it will be handled by setup/upgrade/reset.
  */
 
-import { golangManagedFiles } from './packs/golang/files.js';
-import { generateSafewordGolangciConfig } from './packs/golang/setup.js';
+import { generateSafewordGolangciConfig, golangManagedFiles } from './packs/golang/files.js';
 import { generateRuffBaseConfig } from './packs/python/files.js';
 import {
   typescriptJsonMerges,

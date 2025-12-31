@@ -7,7 +7,7 @@
 import nodePath from 'node:path';
 
 import { exists } from '../../utils/fs.js';
-import type { LanguagePack, SetupResult } from '../types.js';
+import type { LanguagePack, SetupContext, SetupResult } from '../types.js';
 import { setupPythonTooling } from './setup.js';
 
 export const pythonPack: LanguagePack = {
@@ -19,7 +19,7 @@ export const pythonPack: LanguagePack = {
     return exists(nodePath.join(cwd, 'pyproject.toml'));
   },
 
-  setup(cwd: string, _ctx): SetupResult {
+  setup(cwd: string, _ctx: SetupContext): SetupResult {
     const result = setupPythonTooling(cwd);
     return { files: result.files };
   },

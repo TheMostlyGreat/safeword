@@ -7,7 +7,7 @@
 import nodePath from 'node:path';
 
 import { exists } from '../../utils/fs.js';
-import type { LanguagePack, SetupResult } from '../types.js';
+import type { LanguagePack, SetupContext, SetupResult } from '../types.js';
 import { setupGoTooling } from './setup.js';
 
 export const golangPack: LanguagePack = {
@@ -19,7 +19,7 @@ export const golangPack: LanguagePack = {
     return exists(nodePath.join(cwd, 'go.mod'));
   },
 
-  setup(_cwd: string, _ctx): SetupResult {
+  setup(_cwd: string, _ctx: SetupContext): SetupResult {
     // .golangci.yml is created by schema.ts (managedFiles)
     return setupGoTooling();
   },
