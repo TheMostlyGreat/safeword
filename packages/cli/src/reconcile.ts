@@ -343,26 +343,6 @@ interface ReconcilePlan {
 
 /**
  *
- * @param deprecatedFiles
- * @param cwd
- */
-function planDeprecatedFilesRemoval(
-  deprecatedFiles: string[],
-  cwd: string,
-): { actions: Action[]; removed: string[] } {
-  const actions: Action[] = [];
-  const removed: string[] = [];
-  for (const filePath of deprecatedFiles) {
-    if (exists(nodePath.join(cwd, filePath))) {
-      actions.push({ type: 'rm', path: filePath });
-      removed.push(filePath);
-    }
-  }
-  return { actions, removed };
-}
-
-/**
- *
  * @param schema
  * @param mode
  * @param ctx
@@ -504,7 +484,7 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
   }
 
   // 4. Remove deprecated files (renamed or removed in newer versions)
-  const deprecatedFiles = planDeprecatedFilesRemoval(schema.deprecatedFiles, ctx.cwd);
+  const deprecatedFiles = planExistingFilesRemoval(schema.deprecatedFiles, ctx.cwd);
   actions.push(...deprecatedFiles.actions);
   const wouldRemove = deprecatedFiles.removed;
 
