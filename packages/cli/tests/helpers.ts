@@ -434,10 +434,12 @@ source = { virtual = "." }
     case 'pipenv': {
       // Create Pipfile for detection
       writeTestFile(dir, 'Pipfile', '[[source]]\nurl = "https://pypi.org/simple"\n');
-
       break;
     }
-    // No default
+    case 'pip': {
+      // pip is the default - no special config or lockfiles needed
+      break;
+    }
   }
 
   writeTestFile(dir, 'pyproject.toml', content);

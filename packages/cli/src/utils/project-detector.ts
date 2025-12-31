@@ -79,7 +79,7 @@ export interface ProjectType {
   /** True if project has existing format script or formatter config */
   existingFormatter: boolean;
   /** Path to existing ESLint config if present (e.g., 'eslint.config.mjs' or '.eslintrc.json') */
-  existingEslintConfig: string | null;
+  existingEslintConfig: string | undefined;
   /** True if existing ESLint config is legacy format (.eslintrc.*) requiring FlatCompat */
   legacyEslint: boolean;
   /** True if project has [tool.ruff] in pyproject.toml or ruff.toml */
@@ -89,7 +89,7 @@ export interface ProjectType {
   /** True if project has [tool.importlinter] in pyproject.toml or .importlinter */
   existingImportLinterConfig: boolean;
   /** Path to existing golangci-lint config if present (e.g., '.golangci.yml') */
-  existingGolangciConfig: string | null;
+  existingGolangciConfig: string | undefined;
 }
 
 /**
@@ -107,7 +107,7 @@ export interface Languages {
  * @see ARCHITECTURE.md → Language Detection
  */
 export interface PythonProjectType {
-  framework: 'django' | 'flask' | 'fastapi' | null;
+  framework: 'django' | 'flask' | 'fastapi' | undefined;
   packageManager: 'poetry' | 'uv' | 'pip';
 }
 
@@ -163,7 +163,7 @@ export function detectPythonType(cwd: string): PythonProjectType | undefined {
 
   // Detect framework (first match wins)
   const contentLower = content.toLowerCase();
-  const framework = PYTHON_FRAMEWORKS.find(fw => contentLower.includes(fw)) ?? null;
+  const framework = PYTHON_FRAMEWORKS.find(fw => contentLower.includes(fw));
 
   return { framework, packageManager };
 }
@@ -215,15 +215,15 @@ export interface PackageJsonWithScripts extends PackageJson {
 /**
  * Check if project has existing ESLint config.
  * @param cwd - Working directory to scan
- * @returns The config file path if found, null otherwise.
+ * @returns The config file path if found, undefined otherwise.
  */
-export function findExistingEslintConfig(cwd: string): string | null {
+export function findExistingEslintConfig(cwd: string): string | undefined {
   for (const config of ESLINT_CONFIG_FILES) {
     if (existsSync(nodePath.join(cwd, config))) {
       return config;
     }
   }
-  return null;
+  return undefined;
 }
 
 /**
@@ -290,15 +290,15 @@ export function hasExistingImportLinterConfig(cwd: string): boolean {
 /**
  * Check if project has existing golangci-lint config.
  * @param cwd - Working directory to scan
- * @returns The config file path if found, null otherwise.
+ * @returns The config file path if found, undefined otherwise.
  */
-export function findExistingGolangciConfig(cwd: string): string | null {
+export function findExistingGolangciConfig(cwd: string): string | undefined {
   for (const config of GOLANGCI_CONFIG_FILES) {
     if (existsSync(nodePath.join(cwd, config))) {
       return config;
     }
   }
-  return null;
+  return undefined;
 }
 
 /**
@@ -336,7 +336,7 @@ export function detectProjectType(packageJson: PackageJsonWithScripts, cwd?: str
   const hasFormatter = cwd ? hasExistingFormatter(cwd, scripts) : 'format' in scripts;
 
   // Detect existing ESLint config and whether it's legacy format
-  const eslintConfig = cwd ? findExistingEslintConfig(cwd) : null;
+  const eslintConfig = cwd ? findExistingEslintConfig(cwd) : undefined;
   const isLegacyEslint = eslintConfig?.startsWith('.eslintrc') ?? false;
 
   return {
@@ -357,6 +357,6 @@ export function detectProjectType(packageJson: PackageJsonWithScripts, cwd?: str
     existingRuffConfig: cwd ? hasExistingRuffConfig(cwd) : false,
     existingMypyConfig: cwd ? hasExistingMypyConfig(cwd) : false,
     existingImportLinterConfig: cwd ? hasExistingImportLinterConfig(cwd) : false,
-    existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : null,
+    existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : undefined,
   };
 }

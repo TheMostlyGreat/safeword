@@ -4,13 +4,15 @@
 
 let projectConfig = [];
 try {
-  projectConfig = (await import('../eslint.config.mjs')).default;
+  const imported = await import('../eslint.config.mjs');
+  projectConfig = imported.default;
   // Ensure it's an array
   if (!Array.isArray(projectConfig)) {
     projectConfig = [projectConfig];
   }
-} catch (e) {
-  console.warn('Safeword: Could not load project ESLint config, using defaults only');
+} catch {
+  // Intentional: graceful fallback to defaults if project config unavailable
+  console.warn('Safeword: Could not load project ESLint config, using defaults only'); // eslint-disable-line no-undef
 }
 
 // Safeword strict rules - applied after project rules (win on conflict)

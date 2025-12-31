@@ -7,7 +7,7 @@
  * Mirrors the structure of typescript/files.ts and golang/files.ts for consistency.
  */
 
-import type { FileDefinition, ManagedFileDefinition } from '../../schema.js';
+import type { FileDefinition, ManagedFileDefinition } from '../types.js';
 import { detectPythonLayers, detectRootPackage } from './setup.js';
 
 // ============================================================================
@@ -91,7 +91,9 @@ export const pythonOwnedFiles: Record<string, FileDefinition> = {
   // Ruff config for hooks (extends project config if exists)
   '.safeword/ruff.toml': {
     generator: ctx =>
-      ctx.languages?.python ? generateRuffBaseConfig(ctx.projectType.existingRuffConfig) : null,
+      ctx.languages?.python
+        ? generateRuffBaseConfig(ctx.projectType.existingRuffConfig)
+        : undefined,
   },
 };
 
@@ -163,9 +165,9 @@ export const pythonManagedFiles: Record<string, ManagedFileDefinition> = {
   'ruff.toml': {
     generator: ctx => {
       // Skip if not a Python project
-      if (!ctx.languages?.python) return null;
+      if (!ctx.languages?.python) return;
       // Skip if project already has ruff config
-      if (ctx.projectType.existingRuffConfig) return null;
+      if (ctx.projectType.existingRuffConfig) return;
       return generateProjectRuffConfig();
     },
   },
@@ -174,9 +176,9 @@ export const pythonManagedFiles: Record<string, ManagedFileDefinition> = {
   'mypy.ini': {
     generator: ctx => {
       // Skip if not a Python project
-      if (!ctx.languages?.python) return null;
+      if (!ctx.languages?.python) return;
       // Skip if project already has mypy config
-      if (ctx.projectType.existingMypyConfig) return null;
+      if (ctx.projectType.existingMypyConfig) return;
       return generateProjectMypyConfig();
     },
   },
@@ -185,13 +187,13 @@ export const pythonManagedFiles: Record<string, ManagedFileDefinition> = {
   '.importlinter': {
     generator: ctx => {
       // Skip if not a Python project
-      if (!ctx.languages?.python) return null;
+      if (!ctx.languages?.python) return;
       // Skip if project already has import-linter config
-      if (ctx.projectType.existingImportLinterConfig) return null;
+      if (ctx.projectType.existingImportLinterConfig) return;
 
       // Detect layers
       const layers = detectPythonLayers(ctx.cwd);
-      if (layers.length < 2) return null;
+      if (layers.length < 2) return;
 
       const rootPackage = detectRootPackage(ctx.cwd);
       return generateProjectImportLinterConfig(layers, rootPackage);

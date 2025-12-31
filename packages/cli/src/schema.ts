@@ -15,43 +15,19 @@ import {
   typescriptOwnedFiles,
   typescriptPackages,
 } from './packs/typescript/files.js';
+// Re-export shared types from packs/types.ts (breaks circular dependency)
+export type {
+  FileDefinition,
+  JsonMergeDefinition,
+  ManagedFileDefinition,
+  ProjectContext,
+} from './packs/types.js';
+import type { FileDefinition, JsonMergeDefinition } from './packs/types.js';
 import { CURSOR_HOOKS, SETTINGS_HOOKS } from './templates/config.js';
 import { AGENTS_MD_LINK } from './templates/content.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';
 import { MCP_SERVERS } from './utils/install.js';
-import { type Languages, type ProjectType } from './utils/project-detector.js';
 import { VERSION } from './version.js';
-
-// ============================================================================
-// Interfaces
-// ============================================================================
-
-export interface ProjectContext {
-  cwd: string;
-  projectType: ProjectType;
-  developmentDeps: Record<string, string>;
-  isGitRepo: boolean;
-  /** Languages detected in project (for conditional file generation) */
-  languages?: Languages;
-}
-
-export interface FileDefinition {
-  template?: string; // Path in templates/ dir
-  content?: string | (() => string); // Static content or factory
-  generator?: (ctx: ProjectContext) => string | null; // Dynamic generator, null = skip file
-}
-
-// managedFiles: created if missing, updated only if content === current template output
-export type ManagedFileDefinition = FileDefinition;
-
-export interface JsonMergeDefinition {
-  keys: string[]; // Dot-notation keys we manage
-  conditionalKeys?: Record<string, string[]>; // Keys added based on project type
-  merge: (existing: Record<string, unknown>, ctx: ProjectContext) => Record<string, unknown>;
-  unmerge: (existing: Record<string, unknown>) => Record<string, unknown>;
-  removeFileIfEmpty?: boolean; // Delete file if our keys were the only content
-  skipIfMissing?: boolean; // Don't create file if it doesn't exist (for optional integrations)
-}
 
 export interface TextPatchDefinition {
   operation: 'prepend' | 'append';
@@ -220,8 +196,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/SAFEWORD.md': { template: 'SAFEWORD.md' },
     '.safeword/version': { content: () => VERSION },
     // config.json is created by packs system but needs to be registered for cleanup on uninstall
-    // Generator returns null = never created/updated by schema, but still deleted on uninstall
-    '.safeword/config.json': { generator: () => null },
+    // Generator returns undefined = never created/updated by schema, but still deleted on uninstall
+    '.safeword/config.json': { generator: (): undefined => undefined },
 
     // Language-specific safeword configs for hooks (extend project configs if they exist)
     ...typescriptOwnedFiles,

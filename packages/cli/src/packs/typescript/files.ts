@@ -5,8 +5,8 @@
  * Imported by schema.ts and spread into SAFEWORD_SCHEMA.
  */
 
-import type { FileDefinition, JsonMergeDefinition, ManagedFileDefinition } from '../../schema.js';
 import { getEslintConfig, getSafewordEslintConfig } from '../../templates/config.js';
+import type { FileDefinition, JsonMergeDefinition, ManagedFileDefinition } from '../types.js';
 
 // ============================================================================
 // Shared Definitions
@@ -98,13 +98,13 @@ export const typescriptOwnedFiles: Record<string, FileDefinition> = {
             ctx.projectType.existingEslintConfig,
             ctx.projectType.existingFormatter,
           )
-        : null,
+        : undefined,
   },
   '.safeword/.prettierrc': {
     generator: ctx => {
       // Skip for non-JS projects or projects with existing formatter (they use Biome, etc.)
-      if (!ctx.languages?.javascript) return null;
-      if (ctx.projectType.existingFormatter) return null;
+      if (!ctx.languages?.javascript) return;
+      if (ctx.projectType.existingFormatter) return;
       // Add plugins based on project type
       const plugins: string[] = [];
       if (ctx.projectType.astro) plugins.push('prettier-plugin-astro');
@@ -126,8 +126,8 @@ export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
   'eslint.config.mjs': {
     generator: ctx => {
       // Skip if project already has ESLint config (safeword will use .safeword/eslint.config.mjs)
-      if (ctx.projectType.existingEslintConfig) return null;
-      if (!ctx.languages?.javascript) return null;
+      if (ctx.projectType.existingEslintConfig) return;
+      if (!ctx.languages?.javascript) return;
       return getEslintConfig(ctx.projectType.existingFormatter);
     },
   },
@@ -135,10 +135,10 @@ export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
   'tsconfig.json': {
     generator: ctx => {
       // Skip for non-JS projects (Python-only)
-      if (!ctx.languages?.javascript) return null;
+      if (!ctx.languages?.javascript) return;
       // Only create for TypeScript projects
       if (!ctx.developmentDeps.typescript && !ctx.developmentDeps['typescript-eslint']) {
-        return null;
+        return;
       }
       return JSON.stringify(
         {
@@ -171,14 +171,14 @@ export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
             undefined,
             2,
           )
-        : null,
+        : undefined,
   },
   // Project-level Prettier config (created only if no existing formatter)
   '.prettierrc': {
     generator: ctx => {
       // Skip for non-JS projects or projects with existing formatter
-      if (!ctx.languages?.javascript) return null;
-      if (ctx.projectType.existingFormatter) return null;
+      if (!ctx.languages?.javascript) return;
+      if (ctx.projectType.existingFormatter) return;
       // Create base config with styling defaults (no plugins - those are in .safeword/.prettierrc)
       return JSON.stringify(PRETTIER_DEFAULTS, undefined, 2);
     },

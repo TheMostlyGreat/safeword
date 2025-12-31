@@ -12,7 +12,7 @@ import nodePath from 'node:path';
 
 import YAML from 'yaml';
 
-import type { FileDefinition, ManagedFileDefinition } from '../../schema.js';
+import type { FileDefinition, ManagedFileDefinition } from '../types.js';
 
 // ============================================================================
 // Shared Configuration Constants
@@ -70,7 +70,10 @@ ${GOLANGCI_CONFIG_CORE}`;
  * @param existingConfig - Path to existing config (e.g., '.golangci.yml') or null
  * @param cwd - Project directory
  */
-export function generateSafewordGolangciConfig(existingConfig: string | null, cwd: string): string {
+export function generateSafewordGolangciConfig(
+  existingConfig: string | undefined,
+  cwd: string,
+): string {
   if (!existingConfig) {
     // No existing config - generate standalone
     return getSafewordGolangciStandalone();
@@ -83,7 +86,7 @@ export function generateSafewordGolangciConfig(existingConfig: string | null, cw
 
   try {
     const projectContent = readFileSync(configPath, 'utf8');
-    const projectConfig = YAML.parse(projectContent) as Record<string, unknown> | null;
+    const projectConfig = YAML.parse(projectContent) as Record<string, unknown> | undefined;
 
     if (!projectConfig) {
       return getSafewordGolangciStandalone();
@@ -226,7 +229,7 @@ export const golangOwnedFiles: Record<string, FileDefinition> = {
     generator: ctx =>
       ctx.languages?.golang
         ? generateSafewordGolangciConfig(ctx.projectType.existingGolangciConfig, ctx.cwd)
-        : null,
+        : undefined,
   },
 };
 
@@ -239,8 +242,8 @@ export const golangManagedFiles: Record<string, ManagedFileDefinition> = {
   '.golangci.yml': {
     generator: ctx => {
       // Skip if project already has golangci config (safeword will use .safeword/.golangci.yml)
-      if (ctx.projectType.existingGolangciConfig) return null;
-      if (!ctx.languages?.golang) return null;
+      if (ctx.projectType.existingGolangciConfig) return;
+      if (!ctx.languages?.golang) return;
       return generateGolangciConfig();
     },
   },
