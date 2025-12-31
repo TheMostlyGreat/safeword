@@ -190,7 +190,7 @@ if (summary) {
     JSON.stringify({
       decision: 'block',
       reason: `${QUALITY_REVIEW_MESSAGE}\n\n(Note: JSON summary was missing but edit tools were detected)`,
-    })
+    }),
   );
   process.exit(0);
 } else {
@@ -200,7 +200,7 @@ if (summary) {
       decision: 'block',
       reason:
         'SAFEWORD: Response missing required JSON summary. Add to end of response:\n{"proposedChanges": boolean, "madeChanges": boolean}',
-    })
+    }),
   );
   process.exit(0);
 }

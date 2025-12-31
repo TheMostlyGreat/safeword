@@ -9,15 +9,15 @@ Hooks are TypeScript scripts that run at specific points during AI coding sessio
 
 ## Available Hooks
 
-| Hook | Trigger | Purpose |
-|------|---------|---------|
-| `session-version.ts` | Session start | Display safeword version |
-| `session-verify-agents.ts` | Session start | Verify AGENTS.md exists |
-| `session-lint-check.ts` | Session start | Check for lint issues |
-| `prompt-timestamp.ts` | Prompt submit | Add timestamp to context |
-| `prompt-questions.ts` | Prompt submit | Remind about clarifying questions |
-| `post-tool-lint.ts` | After file edit | Lint changed files |
-| `stop-quality.ts` | Session end | Trigger quality review |
+| Hook                       | Trigger         | Purpose                           |
+| -------------------------- | --------------- | --------------------------------- |
+| `session-version.ts`       | Session start   | Display safeword version          |
+| `session-verify-agents.ts` | Session start   | Verify AGENTS.md exists           |
+| `session-lint-check.ts`    | Session start   | Check for lint issues             |
+| `prompt-timestamp.ts`      | Prompt submit   | Add timestamp to context          |
+| `prompt-questions.ts`      | Prompt submit   | Remind about clarifying questions |
+| `post-tool-lint.ts`        | After file edit | Lint changed files                |
+| `stop-quality.ts`          | Session end     | Trigger quality review            |
 
 ## Hook Location
 

@@ -344,11 +344,10 @@ describe('E2E: Stop Hook', () => {
   }
 
   // Helper to parse JSON output from stop hook (new format: exit 0 + JSON stdout)
-  function parseStopOutput(result: {
-    stdout: string;
-    stderr: string;
-    exitCode: number;
-  }): { decision?: string; reason?: string } {
+  function parseStopOutput(result: { stdout: string; stderr: string; exitCode: number }): {
+    decision?: string;
+    reason?: string;
+  } {
     try {
       return JSON.parse(result.stdout.trim());
     } catch {
@@ -358,8 +357,7 @@ describe('E2E: Stop Hook', () => {
 
   describe('stop-quality.ts', () => {
     it('triggers quality review when madeChanges is true', () => {
-      const text =
-        'I made some edits.\n\n{"proposedChanges": false, "madeChanges": true}';
+      const text = 'I made some edits.\n\n{"proposedChanges": false, "madeChanges": true}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
@@ -373,8 +371,7 @@ describe('E2E: Stop Hook', () => {
     });
 
     it('triggers quality review when proposedChanges is true', () => {
-      const text =
-        'I propose these changes.\n\n{"proposedChanges": true, "madeChanges": false}';
+      const text = 'I propose these changes.\n\n{"proposedChanges": true, "madeChanges": false}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
@@ -423,8 +420,7 @@ describe('E2E: Stop Hook', () => {
     });
 
     it('exits silently when no changes made or proposed', () => {
-      const text =
-        'Just answered a question.\n\n{"proposedChanges": false, "madeChanges": false}';
+      const text = 'Just answered a question.\n\n{"proposedChanges": false, "madeChanges": false}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
@@ -543,7 +539,10 @@ describe('E2E: Python Lint Hook', () => {
       // Run with PATH that has bun but likely not ruff
       const result = spawnSync(
         'bash',
-        ['-c', `PATH=/bin:/usr/bin:${bunDir} bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.py"`],
+        [
+          '-c',
+          `PATH=/bin:/usr/bin:${bunDir} bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.py"`,
+        ],
         {
           cwd: projectDirectory,
           env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },

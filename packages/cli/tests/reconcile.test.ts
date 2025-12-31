@@ -76,7 +76,11 @@ describe('Reconcile - Reconciliation Engine', () => {
       developmentDeps: (overrides.developmentDeps as Record<string, string>) ?? {},
       isGitRepo: (overrides.isGitRepo as boolean) ?? true,
       // Default to JavaScript project for existing tests
-      languages: (overrides.languages as { javascript: boolean; python: boolean; golang: boolean }) ?? {
+      languages: (overrides.languages as {
+        javascript: boolean;
+        python: boolean;
+        golang: boolean;
+      }) ?? {
         javascript: true,
         python: false,
         golang: false,
@@ -553,10 +557,11 @@ describe('Reconcile - Reconciliation Engine', () => {
       // Full uninstall
       await reconcile(SAFEWORD_SCHEMA, 'uninstall-full', ctx);
 
-      // Managed files removed
+      // Managed files removed (if they match template)
       expect(existsSync(nodePath.join(temporaryDirectory, 'eslint.config.mjs'))).toBe(false);
-      // .prettierrc stays (user preferences preserved via jsonMerge, only plugins removed)
-      expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(true);
+      // .prettierrc is removed if it matches our template (no customizations)
+      // Note: jsonMerge unmerge cleans up plugins for files that DON'T match template
+      expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(false);
     });
 
     it('should compute packages to remove', async () => {

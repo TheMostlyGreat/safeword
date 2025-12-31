@@ -24,10 +24,14 @@ fi
 
 # Detect package manager from lockfile
 detect_runner() {
-  if [ -f "pnpm-lock.yaml" ]; then echo "pnpm"
-  elif [ -f "yarn.lock" ]; then echo "yarn"
-  elif [ -f "bun.lockb" ]; then echo "bun"
-  else echo "npm"
+  if [ -f "pnpm-lock.yaml" ]; then
+    echo "pnpm"
+  elif [ -f "yarn.lock" ]; then
+    echo "yarn"
+  elif [ -f "bun.lockb" ]; then
+    echo "bun"
+  else
+    echo "npm"
   fi
 }
 
@@ -44,16 +48,16 @@ echo ""
 
 # Function to count matching processes
 count_procs() {
-  pgrep -f "$PROCESS_PATTERN" 2>/dev/null | wc -l | tr -d ' '
+  pgrep -f "$PROCESS_PATTERN" 2> /dev/null | wc -l | tr -d ' '
 }
 
 # Function to kill matching processes
 kill_procs() {
-  pkill -9 -f "$PROCESS_PATTERN" 2>/dev/null || true
+  pkill -9 -f "$PROCESS_PATTERN" 2> /dev/null || true
 }
 
 # Get list of test files using find (portable across bash versions)
-TEST_FILES=$(find "$SEARCH_DIR" -type f -name "$NAME_PATTERN" 2>/dev/null | sort)
+TEST_FILES=$(find "$SEARCH_DIR" -type f -name "$NAME_PATTERN" 2> /dev/null | sort)
 TOTAL=$(echo "$TEST_FILES" | grep -c . || echo 0)
 
 if [ "$TOTAL" -eq 0 ]; then
@@ -113,7 +117,7 @@ for TEST_FILE in $TEST_FILES; do
     echo ""
     echo "Running processes:"
     pgrep -f "$PROCESS_PATTERN" | head -5 | while read -r pid; do
-      ps -p "$pid" -o pid,command= 2>/dev/null | head -c 100
+      ps -p "$pid" -o pid,command= 2> /dev/null | head -c 100
       echo ""
     done
     echo ""

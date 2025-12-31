@@ -254,10 +254,10 @@ describe('Reset Command - Reconcile Integration', () => {
       const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'uninstall-full', ctx);
 
-      // Managed files should be removed
+      // Managed files should be removed (if they match template)
       expect(existsSync(nodePath.join(temporaryDirectory, 'eslint.config.mjs'))).toBe(false);
-      // .prettierrc stays (user preferences preserved via jsonMerge, only plugins removed)
-      expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(true);
+      // .prettierrc is removed if it matches our template (no customizations)
+      expect(existsSync(nodePath.join(temporaryDirectory, '.prettierrc'))).toBe(false);
     });
 
     it('should compute packages to remove', async () => {

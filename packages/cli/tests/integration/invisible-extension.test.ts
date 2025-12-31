@@ -79,7 +79,11 @@ export default [
         initGitRepo(projectDirectory);
 
         // Create existing legacy ESLint config
-        const legacyConfig = JSON.stringify({ extends: ['eslint:recommended'], rules: { 'no-debugger': 'error' } }, null, 2);
+        const legacyConfig = JSON.stringify(
+          { extends: ['eslint:recommended'], rules: { 'no-debugger': 'error' } },
+          null,
+          2,
+        );
         writeTestFile(projectDirectory, '.eslintrc.json', legacyConfig);
 
         await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: SETUP_TIMEOUT });

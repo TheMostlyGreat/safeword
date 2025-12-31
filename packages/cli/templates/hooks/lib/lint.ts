@@ -25,17 +25,37 @@ const JS_EXTENSIONS = new Set([
 const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 const GO_EXTENSIONS = new Set(['go']);
 const SHELL_EXTENSIONS = new Set(['sh']);
-const PRETTIER_EXTENSIONS = new Set(['md', 'json', 'css', 'scss', 'html', 'yaml', 'yml', 'graphql']);
+const PRETTIER_EXTENSIONS = new Set([
+  'md',
+  'json',
+  'css',
+  'scss',
+  'html',
+  'yaml',
+  'yml',
+  'graphql',
+]);
 
 // Cache safeword config paths at module init (avoids repeated fs checks per file)
 const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const SAFEWORD_ESLINT = `${projectDir}/.safeword/eslint.config.mjs`;
 const SAFEWORD_RUFF = `${projectDir}/.safeword/ruff.toml`;
 const SAFEWORD_GOLANGCI = `${projectDir}/.safeword/.golangci.yml`;
+const SAFEWORD_PRETTIER = `${projectDir}/.safeword/.prettierrc`;
 
 const HAS_SAFEWORD_ESLINT = existsSync(SAFEWORD_ESLINT);
 const HAS_SAFEWORD_RUFF = existsSync(SAFEWORD_RUFF);
 const HAS_SAFEWORD_GOLANGCI = existsSync(SAFEWORD_GOLANGCI);
+const HAS_SAFEWORD_PRETTIER = existsSync(SAFEWORD_PRETTIER);
+
+/** Run prettier with safeword config if available */
+async function runPrettier(file: string): Promise<void> {
+  if (HAS_SAFEWORD_PRETTIER) {
+    await $`bunx prettier --config ${SAFEWORD_PRETTIER} --write ${file}`.nothrow().quiet();
+  } else {
+    await $`bunx prettier --write ${file}`.nothrow().quiet();
+  }
+}
 
 /**
  * Lint a file based on its extension.
@@ -63,7 +83,7 @@ export async function lintFile(file: string, _projectDir: string): Promise<void>
     if (eslintResult.exitCode !== 0 && eslintResult.stderr.length > 0) {
       console.log(eslintResult.stderr.toString());
     }
-    await $`bunx prettier --write ${file}`.nothrow().quiet();
+    await runPrettier(file);
     return;
   }
 
@@ -95,7 +115,7 @@ export async function lintFile(file: string, _projectDir: string): Promise<void>
 
   // Other supported formats - prettier only
   if (PRETTIER_EXTENSIONS.has(extension)) {
-    await $`bunx prettier --write ${file}`.nothrow().quiet();
+    await runPrettier(file);
     return;
   }
 
@@ -105,8 +125,9 @@ export async function lintFile(file: string, _projectDir: string): Promise<void>
     if (shellcheckResult.exitCode !== 0 && shellcheckResult.stderr.length > 0) {
       console.log(shellcheckResult.stderr.toString());
     }
-    if (existsSync(`${projectDir}/node_modules/prettier-plugin-sh`)) {
-      await $`bunx prettier --write ${file}`.nothrow().quiet();
+    // Run prettier if safeword config exists (has plugin configured) or plugin is installed
+    if (HAS_SAFEWORD_PRETTIER || existsSync(`${projectDir}/node_modules/prettier-plugin-sh`)) {
+      await runPrettier(file);
     }
   }
 }

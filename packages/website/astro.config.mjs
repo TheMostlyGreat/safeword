@@ -7,7 +7,9 @@ export default defineConfig({
     starlight({
       title: 'Safeword',
       description: 'AI coding agent guardrails - hooks, skills, and quality controls',
-      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/safeword-dev/safeword' }],
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/safeword-dev/safeword' },
+      ],
       sidebar: [
         {
           label: 'Getting Started',

@@ -22,10 +22,14 @@ fi
 
 # Detect package manager from lockfile
 detect_runner() {
-  if [ -f "pnpm-lock.yaml" ]; then echo "pnpm"
-  elif [ -f "yarn.lock" ]; then echo "yarn"
-  elif [ -f "bun.lockb" ]; then echo "bun"
-  else echo "npm"
+  if [ -f "pnpm-lock.yaml" ]; then
+    echo "pnpm"
+  elif [ -f "yarn.lock" ]; then
+    echo "yarn"
+  elif [ -f "bun.lockb" ]; then
+    echo "bun"
+  else
+    echo "npm"
   fi
 }
 
@@ -41,7 +45,7 @@ echo "Test pattern: $NAME_PATTERN in $SEARCH_DIR"
 echo ""
 
 # Get list of test files using find (portable across bash versions)
-TEST_FILES=$(find "$SEARCH_DIR" -type f -name "$NAME_PATTERN" 2>/dev/null | sort)
+TEST_FILES=$(find "$SEARCH_DIR" -type f -name "$NAME_PATTERN" 2> /dev/null | sort)
 TOTAL=$(echo "$TEST_FILES" | grep -c . || echo 0)
 
 if [ "$TOTAL" -eq 0 ]; then

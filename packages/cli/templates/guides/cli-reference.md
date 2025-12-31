@@ -4,8 +4,8 @@ Commands for managing safeword in projects.
 
 ## Commands
 
-| Command                       | Purpose                             |
-| ----------------------------- | ----------------------------------- |
+| Command                        | Purpose                             |
+| ------------------------------ | ----------------------------------- |
 | `bunx safeword@latest setup`   | Install safeword in current project |
 | `bunx safeword@latest check`   | Check project health and versions   |
 | `bunx safeword@latest upgrade` | Upgrade to latest version           |
@@ -14,8 +14,8 @@ Commands for managing safeword in projects.
 
 ## When to Use
 
-| Situation                  | Command                       |
-| -------------------------- | ----------------------------- |
+| Situation                  | Command                        |
+| -------------------------- | ------------------------------ |
 | New project setup          | `bunx safeword@latest setup`   |
 | Check if update available  | `bunx safeword@latest check`   |
 | Update after CLI release   | `bunx safeword@latest upgrade` |

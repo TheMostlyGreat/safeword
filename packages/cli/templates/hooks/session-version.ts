@@ -15,4 +15,6 @@ if (!existsSync(safewordDir)) {
 const versionFile = Bun.file(`${safewordDir}/version`);
 const version = (await versionFile.exists()) ? (await versionFile.text()).trim() : 'unknown';
 
-console.log(`SAFE WORD Claude Config v${version} installed - auto-linting and quality review active`);
+console.log(
+  `SAFE WORD Claude Config v${version} installed - auto-linting and quality review active`,
+);

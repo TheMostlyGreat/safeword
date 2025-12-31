@@ -150,11 +150,12 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('managedFiles', () => {
-    it('should include eslint.config.mjs, tsconfig.json, and knip.json', async () => {
+    it('should include eslint.config.mjs, tsconfig.json, knip.json, and .prettierrc', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('eslint.config.mjs');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('tsconfig.json');
       expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('knip.json');
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('.prettierrc');
     });
   });
 
@@ -166,6 +167,7 @@ describe('Schema - Single Source of Truth', () => {
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.mcp.json');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.cursor/mcp.json');
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.cursor/hooks.json');
+      // .prettierrc is in jsonMerges for uninstall cleanup (removes plugins key)
       expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.prettierrc');
     });
   });

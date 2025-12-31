@@ -45,10 +45,10 @@ function scopeConfigToFiles(config: any, files: string[]): any {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages
 function scopeToFiles(configs: any[], files: string[]): any[] {
-  return configs.flatMap((config) => {
+  return configs.flatMap(config => {
     // Handle arrays (third-party configs may be arrays)
     if (Array.isArray(config)) {
-      return config.map((c) => scopeConfigToFiles(c, files));
+      return config.map(c => scopeConfigToFiles(c, files));
     }
     return scopeConfigToFiles(config, files);
   });

@@ -62,7 +62,9 @@ function parseYamlValue(raw: string): string | boolean {
  * Parse YAML frontmatter from markdown file content.
  * Returns null if no valid frontmatter found.
  */
-function parseFrontmatter(content: string): { frontmatter: ParsedFrontmatter; body: string } | null {
+function parseFrontmatter(
+  content: string,
+): { frontmatter: ParsedFrontmatter; body: string } | null {
   const lines = content.split('\n');
 
   // Must start with --- on line 1 (no blank lines before)
@@ -97,7 +99,10 @@ function parseFrontmatter(content: string): { frontmatter: ParsedFrontmatter; bo
     (frontmatter as Record<string, unknown>)[key] = value;
   }
 
-  const body = lines.slice(endIndex + 1).join('\n').trim();
+  const body = lines
+    .slice(endIndex + 1)
+    .join('\n')
+    .trim();
   return { frontmatter, body };
 }
 
@@ -119,8 +124,7 @@ function getSkillDirectories(): string[] {
  */
 function getCommandFiles(): string[] {
   try {
-    return readdirSync(COMMANDS_DIR)
-      .filter(f => f.endsWith('.md'));
+    return readdirSync(COMMANDS_DIR).filter(f => f.endsWith('.md'));
   } catch {
     return [];
   }
@@ -131,8 +135,7 @@ function getCommandFiles(): string[] {
  */
 function getCursorRuleFiles(): string[] {
   try {
-    return readdirSync(CURSOR_RULES_DIR)
-      .filter(f => f.endsWith('.mdc'));
+    return readdirSync(CURSOR_RULES_DIR).filter(f => f.endsWith('.mdc'));
   } catch {
     return [];
   }
@@ -335,10 +338,7 @@ describe('Skills Validation (Claude Code Format)', () => {
       it('should have valid markdown file references in body', () => {
         if (parsed?.body) {
           const brokenLinks = findBrokenMarkdownLinks(parsed.body, join(SKILLS_DIR, skillDir));
-          expect(
-            brokenLinks,
-            `Broken markdown links: ${brokenLinks.join(', ')}`,
-          ).toHaveLength(0);
+          expect(brokenLinks, `Broken markdown links: ${brokenLinks.join(', ')}`).toHaveLength(0);
         }
       });
 
@@ -439,10 +439,9 @@ describe('Commands Validation (Claude Code Format)', () => {
       it('should have valid allowed-tools syntax if present', () => {
         const allowedTools = parsed?.frontmatter['allowed-tools'];
         if (allowedTools) {
-          expect(
-            allowedTools,
-            `Invalid allowed-tools format: "${allowedTools}"`,
-          ).toMatch(ALLOWED_TOOLS_PATTERN);
+          expect(allowedTools, `Invalid allowed-tools format: "${allowedTools}"`).toMatch(
+            ALLOWED_TOOLS_PATTERN,
+          );
         }
       });
 
@@ -466,10 +465,7 @@ describe('Commands Validation (Claude Code Format)', () => {
       it('should have valid disable-model-invocation if present', () => {
         const disabled = parsed?.frontmatter['disable-model-invocation'];
         if (disabled !== undefined) {
-          expect(
-            typeof disabled,
-            'disable-model-invocation should be boolean',
-          ).toBe('boolean');
+          expect(typeof disabled, 'disable-model-invocation should be boolean').toBe('boolean');
         }
       });
 
@@ -477,9 +473,7 @@ describe('Commands Validation (Claude Code Format)', () => {
       it('should use valid argument patterns ($1, $2, $ARGUMENTS)', () => {
         // Check if command uses any argument patterns
         const usesArguments =
-          content.includes('$1') ||
-          content.includes('$2') ||
-          content.includes('$ARGUMENTS');
+          content.includes('$1') || content.includes('$2') || content.includes('$ARGUMENTS');
 
         if (usesArguments) {
           const invalidPatterns = findInvalidArgumentPatterns(content);
@@ -494,10 +488,7 @@ describe('Commands Validation (Claude Code Format)', () => {
       it('should have valid markdown file references in body', () => {
         if (parsed?.body) {
           const brokenLinks = findBrokenMarkdownLinks(parsed.body, COMMANDS_DIR);
-          expect(
-            brokenLinks,
-            `Broken markdown links: ${brokenLinks.join(', ')}`,
-          ).toHaveLength(0);
+          expect(brokenLinks, `Broken markdown links: ${brokenLinks.join(', ')}`).toHaveLength(0);
         }
       });
     });
@@ -591,10 +582,9 @@ describe('Cursor Rules Validation (.mdc Format)', () => {
       it('should have alwaysApply as boolean', () => {
         const alwaysApply = parsed?.frontmatter.alwaysApply;
         expect(alwaysApply, 'alwaysApply field is required').toBeDefined();
-        expect(
-          typeof alwaysApply,
-          `alwaysApply should be boolean, got ${typeof alwaysApply}`,
-        ).toBe('boolean');
+        expect(typeof alwaysApply, `alwaysApply should be boolean, got ${typeof alwaysApply}`).toBe(
+          'boolean',
+        );
       });
 
       it('should have description as string if present', () => {
@@ -633,10 +623,7 @@ describe('Skills-Cursor Parity', () => {
       }
     }
 
-    expect(
-      missingRules,
-      `Skills missing cursor rules: ${missingRules.join(', ')}`,
-    ).toHaveLength(0);
+    expect(missingRules, `Skills missing cursor rules: ${missingRules.join(', ')}`).toHaveLength(0);
   });
 
   it('each safeword cursor rule should have corresponding skill', () => {
@@ -653,10 +640,7 @@ describe('Skills-Cursor Parity', () => {
       }
     }
 
-    expect(
-      orphanRules,
-      `Cursor rules without skills: ${orphanRules.join(', ')}`,
-    ).toHaveLength(0);
+    expect(orphanRules, `Cursor rules without skills: ${orphanRules.join(', ')}`).toHaveLength(0);
   });
 
   it('should not have duplicate cursor rule names', () => {

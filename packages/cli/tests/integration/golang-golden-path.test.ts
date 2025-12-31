@@ -106,8 +106,12 @@ func bad() {
 
   it.skipIf(!GOLANGCI_LINT_AVAILABLE)('golangci-lint fmt formats files', () => {
     // Create a badly formatted Go file
-    writeTestFile(projectDirectory, 'ugly.go', `package main
-func main(){println("no spaces")}`);
+    writeTestFile(
+      projectDirectory,
+      'ugly.go',
+      `package main
+func main(){println("no spaces")}`,
+    );
 
     // Run golangci-lint fmt
     execSync('golangci-lint fmt ugly.go', { cwd: projectDirectory });
@@ -120,8 +124,12 @@ func main(){println("no spaces")}`);
   it.skipIf(!GOLANGCI_LINT_AVAILABLE)('post-tool-lint hook processes Go files', () => {
     const filePath = nodePath.join(projectDirectory, 'hook-test.go');
     // Intentionally badly formatted
-    writeTestFile(projectDirectory, 'hook-test.go', `package main
-func hookTest(){println("test")}`);
+    writeTestFile(
+      projectDirectory,
+      'hook-test.go',
+      `package main
+func hookTest(){println("test")}`,
+    );
 
     // Simulate Claude Code PostToolUse hook input
     const hookInput = JSON.stringify({

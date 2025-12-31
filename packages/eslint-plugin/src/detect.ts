@@ -165,7 +165,7 @@ export function hasPlaywright(deps: DepsRecord): boolean {
  * Returns the most specific framework detected.
  */
 export function detectFramework(
-  deps: DepsRecord
+  deps: DepsRecord,
 ): 'next' | 'react' | 'astro' | 'typescript' | 'javascript' {
   if ('next' in deps) return 'next';
   if ('react' in deps) return 'react';

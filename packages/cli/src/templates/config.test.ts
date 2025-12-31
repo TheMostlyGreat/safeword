@@ -116,7 +116,9 @@ describe('SETTINGS_HOOKS', () => {
 
     expect(commands.length).toBeGreaterThan(0);
     for (const command of commands) {
-      expect(command, `Command missing $CLAUDE_PROJECT_DIR: ${command}`).toContain('$CLAUDE_PROJECT_DIR');
+      expect(command, `Command missing $CLAUDE_PROJECT_DIR: ${command}`).toContain(
+        '$CLAUDE_PROJECT_DIR',
+      );
     }
   });
 });

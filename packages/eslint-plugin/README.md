@@ -58,39 +58,39 @@ import safeword from 'eslint-plugin-safeword';
 
 export default [
   ...safeword.configs.recommendedTypeScriptReact,
-  ...safeword.configs.tailwind,      // If using Tailwind CSS
+  ...safeword.configs.tailwind, // If using Tailwind CSS
   ...safeword.configs.tanstackQuery, // If using TanStack Query
-  ...safeword.configs.vitest,        // For test files
-  ...safeword.configs.playwright,    // For E2E test files
+  ...safeword.configs.vitest, // For test files
+  ...safeword.configs.playwright, // For E2E test files
 ];
 ```
 
 ## Available Configs
 
-| Config | Use For | Includes |
-|--------|---------|----------|
-| `recommended` | JavaScript projects | Base plugins + JSDoc |
-| `recommendedTypeScript` | TypeScript projects | Base plugins + typescript-eslint (type-checked) |
-| `recommendedTypeScriptReact` | React + TypeScript | TypeScript + React + Hooks |
-| `recommendedTypeScriptNext` | Next.js projects | React + Next.js plugin |
-| `astro` | Astro `.astro` files | Astro plugin only (standalone) |
-| `tailwind` | Tailwind CSS | Additive - for `*.{jsx,tsx,astro,html}` files |
-| `tanstackQuery` | TanStack Query | Additive - combine with base config |
-| `vitest` | Vitest unit tests | Additive - for `*.test.*` and `*.spec.*` files |
-| `playwright` | Playwright E2E tests | Additive - for `*.e2e.*` and `e2e/**/*.{test,spec}.*` files |
+| Config                       | Use For              | Includes                                                    |
+| ---------------------------- | -------------------- | ----------------------------------------------------------- |
+| `recommended`                | JavaScript projects  | Base plugins + JSDoc                                        |
+| `recommendedTypeScript`      | TypeScript projects  | Base plugins + typescript-eslint (type-checked)             |
+| `recommendedTypeScriptReact` | React + TypeScript   | TypeScript + React + Hooks                                  |
+| `recommendedTypeScriptNext`  | Next.js projects     | React + Next.js plugin                                      |
+| `astro`                      | Astro `.astro` files | Astro plugin only (standalone)                              |
+| `tailwind`                   | Tailwind CSS         | Additive - for `*.{jsx,tsx,astro,html}` files               |
+| `tanstackQuery`              | TanStack Query       | Additive - combine with base config                         |
+| `vitest`                     | Vitest unit tests    | Additive - for `*.test.*` and `*.spec.*` files              |
+| `playwright`                 | Playwright E2E tests | Additive - for `*.e2e.*` and `e2e/**/*.{test,spec}.*` files |
 
 ## File Scoping
 
 Configs are scoped to relevant file types to prevent conflicts in multi-framework projects:
 
-| Config | File Patterns |
-|--------|---------------|
-| Base plugins | `**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}` |
-| TypeScript rules | `**/*.{ts,tsx,mts,cts}` |
-| Astro | `**/*.astro` |
-| Tailwind | `**/*.{jsx,tsx,astro,html}` |
-| Vitest | `**/*.{test,spec}.*` |
-| Playwright | `**/*.e2e.*`, `**/e2e/**/*.{test,spec}.*` |
+| Config           | File Patterns                             |
+| ---------------- | ----------------------------------------- |
+| Base plugins     | `**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}`    |
+| TypeScript rules | `**/*.{ts,tsx,mts,cts}`                   |
+| Astro            | `**/*.astro`                              |
+| Tailwind         | `**/*.{jsx,tsx,astro,html}`               |
+| Vitest           | `**/*.{test,spec}.*`                      |
+| Playwright       | `**/*.e2e.*`, `**/e2e/**/*.{test,spec}.*` |
 
 This allows you to combine configs without conflicts:
 
@@ -108,6 +108,7 @@ export default [
 This plugin bundles and configures:
 
 **Base (all configs except Astro):**
+
 - `@eslint/js` - ESLint recommended
 - `eslint-plugin-import-x` - Import validation
 - `eslint-plugin-promise` - Promise handling
@@ -119,20 +120,25 @@ This plugin bundles and configures:
 - `eslint-config-prettier` - Disables conflicting rules
 
 **JavaScript only:**
+
 - `eslint-plugin-jsdoc` - Documentation rules (TypeScript uses types instead)
 
 **TypeScript:**
+
 - `typescript-eslint` - Full type-checked rules
 
 **React:**
+
 - `eslint-plugin-react` - JSX best practices
 - `eslint-plugin-react-hooks` - Hooks rules (v7+ with Compiler support)
 
 **Framework-specific:**
+
 - `@next/eslint-plugin-next` - Next.js rules
 - `eslint-plugin-astro` - Astro component rules (standalone config)
 
 **Additive (combine with base configs):**
+
 - `eslint-plugin-tailwindcss` - Tailwind class validation
 - `@tanstack/eslint-plugin-query` - Query best practices
 - `eslint-plugin-vitest` - Unit test rules
@@ -173,14 +179,14 @@ try {
 
 These rules catch bugs LLMs commonly make:
 
-| Category | Rules |
-|----------|-------|
-| **Error Handling** | `no-incomplete-error-handling`, `no-floating-promises` |
-| **Type Safety** | `no-explicit-any`, `no-unsafe-*` rules |
-| **React** | `jsx-key`, `exhaustive-deps`, `rules-of-hooks` |
-| **Security** | `detect-eval-with-expression`, `detect-non-literal-fs-filename` |
-| **Complexity** | `complexity` (max 10), `max-depth` (4), `max-params` (5) |
-| **Promise** | `no-multiple-resolved`, `no-nesting` |
+| Category           | Rules                                                           |
+| ------------------ | --------------------------------------------------------------- |
+| **Error Handling** | `no-incomplete-error-handling`, `no-floating-promises`          |
+| **Type Safety**    | `no-explicit-any`, `no-unsafe-*` rules                          |
+| **React**          | `jsx-key`, `exhaustive-deps`, `rules-of-hooks`                  |
+| **Security**       | `detect-eval-with-expression`, `detect-non-literal-fs-filename` |
+| **Complexity**     | `complexity` (max 10), `max-depth` (4), `max-params` (5)        |
+| **Promise**        | `no-multiple-resolved`, `no-nesting`                            |
 
 ## Framework Detection Utilities
 

@@ -15,14 +15,13 @@ if (!existsSync(safewordDir)) {
 const warnings: string[] = [];
 
 // Check for ESLint config
-const eslintConfigs = [
-  'eslint.config.mjs',
-  'eslint.config.js',
-  '.eslintrc.json',
-  '.eslintrc.js',
-];
+const eslintConfigs = ['eslint.config.mjs', 'eslint.config.js', '.eslintrc.json', '.eslintrc.js'];
 const hasEslint = await Promise.all(
-  eslintConfigs.map(f => Bun.file(`${projectDir}/${f}`).exists().catch(() => false)),
+  eslintConfigs.map(f =>
+    Bun.file(`${projectDir}/${f}`)
+      .exists()
+      .catch(() => false),
+  ),
 );
 if (!hasEslint.some(Boolean)) {
   warnings.push("ESLint config not found - run 'bun run lint' may fail");
@@ -31,7 +30,11 @@ if (!hasEslint.some(Boolean)) {
 // Check for Prettier config
 const prettierConfigs = ['.prettierrc', '.prettierrc.json', 'prettier.config.js'];
 const hasPrettier = await Promise.all(
-  prettierConfigs.map(f => Bun.file(`${projectDir}/${f}`).exists().catch(() => false)),
+  prettierConfigs.map(f =>
+    Bun.file(`${projectDir}/${f}`)
+      .exists()
+      .catch(() => false),
+  ),
 );
 if (!hasPrettier.some(Boolean)) {
   warnings.push('Prettier config not found - formatting may be inconsistent');

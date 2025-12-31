@@ -181,8 +181,12 @@ func bad() {
 
     it.skipIf(!GOLANGCI_LINT_AVAILABLE)('routes .go files to golangci-lint', () => {
       const filePath = nodePath.join(projectDirectory, 'lint-go.go');
-      writeTestFile(projectDirectory, 'lint-go.go', `package main
-func lintGo(){println("test")}`);
+      writeTestFile(
+        projectDirectory,
+        'lint-go.go',
+        `package main
+func lintGo(){println("test")}`,
+      );
 
       const result = runLintHook(filePath);
       expect(result.status).toBe(0);

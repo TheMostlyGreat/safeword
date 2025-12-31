@@ -404,18 +404,21 @@ version = "0.1.0"
   // Add manager-specific config and lockfiles for proper detection
   // Detection logic in python-setup.ts checks lockfiles first
   switch (manager) {
-  case 'poetry': {
-    content += `\n[tool.poetry]\nname = "test-python-project"\n`;
-    // Create minimal poetry.lock for detection
-    writeTestFile(dir, 'poetry.lock', '# poetry lockfile\npackage = []\n');
+    case 'poetry': {
+      content += `\n[tool.poetry]\nname = "test-python-project"\n`;
+      // Create minimal poetry.lock for detection
+      writeTestFile(dir, 'poetry.lock', '# poetry lockfile\npackage = []\n');
 
-  break;
-  }
-  case 'uv': {
-    // uv requires requires-python in pyproject.toml
-    content += `requires-python = ">=3.10"\n`;
-    // Create valid minimal uv.lock for detection (must match pyproject.toml requires-python)
-    writeTestFile(dir, 'uv.lock', `version = 1
+      break;
+    }
+    case 'uv': {
+      // uv requires requires-python in pyproject.toml
+      content += `requires-python = ">=3.10"\n`;
+      // Create valid minimal uv.lock for detection (must match pyproject.toml requires-python)
+      writeTestFile(
+        dir,
+        'uv.lock',
+        `version = 1
 revision = 2
 requires-python = ">=3.10"
 
@@ -423,17 +426,18 @@ requires-python = ">=3.10"
 name = "test-python-project"
 version = "0.1.0"
 source = { virtual = "." }
-`);
+`,
+      );
 
-  break;
-  }
-  case 'pipenv': {
-    // Create Pipfile for detection
-    writeTestFile(dir, 'Pipfile', '[[source]]\nurl = "https://pypi.org/simple"\n');
+      break;
+    }
+    case 'pipenv': {
+      // Create Pipfile for detection
+      writeTestFile(dir, 'Pipfile', '[[source]]\nurl = "https://pypi.org/simple"\n');
 
-  break;
-  }
-  // No default
+      break;
+    }
+    // No default
   }
 
   writeTestFile(dir, 'pyproject.toml', content);

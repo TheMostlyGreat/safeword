@@ -47,14 +47,14 @@ src/
 
 Configs are scoped to relevant file types to prevent conflicts in multi-framework projects:
 
-| Config | File Patterns |
-|--------|---------------|
-| Base plugins | `**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}` |
-| TypeScript rules | `**/*.{ts,tsx,mts,cts}` |
-| Astro | `**/*.astro` |
-| Tailwind | `**/*.{jsx,tsx,astro,html}` |
-| Vitest | `**/*.{test,spec}.*` |
-| Playwright | `**/*.e2e.*`, `**/e2e/**/*.{test,spec}.*` |
+| Config           | File Patterns                             |
+| ---------------- | ----------------------------------------- |
+| Base plugins     | `**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}`    |
+| TypeScript rules | `**/*.{ts,tsx,mts,cts}`                   |
+| Astro            | `**/*.astro`                              |
+| Tailwind         | `**/*.{jsx,tsx,astro,html}`               |
+| Vitest           | `**/*.{test,spec}.*`                      |
+| Playwright       | `**/*.e2e.*`, `**/e2e/**/*.{test,spec}.*` |
 
 This prevents base JS/TS rules from trying to parse `.astro` files (which use a different parser).
 
@@ -77,48 +77,49 @@ catch (error) { console.error(error); return null; }
 import safeword from 'eslint-plugin-safeword';
 
 // Configs (arrays - spread to use)
-safeword.configs.recommended                // JavaScript + JSDoc
-safeword.configs.recommendedTypeScript      // TypeScript (type-checked)
-safeword.configs.recommendedTypeScriptReact // React + TS
-safeword.configs.recommendedTypeScriptNext  // Next.js
-safeword.configs.astro                      // Astro .astro files ONLY (use with recommendedTypeScript)
-safeword.configs.tailwind                   // Tailwind CSS (additive)
-safeword.configs.tanstackQuery              // TanStack Query (additive)
-safeword.configs.vitest                     // Vitest tests (additive, *.test.* and *.spec.* files)
-safeword.configs.playwright                 // Playwright tests (additive, *.e2e.* and e2e/**/*.{test,spec}.* files)
+safeword.configs.recommended; // JavaScript + JSDoc
+safeword.configs.recommendedTypeScript; // TypeScript (type-checked)
+safeword.configs.recommendedTypeScriptReact; // React + TS
+safeword.configs.recommendedTypeScriptNext; // Next.js
+safeword.configs.astro; // Astro .astro files ONLY (use with recommendedTypeScript)
+safeword.configs.tailwind; // Tailwind CSS (additive)
+safeword.configs.tanstackQuery; // TanStack Query (additive)
+safeword.configs.vitest; // Vitest tests (additive, *.test.* and *.spec.* files)
+safeword.configs.playwright; // Playwright tests (additive, *.e2e.* and e2e/**/*.{test,spec}.* files)
 
 // Detection utilities (for CLI config generation)
-safeword.detect.collectAllDeps(rootDir)     // Collects all deps from workspaces
-safeword.detect.detectFramework(deps)       // → 'next' | 'react' | 'astro' | 'typescript' | 'javascript'
-safeword.detect.hasTailwind(deps)           // Feature detection
-safeword.detect.hasVitest(deps)
-safeword.detect.hasPlaywright(deps)
-safeword.detect.hasTanstackQuery(deps)
-safeword.detect.hasExistingLinter(scripts)  // True if 'lint' script exists
-safeword.detect.hasExistingFormatter(cwd)   // True if formatter config exists
+safeword.detect.collectAllDeps(rootDir); // Collects all deps from workspaces
+safeword.detect.detectFramework(deps); // → 'next' | 'react' | 'astro' | 'typescript' | 'javascript'
+safeword.detect.hasTailwind(deps); // Feature detection
+safeword.detect.hasVitest(deps);
+safeword.detect.hasPlaywright(deps);
+safeword.detect.hasTanstackQuery(deps);
+safeword.detect.hasExistingLinter(scripts); // True if 'lint' script exists
+safeword.detect.hasExistingFormatter(cwd); // True if formatter config exists
 
 // Constants
-safeword.detect.TAILWIND_PACKAGES           // Package names to check
-safeword.detect.TANSTACK_QUERY_PACKAGES
-safeword.detect.PLAYWRIGHT_PACKAGES
-safeword.detect.FORMATTER_CONFIG_FILES
+safeword.detect.TAILWIND_PACKAGES; // Package names to check
+safeword.detect.TANSTACK_QUERY_PACKAGES;
+safeword.detect.PLAYWRIGHT_PACKAGES;
+safeword.detect.FORMATTER_CONFIG_FILES;
 
 // Rules
-safeword.rules                              // { 'no-incomplete-error-handling': RuleModule }
+safeword.rules; // { 'no-incomplete-error-handling': RuleModule }
 ```
 
 ## Development
 
 ```bash
-bun run build        # Build with tsup
-bun run dev          # Watch mode
-bun run test         # Run Vitest
-bun run typecheck    # Type check
+bun run build     # Build with tsup
+bun run dev       # Watch mode
+bun run test      # Run Vitest
+bun run typecheck # Type check
 ```
 
 ## Testing Strategy
 
 Tests verify:
+
 1. **Config loading** - Configs load without errors
 2. **Auto-fix** - Import sorting and style fixes work
 3. **Error severity** - Bug-catching rules fire at `error` level
@@ -144,15 +145,15 @@ Run tests before any changes to configs or rules.
 
 These rules catch bugs LLMs commonly make:
 
-| Rule | Why |
-|------|-----|
-| `safeword/no-incomplete-error-handling` | LLMs swallow errors |
-| `@typescript-eslint/no-floating-promises` | Forgotten await |
-| `@typescript-eslint/no-explicit-any` | Type safety bypass |
-| `react-hooks/exhaustive-deps` | Stale closures |
-| `react/jsx-key` | Missing list keys |
-| `promise/no-multiple-resolved` | Missing return after resolve |
-| `security/detect-eval-with-expression` | Code injection |
-| `complexity` (max 10) | LLMs write dense code |
-| `max-depth` (max 4) | Forces early returns |
-| `max-params` (max 5) | Forces object params |
+| Rule                                      | Why                          |
+| ----------------------------------------- | ---------------------------- |
+| `safeword/no-incomplete-error-handling`   | LLMs swallow errors          |
+| `@typescript-eslint/no-floating-promises` | Forgotten await              |
+| `@typescript-eslint/no-explicit-any`      | Type safety bypass           |
+| `react-hooks/exhaustive-deps`             | Stale closures               |
+| `react/jsx-key`                           | Missing list keys            |
+| `promise/no-multiple-resolved`            | Missing return after resolve |
+| `security/detect-eval-with-expression`    | Code injection               |
+| `complexity` (max 10)                     | LLMs write dense code        |
+| `max-depth` (max 4)                       | Forces early returns         |
+| `max-params` (max 5)                      | Forces object params         |

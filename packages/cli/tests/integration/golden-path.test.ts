@@ -44,7 +44,10 @@ describe('E2E: Golden Path', () => {
     writeTestFile(projectDirectory, 'src/valid.ts', 'export const x = 1;\n');
 
     // Should not throw - config is valid
-    const result = execSync('bunx eslint src/valid.ts', { cwd: projectDirectory, encoding: 'utf8' });
+    const result = execSync('bunx eslint src/valid.ts', {
+      cwd: projectDirectory,
+      encoding: 'utf8',
+    });
     expect(result).toBeDefined();
   });
 

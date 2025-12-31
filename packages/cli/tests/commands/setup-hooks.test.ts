@@ -93,7 +93,9 @@ describe('Test Suite 3: Setup - Hooks and Skills', () => {
 
       // Check for safeword skill directory
       // Should match pattern safeword-* (e.g., safeword-quality-reviewing)
-      expect(fileExists(temporaryDirectory, '.claude/skills/safeword-quality-reviewing')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.claude/skills/safeword-quality-reviewing')).toBe(
+        true,
+      );
 
       // The skill should contain a SKILL.md file
       expect(

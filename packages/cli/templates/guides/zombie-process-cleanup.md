@@ -53,10 +53,10 @@ See `development-workflow.md` → "E2E Testing with Persistent Dev Servers" for 
 ```bash
 # Kill both dev server AND test server ports
 # Example: Next.js (3000/4000), Vite (5173/6173), or your project's ports
-lsof -ti:3000 -ti:4000 | xargs kill -9 2>/dev/null
+lsof -ti:3000 -ti:4000 | xargs kill -9 2> /dev/null
 
 # Kill Playwright processes launched from THIS directory
-pkill -f "playwright.*$(pwd)" 2>/dev/null
+pkill -f "playwright.*$(pwd)" 2> /dev/null
 
 # Wait for cleanup
 sleep 2
@@ -105,37 +105,37 @@ Safeword includes a cleanup script at `.safeword/scripts/cleanup-zombies.sh`:
 
 ```bash
 # Kill Next.js dev server (port 3000)
-lsof -ti:3000 | xargs kill -9 2>/dev/null
+lsof -ti:3000 | xargs kill -9 2> /dev/null
 
 # Kill Next.js build processes for this project
-ps aux | grep "next dev" | grep "$(pwd)" | grep -v grep | awk '{print $2}' | xargs kill -9 2>/dev/null
+ps aux | grep "next dev" | grep "$(pwd)" | grep -v grep | awk '{print $2}' | xargs kill -9 2> /dev/null
 ```
 
 ### Playwright E2E Tests
 
 ```bash
 # Kill Playwright browsers and test runners
-pkill -f "playwright.*$(pwd)" 2>/dev/null
+pkill -f "playwright.*$(pwd)" 2> /dev/null
 
 # Or more specific (by project name)
-pkill -f "playwright.*my-project-name" 2>/dev/null
+pkill -f "playwright.*my-project-name" 2> /dev/null
 ```
 
 ### Vite Projects
 
 ```bash
 # Kill Vite dev server (typically port 5173)
-lsof -ti:5173 | xargs kill -9 2>/dev/null
+lsof -ti:5173 | xargs kill -9 2> /dev/null
 ```
 
 ### React Native / Expo
 
 ```bash
 # Kill Metro bundler (port 8081)
-lsof -ti:8081 | xargs kill -9 2>/dev/null
+lsof -ti:8081 | xargs kill -9 2> /dev/null
 
 # Kill Expo dev tools (port 19000-19006)
-lsof -ti:19000-19006 | xargs kill -9 2>/dev/null
+lsof -ti:19000-19006 | xargs kill -9 2> /dev/null
 ```
 
 ---

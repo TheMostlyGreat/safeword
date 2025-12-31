@@ -13,5 +13,5 @@ if (!existsSync(safewordDir)) {
 }
 
 console.log(
-  `SAFEWORD: Research before asking. Debate options (correct? elegant? latest practices?), then ask 1-5 targeted questions about scope, constraints, or success criteria.`
+  `SAFEWORD: Research before asking. Debate options (correct? elegant? latest practices?), then ask 1-5 targeted questions about scope, constraints, or success criteria.`,
 );
