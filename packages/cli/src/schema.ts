@@ -9,6 +9,7 @@
 
 import { golangManagedFiles } from './packs/golang/files.js';
 import { generateSafewordGolangciConfig } from './packs/golang/setup.js';
+import { generateRuffBaseConfig } from './packs/python/files.js';
 import {
   typescriptJsonMerges,
   typescriptManagedFiles,
@@ -20,7 +21,6 @@ import { AGENTS_MD_LINK } from './templates/content.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';
 import { MCP_SERVERS } from './utils/install.js';
 import { type Languages, type ProjectType } from './utils/project-detector.js';
-import { generateRuffBaseConfig } from './utils/toml.js';
 import { VERSION } from './version.js';
 
 // ============================================================================

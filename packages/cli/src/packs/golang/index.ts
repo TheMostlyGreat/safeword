@@ -19,7 +19,7 @@ export const golangPack: LanguagePack = {
     return exists(nodePath.join(cwd, 'go.mod'));
   },
 
-  setup(): SetupResult {
+  setup(_cwd: string, _ctx): SetupResult {
     // .golangci.yml is created by schema.ts (managedFiles)
     return setupGoTooling();
   },

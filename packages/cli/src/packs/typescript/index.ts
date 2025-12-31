@@ -20,7 +20,7 @@ export const typescriptPack: LanguagePack = {
     return exists(nodePath.join(cwd, 'package.json'));
   },
 
-  setup(): SetupResult {
+  setup(_cwd: string, _ctx): SetupResult {
     // TypeScript setup is handled by the main schema-based setup flow.
     // This pack exists for extension mapping and detection.
     return { files: [] };

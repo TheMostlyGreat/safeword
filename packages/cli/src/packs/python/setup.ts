@@ -12,12 +12,8 @@ import { execSync } from 'node:child_process';
 import nodePath from 'node:path';
 
 import { exists, readFileSafe, writeFile } from '../../utils/fs.js';
-import {
-  appendTomlSection,
-  generateImportLinterConfig,
-  generateMypyConfig,
-  generateRuffConfig,
-} from '../../utils/toml.js';
+import { appendTomlSection } from '../../utils/toml.js';
+import { generateImportLinterConfig, generateMypyConfig, generateRuffConfig } from './files.js';
 
 /**
  * Python layer patterns for architecture detection.

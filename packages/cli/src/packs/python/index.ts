@@ -19,7 +19,7 @@ export const pythonPack: LanguagePack = {
     return exists(nodePath.join(cwd, 'pyproject.toml'));
   },
 
-  setup(cwd: string): SetupResult {
+  setup(cwd: string, _ctx): SetupResult {
     const result = setupPythonTooling(cwd);
     return { files: result.files };
   },
