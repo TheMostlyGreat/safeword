@@ -27,12 +27,14 @@ Current safeword has Python and TypeScript/JavaScript support hardcoded. As more
 ### Pack Contents (config generation only)
 
 Each language pack provides:
+
 - **Detection function**: Is this language present? (e.g., `pyproject.toml` exists)
 - **Config generators**: Generate linter/formatter config (e.g., `generateRuffConfig()`)
 - **Setup function**: Install config files during setup
 - **File extensions**: Which extensions this pack handles (e.g., `.py`, `.pyi`)
 
 NOT included (handled by core):
+
 - Hook execution logic
 - CLI commands
 - Templates/guides
@@ -41,10 +43,10 @@ NOT included (handled by core):
 
 ```typescript
 interface LanguagePack {
-  id: string;                          // e.g., 'python', 'typescript'
-  name: string;                        // e.g., 'Python', 'TypeScript'
-  extensions: string[];                // e.g., ['.py', '.pyi']
-  detect: (cwd: string) => boolean;    // Is this language present?
+  id: string; // e.g., 'python', 'typescript'
+  name: string; // e.g., 'Python', 'TypeScript'
+  extensions: string[]; // e.g., ['.py', '.pyi']
+  detect: (cwd: string) => boolean; // Is this language present?
   setup: (cwd: string, ctx: PackContext) => PackSetupResult;
 }
 
@@ -70,16 +72,19 @@ Installed packs tracked in `.safeword/config.json`:
 ### Detection Flow
 
 **During `safeword setup`:**
+
 1. Scan project for language markers (package.json, pyproject.toml, go.mod, etc.)
 2. For each detected language, run pack's `setup()` function
 3. Record installed packs in `.safeword/config.json`
 
 **During `safeword check`:**
+
 1. Re-detect languages
 2. Warn if new language detected but pack not installed
 3. Suggest: "Run `safeword upgrade` to add Python support"
 
 **During `safeword upgrade`:**
+
 1. Re-detect languages
 2. Install any new packs
 3. Update existing pack configs if pack version changed
@@ -87,6 +92,7 @@ Installed packs tracked in `.safeword/config.json`:
 ### Hook Integration
 
 **Before linting in hook:**
+
 ```typescript
 // In post-tool-lint hook
 const extension = path.extname(changedFile);
@@ -101,6 +107,7 @@ if (pack && !isPackInstalled(pack.id)) {
 ```
 
 **Blocking install** means:
+
 - Hook pauses
 - Pack's `setup()` runs
 - Config files created
@@ -220,15 +227,15 @@ if (pack && !isPackInstalled(pack.id)) {
 
 ## Summary
 
-| Story | Description | Complexity |
-|-------|-------------|------------|
-| 1 | Define pack interface | Low |
-| 2 | Refactor Python to pack | Medium |
-| 3 | Refactor TS/JS to pack | Medium |
-| 4 | Track installed packs | Low |
-| 5 | Hook pack verification | Medium |
-| 6 | Check command detection | Low |
-| 7 | Upgrade pack installation | Low |
+| Story | Description               | Complexity |
+| ----- | ------------------------- | ---------- |
+| 1     | Define pack interface     | Low        |
+| 2     | Refactor Python to pack   | Medium     |
+| 3     | Refactor TS/JS to pack    | Medium     |
+| 4     | Track installed packs     | Low        |
+| 5     | Hook pack verification    | Medium     |
+| 6     | Check command detection   | Low        |
+| 7     | Upgrade pack installation | Low        |
 
 **Implementation order**: 1 → 2 → 3 → 4 → 5 → 6 → 7
 

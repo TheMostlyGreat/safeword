@@ -6,6 +6,7 @@
 **Feature**: Package safeword as a Claude Code marketplace plugin
 
 **Test Files**:
+
 - Manual testing with Claude Code `/plugin` command
 - `packages/cli/tests/plugin-structure.test.ts` (new)
 
@@ -259,12 +260,12 @@ Tests for Story 4 - marketplace.json configuration.
 
 ### Coverage by Story
 
-| Story | Tests | Status |
-|-------|-------|--------|
-| Story 1: Plugin Manifest | 4 | ❌ 0% |
-| Story 2: Hooks Config | 4 | ❌ 0% |
-| Story 3: Directory Structure | 3 | ❌ 0% |
-| Story 4: Marketplace | 1 | ❌ 0% |
+| Story                        | Tests | Status |
+| ---------------------------- | ----- | ------ |
+| Story 1: Plugin Manifest     | 4     | ❌ 0%  |
+| Story 2: Hooks Config        | 4     | ❌ 0%  |
+| Story 3: Directory Structure | 3     | ❌ 0%  |
+| Story 4: Marketplace         | 1     | ❌ 0%  |
 
 ### Skipped Tests Rationale
 

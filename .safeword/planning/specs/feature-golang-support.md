@@ -12,6 +12,7 @@
 ## Context
 
 Safeword's core value propositions:
+
 1. **Philosophy/guides** (language-agnostic) - already works for Go
 2. **Claude hooks** (mostly language-agnostic) - already works except lint hook
 3. **Linting infrastructure** (JS/TS-specific) - needs Go support
@@ -40,15 +41,15 @@ Go has excellent built-in tooling (`go fmt`, `go vet`) plus the meta-linter `gol
 # .golangci.yml - recommended for LLM-assisted development
 linters:
   enable:
-    - errcheck      # unchecked errors (matches @eslint/js)
-    - ineffassign   # unused assignments (matches no-unused-vars)
-    - staticcheck   # comprehensive static analysis (matches sonarjs)
-    - gosimple      # simplifications (matches unicorn)
-    - gocritic      # opinionated checks (matches sonarjs)
-    - gosec         # security (matches eslint-plugin-security)
-    - goimports     # import formatting (matches import-x)
-    - misspell      # spelling (catches LLM errors)
-    - gocyclo       # complexity (matches max-complexity)
+    - errcheck # unchecked errors (matches @eslint/js)
+    - ineffassign # unused assignments (matches no-unused-vars)
+    - staticcheck # comprehensive static analysis (matches sonarjs)
+    - gosimple # simplifications (matches unicorn)
+    - gocritic # opinionated checks (matches sonarjs)
+    - gosec # security (matches eslint-plugin-security)
+    - goimports # import formatting (matches import-x)
+    - misspell # spelling (catches LLM errors)
+    - gocyclo # complexity (matches max-complexity)
 
 linters-settings:
   gocyclo:
@@ -82,6 +83,7 @@ Extends the `Languages` interface with `golang: boolean`. Detection follows the 
 **Tests**: `packages/cli/src/utils/project-detector.test.ts`
 
 **Files**:
+
 - `packages/cli/src/utils/project-detector.ts`
 
 **Notes**: Framework detection (gin/echo/fiber/chi) and go.work support deferred to Phase 2 - Go frameworks don't require different linting configs.
@@ -107,6 +109,7 @@ Extends the `Languages` interface with `golang: boolean`. Detection follows the 
 **Tests**: `packages/cli/tests/integration/hooks.test.ts`
 
 **Files**:
+
 - `packages/cli/templates/hooks/lib/lint.ts`
 - `packages/cli/templates/hooks/post-tool-lint.ts`
 
@@ -132,6 +135,7 @@ Extends the `Languages` interface with `golang: boolean`. Detection follows the 
 **Tests**: `packages/cli/tests/commands/setup-golang.test.ts`
 
 **Files**:
+
 - `packages/cli/src/commands/setup.ts`
 - `packages/cli/src/utils/install.ts`
 
@@ -155,6 +159,7 @@ Extends the `Languages` interface with `golang: boolean`. Detection follows the 
 **Tests**: Manual testing
 
 **Files**:
+
 - `packages/cli/templates/commands/lint.md` (update command template)
 
 ---

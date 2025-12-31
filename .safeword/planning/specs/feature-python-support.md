@@ -12,6 +12,7 @@
 ## Context
 
 Safeword's core value propositions:
+
 1. **Philosophy/guides** (language-agnostic) - already works for Python
 2. **Claude hooks** (mostly language-agnostic) - already works except lint hook
 3. **Linting infrastructure** (JS/TS-specific) - needs Python support
@@ -61,6 +62,7 @@ max-complexity = 10
 ### Architecture Note
 
 Current code assumes package.json exists (`ensurePackageJson()` creates one, `detectProjectType()` requires `PackageJson` input). For Python-only projects:
+
 - Detect language before assuming JS tooling
 - Skip package.json creation for Python-only projects
 - Add `detectLanguages()` layer above `detectProjectType()`
@@ -86,6 +88,7 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 **Tests**: `packages/cli/src/utils/project-detector.test.ts`
 
 **Files**:
+
 - `packages/cli/src/utils/project-detector.ts`
 
 ---
@@ -109,6 +112,7 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 **Tests**: Manual verification
 
 **Files**:
+
 - `packages/cli/templates/hooks/lib/lint.ts`
 - `packages/cli/templates/hooks/post-tool-lint.ts`
 
@@ -134,6 +138,7 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 **Tests**: `packages/cli/tests/commands/setup-python.test.ts` (6 tests)
 
 **Files**:
+
 - `packages/cli/src/commands/setup.ts`
 - `packages/cli/src/schema.ts` (generators return null for Python-only)
 - `packages/cli/src/reconcile.ts` (null check for generators)
@@ -158,6 +163,7 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 **Tests**: Manual testing
 
 **Files**:
+
 - `packages/cli/templates/commands/lint.md` (update command template)
 
 ---
@@ -176,13 +182,13 @@ Current code assumes package.json exists (`ensurePackageJson()` creates one, `de
 
 ### Phase 2: Tooling Parity (Out of Scope)
 
-| Tool | Purpose | JS Equivalent |
-|------|---------|---------------|
-| [Ruff](https://docs.astral.sh/ruff/) | Config generation (`[tool.ruff]`) | eslint.config.mjs |
-| [pre-commit](https://pre-commit.com/) | Git hooks | Husky + lint-staged |
-| [import-linter](https://github.com/seddonym/import-linter) | Architecture validation (requires Python ≥3.10) | dependency-cruiser |
-| [deadcode](https://github.com/albertas/deadcode) | Dead code detection (has `--fix`, requires Python ≥3.10) | Knip |
-| [jscpd](https://github.com/kucherenko/jscpd) | Copy/paste detection | (also jscpd) |
+| Tool                                                       | Purpose                                                  | JS Equivalent       |
+| ---------------------------------------------------------- | -------------------------------------------------------- | ------------------- |
+| [Ruff](https://docs.astral.sh/ruff/)                       | Config generation (`[tool.ruff]`)                        | eslint.config.mjs   |
+| [pre-commit](https://pre-commit.com/)                      | Git hooks                                                | Husky + lint-staged |
+| [import-linter](https://github.com/seddonym/import-linter) | Architecture validation (requires Python ≥3.10)          | dependency-cruiser  |
+| [deadcode](https://github.com/albertas/deadcode)           | Dead code detection (has `--fix`, requires Python ≥3.10) | Knip                |
+| [jscpd](https://github.com/kucherenko/jscpd)               | Copy/paste detection                                     | (also jscpd)        |
 
 **Note:** deadcode has `--fix` for auto-removal, aligning with safeword's philosophy.
 

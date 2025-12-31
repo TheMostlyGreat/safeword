@@ -3,6 +3,7 @@
 **Guide**: `.safeword/guides/design-doc-guide.md`
 
 **Related**:
+
 - Feature Spec: `.safeword/planning/specs/feature-language-packs.md`
 - Test Definitions: `.safeword/planning/test-definitions/feature-language-packs.md`
 - Architecture: `ARCHITECTURE.md` → Language Packs section
@@ -58,7 +59,7 @@ export interface SetupContext {
 }
 
 export interface SetupResult {
-  files: string[];  // Files created/modified
+  files: string[]; // Files created/modified
 }
 ```
 
@@ -95,7 +96,7 @@ export const pythonPack: LanguagePack = {
   id: 'python',
   name: 'Python',
   extensions: ['.py', '.pyi'],
-  detect: (cwd) => exists(join(cwd, 'pyproject.toml')),
+  detect: cwd => exists(join(cwd, 'pyproject.toml')),
   setup: (cwd, ctx) => setupPythonTooling(cwd, ctx.isGitRepo),
 };
 ```
@@ -113,7 +114,7 @@ export const typescriptPack: LanguagePack = {
   id: 'typescript',
   name: 'TypeScript',
   extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'],
-  detect: (cwd) => exists(join(cwd, 'package.json')),
+  detect: cwd => exists(join(cwd, 'package.json')),
   setup: (cwd, ctx) => setupTypescriptTooling(cwd, ctx),
 };
 ```
@@ -141,7 +142,7 @@ export function addInstalledPack(cwd: string, packId: string): void;
 
 ```typescript
 export function installPack(packId: string, cwd: string): void {
-  if (isPackInstalled(cwd, packId)) return;  // Idempotent
+  if (isPackInstalled(cwd, packId)) return; // Idempotent
 
   const pack = LANGUAGE_PACKS[packId];
   if (!pack) throw new Error(`Unknown pack: ${packId}`);

@@ -14,8 +14,8 @@ When AI coding assistants (Claude Code, Cursor, Aider) run linters after edits, 
 
 ```bash
 # PostToolUse hook that blocks on any lint failure
-eslint "$file" || exit 2  # Blocks on style AND semantic errors
-prettier --check "$file" || exit 2  # Blocks even after auto-fix!
+eslint "$file" || exit 2           # Blocks on style AND semantic errors
+prettier --check "$file" || exit 2 # Blocks even after auto-fix!
 ```
 
 ✅ **Good:** Category-specific feedback strategies
@@ -23,10 +23,10 @@ prettier --check "$file" || exit 2  # Blocks even after auto-fix!
 ```bash
 # Formatters: auto-fix, always exit 0
 prettier --write "$file"
-exit 0  # Never block - formatting is done
+exit 0 # Never block - formatting is done
 
 # Type errors: provide feedback to AI
-tsc --noEmit 2>&1 || exit 2  # AI should learn from type errors
+tsc --noEmit 2>&1 || exit 2 # AI should learn from type errors
 
 # Security: hard block
 detect-secrets scan "$file" && exit 0 || exit 2
@@ -78,9 +78,9 @@ file="$CLAUDE_FILE_PATH"
 ext="${file##*.}"
 
 case "$ext" in
-  ts|tsx|js|jsx)
+  ts | tsx | js | jsx)
     # Format silently (always succeeds)
-    prettier --write "$file" 2>/dev/null
+    prettier --write "$file" 2> /dev/null
 
     # Type check with feedback (may fail)
     tsc --noEmit 2>&1
@@ -89,7 +89,7 @@ case "$ext" in
   md)
     # Markdown: format only, no blocking
     # Rationale: docs don't break builds
-    markdownlint-cli2 --fix "$file" 2>/dev/null
+    markdownlint-cli2 --fix "$file" 2> /dev/null
     exit 0
     ;;
   *)

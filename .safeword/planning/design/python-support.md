@@ -27,10 +27,12 @@ detectProjectType  detectPythonType  Both
 **What**: Detects JavaScript/Python from project files
 **Where**: `packages/cli/src/utils/project-detector.ts`
 **Interface**:
+
 ```typescript
 function detectLanguages(cwd: string): Languages;
 function detectPythonType(cwd: string): PythonProjectType | undefined;
 ```
+
 **Dependencies**: Node.js `fs` module
 **Tests**: Suite 1 (Tests 1.1-1.10)
 
@@ -57,6 +59,7 @@ export async function lintFile(file: string, projectDir: string): Promise<void>;
 **Tests**: Suite 3 (Tests 3.1-3.6)
 
 **Schema Modifications** (`schema.ts`):
+
 - `managedFiles['eslint.config.mjs']` → return empty if `!ctx.languages.javascript`
 - `managedFiles['knip.json']` → return empty if `!ctx.languages.javascript`
 - `jsonMerges['package.json']` → add `skipIfMissing: true`
@@ -68,6 +71,7 @@ export async function lintFile(file: string, projectDir: string): Promise<void>;
 **Where**: `packages/cli/templates/commands/lint.md`
 
 **Detection Logic**:
+
 ```bash
 # Python detected if: pyproject.toml OR requirements.txt exists
 # JS detected if: package.json exists
@@ -75,6 +79,7 @@ export async function lintFile(file: string, projectDir: string): Promise<void>;
 ```
 
 **Behavior**:
+
 ```bash
 # Python linting (if Python project detected)
 ([ -f pyproject.toml ] || [ -f requirements.txt ]) && {
@@ -156,10 +161,12 @@ lintFile(file)
 **Error Handling**: Missing linters skip silently via `.nothrow().quiet()` (see `ARCHITECTURE.md` → Graceful Linter Fallback)
 
 **Gotchas**:
+
 - Check both `uv.lock` and `[tool.uv]` for uv detection
 - `pip` is fallback when no manager detected
 
 **Open Questions**:
+
 - [ ] `.pyx` (Cython) files - defer, low priority
 
 ---

@@ -23,13 +23,13 @@ Safeword is a CLI tool that configures linting, hooks, and development guides fo
 
 ### Tech Stack
 
-| Category        | Choice     | Rationale                                  |
-|-----------------|------------|--------------------------------------------|
-| Runtime         | Bun        | Fast startup, TypeScript native            |
-| Package Manager | npm/bun    | Standard for JS ecosystem                  |
-| JS Linting      | ESLint     | Industry standard, extensive rule set      |
-| Python Linting  | Ruff       | Fast, replaces flake8/black/isort          |
-| Type Checking   | tsc / mypy | Native type checkers for each language     |
+| Category        | Choice     | Rationale                              |
+| --------------- | ---------- | -------------------------------------- |
+| Runtime         | Bun        | Fast startup, TypeScript native        |
+| Package Manager | npm/bun    | Standard for JS ecosystem              |
+| JS Linting      | ESLint     | Industry standard, extensive rule set  |
+| Python Linting  | Ruff       | Fast, replaces flake8/black/isort      |
+| Type Checking   | tsc / mypy | Native type checkers for each language |
 
 ---
 
@@ -56,15 +56,19 @@ Language-specific tooling (detection, config generation, setup) is encapsulated 
 
 ```typescript
 interface LanguagePack {
-  id: string;                          // e.g., 'python', 'typescript'
-  name: string;                        // e.g., 'Python', 'TypeScript'
-  extensions: string[];                // e.g., ['.py', '.pyi']
-  detect: (cwd: string) => boolean;    // Is this language present?
+  id: string; // e.g., 'python', 'typescript'
+  name: string; // e.g., 'Python', 'TypeScript'
+  extensions: string[]; // e.g., ['.py', '.pyi']
+  detect: (cwd: string) => boolean; // Is this language present?
   setup: (cwd: string, ctx: SetupContext) => SetupResult;
 }
 
-interface SetupContext { isGitRepo: boolean; }
-interface SetupResult { files: string[]; }
+interface SetupContext {
+  isGitRepo: boolean;
+}
+interface SetupResult {
+  files: string[];
+}
 
 // Registry
 const LANGUAGE_PACKS: Record<string, LanguagePack> = {
@@ -110,8 +114,8 @@ function detectPythonType(cwd: string): PythonProjectType | undefined;
 
 // Language detection result
 interface Languages {
-  javascript: boolean;  // package.json exists
-  python: boolean;      // pyproject.toml OR requirements.txt exists
+  javascript: boolean; // package.json exists
+  python: boolean; // pyproject.toml OR requirements.txt exists
 }
 
 // Python-specific detection (returned only if languages.python)
@@ -124,10 +128,10 @@ interface PythonProjectType {
 // Note: projectType stays REQUIRED - returns all-false for Python-only projects
 interface ProjectContext {
   cwd: string;
-  projectType: ProjectType;       // Unchanged - handles missing package.json
+  projectType: ProjectType; // Unchanged - handles missing package.json
   developmentDeps: Record<string, string>;
   isGitRepo: boolean;
-  languages: Languages;           // NEW
+  languages: Languages; // NEW
   // pythonType?: PythonProjectType; // Phase 2 - for framework-specific configs
 }
 ```
@@ -143,38 +147,38 @@ interface ProjectContext {
 **Status:** Proposed
 **Date:** 2025-12-24
 
-| Field          | Value |
-|----------------|-------|
-| What           | Skip linter silently if not installed, rather than error |
+| Field          | Value                                                                                     |
+| -------------- | ----------------------------------------------------------------------------------------- |
+| What           | Skip linter silently if not installed, rather than error                                  |
 | Why            | Hook should never block Claude's workflow; users may not have tools installed immediately |
-| Trade-off      | User may not realize linting is skipped |
-| Alternatives   | Error on missing linter (rejected: blocks Claude), warn always (rejected: noisy) |
-| Implementation | `packages/cli/templates/hooks/lib/lint.ts` - uses `.nothrow().quiet()` |
+| Trade-off      | User may not realize linting is skipped                                                   |
+| Alternatives   | Error on missing linter (rejected: blocks Claude), warn always (rejected: noisy)          |
+| Implementation | `packages/cli/templates/hooks/lib/lint.ts` - uses `.nothrow().quiet()`                    |
 
 ### TOML Parsing Without Dependencies
 
 **Status:** Proposed
 **Date:** 2025-12-24
 
-| Field          | Value |
-|----------------|-------|
-| What           | Use line-based extraction for pyproject.toml instead of full TOML parser |
+| Field          | Value                                                                               |
+| -------------- | ----------------------------------------------------------------------------------- |
+| What           | Use line-based extraction for pyproject.toml instead of full TOML parser            |
 | Why            | No new npm dependencies; only need section detection (`[tool.poetry]`, `[tool.uv]`) |
-| Trade-off      | May fail on complex TOML edge cases |
-| Alternatives   | @iarna/toml (rejected: adds dependency), toml-js (rejected: adds dependency) |
-| Implementation | `packages/cli/src/utils/project-detector.ts` |
+| Trade-off      | May fail on complex TOML edge cases                                                 |
+| Alternatives   | @iarna/toml (rejected: adds dependency), toml-js (rejected: adds dependency)        |
+| Implementation | `packages/cli/src/utils/project-detector.ts`                                        |
 
 ### Ruff in Hook, mypy in Command Only
 
 **Status:** Proposed
 **Date:** 2025-12-24
 
-| Field          | Value |
-|----------------|-------|
-| What           | Lint hook runs Ruff (fast); /lint command runs mypy (slow) |
-| Why            | Ruff: ms per file, safe for hooks. mypy: seconds for whole project, would block Claude |
-| Trade-off      | Type errors not caught until explicit /lint run |
-| Alternatives   | mypy in hook with caching (rejected: still too slow), skip mypy entirely (rejected: loses value) |
+| Field          | Value                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| What           | Lint hook runs Ruff (fast); /lint command runs mypy (slow)                                           |
+| Why            | Ruff: ms per file, safe for hooks. mypy: seconds for whole project, would block Claude               |
+| Trade-off      | Type errors not caught until explicit /lint run                                                      |
+| Alternatives   | mypy in hook with caching (rejected: still too slow), skip mypy entirely (rejected: loses value)     |
 | Implementation | Hook: `packages/cli/templates/hooks/lib/lint.ts`; Command: `packages/cli/templates/commands/lint.md` |
 
 ### Bundled Language Packs (No External Packages)
@@ -182,13 +186,13 @@ interface ProjectContext {
 **Status:** Proposed
 **Date:** 2025-12-26
 
-| Field          | Value |
-|----------------|-------|
-| What           | Language packs are bundled in safeword core, not separate npm packages |
-| Why            | Simpler distribution, no version matrix, always in sync with CLI |
-| Trade-off      | Can't add languages without safeword release |
+| Field          | Value                                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------- |
+| What           | Language packs are bundled in safeword core, not separate npm packages                                  |
+| Why            | Simpler distribution, no version matrix, always in sync with CLI                                        |
+| Trade-off      | Can't add languages without safeword release                                                            |
 | Alternatives   | Separate npm packages (rejected: version coordination complexity), user-defined packs (deferred: YAGNI) |
-| Implementation | `packages/cli/src/packs/*.ts` |
+| Implementation | `packages/cli/src/packs/*.ts`                                                                           |
 
 ---
 
@@ -217,6 +221,7 @@ const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 **What:** Schema generators check `ctx.languages.javascript` before creating JS-specific files
 **Why:** Prevents eslint.config.mjs, knip.json, package.json merges for Python-only projects
 **Files affected:**
+
 - `packages/cli/src/schema.ts` - managedFiles generators, jsonMerges, packages.base
 
 ---
@@ -228,6 +233,7 @@ const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 **Trigger:** Implementation of Python support feature
 
 **Steps:**
+
 1. Add `detectLanguages()` layer above `detectProjectType()`
 2. Extend lint hook with Python extension routing
 3. Make setup command conditional on detected languages

@@ -32,7 +32,7 @@ ImportLinterIntegration
 
 ```typescript
 // New managedFile generator
-managedFiles['pyproject.toml [tool.ruff]'] = (ctx) => {
+managedFiles['pyproject.toml [tool.ruff]'] = ctx => {
   if (!ctx.languages.python) return { content: null };
   return { content: generateRuffConfig() };
 };
@@ -45,6 +45,7 @@ function mergeTomlSection(existing: string, section: string, content: string): s
 **Tests**: Suite 1 (Test 1.1)
 
 **Config Content** (from spec):
+
 ```toml
 [tool.ruff.lint]
 select = ["E", "F", "B", "S", "SIM", "UP", "I", "ASYNC", "C90", "PT"]
@@ -60,7 +61,7 @@ max-complexity = 10
 **Interface**:
 
 ```typescript
-managedFiles['.pre-commit-config.yaml'] = (ctx) => {
+managedFiles['.pre-commit-config.yaml'] = ctx => {
   if (!ctx.languages.python) return { content: null };
   if (!ctx.isGitRepo) return { content: null };
   return { content: generatePreCommitConfig() };
@@ -71,10 +72,11 @@ managedFiles['.pre-commit-config.yaml'] = (ctx) => {
 **Tests**: Suite 2 (Test 2.1)
 
 **Config Content**:
+
 ```yaml
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10  # update to latest at implementation time
+    rev: v0.14.10 # update to latest at implementation time
     hooks:
       - id: ruff-check
         args: [--fix]
@@ -89,7 +91,7 @@ repos:
 
 ```typescript
 // Only for projects with detected layer structure
-managedFiles['pyproject.toml [tool.importlinter]'] = (ctx) => {
+managedFiles['pyproject.toml [tool.importlinter]'] = ctx => {
   if (!ctx.languages.python) return { content: null };
   const layers = detectLayers(ctx.cwd); // domain, services, api, etc.
   if (!layers.length) return { content: null };
@@ -161,12 +163,14 @@ setup()
 ## User Flow
 
 ### Python project setup
+
 1. User runs `safeword setup` with pyproject.toml
 2. System adds `[tool.ruff]` config to pyproject.toml
 3. System creates `.pre-commit-config.yaml` (if git repo)
 4. User sees: "Run `pre-commit install`"
 
 ### Audit command
+
 1. User runs `/audit`
 2. System runs deadcode (Python) + jscpd (all) + knip (JS)
 3. User sees unused code + duplicates report
@@ -194,22 +198,26 @@ setup()
 **Architecture Reference**: TOML parsing approach in `ARCHITECTURE.md` → "TOML Parsing Without Dependencies"
 
 **Constraints**:
+
 - No TOML parser dependency
 - deadcode and import-linter require Python ≥3.10
 - pre-commit only for git repos
 - Interface code is illustrative; adapt to actual schema patterns during implementation
 
 **Error Handling**:
+
 - Missing tools skip silently (consistent with Phase 1)
 - Invalid pyproject.toml → warn, don't crash
 
 **Gotchas**:
+
 - pre-commit file is `.pre-commit-config.yaml` (not `pre-commit.yaml`)
 - deadcode exit code non-zero when finding dead code (not an error)
 - jscpd is detection-only (no auto-fix)
 - `npx jscpd` works without package.json (downloads to cache)
 
 **Open Questions**:
+
 - [x] Layer detection heuristic - **RESOLVED**: Mirror `boundaries.ts` approach with predefined Python layers:
   - `domain`: domain/, models/, entities/, core/
   - `services`: services/, usecases/, application/

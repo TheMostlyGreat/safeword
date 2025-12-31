@@ -54,8 +54,8 @@ Don't skip past errors. They often contain the exact solution.
 #### 3. Check Recent Changes
 
 ```bash
-git diff HEAD~5          # Recent code changes
-git log --oneline -10    # Recent commits
+git diff HEAD~5       # Recent code changes
+git log --oneline -10 # Recent commits
 ```
 
 What changed that could cause this? Dependencies? Config? Environment?

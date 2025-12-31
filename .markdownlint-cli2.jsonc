@@ -18,6 +18,6 @@
     "MD022": true, // Blank lines around headings
     "MD031": true, // Blank lines around fenced code blocks
     "MD032": true, // Blank lines around lists
-    "MD058": true  // Blank lines around tables
-  }
+    "MD058": true, // Blank lines around tables
+  },
 }

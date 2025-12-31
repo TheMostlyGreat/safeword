@@ -30,7 +30,7 @@ for arg in "$@"; do
     --dry-run)
       DRY_RUN=true
       ;;
-    --help|-h)
+    --help | -h)
       echo "Usage: $0 [--dry-run] [port] [pattern]"
       echo ""
       echo "Cleanup zombie processes for the current project."
@@ -64,9 +64,9 @@ done
 has_config() {
   local pattern=$1
   # Check root first, then common monorepo locations
-  compgen -G "$pattern" >/dev/null 2>&1 && return 0
-  compgen -G "packages/*/$pattern" >/dev/null 2>&1 && return 0
-  compgen -G "apps/*/$pattern" >/dev/null 2>&1 && return 0
+  compgen -G "$pattern" > /dev/null 2>&1 && return 0
+  compgen -G "packages/*/$pattern" > /dev/null 2>&1 && return 0
+  compgen -G "apps/*/$pattern" > /dev/null 2>&1 && return 0
   return 1
 }
 
@@ -129,7 +129,7 @@ KILLED_COUNT=0
 cleanup_port() {
   local port=$1
   local pids
-  pids=$(lsof -ti:"$port" 2>/dev/null || true)
+  pids=$(lsof -ti:"$port" 2> /dev/null || true)
 
   if [ -n "$pids" ]; then
     local count
@@ -139,12 +139,12 @@ cleanup_port() {
     echo "Port $port: $count process(es)"
     for pid in $pids; do
       local cmd
-      cmd=$(ps -p "$pid" -o command= 2>/dev/null | head -c 80 || echo "unknown")
+      cmd=$(ps -p "$pid" -o command= 2> /dev/null | head -c 80 || echo "unknown")
       echo "  PID $pid: $cmd"
     done
 
     if [ "$DRY_RUN" = false ]; then
-      echo "$pids" | xargs kill -9 2>/dev/null || true
+      echo "$pids" | xargs kill -9 2> /dev/null || true
       KILLED_COUNT=$((KILLED_COUNT + count))
     fi
   fi
@@ -155,7 +155,7 @@ cleanup_pattern() {
   local pattern=$1
   local pids
   # Match pattern AND project directory for safety
-  pids=$(pgrep -f "$pattern.*$PROJECT_DIR" 2>/dev/null || pgrep -f "$PROJECT_DIR.*$pattern" 2>/dev/null || true)
+  pids=$(pgrep -f "$pattern.*$PROJECT_DIR" 2> /dev/null || pgrep -f "$PROJECT_DIR.*$pattern" 2> /dev/null || true)
 
   if [ -n "$pids" ]; then
     local count
@@ -165,12 +165,12 @@ cleanup_pattern() {
     echo "Pattern '$pattern' (project-scoped): $count process(es)"
     for pid in $pids; do
       local cmd
-      cmd=$(ps -p "$pid" -o command= 2>/dev/null | head -c 80 || echo "unknown")
+      cmd=$(ps -p "$pid" -o command= 2> /dev/null | head -c 80 || echo "unknown")
       echo "  PID $pid: $cmd"
     done
 
     if [ "$DRY_RUN" = false ]; then
-      echo "$pids" | xargs kill -9 2>/dev/null || true
+      echo "$pids" | xargs kill -9 2> /dev/null || true
       KILLED_COUNT=$((KILLED_COUNT + count))
     fi
   fi
@@ -212,7 +212,7 @@ else
 
   # Verify port is free
   if [ -n "$PORT" ]; then
-    if lsof -i:"$PORT" >/dev/null 2>&1; then
+    if lsof -i:"$PORT" > /dev/null 2>&1; then
       echo -e "${YELLOW}Warning: Port $PORT still in use${NC}"
       lsof -i:"$PORT"
     else

@@ -107,13 +107,13 @@
 **RED**: 6 tests (75%)
 **Passing**: 2 tests (negative tests)
 
-| Tool | Tests | Status |
-|------|-------|--------|
-| Ruff config | 2 | 🔴 RED |
-| pre-commit | 2 | 🔴 RED (1 negative passes) |
-| import-linter | 2 | 🔴 RED (1 negative passes) |
-| deadcode | 1 | 🔴 RED |
-| jscpd | 1 | 🔴 RED |
+| Tool          | Tests | Status                     |
+| ------------- | ----- | -------------------------- |
+| Ruff config   | 2     | 🔴 RED                     |
+| pre-commit    | 2     | 🔴 RED (1 negative passes) |
+| import-linter | 2     | 🔴 RED (1 negative passes) |
+| deadcode      | 1     | 🔴 RED                     |
+| jscpd         | 1     | 🔴 RED                     |
 
 ---
 

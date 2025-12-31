@@ -90,8 +90,8 @@ export default defineConfig({
 
 ```bash
 # Kill all processes on test ports
-lsof -ti:3000 | xargs kill -9 2>/dev/null
-lsof -ti:3001 | xargs kill -9 2>/dev/null
+lsof -ti:3000 | xargs kill -9 2> /dev/null
+lsof -ti:3001 | xargs kill -9 2> /dev/null
 
 # Or kill by process name pattern
 pkill -9 -f "playwright.*test-name"
@@ -136,13 +136,13 @@ pgrep -fl node
 2. **Verify ports are clear**
 
    ```bash
-   lsof -i:3000  # Should return nothing
+   lsof -i:3000 # Should return nothing
    ```
 
 3. **Wait before restarting**
 
    ```bash
-   sleep 5  # Give processes time to fully terminate
+   sleep 5 # Give processes time to fully terminate
    ```
 
 4. **Review process management**
@@ -201,7 +201,7 @@ pnpm test -- path/to/file.test.ts
 ## Running Tests
 
 ```bash
-pnpm test  # Run all tests
+pnpm test # Run all tests
 ```
 ````
 

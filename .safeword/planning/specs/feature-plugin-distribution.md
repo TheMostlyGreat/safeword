@@ -12,6 +12,7 @@
 ## Context
 
 Safeword is currently installed via CLI (`npx safeword setup`). Claude Code has a plugin system that would enable:
+
 - One-command installation (`/plugin install safeword`)
 - Automatic updates
 - Team-wide deployment via settings.json
@@ -19,14 +20,14 @@ Safeword is currently installed via CLI (`npx safeword setup`). Claude Code has 
 
 ### Current State (80% aligned)
 
-| Component | Current Location | Plugin Location | Status |
-|-----------|------------------|-----------------|--------|
-| Commands | `.claude/commands/` | `commands/` | ✅ Ready |
-| Skills | `.claude/skills/` | `skills/` | ✅ Ready |
-| Hooks | `.safeword/hooks/*.ts` | `scripts/` + `hooks.json` | ⚠️ Needs conversion |
-| Guides | `.safeword/guides/` | `guides/` | ✅ Ready |
-| Templates | `.safeword/templates/` | `templates/` | ✅ Ready |
-| Manifest | None | `.claude-plugin/plugin.json` | ❌ Missing |
+| Component | Current Location       | Plugin Location              | Status              |
+| --------- | ---------------------- | ---------------------------- | ------------------- |
+| Commands  | `.claude/commands/`    | `commands/`                  | ✅ Ready            |
+| Skills    | `.claude/skills/`      | `skills/`                    | ✅ Ready            |
+| Hooks     | `.safeword/hooks/*.ts` | `scripts/` + `hooks.json`    | ⚠️ Needs conversion |
+| Guides    | `.safeword/guides/`    | `guides/`                    | ✅ Ready            |
+| Templates | `.safeword/templates/` | `templates/`                 | ✅ Ready            |
+| Manifest  | None                   | `.claude-plugin/plugin.json` | ❌ Missing          |
 
 ## Technical Constraints
 
@@ -68,9 +69,11 @@ Safeword is currently installed via CLI (`npx safeword setup`). Claude Code has 
 **Tests**: Manual validation with `/plugin` command
 
 **Files**:
+
 - `.claude-plugin/plugin.json` (new)
 
 **Example manifest**:
+
 ```json
 {
   "name": "safeword",
@@ -109,10 +112,12 @@ Safeword is currently installed via CLI (`npx safeword setup`). Claude Code has 
 **Tests**: Manual testing with plugin installed
 
 **Files**:
+
 - `hooks/hooks.json` (new)
 - `scripts/` (move from `.safeword/hooks/`)
 
 **Example hooks.json**:
+
 ```json
 {
   "hooks": {
@@ -162,9 +167,11 @@ Safeword is currently installed via CLI (`npx safeword setup`). Claude Code has 
 **Tests**: Plugin install/uninstall cycle
 
 **Files**:
+
 - Multiple directory moves
 
 **Target structure**:
+
 ```
 safeword-plugin/
 ├── .claude-plugin/
@@ -215,9 +222,11 @@ safeword-plugin/
 **Tests**: Fresh install on new project
 
 **Files**:
+
 - `marketplace.json` (new)
 
 **Example marketplace.json**:
+
 ```json
 {
   "name": "safeword-marketplace",

@@ -25,7 +25,16 @@ const JS_EXTENSIONS = new Set([
 const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 const GO_EXTENSIONS = new Set(['go']);
 const SHELL_EXTENSIONS = new Set(['sh']);
-const PRETTIER_EXTENSIONS = new Set(['md', 'json', 'css', 'scss', 'html', 'yaml', 'yml', 'graphql']);
+const PRETTIER_EXTENSIONS = new Set([
+  'md',
+  'json',
+  'css',
+  'scss',
+  'html',
+  'yaml',
+  'yml',
+  'graphql',
+]);
 
 // Cache safeword config paths at module init (avoids repeated fs checks per file)
 const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();

@@ -50,7 +50,8 @@ module.exports = {
 
     {
       name: 'cli-utils-no-upward-imports',
-      comment: 'utils/ is a leaf layer - cannot import from commands, templates, or core (types OK)',
+      comment:
+        'utils/ is a leaf layer - cannot import from commands, templates, or core (types OK)',
       severity: 'error',
       from: { path: '^packages/cli/src/utils/' },
       to: {
@@ -90,7 +91,10 @@ module.exports = {
       comment: 'Core modules (schema, reconcile) cannot import from commands',
       severity: 'error',
       from: {
-        path: [String.raw`^packages/cli/src/schema\.ts$`, String.raw`^packages/cli/src/reconcile\.ts$`],
+        path: [
+          String.raw`^packages/cli/src/schema\.ts$`,
+          String.raw`^packages/cli/src/reconcile\.ts$`,
+        ],
       },
       to: { path: '^packages/cli/src/commands/' },
     },
@@ -211,13 +215,7 @@ module.exports = {
       path: 'node_modules',
     },
     exclude: {
-      path: [
-        'node_modules',
-        'dist',
-        'build',
-        'coverage',
-        String.raw`\.d\.ts$`,
-      ],
+      path: ['node_modules', 'dist', 'build', 'coverage', String.raw`\.d\.ts$`],
     },
     tsPreCompilationDeps: true,
     tsConfig: {
@@ -234,7 +232,10 @@ module.exports = {
           graph: { rankdir: 'LR' },
           modules: [
             { criteria: { source: '^packages/cli' }, attributes: { fillcolor: '#ffcccc' } },
-            { criteria: { source: '^packages/eslint-plugin' }, attributes: { fillcolor: '#ccffcc' } },
+            {
+              criteria: { source: '^packages/eslint-plugin' },
+              attributes: { fillcolor: '#ccffcc' },
+            },
             { criteria: { source: '^packages/website' }, attributes: { fillcolor: '#ccccff' } },
           ],
         },

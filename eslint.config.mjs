@@ -128,7 +128,12 @@ const configs = [
   // Website package overrides - Astro has virtual modules and special patterns
   {
     name: 'website-package-override',
-    files: ['packages/website/**/*.ts', 'packages/website/**/*.tsx', 'packages/website/**/*.astro', 'packages/website/**/*.mjs'],
+    files: [
+      'packages/website/**/*.ts',
+      'packages/website/**/*.tsx',
+      'packages/website/**/*.astro',
+      'packages/website/**/*.mjs',
+    ],
     rules: {
       // Astro virtual modules (astro:content, @astrojs/starlight/*)
       'import-x/no-unresolved': 'off',

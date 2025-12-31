@@ -6,6 +6,7 @@
 **Feature**: Enable safeword to work with Python projects using Ruff + mypy
 
 **Test Files**:
+
 - `packages/cli/src/utils/project-detector.test.ts` (Story 1)
 - `packages/cli/tests/integration/hooks.test.ts` (Story 2)
 - `packages/cli/tests/commands/setup-python.test.ts` (Story 3)
@@ -607,13 +608,13 @@ Tests for non-functional requirements from the spec.
 
 ### Coverage by Story
 
-| Story | Tests | Status |
-|-------|-------|--------|
-| Story 1: Python Detection | 10 | ✅ 100% |
-| Story 2: Lint Hook | 6 | ✅ Manual |
-| Story 3: Conditional Setup | 6 | ✅ 100% |
-| Story 4: Lint Command | 6 | ✅ Manual |
-| Technical Constraints | 2 | ✅ Verified |
+| Story                      | Tests | Status      |
+| -------------------------- | ----- | ----------- |
+| Story 1: Python Detection  | 10    | ✅ 100%     |
+| Story 2: Lint Hook         | 6     | ✅ Manual   |
+| Story 3: Conditional Setup | 6     | ✅ 100%     |
+| Story 4: Lint Command      | 6     | ✅ Manual   |
+| Technical Constraints      | 2     | ✅ Verified |
 
 ### Skipped Tests Rationale
 

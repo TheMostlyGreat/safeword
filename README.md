@@ -103,15 +103,15 @@ Key directories created in your project:
 
 **Purpose**: Fillable structures for feature documentation
 
-| Template                        | Purpose                                          | Used By                |
-| ------------------------------- | ------------------------------------------------ | ---------------------- |
-| **feature-spec-template.md**    | Feature spec (user stories + constraints)        | planning-guide.md      |
-| **task-spec-template.md**       | Bug, improvement, refactor, or internal task     | planning-guide.md      |
-| **test-definitions-feature.md** | Test definition structure (suites, tests, steps) | planning-guide.md      |
-| **design-doc-template.md**      | Design doc structure (architecture, components)  | design-doc-guide.md    |
-| **architecture-template.md**    | ADR for decisions with long-term impact          | planning-guide.md      |
-| **ticket-template.md**          | Context anchor for complex/multi-step work       | SAFEWORD.md            |
-| **work-log-template.md**        | Scratch pad and working memory during execution  | SAFEWORD.md            |
+| Template                        | Purpose                                          | Used By             |
+| ------------------------------- | ------------------------------------------------ | ------------------- |
+| **feature-spec-template.md**    | Feature spec (user stories + constraints)        | planning-guide.md   |
+| **task-spec-template.md**       | Bug, improvement, refactor, or internal task     | planning-guide.md   |
+| **test-definitions-feature.md** | Test definition structure (suites, tests, steps) | planning-guide.md   |
+| **design-doc-template.md**      | Design doc structure (architecture, components)  | design-doc-guide.md |
+| **architecture-template.md**    | ADR for decisions with long-term impact          | planning-guide.md   |
+| **ticket-template.md**          | Context anchor for complex/multi-step work       | SAFEWORD.md         |
+| **work-log-template.md**        | Scratch pad and working memory during execution  | SAFEWORD.md         |
 
 ---
 
@@ -199,23 +199,23 @@ planning/
 ```bash
 # Set up safeword in current project
 bunx safeword@latest setup
-bunx safeword@latest setup -y   # Non-interactive mode
+bunx safeword@latest setup -y # Non-interactive mode
 
 # Check project health and versions
 bunx safeword@latest check
-bunx safeword@latest check --offline   # Skip remote version check
+bunx safeword@latest check --offline # Skip remote version check
 
 # Upgrade to latest version
 bunx safeword@latest upgrade
 
 # Preview changes before upgrading
 bunx safeword@latest diff
-bunx safeword@latest diff -v           # Show full diff output
+bunx safeword@latest diff -v # Show full diff output
 
 # Remove safeword from project
 bunx safeword reset
-bunx safeword reset -y          # Skip confirmation
-bunx safeword reset --full      # Also remove linting config + packages
+bunx safeword reset -y     # Skip confirmation
+bunx safeword reset --full # Also remove linting config + packages
 ```
 
 **Auto-detection**: Detects project type from `package.json` and installs relevant ESLint/Prettier plugins:
