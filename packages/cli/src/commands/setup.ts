@@ -10,15 +10,15 @@ import nodePath from 'node:path';
 import { addInstalledPack } from '../packs/config.js';
 import { setupGoTooling } from '../packs/golang/setup.js';
 import {
+  detectPythonLayers,
   detectPythonPackageManager,
   getPythonInstallCommand,
   hasRuffDependency,
   installPythonDependencies,
-  setupPythonTooling,
 } from '../packs/python/setup.js';
 import { detectLanguages as detectLanguagePacks } from '../packs/registry.js';
 import { reconcile, type ReconcileResult } from '../reconcile.js';
-import { type ProjectContext,SAFEWORD_SCHEMA } from '../schema.js';
+import { type ProjectContext, SAFEWORD_SCHEMA } from '../schema.js';
 import { createProjectContext } from '../utils/context.js';
 import { exists, readJson, writeJson } from '../utils/fs.js';
 import { installDependencies } from '../utils/install.js';
@@ -56,7 +56,7 @@ function setupWorkspaceFormatScripts(cwd: string, ctx: ProjectContext): string[]
   // Resolve workspace patterns to paths
   const workspacePatterns = Array.isArray(rootPackageJson.workspaces)
     ? rootPackageJson.workspaces
-    : rootPackageJson.workspaces.packages ?? [];
+    : (rootPackageJson.workspaces.packages ?? []);
 
   const updated: string[] = [];
 
@@ -152,26 +152,19 @@ function getPythonTools(includeImportLinter: boolean): string[] {
 
 /**
  * Configure Python tooling and install dependencies.
- * Returns files modified and whether install failed.
+ * Config files (ruff.toml, mypy.ini, .importlinter) are created by reconciliation.
+ * This function handles dependency installation.
  */
 function setupPython(cwd: string): PythonSetupStatus {
-  const pythonResult = setupPythonTooling(cwd);
-  const files = pythonResult.files;
   let installFailed = false;
 
-  if (files.length > 0) {
-    info('\nPython tooling configured:');
-    if (files.includes('pyproject.toml')) {
-      info('  Added [tool.ruff] config to pyproject.toml');
-    }
-    if (pythonResult.importLinter) {
-      info('  Added [tool.importlinter] layer contracts');
-    }
-  }
+  // Detect layers for import-linter
+  const layers = detectPythonLayers(cwd);
+  const hasLayers = layers.length >= 2;
 
   // Install Python tools if not already in dependencies
   if (!hasRuffDependency(cwd)) {
-    const tools = getPythonTools(pythonResult.importLinter);
+    const tools = getPythonTools(hasLayers);
     const pm = detectPythonPackageManager(cwd);
     if (pm === 'pip') {
       installFailed = true;
@@ -186,7 +179,8 @@ function setupPython(cwd: string): PythonSetupStatus {
     }
   }
 
-  return { files, installFailed, importLinter: pythonResult.importLinter };
+  // Note: files are now created by reconciliation, not returned here
+  return { files: [], installFailed, importLinter: hasLayers };
 }
 
 interface SetupSummaryOptions {
@@ -216,14 +210,22 @@ function printSetupSummary(options: SetupSummaryOptions): void {
   header('Setup Complete');
 
   // Schema-created files (including .golangci.yml, .safeword/ruff.toml) are in result.created
-  const allCreated = [...result.created, ...archFiles, ...pythonFiles.filter(f => f !== 'pyproject.toml')];
+  const allCreated = [
+    ...result.created,
+    ...archFiles,
+    ...pythonFiles.filter(f => f !== 'pyproject.toml'),
+  ];
   if (allCreated.length > 0 || packageJsonCreated) {
     info('\nCreated:');
     if (packageJsonCreated) listItem('package.json');
     for (const file of allCreated) listItem(file);
   }
 
-  const allUpdated = [...result.updated, ...workspaceUpdates, ...pythonFiles.filter(f => f === 'pyproject.toml')];
+  const allUpdated = [
+    ...result.updated,
+    ...workspaceUpdates,
+    ...pythonFiles.filter(f => f === 'pyproject.toml'),
+  ];
   if (allUpdated.length > 0) {
     info('\nModified:');
     for (const file of allUpdated) listItem(file);
@@ -234,12 +236,16 @@ function printSetupSummary(options: SetupSummaryOptions): void {
 
   // Python-specific guidance: show install command only if auto-install failed
   if (languages.python && pythonInstallFailed) {
-    listItem(`Install Python tools: ${getPythonInstallCommand(cwd, getPythonTools(pythonImportLinter))}`);
+    listItem(
+      `Install Python tools: ${getPythonInstallCommand(cwd, getPythonTools(pythonImportLinter))}`,
+    );
   }
 
   // Go-specific guidance: show if .golangci.yml was created (Go tools are installed globally)
   if (languages.golang && result.created.includes('.golangci.yml')) {
-    listItem('Install Go tools: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest');
+    listItem(
+      'Install Go tools: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest',
+    );
   }
 
   listItem('Commit the new files to git');
@@ -267,8 +273,10 @@ export async function setup(_options: SetupOptions): Promise<void> {
     const ctx = createProjectContext(cwd);
     const languages = ctx.languages ?? { javascript: false, python: false, golang: false };
     const isNonJsOnly = (languages.python || languages.golang) && !languages.javascript;
-    if (languages.python && !languages.javascript) info('Python project detected (skipping JS tooling)');
-    if (languages.golang && !languages.javascript) info('Go project detected (skipping JS tooling)');
+    if (languages.python && !languages.javascript)
+      info('Python project detected (skipping JS tooling)');
+    if (languages.golang && !languages.javascript)
+      info('Go project detected (skipping JS tooling)');
     const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
     success('Created .safeword directory and configuration');
 
@@ -306,8 +314,8 @@ export async function setup(_options: SetupOptions): Promise<void> {
       installDependencies(cwd, result.packagesToInstall, 'linting dependencies');
     }
 
-    // Python-specific setup (extend reference + import-linter + mypy in pyproject.toml)
-    // Note: .safeword/ruff.toml is created by reconcile (ownedFiles)
+    // Python-specific setup (install dependencies)
+    // Note: Config files (ruff.toml, mypy.ini, .importlinter) are created by reconcile (managedFiles)
     const pythonStatus = languages.python
       ? setupPython(cwd)
       : { files: [], installFailed: false, importLinter: false };

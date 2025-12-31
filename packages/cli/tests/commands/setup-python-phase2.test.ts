@@ -5,7 +5,7 @@
  * Test Definitions: .safeword/planning/test-definitions/phase2-python-tooling.md
  */
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import nodePath from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -63,13 +63,20 @@ function readAuditTemplate(): string {
   return readFileSync(nodePath.join(__dirname, '../../templates/commands/audit.md'), 'utf8');
 }
 
+/**
+ * Helper to check if a file exists in the project
+ */
+function fileExists(dir: string, filename: string): boolean {
+  return existsSync(nodePath.join(dir, filename));
+}
+
 // =============================================================================
 // Test Suite 1: Ruff Config Generation
 // =============================================================================
 
 describe('Suite 1: Ruff Config Generation', () => {
   it(
-    'Test 1.1: Generates [tool.ruff] section',
+    'Test 1.1: Generates ruff.toml at project root',
     async () => {
       // Arrange
       createPythonProject(projectDirectory);
@@ -78,26 +85,29 @@ describe('Suite 1: Ruff Config Generation', () => {
       // Act
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
 
-      // Assert
-      const pyprojectContent = readPyprojectToml(projectDirectory);
-      // pyproject.toml uses extend to reference base config
-      expect(pyprojectContent).toContain('[tool.ruff]');
-      expect(pyprojectContent).toContain('extend = ".safeword/ruff.toml"');
+      // Assert - ruff.toml at project root extends .safeword/ruff.toml
+      expect(fileExists(projectDirectory, 'ruff.toml')).toBe(true);
+      const ruffToml = readTestFile(projectDirectory, 'ruff.toml');
+      expect(ruffToml).toContain('extend = ".safeword/ruff.toml"');
 
       // Actual rules are in .safeword/ruff.toml
-      const ruffToml = readTestFile(projectDirectory, '.safeword/ruff.toml');
-      expect(ruffToml).toContain('[lint]');
-      expect(ruffToml).toContain('select = [');
+      const safewordRuffToml = readTestFile(projectDirectory, '.safeword/ruff.toml');
+      expect(safewordRuffToml).toContain('[lint]');
+      expect(safewordRuffToml).toContain('select = [');
       // Verify ALL is selected (includes E, F, B)
-      expect(ruffToml).toMatch(/"ALL"/);
+      expect(safewordRuffToml).toMatch(/"ALL"/);
+
+      // pyproject.toml should NOT be modified for ruff
+      const pyprojectContent = readPyprojectToml(projectDirectory);
+      expect(pyprojectContent).not.toContain('[tool.ruff]');
     },
     TIMEOUT_SETUP,
   );
 
   it(
-    'Test 1.1b: Preserves existing pyproject.toml content',
+    'Test 1.1b: Does not create ruff.toml if project has existing ruff config',
     async () => {
-      // Arrange
+      // Arrange - project with existing [tool.ruff] in pyproject.toml
       writeTestFile(
         projectDirectory,
         'pyproject.toml',
@@ -105,6 +115,9 @@ describe('Suite 1: Ruff Config Generation', () => {
 name = "existing-project"
 version = "2.0.0"
 description = "An existing project"
+
+[tool.ruff]
+line-length = 120
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -115,14 +128,18 @@ testpaths = ["tests"]
       // Act
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
 
-      // Assert
+      // Assert - ruff.toml should NOT be created (project has existing config)
+      expect(fileExists(projectDirectory, 'ruff.toml')).toBe(false);
+
+      // .safeword/ruff.toml should still be created (for hooks)
+      expect(fileExists(projectDirectory, '.safeword/ruff.toml')).toBe(true);
+
+      // Original pyproject.toml content preserved
       const pyprojectContent = readPyprojectToml(projectDirectory);
-      // Original content preserved
       expect(pyprojectContent).toContain('name = "existing-project"');
       expect(pyprojectContent).toContain('description = "An existing project"');
       expect(pyprojectContent).toContain('[tool.pytest.ini_options]');
-      // New content added
-      expect(pyprojectContent).toContain('[tool.ruff]');
+      expect(pyprojectContent).toContain('line-length = 120');
     },
     TIMEOUT_SETUP,
   );
@@ -134,7 +151,7 @@ testpaths = ["tests"]
 
 describe('Suite 2: Architecture Validation', () => {
   it(
-    'Test 2.1: Generates import-linter config',
+    'Test 2.1: Generates .importlinter config file',
     async () => {
       // Arrange
       createPythonProjectWithLayers(projectDirectory);
@@ -143,17 +160,22 @@ describe('Suite 2: Architecture Validation', () => {
       // Act
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
 
-      // Assert
-      const pyprojectContent = readPyprojectToml(projectDirectory);
-      expect(pyprojectContent).toContain('[tool.importlinter]');
+      // Assert - .importlinter file created at project root
+      expect(fileExists(projectDirectory, '.importlinter')).toBe(true);
+      const importLinterConfig = readTestFile(projectDirectory, '.importlinter');
+      expect(importLinterConfig).toContain('[importlinter]');
       // Should have layer contracts
-      expect(pyprojectContent).toMatch(/\[tool\.importlinter\.contracts/);
+      expect(importLinterConfig).toContain('[importlinter:contract:layers]');
+
+      // pyproject.toml should NOT be modified
+      const pyprojectContent = readPyprojectToml(projectDirectory);
+      expect(pyprojectContent).not.toContain('[tool.importlinter]');
     },
     TIMEOUT_SETUP,
   );
 
   it(
-    'Test 2.1b: Does not generate import-linter without layer structure',
+    'Test 2.1b: Does not generate .importlinter without layer structure',
     async () => {
       // Arrange
       createPythonProject(projectDirectory); // No layers
@@ -162,9 +184,8 @@ describe('Suite 2: Architecture Validation', () => {
       // Act
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
 
-      // Assert
-      const pyprojectContent = readPyprojectToml(projectDirectory);
-      expect(pyprojectContent).not.toContain('[tool.importlinter]');
+      // Assert - .importlinter file should NOT exist
+      expect(fileExists(projectDirectory, '.importlinter')).toBe(false);
     },
     TIMEOUT_SETUP,
   );
@@ -212,7 +233,7 @@ describe('Suite 4: Copy/Paste Detection', () => {
 
 describe('Suite 5: mypy Configuration', () => {
   it(
-    'Test 5.1: Generates [tool.mypy] section',
+    'Test 5.1: Generates mypy.ini at project root',
     async () => {
       // Arrange
       createPythonProject(projectDirectory);
@@ -221,20 +242,25 @@ describe('Suite 5: mypy Configuration', () => {
       // Act
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
 
-      // Assert
+      // Assert - mypy.ini file created at project root
+      expect(fileExists(projectDirectory, 'mypy.ini')).toBe(true);
+      const mypyConfig = readTestFile(projectDirectory, 'mypy.ini');
+      expect(mypyConfig).toContain('[mypy]');
+      expect(mypyConfig).toContain('ignore_missing_imports = True');
+      expect(mypyConfig).toContain('show_error_codes = True');
+      expect(mypyConfig).toContain('pretty = True');
+
+      // pyproject.toml should NOT be modified
       const pyprojectContent = readPyprojectToml(projectDirectory);
-      expect(pyprojectContent).toContain('[tool.mypy]');
-      expect(pyprojectContent).toContain('ignore_missing_imports = true');
-      expect(pyprojectContent).toContain('show_error_codes = true');
-      expect(pyprojectContent).toContain('pretty = true');
+      expect(pyprojectContent).not.toContain('[tool.mypy]');
     },
     TIMEOUT_SETUP,
   );
 
   it(
-    'Test 5.2: Does not overwrite existing [tool.mypy]',
+    'Test 5.2: Does not create mypy.ini if project has existing mypy config',
     async () => {
-      // Arrange
+      // Arrange - project with existing [tool.mypy] in pyproject.toml
       writeTestFile(
         projectDirectory,
         'pyproject.toml',
@@ -250,12 +276,12 @@ strict = true
       // Act
       await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
 
-      // Assert
+      // Assert - mypy.ini should NOT be created (project has existing config)
+      expect(fileExists(projectDirectory, 'mypy.ini')).toBe(false);
+
+      // Original pyproject.toml preserved
       const pyprojectContent = readPyprojectToml(projectDirectory);
-      // Should preserve user's strict setting
       expect(pyprojectContent).toContain('strict = true');
-      // Should NOT add our defaults
-      expect(pyprojectContent).not.toContain('ignore_missing_imports');
     },
     TIMEOUT_SETUP,
   );
@@ -276,7 +302,10 @@ describe('Suite 6: Auto-Install Python Tools', () => {
       initGitRepo(projectDirectory);
 
       // Act
-      const result = await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+      const result = await runCli(['setup', '--yes'], {
+        cwd: projectDirectory,
+        timeout: TIMEOUT_SETUP,
+      });
 
       // Assert - should show manual install instruction
       expect(result.stdout).toContain('Install Python tools');
@@ -293,14 +322,17 @@ describe('Suite 6: Auto-Install Python Tools', () => {
       initGitRepo(projectDirectory);
 
       // Act
-      const result = await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+      const result = await runCli(['setup', '--yes'], {
+        cwd: projectDirectory,
+        timeout: TIMEOUT_SETUP,
+      });
 
       // Assert - should show success message, not manual install
       expect(result.stdout).toContain('Installing Python tools');
       expect(result.stdout).toContain('Python tools installed');
       expect(result.stdout).not.toContain('Install Python tools:'); // No manual instruction
 
-      // Verify ruff was added to pyproject.toml
+      // Verify ruff was added to pyproject.toml (as a dependency)
       const pyproject = readTestFile(projectDirectory, 'pyproject.toml');
       expect(pyproject).toContain('ruff');
     },
@@ -325,7 +357,10 @@ dev = ["ruff>=0.8.0"]
       initGitRepo(projectDirectory);
 
       // Act
-      const result = await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+      const result = await runCli(['setup', '--yes'], {
+        cwd: projectDirectory,
+        timeout: TIMEOUT_SETUP,
+      });
 
       // Assert - should NOT show install message (already has ruff)
       expect(result.stdout).not.toContain('Installing Python tools');
@@ -353,7 +388,10 @@ name = "test"
       initGitRepo(projectDirectory);
 
       // Act
-      const result = await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+      const result = await runCli(['setup', '--yes'], {
+        cwd: projectDirectory,
+        timeout: TIMEOUT_SETUP,
+      });
 
       // Assert - Poetry project detected, shows poetry command in fallback
       // (install fails without poetry.lock, so fallback shown)
@@ -370,7 +408,10 @@ name = "test"
       initGitRepo(projectDirectory);
 
       // Act
-      const result = await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+      const result = await runCli(['setup', '--yes'], {
+        cwd: projectDirectory,
+        timeout: TIMEOUT_SETUP,
+      });
 
       // Assert - Pipenv project detected
       expect(result.stdout).toMatch(/pipenv install/);

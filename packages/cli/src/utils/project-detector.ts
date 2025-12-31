@@ -41,7 +41,12 @@ const ESLINT_CONFIG_FILES = [
 ] as const;
 
 // golangci-lint config file markers
-const GOLANGCI_CONFIG_FILES = ['.golangci.yml', '.golangci.yaml', '.golangci.toml', '.golangci.json'];
+const GOLANGCI_CONFIG_FILES = [
+  '.golangci.yml',
+  '.golangci.yaml',
+  '.golangci.toml',
+  '.golangci.json',
+];
 
 // Python frameworks to detect (order matters - first match wins)
 const PYTHON_FRAMEWORKS = ['django', 'flask', 'fastapi'] as const;
@@ -77,8 +82,12 @@ export interface ProjectType {
   existingEslintConfig: string | null;
   /** True if existing ESLint config is legacy format (.eslintrc.*) requiring FlatCompat */
   legacyEslint: boolean;
-  /** True if project has [tool.ruff] in pyproject.toml */
+  /** True if project has [tool.ruff] in pyproject.toml or ruff.toml */
   existingRuffConfig: boolean;
+  /** True if project has [tool.mypy] in pyproject.toml or mypy.ini */
+  existingMypyConfig: boolean;
+  /** True if project has [tool.importlinter] in pyproject.toml or .importlinter */
+  existingImportLinterConfig: boolean;
   /** Path to existing golangci-lint config if present (e.g., '.golangci.yml') */
   existingGolangciConfig: string | null;
 }
@@ -218,16 +227,61 @@ export function findExistingEslintConfig(cwd: string): string | null {
 }
 
 /**
- * Check if project has existing Ruff config in pyproject.toml.
+ * Check if project has existing Ruff config.
  * @param cwd - Working directory to scan
- * @returns True if [tool.ruff] section exists in pyproject.toml
+ * @returns True if ruff.toml exists OR [tool.ruff] in pyproject.toml
  */
 export function hasExistingRuffConfig(cwd: string): boolean {
+  // Check for standalone ruff.toml
+  if (existsSync(nodePath.join(cwd, 'ruff.toml'))) return true;
+
+  // Check for [tool.ruff] in pyproject.toml
   const pyprojectPath = nodePath.join(cwd, PYPROJECT_TOML);
   if (!existsSync(pyprojectPath)) return false;
   try {
     const content = readFileSync(pyprojectPath, 'utf8');
     return content.includes('[tool.ruff]');
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if project has existing mypy config.
+ * @param cwd - Working directory to scan
+ * @returns True if mypy.ini/.mypy.ini exists OR [tool.mypy] in pyproject.toml
+ */
+export function hasExistingMypyConfig(cwd: string): boolean {
+  // Check for standalone mypy config files
+  if (existsSync(nodePath.join(cwd, 'mypy.ini'))) return true;
+  if (existsSync(nodePath.join(cwd, '.mypy.ini'))) return true;
+
+  // Check for [tool.mypy] in pyproject.toml
+  const pyprojectPath = nodePath.join(cwd, PYPROJECT_TOML);
+  if (!existsSync(pyprojectPath)) return false;
+  try {
+    const content = readFileSync(pyprojectPath, 'utf8');
+    return content.includes('[tool.mypy]');
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if project has existing import-linter config.
+ * @param cwd - Working directory to scan
+ * @returns True if .importlinter exists OR [tool.importlinter] in pyproject.toml
+ */
+export function hasExistingImportLinterConfig(cwd: string): boolean {
+  // Check for standalone .importlinter file
+  if (existsSync(nodePath.join(cwd, '.importlinter'))) return true;
+
+  // Check for [tool.importlinter] in pyproject.toml
+  const pyprojectPath = nodePath.join(cwd, PYPROJECT_TOML);
+  if (!existsSync(pyprojectPath)) return false;
+  try {
+    const content = readFileSync(pyprojectPath, 'utf8');
+    return content.includes('[tool.importlinter]');
   } catch {
     return false;
   }
@@ -301,6 +355,8 @@ export function detectProjectType(packageJson: PackageJsonWithScripts, cwd?: str
     existingEslintConfig: eslintConfig,
     legacyEslint: isLegacyEslint,
     existingRuffConfig: cwd ? hasExistingRuffConfig(cwd) : false,
+    existingMypyConfig: cwd ? hasExistingMypyConfig(cwd) : false,
+    existingImportLinterConfig: cwd ? hasExistingImportLinterConfig(cwd) : false,
     existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : null,
   };
 }

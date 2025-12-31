@@ -1,19 +1,19 @@
 /**
  * Python-specific Setup Utilities
  *
- * Handles Python tooling configuration during safeword setup:
- * - Ruff config in pyproject.toml
- * - mypy config in pyproject.toml
- * - Import-linter layer contracts
+ * Setup logic for Python projects.
+ * Config generators are in files.ts (same pattern as TypeScript and Go).
+ *
+ * This file contains:
+ * - Layer detection for architecture boundaries
  * - Package manager detection for install guidance
  */
 
 import { execSync } from 'node:child_process';
 import nodePath from 'node:path';
 
-import { exists, readFileSafe, writeFile } from '../../utils/fs.js';
-import { appendTomlSection } from '../../utils/toml.js';
-import { generateImportLinterConfig, generateMypyConfig, generateRuffConfig } from './files.js';
+import { exists, readFileSafe } from '../../utils/fs.js';
+import type { SetupResult } from '../types.js';
 
 /**
  * Python layer patterns for architecture detection.
@@ -83,13 +83,6 @@ export function detectRootPackage(cwd: string): string {
 
   // Last resort: use directory name
   return nodePath.basename(cwd).replaceAll('-', '_');
-}
-
-export interface PythonSetupResult {
-  /** Files created or modified */
-  files: string[];
-  /** Whether import-linter was configured */
-  importLinter: boolean;
 }
 
 export type PythonPackageManager = 'uv' | 'poetry' | 'pipenv' | 'pip';
@@ -191,55 +184,16 @@ export function installPythonDependencies(cwd: string, tools: string[]): boolean
 }
 
 /**
- * Add a TOML config section and track file modification.
- * Returns updated content.
- */
-function addTomlConfig(content: string, config: string, files: string[]): string {
-  const updated = appendTomlSection(content, config);
-  if (updated !== content && !files.includes('pyproject.toml')) {
-    files.push('pyproject.toml');
-  }
-  return updated;
-}
-
-/**
  * Set up Python tooling configuration.
  *
- * @param cwd - Project root directory
- * @returns Result with created/modified files
+ * Note: Config files (ruff.toml, mypy.ini, .importlinter) are now created
+ * by the schema system (managedFiles) for full reconciliation support.
+ * This function exists for future Python-specific setup logic.
+ *
+ * @returns Empty result (schema handles file creation)
  */
-export function setupPythonTooling(cwd: string): PythonSetupResult {
-  const result: PythonSetupResult = {
-    files: [],
-    importLinter: false,
-  };
-
-  const pyprojectPath = nodePath.join(cwd, 'pyproject.toml');
-
-  // Read existing pyproject.toml
-  let pyprojectContent = readFileSafe(pyprojectPath) ?? '';
-
-  // 1. Add Ruff config to pyproject.toml
-  pyprojectContent = addTomlConfig(pyprojectContent, generateRuffConfig(), result.files);
-
-  // 2. Detect layers and add import-linter config
-  const layers = detectPythonLayers(cwd);
-  if (layers.length >= 2) {
-    const importLinterConfig = generateImportLinterConfig(layers, detectRootPackage(cwd));
-    if (importLinterConfig) {
-      const before = pyprojectContent;
-      pyprojectContent = addTomlConfig(pyprojectContent, importLinterConfig, result.files);
-      if (pyprojectContent !== before) result.importLinter = true;
-    }
-  }
-
-  // 3. Add mypy config to pyproject.toml
-  pyprojectContent = addTomlConfig(pyprojectContent, generateMypyConfig(), result.files);
-
-  // Write pyproject.toml if modified
-  if (result.files.includes('pyproject.toml')) {
-    writeFile(pyprojectPath, pyprojectContent);
-  }
-
-  return result;
+export function setupPythonTooling(): SetupResult {
+  // Config files are created by schema.ts managedFiles
+  // Future: Add any Python-specific setup logic here
+  return { files: [] };
 }

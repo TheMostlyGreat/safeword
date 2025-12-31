@@ -8,7 +8,7 @@
  */
 
 import { generateSafewordGolangciConfig, golangManagedFiles } from './packs/golang/files.js';
-import { generateRuffBaseConfig } from './packs/python/files.js';
+import { generateRuffBaseConfig, pythonManagedFiles } from './packs/python/files.js';
 import {
   typescriptJsonMerges,
   typescriptManagedFiles,
@@ -359,6 +359,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   managedFiles: {
     // TypeScript/JavaScript managed files (ESLint, tsconfig, Knip, Prettier configs)
     ...typescriptManagedFiles,
+    // Python managed files (ruff.toml, mypy.ini, .importlinter)
+    ...pythonManagedFiles,
     // Go managed files (.golangci.yml)
     ...golangManagedFiles,
   },
