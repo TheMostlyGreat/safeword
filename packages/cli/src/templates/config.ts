@@ -277,21 +277,7 @@ const baseConfigs = {
   javascript: configs.recommended,
 };
 
-// Safeword strict rules - additional rules for LLM enforcement
-const safewordStrictRules = {
-  rules: {
-    // Prevent common LLM mistakes
-    "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-    "no-undef": "error",
-    "no-unreachable": "error",
-    "no-constant-condition": "error",
-    "no-empty": "error",
-    // Strict code quality
-    "eqeqeq": ["error", "always", { null: "ignore" }],
-    "no-var": "error",
-    "prefer-const": "error",
-  },
-};
+${SAFEWORD_STRICT_RULES_FULL}
 
 export default [
   { ignores: detect.getIgnores(deps) },
