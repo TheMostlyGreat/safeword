@@ -7,6 +7,44 @@
  * See: https://eslint.org/docs/latest/use/configure/configuration-files
  */
 
+// ============================================================================
+// Shared ESLint Rule Definitions (for template interpolation)
+// ============================================================================
+
+/**
+ * Full strict rules for safeword ESLint configs that extend existing project configs.
+ * These rules are applied after project rules (safeword wins on conflict).
+ * Used by: getSafewordEslintConfigExtending, getSafewordEslintConfigLegacy
+ */
+const SAFEWORD_STRICT_RULES_FULL = `// Safeword strict rules - applied after project rules (win on conflict)
+const safewordStrictRules = {
+  rules: {
+    // Prevent common LLM mistakes
+    "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+    "no-undef": "error",
+    "no-unreachable": "error",
+    "no-constant-condition": "error",
+    "no-empty": "error",
+    "no-extra-semi": "error",
+    "no-func-assign": "error",
+    "no-import-assign": "error",
+    "no-invalid-regexp": "error",
+    "no-irregular-whitespace": "error",
+    "no-loss-of-precision": "error",
+    "no-misleading-character-class": "error",
+    "no-prototype-builtins": "error",
+    "no-unexpected-multiline": "error",
+    "no-unsafe-finally": "error",
+    "no-unsafe-negation": "error",
+    "use-isnan": "error",
+    "valid-typeof": "error",
+    // Strict code quality
+    "eqeqeq": ["error", "always", { null: "ignore" }],
+    "no-var": "error",
+    "prefer-const": "error",
+  },
+};`;
+
 /**
  * Generates an ESLint config using eslint-plugin-safeword.
  *
@@ -123,8 +161,13 @@ export function getSafewordEslintConfig(
 /**
  * Safeword ESLint config that extends a flat config (eslint.config.mjs)
  */
-function getSafewordEslintConfigExtending(existingConfig: string, hasExistingFormatter: boolean): string {
-  const prettierImport = hasExistingFormatter ? '' : 'import eslintConfigPrettier from "eslint-config-prettier";';
+function getSafewordEslintConfigExtending(
+  existingConfig: string,
+  hasExistingFormatter: boolean,
+): string {
+  const prettierImport = hasExistingFormatter
+    ? ''
+    : 'import eslintConfigPrettier from "eslint-config-prettier";';
   const prettierConfig = hasExistingFormatter ? '' : '  eslintConfigPrettier,';
 
   return `// Safeword ESLint config - extends project config with stricter rules
@@ -143,34 +186,7 @@ try {
   console.warn("Safeword: Could not load project ESLint config, using defaults only");
 }
 
-// Safeword strict rules - applied after project rules (win on conflict)
-const safewordStrictRules = {
-  rules: {
-    // Prevent common LLM mistakes
-    "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-    "no-undef": "error",
-    "no-unreachable": "error",
-    "no-constant-condition": "error",
-    "no-empty": "error",
-    "no-extra-semi": "error",
-    "no-func-assign": "error",
-    "no-import-assign": "error",
-    "no-invalid-regexp": "error",
-    "no-irregular-whitespace": "error",
-    "no-loss-of-precision": "error",
-    "no-misleading-character-class": "error",
-    "no-prototype-builtins": "error",
-    "no-unexpected-multiline": "error",
-    "no-unsafe-finally": "error",
-    "no-unsafe-negation": "error",
-    "use-isnan": "error",
-    "valid-typeof": "error",
-    // Strict code quality
-    "eqeqeq": ["error", "always", { null: "ignore" }],
-    "no-var": "error",
-    "prefer-const": "error",
-  },
-};
+${SAFEWORD_STRICT_RULES_FULL}
 
 export default [
   ...projectConfig,
@@ -183,8 +199,13 @@ ${prettierConfig}
 /**
  * Safeword ESLint config that extends a legacy config (.eslintrc.*)
  */
-function getSafewordEslintConfigLegacy(existingConfig: string, hasExistingFormatter: boolean): string {
-  const prettierImport = hasExistingFormatter ? '' : 'import eslintConfigPrettier from "eslint-config-prettier";';
+function getSafewordEslintConfigLegacy(
+  existingConfig: string,
+  hasExistingFormatter: boolean,
+): string {
+  const prettierImport = hasExistingFormatter
+    ? ''
+    : 'import eslintConfigPrettier from "eslint-config-prettier";';
   const prettierConfig = hasExistingFormatter ? '' : '  eslintConfigPrettier,';
 
   return `// Safeword ESLint config - extends legacy project config with stricter rules
@@ -208,34 +229,7 @@ try {
   console.warn("Safeword: Could not load project ESLint config, using defaults only");
 }
 
-// Safeword strict rules - applied after project rules (win on conflict)
-const safewordStrictRules = {
-  rules: {
-    // Prevent common LLM mistakes
-    "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-    "no-undef": "error",
-    "no-unreachable": "error",
-    "no-constant-condition": "error",
-    "no-empty": "error",
-    "no-extra-semi": "error",
-    "no-func-assign": "error",
-    "no-import-assign": "error",
-    "no-invalid-regexp": "error",
-    "no-irregular-whitespace": "error",
-    "no-loss-of-precision": "error",
-    "no-misleading-character-class": "error",
-    "no-prototype-builtins": "error",
-    "no-unexpected-multiline": "error",
-    "no-unsafe-finally": "error",
-    "no-unsafe-negation": "error",
-    "use-isnan": "error",
-    "valid-typeof": "error",
-    // Strict code quality
-    "eqeqeq": ["error", "always", { null: "ignore" }],
-    "no-var": "error",
-    "prefer-const": "error",
-  },
-};
+${SAFEWORD_STRICT_RULES_FULL}
 
 export default [
   ...projectConfig,
@@ -249,7 +243,9 @@ ${prettierConfig}
  * Standalone safeword ESLint config (no project config to extend)
  */
 function getSafewordEslintConfigStandalone(hasExistingFormatter: boolean): string {
-  const prettierImport = hasExistingFormatter ? '' : 'import eslintConfigPrettier from "eslint-config-prettier";';
+  const prettierImport = hasExistingFormatter
+    ? ''
+    : 'import eslintConfigPrettier from "eslint-config-prettier";';
   const prettierConfig = hasExistingFormatter ? '' : '  eslintConfigPrettier,';
 
   return `// Safeword ESLint config - standalone (no project config to extend)
