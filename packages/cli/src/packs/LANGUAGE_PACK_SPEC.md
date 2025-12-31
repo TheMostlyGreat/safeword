@@ -8,8 +8,8 @@ Every language pack implements `LanguagePack` from `types.ts`:
 
 ```typescript
 interface LanguagePack {
-  id: string;           // e.g., 'python', 'golang'
-  name: string;         // e.g., 'Python', 'Go'
+  id: string; // e.g., 'python', 'golang'
+  name: string; // e.g., 'Python', 'Go'
   extensions: string[]; // e.g., ['.py', '.pyi'] or ['.go']
   detect(cwd: string): boolean;
   setup(cwd: string, ctx: SetupContext): SetupResult;
@@ -20,58 +20,139 @@ interface LanguagePack {
 
 **Strictness:** Enable ALL rules by default, then selectively disable noisy/conflicting ones.
 
-| Language | Strictness Setting | Exclusions |
-|----------|-------------------|------------|
-| TypeScript | ESLint: multiple strict plugins | Minimal (Prettier conflicts) |
-| Python | `select = ["ALL"]` | `D`, `ANN`, formatter conflicts |
-| Go | `default: all` | `std-error-handling`, `common-false-positives` |
+| Language   | Strictness Setting              | Exclusions                                     |
+| ---------- | ------------------------------- | ---------------------------------------------- |
+| TypeScript | ESLint: multiple strict plugins | Minimal (Prettier conflicts)                   |
+| Python     | `select = ["ALL"]`              | `D`, `ANN`, formatter conflicts                |
+| Go         | `default: all`                  | `std-error-handling`, `common-false-positives` |
 
 **Design Constraints (Required):** Every language pack MUST enforce:
 
-| Constraint | ESLint | Ruff | golangci-lint |
-|------------|--------|------|---------------|
-| Cyclomatic complexity ≤10 | `complexity: 10` | `C901` (max-complexity=10) | `cyclop` (default: 10) |
-| Max nesting depth ≤4 | `max-depth: 4` | N/A | `nestif` (min-complexity=4) |
-| Max function params ≤5 | `max-params: 5` | `PLR0913` (default: 5) | N/A |
-| Max callback nesting ≤3 | `max-nested-callbacks: 3` | N/A | N/A |
+| Constraint                | ESLint                    | Ruff                       | golangci-lint               |
+| ------------------------- | ------------------------- | -------------------------- | --------------------------- |
+| Cyclomatic complexity ≤10 | `complexity: 10`          | `C901` (max-complexity=10) | `cyclop` (default: 10)      |
+| Max nesting depth ≤4      | `max-depth: 4`            | N/A                        | `nestif` (min-complexity=4) |
+| Max function params ≤5    | `max-params: 5`           | `PLR0913` (default: 5)     | N/A                         |
+| Max callback nesting ≤3   | `max-nested-callbacks: 3` | N/A                        | N/A                         |
 
 **Why:** LLMs write dense, complex code. These constraints force decomposition and improve maintainability.
 
 **Rule Categories (Required):** Every language pack SHOULD enable rules for:
 
-| Category | ESLint | Ruff | golangci-lint |
-|----------|--------|------|---------------|
-| Security | `eslint-plugin-security` | `S` (bandit) | `gosec` |
-| Import cycles | `import-x/no-cycle` | - | `depguard` |
-| Async/Promise | `eslint-plugin-promise` | `ASYNC` | N/A |
-| Regex safety | `eslint-plugin-regexp` | - | - |
+| Category      | ESLint                   | Ruff         | golangci-lint |
+| ------------- | ------------------------ | ------------ | ------------- |
+| Security      | `eslint-plugin-security` | `S` (bandit) | `gosec`       |
+| Import cycles | `import-x/no-cycle`      | -            | `depguard`    |
+| Async/Promise | `eslint-plugin-promise`  | `ASYNC`      | N/A           |
+| Regex safety  | `eslint-plugin-regexp`   | -            | -             |
 
 **Severity:** Use `error` not `warn`. LLMs ignore warnings—only errors stop code generation.
+
+## Pack File Structure
+
+Every language pack has three files in `src/packs/{lang}/`:
+
+```
+src/packs/{lang}/
+├── index.ts   # LanguagePack interface implementation
+├── files.ts   # File definitions (ownedFiles, managedFiles, jsonMerges)
+└── setup.ts   # Setup utilities (detection, installation helpers)
+```
+
+### files.ts Exports
+
+| Export               | Purpose                                               | Example                 |
+| -------------------- | ----------------------------------------------------- | ----------------------- |
+| `{lang}OwnedFiles`   | Config files in `.safeword/` (overwritten on upgrade) | `.safeword/ruff.toml`   |
+| `{lang}ManagedFiles` | Project root configs (created if missing)             | `ruff.toml`, `mypy.ini` |
+| `{lang}JsonMerges`   | Keys merged into existing JSON (optional)             | `package.json` scripts  |
+| `{lang}Packages`     | NPM packages to install (TypeScript only)             | `eslint`, `prettier`    |
+
+These exports are spread into `schema.ts`:
+
+```typescript
+// schema.ts
+ownedFiles: {
+  ...typescriptOwnedFiles,
+  ...pythonOwnedFiles,
+  ...golangOwnedFiles,
+},
+managedFiles: {
+  ...typescriptManagedFiles,
+  ...pythonManagedFiles,
+  ...golangManagedFiles,
+},
+```
+
+### Reconciliation System
+
+Files are managed through reconciliation (not direct writes):
+
+| File Type      | Created            | Updated                          | Deleted on Reset |
+| -------------- | ------------------ | -------------------------------- | ---------------- |
+| `ownedFiles`   | If missing         | Always (if content changed)      | Yes              |
+| `managedFiles` | If missing         | Only if content matches template | Yes              |
+| `jsonMerges`   | Never (merge only) | Merge specific keys              | Keys removed     |
+
+**Key principle:** Pack `setup()` functions should return `{ files: [] }` and let reconciliation handle file creation.
 
 ## Integration Points (Checklist)
 
 ### 1. Pack File (`src/packs/{lang}/index.ts`)
 
 ```typescript
+import { setup{Lang}Tooling } from './setup.js';
+
 export const {lang}Pack: LanguagePack = {
   id: '{lang}',
   name: '{Lang}',
   extensions: ['.ext'],
   detect(cwd) { /* return true if lang manifest exists */ },
-  setup(cwd, ctx) { /* configure tooling, return { files: [...] } */ },
+  setup(_cwd, _ctx) {
+    // Config files created by reconciliation (ownedFiles/managedFiles)
+    return setup{Lang}Tooling();
+  },
 };
 ```
 
-**Note:** TypeScript is special-cased—its setup lives in `schema.ts` (ESLint/tsconfig generation) not `setup()`. New languages should put setup logic in `setup()` or a dedicated `utils/{lang}-setup.ts`.
-
 **Detection heuristic:** Check for the language's manifest file:
+
 - Python → `pyproject.toml` OR `requirements.txt`
 - TypeScript/JS → `package.json`
 - Go → `go.mod`
 - Rust → `Cargo.toml`
 - Java → `pom.xml` or `build.gradle`
 
-### 2. Registry (`src/packs/registry.ts`)
+### 2. Files Definition (`src/packs/{lang}/files.ts`)
+
+```typescript
+import type { FileDefinition, ManagedFileDefinition } from '../../schema.js';
+
+// Config generator (private, used by exports below)
+function generateProjectConfig(): string {
+  return `# Generated by safeword\n...`;
+}
+
+// Owned files (.safeword/ - overwritten on upgrade)
+export const {lang}OwnedFiles: Record<string, FileDefinition> = {
+  '.safeword/{tool}.config': {
+    generator: ctx => ctx.languages?.{lang} ? generateSafewordConfig() : null,
+  },
+};
+
+// Managed files (project root - created if missing)
+export const {lang}ManagedFiles: Record<string, ManagedFileDefinition> = {
+  '{tool}.config': {
+    generator: ctx => {
+      if (!ctx.languages?.{lang}) return null;
+      if (ctx.projectType.existing{Tool}Config) return null;
+      return generateProjectConfig();
+    },
+  },
+};
+```
+
+### 3. Registry (`src/packs/registry.ts`)
 
 ```typescript
 import { {lang}Pack } from './{lang}/index.js';
@@ -82,7 +163,7 @@ export const LANGUAGE_PACKS: Record<string, LanguagePack> = {
 };
 ```
 
-### 3. Lint Hook (`templates/hooks/lib/lint.ts`)
+### 4. Lint Hook (`templates/hooks/lib/lint.ts`)
 
 Add extension set and linting logic:
 
@@ -101,6 +182,7 @@ if ({LANG}_EXTENSIONS.has(extension)) {
 **Pattern:** `linter --fix` then `formatter`. Use `.nothrow().quiet()` to skip gracefully if tools not installed.
 
 **Error output:** For tools that should show errors (ESLint, shellcheck), print stderr on failure:
+
 ```typescript
 const result = await $`bunx eslint --fix ${file}`.nothrow().quiet();
 if (result.exitCode !== 0 && result.stderr.length > 0) {
@@ -109,6 +191,7 @@ if (result.exitCode !== 0 && result.stderr.length > 0) {
 ```
 
 **Shell scripts:** Handled as a special case (not a full language pack):
+
 ```typescript
 const SHELL_EXTENSIONS = new Set(['sh']);
 
@@ -120,7 +203,7 @@ if (SHELL_EXTENSIONS.has(extension)) {
 }
 ```
 
-### 4. Project Detector (`src/utils/project-detector.ts`)
+### 5. Project Detector (`src/utils/project-detector.ts`)
 
 Add language to detection:
 
@@ -148,14 +231,11 @@ export function detectLanguages(cwd: string): Languages {
 }
 ```
 
-### 5. Setup Command (`src/commands/setup.ts`)
+### 6. Setup Command (`src/commands/setup.ts`)
 
 Integrate language setup into the main flow:
 
 ```typescript
-// Import setup function
-import { setup{Lang}Tooling } from '../packs/{lang}/setup.js';
-
 // In setup():
 // 1. Update isNonJsOnly check
 const isNonJsOnly = (languages.python || languages.golang || languages.{lang}) && !languages.javascript;
@@ -163,21 +243,20 @@ const isNonJsOnly = (languages.python || languages.golang || languages.{lang}) &
 // 2. Add detection message
 if (languages.{lang} && !languages.javascript) info('{Lang} project detected (skipping JS tooling)');
 
-// 3. Call language setup (after Python setup block)
-const {lang}Files: string[] = [];
-if (languages.{lang}) {
-  const {lang}Result = setup{Lang}Tooling(cwd);
-  {lang}Files.push(...{lang}Result.files);
-  if ({lang}Result.files.length > 0) {
-    info('\n{Lang} tooling configured:');
-    info('  Created {config-file}');
-  }
-}
+// 3. Config files are created by reconcile() via ownedFiles/managedFiles
+// No need to call pack setup directly - reconciliation handles everything
 
-// 4. Add to printSetupSummary options interface and call
+// 4. Track installed packs
+const detectedPacks = detectLanguagePacks(cwd);
+for (const packId of detectedPacks) {
+  addInstalledPack(cwd, packId);
+}
 ```
 
-### 6. Test Helpers (`tests/helpers.ts`)
+**Note:** Config file creation is handled by `reconcile()` using the pack's `ownedFiles` and `managedFiles`.
+The setup command just needs to detect the language and register the pack.
+
+### 7. Test Helpers (`tests/helpers.ts`)
 
 ```typescript
 // Tool availability check
@@ -198,7 +277,7 @@ export function runEslint(dir: string, file: string, extraArgs: string[] = []): 
 }
 ```
 
-### 7. Golden Path Test (`tests/integration/{lang}-golden-path.test.ts`)
+### 8. Golden Path Test (`tests/integration/{lang}-golden-path.test.ts`)
 
 ```typescript
 const TOOL_AVAILABLE = is{Tool}Installed();
@@ -238,20 +317,28 @@ Test code must trigger linters that are actually enabled. Research what your lin
 
 ```typescript
 // ❌ Go: unused functions in `package main` are NOT caught (golangci-lint)
-writeTestFile(dir, 'bad.go', `package main
+writeTestFile(
+  dir,
+  'bad.go',
+  `package main
 func unused() {} // NOT detected!
-`);
+`,
+);
 
 // ✅ Go: unused imports ARE caught by 'unused' linter
-writeTestFile(dir, 'bad.go', `package main
+writeTestFile(
+  dir,
+  'bad.go',
+  `package main
 import "fmt" // unused import - DETECTED
 func bad() { println("not using fmt") }
-`);
+`,
+);
 ```
 
 Research the default linter set before writing violation tests.
 
-### 8. Tooling Validation Test (`tests/integration/tooling-validation.test.ts`)
+### 9. Tooling Validation Test (`tests/integration/tooling-validation.test.ts`)
 
 Add a suite if the language has type checking or framework-specific rules:
 
@@ -305,30 +392,44 @@ export function install{Lang}Dependencies(cwd: string, tools: string[]): boolean
 }
 ```
 
-| Language | Auto-Install | Reason |
-|----------|--------------|--------|
-| TypeScript | ✓ via npm/yarn/pnpm | Standard dev dependency workflow |
-| Python | ✓ via uv/poetry | pip skipped (PEP 668 externally-managed) |
-| Go | ✗ | Tools installed globally via `go install` |
+| Language   | Auto-Install        | Reason                                    |
+| ---------- | ------------------- | ----------------------------------------- |
+| TypeScript | ✓ via npm/yarn/pnpm | Standard dev dependency workflow          |
+| Python     | ✓ via uv/poetry     | pip skipped (PEP 668 externally-managed)  |
+| Go         | ✗                   | Tools installed globally via `go install` |
 
 ## Type Checking Config (Optional)
 
 Languages with separate type checkers should configure them during setup:
 
-| Language | Type Checker | Config Location |
-|----------|--------------|-----------------|
-| TypeScript | tsc | `tsconfig.json` (user-managed) |
-| Python | mypy | `[tool.mypy]` in pyproject.toml |
-| Go | N/A | Built into compiler |
+| Language   | Type Checker | Config Location              |
+| ---------- | ------------ | ---------------------------- |
+| TypeScript | tsc          | `tsconfig.json` (managed)    |
+| Python     | mypy         | `mypy.ini` (standalone file) |
+| Go         | N/A          | Built into compiler          |
+
+Config generators go in `files.ts` and are used by `managedFiles`:
 
 ```typescript
-// Example: Python mypy config
-export function generateMypyConfig(): string {
-  return `[tool.mypy]
-ignore_missing_imports = true
-show_error_codes = true
-pretty = true`;
+// files.ts - Python mypy config generator
+function generateProjectMypyConfig(): string {
+  return `# Generated by safeword
+[mypy]
+ignore_missing_imports = True
+show_error_codes = True
+pretty = True
+`;
 }
+
+export const pythonManagedFiles = {
+  'mypy.ini': {
+    generator: ctx => {
+      if (!ctx.languages?.python) return null;
+      if (ctx.projectType.existingMypyConfig) return null; // Skip if user has config
+      return generateProjectMypyConfig();
+    },
+  },
+};
 ```
 
 ## Existing Tooling Detection (Optional)
@@ -342,46 +443,66 @@ export function hasExisting{Lang}Linter(cwd: string): boolean {
 }
 ```
 
-| Language | Linter Detection | Formatter Detection |
-|----------|------------------|---------------------|
+| Language   | Linter Detection                   | Formatter Detection                     |
+| ---------- | ---------------------------------- | --------------------------------------- |
 | TypeScript | ESLint config files, `lint` script | Prettier/Biome configs, `format` script |
-| Python | `[tool.ruff]` section | Ruff format, Black configs |
-| Go | N/A (go vet is built-in) | N/A (gofmt is built-in) |
+| Python     | `[tool.ruff]` section              | Ruff format, Black configs              |
+| Go         | N/A (go vet is built-in)           | N/A (gofmt is built-in)                 |
 
 **Usage:** Skip auto-configuration if tooling already exists to avoid conflicts.
 
 ## Setup File Pattern (`src/packs/{lang}/setup.ts`)
 
-Complex languages need a dedicated setup file in their pack directory:
+Setup files contain detection and installation utilities. Config generators go in `files.ts`.
 
 ```typescript
 // Detection functions
 export function detect{Lang}Layers(cwd: string): string[] { /* architecture detection */ }
 export function has{Tool}Dependency(cwd: string): boolean { /* check if tool already declared */ }
+export function detect{Lang}PackageManager(cwd: string): 'uv' | 'poetry' | 'pip' { /* PM detection */ }
 
-// Config generators
-export function generate{Tool}Config(): string { /* tool config content */ }
+// Installation helpers (for auto-installing dev dependencies)
+export function install{Lang}Dependencies(cwd: string, tools: string[]): boolean { /* install tools */ }
 
 // Main setup - called by pack's setup()
-export function setup{Lang}Tooling(cwd: string): SetupResult {
-  // 1. Read existing manifest (or create minimal one)
-  // 2. Append tool configs without clobbering existing content
-  // 3. Return { files: [] } if language needs no config (Go)
-  return { files: ['modified-file'] };
+export function setup{Lang}Tooling(): SetupResult {
+  // Config files are created by reconciliation (ownedFiles/managedFiles in files.ts)
+  // This function exists for:
+  // 1. Future language-specific setup logic
+  // 2. Consistency with other packs
+  return { files: [] };
 }
 ```
+
+**Note:** Config generators (`generate{Tool}Config()`) should be in `files.ts`, not `setup.ts`.
+The setup function should NOT write files directly—reconciliation handles that.
 
 ## Architecture Validation (Optional)
 
 If the language ecosystem has import/layer enforcement tools:
 
-| Language | Tool | Config Location |
-|----------|------|-----------------|
-| Python | import-linter | `[tool.importlinter]` in pyproject.toml |
-| TypeScript | eslint-boundaries | eslint.config.mjs |
-| Go | depguard | .golangci.yml |
+| Language   | Tool              | Config Location                   |
+| ---------- | ----------------- | --------------------------------- |
+| Python     | import-linter     | `.importlinter` (standalone file) |
+| TypeScript | eslint-boundaries | `eslint.config.mjs`               |
+| Go         | depguard          | `.golangci.yml`                   |
 
 Pattern: Detect layer directories (domain, services, api, etc.), generate contracts if 2+ layers found.
+
+```typescript
+// files.ts - Python import-linter config
+export const pythonManagedFiles = {
+  '.importlinter': {
+    generator: ctx => {
+      if (!ctx.languages?.python) return null;
+      if (ctx.projectType.existingImportLinterConfig) return null;
+      const layers = detectPythonLayers(ctx.cwd);
+      if (layers.length < 2) return null; // Need 2+ layers for contracts
+      return generateImportLinterConfig(layers);
+    },
+  },
+};
+```
 
 ## Framework Detection (Optional)
 
@@ -403,6 +524,7 @@ TypeScript does this at **lint time** via `safeword.detect()` in eslint.config.m
 Beyond golden-path and tooling-validation, add:
 
 **File Naming Convention:** Create language-specific test files rather than adding to existing generic files:
+
 - `mixed-project-{lang}.test.ts` (not adding to `mixed-project.test.ts`)
 - `add-language-{lang}.test.ts` (not adding to `add-language.test.ts`)
 - `setup-{lang}.test.ts` (not adding to `setup.test.ts`)
@@ -476,12 +598,14 @@ describe('E2E: Add {Lang} to Existing Project', () => {
 Before shipping a new language pack, verify:
 
 **Core Integration:**
+
 - [ ] `detect()` returns true for lang-only projects
 - [ ] `setup()` creates valid tool config
 - [ ] Hook lints files with correct extension
 - [ ] Hook skips gracefully if tools not installed
 
 **Testing (6 test areas):**
+
 - [ ] Golden path: config created, tool runs, violations detected, formatting works, hook works
 - [ ] Tooling validation: type checker catches errors (if applicable)
 - [ ] Unit tests: detection functions, dependency checks
@@ -490,16 +614,19 @@ Before shipping a new language pack, verify:
 - [ ] Add language: upgrade path installs pack when manifest added
 
 **Test Helpers:**
+
 - [ ] `is{Tool}Installed()` for each tool
 - [ ] `create{Lang}Project(dir, options?)` with package manager variants
 - [ ] `run{Linter}(dir, file)` for linter execution (if applicable)
 
 **Project Types:**
+
 - [ ] Pure {lang} project (no package.json) works end-to-end
 - [ ] Mixed project (JS + {lang}) works correctly
 - [ ] Existing tool configs are preserved (not clobbered)
 
 **Optional Integrations:**
+
 - [ ] Package manager detection (if language has multiple)
 - [ ] Auto-install dependencies (if package manager supports dev deps)
 - [ ] Type checking config (if separate type checker exists)
@@ -507,6 +634,7 @@ Before shipping a new language pack, verify:
 - [ ] Architecture/layer detection (if import enforcement tools exist)
 
 **Research Before Implementation:**
+
 - [ ] Verify linter default preset (what's enabled out-of-the-box)
 - [ ] Test violation detection manually (don't assume what gets caught)
 - [ ] Check config format version (e.g., golangci-lint v1 vs v2 syntax)
