@@ -7,6 +7,30 @@
  * @see ARCHITECTURE.md → "TOML Parsing Without Dependencies"
  */
 
+// ============================================================================
+// Shared Ruff Configuration
+// ============================================================================
+
+/**
+ * Shared Ruff lint rules for .safeword/ruff.toml.
+ * Used by both standalone and extending configs.
+ */
+const RUFF_LINT_RULES = `[lint]
+select = ["ALL"]
+ignore = [
+    "D",      # pydocstyle - too noisy for LLM code
+    "ANN",    # flake8-annotations - mypy handles this
+    "COM812", # missing trailing comma - conflicts with formatter
+    "ISC001", # single-line-implicit-string-concatenation - conflicts with formatter
+    "E501",   # line too long - formatter handles this
+]
+
+[lint.per-file-ignores]
+"tests/**" = ["S101"]  # allow assert in tests
+
+[lint.mccabe]
+max-complexity = 10`;
+
 /**
  * Check if a TOML section header exists in the content.
  * @param content - TOML file content
@@ -73,21 +97,7 @@ extend = "../pyproject.toml"
 # These rules take precedence over project config
 line-length = 100
 
-[lint]
-select = ["ALL"]
-ignore = [
-    "D",      # pydocstyle - too noisy for LLM code
-    "ANN",    # flake8-annotations - mypy handles this
-    "COM812", # missing trailing comma - conflicts with formatter
-    "ISC001", # single-line-implicit-string-concatenation - conflicts with formatter
-    "E501",   # line too long - formatter handles this
-]
-
-[lint.per-file-ignores]
-"tests/**" = ["S101"]  # allow assert in tests
-
-[lint.mccabe]
-max-complexity = 10
+${RUFF_LINT_RULES}
 `;
   }
 
@@ -97,21 +107,7 @@ max-complexity = 10
 
 line-length = 100
 
-[lint]
-select = ["ALL"]
-ignore = [
-    "D",      # pydocstyle - too noisy for LLM code
-    "ANN",    # flake8-annotations - mypy handles this
-    "COM812", # missing trailing comma - conflicts with formatter
-    "ISC001", # single-line-implicit-string-concatenation - conflicts with formatter
-    "E501",   # line too long - formatter handles this
-]
-
-[lint.per-file-ignores]
-"tests/**" = ["S101"]  # allow assert in tests
-
-[lint.mccabe]
-max-complexity = 10
+${RUFF_LINT_RULES}
 `;
 }
 
