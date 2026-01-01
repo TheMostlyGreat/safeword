@@ -64,6 +64,11 @@ export const playwrightConfig: any[] = [
 
       // EXCEPTION: stays at warn (legitimate TDD pattern)
       'playwright/no-skipped-test': 'warn',
+
+      // Relax base rules for test files
+      '@typescript-eslint/no-empty-function': 'off', // Empty catch blocks for expected errors
+      'security/detect-non-literal-fs-filename': 'off', // Tests use fixtures from known paths
+      'unicorn/no-null': 'off', // Playwright API uses null (e.g., waitForFunction signature)
     },
   },
 ];

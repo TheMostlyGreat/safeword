@@ -35,6 +35,10 @@ export const vitestConfig: any[] = [
 
       // Additional strict rules
       'vitest/no-focused-tests': 'error', // No .only() in CI
+
+      // Relax base rules for test files
+      '@typescript-eslint/no-empty-function': 'off', // Empty catch blocks for expected errors
+      'security/detect-non-literal-fs-filename': 'off', // Tests use fixtures from known paths
     },
   },
 ];
