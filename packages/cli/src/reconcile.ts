@@ -152,8 +152,8 @@ function planOwnedFileWrites(
   for (const [filePath, definition] of Object.entries(files)) {
     if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
     const content = resolveFileContent(definition, ctx);
-    // Skip files where generator returned null (e.g., non-JS projects)
-    if (content === null) continue;
+    // Skip files where generator returned undefined (e.g., non-JS projects)
+    if (content === undefined) continue;
     actions.push({ type: 'write', path: filePath, content });
     created.push(filePath);
   }
@@ -169,8 +169,8 @@ function planManagedFileWrites(
   for (const [filePath, definition] of Object.entries(files)) {
     if (exists(nodePath.join(ctx.cwd, filePath))) continue;
     const content = resolveFileContent(definition, ctx);
-    // Skip files where generator returned null (e.g., non-JS projects)
-    if (content === null) continue;
+    // Skip files where generator returned undefined (e.g., non-JS projects)
+    if (content === undefined) continue;
     actions.push({ type: 'write', path: filePath, content });
     created.push(filePath);
   }
@@ -454,8 +454,8 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     const fullPath = nodePath.join(ctx.cwd, filePath);
     const newContent = resolveFileContent(definition, ctx);
 
-    // Skip files where generator returned null (e.g., non-JS projects)
-    if (newContent === null) continue;
+    // Skip files where generator returned undefined (e.g., non-JS projects)
+    if (newContent === undefined) continue;
 
     if (!fileNeedsUpdate(fullPath, newContent)) continue;
 
@@ -472,8 +472,8 @@ function computeUpgradePlan(schema: SafewordSchema, ctx: ProjectContext): Reconc
     const fullPath = nodePath.join(ctx.cwd, filePath);
     const newContent = resolveFileContent(definition, ctx);
 
-    // Skip files where generator returned null (e.g., non-JS projects)
-    if (newContent === null) continue;
+    // Skip files where generator returned undefined (e.g., non-JS projects)
+    if (newContent === undefined) continue;
 
     if (!exists(fullPath)) {
       // Missing - create it
@@ -713,7 +713,7 @@ function executeWrite(cwd: string, path: string, content: string, result: Execut
  * @param definition
  * @param ctx
  */
-function resolveFileContent(definition: FileDefinition, ctx: ProjectContext): string | null {
+function resolveFileContent(definition: FileDefinition, ctx: ProjectContext): string | undefined {
   if (definition.template) {
     const templatesDirectory = getTemplatesDirectory();
     return readFile(nodePath.join(templatesDirectory, definition.template));

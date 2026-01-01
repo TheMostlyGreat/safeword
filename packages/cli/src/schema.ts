@@ -22,7 +22,7 @@ export type {
   ManagedFileDefinition,
   ProjectContext,
 } from './packs/types.js';
-import type { FileDefinition, JsonMergeDefinition } from './packs/types.js';
+import type { FileDefinition, JsonMergeDefinition, ManagedFileDefinition } from './packs/types.js';
 import { CURSOR_HOOKS, SETTINGS_HOOKS } from './templates/config.js';
 import { AGENTS_MD_LINK } from './templates/content.js';
 import { filterOutSafewordHooks } from './utils/hooks.js';

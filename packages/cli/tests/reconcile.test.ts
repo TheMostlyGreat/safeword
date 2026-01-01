@@ -67,10 +67,12 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false,
-        existingEslintConfig: null,
+        existingEslintConfig: undefined,
         legacyEslint: false,
         existingRuffConfig: false,
-        existingGolangciConfig: null,
+        existingMypyConfig: false,
+        existingImportLinterConfig: false,
+        existingGolangciConfig: undefined,
         ...(overrides.projectType as Record<string, unknown>),
       },
       developmentDeps: (overrides.developmentDeps as Record<string, string>) ?? {},
@@ -682,10 +684,12 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false, // no existing formatter, gets prettier
-        existingEslintConfig: null,
+        existingEslintConfig: undefined,
         legacyEslint: false,
         existingRuffConfig: false,
-        existingGolangciConfig: null,
+        existingMypyConfig: false,
+        existingImportLinterConfig: false,
+        existingGolangciConfig: undefined,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -715,10 +719,12 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: true, // Has existing formatter, doesn't get prettier
-        existingEslintConfig: null,
+        existingEslintConfig: undefined,
         legacyEslint: false,
         existingRuffConfig: false,
-        existingGolangciConfig: null,
+        existingMypyConfig: false,
+        existingImportLinterConfig: false,
+        existingGolangciConfig: undefined,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -745,10 +751,12 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false,
-        existingEslintConfig: null,
+        existingEslintConfig: undefined,
         legacyEslint: false,
         existingRuffConfig: false,
-        existingGolangciConfig: null,
+        existingMypyConfig: false,
+        existingImportLinterConfig: false,
+        existingGolangciConfig: undefined,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -773,10 +781,12 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: true, // Existing formatter handles formatting
-        existingEslintConfig: null,
+        existingEslintConfig: undefined,
         legacyEslint: false,
         existingRuffConfig: false,
-        existingGolangciConfig: null,
+        existingMypyConfig: false,
+        existingImportLinterConfig: false,
+        existingGolangciConfig: undefined,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -802,10 +812,12 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false,
-        existingEslintConfig: null,
+        existingEslintConfig: undefined,
         legacyEslint: false,
         existingRuffConfig: false,
-        existingGolangciConfig: null,
+        existingMypyConfig: false,
+        existingImportLinterConfig: false,
+        existingGolangciConfig: undefined,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -833,10 +845,12 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false,
-        existingEslintConfig: null,
+        existingEslintConfig: undefined,
         legacyEslint: false,
         existingRuffConfig: false,
-        existingGolangciConfig: null,
+        existingMypyConfig: false,
+        existingImportLinterConfig: false,
+        existingGolangciConfig: undefined,
       };
 
       const installedDevelopmentDeps = {
@@ -874,10 +888,12 @@ describe('Reconcile - Reconciliation Engine', () => {
         shell: false,
         existingLinter: false,
         existingFormatter: false,
-        existingEslintConfig: null,
+        existingEslintConfig: undefined,
         legacyEslint: false,
         existingRuffConfig: false,
-        existingGolangciConfig: null,
+        existingMypyConfig: false,
+        existingImportLinterConfig: false,
+        existingGolangciConfig: undefined,
       };
 
       // isGitRepo = false
