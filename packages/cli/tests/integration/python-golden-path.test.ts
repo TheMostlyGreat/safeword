@@ -46,17 +46,16 @@ describe('E2E: Python Golden Path', () => {
   });
 
   it('creates Ruff config via extend pattern', () => {
-    const pyproject = readTestFile(projectDirectory, 'pyproject.toml');
-    const ruffToml = readTestFile(projectDirectory, '.safeword/ruff.toml');
+    const ruffToml = readTestFile(projectDirectory, 'ruff.toml');
+    const safewordRuff = readTestFile(projectDirectory, '.safeword/ruff.toml');
 
-    // pyproject.toml uses extend to reference the base config
-    expect(pyproject).toContain('[tool.ruff]');
-    expect(pyproject).toContain('extend = ".safeword/ruff.toml"');
+    // Project-level ruff.toml extends .safeword/ruff.toml
+    expect(ruffToml).toContain('extend = ".safeword/ruff.toml"');
 
-    // Actual rules are in .safeword/ruff.toml
-    expect(ruffToml).toContain('line-length');
-    expect(ruffToml).toContain('[lint]');
-    expect(ruffToml).toContain('select');
+    // Actual strict rules are in .safeword/ruff.toml
+    expect(safewordRuff).toContain('line-length');
+    expect(safewordRuff).toContain('[lint]');
+    expect(safewordRuff).toContain('select');
   });
 
   it.skipIf(!RUFF_AVAILABLE)('ruff config is valid and runs', () => {

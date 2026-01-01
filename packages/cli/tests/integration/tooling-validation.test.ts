@@ -67,18 +67,17 @@ requires-python = ">=3.10"
   });
 
   it('adds Ruff config via extend pattern', () => {
-    const config = readTestFile(projectDirectory, 'pyproject.toml');
-    expect(config).toContain('[tool.ruff]');
-    expect(config).toContain('extend = ".safeword/ruff.toml"');
+    const ruffToml = readTestFile(projectDirectory, 'ruff.toml');
+    expect(ruffToml).toContain('extend = ".safeword/ruff.toml"');
 
-    // Actual rules in .safeword/ruff.toml
-    const ruffToml = readTestFile(projectDirectory, '.safeword/ruff.toml');
-    expect(ruffToml).toContain('[lint]');
+    // Actual strict rules in .safeword/ruff.toml
+    const safewordRuff = readTestFile(projectDirectory, '.safeword/ruff.toml');
+    expect(safewordRuff).toContain('[lint]');
   });
 
-  it('adds mypy config to pyproject.toml', () => {
-    const config = readTestFile(projectDirectory, 'pyproject.toml');
-    expect(config).toContain('[tool.mypy]');
+  it('adds mypy config file', () => {
+    const mypyConfig = readTestFile(projectDirectory, 'mypy.ini');
+    expect(mypyConfig).toContain('[mypy]');
   });
 
   it('does NOT create eslint.config.mjs (no JS tooling)', () => {
@@ -110,10 +109,10 @@ describe('E2E: mypy Type Error Detection', () => {
   });
 
   it('generates mypy config with correct settings', () => {
-    const config = readTestFile(projectDirectory, 'pyproject.toml');
-    expect(config).toContain('[tool.mypy]');
-    expect(config).toContain('ignore_missing_imports = true');
-    expect(config).toContain('show_error_codes = true');
+    const config = readTestFile(projectDirectory, 'mypy.ini');
+    expect(config).toContain('[mypy]');
+    expect(config).toContain('ignore_missing_imports = True');
+    expect(config).toContain('show_error_codes = True');
   });
 
   it.skipIf(!MYPY_AVAILABLE)('mypy runs without error on valid code', () => {
