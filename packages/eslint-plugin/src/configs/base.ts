@@ -248,6 +248,8 @@ const basePluginsUnscoped: any[] = [
     plugins: { safeword: { rules: safewordRules } },
     rules: {
       'safeword/no-incomplete-error-handling': 'error',
+      'safeword/no-accumulating-spread': 'error', // O(n²) reduce pattern
+      'safeword/no-re-export-all': 'error', // Hurts tree-shaking
     },
   },
 ];

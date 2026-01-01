@@ -1,0 +1,175 @@
+/**
+ * Rule: no-accumulating-spread
+ *
+ * Detects spread operator on accumulators in reduce callbacks, which causes
+ * O(n²) time complexity. This is a common LLM performance mistake.
+ *
+ * Bad (O(n²)):
+ *   items.reduce((acc, item) => ({ ...acc, [item.id]: item }), {})
+ *   items.reduce((acc, item) => [...acc, item.name], [])
+ *
+ * Good (O(n)):
+ *   items.reduce((acc, item) => { acc[item.id] = item; return acc; }, {})
+ *   items.reduce((acc, item) => { acc.push(item.name); return acc; }, [])
+ *
+ * Or better - avoid reduce entirely:
+ *   Object.fromEntries(items.map(item => [item.id, item]))
+ *   items.map(item => item.name)
+ */
+
+import type { Rule } from 'eslint';
+import type {
+  ArrowFunctionExpression,
+  CallExpression,
+  FunctionExpression,
+  Node,
+  SpreadElement,
+} from 'estree';
+
+/**
+ * Check if a node is a call to .reduce()
+ */
+function isReduceCall(node: CallExpression): boolean {
+  const { callee } = node;
+  return (
+    callee.type === 'MemberExpression' &&
+    callee.property.type === 'Identifier' &&
+    callee.property.name === 'reduce'
+  );
+}
+
+/**
+ * Get the accumulator parameter name from a reduce callback
+ */
+function getAccumulatorName(
+  callback: ArrowFunctionExpression | FunctionExpression,
+): string | undefined {
+  const firstParameter = callback.params[0];
+  if (firstParameter?.type === 'Identifier') {
+    return firstParameter.name;
+  }
+  return undefined;
+}
+
+/**
+ * Check if a spread element spreads the accumulator
+ */
+function spreadsAccumulator(spread: SpreadElement, accName: string): boolean {
+  return spread.argument.type === 'Identifier' && spread.argument.name === accName;
+}
+
+/**
+ * Recursively check if an expression contains a spread of the accumulator
+ */
+function containsAccumulatorSpread(node: Node, accName: string): SpreadElement | undefined {
+  if (node.type === 'SpreadElement' && spreadsAccumulator(node, accName)) {
+    return node;
+  }
+
+  if (node.type === 'ObjectExpression') {
+    for (const property of node.properties) {
+      if (property.type === 'SpreadElement' && spreadsAccumulator(property, accName)) {
+        return property;
+      }
+    }
+  }
+
+  if (node.type === 'ArrayExpression') {
+    for (const element of node.elements) {
+      if (element?.type === 'SpreadElement' && spreadsAccumulator(element, accName)) {
+        return element;
+      }
+    }
+  }
+
+  if (node.type === 'ConditionalExpression') {
+    return (
+      containsAccumulatorSpread(node.consequent, accName) ??
+      containsAccumulatorSpread(node.alternate, accName)
+    );
+  }
+
+  if (node.type === 'LogicalExpression') {
+    return (
+      containsAccumulatorSpread(node.left, accName) ??
+      containsAccumulatorSpread(node.right, accName)
+    );
+  }
+
+  return undefined;
+}
+
+/**
+ * Check arrow function body for accumulator spread
+ */
+function checkArrowBody(
+  body: ArrowFunctionExpression['body'],
+  accName: string,
+): SpreadElement | undefined {
+  // Direct return: (acc, item) => ({ ...acc, ... })
+  if (body.type === 'ObjectExpression' || body.type === 'ArrayExpression') {
+    return containsAccumulatorSpread(body, accName);
+  }
+
+  // Parenthesized or conditional
+  if (body.type === 'ConditionalExpression' || body.type === 'LogicalExpression') {
+    return containsAccumulatorSpread(body, accName);
+  }
+
+  // Block body - check return statements
+  if (body.type === 'BlockStatement') {
+    for (const stmt of body.body) {
+      if (stmt.type === 'ReturnStatement' && stmt.argument) {
+        const found = containsAccumulatorSpread(stmt.argument, accName);
+        if (found) return found;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+const rule: Rule.RuleModule = {
+  meta: {
+    type: 'problem',
+    docs: {
+      description: 'Disallow spreading accumulator in reduce (causes O(n²) complexity)',
+      recommended: true,
+    },
+    messages: {
+      accumulatingSpread:
+        'Spreading accumulator in reduce() causes O(n²) complexity. ' +
+        'Mutate the accumulator instead, or use map/filter/Object.fromEntries.',
+    },
+    schema: [],
+  },
+
+  create(context) {
+    return {
+      CallExpression(node: CallExpression) {
+        if (!isReduceCall(node)) return;
+
+        const callback = node.arguments[0];
+        if (
+          !callback ||
+          (callback.type !== 'ArrowFunctionExpression' && callback.type !== 'FunctionExpression')
+        ) {
+          return;
+        }
+
+        const accName = getAccumulatorName(callback);
+        if (!accName) return;
+
+        const spreadNode = checkArrowBody(callback.body, accName);
+        if (spreadNode) {
+          context.report({
+            node: spreadNode,
+            messageId: 'accumulatingSpread',
+          });
+        }
+      },
+    };
+  },
+};
+
+export default rule;
