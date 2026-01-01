@@ -149,11 +149,12 @@ describe('Astro config', () => {
   });
 
   describe('total rule count', () => {
-    it('has exactly 11 astro rules configured', () => {
+    it('has 44 astro rules configured (8 core + 33 a11y + 3 custom)', () => {
       const allRules = getAllRules(astroConfig);
       const astroRules = Object.keys(allRules).filter(name => name.startsWith('astro/'));
 
-      expect(astroRules.length).toBe(11);
+      // 8 from flat/recommended + 33 from flat/jsx-a11y-strict + 3 custom LLM rules
+      expect(astroRules.length).toBe(44);
     });
   });
 });
