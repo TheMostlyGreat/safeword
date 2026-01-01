@@ -224,6 +224,10 @@ const basePluginsUnscoped: any[] = [
       'unicorn/no-null': 'error', // Use undefined
       'unicorn/no-array-for-each': 'error', // Use for...of
       'unicorn/no-negated-condition': 'error', // Clearer conditionals
+      // Cherry-picked from 'all' config - high value for LLM code
+      'unicorn/no-unused-properties': 'error', // Dead code in enum-like objects
+      'unicorn/consistent-destructuring': 'error', // Don't mix props.x and {x} = props
+      'unicorn/prefer-import-meta-properties': 'error', // import.meta.dirname > __dirname
     },
   },
 
