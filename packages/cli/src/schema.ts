@@ -281,7 +281,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/skills/safeword-writing-plans/SKILL.md': {
       template: 'skills/safeword-writing-plans/SKILL.md',
     },
-    '.claude/commands/architecture.md': { template: 'commands/architecture.md' },
+    '.claude/commands/drift.md': { template: 'commands/drift.md' },
     '.claude/commands/audit.md': { template: 'commands/audit.md' },
     '.claude/commands/cleanup-zombies.md': { template: 'commands/cleanup-zombies.md' },
     '.claude/commands/lint.md': { template: 'commands/lint.md' },
@@ -309,7 +309,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
 
     // Cursor commands (5 files - same as Claude)
-    '.cursor/commands/architecture.md': { template: 'commands/architecture.md' },
+    '.cursor/commands/drift.md': { template: 'commands/drift.md' },
     '.cursor/commands/audit.md': { template: 'commands/audit.md' },
     '.cursor/commands/cleanup-zombies.md': { template: 'commands/cleanup-zombies.md' },
     '.cursor/commands/lint.md': { template: 'commands/lint.md' },
