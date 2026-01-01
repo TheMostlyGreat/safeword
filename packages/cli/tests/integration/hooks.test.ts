@@ -228,7 +228,7 @@ describe('E2E: UserPromptSubmit Hooks', () => {
 
       expect(output).toContain('Current time:');
       // Check for natural language format (day of week, month, date, year)
-      expect(output).toMatch(/\w+, \w+ \d{2}, \d{4}/);
+      expect(output).toMatch(/\w+, \w+ \d{1,2}, \d{4}/);
       // Check for ISO format (with milliseconds)
       expect(output).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/);
       // Check for local time
