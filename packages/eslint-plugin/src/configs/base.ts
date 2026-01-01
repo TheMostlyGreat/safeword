@@ -92,6 +92,7 @@ const basePluginsUnscoped: any[] = [
       complexity: ['error', 10], // Cyclomatic complexity - LLMs write dense, complex code
       'max-nested-callbacks': ['error', 3], // Prevents callback hell in async code
       eqeqeq: ['error', 'always', { null: 'ignore' }], // === required, except x == null
+      'preserve-caught-error': 'error', // Re-throw with { cause: error } to preserve stack
     },
   },
 

@@ -98,6 +98,7 @@ export const recommendedTypeScript: any[] = [
       '@typescript-eslint/switch-exhaustiveness-check': 'error', // Missing case in union switch
       '@typescript-eslint/no-shadow': 'error', // Variable shadows outer scope
       '@typescript-eslint/require-array-sort-compare': 'error', // [].sort() needs compareFn
+      '@typescript-eslint/no-unused-private-class-members': 'error', // Catch dead code in classes
     },
   },
 
