@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "test": "bun run --cwd packages/cli test && bun run --cwd packages/eslint-plugin test",
     "lint": "eslint .",
     "format": "prettier --write .",
     "eval": "dotenv -e .env -- promptfoo eval -c promptfoo.yaml",
