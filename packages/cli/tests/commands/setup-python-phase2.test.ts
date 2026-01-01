@@ -23,7 +23,7 @@ import {
   writeTestFile,
 } from '../helpers';
 
-const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 
 let projectDirectory: string;
 
@@ -246,6 +246,9 @@ describe('Suite 5: mypy Configuration', () => {
       expect(fileExists(projectDirectory, 'mypy.ini')).toBe(true);
       const mypyConfig = readTestFile(projectDirectory, 'mypy.ini');
       expect(mypyConfig).toContain('[mypy]');
+      // Strict mode for LLM agents
+      expect(mypyConfig).toContain('strict = True');
+      expect(mypyConfig).toContain('warn_unreachable = True');
       expect(mypyConfig).toContain('ignore_missing_imports = True');
       expect(mypyConfig).toContain('show_error_codes = True');
       expect(mypyConfig).toContain('pretty = True');
