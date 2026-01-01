@@ -15,4 +15,9 @@ Assume you've never seen it before.
 - Does it follow latest docs/best practices?
 - If questions remain: research first, then ask targeted questions.
 - Avoid bloat.
-- If you asked a question above that's still relevant after review, re-ask it.`;
+- If you asked a question above that's still relevant after review, re-ask it.
+
+End your response with: {"proposedChanges": boolean, "madeChanges": boolean}
+- proposedChanges: true if THIS response suggests new code/changes to implement
+- madeChanges: true if THIS response used Edit/Write tools
+- Review confirmations (like this) should report both as false`;
