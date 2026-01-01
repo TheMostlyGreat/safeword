@@ -3,7 +3,7 @@
  *
  * Verifies that the React config:
  * - Loads without errors
- * - Includes react and react-hooks plugins
+ * - Includes react, react-hooks, and jsx-a11y plugins
  * - Has correct rule severities configured
  */
 
@@ -102,5 +102,39 @@ describe('React JSX rules (config severity)', () => {
   it('react/react-in-jsx-scope is off (React 17+)', () => {
     const config = getRuleConfig(recommendedTypeScriptReact, 'react/react-in-jsx-scope');
     expect(getSeverity(config)).toBe(0);
+  });
+});
+
+describe('Accessibility rules (jsx-a11y)', () => {
+  it('includes jsx-a11y plugin', () => {
+    const hasJsxA11y = recommendedTypeScriptReact.some(
+      config =>
+        typeof config === 'object' &&
+        config !== null &&
+        'plugins' in config &&
+        config.plugins &&
+        'jsx-a11y' in config.plugins,
+    );
+    expect(hasJsxA11y).toBe(true);
+  });
+
+  it('jsx-a11y/alt-text is at error severity', () => {
+    const config = getRuleConfig(recommendedTypeScriptReact, 'jsx-a11y/alt-text');
+    expect(getSeverity(config)).toBe(ERROR);
+  });
+
+  it('jsx-a11y/anchor-is-valid is at error severity', () => {
+    const config = getRuleConfig(recommendedTypeScriptReact, 'jsx-a11y/anchor-is-valid');
+    expect(getSeverity(config)).toBe(ERROR);
+  });
+
+  it('jsx-a11y/aria-role is at error severity', () => {
+    const config = getRuleConfig(recommendedTypeScriptReact, 'jsx-a11y/aria-role');
+    expect(getSeverity(config)).toBe(ERROR);
+  });
+
+  it('jsx-a11y/no-autofocus is at error severity', () => {
+    const config = getRuleConfig(recommendedTypeScriptReact, 'jsx-a11y/no-autofocus');
+    expect(getSeverity(config)).toBe(ERROR);
   });
 });

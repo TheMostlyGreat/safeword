@@ -4,12 +4,14 @@
  * Extends the TypeScript config with React-specific rules:
  * - eslint-plugin-react: JSX rules (keys, duplicates, etc.)
  * - eslint-plugin-react-hooks 7.x: Hook rules + React Compiler diagnostics
+ * - eslint-plugin-jsx-a11y: Accessibility rules (strict preset)
  *
  * Philosophy: LLMs make React-specific mistakes. These rules catch them.
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unnecessary-condition -- ESLint config types are incompatible across plugin packages */
 
+import jsxA11y from 'eslint-plugin-jsx-a11y';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPluginImport from 'eslint-plugin-react-hooks';
 
@@ -49,6 +51,9 @@ export const recommendedTypeScriptReact: any[] = [
   // React Hooks + Compiler rules (v7.x flat config)
   // Using recommended-latest which includes void-use-memo
   reactHooksConfig,
+
+  // Accessibility rules - strict preset (all at error level)
+  jsxA11y.flatConfigs.strict,
 
   // Escalate warn rules to error + add LLM-critical rules
   {
