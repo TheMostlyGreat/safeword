@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const cliRoot = nodePath.join(__dirname, '..');
 
 describe('NPM Package Structure', () => {
@@ -90,7 +90,7 @@ describe('NPM Package Structure', () => {
     const files = readdirSync(commandsPath);
 
     expect(files).toContain('quality-review.md');
-    expect(files).toContain('architecture.md');
+    expect(files).toContain('drift.md');
     expect(files).toContain('lint.md');
   });
 

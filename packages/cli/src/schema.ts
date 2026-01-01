@@ -193,6 +193,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // Files owned by safeword (overwritten on upgrade if content changed)
   ownedFiles: {
     // Core files
+    '.safeword/AGENTS.md': { template: 'AGENTS.md' },
     '.safeword/SAFEWORD.md': { template: 'SAFEWORD.md' },
     '.safeword/version': { content: () => VERSION },
     // config.json is created by packs system but needs to be registered for cleanup on uninstall

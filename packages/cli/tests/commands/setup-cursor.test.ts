@@ -52,7 +52,7 @@ describe('Test Suite: Setup - Cursor IDE Support', () => {
       expect(fileExists(temporaryDirectory, '.cursor/commands')).toBe(true);
       expect(fileExists(temporaryDirectory, '.cursor/commands/lint.md')).toBe(true);
       expect(fileExists(temporaryDirectory, '.cursor/commands/quality-review.md')).toBe(true);
-      expect(fileExists(temporaryDirectory, '.cursor/commands/architecture.md')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.cursor/commands/drift.md')).toBe(true);
     });
 
     it('should have same content as Claude commands', async () => {
