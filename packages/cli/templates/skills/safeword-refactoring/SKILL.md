@@ -180,8 +180,11 @@ git checkout -- <changed-files>
 More refactoring needed?
 ├─ Yes → Return to Phase 3 (one more refactoring)
 └─ No → Done
+    ├─ Run `/audit` to verify no dead code or new issues
     └─ Report: "Refactoring complete. Changes: [summary]"
 ```
+
+**Audit catches:** Dead code left behind, new duplication (should decrease!), architecture violations.
 
 ---
 
@@ -226,3 +229,4 @@ More refactoring needed?
 3. **Revert on failure** - Don't fix, revert and retry smaller
 4. **Commit after each success** - `refactor: [description]`
 5. **Smallest scope first** - Rename < Extract < Move < Restructure
+6. **Audit when done** - Run `/audit` to verify no dead code or new issues
