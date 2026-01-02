@@ -28,6 +28,22 @@ const PRETTIER_DEFAULTS = {
 } as const;
 
 /**
+ * Get Prettier plugins based on project type.
+ * Tailwind plugin must be last for proper class sorting.
+ */
+function getPrettierPlugins(projectType: {
+  astro?: boolean;
+  shell?: boolean;
+  tailwind?: boolean;
+}): string[] {
+  const plugins: string[] = [];
+  if (projectType.astro) plugins.push('prettier-plugin-astro');
+  if (projectType.shell) plugins.push('prettier-plugin-sh');
+  if (projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
+  return plugins;
+}
+
+/**
  * Biome config merge - adds safeword files to excludes list.
  * Biome v2 uses `includes` with `!` prefix for exclusions.
  */
@@ -106,11 +122,7 @@ export const typescriptOwnedFiles: Record<string, FileDefinition> = {
       if (!ctx.languages?.javascript) return;
       if (ctx.projectType.existingFormatter) return;
       // Add plugins based on project type
-      const plugins: string[] = [];
-      if (ctx.projectType.astro) plugins.push('prettier-plugin-astro');
-      if (ctx.projectType.shell) plugins.push('prettier-plugin-sh');
-      // Tailwind must be last for proper class sorting
-      if (ctx.projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
+      const plugins = getPrettierPlugins(ctx.projectType);
       const config = plugins.length > 0 ? { ...PRETTIER_DEFAULTS, plugins } : PRETTIER_DEFAULTS;
       return JSON.stringify(config, undefined, 2);
     },
@@ -270,12 +282,7 @@ export const typescriptJsonMerges: Record<string, JsonMergeDefinition> = {
       }
 
       // Always update plugins based on project type (safeword owns this)
-      const plugins: string[] = [];
-      if (ctx.projectType.astro) plugins.push('prettier-plugin-astro');
-      if (ctx.projectType.shell) plugins.push('prettier-plugin-sh');
-      // Tailwind must be last for proper class sorting
-      if (ctx.projectType.tailwind) plugins.push('prettier-plugin-tailwindcss');
-
+      const plugins = getPrettierPlugins(ctx.projectType);
       if (plugins.length > 0) {
         result.plugins = plugins;
       } else {
