@@ -44,19 +44,26 @@ NOT included (handled by core):
 
 **Every language pack MUST provide equivalent `/audit` capabilities:**
 
-| Capability    | TypeScript/JS  | Python              | Go                     |
-| ------------- | -------------- | ------------------- | ---------------------- |
-| Dead code     | knip           | deadcode            | golangci-lint --unused |
-| Outdated deps | bun outdated   | poetry/pip outdated | go list -m -u all      |
-| Duplication   | jscpd (shared) | jscpd (shared)      | jscpd (shared)         |
-| Architecture  | depcruise      | (future: pydeps)    | (future: go-arch)      |
+| Capability    | TypeScript/JS  | Python                  | Go                     |
+| ------------- | -------------- | ----------------------- | ---------------------- |
+| Architecture  | depcruise      | Runtime + import-linter | Compiler (built-in)    |
+| Dead code     | knip           | deadcode                | golangci-lint --unused |
+| Duplication   | jscpd (shared) | jscpd (shared)          | jscpd (shared)         |
+| Outdated deps | bun outdated   | poetry/pip outdated     | go list -m -u all      |
+
+**Architecture checking notes:**
+
+- **TypeScript/JS**: depcruise detects circular deps + enforces layer rules
+- **Python**: Circular imports cause ImportError at runtime; for static analysis use import-linter
+- **Go**: Compiler enforces no circular imports at build time (free!)
 
 When adding a new language pack:
 
-1. Identify dead code tool for that language
-2. Identify outdated deps tool for that language
-3. Add conditional commands to `/audit` command template
-4. Update audit report format
+1. Identify architecture/circular dep tool for that language
+2. Identify dead code tool for that language
+3. Identify outdated deps tool for that language
+4. Add conditional commands to `/audit` command template
+5. Update audit report format
 
 ### Pack Registry
 
