@@ -1,49 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions, sonarjs/function-return-type, security/detect-object-injection, jsdoc/require-param-description, jsdoc/require-returns */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, it } from 'vitest';
 
 import { TAILWIND_FILES, tailwindConfig } from '../tailwind.js';
-
-/**
- * Helper to get effective rule config from flat config array.
- * Returns the LAST match since ESLint flat config uses last-wins for rule resolution.
- * @param config
- * @param ruleId
- */
-function getRuleConfig(config: any[], ruleId: string): any {
-  let result: any;
-  for (const configObject of config) {
-    if (configObject.rules && ruleId in configObject.rules) {
-      result = configObject.rules[ruleId];
-    }
-  }
-  return result;
-}
-
-/**
- * Helper to extract severity from rule config
- * @param ruleConfig
- */
-function getSeverity(ruleConfig: any): number | string | undefined {
-  if (ruleConfig === undefined) return undefined;
-  if (typeof ruleConfig === 'number') return ruleConfig;
-  if (typeof ruleConfig === 'string') return ruleConfig;
-  if (Array.isArray(ruleConfig)) return ruleConfig[0];
-  return undefined;
-}
-
-/**
- * Collect all rules from config
- * @param config
- */
-function getAllRules(config: any[]): Record<string, any> {
-  const allRules: Record<string, any> = {};
-  for (const configObject of config) {
-    if (configObject.rules) {
-      Object.assign(allRules, configObject.rules);
-    }
-  }
-  return allRules;
-}
+import { getAllRules, getRuleConfig, getSeverity } from './test-utils.js';
 
 describe('Tailwind config', () => {
   it('exports tailwindConfig as an array', () => {
