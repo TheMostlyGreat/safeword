@@ -291,14 +291,14 @@ This section is for contributors to safeword itself.
 
 ### Optional System Binaries
 
-These tools enhance certain features but are not required:
+These tools enhance development scripts but are not required:
 
-| Binary  | Purpose                            | Install                 |
-| ------- | ---------------------------------- | ----------------------- |
-| `shfmt` | Shell script formatting in `/lint` | `brew install shfmt`    |
-| `dot`   | Dependency graph visualization     | `brew install graphviz` |
+| Binary  | Purpose                       | Script           | Install                 |
+| ------- | ----------------------------- | ---------------- | ----------------------- |
+| `shfmt` | Format shell scripts in repo  | `bun format:sh`  | `brew install shfmt`    |
+| `dot`   | Generate dependency graph SVG | `bun deps:graph` | `brew install graphviz` |
 
-Without these binaries, related features gracefully skip or use fallback behavior.
+Without these binaries, the scripts print a message and skip.
 
 ### Development Workflow
 
