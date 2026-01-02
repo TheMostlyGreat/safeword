@@ -17,6 +17,31 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 // import { reconcile, computePackagesToInstall } from '../src/reconcile.js';
 // import { SAFEWORD_SCHEMA } from '../src/schema.js';
 
+/**
+ * Default project type fixture with all flags false.
+ * Spread with overrides in tests: { ...DEFAULT_PROJECT_TYPE, astro: true }
+ */
+const DEFAULT_PROJECT_TYPE = {
+  typescript: false,
+  react: false,
+  nextjs: false,
+  astro: false,
+  vitest: false,
+  playwright: false,
+  tailwind: false,
+  tanstackQuery: false,
+  publishableLibrary: false,
+  shell: false,
+  existingLinter: false,
+  existingFormatter: false,
+  existingEslintConfig: undefined,
+  legacyEslint: false,
+  existingRuffConfig: false,
+  existingMypyConfig: false,
+  existingImportLinterConfig: false,
+  existingGolangciConfig: undefined,
+};
+
 describe('Reconcile - Reconciliation Engine', () => {
   let temporaryDirectory: string;
 
@@ -55,24 +80,7 @@ describe('Reconcile - Reconciliation Engine', () => {
     return {
       cwd: temporaryDirectory,
       projectType: {
-        typescript: false,
-        react: false,
-        nextjs: false,
-        astro: false,
-        vitest: false,
-        playwright: false,
-        tailwind: false,
-        tanstackQuery: false,
-        publishableLibrary: false,
-        shell: false,
-        existingLinter: false,
-        existingFormatter: false,
-        existingEslintConfig: undefined,
-        legacyEslint: false,
-        existingRuffConfig: false,
-        existingMypyConfig: false,
-        existingImportLinterConfig: false,
-        existingGolangciConfig: undefined,
+        ...DEFAULT_PROJECT_TYPE,
         ...(overrides.projectType as Record<string, unknown>),
       },
       developmentDeps: (overrides.developmentDeps as Record<string, string>) ?? {},
@@ -671,26 +679,8 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { computePackagesToInstall } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
-      const projectType = {
-        typescript: false,
-        react: false,
-        nextjs: false,
-        astro: false,
-        vitest: false,
-        playwright: false,
-        tailwind: false,
-        tanstackQuery: false,
-        publishableLibrary: false,
-        shell: false,
-        existingLinter: false,
-        existingFormatter: false, // no existing formatter, gets prettier
-        existingEslintConfig: undefined,
-        legacyEslint: false,
-        existingRuffConfig: false,
-        existingMypyConfig: false,
-        existingImportLinterConfig: false,
-        existingGolangciConfig: undefined,
-      };
+      // no existing formatter, gets prettier
+      const projectType = { ...DEFAULT_PROJECT_TYPE };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
@@ -706,26 +696,8 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { computePackagesToInstall } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
-      const projectType = {
-        typescript: false,
-        react: false,
-        nextjs: false,
-        astro: false,
-        vitest: false,
-        playwright: false,
-        tailwind: false,
-        tanstackQuery: false,
-        publishableLibrary: false,
-        shell: false,
-        existingLinter: false,
-        existingFormatter: true, // Has existing formatter, doesn't get prettier
-        existingEslintConfig: undefined,
-        legacyEslint: false,
-        existingRuffConfig: false,
-        existingMypyConfig: false,
-        existingImportLinterConfig: false,
-        existingGolangciConfig: undefined,
-      };
+      // Has existing formatter, doesn't get prettier
+      const projectType = { ...DEFAULT_PROJECT_TYPE, existingFormatter: true };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
@@ -738,26 +710,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { computePackagesToInstall } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
-      const projectType = {
-        typescript: false,
-        react: false,
-        nextjs: false,
-        astro: true,
-        vitest: false,
-        playwright: false,
-        tailwind: false,
-        tanstackQuery: false,
-        publishableLibrary: false,
-        shell: false,
-        existingLinter: false,
-        existingFormatter: false,
-        existingEslintConfig: undefined,
-        legacyEslint: false,
-        existingRuffConfig: false,
-        existingMypyConfig: false,
-        existingImportLinterConfig: false,
-        existingGolangciConfig: undefined,
-      };
+      const projectType = { ...DEFAULT_PROJECT_TYPE, astro: true };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
@@ -768,26 +721,8 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { computePackagesToInstall } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
-      const projectType = {
-        typescript: false,
-        react: false,
-        nextjs: false,
-        astro: true,
-        vitest: false,
-        playwright: false,
-        tailwind: false,
-        tanstackQuery: false,
-        publishableLibrary: false,
-        shell: false,
-        existingLinter: false,
-        existingFormatter: true, // Existing formatter handles formatting
-        existingEslintConfig: undefined,
-        legacyEslint: false,
-        existingRuffConfig: false,
-        existingMypyConfig: false,
-        existingImportLinterConfig: false,
-        existingGolangciConfig: undefined,
-      };
+      // Existing formatter handles formatting
+      const projectType = { ...DEFAULT_PROJECT_TYPE, astro: true, existingFormatter: true };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
@@ -800,24 +735,10 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
       const projectType = {
-        typescript: false,
-        react: false,
-        nextjs: false,
+        ...DEFAULT_PROJECT_TYPE,
         astro: true,
-        vitest: false,
-        playwright: false,
         tailwind: true,
-        tanstackQuery: false,
         publishableLibrary: true,
-        shell: false,
-        existingLinter: false,
-        existingFormatter: false,
-        existingEslintConfig: undefined,
-        legacyEslint: false,
-        existingRuffConfig: false,
-        existingMypyConfig: false,
-        existingImportLinterConfig: false,
-        existingGolangciConfig: undefined,
       };
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
@@ -832,26 +753,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { computePackagesToInstall } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
-      const projectType = {
-        typescript: false,
-        react: false,
-        nextjs: false,
-        astro: false,
-        vitest: false,
-        playwright: false,
-        tailwind: false,
-        tanstackQuery: false,
-        publishableLibrary: false,
-        shell: false,
-        existingLinter: false,
-        existingFormatter: false,
-        existingEslintConfig: undefined,
-        legacyEslint: false,
-        existingRuffConfig: false,
-        existingMypyConfig: false,
-        existingImportLinterConfig: false,
-        existingGolangciConfig: undefined,
-      };
+      const projectType = { ...DEFAULT_PROJECT_TYPE };
 
       const installedDevelopmentDeps = {
         eslint: '^8.0.0',
@@ -875,26 +777,7 @@ describe('Reconcile - Reconciliation Engine', () => {
       const { computePackagesToInstall } = await import('../src/reconcile.js');
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
-      const projectType = {
-        typescript: false,
-        react: false,
-        nextjs: false,
-        astro: false,
-        vitest: false,
-        playwright: false,
-        tailwind: false,
-        tanstackQuery: false,
-        publishableLibrary: false,
-        shell: false,
-        existingLinter: false,
-        existingFormatter: false,
-        existingEslintConfig: undefined,
-        legacyEslint: false,
-        existingRuffConfig: false,
-        existingMypyConfig: false,
-        existingImportLinterConfig: false,
-        existingGolangciConfig: undefined,
-      };
+      const projectType = { ...DEFAULT_PROJECT_TYPE };
 
       // isGitRepo = false
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {}, false);
