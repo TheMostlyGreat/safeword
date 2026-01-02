@@ -143,14 +143,18 @@ function planTextPatches(
   return actions;
 }
 
-function planOwnedFileWrites(
+/**
+ * Generic file write planner with configurable skip condition.
+ */
+function planFileWrites(
   files: Record<string, FileDefinition>,
   ctx: ProjectContext,
+  shouldSkip: (filePath: string, ctx: ProjectContext) => boolean,
 ): { actions: Action[]; created: string[] } {
   const actions: Action[] = [];
   const created: string[] = [];
   for (const [filePath, definition] of Object.entries(files)) {
-    if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
+    if (shouldSkip(filePath, ctx)) continue;
     const content = resolveFileContent(definition, ctx);
     // Skip files where generator returned undefined (e.g., non-JS projects)
     if (content === undefined) continue;
@@ -160,21 +164,20 @@ function planOwnedFileWrites(
   return { actions, created };
 }
 
+/** Owned files: skip husky files in non-git repos */
+function planOwnedFileWrites(
+  files: Record<string, FileDefinition>,
+  ctx: ProjectContext,
+): { actions: Action[]; created: string[] } {
+  return planFileWrites(files, ctx, (filePath, c) => shouldSkipForNonGit(filePath, c.isGitRepo));
+}
+
+/** Managed files: skip if file already exists */
 function planManagedFileWrites(
   files: Record<string, FileDefinition>,
   ctx: ProjectContext,
 ): { actions: Action[]; created: string[] } {
-  const actions: Action[] = [];
-  const created: string[] = [];
-  for (const [filePath, definition] of Object.entries(files)) {
-    if (exists(nodePath.join(ctx.cwd, filePath))) continue;
-    const content = resolveFileContent(definition, ctx);
-    // Skip files where generator returned undefined (e.g., non-JS projects)
-    if (content === undefined) continue;
-    actions.push({ type: 'write', path: filePath, content });
-    created.push(filePath);
-  }
-  return { actions, created };
+  return planFileWrites(files, ctx, (filePath, c) => exists(nodePath.join(c.cwd, filePath)));
 }
 
 function planTextPatchesWithCreation(
