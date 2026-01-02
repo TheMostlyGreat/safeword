@@ -39,7 +39,6 @@
     "shellcheck": "^4.1.0",
     "zod": "4.3.4"
   },
-  "resolutions": {},
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}": [
       "eslint --fix",
