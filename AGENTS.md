@@ -54,6 +54,8 @@ See `ARCHITECTURE.md` for full structure including all packages and templates.
 
 3. **Hook paths**: Always use `"$CLAUDE_PROJECT_DIR"/.safeword/hooks/...` format (quoted variable) for Claude Code hooks.
 
+4. **Monorepo publishing**: `workspace:^` resolves at `bun install` time, not publish time. For 0.x packages, `^0.6.0` excludes 0.7.0. Run `bun install` after version bumps, or use explicit versions for cross-package deps.
+
 ## Project-Specific Content
 
 **Location**: `.safeword-project/` (never touched by CLI reset/upgrade)

@@ -1,6 +1,6 @@
 {
   "name": "safeword",
-  "version": "0.15.0",
+  "version": "0.15.2",
   "description": "CLI for setting up and managing safeword development environments",
   "type": "module",
   "bin": {
@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "commander": "^12.1.0",
-    "eslint-plugin-safeword": "workspace:^",
+    "eslint-plugin-safeword": "^0.7.0",
     "yaml": "^2.7.0"
   },
   "devDependencies": {
