@@ -17,3 +17,4 @@ eval-results.json
 .claude/shell-snapshots/
 .claude/mcp/arcade.json
 dependency-graph.svg
+.playwright-mcp/

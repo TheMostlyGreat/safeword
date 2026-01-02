@@ -1,0 +1,220 @@
+/* Safeword Theme - Oswald + IBM Plex Sans + Lilex */
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Lilex:wght@400;500;600;700&display=swap');
+
+/* Red background theme */
+:root {
+  --sl-color-bg: #ff0000;
+  --sl-color-bg-nav: #ff0000;
+  --sl-color-bg-sidebar: #ff0000;
+  --sl-color-hairline: #000;
+  --sl-color-hairline-light: #000;
+  --sl-color-text: #000;
+  --sl-color-text-accent: #000;
+  --sl-color-white: #000;
+  --sl-color-gray-1: #000;
+  --sl-color-gray-2: #1a1a1a;
+  --sl-color-gray-3: #333;
+  --sl-color-gray-4: #555;
+  --sl-color-gray-5: #777;
+  --sl-color-gray-6: #999;
+  --sl-color-accent: #000;
+  --sl-color-accent-high: #000;
+  --sl-color-accent-low: rgba(0, 0, 0, 0.1);
+}
+
+html,
+body,
+main,
+.sl-content,
+[data-theme] {
+  background: #ff0000 !important;
+}
+
+/* Force black text everywhere */
+* {
+  color: #000;
+  border-color: #000;
+}
+
+/* Oswald for headlines */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.sl-markdown-content h4,
+.sl-markdown-content h5,
+.sl-markdown-content h6 {
+  font-family: 'Oswald', sans-serif !important;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* IBM Plex Sans for body */
+body,
+p,
+li,
+td,
+th,
+span,
+a,
+label,
+.sl-markdown-content,
+.sl-markdown-content p,
+.sl-markdown-content li,
+.sl-markdown-content td,
+.sl-markdown-content th {
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+/* Lilex for code/monospace */
+code,
+pre,
+kbd,
+samp,
+.expressive-code,
+.expressive-code *,
+figure.frame *,
+.ec-line,
+.ec-line * {
+  font-family: 'Lilex', monospace !important;
+}
+
+/* Inline code styling */
+:not(pre) > code {
+  background: #000 !important;
+  color: #ff0000 !important;
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+
+/* Terminal box styling */
+figure.frame .header,
+figure.frame figcaption {
+  display: none !important;
+}
+
+figure.frame pre {
+  border-radius: 6px !important;
+  padding: 1rem 1.25rem !important;
+  background: #000 !important;
+  border: none !important;
+}
+
+figure.frame pre code,
+figure.frame .ec-line,
+figure.frame .ec-line *,
+figure.frame .ec-line .code,
+figure.frame .ec-line .code * {
+  color: #ff0000 !important;
+  background: transparent !important;
+}
+
+/* Chevron prompt for terminal */
+figure.frame .ec-line .code::before {
+  content: '> ';
+  color: #ff0000;
+  opacity: 0.5;
+}
+
+/* Copy button - make visible with lighter gray */
+figure.frame button,
+.expressive-code button,
+button.copy {
+  color: #888 !important;
+  opacity: 1 !important;
+}
+
+figure.frame button:hover,
+.expressive-code button:hover,
+button.copy:hover {
+  color: #ff0000 !important;
+}
+
+/* Search bar cmd-k shortcut */
+button[aria-label='Search'] kbd {
+  color: #666 !important;
+  border-color: #666 !important;
+  background: transparent !important;
+  opacity: 1 !important;
+}
+
+button[aria-label='Search'] kbd kbd {
+  color: #666 !important;
+}
+
+/* Logo styling */
+.site-title {
+  border: 3px solid #000 !important;
+  padding: 0.2em 0.4em !important;
+  font-family: 'Oswald', sans-serif !important;
+  text-transform: uppercase !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+.site-title:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar styling */
+nav[aria-label='Main'] a,
+.sidebar-content a {
+  color: #000 !important;
+}
+
+nav[aria-label='Main'] a[aria-current='page'],
+.sidebar-content a[aria-current='page'] {
+  background: rgba(0, 0, 0, 0.15) !important;
+  font-weight: 600;
+}
+
+/* Table styling */
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-color: #000 !important;
+}
+
+th {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Star badge in header */
+.star-badge {
+  background: rgba(0, 0, 0, 0.15) !important;
+  color: #000 !important;
+}
+
+.star-badge:hover {
+  background: rgba(0, 0, 0, 0.25) !important;
+}
+
+.star-badge svg {
+  color: #000 !important;
+}
+
+/* Links */
+a {
+  color: #000;
+  text-decoration: underline;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+/* Selection */
+::selection {
+  background: #000;
+  color: #ff0000;
+}

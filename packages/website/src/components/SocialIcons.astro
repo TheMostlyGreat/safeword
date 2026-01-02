@@ -1,0 +1,59 @@
+---
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+
+const REPO = 'TheMostlyGreat/safeword';
+let starCount = '—';
+
+try {
+  const res = await fetch(`https://api.github.com/repos/${REPO}`, {
+    headers: { 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (res.ok) {
+    const data = await res.json();
+    const count = data.stargazers_count;
+    starCount = count >= 1000 ? `${(count / 1000).toFixed(1)}k` : String(count);
+  }
+} catch {
+  // Use fallback
+}
+---
+
+<div class="social-icons-wrapper">
+  <a href={`https://github.com/${REPO}`} class="star-badge" aria-label="Star on GitHub">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+      <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/>
+    </svg>
+    <span>{starCount}</span>
+  </a>
+  <Default />
+</div>
+
+<style>
+  .social-icons-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .star-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 2rem;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-white);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .star-badge:hover {
+    background: var(--sl-color-gray-5);
+  }
+
+  .star-badge svg {
+    color: #f59e0b;
+  }
+</style>
