@@ -1,14 +1,22 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 
+const __dirname = import.meta.dirname;
+
 export default defineConfig({
   site: 'https://safeword.dev',
+  vite: {
+    cacheDir: path.resolve(__dirname, 'node_modules/.vite'),
+  },
   integrations: [
     starlight({
       title: 'Safeword',
       description: 'AI coding agent guardrails - hooks, skills, and quality controls',
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/safeword-dev/safeword' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/TheMostlyGreat/safeword' },
       ],
       sidebar: [
         {
@@ -21,12 +29,13 @@ export default defineConfig({
         },
         {
           label: 'Guides',
-          autogenerate: { directory: 'guides' },
+          items: [{ label: 'Overview', slug: 'guides' }],
         },
         {
           label: 'Reference',
           items: [
-            { label: 'CLI Commands', slug: 'reference/cli' },
+            { label: 'CLI', slug: 'reference/cli' },
+            { label: 'Commands', slug: 'reference/commands' },
             { label: 'Hooks', slug: 'reference/hooks' },
             { label: 'Skills', slug: 'reference/skills' },
             { label: 'Configuration', slug: 'reference/configuration' },
@@ -34,7 +43,7 @@ export default defineConfig({
         },
       ],
       editLink: {
-        baseUrl: 'https://github.com/safeword-dev/safeword/edit/main/packages/website/',
+        baseUrl: 'https://github.com/TheMostlyGreat/safeword/edit/main/packages/website/',
       },
     }),
   ],

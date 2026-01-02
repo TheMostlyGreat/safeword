@@ -5,42 +5,109 @@ description: Safeword skills reference
 
 # Skills
 
-Skills are structured workflows that guide AI agents through specific tasks.
+Skills are structured workflows that guide AI agents through specific tasks. They enforce discipline and best practices.
 
 ## Available Skills
 
-| Skill                       | Trigger                         | Purpose                                  |
-| --------------------------- | ------------------------------- | ---------------------------------------- |
-| `safeword-brainstorming`    | "brainstorm", "explore options" | Collaborative design through questioning |
-| `safeword-debugging`        | "debug", "fix error"            | Four-phase debugging framework           |
-| `safeword-enforcing-tdd`    | "implement", "add feature"      | RED → GREEN → REFACTOR cycle             |
-| `safeword-quality-reviewer` | "review", "check quality"       | Deep code review with web research       |
-| `safeword-refactoring`      | "refactor", "clean up"          | Small-step refactoring discipline        |
-| `safeword-writing-plans`    | "write plan", "break down"      | Detailed implementation plans            |
+| Skill                       | Triggers                                     | Purpose                                           |
+| --------------------------- | -------------------------------------------- | ------------------------------------------------- |
+| `safeword-brainstorming`    | "brainstorm", "design", "explore options"    | Collaborative design through Socratic questioning |
+| `safeword-debugging`        | "debug", "fix error", "test failing"         | Four-phase debugging (investigate before fixing)  |
+| `safeword-enforcing-tdd`    | "implement", "add", "build", "fix"           | RED → GREEN → REFACTOR discipline                 |
+| `safeword-quality-reviewer` | "review", "check quality", "verify versions" | Deep code review with web research                |
+| `safeword-refactoring`      | "refactor", "clean up", "restructure"        | Small-step refactoring with test verification     |
+| `safeword-writing-plans`    | "write plan", "execution plan", "break down" | Detailed implementation plans for agents          |
+
+## Skill Details
+
+### safeword-brainstorming
+
+Use before implementation when refining rough ideas into specs. Guides collaborative design through:
+
+- Socratic questioning
+- Alternative exploration
+- Incremental validation
+
+### safeword-debugging
+
+Four-phase debugging framework that ensures root cause identification **before** fixes:
+
+1. **Investigate** - Gather information
+2. **Hypothesize** - Form theories
+3. **Test** - Validate hypotheses
+4. **Fix** - Apply solution
+
+### safeword-enforcing-tdd
+
+Enforces strict RED → GREEN → REFACTOR test discipline:
+
+1. **RED** - Write failing test first
+2. **GREEN** - Minimum code to pass
+3. **REFACTOR** - Improve while tests pass
+
+### safeword-quality-reviewer
+
+Deep code review with web research to verify against latest ecosystem:
+
+- Check library versions
+- Verify security patterns
+- Review against official docs
+
+### safeword-refactoring
+
+Systematic refactoring with small-step discipline:
+
+- One change → test → commit cycle
+- For structural improvements only
+- NOT for adding features or fixing bugs
+
+### safeword-writing-plans
+
+Creates execution plans with:
+
+- Exact file paths
+- Complete code examples
+- Verification steps
 
 ## Using Skills
 
 Invoke skills with slash commands in Claude Code:
 
-```
+```text
 /safeword-debugging
 ```
 
 Or mention the trigger phrase in your prompt:
 
-```
+```text
 "Debug this test failure..."
 ```
+
+## IDE Parity
+
+Skills are installed for both Claude Code and Cursor:
+
+| IDE         | Location                       |
+| ----------- | ------------------------------ |
+| Claude Code | `.claude/skills/safeword-*/`   |
+| Cursor      | `.cursor/rules/safeword-*.mdc` |
 
 ## Skill Location
 
 Skills live in `.claude/skills/`:
 
-```
+```text
 .claude/skills/
 ├── safeword-brainstorming/
 │   └── SKILL.md
 ├── safeword-debugging/
 │   └── SKILL.md
-└── ...
+├── safeword-enforcing-tdd/
+│   └── SKILL.md
+├── safeword-quality-reviewer/
+│   └── SKILL.md
+├── safeword-refactoring/
+│   └── SKILL.md
+└── safeword-writing-plans/
+    └── SKILL.md
 ```

@@ -5,24 +5,58 @@ description: What is Safeword and why you need it
 
 # Safeword
 
-**AI coding agent guardrails** - hooks, skills, and quality controls for Claude Code, Cursor, and other AI coding assistants.
+**Problem**: AI agents write code without tests, skip design validation, and lack consistency across projects.
+
+**Solution**: Portable patterns and guides that enforce TDD workflow, quality standards, and best practices across all your projects.
 
 ## Why Safeword?
 
 AI coding agents are powerful but need guidance:
 
-- **Hooks** - Auto-lint on file changes, quality review on session end
-- **Skills** - Structured workflows for TDD, debugging, refactoring
+- **Hooks** - Auto-lint on file changes, quality review on session end, version tracking
+- **Skills** - Structured workflows for TDD, debugging, refactoring, brainstorming
+- **Commands** - Slash commands for linting, auditing, drift detection
+- **Guides** - TDD methodology, testing, planning, code philosophy
 - **ESLint Plugin** - Catch common LLM mistakes (incomplete error handling, etc.)
+- **Multi-language** - JavaScript/TypeScript, Python (Ruff), Go (golangci-lint)
 
 ## Quick Install
 
 ```bash
-npx safeword setup
+bunx safeword@latest setup
 ```
 
 This sets up:
 
-- `.safeword/` directory with hooks and guides
-- `.claude/` or `.cursor/` configuration
-- ESLint + Prettier with LLM-optimized rules
+| Path                | Description                     |
+| ------------------- | ------------------------------- |
+| `.safeword/`        | Hooks, guides, and templates    |
+| `.claude/`          | Claude Code settings and skills |
+| `.cursor/rules/`    | Cursor AI rules                 |
+| `eslint.config.mjs` | ESLint with safeword plugin     |
+| `.prettierrc`       | Prettier configuration          |
+| `AGENTS.md`         | Project context with framework  |
+
+## How It Works
+
+**Project-local framework**: Scripts write to `.safeword/` and `.claude/` in your project (no global install needed)
+
+**Team consistency**: Teammates get the framework from your project repo
+
+**Living documentation**: Update guides as you learn, extract learnings from debugging, archive completed work
+
+## What's Inside
+
+- `.safeword/guides/` - Core methodology and best practices
+- `.safeword/templates/` - Fillable document structures
+- `.safeword/planning/` - Specs, test definitions, design docs
+- `.safeword/hooks/` - Automation scripts for Claude Code
+- `.claude/commands/` - Slash commands
+- `.claude/skills/` - Specialized agent capabilities
+
+## MCP Server Integrations
+
+Safeword auto-configures these MCP servers:
+
+- **context7** - Up-to-date library documentation lookup
+- **playwright** - Browser automation for testing

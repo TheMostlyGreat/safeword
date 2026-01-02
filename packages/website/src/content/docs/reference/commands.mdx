@@ -1,0 +1,113 @@
+---
+title: Commands
+description: Safeword slash commands reference
+---
+
+# Commands
+
+Commands are slash commands available in Claude Code. They provide quick access to common tasks.
+
+## Available Commands
+
+| Command            | Purpose                                   |
+| ------------------ | ----------------------------------------- |
+| `/lint`            | Run linters and formatters                |
+| `/audit`           | Run architecture and dead code analysis   |
+| `/drift`           | Check if architecture docs match codebase |
+| `/quality-review`  | Deep code review with web research        |
+| `/cleanup-zombies` | Kill zombie dev server processes          |
+
+## Command Details
+
+### /lint
+
+Run linters and formatters to fix code style issues.
+
+```text
+/lint
+```
+
+Runs the appropriate linter based on file type:
+
+- **JavaScript/TypeScript**: ESLint + Prettier
+- **Python**: Ruff (fast linting) + mypy (type checking)
+- **Go**: golangci-lint
+
+### /audit
+
+Run comprehensive code audit for architecture and dead code.
+
+```text
+/audit
+```
+
+Analyzes:
+
+- Architecture compliance
+- Dead code detection
+- Dependency analysis
+
+### /drift
+
+Check if architecture documentation matches the actual codebase.
+
+```text
+/drift
+```
+
+Compares:
+
+- ARCHITECTURE.md against actual structure
+- Documented patterns against implementation
+- Creates or updates docs if missing
+
+### /quality-review
+
+Deep code review with web research to verify against latest ecosystem.
+
+```text
+/quality-review
+```
+
+Checks:
+
+- Library versions against latest
+- Security patterns
+- Best practices from official docs
+
+### /cleanup-zombies
+
+Kill zombie dev servers and test processes for the project.
+
+```text
+/cleanup-zombies
+```
+
+Cleans up:
+
+- Orphaned dev server processes
+- Stuck test runners
+- Port conflicts
+
+## Command Location
+
+Commands live in `.claude/commands/`:
+
+```text
+.claude/commands/
+├── audit.md
+├── cleanup-zombies.md
+├── drift.md
+├── lint.md
+└── quality-review.md
+```
+
+## Using Commands
+
+In Claude Code, type the command with a slash:
+
+```text
+/lint
+```
+
+Commands are different from skills - they're quick actions rather than structured workflows.

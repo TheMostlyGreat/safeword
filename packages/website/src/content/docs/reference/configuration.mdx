@@ -13,18 +13,41 @@ Safeword manages two types of files:
 
 Overwritten on every `safeword upgrade`:
 
-- `.safeword/hooks/*`
-- `.claude/skills/*`
-- `.cursor/rules/*`
-- `.safeword/SAFEWORD.md`
+- `.safeword/hooks/*` - Automation hooks
+- `.safeword/guides/*` - Methodology guides
+- `.safeword/templates/*` - Document templates
+- `.safeword/SAFEWORD.md` - Core instructions
+- `.claude/skills/*` - Claude Code skills
+- `.claude/commands/*` - Slash commands
+- `.cursor/rules/*` - Cursor rules
 
 ### Managed Files
 
 Only created if missing, never overwritten:
 
-- `eslint.config.mjs`
-- `.prettierrc`
-- `.claude/settings.json`
+- `eslint.config.mjs` - ESLint configuration
+- `.prettierrc` - Prettier configuration
+- `.claude/settings.json` - Hook configuration
+- `AGENTS.md` - Project context
+
+## Language Packs
+
+Safeword tracks installed language packs in `.safeword/config.json`:
+
+```json
+{
+  "version": "0.15.0",
+  "installedPacks": ["python", "typescript", "golang"]
+}
+```
+
+Each language pack provides:
+
+| Language   | Linting           | Type Checking |
+| ---------- | ----------------- | ------------- |
+| TypeScript | ESLint + Prettier | tsc           |
+| Python     | Ruff              | mypy          |
+| Go         | golangci-lint     | go vet        |
 
 ## ESLint Configuration
 
@@ -41,6 +64,14 @@ export default [
 ];
 ```
 
+Available configs:
+
+- `recommendedTypeScript` - Base TypeScript rules
+- `react` - React/JSX rules
+- `vitest` - Vitest testing rules
+- `playwright` - Playwright testing rules
+- `astro` - Astro framework rules
+
 ## Claude Settings
 
 Hook configuration in `.claude/settings.json`:
@@ -48,7 +79,15 @@ Hook configuration in `.claude/settings.json`:
 ```json
 {
   "hooks": {
-    "SessionStart": [...],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          "bun \"$CLAUDE_PROJECT_DIR\"/.safeword/hooks/session-version.ts",
+          "bun \"$CLAUDE_PROJECT_DIR\"/.safeword/hooks/session-verify-agents.ts"
+        ]
+      }
+    ],
     "UserPromptSubmit": [...],
     "PostToolUse": [...],
     "Stop": [...]
@@ -56,6 +95,33 @@ Hook configuration in `.claude/settings.json`:
 }
 ```
 
-## Version File
+## MCP Configuration
+
+MCP servers configured in `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "command": "bunx",
+      "args": ["@upstash/context7-mcp@latest"]
+    },
+    "playwright": {
+      "command": "bunx",
+      "args": ["@playwright/mcp@latest"]
+    }
+  }
+}
+```
+
+## Version Tracking
 
 `.safeword/version` tracks the installed version for upgrade logic.
+
+## Project-Specific Content
+
+Content that shouldn't be touched by upgrades goes in `.safeword-project/`:
+
+- Project-specific guides
+- Custom templates
+- Local learnings

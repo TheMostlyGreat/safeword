@@ -1,0 +1,43 @@
+---
+title: Safeword
+description: AI coding agent guardrails - hooks, skills, and quality controls
+template: splash
+hero:
+  tagline: Portable patterns and guides that enforce TDD workflow, quality standards, and best practices across all your projects.
+  actions:
+    - text: Get Started
+      link: /getting-started/introduction/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/TheMostlyGreat/safeword
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Features
+
+<CardGrid stagger>
+  <Card title="Hooks" icon="setting">
+    Auto-lint on file changes, quality review on session end, version tracking
+  </Card>
+  <Card title="Skills" icon="puzzle">
+    Structured workflows for TDD, debugging, refactoring, brainstorming
+  </Card>
+  <Card title="Commands" icon="rocket">
+    Slash commands for linting, auditing, drift detection
+  </Card>
+  <Card title="Multi-language" icon="translate">
+    JavaScript/TypeScript, Python (Ruff), Go (golangci-lint)
+  </Card>
+</CardGrid>
+
+## Quick Install
+
+```bash
+bunx safeword@latest setup
+```
+
+Your project will have hooks, skills, guides, and linting configured in seconds.

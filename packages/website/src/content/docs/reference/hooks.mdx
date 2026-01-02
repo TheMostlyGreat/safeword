@@ -5,29 +5,29 @@ description: Safeword hooks reference
 
 # Hooks
 
-Hooks are TypeScript scripts that run at specific points during AI coding sessions.
+Hooks are TypeScript scripts that run at specific points during AI coding sessions. They execute with Bun runtime.
 
 ## Available Hooks
 
-| Hook                       | Trigger         | Purpose                           |
-| -------------------------- | --------------- | --------------------------------- |
-| `session-version.ts`       | Session start   | Display safeword version          |
-| `session-verify-agents.ts` | Session start   | Verify AGENTS.md exists           |
-| `session-lint-check.ts`    | Session start   | Check for lint issues             |
-| `prompt-timestamp.ts`      | Prompt submit   | Add timestamp to context          |
-| `prompt-questions.ts`      | Prompt submit   | Remind about clarifying questions |
-| `post-tool-lint.ts`        | After file edit | Lint changed files                |
-| `stop-quality.ts`          | Session end     | Trigger quality review            |
+| Hook                       | Trigger          | Purpose                                  |
+| -------------------------- | ---------------- | ---------------------------------------- |
+| `session-version.ts`       | SessionStart     | Display safeword version                 |
+| `session-verify-agents.ts` | SessionStart     | Verify AGENTS.md link exists             |
+| `session-lint-check.ts`    | SessionStart     | Check for lint errors on session start   |
+| `prompt-timestamp.ts`      | UserPromptSubmit | Inject timestamp into prompts            |
+| `prompt-questions.ts`      | UserPromptSubmit | Remind agent to ask clarifying questions |
+| `post-tool-lint.ts`        | PostToolUse      | Auto-lint after file edits               |
+| `stop-quality.ts`          | Stop             | Quality review prompt on stop            |
 
 ## Hook Location
 
 Hooks live in `.safeword/hooks/` and are executed with Bun:
 
-```
+```text
 .safeword/hooks/
 ├── lib/
-│   ├── lint.ts
-│   └── quality.ts
+│   ├── lint.ts        # Multi-language lint logic
+│   └── quality.ts     # Quality review helpers
 ├── post-tool-lint.ts
 ├── prompt-questions.ts
 ├── prompt-timestamp.ts
@@ -37,10 +37,45 @@ Hooks live in `.safeword/hooks/` and are executed with Bun:
 └── stop-quality.ts
 ```
 
+## Multi-Language Linting
+
+The `post-tool-lint.ts` hook routes files to the correct linter based on extension:
+
+| Extension         | Linter        |
+| ----------------- | ------------- |
+| `.js`, `.ts`, etc | ESLint        |
+| `.py`, `.pyi`     | Ruff          |
+| `.go`             | golangci-lint |
+
+Linters run silently if not installed (graceful fallback).
+
+## Hook Configuration
+
+Hooks are configured in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          "bun \"$CLAUDE_PROJECT_DIR\"/.safeword/hooks/session-version.ts"
+        ]
+      }
+    ],
+    "UserPromptSubmit": [...],
+    "PostToolUse": [...],
+    "Stop": [...]
+  }
+}
+```
+
 ## Customizing Hooks
 
 Hooks are "owned" files - they get overwritten on `safeword upgrade`. To customize:
 
-1. Copy the hook to a new name
+1. Copy the hook to a new name (e.g., `my-custom-lint.ts`)
 2. Modify as needed
 3. Update `.claude/settings.json` to use your hook
+4. Your custom hook won't be touched by upgrades

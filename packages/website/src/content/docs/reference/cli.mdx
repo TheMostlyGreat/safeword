@@ -10,7 +10,7 @@ description: Safeword command-line interface reference
 Initialize safeword in a project.
 
 ```bash
-npx safeword setup [options]
+bunx safeword@latest setup [options]
 ```
 
 | Option        | Description               |
@@ -18,12 +18,18 @@ npx safeword setup [options]
 | `--yes`, `-y` | Skip confirmation prompts |
 | `--force`     | Overwrite existing files  |
 
+**Auto-detection**: Detects project type from `package.json` and installs relevant ESLint/Prettier plugins:
+
+- TypeScript, React, Next.js, Astro, Vue, Svelte, Electron
+- Vitest, Playwright, Tailwind
+- Publishable libraries (adds publint)
+
 ## `safeword upgrade`
 
 Update safeword files to latest version.
 
 ```bash
-npx safeword upgrade [options]
+bunx safeword@latest upgrade [options]
 ```
 
 | Option      | Description                            |
@@ -31,30 +37,61 @@ npx safeword upgrade [options]
 | `--dry-run` | Show what would change without writing |
 | `--force`   | Overwrite modified owned files         |
 
+Updates owned files while preserving your customizations to managed files.
+
 ## `safeword check`
 
 Verify installation and report issues.
 
 ```bash
-npx safeword check
+bunx safeword@latest check [options]
 ```
+
+| Option      | Description               |
+| ----------- | ------------------------- |
+| `--offline` | Skip remote version check |
 
 ## `safeword reset`
 
 Remove all safeword files.
 
 ```bash
-npx safeword reset [options]
+bunx safeword reset [options]
 ```
 
-| Option        | Description       |
-| ------------- | ----------------- |
-| `--yes`, `-y` | Skip confirmation |
+| Option        | Description                           |
+| ------------- | ------------------------------------- |
+| `--yes`, `-y` | Skip confirmation                     |
+| `--full`      | Also remove linting config + packages |
 
 ## `safeword diff`
 
 Show differences between local and template files.
 
 ```bash
-npx safeword diff [file]
+bunx safeword@latest diff [file] [options]
 ```
+
+| Option | Description           |
+| ------ | --------------------- |
+| `-v`   | Show full diff output |
+
+## How Guide Imports Work
+
+`AGENTS.md` contains a link: `@./.safeword/SAFEWORD.md` (also added to `CLAUDE.md` if present)
+
+SAFEWORD.md then imports guides via the Quick Reference table. Claude Code auto-loads these as context.
+
+## Learnings System
+
+Check for existing learnings:
+
+```bash
+ls .safeword/learnings/
+```
+
+Extract new learning:
+
+1. Follow recognition triggers in `learning-extraction.md`
+2. Create `.safeword/learnings/[concept].md`
+3. Use template: Problem → Gotcha → Examples → Testing Trap
