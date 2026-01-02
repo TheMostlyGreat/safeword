@@ -1,7 +1,7 @@
 # Task: Audit Cleanup
 
 **Created:** 2026-01-02
-**Status:** In Progress
+**Status:** Complete
 
 ---
 
@@ -17,27 +17,14 @@ Address remaining issues from `/audit` run after knip cleanup.
 - [x] Architecture check: No circular dependencies ✓
 - [x] Fix poetry test helper (7a16873) - was never working, not a regression
 - [x] Add missing devDependencies (1c6c2da) - @vitest/coverage-v8, @types/estree
+- [x] Fix depcruise unsafe regex (ebf64ee) - use path array, .cjs extension
+- [x] Document optional binaries (shfmt, dot) in README
 
 ---
 
 ## Remaining Issues
 
-### 1. Depcruise Unsafe Regex (Medium Priority)
-
-The `no-dev-deps-in-src` rule has an unsafe regex pattern:
-
-```
-ERROR: rule {"name":"no-dev-deps-in-src"...} has an unsafe regular expression
-```
-
-**Action:** Fix regex in `packages/cli/src/utils/depcruise-config.ts`
-
-### 2. Optional Binaries (Low Priority - Documentation)
-
-| Binary  | Usage                              | Status                       |
-| ------- | ---------------------------------- | ---------------------------- |
-| `shfmt` | Shell script formatting            | Optional, document in README |
-| `dot`   | Graphviz (depcruise visualization) | Optional, document in README |
+None - all issues resolved.
 
 ---
 
@@ -53,17 +40,6 @@ ERROR: rule {"name":"no-dev-deps-in-src"...} has an unsafe regular expression
 **737 passed**, 1 skipped (49 test files) ✅
 
 All tests passing after poetry test fix.
-
----
-
-## Execution Order
-
-1. **Fix depcruise unsafe regex**
-   - Update `no-dev-deps-in-src` rule regex in depcruise-config.ts
-   - Test with: `npx depcruise --config .dependency-cruiser.cjs packages/cli/src`
-
-2. **Document optional binaries** (if time permits)
-   - Add note to README about shfmt and dot being optional system tools
 
 ---
 

@@ -289,6 +289,17 @@ This section is for contributors to safeword itself.
 | Tests     | Vitest, promptfoo (LLM evals) |
 | Linting   | ESLint 9 + Prettier           |
 
+### Optional System Binaries
+
+These tools enhance certain features but are not required:
+
+| Binary  | Purpose                            | Install                 |
+| ------- | ---------------------------------- | ----------------------- |
+| `shfmt` | Shell script formatting in `/lint` | `brew install shfmt`    |
+| `dot`   | Dependency graph visualization     | `brew install graphviz` |
+
+Without these binaries, related features gracefully skip or use fallback behavior.
+
 ### Development Workflow
 
 **Editing Source Templates:**
