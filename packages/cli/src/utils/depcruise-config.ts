@@ -104,7 +104,7 @@ export function generateDepCruiseConfigFile(arch: DepCruiseArchitecture): string
       comment: 'Production code should not import devDependencies - may cause runtime failures',
       severity: 'warn',
       from: {
-        path: '^(packages/[^/]+/)?src',
+        path: ['^src', '^packages/[^/]+/src'],
         pathNot: '\\.test\\.[tj]sx?$',
       },
       to: { dependencyTypes: ['npm-dev'] },
@@ -164,7 +164,7 @@ export function generateDepCruiseMainConfig(): string {
  * ADD YOUR CUSTOM RULES BELOW the spread operator.
  */
 
-const generated = require('./.safeword/depcruise-config.js');
+const generated = require('./.safeword/depcruise-config.cjs');
 
 module.exports = {
   forbidden: [

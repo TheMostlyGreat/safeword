@@ -30,14 +30,15 @@ export function syncConfigCore(cwd: string, arch: DepCruiseArchitecture): SyncCo
   const safewordDirectory = nodePath.join(cwd, '.safeword');
   const result: SyncConfigResult = { generatedConfig: false, createdMainConfig: false };
 
-  // Generate and write .safeword/depcruise-config.js
-  const generatedConfigPath = nodePath.join(safewordDirectory, 'depcruise-config.js');
+  // Generate and write .safeword/depcruise-config.cjs (CJS for compatibility)
+  const generatedConfigPath = nodePath.join(safewordDirectory, 'depcruise-config.cjs');
   const generatedConfig = generateDepCruiseConfigFile(arch);
   writeFileSync(generatedConfigPath, generatedConfig);
   result.generatedConfig = true;
 
   // Create main config if not exists (self-healing)
-  const mainConfigPath = nodePath.join(cwd, '.dependency-cruiser.js');
+  // Use .cjs extension to work in ESM projects (type: "module")
+  const mainConfigPath = nodePath.join(cwd, '.dependency-cruiser.cjs');
   if (!exists(mainConfigPath)) {
     const mainConfig = generateDepCruiseMainConfig();
     writeFileSync(mainConfigPath, mainConfig);
@@ -81,10 +82,10 @@ export async function syncConfig(): Promise<void> {
   const result = syncConfigCore(cwd, arch);
 
   if (result.generatedConfig) {
-    info('Generated .safeword/depcruise-config.js');
+    info('Generated .safeword/depcruise-config.cjs');
   }
   if (result.createdMainConfig) {
-    info('Created .dependency-cruiser.js');
+    info('Created .dependency-cruiser.cjs');
   }
 
   success('Config synced');

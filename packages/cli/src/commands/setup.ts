@@ -290,8 +290,8 @@ export async function setup(_options: SetupOptions): Promise<void> {
 
       if (hasArchitectureDetected(arch)) {
         const syncResult = syncConfigCore(cwd, arch);
-        if (syncResult.generatedConfig) archFiles.push('.safeword/depcruise-config.js');
-        if (syncResult.createdMainConfig) archFiles.push('.dependency-cruiser.js');
+        if (syncResult.generatedConfig) archFiles.push('.safeword/depcruise-config.cjs');
+        if (syncResult.createdMainConfig) archFiles.push('.dependency-cruiser.cjs');
 
         const detected: string[] = [];
         if (arch.elements.length > 0) {

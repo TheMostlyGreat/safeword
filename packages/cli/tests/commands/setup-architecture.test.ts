@@ -42,11 +42,11 @@ describe('Setup - Architecture Integration', () => {
       expect(result.exitCode).toBe(0);
 
       // Should create depcruise configs
-      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.js')).toBe(true);
-      expect(fileExists(temporaryDirectory, '.dependency-cruiser.js')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.cjs')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.dependency-cruiser.cjs')).toBe(true);
 
       // Generated config should have rules
-      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.js');
+      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.cjs');
       expect(config).toContain('module.exports');
       expect(config).toContain('forbidden');
       expect(config).toContain('no-circular');
@@ -65,8 +65,8 @@ describe('Setup - Architecture Integration', () => {
       expect(result.exitCode).toBe(0);
 
       // Should create depcruise configs
-      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.js')).toBe(true);
-      expect(fileExists(temporaryDirectory, '.dependency-cruiser.js')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.cjs')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.dependency-cruiser.cjs')).toBe(true);
     });
   });
 
@@ -83,8 +83,8 @@ describe('Setup - Architecture Integration', () => {
       expect(result.exitCode).toBe(0);
 
       // Should NOT create depcruise configs (no architecture detected)
-      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.js')).toBe(false);
-      expect(fileExists(temporaryDirectory, '.dependency-cruiser.js')).toBe(false);
+      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.cjs')).toBe(false);
+      expect(fileExists(temporaryDirectory, '.dependency-cruiser.cjs')).toBe(false);
     });
   });
 
@@ -123,7 +123,7 @@ describe('Setup - Architecture Integration', () => {
       expect(result.exitCode).toBe(0);
 
       // Should mention depcruise files in output
-      expect(result.stdout).toContain('.dependency-cruiser.js');
+      expect(result.stdout).toContain('.dependency-cruiser.cjs');
     });
   });
 });

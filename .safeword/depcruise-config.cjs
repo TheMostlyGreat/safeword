@@ -27,7 +27,7 @@ module.exports = {
       comment: 'Production code should not import devDependencies - may cause runtime failures',
       severity: 'warn',
       from: {
-        path: '^(packages/[^/]+/)?src',
+        path: ['^src', '^packages/[^/]+/src'],
         pathNot: '\\.test\\.[tj]sx?$',
       },
       to: { dependencyTypes: ['npm-dev'] },

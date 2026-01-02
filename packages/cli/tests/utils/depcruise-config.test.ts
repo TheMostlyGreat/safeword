@@ -128,7 +128,7 @@ describe('DepCruise Config Generator', () => {
       const config = generateDepCruiseMainConfig();
 
       // Imports from .safeword
-      expect(config).toContain('./.safeword/depcruise-config.js');
+      expect(config).toContain('./.safeword/depcruise-config.cjs');
 
       // Spreads generated
       expect(config).toContain('...generated.forbidden');

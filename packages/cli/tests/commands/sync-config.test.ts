@@ -43,52 +43,52 @@ describe('Sync Config Command', () => {
   });
 
   describe('Test 2.2: Writes generated config to .safeword/', () => {
-    it('should create depcruise-config.js in .safeword directory', async () => {
+    it('should create depcruise-config.cjs in .safeword directory', async () => {
       await createConfiguredProject(temporaryDirectory);
 
       const result = await runCli(['sync-config'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
-      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.js')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.cjs')).toBe(true);
 
-      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.js');
+      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.cjs');
       expect(config).toContain('module.exports');
       expect(config).toContain('forbidden');
     });
   });
 
   describe('Test 2.3: Creates main config if not exists', () => {
-    it('should create .dependency-cruiser.js at project root if missing', async () => {
+    it('should create .dependency-cruiser.cjs at project root if missing', async () => {
       await createConfiguredProject(temporaryDirectory);
 
       const result = await runCli(['sync-config'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
-      expect(fileExists(temporaryDirectory, '.dependency-cruiser.js')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.dependency-cruiser.cjs')).toBe(true);
 
-      const config = readTestFile(temporaryDirectory, '.dependency-cruiser.js');
-      expect(config).toContain('.safeword/depcruise-config.js');
+      const config = readTestFile(temporaryDirectory, '.dependency-cruiser.cjs');
+      expect(config).toContain('.safeword/depcruise-config.cjs');
     });
   });
 
   describe('Test 2.4: Does not overwrite existing main config', () => {
-    it('should preserve user customizations in .dependency-cruiser.js', async () => {
+    it('should preserve user customizations in .dependency-cruiser.cjs', async () => {
       await createConfiguredProject(temporaryDirectory);
 
       // Create custom main config
       const customContent = `// Custom config\nmodule.exports = { custom: true };`;
-      writeTestFile(temporaryDirectory, '.dependency-cruiser.js', customContent);
+      writeTestFile(temporaryDirectory, '.dependency-cruiser.cjs', customContent);
 
       const result = await runCli(['sync-config'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(0);
 
       // Main config should be unchanged
-      const config = readTestFile(temporaryDirectory, '.dependency-cruiser.js');
+      const config = readTestFile(temporaryDirectory, '.dependency-cruiser.cjs');
       expect(config).toBe(customContent);
 
       // But generated config should exist
-      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.js')).toBe(true);
+      expect(fileExists(temporaryDirectory, '.safeword/depcruise-config.cjs')).toBe(true);
     });
   });
 
@@ -109,7 +109,7 @@ describe('Sync Config Command', () => {
       expect(result.exitCode).toBe(0);
 
       // Generated config should reflect detected architecture
-      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.js');
+      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.cjs');
       expect(config).toContain('forbidden');
       // Should always have no-circular rule
       expect(config).toContain('no-circular');
@@ -130,7 +130,7 @@ describe('Sync Config Command', () => {
       expect(result.exitCode).toBe(0);
 
       // Generated config should have monorepo hierarchy rules
-      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.js');
+      const config = readTestFile(temporaryDirectory, '.safeword/depcruise-config.cjs');
       expect(config).toContain('libs-cannot-import-packages-or-apps');
       expect(config).toContain('packages-cannot-import-apps');
     });
