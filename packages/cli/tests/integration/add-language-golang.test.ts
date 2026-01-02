@@ -76,10 +76,13 @@ go 1.22
       writeTestFile(
         projectDirectory,
         'main.go',
-        `package main
+        `// Package main is the entry point.
+package main
+
+import "fmt"
 
 func main() {
-	println("hello")
+	fmt.Println("hello")
 }
 `,
       );

@@ -56,14 +56,17 @@ go 1.22
 `,
     );
 
-    // Create a minimal main.go
+    // Create a minimal main.go (lint-compliant)
     writeTestFile(
       projectDirectory,
       'main.go',
-      `package main
+      `// Package main is the entry point.
+package main
+
+import "fmt"
 
 func main() {
-	println("hello")
+	fmt.Println("hello")
 }
 `,
     );
