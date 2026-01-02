@@ -289,7 +289,7 @@ formatters:
 
         // Should use --config flag when safeword configs exist
         expect(lintHook).toContain('--config');
-        expect(lintHook).toContain('HAS_SAFEWORD_ESLINT');
+        expect(lintHook).toContain('hasEslint');
       },
       SETUP_TIMEOUT,
     );
