@@ -20,8 +20,8 @@ export const TIMEOUT_SETUP = 60_000;
 /** bun install operations under load or cold cache (120s) */
 export const TIMEOUT_BUN_INSTALL = 120_000;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = nodePath.dirname(__filename);
+const __filename = import.meta.filename;
+const __dirname = import.meta.dirname;
 
 /**
  * Path to the CLI entry point (built)
@@ -466,10 +466,13 @@ go 1.22
   writeTestFile(
     dir,
     'main.go',
-    `package main
+    `// Package main is the entry point.
+package main
+
+import "fmt"
 
 func main() {
-	println("hello")
+	fmt.Println("hello")
 }
 `,
   );

@@ -26,6 +26,9 @@ const GOLANGCI_CONFIG_CORE = `version: "2"
 
 linters:
   default: all
+  disable:
+    - forbidigo # Too strict for defaults - blocks all print statements
+    - wsl # Deprecated in v2.2.0, replaced by wsl_v5
   exclusions:
     presets:
       - std-error-handling
@@ -129,6 +132,7 @@ function getSafewordGolangciMergedV2(projectConfig: Record<string, unknown>): st
   const projectLinters = (projectConfig.linters as Record<string, unknown>) || {};
   const safewordLinters: Record<string, unknown> = {
     default: 'all',
+    disable: ['forbidigo', 'wsl'], // Too strict / deprecated
     exclusions: {
       presets: ['std-error-handling', 'common-false-positives'],
     },
