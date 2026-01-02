@@ -405,10 +405,11 @@ version = "0.1.0"
   // Detection logic in python-setup.ts checks lockfiles first
   switch (manager) {
     case 'poetry': {
-      content += `\n[tool.poetry]\nname = "test-python-project"\n`;
-      // Create minimal poetry.lock for detection
-      writeTestFile(dir, 'poetry.lock', '# poetry lockfile\npackage = []\n');
-
+      // Poetry requires name, version, and python constraint in [tool.poetry]
+      // Without python constraint, poetry assumes Python 2.7+ which fails modern deps like ruff
+      // Don't create poetry.lock - let poetry create it during `poetry add`
+      // Detection will work via [tool.poetry] section (see detectPythonPackageManager)
+      content += `\n[tool.poetry]\nname = "test-python-project"\nversion = "0.1.0"\n\n[tool.poetry.dependencies]\npython = "^3.10"\n`;
       break;
     }
     case 'uv': {
