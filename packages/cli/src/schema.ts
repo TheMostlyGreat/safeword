@@ -16,12 +16,7 @@ import {
   typescriptPackages,
 } from './packs/typescript/files.js';
 // Re-export shared types from packs/types.ts (breaks circular dependency)
-export type {
-  FileDefinition,
-  JsonMergeDefinition,
-  ManagedFileDefinition,
-  ProjectContext,
-} from './packs/types.js';
+export type { FileDefinition, JsonMergeDefinition, ProjectContext } from './packs/types.js';
 import type { FileDefinition, JsonMergeDefinition, ManagedFileDefinition } from './packs/types.js';
 import { CURSOR_HOOKS, SETTINGS_HOOKS } from './templates/config.js';
 import { AGENTS_MD_LINK } from './templates/content.js';

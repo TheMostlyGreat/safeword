@@ -45,5 +45,3 @@ export const tailwindConfig: any[] = [
     },
   },
 ];
-
-export default tailwindConfig;

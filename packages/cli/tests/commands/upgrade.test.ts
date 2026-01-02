@@ -212,13 +212,6 @@ describe('Test Suite 9: Upgrade', () => {
     });
   });
 
-  describe('Test 9.10: Restores backup on failure', () => {
-    it.skip('should restore from backup if upgrade fails mid-way', async () => {
-      // This test would require a way to force upgrade failure
-      // Skipped as it requires mocking internal failures
-    });
-  });
-
   // ==========================================================================
   // Language Packs Installation (Feature: Language Packs)
   // Test Definitions: .safeword/planning/test-definitions/feature-language-packs.md

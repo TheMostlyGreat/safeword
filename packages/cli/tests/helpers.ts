@@ -14,7 +14,7 @@ const execAsync = promisify(exec);
 /** Quick operations that don't spawn processes (10s) */
 export const TIMEOUT_QUICK = 10_000;
 /** Sync CLI operations without bun install (30s) */
-export const TIMEOUT_SYNC = 30_000;
+const TIMEOUT_SYNC = 30_000;
 /** Setup commands that may run bun install with warm cache (60s) */
 export const TIMEOUT_SETUP = 60_000;
 /** bun install operations under load or cold cache (120s) */
@@ -26,24 +26,24 @@ const __dirname = import.meta.dirname;
 /**
  * Path to the CLI entry point (built)
  */
-export const CLI_PATH = nodePath.join(__dirname, '../dist/cli.js');
+const CLI_PATH = nodePath.join(__dirname, '../dist/cli.js');
 
 /**
  * Path to the local eslint-plugin-safeword package (for file: references in tests)
  */
-export const ESLINT_PLUGIN_PATH = nodePath.join(__dirname, '../../eslint-plugin');
+const ESLINT_PLUGIN_PATH = nodePath.join(__dirname, '../../eslint-plugin');
 
 /**
  * eslint-plugin-safeword reference for test package.json files.
  * Uses file: protocol to install the local built package instead of from npm.
  * This ensures tests run against the current source code.
  */
-export const ESLINT_PLUGIN_VERSION = `file:${ESLINT_PLUGIN_PATH}`;
+const ESLINT_PLUGIN_VERSION = `file:${ESLINT_PLUGIN_PATH}`;
 
 /**
  * Path to the CLI source (for ts-node execution during development)
  */
-export const CLI_SRC_PATH = nodePath.join(__dirname, '../src/cli.ts');
+const CLI_SRC_PATH = nodePath.join(__dirname, '../src/cli.ts');
 
 /**
  * Creates a temporary directory for test isolation
@@ -136,7 +136,7 @@ export function createNextJsPackageJson(
 /**
  * Result from running the CLI
  */
-export interface CliResult {
+interface CliResult {
   stdout: string;
   stderr: string;
   exitCode: number;

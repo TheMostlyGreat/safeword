@@ -12,7 +12,7 @@ import { join } from 'node:path';
 /**
  * TanStack Query package names across all supported frameworks.
  */
-export const TANSTACK_QUERY_PACKAGES = [
+const TANSTACK_QUERY_PACKAGES = [
   '@tanstack/react-query',
   '@tanstack/vue-query',
   '@tanstack/solid-query',
@@ -23,22 +23,18 @@ export const TANSTACK_QUERY_PACKAGES = [
 /**
  * Tailwind CSS package names (v3 and v4 installation methods).
  */
-export const TAILWIND_PACKAGES = [
-  'tailwindcss',
-  '@tailwindcss/vite',
-  '@tailwindcss/postcss',
-] as const;
+const TAILWIND_PACKAGES = ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/postcss'] as const;
 
 /**
  * Playwright test package names.
  */
-export const PLAYWRIGHT_PACKAGES = ['@playwright/test', 'playwright'] as const;
+const PLAYWRIGHT_PACKAGES = ['@playwright/test', 'playwright'] as const;
 
 /**
  * Known formatter config files.
  * If any exist, user likely has their own formatter setup.
  */
-export const FORMATTER_CONFIG_FILES = [
+const FORMATTER_CONFIG_FILES = [
   // Biome
   'biome.json',
   'biome.jsonc',
@@ -71,14 +67,14 @@ export const FORMATTER_CONFIG_FILES = [
   'prettier.config.mts',
 ] as const;
 
-export type DepsRecord = Record<string, string | undefined>;
-export type ScriptsRecord = Record<string, string | undefined>;
+type DepsRecord = Record<string, string | undefined>;
+type ScriptsRecord = Record<string, string | undefined>;
 
 /**
  * Collect all dependencies from root and workspace package.json files.
  * Supports npm/yarn workspaces and common monorepo patterns.
  */
-export function collectAllDeps(rootDir: string): DepsRecord {
+function collectAllDeps(rootDir: string): DepsRecord {
   const allDeps: DepsRecord = {};
 
   const mergeDeps = (pkgPath: string): void => {
@@ -135,28 +131,28 @@ export function collectAllDeps(rootDir: string): DepsRecord {
 /**
  * Check if Tailwind CSS is installed.
  */
-export function hasTailwind(deps: DepsRecord): boolean {
+function hasTailwind(deps: DepsRecord): boolean {
   return TAILWIND_PACKAGES.some(pkg => pkg in deps);
 }
 
 /**
  * Check if TanStack Query is installed.
  */
-export function hasTanstackQuery(deps: DepsRecord): boolean {
+function hasTanstackQuery(deps: DepsRecord): boolean {
   return TANSTACK_QUERY_PACKAGES.some(pkg => pkg in deps);
 }
 
 /**
  * Check if Vitest is installed.
  */
-export function hasVitest(deps: DepsRecord): boolean {
+function hasVitest(deps: DepsRecord): boolean {
   return 'vitest' in deps;
 }
 
 /**
  * Check if Playwright is installed.
  */
-export function hasPlaywright(deps: DepsRecord): boolean {
+function hasPlaywright(deps: DepsRecord): boolean {
   return PLAYWRIGHT_PACKAGES.some(pkg => pkg in deps);
 }
 
@@ -164,7 +160,7 @@ export function hasPlaywright(deps: DepsRecord): boolean {
  * Detect base framework for config selection.
  * Returns the most specific framework detected.
  */
-export function detectFramework(
+function detectFramework(
   deps: DepsRecord,
 ): 'next' | 'react' | 'astro' | 'typescript' | 'javascript' {
   if ('next' in deps) return 'next';
@@ -177,7 +173,7 @@ export function detectFramework(
 /**
  * Get dynamic ignores based on detected frameworks.
  */
-export function getIgnores(deps: DepsRecord): string[] {
+function getIgnores(deps: DepsRecord): string[] {
   const ignores = ['**/node_modules/', '**/dist/', '**/build/', '**/coverage/'];
   if ('next' in deps) ignores.push('**/.next/');
   if ('astro' in deps) ignores.push('**/.astro/');
@@ -188,7 +184,7 @@ export function getIgnores(deps: DepsRecord): string[] {
  * Check if project has an existing linter setup.
  * True if package.json has a "lint" script.
  */
-export function hasExistingLinter(scripts: ScriptsRecord): boolean {
+function hasExistingLinter(scripts: ScriptsRecord): boolean {
   return 'lint' in scripts;
 }
 
@@ -196,7 +192,7 @@ export function hasExistingLinter(scripts: ScriptsRecord): boolean {
  * Check if project has an existing formatter setup.
  * True if package.json has a "format" script OR any formatter config file exists.
  */
-export function hasExistingFormatter(cwd: string, scripts: ScriptsRecord): boolean {
+function hasExistingFormatter(cwd: string, scripts: ScriptsRecord): boolean {
   // Check for format script
   if ('format' in scripts) return true;
 
@@ -229,5 +225,3 @@ export const detect = {
   hasExistingLinter,
   hasExistingFormatter,
 };
-
-export default detect;

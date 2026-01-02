@@ -15,7 +15,7 @@ import { header, info, keyValue, listItem, success, warn } from '../utils/output
 import { isNewerVersion } from '../utils/version.js';
 import { VERSION } from '../version.js';
 
-export interface CheckOptions {
+interface CheckOptions {
   offline?: boolean;
 }
 

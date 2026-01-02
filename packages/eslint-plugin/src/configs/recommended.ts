@@ -40,5 +40,3 @@ export const recommended: any[] = [
     },
   },
 ];
-
-export default recommended;

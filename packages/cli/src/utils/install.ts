@@ -11,7 +11,7 @@ import { join } from 'node:path';
 
 import { info, listItem, success, warn } from './output.js';
 
-export type PackageManager = 'npm' | 'yarn' | 'pnpm' | 'bun';
+type PackageManager = 'npm' | 'yarn' | 'pnpm' | 'bun';
 
 /**
  * Detect package manager by lockfile (bun > pnpm > yarn > npm)
@@ -40,7 +40,7 @@ function getInstallArguments(pm: PackageManager): string[] {
 /**
  * Get display command for logging
  */
-export function getInstallCommand(pm: PackageManager, packages: string[]): string {
+function getInstallCommand(pm: PackageManager, packages: string[]): string {
   const cmds: Record<PackageManager, string> = {
     npm: `npm install -D ${packages.join(' ')}`,
     yarn: `yarn add -D ${packages.join(' ')}`,

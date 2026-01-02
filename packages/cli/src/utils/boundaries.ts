@@ -55,7 +55,7 @@ const HIERARCHY: Record<Layer, Layer[]> = {
   app: ['features', 'components', 'hooks', 'services', 'lib', 'utils', 'types'],
 };
 
-export interface DetectedElement {
+interface DetectedElement {
   layer: Layer;
   pattern: string; // glob pattern for boundaries config
   location: string; // human-readable location

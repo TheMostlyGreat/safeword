@@ -17,7 +17,7 @@ import {
 import { exists } from '../utils/fs.js';
 import { error, info, success } from '../utils/output.js';
 
-export interface SyncConfigResult {
+interface SyncConfigResult {
   generatedConfig: boolean;
   createdMainConfig: boolean;
 }

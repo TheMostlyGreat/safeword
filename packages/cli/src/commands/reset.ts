@@ -17,7 +17,7 @@ import { exists } from '../utils/fs.js';
 import { detectPackageManager, getUninstallCommand } from '../utils/install.js';
 import { error, header, info, listItem, success, warn } from '../utils/output.js';
 
-export interface ResetOptions {
+interface ResetOptions {
   yes?: boolean;
   full?: boolean;
 }

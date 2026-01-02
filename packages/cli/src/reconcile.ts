@@ -255,7 +255,7 @@ function getClaudeParentDirectoryForCleanup(filePath: string): string | undefine
 // Types
 // ============================================================================
 
-export type ReconcileMode = 'install' | 'upgrade' | 'uninstall' | 'uninstall-full';
+type ReconcileMode = 'install' | 'upgrade' | 'uninstall' | 'uninstall-full';
 
 export type Action =
   | { type: 'mkdir'; path: string }
@@ -278,7 +278,7 @@ export interface ReconcileResult {
   packagesToRemove: string[];
 }
 
-export interface ReconcileOptions {
+interface ReconcileOptions {
   dryRun?: boolean;
 }
 

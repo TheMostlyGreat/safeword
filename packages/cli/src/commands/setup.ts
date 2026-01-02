@@ -27,7 +27,7 @@ import { detectLanguages, type Languages } from '../utils/project-detector.js';
 import { VERSION } from '../version.js';
 import { buildArchitecture, hasArchitectureDetected, syncConfigCore } from './sync-config.js';
 
-export interface SetupOptions {
+interface SetupOptions {
   yes?: boolean;
 }
 

@@ -113,5 +113,3 @@ export const recommendedTypeScript: any[] = [
     },
   },
 ];
-
-export default recommendedTypeScript;

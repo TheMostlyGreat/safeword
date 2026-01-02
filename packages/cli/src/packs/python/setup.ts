@@ -85,7 +85,7 @@ export function detectRootPackage(cwd: string): string {
   return nodePath.basename(cwd).replaceAll('-', '_');
 }
 
-export type PythonPackageManager = 'uv' | 'poetry' | 'pipenv' | 'pip';
+type PythonPackageManager = 'uv' | 'poetry' | 'pipenv' | 'pip';
 
 /**
  * Check if ruff is already declared as a dependency in pyproject.toml.

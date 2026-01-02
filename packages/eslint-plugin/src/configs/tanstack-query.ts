@@ -38,5 +38,3 @@ export const tanstackQueryConfig: any[] = [
     },
   },
 ];
-
-export default tanstackQueryConfig;

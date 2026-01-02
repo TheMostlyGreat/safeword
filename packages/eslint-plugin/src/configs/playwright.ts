@@ -72,5 +72,3 @@ export const playwrightConfig: any[] = [
     },
   },
 ];
-
-export default playwrightConfig;

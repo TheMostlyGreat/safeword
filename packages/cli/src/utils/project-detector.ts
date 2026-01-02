@@ -14,8 +14,7 @@ import { detect } from 'eslint-plugin-safeword';
 export const {
   TAILWIND_PACKAGES,
   TANSTACK_QUERY_PACKAGES,
-  PLAYWRIGHT_PACKAGES,
-  FORMATTER_CONFIG_FILES,
+
   hasExistingLinter,
   hasExistingFormatter,
 } = detect;
@@ -174,7 +173,7 @@ export function detectPythonType(cwd: string): PythonProjectType | undefined {
  * @param cwd
  * @param maxDepth
  */
-export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
+function hasShellScripts(cwd: string, maxDepth = 4): boolean {
   const excludeDirectories = new Set(['node_modules', '.git', '.safeword']);
 
   /**
@@ -208,7 +207,7 @@ export function hasShellScripts(cwd: string, maxDepth = 4): boolean {
   return scan(cwd, 0);
 }
 
-export interface PackageJsonWithScripts extends PackageJson {
+interface PackageJsonWithScripts extends PackageJson {
   scripts?: Record<string, string>;
 }
 
@@ -217,7 +216,7 @@ export interface PackageJsonWithScripts extends PackageJson {
  * @param cwd - Working directory to scan
  * @returns The config file path if found, undefined otherwise.
  */
-export function findExistingEslintConfig(cwd: string): string | undefined {
+function findExistingEslintConfig(cwd: string): string | undefined {
   for (const config of ESLINT_CONFIG_FILES) {
     if (existsSync(nodePath.join(cwd, config))) {
       return config;
@@ -231,7 +230,7 @@ export function findExistingEslintConfig(cwd: string): string | undefined {
  * @param cwd - Working directory to scan
  * @returns True if ruff.toml exists OR [tool.ruff] in pyproject.toml
  */
-export function hasExistingRuffConfig(cwd: string): boolean {
+function hasExistingRuffConfig(cwd: string): boolean {
   // Check for standalone ruff.toml
   if (existsSync(nodePath.join(cwd, 'ruff.toml'))) return true;
 
@@ -251,7 +250,7 @@ export function hasExistingRuffConfig(cwd: string): boolean {
  * @param cwd - Working directory to scan
  * @returns True if mypy.ini/.mypy.ini exists OR [tool.mypy] in pyproject.toml
  */
-export function hasExistingMypyConfig(cwd: string): boolean {
+function hasExistingMypyConfig(cwd: string): boolean {
   // Check for standalone mypy config files
   if (existsSync(nodePath.join(cwd, 'mypy.ini'))) return true;
   if (existsSync(nodePath.join(cwd, '.mypy.ini'))) return true;
@@ -272,7 +271,7 @@ export function hasExistingMypyConfig(cwd: string): boolean {
  * @param cwd - Working directory to scan
  * @returns True if .importlinter exists OR [tool.importlinter] in pyproject.toml
  */
-export function hasExistingImportLinterConfig(cwd: string): boolean {
+function hasExistingImportLinterConfig(cwd: string): boolean {
   // Check for standalone .importlinter file
   if (existsSync(nodePath.join(cwd, '.importlinter'))) return true;
 
@@ -292,7 +291,7 @@ export function hasExistingImportLinterConfig(cwd: string): boolean {
  * @param cwd - Working directory to scan
  * @returns The config file path if found, undefined otherwise.
  */
-export function findExistingGolangciConfig(cwd: string): string | undefined {
+function findExistingGolangciConfig(cwd: string): string | undefined {
   for (const config of GOLANGCI_CONFIG_FILES) {
     if (existsSync(nodePath.join(cwd, config))) {
       return config;

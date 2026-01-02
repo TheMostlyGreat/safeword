@@ -43,5 +43,3 @@ export const astroConfig: any[] = [
     },
   },
 ];
-
-export default astroConfig;

@@ -42,5 +42,3 @@ export const vitestConfig: any[] = [
     },
   },
 ];
-
-export default vitestConfig;

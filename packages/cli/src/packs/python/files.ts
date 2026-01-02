@@ -48,7 +48,7 @@ max-complexity = 10`;
  *
  * @param existingRuffConfig - True if project has existing ruff config
  */
-export function generateRuffBaseConfig(existingRuffConfig = false): string {
+function generateRuffBaseConfig(existingRuffConfig = false): string {
   if (existingRuffConfig) {
     // Extend project's existing Ruff config with safeword's stricter rules
     // Note: Ruff's extend works with both ruff.toml and pyproject.toml

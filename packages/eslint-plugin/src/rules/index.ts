@@ -11,5 +11,3 @@ export const rules = {
   'no-incomplete-error-handling': noIncompleteErrorHandling,
   'no-re-export-all': noReExportAll,
 };
-
-export default rules;

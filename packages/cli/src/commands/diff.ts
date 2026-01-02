@@ -13,7 +13,7 @@ import { exists, readFileSafe } from '../utils/fs.js';
 import { error, header, info, listItem, success } from '../utils/output.js';
 import { VERSION } from '../version.js';
 
-export interface DiffOptions {
+interface DiffOptions {
   verbose?: boolean;
 }
 

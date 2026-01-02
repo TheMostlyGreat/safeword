@@ -46,5 +46,3 @@ export const recommendedTypeScriptNext: any[] = [
     },
   },
 ];
-
-export default recommendedTypeScriptNext;

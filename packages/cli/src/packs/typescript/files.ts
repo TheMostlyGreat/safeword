@@ -15,7 +15,7 @@ import type { FileDefinition, JsonMergeDefinition, ManagedFileDefinition } from 
 /**
  * Prettier styling defaults - shared between .safeword/.prettierrc and root .prettierrc
  */
-export const PRETTIER_DEFAULTS = {
+const PRETTIER_DEFAULTS = {
   semi: true,
   singleQuote: true,
   tabWidth: 2,

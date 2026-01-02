@@ -26,7 +26,7 @@ function isHookEntry(h: unknown): h is HookEntry {
  * Check if a hook entry contains a safeword hook (command contains '.safeword')
  * @param h
  */
-export function isSafewordHook(h: unknown): boolean {
+function isSafewordHook(h: unknown): boolean {
   if (!isHookEntry(h)) return false;
   return h.hooks.some(cmd => typeof cmd.command === 'string' && cmd.command.includes('.safeword'));
 }

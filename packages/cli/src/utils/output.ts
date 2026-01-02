@@ -37,7 +37,7 @@ export function error(message: string): void {
 /**
  * Print a blank line
  */
-export function blank(): void {
+function blank(): void {
   console.log('');
 }
 

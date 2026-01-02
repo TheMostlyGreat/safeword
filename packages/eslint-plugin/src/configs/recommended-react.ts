@@ -89,5 +89,3 @@ export const recommendedTypeScriptReact: any[] = [
     },
   },
 ];
-
-export default recommendedTypeScriptReact;
