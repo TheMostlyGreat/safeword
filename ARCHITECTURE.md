@@ -1,7 +1,7 @@
 # Safeword Architecture
 
-**Version:** 1.1
-**Last Updated:** 2025-12-31
+**Version:** 1.2
+**Last Updated:** 2026-01-02
 **Status:** Production
 
 ---
@@ -9,6 +9,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Monorepo Structure](#monorepo-structure)
 - [CLI Structure](#cli-structure)
 - [Language Packs](#language-packs)
 - [Language Detection](#language-detection)
@@ -35,20 +36,52 @@ Safeword is a CLI tool that configures linting, hooks, and development guides fo
 
 ---
 
+## Monorepo Structure
+
+```text
+packages/
+├── cli/            # Main CLI tool (bunx safeword)
+├── eslint-plugin/  # ESLint plugin with LLM-optimized rules
+└── website/        # Documentation site (Astro/Starlight)
+```
+
+| Package                   | Purpose                                           | Published As             |
+| ------------------------- | ------------------------------------------------- | ------------------------ |
+| `packages/cli/`           | CLI that installs hooks, guides, linting configs  | `safeword`               |
+| `packages/eslint-plugin/` | ESLint plugin with rules optimized for LLM agents | `eslint-plugin-safeword` |
+| `packages/website/`       | Documentation website                             | Private (not published)  |
+
+**Dependency:** CLI depends on eslint-plugin (`eslint-plugin-safeword: workspace:^`)
+
+---
+
 ## CLI Structure
 
 ```text
 packages/cli/
 ├── src/
-│   ├── commands/       # CLI commands (setup, upgrade, check)
-│   ├── packs/          # Language packs (typescript, python, golang)
-│   │   └── {lang}/     # index.ts, files.ts, setup.ts
-│   ├── utils/          # Detection, file ops, git
+│   ├── commands/       # CLI commands (setup, upgrade, check, diff, reset)
+│   ├── packs/          # Language packs + registry
+│   │   ├── {lang}/     # index.ts, files.ts, setup.ts per language
+│   │   ├── registry.ts # Central pack registry and detection
+│   │   ├── config.ts   # Pack config management (.safeword/config.json)
+│   │   ├── install.ts  # Pack installation logic
+│   │   └── types.ts    # Shared type definitions
+│   ├── templates/      # Template content helpers
+│   ├── utils/          # Detection, file ops, git, version
 │   ├── schema.ts       # Single source of truth for all managed files
 │   └── reconcile.ts    # Schema-based file management
 ├── templates/
-│   ├── hooks/          # Claude Code hooks
-│   └── commands/       # Slash command templates
+│   ├── SAFEWORD.md     # Core instructions (installed to .safeword/)
+│   ├── AGENTS.md       # Project context template
+│   ├── commands/       # Slash commands (/lint, /audit, /drift)
+│   ├── cursor/         # Cursor IDE rules (.mdc files)
+│   ├── doc-templates/  # Feature specs, design docs, tickets
+│   ├── guides/         # Methodology guides (TDD, planning, etc.)
+│   ├── hooks/          # Claude Code hooks (lint, quality review)
+│   ├── prompts/        # Prompt templates for commands
+│   ├── scripts/        # Shell scripts (cleanup, bisect)
+│   └── skills/         # Claude Code skills (debugging, TDD, etc.)
 ```
 
 ---
@@ -76,9 +109,18 @@ const LANGUAGE_PACKS: Record<string, LanguagePack> = {
 };
 ```
 
-### Pack File Structure (3-file pattern)
+### Pack File Structure
 
-Each language pack uses a consistent 3-file pattern:
+**Root files** (shared infrastructure):
+
+| File          | Purpose                                              |
+| ------------- | ---------------------------------------------------- |
+| `registry.ts` | Central registry, `detectLanguages()`, pack lookup   |
+| `config.ts`   | Read/write `.safeword/config.json` (installed packs) |
+| `install.ts`  | Pack installation orchestration                      |
+| `types.ts`    | Shared types (`LanguagePack`, `ProjectContext`)      |
+
+**Per-language packs** (3-file pattern):
 
 ```text
 packs/{lang}/

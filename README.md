@@ -275,6 +275,64 @@ Commit `.safeword/` and `.claude/` in your project repo for team consistency.
 
 ---
 
+## Development
+
+This section is for contributors to safeword itself.
+
+### Tech Stack
+
+| Component | Technology                    |
+| --------- | ----------------------------- |
+| Runtime   | Bun (dev), Node 18+ (users)   |
+| CLI       | TypeScript, Commander.js      |
+| Build     | tsup (ESM-only output)        |
+| Tests     | Vitest, promptfoo (LLM evals) |
+| Linting   | ESLint 9 + Prettier           |
+
+### Development Workflow
+
+**Editing Source Templates:**
+
+1. Edit in `packages/cli/templates/` (source of truth)
+2. Run `bunx safeword upgrade` to sync to `.safeword/`
+3. Test changes, run evals: `bun run eval`
+
+**Running Tests:**
+
+```bash
+# Important: Use `bun run test` (Vitest), NOT `bun test` (Bun's runner)
+bun run test                      # All tests
+bunx vitest run tests/foo.test.ts # Single file
+bun run test:integration          # Integration tests
+bun run test:watch                # Watch mode
+```
+
+**Publishing:**
+
+Always run `bun publish` from `packages/cli/` directory, not the monorepo root.
+
+### CLI Parity (Claude Code / Cursor)
+
+The CLI installs matching skills for both Claude Code and Cursor IDEs.
+
+**Source of truth:** `packages/cli/src/schema.ts`
+
+**Parity tests:** `packages/cli/tests/schema.test.ts`
+
+| IDE         | Skills Location                | Commands Location       |
+| ----------- | ------------------------------ | ----------------------- |
+| Claude Code | `.claude/skills/safeword-*/`   | `.claude/commands/*.md` |
+| Cursor      | `.cursor/rules/safeword-*.mdc` | N/A                     |
+
+**Editing skills:**
+
+1. Edit templates in `packages/cli/templates/skills/` (Claude) and `packages/cli/templates/cursor/rules/` (Cursor)
+2. Update `packages/cli/src/schema.ts` if adding/removing skills
+3. Run parity tests: `bun run test -- --testNamePattern="parity"`
+4. Run `bunx safeword upgrade` to sync to local project
+
+---
+
 ## LLM Eval Testing
 
 **Purpose**: Validate that guides are effective for LLM consumption using promptfoo.
