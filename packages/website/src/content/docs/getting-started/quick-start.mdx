@@ -5,77 +5,81 @@ description: Get up and running with Safeword in 30 seconds
 
 # Quick Start
 
-## 1. Install (30 seconds)
+AI coding agents are powerful but need guidance. Safeword provides portable hooks, skills, and quality controls that enforce TDD workflow and best practices across all your projects.
+
+## Install
 
 ```bash
-cd /path/to/your/project
 bunx safeword@latest setup
 ```
 
-## 2. Verify
+Or with npm: `npx safeword@latest setup`
 
-```bash
-# Check for SAFEWORD files and hooks
-test -f .safeword/SAFEWORD.md && echo ".safeword/SAFEWORD.md ✓"
-test -f .claude/settings.json && echo ".claude/settings.json ✓"
-```
+## What You Get
 
-**Result**: Your project now has:
-
-- `.safeword/SAFEWORD.md` - Global patterns and workflows
-- `.safeword/guides/` - TDD methodology, testing, code philosophy
-- `.safeword/hooks/` - Claude Code hooks (auto-linting, quality review)
-- `.claude/settings.json` - Hook configuration for Claude Code
-- `.claude/commands/` - Slash commands (`/lint`, `/quality-review`, `/drift`)
-- `AGENTS.md` - Project context with framework reference
+| Path                | Description                     |
+| ------------------- | ------------------------------- |
+| `.safeword/`        | Hooks, guides, and templates    |
+| `.claude/`          | Claude Code settings and skills |
+| `.cursor/rules/`    | Cursor AI rules                 |
+| `eslint.config.mjs` | ESLint with safeword plugin     |
+| `AGENTS.md`         | Project context file            |
 
 **Commit these to your repo** for team consistency.
 
-## 3. Start Coding
-
-Open your project in Claude Code or Cursor. Safeword hooks activate automatically:
-
-- **On session start** → Version check, lint check, AGENTS.md verification
-- **On prompt submit** → Timestamp injection, question reminders
-- **On file edit** → Auto-lint changed files (ESLint, Ruff, golangci-lint)
-- **On session end** → Quality review prompt
-
-## 4. Use Commands
-
-Invoke commands with slash syntax:
-
-```text
-/lint              # Run linters and formatters
-/audit             # Run architecture and dead code analysis
-/drift             # Check if docs match reality
-/quality-review    # Deep code review with web research
-/cleanup-zombies   # Kill zombie dev server processes
-```
-
-## 5. Use Skills
-
-Skills are structured workflows that guide the AI:
-
-```text
-/safeword-debugging      # Four-phase debugging (investigate first)
-/safeword-enforcing-tdd  # RED → GREEN → REFACTOR discipline
-/safeword-refactoring    # Small-step refactoring with tests
-/safeword-brainstorming  # Collaborative design through questioning
-/safeword-writing-plans  # Create detailed execution plans
-```
-
-## 6. Check Status
+## Verify
 
 ```bash
 bunx safeword@latest check
-bunx safeword@latest check --offline # Skip remote version check
 ```
 
-Verifies your setup and reports any issues.
+## Start Coding
+
+Open your project in Claude Code or Cursor. Hooks activate automatically:
+
+- **SessionStart** — Version check, lint check, AGENTS.md verification
+- **UserPromptSubmit** — Timestamp injection, question reminders
+- **PostToolUse** — Auto-lint changed files
+- **Stop** — Quality review prompt
+
+## Commands
+
+Quick actions via slash syntax:
+
+| Command            | Purpose                             |
+| ------------------ | ----------------------------------- |
+| `/lint`            | Run linters and formatters          |
+| `/audit`           | Architecture and dead code analysis |
+| `/drift`           | Check if docs match reality         |
+| `/quality-review`  | Deep code review with web research  |
+| `/cleanup-zombies` | Kill zombie dev server processes    |
+
+## Skills
+
+Structured workflows that guide the AI:
+
+| Skill                     | Purpose                                  |
+| ------------------------- | ---------------------------------------- |
+| `/safeword-debugging`     | Four-phase debugging (investigate first) |
+| `/safeword-enforcing-tdd` | RED → GREEN → REFACTOR discipline        |
+| `/safeword-refactoring`   | Small-step refactoring with tests        |
+| `/safeword-brainstorming` | Collaborative design through questioning |
+| `/safeword-writing-plans` | Create detailed execution plans          |
+
+## Language Support
+
+Auto-detected from your project:
+
+| Language   | Linting           |
+| ---------- | ----------------- |
+| TypeScript | ESLint + Prettier |
+| Python     | Ruff + mypy       |
+| Go         | golangci-lint     |
 
 ## Next Steps
 
-- Read the [CLI Reference](/reference/cli) for all commands
-- Explore [Hooks](/reference/hooks) to understand automation
-- Check [Skills](/reference/skills) for structured workflows
-- Review [Configuration](/reference/configuration) for customization
+- [CLI Reference](/reference/cli) — All CLI commands
+- [Commands](/reference/commands) — Slash command details
+- [Skills](/reference/skills) — Workflow descriptions
+- [Hooks](/reference/hooks) — Automation triggers
+- [Configuration](/reference/configuration) — Customization options

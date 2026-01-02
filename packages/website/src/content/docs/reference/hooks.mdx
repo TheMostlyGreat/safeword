@@ -49,28 +49,6 @@ The `post-tool-lint.ts` hook routes files to the correct linter based on extensi
 
 Linters run silently if not installed (graceful fallback).
 
-## Hook Configuration
-
-Hooks are configured in `.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          "bun \"$CLAUDE_PROJECT_DIR\"/.safeword/hooks/session-version.ts"
-        ]
-      }
-    ],
-    "UserPromptSubmit": [...],
-    "PostToolUse": [...],
-    "Stop": [...]
-  }
-}
-```
-
 ## Customizing Hooks
 
 Hooks are "owned" files - they get overwritten on `safeword upgrade`. To customize:

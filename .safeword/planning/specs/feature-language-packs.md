@@ -32,12 +32,31 @@ Each language pack provides:
 - **Config generators**: Generate linter/formatter config (e.g., `generateRuffConfig()`)
 - **Setup function**: Install config files during setup
 - **File extensions**: Which extensions this pack handles (e.g., `.py`, `.pyi`)
+- **Audit commands**: Dead code detection + outdated deps check (see Audit Parity below)
 
 NOT included (handled by core):
 
 - Hook execution logic
 - CLI commands
 - Templates/guides
+
+### Audit Parity Requirement
+
+**Every language pack MUST provide equivalent `/audit` capabilities:**
+
+| Capability    | TypeScript/JS  | Python              | Go                     |
+| ------------- | -------------- | ------------------- | ---------------------- |
+| Dead code     | knip           | deadcode            | golangci-lint --unused |
+| Outdated deps | bun outdated   | poetry/pip outdated | go list -m -u all      |
+| Duplication   | jscpd (shared) | jscpd (shared)      | jscpd (shared)         |
+| Architecture  | depcruise      | (future: pydeps)    | (future: go-arch)      |
+
+When adding a new language pack:
+
+1. Identify dead code tool for that language
+2. Identify outdated deps tool for that language
+3. Add conditional commands to `/audit` command template
+4. Update audit report format
 
 ### Pack Registry
 

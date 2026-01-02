@@ -1,9 +1,9 @@
 ---
-title: CLI Commands
+title: CLI
 description: Safeword command-line interface reference
 ---
 
-# CLI Commands
+# CLI
 
 ## `safeword setup`
 
@@ -17,12 +17,6 @@ bunx safeword@latest setup [options]
 | ------------- | ------------------------- |
 | `--yes`, `-y` | Skip confirmation prompts |
 | `--force`     | Overwrite existing files  |
-
-**Auto-detection**: Detects project type from `package.json` and installs relevant ESLint/Prettier plugins:
-
-- TypeScript, React, Next.js, Astro, Vue, Svelte, Electron
-- Vitest, Playwright, Tailwind
-- Publishable libraries (adds publint)
 
 ## `safeword upgrade`
 
@@ -75,23 +69,3 @@ bunx safeword@latest diff [file] [options]
 | Option | Description           |
 | ------ | --------------------- |
 | `-v`   | Show full diff output |
-
-## How Guide Imports Work
-
-`AGENTS.md` contains a link: `@./.safeword/SAFEWORD.md` (also added to `CLAUDE.md` if present)
-
-SAFEWORD.md then imports guides via the Quick Reference table. Claude Code auto-loads these as context.
-
-## Learnings System
-
-Check for existing learnings:
-
-```bash
-ls .safeword/learnings/
-```
-
-Extract new learning:
-
-1. Follow recognition triggers in `learning-extraction.md`
-2. Create `.safeword/learnings/[concept].md`
-3. Use template: Problem → Gotcha → Examples → Testing Trap
