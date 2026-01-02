@@ -65,9 +65,9 @@ bunx jscpd . --gitignore --min-lines 10 --reporters console 2>&1 || true
   bun outdated 2>&1 || npm outdated 2>&1 || true
 }
 
-# 5b. Outdated - Python
+# 5b. Outdated - Python (uv > poetry > pip)
 ([ -f pyproject.toml ] || [ -f requirements.txt ]) && {
-  poetry show --outdated 2>&1 || pip list --outdated 2>&1 || true
+  uv pip list --outdated 2>&1 || poetry show --outdated 2>&1 || pip list --outdated 2>&1 || true
 }
 
 # 5c. Outdated - Go
@@ -99,5 +99,5 @@ After running, report in this format:
 **Outdated Packages:**
 
 - TS/JS: [list or "all up to date"]
-- Python: [list or "all up to date"]
+- Python (uv/poetry/pip): [list or "all up to date"]
 - Go: [list or "all up to date"]

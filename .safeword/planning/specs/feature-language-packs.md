@@ -49,7 +49,7 @@ NOT included (handled by core):
 | Architecture  | depcruise      | Runtime + import-linter | Compiler (built-in)    |
 | Dead code     | knip           | deadcode                | golangci-lint --unused |
 | Duplication   | jscpd (shared) | jscpd (shared)          | jscpd (shared)         |
-| Outdated deps | bun outdated   | poetry/pip outdated     | go list -m -u all      |
+| Outdated deps | bun outdated   | uv/poetry/pip outdated  | go list -m -u all      |
 
 **Architecture checking notes:**
 
