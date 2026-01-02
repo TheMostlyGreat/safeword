@@ -36,8 +36,10 @@
     "prettier": "^3.7.4",
     "prettier-plugin-sh": "^0.18.0",
     "promptfoo": "^0.119.5",
-    "shellcheck": "^4.1.0"
+    "shellcheck": "^4.1.0",
+    "zod": "4.3.4"
   },
+  "resolutions": {},
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}": [
       "eslint --fix",
