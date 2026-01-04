@@ -174,7 +174,7 @@ planning/
 
 - `safeword-brainstorming/` - Collaborative design through Socratic questioning
 - `safeword-debugging/` - Four-phase debugging (investigate before fixing)
-- `safeword-enforcing-tdd/` - RED → GREEN → REFACTOR discipline
+- `safeword-tdd-enforcing/` - RED → GREEN → REFACTOR discipline
 - `safeword-quality-reviewer/` - Deep code review with web research
 - `safeword-refactoring/` - Small-step refactoring with test verification
 - `safeword-writing-plans/` - Create detailed execution plans for agents

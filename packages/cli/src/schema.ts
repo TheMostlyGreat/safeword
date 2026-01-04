@@ -149,6 +149,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Shell libraries no longer needed with Bun
     '.safeword/lib/common.sh',
     '.safeword/lib/jq-fallback.sh',
+    // Skill renamed from enforcing-tdd to tdd-enforcing (v0.16.0)
+    '.claude/skills/safeword-enforcing-tdd/SKILL.md',
+    '.cursor/rules/safeword-enforcing-tdd.mdc',
   ],
 
   // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
@@ -183,6 +186,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   deprecatedDirs: [
     '.husky', // Pre-commit hooks no longer managed by safeword
     '.safeword/lib', // Shell libraries no longer needed with Bun (v0.13.0)
+    '.claude/skills/safeword-enforcing-tdd', // Renamed to safeword-tdd-enforcing (v0.16.0)
   ],
 
   // Files owned by safeword (overwritten on upgrade if content changed)
@@ -265,8 +269,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/skills/safeword-debugging/SKILL.md': {
       template: 'skills/safeword-debugging/SKILL.md',
     },
-    '.claude/skills/safeword-enforcing-tdd/SKILL.md': {
-      template: 'skills/safeword-enforcing-tdd/SKILL.md',
+    '.claude/skills/safeword-tdd-enforcing/SKILL.md': {
+      template: 'skills/safeword-tdd-enforcing/SKILL.md',
     },
     '.claude/skills/safeword-quality-reviewing/SKILL.md': {
       template: 'skills/safeword-quality-reviewing/SKILL.md',
@@ -277,11 +281,17 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/skills/safeword-writing-plans/SKILL.md': {
       template: 'skills/safeword-writing-plans/SKILL.md',
     },
+    '.claude/skills/safeword-bdd-orchestrating/SKILL.md': {
+      template: 'skills/safeword-bdd-orchestrating/SKILL.md',
+    },
+    '.claude/commands/bdd.md': { template: 'commands/bdd.md' },
+    '.claude/commands/tdd.md': { template: 'commands/tdd.md' },
     '.claude/commands/drift.md': { template: 'commands/drift.md' },
     '.claude/commands/audit.md': { template: 'commands/audit.md' },
     '.claude/commands/cleanup-zombies.md': { template: 'commands/cleanup-zombies.md' },
     '.claude/commands/lint.md': { template: 'commands/lint.md' },
     '.claude/commands/quality-review.md': { template: 'commands/quality-review.md' },
+    '.claude/commands/refactor.md': { template: 'commands/refactor.md' },
 
     // Cursor rules (7 files)
     '.cursor/rules/safeword-core.mdc': { template: 'cursor/rules/safeword-core.mdc' },
@@ -291,8 +301,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.cursor/rules/safeword-debugging.mdc': {
       template: 'cursor/rules/safeword-debugging.mdc',
     },
-    '.cursor/rules/safeword-enforcing-tdd.mdc': {
-      template: 'cursor/rules/safeword-enforcing-tdd.mdc',
+    '.cursor/rules/safeword-tdd-enforcing.mdc': {
+      template: 'cursor/rules/safeword-tdd-enforcing.mdc',
     },
     '.cursor/rules/safeword-quality-reviewing.mdc': {
       template: 'cursor/rules/safeword-quality-reviewing.mdc',
@@ -303,13 +313,19 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.cursor/rules/safeword-writing-plans.mdc': {
       template: 'cursor/rules/safeword-writing-plans.mdc',
     },
+    '.cursor/rules/safeword-bdd-orchestrating.mdc': {
+      template: 'cursor/rules/safeword-bdd-orchestrating.mdc',
+    },
 
-    // Cursor commands (5 files - same as Claude)
+    // Cursor commands (8 files - same as Claude)
+    '.cursor/commands/bdd.md': { template: 'commands/bdd.md' },
+    '.cursor/commands/tdd.md': { template: 'commands/tdd.md' },
     '.cursor/commands/drift.md': { template: 'commands/drift.md' },
     '.cursor/commands/audit.md': { template: 'commands/audit.md' },
     '.cursor/commands/cleanup-zombies.md': { template: 'commands/cleanup-zombies.md' },
     '.cursor/commands/lint.md': { template: 'commands/lint.md' },
     '.cursor/commands/quality-review.md': { template: 'commands/quality-review.md' },
+    '.cursor/commands/refactor.md': { template: 'commands/refactor.md' },
 
     // Cursor hooks adapters (2 files) - TypeScript with Bun runtime
     '.safeword/hooks/cursor/after-file-edit.ts': { template: 'hooks/cursor/after-file-edit.ts' },

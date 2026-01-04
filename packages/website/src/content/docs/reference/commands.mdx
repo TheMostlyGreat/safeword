@@ -3,111 +3,36 @@ title: Commands
 description: Safeword slash commands reference
 ---
 
-# Commands
+Quick actions available via slash syntax in Claude Code.
 
-Commands are slash commands available in Claude Code. They provide quick access to common tasks.
+| Command            | Purpose                                 |
+| ------------------ | --------------------------------------- |
+| `/lint`            | Run linters and formatters on your code |
+| `/audit`           | Architecture and dead code analysis     |
+| `/drift`           | Check if docs match the actual codebase |
+| `/quality-review`  | Deep code review with web research      |
+| `/cleanup-zombies` | Kill zombie dev server processes        |
 
-## Available Commands
+## /lint
 
-| Command            | Purpose                                   |
-| ------------------ | ----------------------------------------- |
-| `/lint`            | Run linters and formatters                |
-| `/audit`           | Run architecture and dead code analysis   |
-| `/drift`           | Check if architecture docs match codebase |
-| `/quality-review`  | Deep code review with web research        |
-| `/cleanup-zombies` | Kill zombie dev server processes          |
+Routes files to the correct linter based on extension:
 
-## Command Details
+- **TypeScript/JavaScript** → ESLint + Prettier
+- **Python** → Ruff + mypy
+- **Go** → golangci-lint
 
-### /lint
+## /audit
 
-Run linters and formatters to fix code style issues.
+Analyzes architecture compliance, dead code, and dependency issues.
 
-```text
-/lint
-```
+## /drift
 
-Runs the appropriate linter based on file type:
+Compares `ARCHITECTURE.md` against actual structure. Creates or updates docs if missing.
 
-- **JavaScript/TypeScript**: ESLint + Prettier
-- **Python**: Ruff (fast linting) + mypy (type checking)
-- **Go**: golangci-lint
+## /quality-review
 
-### /audit
+Checks library versions, security patterns, and best practices against official docs.
 
-Run comprehensive code audit for architecture and dead code.
+## /cleanup-zombies
 
-```text
-/audit
-```
-
-Analyzes:
-
-- Architecture compliance
-- Dead code detection
-- Dependency analysis
-
-### /drift
-
-Check if architecture documentation matches the actual codebase.
-
-```text
-/drift
-```
-
-Compares:
-
-- ARCHITECTURE.md against actual structure
-- Documented patterns against implementation
-- Creates or updates docs if missing
-
-### /quality-review
-
-Deep code review with web research to verify against latest ecosystem.
-
-```text
-/quality-review
-```
-
-Checks:
-
-- Library versions against latest
-- Security patterns
-- Best practices from official docs
-
-### /cleanup-zombies
-
-Kill zombie dev servers and test processes for the project.
-
-```text
-/cleanup-zombies
-```
-
-Cleans up:
-
-- Orphaned dev server processes
-- Stuck test runners
-- Port conflicts
-
-## Command Location
-
-Commands live in `.claude/commands/`:
-
-```text
-.claude/commands/
-├── audit.md
-├── cleanup-zombies.md
-├── drift.md
-├── lint.md
-└── quality-review.md
-```
-
-## Using Commands
-
-In Claude Code, type the command with a slash:
-
-```text
-/lint
-```
-
-Commands are different from skills - they're quick actions rather than structured workflows.
+Kills orphaned dev servers, stuck test runners, and port conflicts.

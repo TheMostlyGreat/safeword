@@ -14,19 +14,14 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Safeword',
-      components: {
-        SocialIcons: './src/components/SocialIcons.astro',
-      },
       customCss: ['./src/styles/custom.css'],
       description: 'AI coding agent guardrails - hooks, skills, and quality controls',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/TheMostlyGreat/safeword' },
       ],
       sidebar: [
-        { label: 'Quick Start', slug: 'getting-started/quick-start' },
         {
           label: 'Reference',
-          collapsed: true,
           items: [
             { label: 'CLI', slug: 'reference/cli' },
             { label: 'Commands', slug: 'reference/commands' },

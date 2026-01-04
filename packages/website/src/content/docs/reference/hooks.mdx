@@ -3,59 +3,71 @@ title: Hooks
 description: Safeword hooks reference
 ---
 
-# Hooks
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Hooks are TypeScript scripts that run at specific points during AI coding sessions. They execute with Bun runtime.
+Automation and guardrails that guide your coding session.
 
-## Available Hooks
+<Tabs>
+  <TabItem label="Claude Code">
+    TypeScript scripts executed with Bun at specific trigger points.
 
-| Hook                       | Trigger          | Purpose                                  |
-| -------------------------- | ---------------- | ---------------------------------------- |
-| `session-version.ts`       | SessionStart     | Display safeword version                 |
-| `session-verify-agents.ts` | SessionStart     | Verify AGENTS.md link exists             |
-| `session-lint-check.ts`    | SessionStart     | Check for lint errors on session start   |
-| `prompt-timestamp.ts`      | UserPromptSubmit | Inject timestamp into prompts            |
-| `prompt-questions.ts`      | UserPromptSubmit | Remind agent to ask clarifying questions |
-| `post-tool-lint.ts`        | PostToolUse      | Auto-lint after file edits               |
-| `stop-quality.ts`          | Stop             | Quality review prompt on stop            |
+    | Hook                       | Trigger          | Purpose                           |
+    | -------------------------- | ---------------- | --------------------------------- |
+    | `session-version.ts`       | SessionStart     | Display safeword version          |
+    | `session-verify-agents.ts` | SessionStart     | Verify AGENTS.md link exists      |
+    | `session-lint-check.ts`    | SessionStart     | Check for lint errors             |
+    | `prompt-timestamp.ts`      | UserPromptSubmit | Inject timestamp into prompts     |
+    | `prompt-questions.ts`      | UserPromptSubmit | Remind agent to ask questions     |
+    | `post-tool-lint.ts`        | PostToolUse      | Auto-lint after file edits        |
+    | `stop-quality.ts`          | Stop             | Prompt for quality review on stop |
 
-## Hook Location
+    ### Auto-Linting
 
-Hooks live in `.safeword/hooks/` and are executed with Bun:
+    The `post-tool-lint.ts` hook routes files to the correct linter:
 
-```text
-.safeword/hooks/
-├── lib/
-│   ├── lint.ts        # Multi-language lint logic
-│   └── quality.ts     # Quality review helpers
-├── post-tool-lint.ts
-├── prompt-questions.ts
-├── prompt-timestamp.ts
-├── session-lint-check.ts
-├── session-verify-agents.ts
-├── session-version.ts
-└── stop-quality.ts
-```
+    | Extension         | Linter        |
+    | ----------------- | ------------- |
+    | `.js`, `.ts`, etc | ESLint        |
+    | `.py`, `.pyi`     | Ruff          |
+    | `.go`             | golangci-lint |
 
-## Multi-Language Linting
+    Linters run silently if not installed.
 
-The `post-tool-lint.ts` hook routes files to the correct linter based on extension:
+    ### Custom Hooks
 
-| Extension         | Linter        |
-| ----------------- | ------------- |
-| `.js`, `.ts`, etc | ESLint        |
-| `.py`, `.pyi`     | Ruff          |
-| `.go`             | golangci-lint |
+    Hooks are "owned" files—overwritten on `safeword upgrade`. To customize:
 
-Linters run silently if not installed (graceful fallback).
+    1. Copy the hook to a new name (e.g., `my-lint.ts`)
+    2. Update `.claude/settings.json` to use your hook
+    3. Your custom hook won't be touched by upgrades
 
-## Customizing Hooks
+  </TabItem>
+  <TabItem label="Cursor">
+    Cursor uses **rules files** (`.cursor/rules/*.mdc`) rather than event-driven hooks.
 
-Hooks are configured in `.claude/settings.json` (see [Configuration](/reference/configuration#claude-settings)).
+    Safeword installs rules that provide similar guidance:
 
-Hooks are "owned" files - they get overwritten on `safeword upgrade`. To customize:
+    | Rule                           | Purpose                                   |
+    | ------------------------------ | ----------------------------------------- |
+    | `safeword-debugging.mdc`       | Four-phase debugging discipline           |
+    | `safeword-tdd-enforcing.mdc`   | RED → GREEN → REFACTOR enforcement        |
+    | `safeword-refactoring.mdc`     | Small-step refactoring with tests         |
+    | `safeword-brainstorming.mdc`   | Collaborative design through questioning  |
+    | `safeword-quality-reviewer.mdc`| Deep code review guidance                 |
 
-1. Copy the hook to a new name (e.g., `my-custom-lint.ts`)
-2. Modify as needed
-3. Update `.claude/settings.json` to use your hook
-4. Your custom hook won't be touched by upgrades
+    ### Differences from Claude Code
+
+    - **No event triggers** — Rules are persistent instructions, not event-driven
+    - **No auto-linting** — Run `/lint` manually or configure Cursor's format-on-save
+    - **No session hooks** — Rules apply continuously during the session
+
+    ### Custom Rules
+
+    Rules are "owned" files—overwritten on `safeword upgrade`. To customize:
+
+    1. Copy the rule to a new name (e.g., `my-debugging.mdc`)
+    2. Modify as needed
+    3. Your custom rule won't be touched by upgrades
+
+  </TabItem>
+</Tabs>

@@ -16,7 +16,7 @@ Answer IN ORDER. Stop at first match:
 
 1. Spec exists and is approved? → Use this skill
 2. No spec yet? → Use brainstorming skill first
-3. Simple task, obvious steps? → Skip (use enforcing-tdd directly)
+3. Simple task, obvious steps? → Skip (use tdd-enforcing directly)
 
 ---
 
@@ -174,13 +174,13 @@ Plan saved to `.safeword/planning/plans/{slug}.md`
 
 **Execution options:**
 
-1. **Continue here** - I'll execute tasks one-by-one using enforcing-tdd
+1. **Continue here** - I'll execute tasks one-by-one using tdd-enforcing
 2. **Fresh session** - Open new session, reference the plan file
 
 Which approach?
 ```
 
-3. If continuing: Start with Task 1, use enforcing-tdd skill
+3. If continuing: Start with Task 1, use tdd-enforcing skill
 
 **Exit Criteria:**
 

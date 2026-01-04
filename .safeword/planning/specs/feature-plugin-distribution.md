@@ -185,7 +185,7 @@ safeword-plugin/
 ├── skills/
 │   ├── safeword-debugging/SKILL.md
 │   ├── safeword-brainstorming/SKILL.md
-│   ├── safeword-enforcing-tdd/SKILL.md
+│   ├── safeword-tdd-enforcing/SKILL.md
 │   ├── safeword-refactoring/SKILL.md
 │   ├── safeword-quality-reviewer/SKILL.md
 │   └── safeword-writing-plans/SKILL.md

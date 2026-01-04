@@ -31,9 +31,11 @@ Use **gerund form** (verb + -ing). This clearly describes the activity.
 
 | Form       | Examples                                      | Status     |
 | ---------- | --------------------------------------------- | ---------- |
-| Gerund     | `brainstorming`, `debugging`, `enforcing-tdd` | Preferred  |
+| Gerund     | `brainstorming`, `debugging`, `tdd-enforcing` | Preferred  |
 | Noun-agent | `debugger`, `tdd-enforcer`                    | Acceptable |
 | Vague      | `helper`, `utils`, `tools`                    | Avoid      |
+
+**Keyword-first pattern:** For methodology skills (BDD, TDD), put the keyword first for searchability: `bdd-orchestrating`, `tdd-enforcing`. Users searching "bdd" or "tdd" find them faster.
 
 **Rules:**
 
@@ -248,3 +250,23 @@ Before publishing a skill:
 - [ ] Consistent terminology throughout
 - [ ] Concrete examples provided
 - [ ] Tested with Haiku, Sonnet, and Opus
+
+---
+
+## Schema Registration (CRITICAL)
+
+**Every new template file MUST be registered in `packages/cli/src/schema.ts`.**
+
+Without schema registration, templates are orphaned and never installed by `safeword setup` or `safeword upgrade`.
+
+**For new skills:**
+
+1. Add to `ownedFiles`:
+   - `.claude/skills/safeword-{name}/SKILL.md` → `skills/safeword-{name}/SKILL.md`
+   - `.cursor/rules/safeword-{name}.mdc` → `cursor/rules/safeword-{name}.mdc`
+
+2. For new commands:
+   - `.claude/commands/{name}.md` → `commands/{name}.md`
+   - `.cursor/commands/{name}.md` → `commands/{name}.md`
+
+See [Schema Registration Guide](./../guides/schema-registration-guide.md) for the full list of template types and their schema mappings.

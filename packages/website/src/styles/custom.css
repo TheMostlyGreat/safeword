@@ -150,14 +150,14 @@ figure.frame .copy button,
   width: 32px !important;
   height: 32px !important;
   opacity: 1 !important;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23888'%3E%3Cpath d='M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z'/%3E%3C/svg%3E")
-    center/60% no-repeat !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'%3E%3C/path%3E%3C/svg%3E")
+    center/50% no-repeat !important;
 }
 
 figure.frame .copy button:hover,
 .expressive-code .copy button:hover {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z'/%3E%3C/svg%3E")
-    center/60% no-repeat !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'%3E%3C/path%3E%3C/svg%3E")
+    center/50% no-repeat !important;
 }
 
 figure.frame .copy button div,
@@ -227,20 +227,6 @@ th {
   background: transparent !important;
 }
 
-/* Star badge in header */
-.star-badge {
-  background: rgba(0, 0, 0, 0.15) !important;
-  color: #000 !important;
-}
-
-.star-badge:hover {
-  background: rgba(0, 0, 0, 0.25) !important;
-}
-
-.star-badge svg {
-  color: #000 !important;
-}
-
 /* Links */
 a {
   color: #000;
@@ -255,4 +241,52 @@ a:hover {
 ::selection {
   background: #000;
   color: #ff0000;
+}
+
+/* Splash page: hide search, theme toggle, and redundant H1 */
+[data-has-hero] button[aria-label='Search'],
+[data-has-hero] starlight-theme-select,
+[data-has-hero] .hero h1 {
+  display: none !important;
+}
+
+/* Reduce hero spacing on splash page */
+[data-has-hero] .hero {
+  padding-block: 2rem 0 !important;
+  min-height: auto !important;
+}
+
+/* Center logo on splash page and make it larger */
+[data-has-hero] header .site-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2em;
+  padding: 0.3em 0.6em !important;
+}
+
+/* Remove sticky header on splash page */
+[data-has-hero] header {
+  position: static;
+}
+
+/* Double GitHub button size on splash page */
+[data-has-hero] header a[href*='github'] {
+  transform: scale(2);
+  transform-origin: top right;
+  align-self: flex-start;
+  margin-top: 0.3em;
+}
+
+/* Tab styling - black underline to match theme */
+[role='tablist'] {
+  border-color: #000 !important;
+}
+
+[role='tab'] {
+  border-color: transparent !important;
+}
+
+[role='tab'][aria-selected='true'] {
+  border-color: #000 !important;
 }

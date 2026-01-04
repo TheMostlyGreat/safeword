@@ -3,45 +3,27 @@ title: Configuration
 description: Safeword configuration reference
 ---
 
-# Configuration
-
 ## File Categories
-
-Safeword manages two types of files:
 
 ### Owned Files
 
 Overwritten on every `safeword upgrade`:
 
-- `.safeword/hooks/*` - Automation hooks
-- `.safeword/guides/*` - Methodology guides
-- `.safeword/templates/*` - Document templates
-- `.safeword/SAFEWORD.md` - Core instructions
-- `.claude/skills/*` - Claude Code skills
-- `.claude/commands/*` - Slash commands
-- `.cursor/rules/*` - Cursor rules
+- `.safeword/hooks/*`, `.safeword/guides/*`, `.safeword/templates/*`
+- `.claude/skills/*`, `.claude/commands/*`
+- `.cursor/rules/*`
 
 ### Managed Files
 
-Only created if missing, never overwritten:
+Created if missing, never overwritten:
 
-- `eslint.config.mjs` - ESLint configuration
-- `.prettierrc` - Prettier configuration
-- `.claude/settings.json` - Hook configuration
-- `AGENTS.md` - Project context
+- `eslint.config.mjs`, `.prettierrc`
+- `.claude/settings.json`
+- `AGENTS.md`
 
 ## Language Packs
 
-Safeword tracks installed language packs in `.safeword/config.json`:
-
-```json
-{
-  "version": "0.15.0",
-  "installedPacks": ["python", "typescript", "golang"]
-}
-```
-
-Each language pack provides:
+Auto-detected from your project. Tracked in `.safeword/config.json`.
 
 | Language   | Linting           | Type Checking |
 | ---------- | ----------------- | ------------- |
@@ -49,79 +31,24 @@ Each language pack provides:
 | Python     | Ruff              | mypy          |
 | Go         | golangci-lint     | go vet        |
 
-## ESLint Configuration
-
-Safeword provides an ESLint plugin with multiple configs:
+## ESLint Plugin
 
 ```js
-// eslint.config.mjs
 import safeword from 'eslint-plugin-safeword';
 
 export default [
   ...safeword.configs.recommendedTypeScript,
-  ...safeword.configs.react,
-  ...safeword.configs.vitest,
+  ...safeword.configs.react, // optional
+  ...safeword.configs.vitest, // optional
 ];
 ```
 
-Available configs:
+Available: `recommendedTypeScript`, `react`, `vitest`, `playwright`, `astro`
 
-- `recommendedTypeScript` - Base TypeScript rules
-- `react` - React/JSX rules
-- `vitest` - Vitest testing rules
-- `playwright` - Playwright testing rules
-- `astro` - Astro framework rules
+## Hook Configuration
 
-## Claude Settings
-
-Hook configuration in `.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          "bun \"$CLAUDE_PROJECT_DIR\"/.safeword/hooks/session-version.ts",
-          "bun \"$CLAUDE_PROJECT_DIR\"/.safeword/hooks/session-verify-agents.ts"
-        ]
-      }
-    ],
-    "UserPromptSubmit": [...],
-    "PostToolUse": [...],
-    "Stop": [...]
-  }
-}
-```
-
-## MCP Configuration
-
-MCP servers configured in `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "context7": {
-      "command": "bunx",
-      "args": ["@upstash/context7-mcp@latest"]
-    },
-    "playwright": {
-      "command": "bunx",
-      "args": ["@playwright/mcp@latest"]
-    }
-  }
-}
-```
-
-## Version Tracking
-
-`.safeword/version` tracks the installed version for upgrade logic.
+Hooks are configured in `.claude/settings.json` under the `hooks` key. See [Hooks reference](/reference/hooks) for available hooks.
 
 ## Project-Specific Content
 
-Content that shouldn't be touched by upgrades goes in `.safeword-project/`:
-
-- Project-specific guides
-- Custom templates
-- Local learnings
+Content that won't be touched by upgrades goes in `.safeword-project/`.

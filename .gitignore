@@ -18,3 +18,6 @@ eval-results.json
 .claude/mcp/arcade.json
 dependency-graph.svg
 .playwright-mcp/
+
+# Brand assets (internal)
+brand/

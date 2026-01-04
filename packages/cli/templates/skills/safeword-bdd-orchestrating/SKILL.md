@@ -1,0 +1,93 @@
+---
+name: bdd-orchestrating
+description: BDD orchestrator for feature-level work requiring multiple scenarios. Use when user says 'add', 'implement', 'build', 'feature', or work touches 3+ files with new state/flows. Also use when user runs /bdd. Do NOT use for bug fixes, typos, config changes, or 1-2 file tasks—use safeword-tdd-enforcing directly.
+allowed-tools: '*'
+---
+
+# BDD Orchestrator
+
+Behavior-first development for features. Discovery → Scenarios → Implementation.
+
+**Iron Law:** DEFINE BEHAVIOR BEFORE IMPLEMENTATION
+
+## Work Level Detection
+
+Follow this decision tree. Stop at first match:
+
+```
+Is this explicitly a bug fix, typo, or config change?
+├─ Yes → patch (use TDD skill directly)
+└─ No ↓
+
+Does request mention "feature", "add", "implement", "support", "build"?
+├─ No → task (use TDD skill directly)
+└─ Yes ↓
+
+Will it require 3+ files AND (new state OR multiple user flows)?
+├─ Yes → feature (continue with BDD)
+└─ No / Unsure ↓
+
+Can ONE E2E test cover the observable change?
+├─ Yes → task (use TDD skill directly)
+└─ No → feature (continue with BDD)
+
+Fallback: task. User can `/bdd` to override.
+```
+
+**Detection signals:**
+
+| Signal        | task → TDD                | feature → BDD                   |
+| ------------- | ------------------------- | ------------------------------- |
+| Files touched | 1-2 files                 | 3+ files                        |
+| Test count    | 1 E2E test sufficient     | Multiple scenarios needed       |
+| State changes | None or trivial           | New state machine / transitions |
+| User flows    | Single path               | Multiple paths / branching      |
+| Keywords      | "change", "fix", "update" | "add", "implement", "feature"   |
+
+**Examples:**
+
+| Request                      | Signals                           | Level   |
+| ---------------------------- | --------------------------------- | ------- |
+| "Change button color to red" | 1 file, 1 test, no state          | task    |
+| "Add dark mode toggle"       | 3+ files, new state, user prefs   | feature |
+| "Fix login error message"    | 1-2 files, 1 test                 | task    |
+| "Add user authentication"    | Many files, state machine, flows  | feature |
+| "Update API response format" | 1-2 files, 1 E2E test             | task    |
+| "Add shopping cart"          | Many files, state, multiple flows | feature |
+| "Fix typo in README"         | 1 file, no test needed            | patch   |
+
+**Edge cases:**
+
+- "Add a comment to function X" → patch (not a behavior change, despite "add")
+- "Implement the fix for bug #123" → task (bug fix, despite "implement")
+- "Build the Docker image" → patch (infrastructure, not product behavior)
+- "Add logging to the auth module" → task (observability, 1-2 files, no user flow)
+- "Feature flag for dark mode" → task if toggle only, feature if full dark mode
+
+---
+
+## Announcement
+
+After detection, always announce:
+
+- **patch:** "Patch. Fixing directly."
+- **task:** "Task. Writing tests first. `/bdd` to override."
+- **feature:** "Feature. Defining behaviors first. `/tdd` to override."
+
+---
+
+## Current Behavior (Iteration 1)
+
+1. Detect work level using algorithm above
+2. Announce with override hint
+3. Delegate to `safeword-tdd-enforcing` for implementation
+
+Future iterations add: context check, discovery, scenarios, validation, decomposition.
+
+---
+
+## Key Takeaways
+
+- **patch/task** → delegate to TDD immediately
+- **feature** → BDD phases first (Iteration 1: just announce, then TDD)
+- When unsure → default to task, user can `/bdd` to override

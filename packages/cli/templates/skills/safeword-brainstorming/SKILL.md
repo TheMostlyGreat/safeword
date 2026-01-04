@@ -17,7 +17,7 @@ Answer IN ORDER. Stop at first match:
 1. Rough idea needs refinement? → Use this skill
 2. Multiple approaches possible? → Use this skill
 3. Unclear requirements? → Use this skill
-4. Clear task, obvious approach? → Skip (use enforcing-tdd directly)
+4. Clear task, obvious approach? → Skip (use tdd-enforcing directly)
 5. Pure research/investigation? → Skip
 
 ---
@@ -146,28 +146,28 @@ Which direction feels right?
 
 **Protocol:**
 
-1. Determine level (L0/L1/L2) using triage questions
+1. Determine level (patch/task/feature) using triage questions
 2. Create spec using appropriate template
 3. Commit the spec
 
 **Triage:**
 
-| Question                                 | If Yes →                     |
-| ---------------------------------------- | ---------------------------- |
-| User-facing feature with business value? | **L2** → Feature Spec        |
-| Bug, improvement, internal, or refactor? | **L1** → Task Spec           |
-| Typo, config, or trivial change?         | **L0** → Task Spec (minimal) |
+| Question                                 | If Yes →                        |
+| ---------------------------------------- | ------------------------------- |
+| User-facing feature with business value? | **feature** → Feature Spec      |
+| Bug, improvement, internal, or refactor? | **task** → Task Spec            |
+| Typo, config, or trivial change?         | **patch** → Task Spec (minimal) |
 
 **Output Locations:**
 
-- L2: `.safeword/planning/specs/feature-[slug].md`
-- L1/L0: `.safeword/planning/specs/task-[slug].md`
-- L2 Test Defs: `.safeword/planning/test-definitions/feature-[slug].md`
+- feature: `.safeword/planning/specs/feature-[slug].md`
+- task/patch: `.safeword/planning/specs/task-[slug].md`
+- feature Test Defs: `.safeword/planning/test-definitions/feature-[slug].md`
 
 **Exit Criteria:**
 
 - [ ] Spec created in correct location
-- [ ] L2: Test definitions created
+- [ ] feature: Test definitions created
 - [ ] Spec committed to git
 
 ---
@@ -178,12 +178,12 @@ Which direction feels right?
 
 1. Summarize what was created
 2. Ask: "Ready to start implementation with TDD?"
-3. If yes → Invoke enforcing-tdd skill
+3. If yes → Invoke tdd-enforcing skill
 
 **Exit Criteria:**
 
 - [ ] User confirmed spec is complete
-- [ ] Handed off to enforcing-tdd (if continuing)
+- [ ] Handed off to tdd-enforcing (if continuing)
 
 ---
 

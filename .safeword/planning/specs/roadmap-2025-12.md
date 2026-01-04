@@ -586,7 +586,7 @@ Improve `safeword check` to detect configuration drift and issues:
   ```json
   {
     "skills": {
-      "shared": ["brainstorming", "debugging", "enforcing-tdd", ...],
+      "shared": ["brainstorming", "debugging", "tdd-enforcing", ...],
       "cursorOnly": ["core"],
       "claudeOnly": []
     }
