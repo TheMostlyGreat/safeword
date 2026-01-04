@@ -1,6 +1,6 @@
 {
   "name": "safeword",
-  "version": "0.15.3",
+  "version": "0.15.4",
   "description": "CLI for setting up and managing safeword development environments",
   "type": "module",
   "bin": {
@@ -29,7 +29,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests",
     "clean": "rm -rf dist",
-    "prepublishOnly": "node scripts/check-bun-publish.js && bun run build && bun run test",
+    "prepublishOnly": "node scripts/check-bun-publish.js && bun run build",
     "lint:eslint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

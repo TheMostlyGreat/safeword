@@ -8,4 +8,7 @@ export default defineConfig({
   clean: true,
   target: 'node18',
   shims: false,
+  // Exclude devDependencies that have native bindings from bundling
+  noExternal: [],
+  skipNodeModulesBundle: true,
 });
