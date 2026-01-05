@@ -74,7 +74,7 @@ catch (error) { console.error(error); return null; }
 ## Exported API
 
 ```typescript
-import safeword from 'eslint-plugin-safeword';
+import safeword from "eslint-plugin-safeword";
 
 // Configs (arrays - spread to use)
 safeword.configs.recommended; // JavaScript + JSDoc

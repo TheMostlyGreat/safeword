@@ -52,8 +52,8 @@ Vue plugin uses priority-based presets:
 ```javascript
 // Vue support
 if (deps.vue || deps.nuxt) {
-  const vue = await import('eslint-plugin-vue');
-  configs.push(...vue.default.configs['flat/recommended']);
+  const vue = await import("eslint-plugin-vue");
+  configs.push(...vue.default.configs["flat/recommended"]);
 }
 ```
 
@@ -71,7 +71,7 @@ LLMs often mutate props directly:
 
 ```vue
 <script setup>
-const props = defineProps(['items']);
+const props = defineProps(["items"]);
 
 // LLM mistake: mutating props
 props.items.push(newItem); // Error!

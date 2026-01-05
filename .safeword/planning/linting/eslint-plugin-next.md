@@ -50,7 +50,7 @@ For LLM development, consider `core-web-vitals` instead of `recommended`:
 Next.js 16+ added named exports for flat config:
 
 ```javascript
-import { flatConfig } from '@next/eslint-plugin-next';
+import { flatConfig } from "@next/eslint-plugin-next";
 
 export default {
   ...flatConfig.recommended,
@@ -65,10 +65,10 @@ Our config uses the legacy approach (dynamically loading and spreading rules), w
 ```javascript
 // Next.js plugin (conditional)
 if (deps.next) {
-  const nextPlugin = await import('@next/eslint-plugin-next');
+  const nextPlugin = await import("@next/eslint-plugin-next");
   configs.push({
-    name: 'nextjs',
-    plugins: { '@next/next': nextPlugin.default },
+    name: "nextjs",
+    plugins: { "@next/next": nextPlugin.default },
     rules: nextPlugin.default.configs.recommended.rules,
   });
 }

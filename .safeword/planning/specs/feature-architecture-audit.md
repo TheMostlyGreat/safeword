@@ -192,7 +192,7 @@ Errors (manual fix required):
 
 ```javascript
 // .dependency-cruiser.js (user-editable, created once by sync-config)
-const generated = require('./.safeword/depcruise-config.js');
+const generated = require("./.safeword/depcruise-config.js");
 
 module.exports = {
   forbidden: [

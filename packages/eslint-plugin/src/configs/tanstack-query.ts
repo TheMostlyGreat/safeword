@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
-import tanstackQueryPlugin from '@tanstack/eslint-plugin-query';
+import tanstackQueryPlugin from "@tanstack/eslint-plugin-query";
 
 /**
  * TanStack Query linting config
@@ -23,18 +23,18 @@ import tanstackQueryPlugin from '@tanstack/eslint-plugin-query';
  */
 export const tanstackQueryConfig: any[] = [
   {
-    name: 'safeword/tanstack-query',
+    name: "safeword/tanstack-query",
     plugins: {
-      '@tanstack/query': tanstackQueryPlugin,
+      "@tanstack/query": tanstackQueryPlugin,
     },
     rules: {
-      '@tanstack/query/exhaustive-deps': 'error',
-      '@tanstack/query/stable-query-client': 'error',
-      '@tanstack/query/no-void-query-fn': 'error',
-      '@tanstack/query/no-rest-destructuring': 'error',
-      '@tanstack/query/no-unstable-deps': 'error',
-      '@tanstack/query/infinite-query-property-order': 'error',
-      '@tanstack/query/mutation-property-order': 'error',
+      "@tanstack/query/exhaustive-deps": "error",
+      "@tanstack/query/stable-query-client": "error",
+      "@tanstack/query/no-void-query-fn": "error",
+      "@tanstack/query/no-rest-destructuring": "error",
+      "@tanstack/query/no-unstable-deps": "error",
+      "@tanstack/query/infinite-query-property-order": "error",
+      "@tanstack/query/mutation-property-order": "error",
     },
   },
 ];

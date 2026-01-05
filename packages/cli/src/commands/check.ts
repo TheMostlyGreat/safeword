@@ -4,16 +4,23 @@
  * Uses reconcile() with dryRun to detect missing files and configuration issues.
  */
 
-import nodePath from 'node:path';
+import nodePath from "node:path";
 
-import { getMissingPacks } from '../packs/registry.js';
-import { reconcile } from '../reconcile.js';
-import { SAFEWORD_SCHEMA } from '../schema.js';
-import { createProjectContext } from '../utils/context.js';
-import { exists, readFileSafe } from '../utils/fs.js';
-import { header, info, keyValue, listItem, success, warn } from '../utils/output.js';
-import { isNewerVersion } from '../utils/version.js';
-import { VERSION } from '../version.js';
+import { getMissingPacks } from "../packs/registry.js";
+import { reconcile } from "../reconcile.js";
+import { SAFEWORD_SCHEMA } from "../schema.js";
+import { createProjectContext } from "../utils/context.js";
+import { exists, readFileSafe } from "../utils/fs.js";
+import {
+  header,
+  info,
+  keyValue,
+  listItem,
+  success,
+  warn,
+} from "../utils/output.js";
+import { isNewerVersion } from "../utils/version.js";
+import { VERSION } from "../version.js";
 
 interface CheckOptions {
   offline?: boolean;
@@ -24,10 +31,13 @@ interface CheckOptions {
  * @param cwd
  * @param actions
  */
-function findMissingFiles(cwd: string, actions: { type: string; path: string }[]): string[] {
+function findMissingFiles(
+  cwd: string,
+  actions: { type: string; path: string }[],
+): string[] {
   const issues: string[] = [];
   for (const action of actions) {
-    if (action.type === 'write' && !exists(nodePath.join(cwd, action.path))) {
+    if (action.type === "write" && !exists(nodePath.join(cwd, action.path))) {
       issues.push(`Missing: ${action.path}`);
     }
   }
@@ -45,11 +55,11 @@ function findMissingPatches(
 ): string[] {
   const issues: string[] = [];
   for (const action of actions) {
-    if (action.type !== 'text-patch') continue;
+    if (action.type !== "text-patch") continue;
 
     const fullPath = nodePath.join(cwd, action.path);
     if (exists(fullPath)) {
-      const content = readFileSafe(fullPath) ?? '';
+      const content = readFileSafe(fullPath) ?? "";
       if (action.definition && !content.includes(action.definition.marker)) {
         issues.push(`${action.path} missing safeword link`);
       }
@@ -82,7 +92,7 @@ async function checkLatestVersion(timeout = 3000): Promise<string | undefined> {
       controller.abort();
     }, timeout);
 
-    const response = await fetch('https://registry.npmjs.org/safeword/latest', {
+    const response = await fetch("https://registry.npmjs.org/safeword/latest", {
       signal: controller.signal,
     });
 
@@ -102,7 +112,7 @@ async function checkLatestVersion(timeout = 3000): Promise<string | undefined> {
  * @param cwd
  */
 async function checkHealth(cwd: string): Promise<HealthStatus> {
-  const safewordDirectory = nodePath.join(cwd, '.safeword');
+  const safewordDirectory = nodePath.join(cwd, ".safeword");
 
   // Check if configured
   if (!exists(safewordDirectory)) {
@@ -119,12 +129,14 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
   }
 
   // Read project version
-  const versionPath = nodePath.join(safewordDirectory, 'version');
+  const versionPath = nodePath.join(safewordDirectory, "version");
   const projectVersion = readFileSafe(versionPath)?.trim() ?? undefined;
 
   // Use reconcile with dryRun to detect issues
   const ctx = createProjectContext(cwd);
-  const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
+  const result = await reconcile(SAFEWORD_SCHEMA, "upgrade", ctx, {
+    dryRun: true,
+  });
 
   // Collect issues from write actions and text patches
   // Filter out chmod (paths[] instead of path) and json-merge/unmerge (incompatible definition)
@@ -133,8 +145,11 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
       a,
     ): a is Exclude<
       (typeof result.actions)[number],
-      { type: 'chmod' } | { type: 'json-merge' } | { type: 'json-unmerge' }
-    > => a.type !== 'chmod' && a.type !== 'json-merge' && a.type !== 'json-unmerge',
+      { type: "chmod" } | { type: "json-merge" } | { type: "json-unmerge" }
+    > =>
+      a.type !== "chmod" &&
+      a.type !== "json-merge" &&
+      a.type !== "json-unmerge",
   );
   const issues: string[] = [
     ...findMissingFiles(cwd, actionsWithPath),
@@ -142,8 +157,8 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
   ];
 
   // Check for missing .claude/settings.json
-  if (!exists(nodePath.join(cwd, '.claude', 'settings.json'))) {
-    issues.push('Missing: .claude/settings.json');
+  if (!exists(nodePath.join(cwd, ".claude", "settings.json"))) {
+    issues.push("Missing: .claude/settings.json");
   }
 
   // Check for missing language packs
@@ -166,7 +181,7 @@ async function checkHealth(cwd: string): Promise<HealthStatus> {
  * @param health
  */
 async function reportUpdateStatus(health: HealthStatus): Promise<void> {
-  info('\nChecking for updates...');
+  info("\nChecking for updates...");
   const latestVersion = await checkLatestVersion();
 
   if (!latestVersion) {
@@ -179,9 +194,9 @@ async function reportUpdateStatus(health: HealthStatus): Promise<void> {
 
   if (health.updateAvailable) {
     warn(`Update available: v${latestVersion}`);
-    info('Run `bunx safeword@latest upgrade` to upgrade');
+    info("Run `bunx safeword@latest upgrade` to upgrade");
   } else {
-    success('CLI is up to date');
+    success("CLI is up to date");
   }
 }
 
@@ -193,8 +208,10 @@ function reportVersionMismatch(health: HealthStatus): void {
   if (!health.projectVersion) return;
 
   if (isNewerVersion(health.cliVersion, health.projectVersion)) {
-    warn(`Project config (v${health.projectVersion}) is newer than CLI (v${health.cliVersion})`);
-    info('Consider upgrading the CLI');
+    warn(
+      `Project config (v${health.projectVersion}) is newer than CLI (v${health.cliVersion})`,
+    );
+    info("Consider upgrading the CLI");
   } else if (isNewerVersion(health.projectVersion, health.cliVersion)) {
     info(`\nUpgrade available for project config`);
     info(
@@ -211,31 +228,31 @@ function reportVersionMismatch(health: HealthStatus): void {
 function reportHealthSummary(health: HealthStatus): boolean {
   // Check missing packs first (highest priority - explains missing files)
   if (health.missingPacks.length > 0) {
-    header('Missing Language Packs');
+    header("Missing Language Packs");
     for (const pack of health.missingPacks) {
       listItem(`${pack} pack not installed`);
     }
-    info('\nRun `safeword upgrade` to install missing packs');
+    info("\nRun `safeword upgrade` to install missing packs");
     return true;
   }
 
   if (health.missingPackages.length > 0) {
-    header('Missing Packages');
+    header("Missing Packages");
     for (const pkg of health.missingPackages) listItem(pkg);
-    info('\nRun `safeword upgrade` to install missing packages');
+    info("\nRun `safeword upgrade` to install missing packages");
     return true;
   }
 
   if (health.issues.length > 0) {
-    header('Issues Found');
+    header("Issues Found");
     for (const issue of health.issues) {
       warn(issue);
     }
-    info('\nRun `safeword upgrade` to repair configuration');
+    info("\nRun `safeword upgrade` to repair configuration");
     return true;
   }
 
-  success('\nConfiguration is healthy');
+  success("\nConfiguration is healthy");
   return false;
 }
 
@@ -246,23 +263,26 @@ function reportHealthSummary(health: HealthStatus): boolean {
 export async function check(options: CheckOptions): Promise<void> {
   const cwd = process.cwd();
 
-  header('Safeword Health Check');
+  header("Safeword Health Check");
 
   const health = await checkHealth(cwd);
 
   // Not configured
   if (!health.configured) {
-    info('Not configured. Run `safeword setup` to initialize.');
+    info("Not configured. Run `safeword setup` to initialize.");
     return;
   }
 
   // Show versions
-  keyValue('Safeword CLI', `v${health.cliVersion}`);
-  keyValue('Project config', health.projectVersion ? `v${health.projectVersion}` : 'unknown');
+  keyValue("Safeword CLI", `v${health.cliVersion}`);
+  keyValue(
+    "Project config",
+    health.projectVersion ? `v${health.projectVersion}` : "unknown",
+  );
 
   // Check for updates (unless offline)
   if (options.offline) {
-    info('\nSkipped update check (offline mode)');
+    info("\nSkipped update check (offline mode)");
   } else {
     await reportUpdateStatus(health);
   }

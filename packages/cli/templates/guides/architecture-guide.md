@@ -334,37 +334,37 @@ project/
 2. Add to `eslint.config.mjs`:
 
 ```javascript
-import boundaries from 'eslint-plugin-boundaries';
+import boundaries from "eslint-plugin-boundaries";
 
 export default defineConfig([
   // ... other configs ...
   {
-    name: 'boundaries-config',
-    files: ['**/*.{js,ts,tsx}'],
+    name: "boundaries-config",
+    files: ["**/*.{js,ts,tsx}"],
     plugins: { boundaries },
     settings: {
-      'boundaries/include': ['src/**/*'],
-      'boundaries/elements': [
-        { type: 'app', pattern: 'src/app/**/*' },
-        { type: 'domain', pattern: 'src/domain/**/*' },
-        { type: 'infra', pattern: 'src/infra/**/*' },
-        { type: 'shared', pattern: 'src/shared/**/*' },
+      "boundaries/include": ["src/**/*"],
+      "boundaries/elements": [
+        { type: "app", pattern: "src/app/**/*" },
+        { type: "domain", pattern: "src/domain/**/*" },
+        { type: "infra", pattern: "src/infra/**/*" },
+        { type: "shared", pattern: "src/shared/**/*" },
       ],
     },
     rules: {
-      'boundaries/element-types': [
-        'error',
+      "boundaries/element-types": [
+        "error",
         {
-          default: 'disallow',
+          default: "disallow",
           rules: [
-            { from: 'app', allow: ['domain', 'infra', 'shared'] },
-            { from: 'domain', allow: ['shared'] },
-            { from: 'infra', allow: ['domain', 'shared'] },
-            { from: 'shared', allow: [] },
+            { from: "app", allow: ["domain", "infra", "shared"] },
+            { from: "domain", allow: ["shared"] },
+            { from: "infra", allow: ["domain", "shared"] },
+            { from: "shared", allow: [] },
           ],
         },
       ],
-      'boundaries/no-unknown-files': 'error',
+      "boundaries/no-unknown-files": "error",
     },
   },
 ]);

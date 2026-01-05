@@ -5,14 +5,14 @@
  * All security rules now at error - no distinction between "high confidence" and "advisory".
  */
 
-import { Linter } from 'eslint';
-import { describe, expect, it } from 'vitest';
+import { Linter } from "eslint";
+import { describe, expect, it } from "vitest";
 
-import { recommended } from '../recommended.js';
+import { recommended } from "../recommended.js";
 
 const ERROR = 2;
 
-const jsLinter = new Linter({ configType: 'flat' });
+const jsLinter = new Linter({ configType: "flat" });
 
 /**
  * Lint JS code and return messages for a specific rule.
@@ -20,8 +20,8 @@ const jsLinter = new Linter({ configType: 'flat' });
  * @param ruleId - Rule ID to filter for
  */
 function lintJs(code: string, ruleId: string) {
-  const results = jsLinter.verify(code, recommended, { filename: 'test.mjs' });
-  return results.filter(r => r.ruleId === ruleId);
+  const results = jsLinter.verify(code, recommended, { filename: "test.mjs" });
+  return results.filter((r) => r.ruleId === ruleId);
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, security/detect-object-injection -- ESLint config types vary across plugins */
@@ -34,7 +34,13 @@ function lintJs(code: string, ruleId: string) {
 function getRuleConfig(config: any[], ruleId: string): unknown {
   for (let i = config.length - 1; i >= 0; i--) {
     const c = config[i];
-    if (c && typeof c === 'object' && 'rules' in c && c.rules && ruleId in c.rules) {
+    if (
+      c &&
+      typeof c === "object" &&
+      "rules" in c &&
+      c.rules &&
+      ruleId in c.rules
+    ) {
       return c.rules[ruleId];
     }
   }
@@ -50,46 +56,49 @@ function expectErrorSeverity(config: any[], ruleId: string): void {
   const ruleConfig = getRuleConfig(config, ruleId);
   expect(ruleConfig).toBeDefined();
   const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
-  expect(severity === 'error' || severity === ERROR).toBe(true);
+  expect(severity === "error" || severity === ERROR).toBe(true);
 }
 /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, security/detect-object-injection */
 
-describe('Story 5: Security Rules at Error', () => {
-  describe('all security rules at error severity (LLMs ignore warnings)', () => {
-    it('security/detect-object-injection errors on bracket notation', () => {
+describe("Story 5: Security Rules at Error", () => {
+  describe("all security rules at error severity (LLMs ignore warnings)", () => {
+    it("security/detect-object-injection errors on bracket notation", () => {
       const code = `const key = 'prop';
 const obj = { prop: 1 };
 const value = obj[key];
 export { value };
 `;
-      const errors = lintJs(code, 'security/detect-object-injection');
+      const errors = lintJs(code, "security/detect-object-injection");
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].severity).toBe(ERROR);
     });
 
-    it('security/detect-possible-timing-attacks is configured at error severity', () => {
-      expectErrorSeverity(recommended, 'security/detect-possible-timing-attacks');
+    it("security/detect-possible-timing-attacks is configured at error severity", () => {
+      expectErrorSeverity(
+        recommended,
+        "security/detect-possible-timing-attacks",
+      );
     });
 
-    it('security/detect-buffer-noassert is configured at error severity', () => {
-      expectErrorSeverity(recommended, 'security/detect-buffer-noassert');
+    it("security/detect-buffer-noassert is configured at error severity", () => {
+      expectErrorSeverity(recommended, "security/detect-buffer-noassert");
     });
 
-    it('security/detect-new-buffer is configured at error severity', () => {
-      expectErrorSeverity(recommended, 'security/detect-new-buffer');
+    it("security/detect-new-buffer is configured at error severity", () => {
+      expectErrorSeverity(recommended, "security/detect-new-buffer");
     });
 
-    it('security/detect-pseudoRandomBytes is configured at error severity', () => {
-      expectErrorSeverity(recommended, 'security/detect-pseudoRandomBytes');
+    it("security/detect-pseudoRandomBytes is configured at error severity", () => {
+      expectErrorSeverity(recommended, "security/detect-pseudoRandomBytes");
     });
   });
 
-  describe('confirms critical security rules also at error', () => {
-    it('security/detect-eval-with-expression is error', () => {
+  describe("confirms critical security rules also at error", () => {
+    it("security/detect-eval-with-expression is error", () => {
       const code = `const userInput = 'code';
 eval(userInput);
 `;
-      const errors = lintJs(code, 'security/detect-eval-with-expression');
+      const errors = lintJs(code, "security/detect-eval-with-expression");
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].severity).toBe(ERROR);
     });

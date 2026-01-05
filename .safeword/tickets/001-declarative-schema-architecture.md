@@ -55,7 +55,7 @@ setupHuskyPreCommit(cwd);
 **After (thin wrapper):**
 
 ```typescript
-const packageJson = readJson<PackageJson>(join(cwd, 'package.json'));
+const packageJson = readJson<PackageJson>(join(cwd, "package.json"));
 const ctx: ProjectContext = {
   cwd,
   projectType: detectProjectType(packageJson),
@@ -114,7 +114,7 @@ Create a helper for common patterns:
 ```typescript
 // src/utils/context.ts
 export function createProjectContext(cwd: string): ProjectContext {
-  const packageJson = readJson<PackageJson>(join(cwd, 'package.json'));
+  const packageJson = readJson<PackageJson>(join(cwd, "package.json"));
   return {
     cwd,
     projectType: detectProjectType(packageJson ?? {}),

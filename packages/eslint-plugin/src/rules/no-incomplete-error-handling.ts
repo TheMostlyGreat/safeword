@@ -15,12 +15,12 @@
 
 /* eslint-disable sonarjs/cognitive-complexity, sonarjs/no-nested-conditional, @typescript-eslint/no-unnecessary-condition, jsdoc/require-returns, jsdoc/require-param-description */
 
-import type { Rule } from 'eslint';
-import type { CallExpression, CatchClause, Statement } from 'estree';
+import type { Rule } from "eslint";
+import type { CallExpression, CatchClause, Statement } from "estree";
 
-const LOG_METHODS = new Set(['log', 'error', 'warn', 'info', 'debug', 'trace']);
+const LOG_METHODS = new Set(["log", "error", "warn", "info", "debug", "trace"]);
 
-const LOG_OBJECTS = new Set(['console', 'logger', 'log']);
+const LOG_OBJECTS = new Set(["console", "logger", "log"]);
 
 /**
  * Checks if a call expression is a logging call (console.log, logger.error, etc.)
@@ -31,9 +31,9 @@ function isLoggingCall(node: CallExpression): boolean {
 
   // console.error(...), logger.error(...), etc.
   if (
-    callee.type === 'MemberExpression' &&
-    callee.object.type === 'Identifier' &&
-    callee.property.type === 'Identifier'
+    callee.type === "MemberExpression" &&
+    callee.object.type === "Identifier" &&
+    callee.property.type === "Identifier"
   ) {
     const obj = callee.object.name.toLowerCase();
     const method = callee.property.name.toLowerCase();
@@ -50,23 +50,24 @@ function isLoggingCall(node: CallExpression): boolean {
 function hasTerminatingStatement(statements: Statement[]): boolean {
   for (const stmt of statements) {
     switch (stmt.type) {
-      case 'ThrowStatement':
-      case 'ReturnStatement': {
+      case "ThrowStatement":
+      case "ReturnStatement": {
         return true;
       }
 
-      case 'IfStatement': {
+      case "IfStatement": {
         // Both branches must terminate
         const consequentTerminates =
-          stmt.consequent.type === 'BlockStatement'
+          stmt.consequent.type === "BlockStatement"
             ? hasTerminatingStatement(stmt.consequent.body)
-            : stmt.consequent.type === 'ThrowStatement' ||
-              stmt.consequent.type === 'ReturnStatement';
+            : stmt.consequent.type === "ThrowStatement" ||
+              stmt.consequent.type === "ReturnStatement";
 
         const alternateTerminates = stmt.alternate
-          ? stmt.alternate.type === 'BlockStatement'
+          ? stmt.alternate.type === "BlockStatement"
             ? hasTerminatingStatement(stmt.alternate.body)
-            : stmt.alternate.type === 'ThrowStatement' || stmt.alternate.type === 'ReturnStatement'
+            : stmt.alternate.type === "ThrowStatement" ||
+              stmt.alternate.type === "ReturnStatement"
           : false;
 
         if (consequentTerminates && alternateTerminates) {
@@ -87,15 +88,15 @@ function containsLoggingCall(statements: Statement[]): boolean {
   for (const stmt of statements) {
     // Direct logging call
     if (
-      stmt.type === 'ExpressionStatement' &&
-      stmt.expression.type === 'CallExpression' &&
+      stmt.type === "ExpressionStatement" &&
+      stmt.expression.type === "CallExpression" &&
       isLoggingCall(stmt.expression)
     ) {
       return true;
     }
 
     // Check nested blocks
-    if (stmt.type === 'IfStatement') {
+    if (stmt.type === "IfStatement") {
       if (containsLoggingCall([stmt.consequent])) {
         return true;
       }
@@ -104,7 +105,7 @@ function containsLoggingCall(statements: Statement[]): boolean {
       }
     }
 
-    if (stmt.type === 'BlockStatement' && containsLoggingCall(stmt.body)) {
+    if (stmt.type === "BlockStatement" && containsLoggingCall(stmt.body)) {
       return true;
     }
   }
@@ -113,14 +114,15 @@ function containsLoggingCall(statements: Statement[]): boolean {
 
 const rule: Rule.RuleModule = {
   meta: {
-    type: 'problem',
+    type: "problem",
     docs: {
-      description: 'Disallow catch blocks that log but do not rethrow or return',
+      description:
+        "Disallow catch blocks that log but do not rethrow or return",
       recommended: true,
     },
     messages: {
       incompleteErrorHandling:
-        'Catch block logs error but does not rethrow or return. This swallows the error silently.',
+        "Catch block logs error but does not rethrow or return. This swallows the error silently.",
     },
     schema: [],
   },
@@ -129,15 +131,18 @@ const rule: Rule.RuleModule = {
     return {
       CatchClause(node: CatchClause) {
         const { body } = node;
-        if (body.type !== 'BlockStatement') return;
+        if (body.type !== "BlockStatement") return;
 
         const statements = body.body;
 
         // Only flag if there's a logging call but no terminating statement
-        if (containsLoggingCall(statements) && !hasTerminatingStatement(statements)) {
+        if (
+          containsLoggingCall(statements) &&
+          !hasTerminatingStatement(statements)
+        ) {
           context.report({
             node,
-            messageId: 'incompleteErrorHandling',
+            messageId: "incompleteErrorHandling",
           });
         }
       },

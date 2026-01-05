@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
-import vitestPlugin from 'eslint-plugin-vitest';
+import vitestPlugin from "eslint-plugin-vitest";
 
 /**
  * Vitest test linting config
@@ -17,28 +17,28 @@ import vitestPlugin from 'eslint-plugin-vitest';
  */
 export const vitestConfig: any[] = [
   {
-    name: 'safeword/vitest',
-    files: ['**/*.test.{ts,tsx,js,jsx}', '**/*.spec.{ts,tsx,js,jsx}'],
+    name: "safeword/vitest",
+    files: ["**/*.test.{ts,tsx,js,jsx}", "**/*.spec.{ts,tsx,js,jsx}"],
     plugins: {
       vitest: vitestPlugin,
     },
     rules: {
       // Recommended rules (all at error)
-      'vitest/expect-expect': 'error',
-      'vitest/no-identical-title': 'error',
-      'vitest/no-commented-out-tests': 'error',
-      'vitest/valid-title': 'error',
-      'vitest/valid-expect': ['error', { maxArgs: 2 }], // Allow custom message: expect(value, 'message')
-      'vitest/valid-describe-callback': 'error',
-      'vitest/require-local-test-context-for-concurrent-snapshots': 'error',
-      'vitest/no-import-node-test': 'error',
+      "vitest/expect-expect": "error",
+      "vitest/no-identical-title": "error",
+      "vitest/no-commented-out-tests": "error",
+      "vitest/valid-title": "error",
+      "vitest/valid-expect": ["error", { maxArgs: 2 }], // Allow custom message: expect(value, 'message')
+      "vitest/valid-describe-callback": "error",
+      "vitest/require-local-test-context-for-concurrent-snapshots": "error",
+      "vitest/no-import-node-test": "error",
 
       // Additional strict rules
-      'vitest/no-focused-tests': 'error', // No .only() in CI
+      "vitest/no-focused-tests": "error", // No .only() in CI
 
       // Relax base rules for test files
-      '@typescript-eslint/no-empty-function': 'off', // Empty catch blocks for expected errors
-      'security/detect-non-literal-fs-filename': 'off', // Tests use fixtures from known paths
+      "@typescript-eslint/no-empty-function": "off", // Empty catch blocks for expected errors
+      "security/detect-non-literal-fs-filename": "off", // Tests use fixtures from known paths
     },
   },
 ];

@@ -48,7 +48,7 @@ These are disabled by default because `set:html` is sometimes needed for trusted
 ```javascript
 // Astro support
 if (deps.astro) {
-  const astro = await import('eslint-plugin-astro');
+  const astro = await import("eslint-plugin-astro");
   configs.push(...astro.default.configs.recommended);
 }
 ```

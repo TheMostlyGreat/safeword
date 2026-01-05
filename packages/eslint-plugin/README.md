@@ -54,7 +54,7 @@ export default [
 Feature configs are additive - spread them after your base config:
 
 ```javascript
-import safeword from 'eslint-plugin-safeword';
+import safeword from "eslint-plugin-safeword";
 
 export default [
   ...safeword.configs.recommendedTypeScriptReact,
@@ -193,7 +193,7 @@ These rules catch bugs LLMs commonly make:
 The plugin exports detection utilities for dynamic config generation:
 
 ```javascript
-import { detect } from 'eslint-plugin-safeword';
+import { detect } from "eslint-plugin-safeword";
 
 const deps = detect.collectAllDeps(process.cwd());
 const framework = detect.detectFramework(deps);

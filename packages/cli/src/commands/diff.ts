@@ -4,14 +4,14 @@
  * Uses reconcile() with dryRun to compute what would change.
  */
 
-import nodePath from 'node:path';
+import nodePath from "node:path";
 
-import { type Action, reconcile } from '../reconcile.js';
-import { SAFEWORD_SCHEMA } from '../schema.js';
-import { createProjectContext } from '../utils/context.js';
-import { exists, readFileSafe } from '../utils/fs.js';
-import { error, header, info, listItem, success } from '../utils/output.js';
-import { VERSION } from '../version.js';
+import { type Action, reconcile } from "../reconcile.js";
+import { SAFEWORD_SCHEMA } from "../schema.js";
+import { createProjectContext } from "../utils/context.js";
+import { exists, readFileSafe } from "../utils/fs.js";
+import { error, header, info, listItem, success } from "../utils/output.js";
+import { VERSION } from "../version.js";
 
 interface DiffOptions {
   verbose?: boolean;
@@ -19,7 +19,7 @@ interface DiffOptions {
 
 interface FileDiff {
   path: string;
-  status: 'added' | 'modified' | 'unchanged';
+  status: "added" | "modified" | "unchanged";
   currentContent?: string;
   newContent?: string;
 }
@@ -30,9 +30,13 @@ interface FileDiff {
  * @param newContent
  * @param filename
  */
-function createUnifiedDiff(oldContent: string, newContent: string, filename: string): string {
-  const oldLines = oldContent.split('\n');
-  const newLines = newContent.split('\n');
+function createUnifiedDiff(
+  oldContent: string,
+  newContent: string,
+  filename: string,
+): string {
+  const oldLines = oldContent.split("\n");
+  const newLines = newContent.split("\n");
 
   const lines: string[] = [`--- a/${filename}`, `+++ b/${filename}`];
 
@@ -46,7 +50,7 @@ function createUnifiedDiff(oldContent: string, newContent: string, filename: str
     const newLine: string | undefined = newLines[i];
 
     if (oldLine === newLine) {
-      lines.push(` ${oldLine ?? ''}`);
+      lines.push(` ${oldLine ?? ""}`);
     } else {
       hasChanges = true;
       if (oldLine !== undefined) {
@@ -59,13 +63,13 @@ function createUnifiedDiff(oldContent: string, newContent: string, filename: str
   }
 
   if (!hasChanges) {
-    return '';
+    return "";
   }
 
   // Add context marker
   lines.splice(2, 0, `@@ -1,${oldLines.length} +1,${newLines.length} @@`);
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -89,7 +93,11 @@ function showModifiedDiffs(files: FileDiff[]): void {
   for (const file of files) {
     if (!file.currentContent || !file.newContent) continue;
     info(`\n${file.path}:`);
-    const diffOutput = createUnifiedDiff(file.currentContent, file.newContent, file.path);
+    const diffOutput = createUnifiedDiff(
+      file.currentContent,
+      file.newContent,
+      file.path,
+    );
     if (diffOutput) {
       console.log(diffOutput);
     }
@@ -104,13 +112,13 @@ function showAddedPreviews(files: FileDiff[]): void {
   for (const file of files) {
     if (!file.newContent) continue;
     info(`\n${file.path}: (new file)`);
-    const allLines = file.newContent.split('\n');
+    const allLines = file.newContent.split("\n");
     const lines = allLines.slice(0, 10);
     for (const line of lines) {
       console.log(`+${line}`);
     }
     if (allLines.length > 10) {
-      console.log('... (truncated)');
+      console.log("... (truncated)");
     }
   }
 }
@@ -121,7 +129,7 @@ function showAddedPreviews(files: FileDiff[]): void {
  */
 function showPackagesToInstall(packages: string[]): void {
   if (packages.length === 0) return;
-  info('\nPackages to install:');
+  info("\nPackages to install:");
   for (const pkg of packages) {
     listItem(pkg);
   }
@@ -137,7 +145,7 @@ function actionsToDiffs(actions: Action[], cwd: string): FileDiff[] {
   const seenPaths = new Set<string>();
 
   for (const action of actions) {
-    if (action.type === 'write') {
+    if (action.type === "write") {
       if (seenPaths.has(action.path)) continue;
       seenPaths.add(action.path);
 
@@ -147,20 +155,20 @@ function actionsToDiffs(actions: Action[], cwd: string): FileDiff[] {
       if (currentContent === undefined) {
         diffs.push({
           path: action.path,
-          status: 'added',
+          status: "added",
           newContent: action.content,
         });
       } else if (currentContent.trim() === action.content.trim()) {
         diffs.push({
           path: action.path,
-          status: 'unchanged',
+          status: "unchanged",
           currentContent,
           newContent: action.content,
         });
       } else {
         diffs.push({
           path: action.path,
-          status: 'modified',
+          status: "modified",
           currentContent,
           newContent: action.content,
         });
@@ -177,31 +185,33 @@ function actionsToDiffs(actions: Action[], cwd: string): FileDiff[] {
  */
 export async function diff(options: DiffOptions): Promise<void> {
   const cwd = process.cwd();
-  const safewordDirectory = nodePath.join(cwd, '.safeword');
+  const safewordDirectory = nodePath.join(cwd, ".safeword");
 
   // Check if configured
   if (!exists(safewordDirectory)) {
-    error('Not configured. Run `safeword setup` first.');
+    error("Not configured. Run `safeword setup` first.");
     process.exit(1);
   }
 
   // Read project version
-  const versionPath = nodePath.join(safewordDirectory, 'version');
-  const projectVersion = readFileSafe(versionPath)?.trim() ?? 'unknown';
+  const versionPath = nodePath.join(safewordDirectory, "version");
+  const projectVersion = readFileSafe(versionPath)?.trim() ?? "unknown";
 
-  header('Safeword Diff');
+  header("Safeword Diff");
   info(`Changes from v${projectVersion} → v${VERSION}`);
 
   // Use reconcile with dryRun to compute changes
   const ctx = createProjectContext(cwd);
-  const result = await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx, { dryRun: true });
+  const result = await reconcile(SAFEWORD_SCHEMA, "upgrade", ctx, {
+    dryRun: true,
+  });
 
   // Convert actions to file diffs
   const diffs = actionsToDiffs(result.actions, cwd);
 
-  const added = diffs.filter(d => d.status === 'added');
-  const modified = diffs.filter(d => d.status === 'modified');
-  const unchanged = diffs.filter(d => d.status === 'unchanged');
+  const added = diffs.filter((d) => d.status === "added");
+  const modified = diffs.filter((d) => d.status === "modified");
+  const unchanged = diffs.filter((d) => d.status === "unchanged");
 
   // Summary
   info(
@@ -214,21 +224,25 @@ export async function diff(options: DiffOptions): Promise<void> {
   }
 
   // List by category
-  listFileCategory('Added', added);
-  listFileCategory('Modified', modified);
-  listFileCategory('Unchanged', unchanged);
+  listFileCategory("Added", added);
+  listFileCategory("Modified", modified);
+  listFileCategory("Unchanged", unchanged);
 
   // Verbose output - show actual diffs
   if (options.verbose) {
-    header('Detailed Changes');
+    header("Detailed Changes");
     showModifiedDiffs(modified);
     showAddedPreviews(added);
     showPackagesToInstall(result.packagesToInstall);
   }
 
-  if (added.length === 0 && modified.length === 0 && result.packagesToInstall.length === 0) {
-    success('\nNo changes needed - configuration is up to date');
+  if (
+    added.length === 0 &&
+    modified.length === 0 &&
+    result.packagesToInstall.length === 0
+  ) {
+    success("\nNo changes needed - configuration is up to date");
   } else {
-    info('\nRun `safeword upgrade` to apply these changes');
+    info("\nRun `safeword upgrade` to apply these changes");
   }
 }

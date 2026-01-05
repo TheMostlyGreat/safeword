@@ -1,43 +1,49 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-import starlight from '@astrojs/starlight';
-import { defineConfig } from 'astro/config';
+import starlight from "@astrojs/starlight";
+import { defineConfig } from "astro/config";
 
 const __dirname = import.meta.dirname;
 
 export default defineConfig({
-  site: 'https://safeword.dev',
+  site: "https://safeword.dev",
   vite: {
-    cacheDir: path.resolve(__dirname, 'node_modules/.vite'),
+    cacheDir: path.resolve(__dirname, "node_modules/.vite"),
   },
   integrations: [
     starlight({
-      title: 'Safeword',
+      title: "Safeword",
       components: {
-        SocialIcons: './src/components/SocialIcons.astro',
+        SocialIcons: "./src/components/SocialIcons.astro",
       },
-      customCss: ['./src/styles/custom.css'],
-      description: 'AI coding agent guardrails - hooks, skills, and quality controls',
+      customCss: ["./src/styles/custom.css"],
+      description:
+        "AI coding agent guardrails - hooks, skills, and quality controls",
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/TheMostlyGreat/safeword' },
+        {
+          icon: "github",
+          label: "GitHub",
+          href: "https://github.com/TheMostlyGreat/safeword",
+        },
       ],
       sidebar: [
-        { label: 'Quick Start', slug: 'getting-started/quick-start' },
+        { label: "Quick Start", slug: "getting-started/quick-start" },
         {
-          label: 'Reference',
+          label: "Reference",
           collapsed: true,
           items: [
-            { label: 'CLI', slug: 'reference/cli' },
-            { label: 'Commands', slug: 'reference/commands' },
-            { label: 'Skills', slug: 'reference/skills' },
-            { label: 'Hooks', slug: 'reference/hooks' },
-            { label: 'Configuration', slug: 'reference/configuration' },
+            { label: "CLI", slug: "reference/cli" },
+            { label: "Commands", slug: "reference/commands" },
+            { label: "Skills", slug: "reference/skills" },
+            { label: "Hooks", slug: "reference/hooks" },
+            { label: "Configuration", slug: "reference/configuration" },
           ],
         },
       ],
       editLink: {
-        baseUrl: 'https://github.com/TheMostlyGreat/safeword/edit/main/packages/website/',
+        baseUrl:
+          "https://github.com/TheMostlyGreat/safeword/edit/main/packages/website/",
       },
     }),
   ],

@@ -1,9 +1,9 @@
 /* eslint-disable jsdoc/require-returns, jsdoc/require-param-description */
 
-import { RuleTester } from 'eslint';
-import { describe, expect, it } from 'vitest';
+import { RuleTester } from "eslint";
+import { describe, expect, it } from "vitest";
 
-import rule from '../no-incomplete-error-handling.js';
+import rule from "../no-incomplete-error-handling.js";
 
 const ruleTester = new RuleTester();
 
@@ -13,23 +13,23 @@ const ruleTester = new RuleTester();
  */
 const fn = (code: string) => `function test() { ${code} }`;
 
-describe('no-incomplete-error-handling', () => {
-  it('should pass RuleTester tests', () => {
+describe("no-incomplete-error-handling", () => {
+  it("should pass RuleTester tests", () => {
     // RuleTester.run throws if tests fail, so we wrap to satisfy sonarjs/assertions-in-tests
     expect(() => {
-      ruleTester.run('no-incomplete-error-handling', rule, {
+      ruleTester.run("no-incomplete-error-handling", rule, {
         valid: [
           // Empty catch - not flagged (no logging)
-          'try { foo(); } catch (e) {}',
+          "try { foo(); } catch (e) {}",
 
           // Rethrow after log
-          'try { foo(); } catch (e) { console.error(e); throw e; }',
+          "try { foo(); } catch (e) { console.error(e); throw e; }",
 
           // Return after log (inside function)
-          fn('try { foo(); } catch (e) { console.error(e); return null; }'),
+          fn("try { foo(); } catch (e) { console.error(e); return null; }"),
 
           // Return before log (terminates early)
-          fn('try { foo(); } catch (e) { return console.error(e); }'),
+          fn("try { foo(); } catch (e) { return console.error(e); }"),
 
           // Wrap and rethrow
           'try { foo(); } catch (e) { console.error(e); throw new Error("wrapped", { cause: e }); }',
@@ -45,43 +45,43 @@ describe('no-incomplete-error-handling', () => {
         }`),
 
           // No logging - any handling is fine
-          'try { foo(); } catch (e) { handleError(e); }',
+          "try { foo(); } catch (e) { handleError(e); }",
 
           // Logger object variants
-          'try { foo(); } catch (e) { logger.error(e); throw e; }',
-          fn('try { foo(); } catch (e) { log.warn(e); return false; }'),
+          "try { foo(); } catch (e) { logger.error(e); throw e; }",
+          fn("try { foo(); } catch (e) { log.warn(e); return false; }"),
 
           // Logging different methods
-          'try { foo(); } catch (e) { console.warn(e); throw e; }',
-          'try { foo(); } catch (e) { console.log(e); throw e; }',
-          'try { foo(); } catch (e) { console.debug(e); throw e; }',
-          fn('try { foo(); } catch (e) { console.info(e); return; }'),
-          fn('try { foo(); } catch (e) { console.trace(e); return; }'),
+          "try { foo(); } catch (e) { console.warn(e); throw e; }",
+          "try { foo(); } catch (e) { console.log(e); throw e; }",
+          "try { foo(); } catch (e) { console.debug(e); throw e; }",
+          fn("try { foo(); } catch (e) { console.info(e); return; }"),
+          fn("try { foo(); } catch (e) { console.trace(e); return; }"),
         ],
 
         invalid: [
           // Classic LLM mistake: log and continue
           {
-            code: 'try { foo(); } catch (e) { console.error(e); }',
-            errors: [{ messageId: 'incompleteErrorHandling' }],
+            code: "try { foo(); } catch (e) { console.error(e); }",
+            errors: [{ messageId: "incompleteErrorHandling" }],
           },
 
           // Log with other statements but no termination
           {
-            code: 'try { foo(); } catch (e) { console.error(e); doSomething(); }',
-            errors: [{ messageId: 'incompleteErrorHandling' }],
+            code: "try { foo(); } catch (e) { console.error(e); doSomething(); }",
+            errors: [{ messageId: "incompleteErrorHandling" }],
           },
 
           // Logger object
           {
-            code: 'try { foo(); } catch (e) { logger.error(e); }',
-            errors: [{ messageId: 'incompleteErrorHandling' }],
+            code: "try { foo(); } catch (e) { logger.error(e); }",
+            errors: [{ messageId: "incompleteErrorHandling" }],
           },
 
           // Console.log (not just error)
           {
-            code: 'try { foo(); } catch (e) { console.log(e); }',
-            errors: [{ messageId: 'incompleteErrorHandling' }],
+            code: "try { foo(); } catch (e) { console.log(e); }",
+            errors: [{ messageId: "incompleteErrorHandling" }],
           },
 
           // Conditional that doesn't terminate in both branches
@@ -92,7 +92,7 @@ describe('no-incomplete-error-handling', () => {
               throw e;
             }
           }`),
-            errors: [{ messageId: 'incompleteErrorHandling' }],
+            errors: [{ messageId: "incompleteErrorHandling" }],
           },
 
           // Nested logging in if block (no termination)
@@ -102,13 +102,13 @@ describe('no-incomplete-error-handling', () => {
               console.error(e);
             }
           }`,
-            errors: [{ messageId: 'incompleteErrorHandling' }],
+            errors: [{ messageId: "incompleteErrorHandling" }],
           },
 
           // Braceless if with logging
           {
-            code: 'try { foo(); } catch (e) { if (debug) console.error(e); }',
-            errors: [{ messageId: 'incompleteErrorHandling' }],
+            code: "try { foo(); } catch (e) { if (debug) console.error(e); }",
+            errors: [{ messageId: "incompleteErrorHandling" }],
           },
         ],
       });

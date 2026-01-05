@@ -10,30 +10,30 @@
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
 
-import { Linter } from 'eslint';
-import { describe, expect, it } from 'vitest';
+import { Linter } from "eslint";
+import { describe, expect, it } from "vitest";
 
-import plugin from '../../index.js';
-import { astroConfig } from '../astro.js';
-import { JS_TS_FILES } from '../base.js';
-import { recommended } from '../recommended.js';
-import { recommendedTypeScript } from '../recommended-typescript.js';
+import plugin from "../../index.js";
+import { astroConfig } from "../astro.js";
+import { JS_TS_FILES } from "../base.js";
+import { recommended } from "../recommended.js";
+import { recommendedTypeScript } from "../recommended-typescript.js";
 
-describe('recommended config', () => {
-  it('is a non-empty array', () => {
+describe("recommended config", () => {
+  it("is a non-empty array", () => {
     expect(Array.isArray(recommended)).toBe(true);
     expect(recommended.length).toBeGreaterThan(0);
   });
 
-  it('includes expected plugins', () => {
-    const configNames = recommended.flatMap(config => {
-      if (typeof config === 'object' && config !== null) {
+  it("includes expected plugins", () => {
+    const configNames = recommended.flatMap((config) => {
+      if (typeof config === "object" && config !== null) {
         // Check for plugin registrations
-        if ('plugins' in config && config.plugins) {
+        if ("plugins" in config && config.plugins) {
           return Object.keys(config.plugins);
         }
         // Check for config names
-        if ('name' in config && typeof config.name === 'string') {
+        if ("name" in config && typeof config.name === "string") {
           return [config.name];
         }
       }
@@ -41,34 +41,36 @@ describe('recommended config', () => {
     });
 
     // Should include our safeword plugin
-    expect(configNames).toContain('safeword');
+    expect(configNames).toContain("safeword");
   });
 
-  it('loads without errors via ESLint API', () => {
-    const linter = new Linter({ configType: 'flat' });
+  it("loads without errors via ESLint API", () => {
+    const linter = new Linter({ configType: "flat" });
 
     // Verify config can be used - this will throw if invalid
     expect(() => {
-      linter.verify('const x = 1;', recommended);
+      linter.verify("const x = 1;", recommended);
     }).not.toThrow();
   });
 
-  it('returns no errors for valid code', () => {
-    const linter = new Linter({ configType: 'flat' });
+  it("returns no errors for valid code", () => {
+    const linter = new Linter({ configType: "flat" });
 
     // Simple valid code - uses export to avoid no-unused-vars
     const validCode = `
 export const add = (a, b) => a + b;
 `;
 
-    const results = linter.verify(validCode, recommended, { filename: 'test.mjs' });
-    const errors = results.filter(r => r.severity === 2);
+    const results = linter.verify(validCode, recommended, {
+      filename: "test.mjs",
+    });
+    const errors = results.filter((r) => r.severity === 2);
 
     expect(errors).toHaveLength(0);
   });
 
-  it('returns errors for invalid code', () => {
-    const linter = new Linter({ configType: 'flat' });
+  it("returns errors for invalid code", () => {
+    const linter = new Linter({ configType: "flat" });
 
     // Code with security issue - eval with expression
     const invalidCode = `
@@ -77,13 +79,13 @@ eval(userInput);
 `;
 
     const results = linter.verify(invalidCode, recommended);
-    const errors = results.filter(r => r.severity === 2);
+    const errors = results.filter((r) => r.severity === 2);
 
     expect(errors.length).toBeGreaterThan(0);
   });
 
-  it('catches incomplete error handling', () => {
-    const linter = new Linter({ configType: 'flat' });
+  it("catches incomplete error handling", () => {
+    const linter = new Linter({ configType: "flat" });
 
     const code = `
 try {
@@ -95,29 +97,31 @@ try {
 
     const results = linter.verify(code, recommended);
     const safewordErrors = results.filter(
-      r => r.ruleId === 'safeword/no-incomplete-error-handling',
+      (r) => r.ruleId === "safeword/no-incomplete-error-handling",
     );
 
     expect(safewordErrors.length).toBe(1);
   });
 });
 
-describe('recommendedTypeScript config', () => {
-  it('is a non-empty array', () => {
+describe("recommendedTypeScript config", () => {
+  it("is a non-empty array", () => {
     expect(Array.isArray(recommendedTypeScript)).toBe(true);
     expect(recommendedTypeScript.length).toBeGreaterThan(0);
   });
 
-  it('includes TypeScript plugins', () => {
-    const hasTypeScriptConfig = recommendedTypeScript.some(config => {
-      if (typeof config === 'object' && config !== null) {
+  it("includes TypeScript plugins", () => {
+    const hasTypeScriptConfig = recommendedTypeScript.some((config) => {
+      if (typeof config === "object" && config !== null) {
         // Check for @typescript-eslint rules
-        if ('rules' in config && config.rules) {
-          return Object.keys(config.rules).some(rule => rule.startsWith('@typescript-eslint/'));
+        if ("rules" in config && config.rules) {
+          return Object.keys(config.rules).some((rule) =>
+            rule.startsWith("@typescript-eslint/"),
+          );
         }
         // Check for typescript-eslint plugin
-        if ('plugins' in config && config.plugins) {
-          return '@typescript-eslint' in config.plugins;
+        if ("plugins" in config && config.plugins) {
+          return "@typescript-eslint" in config.plugins;
         }
       }
       return false;
@@ -126,13 +130,25 @@ describe('recommendedTypeScript config', () => {
     expect(hasTypeScriptConfig).toBe(true);
   });
 
-  it('includes projectService for type-checked rules', () => {
-    const hasProjectService = recommendedTypeScript.some(config => {
-      if (typeof config === 'object' && config !== null && 'languageOptions' in config) {
+  it("includes projectService for type-checked rules", () => {
+    const hasProjectService = recommendedTypeScript.some((config) => {
+      if (
+        typeof config === "object" &&
+        config !== null &&
+        "languageOptions" in config
+      ) {
         const langOpts = config.languageOptions;
-        if (langOpts && typeof langOpts === 'object' && 'parserOptions' in langOpts) {
+        if (
+          langOpts &&
+          typeof langOpts === "object" &&
+          "parserOptions" in langOpts
+        ) {
           const parserOpts = langOpts.parserOptions;
-          return parserOpts && typeof parserOpts === 'object' && 'projectService' in parserOpts;
+          return (
+            parserOpts &&
+            typeof parserOpts === "object" &&
+            "projectService" in parserOpts
+          );
         }
       }
       return false;
@@ -141,13 +157,15 @@ describe('recommendedTypeScript config', () => {
     expect(hasProjectService).toBe(true);
   });
 
-  it('scopes TypeScript rules to .ts/.tsx files', () => {
-    const hasTsFileScope = recommendedTypeScript.some(config => {
-      if (typeof config === 'object' && config !== null && 'files' in config) {
+  it("scopes TypeScript rules to .ts/.tsx files", () => {
+    const hasTsFileScope = recommendedTypeScript.some((config) => {
+      if (typeof config === "object" && config !== null && "files" in config) {
         const files = config.files;
         if (Array.isArray(files)) {
           return files.some(
-            f => typeof f === 'string' && (f.includes('.ts') || f.includes('.tsx')),
+            (f) =>
+              typeof f === "string" &&
+              (f.includes(".ts") || f.includes(".tsx")),
           );
         }
       }
@@ -157,57 +175,62 @@ describe('recommendedTypeScript config', () => {
     expect(hasTsFileScope).toBe(true);
   });
 
-  it('loads without errors via ESLint API', () => {
-    const linter = new Linter({ configType: 'flat' });
+  it("loads without errors via ESLint API", () => {
+    const linter = new Linter({ configType: "flat" });
 
     // For type-checked rules, we need to use the config in a way that
     // doesn't require actual type information (Linter API limitation)
     expect(() => {
       // Just verify the config is valid ESLint config format
-      linter.verify('const x: number = 1;', recommendedTypeScript, {
-        filename: 'test.ts',
+      linter.verify("const x: number = 1;", recommendedTypeScript, {
+        filename: "test.ts",
       });
     }).not.toThrow();
   });
 });
 
-describe('plugin exports', () => {
-  it('exports default plugin object', () => {
+describe("plugin exports", () => {
+  it("exports default plugin object", () => {
     expect(plugin).toBeDefined();
-    expect(typeof plugin).toBe('object');
+    expect(typeof plugin).toBe("object");
   });
 
-  it('has meta with name and version', () => {
+  it("has meta with name and version", () => {
     expect(plugin.meta).toBeDefined();
-    expect(plugin.meta.name).toBe('eslint-plugin-safeword');
+    expect(plugin.meta.name).toBe("eslint-plugin-safeword");
     expect(plugin.meta.version).toBeDefined();
   });
 
-  it('exports configs.recommended', () => {
+  it("exports configs.recommended", () => {
     expect(plugin.configs).toBeDefined();
     expect(plugin.configs.recommended).toBeDefined();
     expect(Array.isArray(plugin.configs.recommended)).toBe(true);
   });
 
-  it('exports configs.recommendedTypeScript', () => {
+  it("exports configs.recommendedTypeScript", () => {
     expect(plugin.configs.recommendedTypeScript).toBeDefined();
     expect(Array.isArray(plugin.configs.recommendedTypeScript)).toBe(true);
   });
 
-  it('exports rules', () => {
+  it("exports rules", () => {
     expect(plugin.rules).toBeDefined();
-    expect(plugin.rules['no-incomplete-error-handling']).toBeDefined();
+    expect(plugin.rules["no-incomplete-error-handling"]).toBeDefined();
   });
 });
 
-describe('default ignores', () => {
-  it('includes node_modules in ignores', () => {
-    const hasNodeModulesIgnore = recommended.some(config => {
-      if (typeof config === 'object' && config !== null && 'ignores' in config) {
+describe("default ignores", () => {
+  it("includes node_modules in ignores", () => {
+    const hasNodeModulesIgnore = recommended.some((config) => {
+      if (
+        typeof config === "object" &&
+        config !== null &&
+        "ignores" in config
+      ) {
         const ignores = config.ignores;
         if (Array.isArray(ignores)) {
           return ignores.some(
-            pattern => typeof pattern === 'string' && pattern.includes('node_modules'),
+            (pattern) =>
+              typeof pattern === "string" && pattern.includes("node_modules"),
           );
         }
       }
@@ -217,12 +240,19 @@ describe('default ignores', () => {
     expect(hasNodeModulesIgnore).toBe(true);
   });
 
-  it('includes dist in ignores', () => {
-    const hasDistIgnore = recommended.some(config => {
-      if (typeof config === 'object' && config !== null && 'ignores' in config) {
+  it("includes dist in ignores", () => {
+    const hasDistIgnore = recommended.some((config) => {
+      if (
+        typeof config === "object" &&
+        config !== null &&
+        "ignores" in config
+      ) {
         const ignores = config.ignores;
         if (Array.isArray(ignores)) {
-          return ignores.some(pattern => typeof pattern === 'string' && pattern.includes('dist'));
+          return ignores.some(
+            (pattern) =>
+              typeof pattern === "string" && pattern.includes("dist"),
+          );
         }
       }
       return false;
@@ -232,21 +262,21 @@ describe('default ignores', () => {
   });
 });
 
-describe('file scoping', () => {
-  it('exports JS_TS_FILES pattern constant', () => {
+describe("file scoping", () => {
+  it("exports JS_TS_FILES pattern constant", () => {
     expect(JS_TS_FILES).toBeDefined();
     expect(Array.isArray(JS_TS_FILES)).toBe(true);
     // Pattern uses glob syntax: **/*.{js,jsx,ts,tsx,...}
-    expect(JS_TS_FILES[0]).toContain('**/*');
-    expect(JS_TS_FILES[0]).toContain('js');
-    expect(JS_TS_FILES[0]).toContain('ts');
+    expect(JS_TS_FILES[0]).toContain("**/*");
+    expect(JS_TS_FILES[0]).toContain("js");
+    expect(JS_TS_FILES[0]).toContain("ts");
   });
 
-  it('most base plugins are scoped to JS/TS files', () => {
+  it("most base plugins are scoped to JS/TS files", () => {
     // Count configs that have files scoping
-    const scopedConfigs = recommended.filter(config => {
-      if (typeof config === 'object' && config !== null) {
-        return 'files' in config;
+    const scopedConfigs = recommended.filter((config) => {
+      if (typeof config === "object" && config !== null) {
+        return "files" in config;
       }
       return false;
     });
@@ -256,7 +286,7 @@ describe('file scoping', () => {
     expect(scopedConfigs.length).toBeGreaterThan(10);
   });
 
-  it('TypeScript config can be combined with Astro config', () => {
+  it("TypeScript config can be combined with Astro config", () => {
     // Verify configs can be spread together without structural issues
     const combinedConfig = [...recommendedTypeScript, ...astroConfig];
 
@@ -265,20 +295,20 @@ describe('file scoping', () => {
     expect(combinedConfig.length).toBeGreaterThan(recommendedTypeScript.length);
   });
 
-  it('Astro rules are scoped to .astro files', () => {
+  it("Astro rules are scoped to .astro files", () => {
     // Verify Astro rules have .astro file scope
-    const astroRulesConfigs = astroConfig.filter(config => {
-      if (typeof config === 'object' && config !== null && 'rules' in config) {
+    const astroRulesConfigs = astroConfig.filter((config) => {
+      if (typeof config === "object" && config !== null && "rules" in config) {
         const rules = Object.keys(config.rules || {});
-        return rules.some(r => r.startsWith('astro/'));
+        return rules.some((r) => r.startsWith("astro/"));
       }
       return false;
     });
 
     // All Astro configs with astro/ rules should have .astro file scope
-    const allAstroScoped = astroRulesConfigs.every(config => {
-      if ('files' in config && Array.isArray(config.files)) {
-        return config.files.some((f: string) => f.includes('.astro'));
+    const allAstroScoped = astroRulesConfigs.every((config) => {
+      if ("files" in config && Array.isArray(config.files)) {
+        return config.files.some((f: string) => f.includes(".astro"));
       }
       // Astro plugin may set files via a different mechanism
       return true;
@@ -286,13 +316,13 @@ describe('file scoping', () => {
     expect(allAstroScoped).toBe(true);
   });
 
-  it('combined config lints .ts files without errors', () => {
-    const linter = new Linter({ configType: 'flat' });
+  it("combined config lints .ts files without errors", () => {
+    const linter = new Linter({ configType: "flat" });
     const combinedConfig = [...recommendedTypeScript, ...astroConfig];
 
     // Should not throw for TypeScript files
     expect(() => {
-      linter.verify('const x = 1;', combinedConfig, { filename: 'test.ts' });
+      linter.verify("const x = 1;", combinedConfig, { filename: "test.ts" });
     }).not.toThrow();
   });
 });

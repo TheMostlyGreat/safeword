@@ -11,7 +11,6 @@ export { default } from "eslint-plugin-safeword";
 // Re-export named configs for convenience
 export {
   astroConfig,
-  detect,
   playwrightConfig,
   recommended,
   recommendedTypeScript,

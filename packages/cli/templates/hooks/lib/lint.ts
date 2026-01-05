@@ -6,36 +6,36 @@
 //
 // Auto-upgrades safeword if a language pack is missing.
 
-import { existsSync } from 'node:fs';
+import { existsSync } from "node:fs";
 
-import { $ } from 'bun';
+import { $ } from "bun";
 
 // File extensions for different linting strategies
 const JS_EXTENSIONS = new Set([
-  'js',
-  'jsx',
-  'ts',
-  'tsx',
-  'mjs',
-  'mts',
-  'cjs',
-  'cts',
-  'vue',
-  'svelte',
-  'astro',
+  "js",
+  "jsx",
+  "ts",
+  "tsx",
+  "mjs",
+  "mts",
+  "cjs",
+  "cts",
+  "vue",
+  "svelte",
+  "astro",
 ]);
-const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
-const GO_EXTENSIONS = new Set(['go']);
-const SHELL_EXTENSIONS = new Set(['sh']);
+const PYTHON_EXTENSIONS = new Set(["py", "pyi"]);
+const GO_EXTENSIONS = new Set(["go"]);
+const SHELL_EXTENSIONS = new Set(["sh"]);
 const PRETTIER_EXTENSIONS = new Set([
-  'md',
-  'json',
-  'css',
-  'scss',
-  'html',
-  'yaml',
-  'yml',
-  'graphql',
+  "md",
+  "json",
+  "css",
+  "scss",
+  "html",
+  "yaml",
+  "yml",
+  "graphql",
 ]);
 
 // Cache safeword config paths
@@ -57,7 +57,10 @@ function hasConfig(path: string): boolean {
  * Run safeword upgrade and auto-commit .safeword/ changes.
  * Only runs once per process to avoid repeated slow upgrades.
  */
-async function ensurePackInstalled(packName: string, configPath: string): Promise<boolean> {
+async function ensurePackInstalled(
+  packName: string,
+  configPath: string,
+): Promise<boolean> {
   // Already have config
   if (hasConfig(configPath)) return true;
 
@@ -69,7 +72,9 @@ async function ensurePackInstalled(packName: string, configPath: string): Promis
 
   const result = await $`bunx safeword@latest upgrade --yes`.nothrow().quiet();
   if (result.exitCode !== 0) {
-    console.error('SAFEWORD: Upgrade failed. Run manually: bunx safeword upgrade');
+    console.error(
+      "SAFEWORD: Upgrade failed. Run manually: bunx safeword upgrade",
+    );
     return false;
   }
 
@@ -82,10 +87,10 @@ async function ensurePackInstalled(packName: string, configPath: string): Promis
       .quiet();
   if (commitResult.exitCode !== 0) {
     console.log(
-      'SAFEWORD: Could not auto-commit .safeword/ changes (not a git repo or no changes)',
+      "SAFEWORD: Could not auto-commit .safeword/ changes (not a git repo or no changes)",
     );
   } else {
-    console.log('SAFEWORD: Upgrade complete and committed');
+    console.log("SAFEWORD: Upgrade complete and committed");
   }
 
   return hasConfig(configPath);
@@ -94,7 +99,9 @@ async function ensurePackInstalled(packName: string, configPath: string): Promis
 /** Run prettier with safeword config if available */
 async function runPrettier(file: string): Promise<void> {
   if (hasConfig(SAFEWORD_PRETTIER)) {
-    await $`bunx prettier --config ${SAFEWORD_PRETTIER} --write ${file}`.nothrow().quiet();
+    await $`bunx prettier --config ${SAFEWORD_PRETTIER} --write ${file}`
+      .nothrow()
+      .quiet();
   } else {
     await $`bunx prettier --write ${file}`.nothrow().quiet();
   }
@@ -113,15 +120,20 @@ async function runPrettier(file: string): Promise<void> {
  * @param file - Path to the file to lint
  * @param _projectDir - Project root directory (cached at module init, kept for backward compat)
  */
-export async function lintFile(file: string, _projectDir: string): Promise<void> {
-  const extension = file.split('.').pop()?.toLowerCase() ?? '';
+export async function lintFile(
+  file: string,
+  _projectDir: string,
+): Promise<void> {
+  const extension = file.split(".").pop()?.toLowerCase() ?? "";
 
   // JS/TS and framework files - ESLint first (fix code), then Prettier (format)
   // Auto-upgrades safeword if TypeScript pack is missing
   if (JS_EXTENSIONS.has(extension)) {
-    const hasEslint = await ensurePackInstalled('TypeScript', SAFEWORD_ESLINT);
+    const hasEslint = await ensurePackInstalled("TypeScript", SAFEWORD_ESLINT);
     const eslintResult = hasEslint
-      ? await $`bunx eslint --config ${SAFEWORD_ESLINT} --fix ${file}`.nothrow().quiet()
+      ? await $`bunx eslint --config ${SAFEWORD_ESLINT} --fix ${file}`
+          .nothrow()
+          .quiet()
       : await $`bunx eslint --fix ${file}`.nothrow().quiet();
 
     if (eslintResult.exitCode !== 0 && eslintResult.stderr.length > 0) {
@@ -134,9 +146,11 @@ export async function lintFile(file: string, _projectDir: string): Promise<void>
   // Python files - Ruff check (fix code), then Ruff format
   // Auto-upgrades safeword if Python pack is missing
   if (PYTHON_EXTENSIONS.has(extension)) {
-    const hasRuff = await ensurePackInstalled('Python', SAFEWORD_RUFF);
+    const hasRuff = await ensurePackInstalled("Python", SAFEWORD_RUFF);
     if (hasRuff) {
-      await $`ruff check --config ${SAFEWORD_RUFF} --fix ${file}`.nothrow().quiet();
+      await $`ruff check --config ${SAFEWORD_RUFF} --fix ${file}`
+        .nothrow()
+        .quiet();
       await $`ruff format --config ${SAFEWORD_RUFF} ${file}`.nothrow().quiet();
     } else {
       // Fallback: run without safeword config
@@ -149,10 +163,14 @@ export async function lintFile(file: string, _projectDir: string): Promise<void>
   // Go files - golangci-lint run (fix code), then golangci-lint fmt (format)
   // Auto-upgrades safeword if Go pack is missing
   if (GO_EXTENSIONS.has(extension)) {
-    const hasGolangci = await ensurePackInstalled('Go', SAFEWORD_GOLANGCI);
+    const hasGolangci = await ensurePackInstalled("Go", SAFEWORD_GOLANGCI);
     if (hasGolangci) {
-      await $`golangci-lint run --config ${SAFEWORD_GOLANGCI} --fix ${file}`.nothrow().quiet();
-      await $`golangci-lint fmt --config ${SAFEWORD_GOLANGCI} ${file}`.nothrow().quiet();
+      await $`golangci-lint run --config ${SAFEWORD_GOLANGCI} --fix ${file}`
+        .nothrow()
+        .quiet();
+      await $`golangci-lint fmt --config ${SAFEWORD_GOLANGCI} ${file}`
+        .nothrow()
+        .quiet();
     } else {
       // Fallback: run without safeword config
       await $`golangci-lint run --fix ${file}`.nothrow().quiet();

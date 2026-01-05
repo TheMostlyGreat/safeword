@@ -5,20 +5,25 @@
  * to enable safe refactoring.
  */
 
-import { mkdirSync, rmSync } from 'node:fs';
-import { mkdtemp } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import nodePath from 'node:path';
+import { mkdirSync, rmSync } from "node:fs";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import nodePath from "node:path";
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { detectArchitecture, generateBoundariesConfig } from '../../src/utils/boundaries.js';
+import {
+  detectArchitecture,
+  generateBoundariesConfig,
+} from "../../src/utils/boundaries.js";
 
-describe('boundaries.ts', () => {
+describe("boundaries.ts", () => {
   let temporaryDirectory: string;
 
   beforeEach(async () => {
-    temporaryDirectory = await mkdtemp(nodePath.join(tmpdir(), 'boundaries-test-'));
+    temporaryDirectory = await mkdtemp(
+      nodePath.join(tmpdir(), "boundaries-test-"),
+    );
   });
 
   afterEach(() => {
@@ -32,9 +37,9 @@ describe('boundaries.ts', () => {
     }
   }
 
-  describe('detectArchitecture()', () => {
-    describe('empty project', () => {
-      it('returns empty elements for empty project', () => {
+  describe("detectArchitecture()", () => {
+    describe("empty project", () => {
+      it("returns empty elements for empty project", () => {
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.elements).toEqual([]);
@@ -42,117 +47,129 @@ describe('boundaries.ts', () => {
       });
     });
 
-    describe('standard project structure', () => {
-      it('detects src/utils directory', () => {
-        createDir('src/utils');
+    describe("standard project structure", () => {
+      it("detects src/utils directory", () => {
+        createDir("src/utils");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.elements).toHaveLength(1);
         expect(result.elements[0]).toEqual({
-          layer: 'utils',
-          pattern: 'src/utils/**',
-          location: 'src/utils',
+          layer: "utils",
+          pattern: "src/utils/**",
+          location: "src/utils",
         });
         expect(result.isMonorepo).toBe(false);
       });
 
-      it('detects src/components directory', () => {
-        createDir('src/components');
+      it("detects src/components directory", () => {
+        createDir("src/components");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.elements).toHaveLength(1);
-        expect(result.elements[0].layer).toBe('components');
-        expect(result.elements[0].pattern).toBe('src/components/**');
+        expect(result.elements[0].layer).toBe("components");
+        expect(result.elements[0].pattern).toBe("src/components/**");
       });
 
-      it('detects multiple architecture layers', () => {
-        createDir('src/types', 'src/utils', 'src/components', 'src/features');
+      it("detects multiple architecture layers", () => {
+        createDir("src/types", "src/utils", "src/components", "src/features");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.elements).toHaveLength(4);
-        const layers = result.elements.map(e => e.layer);
-        expect(layers).toContain('types');
-        expect(layers).toContain('utils');
-        expect(layers).toContain('components');
-        expect(layers).toContain('features');
+        const layers = result.elements.map((e) => e.layer);
+        expect(layers).toContain("types");
+        expect(layers).toContain("utils");
+        expect(layers).toContain("components");
+        expect(layers).toContain("features");
       });
 
-      it('detects root-level directories without src/', () => {
-        createDir('utils', 'components');
+      it("detects root-level directories without src/", () => {
+        createDir("utils", "components");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.elements).toHaveLength(2);
-        expect(result.elements.find(e => e.layer === 'utils')?.pattern).toBe('utils/**');
-        expect(result.elements.find(e => e.layer === 'components')?.pattern).toBe('components/**');
+        expect(result.elements.find((e) => e.layer === "utils")?.pattern).toBe(
+          "utils/**",
+        );
+        expect(
+          result.elements.find((e) => e.layer === "components")?.pattern,
+        ).toBe("components/**");
       });
 
-      it('detects alternative directory names', () => {
-        createDir('src/helpers', 'src/ui', 'src/api');
+      it("detects alternative directory names", () => {
+        createDir("src/helpers", "src/ui", "src/api");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.elements).toHaveLength(3);
-        expect(result.elements.find(e => e.layer === 'utils')?.location).toBe('src/helpers');
-        expect(result.elements.find(e => e.layer === 'components')?.location).toBe('src/ui');
-        expect(result.elements.find(e => e.layer === 'services')?.location).toBe('src/api');
+        expect(result.elements.find((e) => e.layer === "utils")?.location).toBe(
+          "src/helpers",
+        );
+        expect(
+          result.elements.find((e) => e.layer === "components")?.location,
+        ).toBe("src/ui");
+        expect(
+          result.elements.find((e) => e.layer === "services")?.location,
+        ).toBe("src/api");
       });
 
-      it('prefers src/ over root level for same layer', () => {
-        createDir('src/utils', 'utils');
+      it("prefers src/ over root level for same layer", () => {
+        createDir("src/utils", "utils");
 
         const result = detectArchitecture(temporaryDirectory);
 
         // Should only have one utils entry (src/utils scanned first)
-        const utilitiesElements = result.elements.filter(e => e.layer === 'utils');
+        const utilitiesElements = result.elements.filter(
+          (e) => e.layer === "utils",
+        );
         expect(utilitiesElements).toHaveLength(1);
-        expect(utilitiesElements[0].pattern).toBe('src/utils/**');
+        expect(utilitiesElements[0].pattern).toBe("src/utils/**");
       });
     });
 
-    describe('monorepo detection', () => {
-      it('detects packages/ as monorepo', () => {
-        createDir('packages/core', 'packages/ui');
+    describe("monorepo detection", () => {
+      it("detects packages/ as monorepo", () => {
+        createDir("packages/core", "packages/ui");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.isMonorepo).toBe(true);
       });
 
-      it('detects apps/ as monorepo', () => {
-        createDir('apps/web', 'apps/mobile');
+      it("detects apps/ as monorepo", () => {
+        createDir("apps/web", "apps/mobile");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.isMonorepo).toBe(true);
       });
 
-      it('detects libs/ as monorepo', () => {
-        createDir('libs/shared');
+      it("detects libs/ as monorepo", () => {
+        createDir("libs/shared");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.isMonorepo).toBe(true);
       });
 
-      it('scans inside monorepo packages', () => {
-        createDir('packages/core/src/utils', 'packages/ui/src/components');
+      it("scans inside monorepo packages", () => {
+        createDir("packages/core/src/utils", "packages/ui/src/components");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.isMonorepo).toBe(true);
         expect(result.elements).toHaveLength(2);
 
-        const patterns = result.elements.map(e => e.pattern);
-        expect(patterns).toContain('packages/core/src/utils/**');
-        expect(patterns).toContain('packages/ui/src/components/**');
+        const patterns = result.elements.map((e) => e.pattern);
+        expect(patterns).toContain("packages/core/src/utils/**");
+        expect(patterns).toContain("packages/ui/src/components/**");
       });
 
-      it('ignores hidden directories in monorepo root', () => {
-        createDir('packages/.hidden', 'packages/visible');
+      it("ignores hidden directories in monorepo root", () => {
+        createDir("packages/.hidden", "packages/visible");
 
         const result = detectArchitecture(temporaryDirectory);
 
@@ -160,8 +177,8 @@ describe('boundaries.ts', () => {
         // .hidden should not be scanned
       });
 
-      it('combines monorepo and root-level architecture', () => {
-        createDir('packages/core/src/utils', 'src/shared');
+      it("combines monorepo and root-level architecture", () => {
+        createDir("packages/core/src/utils", "src/shared");
 
         const result = detectArchitecture(temporaryDirectory);
 
@@ -170,36 +187,44 @@ describe('boundaries.ts', () => {
       });
     });
 
-    describe('deduplication', () => {
-      it('deduplicates elements with same pattern', () => {
+    describe("deduplication", () => {
+      it("deduplicates elements with same pattern", () => {
         // This shouldn't normally happen, but test dedup logic
-        createDir('src/utils');
+        createDir("src/utils");
 
         const result = detectArchitecture(temporaryDirectory);
 
-        const utilitiesElements = result.elements.filter(e => e.layer === 'utils');
+        const utilitiesElements = result.elements.filter(
+          (e) => e.layer === "utils",
+        );
         expect(utilitiesElements).toHaveLength(1);
       });
     });
   });
 
-  describe('generateBoundariesConfig()', () => {
-    describe('empty architecture', () => {
-      it('generates valid config for empty architecture', () => {
+  describe("generateBoundariesConfig()", () => {
+    describe("empty architecture", () => {
+      it("generates valid config for empty architecture", () => {
         const arch = { elements: [], isMonorepo: false };
 
         const config = generateBoundariesConfig(arch);
 
-        expect(config).toContain('eslint-plugin-boundaries');
-        expect(config).toContain('No architecture directories detected');
+        expect(config).toContain("eslint-plugin-boundaries");
+        expect(config).toContain("No architecture directories detected");
         expect(config).toContain("'boundaries/no-unknown': 'off'");
       });
     });
 
-    describe('single layer', () => {
-      it('generates config with single element', () => {
+    describe("single layer", () => {
+      it("generates config with single element", () => {
         const arch = {
-          elements: [{ layer: 'utils' as const, pattern: 'src/utils/**', location: 'src/utils' }],
+          elements: [
+            {
+              layer: "utils" as const,
+              pattern: "src/utils/**",
+              location: "src/utils",
+            },
+          ],
           isMonorepo: false,
         };
 
@@ -207,19 +232,23 @@ describe('boundaries.ts', () => {
 
         expect(config).toContain("type: 'utils'");
         expect(config).toContain("pattern: 'src/utils/**'");
-        expect(config).toContain('Detected: src/utils');
+        expect(config).toContain("Detected: src/utils");
       });
     });
 
-    describe('multiple layers with rules', () => {
-      it('generates hierarchy rules for components importing utils', () => {
+    describe("multiple layers with rules", () => {
+      it("generates hierarchy rules for components importing utils", () => {
         const arch = {
           elements: [
-            { layer: 'utils' as const, pattern: 'src/utils/**', location: 'src/utils' },
             {
-              layer: 'components' as const,
-              pattern: 'src/components/**',
-              location: 'src/components',
+              layer: "utils" as const,
+              pattern: "src/utils/**",
+              location: "src/utils",
+            },
+            {
+              layer: "components" as const,
+              pattern: "src/components/**",
+              location: "src/components",
             },
           ],
           isMonorepo: false,
@@ -232,11 +261,19 @@ describe('boundaries.ts', () => {
         expect(config).toContain("'utils'");
       });
 
-      it('does not generate rule for types layer (no imports allowed)', () => {
+      it("does not generate rule for types layer (no imports allowed)", () => {
         const arch = {
           elements: [
-            { layer: 'types' as const, pattern: 'src/types/**', location: 'src/types' },
-            { layer: 'utils' as const, pattern: 'src/utils/**', location: 'src/utils' },
+            {
+              layer: "types" as const,
+              pattern: "src/types/**",
+              location: "src/types",
+            },
+            {
+              layer: "utils" as const,
+              pattern: "src/utils/**",
+              location: "src/utils",
+            },
           ],
           isMonorepo: false,
         };
@@ -249,18 +286,34 @@ describe('boundaries.ts', () => {
         expect(config).toContain("allow: ['types']");
       });
 
-      it('generates full hierarchy for complete architecture', () => {
+      it("generates full hierarchy for complete architecture", () => {
         const arch = {
           elements: [
-            { layer: 'types' as const, pattern: 'src/types/**', location: 'src/types' },
-            { layer: 'utils' as const, pattern: 'src/utils/**', location: 'src/utils' },
-            { layer: 'services' as const, pattern: 'src/services/**', location: 'src/services' },
             {
-              layer: 'components' as const,
-              pattern: 'src/components/**',
-              location: 'src/components',
+              layer: "types" as const,
+              pattern: "src/types/**",
+              location: "src/types",
             },
-            { layer: 'features' as const, pattern: 'src/features/**', location: 'src/features' },
+            {
+              layer: "utils" as const,
+              pattern: "src/utils/**",
+              location: "src/utils",
+            },
+            {
+              layer: "services" as const,
+              pattern: "src/services/**",
+              location: "src/services",
+            },
+            {
+              layer: "components" as const,
+              pattern: "src/components/**",
+              location: "src/components",
+            },
+            {
+              layer: "features" as const,
+              pattern: "src/features/**",
+              location: "src/features",
+            },
           ],
           isMonorepo: false,
         };
@@ -275,19 +328,19 @@ describe('boundaries.ts', () => {
         expect(config).toContain("type: 'features'");
 
         // Verify rules are generated
-        expect(config).toContain('boundaries/element-types');
+        expect(config).toContain("boundaries/element-types");
         expect(config).toContain("default: 'disallow'");
       });
     });
 
-    describe('monorepo indicator', () => {
-      it('includes monorepo note in description', () => {
+    describe("monorepo indicator", () => {
+      it("includes monorepo note in description", () => {
         const arch = {
           elements: [
             {
-              layer: 'utils' as const,
-              pattern: 'packages/core/utils/**',
-              location: 'packages/core/utils',
+              layer: "utils" as const,
+              pattern: "packages/core/utils/**",
+              location: "packages/core/utils",
             },
           ],
           isMonorepo: true,
@@ -295,23 +348,29 @@ describe('boundaries.ts', () => {
 
         const config = generateBoundariesConfig(arch);
 
-        expect(config).toContain('(monorepo)');
+        expect(config).toContain("(monorepo)");
       });
     });
 
-    describe('config structure', () => {
-      it('generates valid ESM export', () => {
+    describe("config structure", () => {
+      it("generates valid ESM export", () => {
         const arch = {
-          elements: [{ layer: 'utils' as const, pattern: 'src/utils/**', location: 'src/utils' }],
+          elements: [
+            {
+              layer: "utils" as const,
+              pattern: "src/utils/**",
+              location: "src/utils",
+            },
+          ],
           isMonorepo: false,
         };
 
         const config = generateBoundariesConfig(arch);
 
-        expect(config).toContain('export default {');
-        expect(config).toContain('plugins: { boundaries }');
-        expect(config).toContain('settings:');
-        expect(config).toContain('rules:');
+        expect(config).toContain("export default {");
+        expect(config).toContain("plugins: { boundaries }");
+        expect(config).toContain("settings:");
+        expect(config).toContain("rules:");
       });
     });
   });

@@ -4,36 +4,36 @@
 // Uses explicit --config flags pointing to .safeword/ configs for LLM enforcement.
 // This allows stricter rules for LLMs while humans use their normal project configs.
 
-import { existsSync } from 'node:fs';
+import { existsSync } from "node:fs";
 
-import { $ } from 'bun';
+import { $ } from "bun";
 
 // File extensions for different linting strategies
 const JS_EXTENSIONS = new Set([
-  'js',
-  'jsx',
-  'ts',
-  'tsx',
-  'mjs',
-  'mts',
-  'cjs',
-  'cts',
-  'vue',
-  'svelte',
-  'astro',
+  "js",
+  "jsx",
+  "ts",
+  "tsx",
+  "mjs",
+  "mts",
+  "cjs",
+  "cts",
+  "vue",
+  "svelte",
+  "astro",
 ]);
-const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
-const GO_EXTENSIONS = new Set(['go']);
-const SHELL_EXTENSIONS = new Set(['sh']);
+const PYTHON_EXTENSIONS = new Set(["py", "pyi"]);
+const GO_EXTENSIONS = new Set(["go"]);
+const SHELL_EXTENSIONS = new Set(["sh"]);
 const PRETTIER_EXTENSIONS = new Set([
-  'md',
-  'json',
-  'css',
-  'scss',
-  'html',
-  'yaml',
-  'yml',
-  'graphql',
+  "md",
+  "json",
+  "css",
+  "scss",
+  "html",
+  "yaml",
+  "yml",
+  "graphql",
 ]);
 
 // Cache safeword config paths at module init (avoids repeated fs checks per file)
@@ -59,14 +59,19 @@ const HAS_SAFEWORD_GOLANGCI = existsSync(SAFEWORD_GOLANGCI);
  * @param file - Path to the file to lint
  * @param _projectDir - Project root directory (cached at module init, kept for backward compat)
  */
-export async function lintFile(file: string, _projectDir: string): Promise<void> {
-  const extension = file.split('.').pop()?.toLowerCase() ?? '';
+export async function lintFile(
+  file: string,
+  _projectDir: string,
+): Promise<void> {
+  const extension = file.split(".").pop()?.toLowerCase() ?? "";
 
   // JS/TS and framework files - ESLint first (fix code), then Prettier (format)
   if (JS_EXTENSIONS.has(extension)) {
     // Use safeword config if available for stricter LLM rules
     const eslintResult = HAS_SAFEWORD_ESLINT
-      ? await $`bunx eslint --config ${SAFEWORD_ESLINT} --fix ${file}`.nothrow().quiet()
+      ? await $`bunx eslint --config ${SAFEWORD_ESLINT} --fix ${file}`
+          .nothrow()
+          .quiet()
       : await $`bunx eslint --fix ${file}`.nothrow().quiet();
 
     if (eslintResult.exitCode !== 0 && eslintResult.stderr.length > 0) {
@@ -80,7 +85,9 @@ export async function lintFile(file: string, _projectDir: string): Promise<void>
   // Skips gracefully if ruff is not installed
   if (PYTHON_EXTENSIONS.has(extension)) {
     if (HAS_SAFEWORD_RUFF) {
-      await $`ruff check --config ${SAFEWORD_RUFF} --fix ${file}`.nothrow().quiet();
+      await $`ruff check --config ${SAFEWORD_RUFF} --fix ${file}`
+        .nothrow()
+        .quiet();
       await $`ruff format --config ${SAFEWORD_RUFF} ${file}`.nothrow().quiet();
     } else {
       await $`ruff check --fix ${file}`.nothrow().quiet();
@@ -93,8 +100,12 @@ export async function lintFile(file: string, _projectDir: string): Promise<void>
   // Skips gracefully if golangci-lint is not installed
   if (GO_EXTENSIONS.has(extension)) {
     if (HAS_SAFEWORD_GOLANGCI) {
-      await $`golangci-lint run --config ${SAFEWORD_GOLANGCI} --fix ${file}`.nothrow().quiet();
-      await $`golangci-lint fmt --config ${SAFEWORD_GOLANGCI} ${file}`.nothrow().quiet();
+      await $`golangci-lint run --config ${SAFEWORD_GOLANGCI} --fix ${file}`
+        .nothrow()
+        .quiet();
+      await $`golangci-lint fmt --config ${SAFEWORD_GOLANGCI} ${file}`
+        .nothrow()
+        .quiet();
     } else {
       await $`golangci-lint run --fix ${file}`.nothrow().quiet();
       await $`golangci-lint fmt ${file}`.nothrow().quiet();

@@ -49,13 +49,13 @@ No changes needed - `bun run` executes npm scripts.
 **Before:**
 
 ```typescript
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from "vitest";
 ```
 
 **After:**
 
 ```typescript
-import { describe, expect, it, vi, beforeEach } from 'bun:test';
+import { describe, expect, it, vi, beforeEach } from "bun:test";
 ```
 
 ### 2.2 Files to Update

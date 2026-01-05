@@ -31,11 +31,11 @@
 
 ```javascript
 // Bad - LLMs write this frequently
-new Promise(resolve => {
+new Promise((resolve) => {
   if (!cache) {
     resolve(null); // No return! Execution continues
   }
-  resolve(cache.get('key')); // Called again
+  resolve(cache.get("key")); // Called again
 });
 ```
 

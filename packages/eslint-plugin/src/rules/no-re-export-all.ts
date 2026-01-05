@@ -17,19 +17,19 @@
  * Note: `export * as namespace from` is allowed as it creates a named export.
  */
 
-import type { Rule } from 'eslint';
-import type { ExportAllDeclaration } from 'estree';
+import type { Rule } from "eslint";
+import type { ExportAllDeclaration } from "estree";
 
 const rule: Rule.RuleModule = {
   meta: {
-    type: 'suggestion',
+    type: "suggestion",
     docs: {
-      description: 'Disallow wildcard re-exports (export * from)',
+      description: "Disallow wildcard re-exports (export * from)",
       recommended: true,
     },
     messages: {
       noReExportAll:
-        'Avoid `export * from`. Use named exports for better tree-shaking and clearer dependencies.',
+        "Avoid `export * from`. Use named exports for better tree-shaking and clearer dependencies.",
     },
     schema: [],
   },
@@ -44,7 +44,7 @@ const rule: Rule.RuleModule = {
 
         context.report({
           node,
-          messageId: 'noReExportAll',
+          messageId: "noReExportAll",
         });
       },
     };

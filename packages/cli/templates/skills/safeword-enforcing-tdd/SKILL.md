@@ -182,7 +182,7 @@ function calculateDiscount(amount, tier) {
 
 // ✅ GOOD - Actual logic
 function calculateDiscount(amount, tier) {
-  if (tier === 'VIP') return amount * 0.8;
+  if (tier === "VIP") return amount * 0.8;
   return amount;
 }
 ```

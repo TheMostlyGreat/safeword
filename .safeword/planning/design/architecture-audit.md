@@ -69,7 +69,7 @@ The architecture audit system adds three components to safeword:
 **Interface**:
 
 ```typescript
-import type { DetectedArchitecture } from './boundaries.js';
+import type { DetectedArchitecture } from "./boundaries.js";
 
 // Note: dependency-cruiser rule shapes are complex and vary by rule type.
 // See https://github.com/sverweij/dependency-cruiser for full schema.
@@ -176,39 +176,47 @@ Report format:
 module.exports = {
   forbidden: [
     // ERROR RULES (block on violations)
-    { name: 'no-circular', severity: 'error', from: {}, to: { circular: true } },
     {
-      name: 'packages-cannot-import-apps',
-      severity: 'error',
-      from: { path: '^packages/' },
-      to: { path: '^apps/' },
+      name: "no-circular",
+      severity: "error",
+      from: {},
+      to: { circular: true },
     },
     {
-      name: 'libs-cannot-import-packages-or-apps',
-      severity: 'error',
-      from: { path: '^libs/' },
-      to: { path: '^(packages|apps)/' },
+      name: "packages-cannot-import-apps",
+      severity: "error",
+      from: { path: "^packages/" },
+      to: { path: "^apps/" },
+    },
+    {
+      name: "libs-cannot-import-packages-or-apps",
+      severity: "error",
+      from: { path: "^libs/" },
+      to: { path: "^(packages|apps)/" },
     },
 
     // INFO RULES (reported in /audit, not errors)
     {
-      name: 'no-orphans',
-      severity: 'info',
-      from: { orphan: true, pathNot: ['\\.test\\.', 'index\\.ts$', 'main\\.ts$'] },
+      name: "no-orphans",
+      severity: "info",
+      from: {
+        orphan: true,
+        pathNot: ["\\.test\\.", "index\\.ts$", "main\\.ts$"],
+      },
       to: {},
     },
     {
-      name: 'no-god-modules',
-      severity: 'info',
-      from: { pathNot: ['index\\.ts$', 'app\\.ts$', '\\.test\\.'] },
+      name: "no-god-modules",
+      severity: "info",
+      from: { pathNot: ["index\\.ts$", "app\\.ts$", "\\.test\\."] },
       to: {},
       module: { numberOfDependenciesMoreThan: 15 },
     },
   ],
   options: {
-    doNotFollow: { path: ['node_modules', '.safeword'] },
-    tsConfig: { fileName: 'tsconfig.json' },
-    enhancedResolveOptions: { extensions: ['.ts', '.tsx', '.js', '.jsx'] },
+    doNotFollow: { path: ["node_modules", ".safeword"] },
+    tsConfig: { fileName: "tsconfig.json" },
+    enhancedResolveOptions: { extensions: [".ts", ".tsx", ".js", ".jsx"] },
   },
 };
 ```
@@ -246,7 +254,7 @@ project/
 
 ```javascript
 // .dependency-cruiser.js (user's file - preserved if exists)
-const generated = require('./.safeword/depcruise-config.js');
+const generated = require("./.safeword/depcruise-config.js");
 
 module.exports = {
   forbidden: [

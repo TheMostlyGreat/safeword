@@ -41,10 +41,14 @@ LLMs frequently make test mistakes that silently pass:
 ```javascript
 // Vitest support (scoped to test files)
 if (deps.vitest) {
-  const vitest = await import('@vitest/eslint-plugin');
+  const vitest = await import("@vitest/eslint-plugin");
   configs.push({
-    name: 'vitest',
-    files: ['**/*.test.{js,ts,jsx,tsx}', '**/*.spec.{js,ts,jsx,tsx}', '**/tests/**'],
+    name: "vitest",
+    files: [
+      "**/*.test.{js,ts,jsx,tsx}",
+      "**/*.spec.{js,ts,jsx,tsx}",
+      "**/tests/**",
+    ],
     plugins: { vitest: vitest.default },
     languageOptions: {
       globals: { ...vitest.default.environments.env.globals },
@@ -68,7 +72,7 @@ LLMs often generate tests that "pass" but test nothing:
 
 ```typescript
 // LLM mistake: no actual assertion
-it('should handle errors', async () => {
+it("should handle errors", async () => {
   const result = await doSomething();
   console.log(result); // No expect!
 });
@@ -82,7 +86,7 @@ LLMs sometimes leave `.only` when iterating:
 
 ```typescript
 // LLM mistake: focused test
-it.only('debug this one', () => {
+it.only("debug this one", () => {
   // Will skip all other tests!
 });
 ```
@@ -95,10 +99,10 @@ LLMs generate flaky tests with conditional assertions:
 
 ```typescript
 // LLM mistake: conditional expect
-it('handles both cases', () => {
+it("handles both cases", () => {
   const result = maybeGetValue();
   if (result) {
-    expect(result).toBe('value');
+    expect(result).toBe("value");
   }
   // Passes when result is null - no assertion!
 });

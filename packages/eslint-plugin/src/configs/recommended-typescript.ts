@@ -13,16 +13,16 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- ESLint config types are incompatible across plugin packages */
 
-import { importX } from 'eslint-plugin-import-x';
-import { configs as tseslintConfigs } from 'typescript-eslint';
+import { importX } from "eslint-plugin-import-x";
+import { configs as tseslintConfigs } from "typescript-eslint";
 
-import { basePlugins, prettierConfig } from './base.js';
+import { basePlugins, prettierConfig } from "./base.js";
 
 /**
  * File patterns for TypeScript files.
  * Used for parser options and type-checked rules.
  */
-const TS_FILES = ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'];
+const TS_FILES = ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"];
 
 /**
  * TypeScript recommended config - all base plugins + typescript-eslint strict
@@ -46,7 +46,7 @@ export const recommendedTypeScript: any[] = [
 
   // Enable projectService for type-checked rules (modern approach, auto-discovers tsconfig)
   {
-    name: 'safeword/typescript-parser-options',
+    name: "safeword/typescript-parser-options",
     files: TS_FILES,
     languageOptions: {
       parserOptions: {
@@ -59,8 +59,8 @@ export const recommendedTypeScript: any[] = [
   // Includes JS files and .astro files (which use astro-eslint-parser)
   {
     ...tseslintConfigs.disableTypeChecked,
-    name: 'safeword/disable-type-checked-for-non-ts',
-    files: ['**/*.js', '**/*.mjs', '**/*.cjs', '**/*.jsx', '**/*.astro'],
+    name: "safeword/disable-type-checked-for-non-ts",
+    files: ["**/*.js", "**/*.mjs", "**/*.cjs", "**/*.jsx", "**/*.astro"],
   },
 
   // No JSDoc for TypeScript - types > docs
@@ -69,19 +69,19 @@ export const recommendedTypeScript: any[] = [
   // TypeScript-specific rule overrides for LLM code
   // Only applies to TS files (JS files don't have type info for these rules)
   {
-    name: 'safeword/typescript-rules',
+    name: "safeword/typescript-rules",
     files: TS_FILES,
     rules: {
       // Allow interface vs type - both are valid
-      '@typescript-eslint/consistent-type-definitions': 'off',
+      "@typescript-eslint/consistent-type-definitions": "off",
 
       // LLMs use `any` when stuck - force them to use `unknown` instead
-      '@typescript-eslint/no-explicit-any': 'error',
+      "@typescript-eslint/no-explicit-any": "error",
 
       // LLMs use truthy checks when they should be explicit
       // This catches bugs like `if (count)` when count could be 0
-      '@typescript-eslint/strict-boolean-expressions': [
-        'error',
+      "@typescript-eslint/strict-boolean-expressions": [
+        "error",
         {
           allowString: true, // Allow string checks (common pattern)
           allowNumber: false, // Disallow number checks (0 is falsy bug)
@@ -94,11 +94,11 @@ export const recommendedTypeScript: any[] = [
       ],
 
       // Design rules not in strict+stylistic (high LLM value)
-      '@typescript-eslint/consistent-type-imports': 'error', // import type { X } for types
-      '@typescript-eslint/switch-exhaustiveness-check': 'error', // Missing case in union switch
-      '@typescript-eslint/no-shadow': 'error', // Variable shadows outer scope
-      '@typescript-eslint/require-array-sort-compare': 'error', // [].sort() needs compareFn
-      '@typescript-eslint/no-unused-private-class-members': 'error', // Catch dead code in classes
+      "@typescript-eslint/consistent-type-imports": "error", // import type { X } for types
+      "@typescript-eslint/switch-exhaustiveness-check": "error", // Missing case in union switch
+      "@typescript-eslint/no-shadow": "error", // Variable shadows outer scope
+      "@typescript-eslint/require-array-sort-compare": "error", // [].sort() needs compareFn
+      "@typescript-eslint/no-unused-private-class-members": "error", // Catch dead code in classes
     },
   },
 
@@ -107,9 +107,9 @@ export const recommendedTypeScript: any[] = [
 
   // Re-enable curly after prettier (prettier turns it off but we want braces for LLM code)
   {
-    name: 'safeword/post-prettier',
+    name: "safeword/post-prettier",
     rules: {
-      curly: 'error', // Force braces on if/else/for/while - LLMs write unsafe single-line blocks
+      curly: "error", // Force braces on if/else/for/while - LLMs write unsafe single-line blocks
     },
   },
 ];

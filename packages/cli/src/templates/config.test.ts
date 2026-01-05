@@ -2,12 +2,12 @@
  * Unit tests for content templates
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest";
 
-import { getEslintConfig, SETTINGS_HOOKS } from './config';
+import { getEslintConfig, SETTINGS_HOOKS } from "./config";
 
-describe('getEslintConfig', () => {
-  it('should use import.meta.url for config-relative path resolution (not CWD)', () => {
+describe("getEslintConfig", () => {
+  it("should use import.meta.url for config-relative path resolution (not CWD)", () => {
     // This test documents a critical fix: the ESLint config must resolve package.json
     // relative to the config file location, NOT relative to process.cwd().
     // When lint-staged runs from a subdirectory in a monorepo, CWD-relative resolution
@@ -15,73 +15,73 @@ describe('getEslintConfig', () => {
     const config = getEslintConfig();
 
     // Must use import.meta.url pattern for config-relative resolution
-    expect(config).toContain('import.meta.url');
-    expect(config).toContain('fileURLToPath');
-    expect(config).toContain('dirname');
+    expect(config).toContain("import.meta.url");
+    expect(config).toContain("fileURLToPath");
+    expect(config).toContain("dirname");
   });
 
-  it('should import eslint-plugin-safeword and destructure detect/configs', () => {
+  it("should import eslint-plugin-safeword and destructure detect/configs", () => {
     const config = getEslintConfig();
 
     expect(config).toContain('import safeword from "eslint-plugin-safeword"');
-    expect(config).toContain('const { detect, configs } = safeword');
+    expect(config).toContain("const { detect, configs } = safeword");
   });
 
-  it('should use detect.collectAllDeps for dependency scanning', () => {
+  it("should use detect.collectAllDeps for dependency scanning", () => {
     const config = getEslintConfig();
 
-    expect(config).toContain('detect.collectAllDeps(__dirname)');
-    expect(config).toContain('detect.detectFramework(deps)');
+    expect(config).toContain("detect.collectAllDeps(__dirname)");
+    expect(config).toContain("detect.detectFramework(deps)");
   });
 
-  it('should include framework detection for config selection', () => {
+  it("should include framework detection for config selection", () => {
     const config = getEslintConfig();
 
     // Config should have baseConfigs mapping
-    expect(config).toContain('configs.recommendedTypeScriptNext');
-    expect(config).toContain('configs.recommendedTypeScriptReact');
-    expect(config).toContain('configs.recommendedTypeScript');
-    expect(config).toContain('configs.recommended');
-    expect(config).toContain('baseConfigs[framework]');
+    expect(config).toContain("configs.recommendedTypeScriptNext");
+    expect(config).toContain("configs.recommendedTypeScriptReact");
+    expect(config).toContain("configs.recommendedTypeScript");
+    expect(config).toContain("configs.recommended");
+    expect(config).toContain("baseConfigs[framework]");
   });
 
-  it('should use detect helpers for optional configs', () => {
+  it("should use detect helpers for optional configs", () => {
     const config = getEslintConfig();
 
-    expect(config).toContain('detect.hasVitest(deps)');
-    expect(config).toContain('detect.hasPlaywright(deps)');
-    expect(config).toContain('detect.hasTailwind(deps)');
-    expect(config).toContain('detect.hasTanstackQuery(deps)');
+    expect(config).toContain("detect.hasVitest(deps)");
+    expect(config).toContain("detect.hasPlaywright(deps)");
+    expect(config).toContain("detect.hasTailwind(deps)");
+    expect(config).toContain("detect.hasTanstackQuery(deps)");
   });
 
-  it('should use detect.getIgnores for dynamic ignores', () => {
+  it("should use detect.getIgnores for dynamic ignores", () => {
     const config = getEslintConfig();
 
-    expect(config).toContain('detect.getIgnores(deps)');
+    expect(config).toContain("detect.getIgnores(deps)");
   });
 
-  it('should include eslint-config-prettier when no existing formatter', () => {
+  it("should include eslint-config-prettier when no existing formatter", () => {
     const config = getEslintConfig(false);
 
-    expect(config).toContain('eslintConfigPrettier');
+    expect(config).toContain("eslintConfigPrettier");
   });
 
-  it('should NOT include eslint-config-prettier when existing formatter present', () => {
+  it("should NOT include eslint-config-prettier when existing formatter present", () => {
     const config = getEslintConfig(true);
 
-    expect(config).not.toContain('eslintConfigPrettier');
+    expect(config).not.toContain("eslintConfigPrettier");
   });
 });
 
-describe('SETTINGS_HOOKS', () => {
-  it('should define all required hook types', () => {
-    expect(SETTINGS_HOOKS).toHaveProperty('SessionStart');
-    expect(SETTINGS_HOOKS).toHaveProperty('UserPromptSubmit');
-    expect(SETTINGS_HOOKS).toHaveProperty('Stop');
-    expect(SETTINGS_HOOKS).toHaveProperty('PostToolUse');
+describe("SETTINGS_HOOKS", () => {
+  it("should define all required hook types", () => {
+    expect(SETTINGS_HOOKS).toHaveProperty("SessionStart");
+    expect(SETTINGS_HOOKS).toHaveProperty("UserPromptSubmit");
+    expect(SETTINGS_HOOKS).toHaveProperty("Stop");
+    expect(SETTINGS_HOOKS).toHaveProperty("PostToolUse");
   });
 
-  it('should have valid PostToolUse matcher that targets edit tools', () => {
+  it("should have valid PostToolUse matcher that targets edit tools", () => {
     const matcher = SETTINGS_HOOKS.PostToolUse[0].matcher;
 
     // Must be valid regex
@@ -91,23 +91,23 @@ describe('SETTINGS_HOOKS', () => {
     const regex = new RegExp(matcher);
 
     // Should match file-modifying tools
-    expect(regex.test('Write')).toBe(true);
-    expect(regex.test('Edit')).toBe(true);
-    expect(regex.test('MultiEdit')).toBe(true);
-    expect(regex.test('NotebookEdit')).toBe(true);
+    expect(regex.test("Write")).toBe(true);
+    expect(regex.test("Edit")).toBe(true);
+    expect(regex.test("MultiEdit")).toBe(true);
+    expect(regex.test("NotebookEdit")).toBe(true);
 
     // Should NOT match read-only tools
-    expect(regex.test('Read')).toBe(false);
-    expect(regex.test('Bash')).toBe(false);
-    expect(regex.test('Grep')).toBe(false);
+    expect(regex.test("Read")).toBe(false);
+    expect(regex.test("Bash")).toBe(false);
+    expect(regex.test("Grep")).toBe(false);
   });
 
-  it('should have all commands reference $CLAUDE_PROJECT_DIR', () => {
+  it("should have all commands reference $CLAUDE_PROJECT_DIR", () => {
     const commands: string[] = [];
     for (const entries of Object.values(SETTINGS_HOOKS)) {
       for (const entry of entries) {
         for (const hook of entry.hooks) {
-          if (hook.type === 'command') {
+          if (hook.type === "command") {
             commands.push(hook.command);
           }
         }
@@ -116,9 +116,10 @@ describe('SETTINGS_HOOKS', () => {
 
     expect(commands.length).toBeGreaterThan(0);
     for (const command of commands) {
-      expect(command, `Command missing $CLAUDE_PROJECT_DIR: ${command}`).toContain(
-        '$CLAUDE_PROJECT_DIR',
-      );
+      expect(
+        command,
+        `Command missing $CLAUDE_PROJECT_DIR: ${command}`,
+      ).toContain("$CLAUDE_PROJECT_DIR");
     }
   });
 });

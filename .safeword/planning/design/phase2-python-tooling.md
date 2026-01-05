@@ -32,13 +32,17 @@ ImportLinterIntegration
 
 ```typescript
 // New managedFile generator
-managedFiles['pyproject.toml [tool.ruff]'] = ctx => {
+managedFiles["pyproject.toml [tool.ruff]"] = (ctx) => {
   if (!ctx.languages.python) return { content: null };
   return { content: generateRuffConfig() };
 };
 
 // TOML section merge (similar to JSON merge)
-function mergeTomlSection(existing: string, section: string, content: string): string;
+function mergeTomlSection(
+  existing: string,
+  section: string,
+  content: string,
+): string;
 ```
 
 **Dependencies**: Node.js `fs`, no TOML parser (line-based merge)
@@ -61,7 +65,7 @@ max-complexity = 10
 **Interface**:
 
 ```typescript
-managedFiles['.pre-commit-config.yaml'] = ctx => {
+managedFiles[".pre-commit-config.yaml"] = (ctx) => {
   if (!ctx.languages.python) return { content: null };
   if (!ctx.isGitRepo) return { content: null };
   return { content: generatePreCommitConfig() };
@@ -91,7 +95,7 @@ repos:
 
 ```typescript
 // Only for projects with detected layer structure
-managedFiles['pyproject.toml [tool.importlinter]'] = ctx => {
+managedFiles["pyproject.toml [tool.importlinter]"] = (ctx) => {
   if (!ctx.languages.python) return { content: null };
   const layers = detectLayers(ctx.cwd); // domain, services, api, etc.
   if (!layers.length) return { content: null };

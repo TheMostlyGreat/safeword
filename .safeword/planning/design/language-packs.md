@@ -71,8 +71,8 @@ export interface SetupResult {
 **Where**: `packages/cli/src/packs/registry.ts`
 
 ```typescript
-import { pythonPack } from './python.js';
-import { typescriptPack } from './typescript.js';
+import { pythonPack } from "./python.js";
+import { typescriptPack } from "./typescript.js";
 
 export const LANGUAGE_PACKS: Record<string, LanguagePack> = {
   python: pythonPack,
@@ -93,10 +93,10 @@ export function detectLanguages(cwd: string): string[];
 
 ```typescript
 export const pythonPack: LanguagePack = {
-  id: 'python',
-  name: 'Python',
-  extensions: ['.py', '.pyi'],
-  detect: cwd => exists(join(cwd, 'pyproject.toml')),
+  id: "python",
+  name: "Python",
+  extensions: [".py", ".pyi"],
+  detect: (cwd) => exists(join(cwd, "pyproject.toml")),
   setup: (cwd, ctx) => setupPythonTooling(cwd, ctx.isGitRepo),
 };
 ```
@@ -111,10 +111,10 @@ export const pythonPack: LanguagePack = {
 
 ```typescript
 export const typescriptPack: LanguagePack = {
-  id: 'typescript',
-  name: 'TypeScript',
-  extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'],
-  detect: cwd => exists(join(cwd, 'package.json')),
+  id: "typescript",
+  name: "TypeScript",
+  extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
+  detect: (cwd) => exists(join(cwd, "package.json")),
   setup: (cwd, ctx) => setupTypescriptTooling(cwd, ctx),
 };
 ```

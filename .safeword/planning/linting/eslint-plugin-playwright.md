@@ -78,9 +78,9 @@ LLMs frequently forget `await` on Playwright actions:
 
 ```typescript
 // LLM mistake: missing await
-test('login flow', async ({ page }) => {
-  page.goto('/login'); // Missing await!
-  page.fill('#email', 'test@example.com'); // Race condition!
+test("login flow", async ({ page }) => {
+  page.goto("/login"); // Missing await!
+  page.fill("#email", "test@example.com"); // Race condition!
 });
 ```
 
@@ -92,7 +92,7 @@ LLMs trained on older Playwright docs use deprecated patterns:
 
 ```typescript
 // LLM mistake: deprecated waiters
-await page.waitForSelector('.loaded'); // Warn
+await page.waitForSelector(".loaded"); // Warn
 await page.waitForNavigation(); // Error
 await page.waitForTimeout(1000); // Warn - arbitrary waits
 ```
@@ -101,7 +101,7 @@ Modern Playwright uses web-first assertions instead:
 
 ```typescript
 // Correct: web-first assertion
-await expect(page.locator('.loaded')).toBeVisible();
+await expect(page.locator(".loaded")).toBeVisible();
 ```
 
 ### Force Option Abuse
@@ -110,7 +110,7 @@ LLMs use `{ force: true }` to bypass flaky selectors:
 
 ```typescript
 // LLM mistake: forcing clicks
-await page.click('button', { force: true }); // Hides real issues
+await page.click("button", { force: true }); // Hides real issues
 ```
 
 `no-force-option` encourages fixing the underlying selector problem.
@@ -120,9 +120,9 @@ await page.click('button', { force: true }); // Hides real issues
 ```javascript
 // Playwright for e2e tests (always included - safeword sets up Playwright)
 configs.push({
-  name: 'playwright',
-  files: ['**/e2e/**', '**/*.e2e.{js,ts,jsx,tsx}', '**/playwright/**'],
-  ...playwright.configs['flat/recommended'],
+  name: "playwright",
+  files: ["**/e2e/**", "**/*.e2e.{js,ts,jsx,tsx}", "**/playwright/**"],
+  ...playwright.configs["flat/recommended"],
 });
 ```
 

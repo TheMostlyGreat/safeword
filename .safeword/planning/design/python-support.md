@@ -43,7 +43,7 @@ function detectPythonType(cwd: string): PythonProjectType | undefined;
 **Interface**:
 
 ```typescript
-const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
+const PYTHON_EXTENSIONS = new Set(["py", "pyi"]);
 export async function lintFile(file: string, projectDir: string): Promise<void>;
 ```
 

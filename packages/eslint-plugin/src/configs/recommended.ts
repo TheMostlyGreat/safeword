@@ -11,9 +11,9 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- ESLint config types are incompatible across plugin packages */
 
-import pluginJsdoc from 'eslint-plugin-jsdoc';
+import pluginJsdoc from "eslint-plugin-jsdoc";
 
-import { basePlugins, prettierConfig } from './base.js';
+import { basePlugins, prettierConfig } from "./base.js";
 
 /**
  * JavaScript recommended config - core plugins without TypeScript
@@ -28,7 +28,7 @@ export const recommended: any[] = [
 
   // JSDoc - JavaScript needs docs (no type safety net)
   // Using error config - LLMs ignore warnings
-  pluginJsdoc.configs['flat/recommended-error'],
+  pluginJsdoc.configs["flat/recommended-error"],
 
   // Prettier must be last to disable conflicting rules
   prettierConfig,
@@ -36,7 +36,7 @@ export const recommended: any[] = [
   // Re-enable curly after prettier (prettier turns it off but we want braces for LLM code)
   {
     rules: {
-      curly: 'error', // Force braces on if/else/for/while - LLMs write unsafe single-line blocks
+      curly: "error", // Force braces on if/else/for/while - LLMs write unsafe single-line blocks
     },
   },
 ];

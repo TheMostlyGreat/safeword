@@ -5,7 +5,7 @@
  * ADD YOUR CUSTOM RULES BELOW the spread operator.
  */
 
-const generated = require('./.safeword/depcruise-config.cjs');
+const generated = require("./.safeword/depcruise-config.cjs");
 
 module.exports = {
   forbidden: [

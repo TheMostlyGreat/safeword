@@ -5,11 +5,8 @@
  * Consolidates ESLint, depcruise, knip, jscpd, ruff configs.
  */
 
-// Re-export ESLint configs
-export * from "./eslint/index.js";
-
-// Detection
-export { detect } from "./detection/index.js";
+// Detection - re-export from eslint-plugin-safeword (single source of truth)
+export { detect } from "eslint-plugin-safeword";
 
 // Tools
 export * from "./tools/depcruise.js";

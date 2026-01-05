@@ -3,9 +3,9 @@
 // Triggers quality review when changes are proposed or made
 // Uses JSON summary if available, falls back to detecting edit tool usage
 
-import { existsSync } from 'node:fs';
+import { existsSync } from "node:fs";
 
-import { QUALITY_REVIEW_MESSAGE } from './lib/quality.ts';
+import { QUALITY_REVIEW_MESSAGE } from "./lib/quality.ts";
 
 interface HookInput {
   transcript_path?: string;
@@ -30,7 +30,7 @@ interface ResponseSummary {
   madeChanges: boolean;
 }
 
-const EDIT_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
+const EDIT_TOOLS = new Set(["Write", "Edit", "MultiEdit", "NotebookEdit"]);
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const safewordDir = `${projectDir}/.safeword`;
@@ -60,7 +60,7 @@ if (!(await transcriptFile.exists())) {
 
 // Read transcript (JSONL format)
 const transcriptText = await transcriptFile.text();
-const lines = transcriptText.trim().split('\n');
+const lines = transcriptText.trim().split("\n");
 
 // Only look at the LAST assistant message for JSON summary
 // Scan up to 5 recent assistant messages for edit tool detection
@@ -69,19 +69,31 @@ let editToolsUsed = false;
 let assistantMessagesChecked = 0;
 const MAX_MESSAGES_FOR_TOOLS = 5;
 
-for (let i = lines.length - 1; i >= 0 && assistantMessagesChecked < MAX_MESSAGES_FOR_TOOLS; i--) {
+for (
+  let i = lines.length - 1;
+  i >= 0 && assistantMessagesChecked < MAX_MESSAGES_FOR_TOOLS;
+  i--
+) {
   try {
     const message: TranscriptMessage = JSON.parse(lines[i]);
-    if (message.type === 'assistant' && message.message?.content) {
+    if (message.type === "assistant" && message.message?.content) {
       assistantMessagesChecked++;
 
       for (const item of message.message.content) {
         // Only collect text from the FIRST (most recent) assistant message
-        if (assistantMessagesChecked === 1 && item.type === 'text' && item.text) {
+        if (
+          assistantMessagesChecked === 1 &&
+          item.type === "text" &&
+          item.text
+        ) {
           recentTexts.push(item.text);
         }
         // Detect edit tool usage in recent messages
-        if (item.type === 'tool_use' && item.name && EDIT_TOOLS.has(item.name)) {
+        if (
+          item.type === "tool_use" &&
+          item.name &&
+          EDIT_TOOLS.has(item.name)
+        ) {
           editToolsUsed = true;
         }
       }
@@ -96,7 +108,7 @@ if (recentTexts.length === 0 && !editToolsUsed) {
 }
 
 // Combine all recent texts to search for JSON summary
-const combinedText = recentTexts.join('\n');
+const combinedText = recentTexts.join("\n");
 
 /**
  * Extract all JSON objects from text using brace-balanced scanning.
@@ -107,7 +119,7 @@ function extractJsonObjects(text: string): string[] {
   let i = 0;
 
   while (i < text.length) {
-    if (text[i] === '{') {
+    if (text[i] === "{") {
       let depth = 0;
       let inString = false;
       let escape = false;
@@ -121,7 +133,7 @@ function extractJsonObjects(text: string): string[] {
           continue;
         }
 
-        if (char === '\\' && inString) {
+        if (char === "\\" && inString) {
           escape = true;
           continue;
         }
@@ -132,8 +144,8 @@ function extractJsonObjects(text: string): string[] {
         }
 
         if (!inString) {
-          if (char === '{') depth++;
-          if (char === '}') depth--;
+          if (char === "{") depth++;
+          if (char === "}") depth--;
 
           if (depth === 0) {
             results.push(text.slice(start, j + 1));
@@ -153,10 +165,10 @@ const candidates = extractJsonObjects(combinedText);
 
 function isValidSummary(object: unknown): object is ResponseSummary {
   return (
-    typeof object === 'object' &&
+    typeof object === "object" &&
     object !== null &&
-    typeof (object as ResponseSummary).proposedChanges === 'boolean' &&
-    typeof (object as ResponseSummary).madeChanges === 'boolean'
+    typeof (object as ResponseSummary).proposedChanges === "boolean" &&
+    typeof (object as ResponseSummary).madeChanges === "boolean"
   );
 }
 
@@ -181,14 +193,16 @@ for (const candidate of candidates) {
 if (summary) {
   // Use reported summary
   if (summary.proposedChanges || summary.madeChanges) {
-    console.log(JSON.stringify({ decision: 'block', reason: QUALITY_REVIEW_MESSAGE }));
+    console.log(
+      JSON.stringify({ decision: "block", reason: QUALITY_REVIEW_MESSAGE }),
+    );
     process.exit(0);
   }
 } else if (editToolsUsed) {
   // Fallback: edit tools detected but no summary - trigger review anyway
   console.log(
     JSON.stringify({
-      decision: 'block',
+      decision: "block",
       reason: `${QUALITY_REVIEW_MESSAGE}\n\n(Note: JSON summary was missing but edit tools were detected)`,
     }),
   );
@@ -197,7 +211,7 @@ if (summary) {
   // No summary and no edit tools - remind about required format
   console.log(
     JSON.stringify({
-      decision: 'block',
+      decision: "block",
       reason:
         'SAFEWORD: Response missing required JSON summary. Add to end of response:\n{"proposedChanges": boolean, "madeChanges": boolean}',
     }),

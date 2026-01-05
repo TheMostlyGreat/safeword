@@ -7,7 +7,7 @@
  * Future: Layer detection for depguard import rules.
  */
 
-import type { SetupResult } from '../types.js';
+import type { SetupResult } from "../types.js";
 
 /**
  * Set up Go tooling configuration.

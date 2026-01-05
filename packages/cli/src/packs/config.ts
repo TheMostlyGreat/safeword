@@ -4,12 +4,12 @@
  * Helpers to read/write installedPacks in .safeword/config.json
  */
 
-import nodePath from 'node:path';
+import nodePath from "node:path";
 
-import { readFileSafe, writeFile } from '../utils/fs.js';
-import { VERSION } from '../version.js';
+import { readFileSafe, writeFile } from "../utils/fs.js";
+import { VERSION } from "../version.js";
 
-const CONFIG_PATH = '.safeword/config.json';
+const CONFIG_PATH = ".safeword/config.json";
 
 interface SafewordConfig {
   version: string;

@@ -5,7 +5,17 @@
 
 **Feature**: Modular language support with bundled language packs
 
-**Status**: Draft
+**Status**: ~~Draft~~ **DEPRECATED**
+
+> **Superseded by**: `@safeword/quality` package - see [GitHub Issue #31](https://github.com/TheMostlyGreat/safeword/issues/31)
+>
+> The quality package consolidates language bases, framework presets, and tool runners
+> into a unified architecture. Key differences:
+>
+> - No persistent state (`installedPacks` tracking) - runtime detection only
+> - `BaseConfig` replaces `LanguagePack` with simpler interface
+> - Config generation via `compileToX()` functions
+> - Audit capabilities integrated into tool runners
 
 ---
 

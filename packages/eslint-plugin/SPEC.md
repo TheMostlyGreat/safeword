@@ -61,7 +61,7 @@ astro                            # Astro projects (standalone)
 
 ```js
 // eslint.config.js
-import safeword from 'eslint-plugin-safeword';
+import safeword from "eslint-plugin-safeword";
 
 export default [
   // 1. Safeword config (spread first)
@@ -70,12 +70,12 @@ export default [
   // 2. User overrides (spread after = wins)
   {
     rules: {
-      '@typescript-eslint/no-explicit-any': 'warn', // override safeword
+      "@typescript-eslint/no-explicit-any": "warn", // override safeword
     },
   },
 
   // 3. User ignores
-  { ignores: ['dist/**'] },
+  { ignores: ["dist/**"] },
 ];
 ```
 

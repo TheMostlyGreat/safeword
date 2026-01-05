@@ -12,7 +12,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
-import playwrightPlugin from 'eslint-plugin-playwright';
+import playwrightPlugin from "eslint-plugin-playwright";
 
 /**
  * Playwright e2e test linting config
@@ -26,49 +26,52 @@ import playwrightPlugin from 'eslint-plugin-playwright';
  */
 export const playwrightConfig: any[] = [
   {
-    name: 'safeword/playwright',
-    files: ['**/*.e2e.{ts,tsx,js,jsx}', '**/e2e/**/*.{test,spec}.{ts,tsx,js,jsx}'],
+    name: "safeword/playwright",
+    files: [
+      "**/*.e2e.{ts,tsx,js,jsx}",
+      "**/e2e/**/*.{test,spec}.{ts,tsx,js,jsx}",
+    ],
     plugins: {
       playwright: playwrightPlugin,
     },
     rules: {
       // From recommended - already at error
-      'playwright/missing-playwright-await': 'error',
-      'playwright/no-focused-test': 'error',
-      'playwright/no-networkidle': 'error',
-      'playwright/no-standalone-expect': 'error',
-      'playwright/no-unsafe-references': 'error',
-      'playwright/no-unused-locators': 'error',
-      'playwright/no-wait-for-navigation': 'error',
-      'playwright/prefer-web-first-assertions': 'error',
-      'playwright/valid-describe-callback': 'error',
-      'playwright/valid-expect': 'error',
-      'playwright/valid-expect-in-promise': 'error',
-      'playwright/valid-test-tags': 'error',
-      'playwright/valid-title': 'error',
+      "playwright/missing-playwright-await": "error",
+      "playwright/no-focused-test": "error",
+      "playwright/no-networkidle": "error",
+      "playwright/no-standalone-expect": "error",
+      "playwright/no-unsafe-references": "error",
+      "playwright/no-unused-locators": "error",
+      "playwright/no-wait-for-navigation": "error",
+      "playwright/prefer-web-first-assertions": "error",
+      "playwright/valid-describe-callback": "error",
+      "playwright/valid-expect": "error",
+      "playwright/valid-expect-in-promise": "error",
+      "playwright/valid-test-tags": "error",
+      "playwright/valid-title": "error",
 
       // Escalated from warn to error (LLMs ignore warnings)
-      'playwright/expect-expect': 'error',
-      'playwright/max-nested-describe': 'error',
-      'playwright/no-conditional-expect': 'error',
-      'playwright/no-conditional-in-test': 'error',
-      'playwright/no-element-handle': 'error',
-      'playwright/no-eval': 'error',
-      'playwright/no-force-option': 'error',
-      'playwright/no-nested-step': 'error',
-      'playwright/no-page-pause': 'error',
-      'playwright/no-useless-await': 'error',
-      'playwright/no-useless-not': 'error',
-      'playwright/no-wait-for-selector': 'error',
-      'playwright/no-wait-for-timeout': 'error',
+      "playwright/expect-expect": "error",
+      "playwright/max-nested-describe": "error",
+      "playwright/no-conditional-expect": "error",
+      "playwright/no-conditional-in-test": "error",
+      "playwright/no-element-handle": "error",
+      "playwright/no-eval": "error",
+      "playwright/no-force-option": "error",
+      "playwright/no-nested-step": "error",
+      "playwright/no-page-pause": "error",
+      "playwright/no-useless-await": "error",
+      "playwright/no-useless-not": "error",
+      "playwright/no-wait-for-selector": "error",
+      "playwright/no-wait-for-timeout": "error",
 
       // EXCEPTION: stays at warn (legitimate TDD pattern)
-      'playwright/no-skipped-test': 'warn',
+      "playwright/no-skipped-test": "warn",
 
       // Relax base rules for test files
-      '@typescript-eslint/no-empty-function': 'off', // Empty catch blocks for expected errors
-      'security/detect-non-literal-fs-filename': 'off', // Tests use fixtures from known paths
-      'unicorn/no-null': 'off', // Playwright API uses null (e.g., waitForFunction signature)
+      "@typescript-eslint/no-empty-function": "off", // Empty catch blocks for expected errors
+      "security/detect-non-literal-fs-filename": "off", // Tests use fixtures from known paths
+      "unicorn/no-null": "off", // Playwright API uses null (e.g., waitForFunction signature)
     },
   },
 ];

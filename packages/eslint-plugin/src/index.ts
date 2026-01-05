@@ -36,19 +36,19 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
-import type { Rule } from 'eslint';
+import type { Rule } from "eslint";
 
-import { astroConfig } from './configs/astro.js';
-import { playwrightConfig } from './configs/playwright.js';
-import { recommended } from './configs/recommended.js';
-import { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
-import { recommendedTypeScriptReact } from './configs/recommended-react.js';
-import { recommendedTypeScript } from './configs/recommended-typescript.js';
-import { tailwindConfig } from './configs/tailwind.js';
-import { tanstackQueryConfig } from './configs/tanstack-query.js';
-import { vitestConfig } from './configs/vitest.js';
-import { detect } from './detect.js';
-import { rules } from './rules/index.js';
+import { astroConfig } from "./configs/astro.js";
+import { playwrightConfig } from "./configs/playwright.js";
+import { recommended } from "./configs/recommended.js";
+import { recommendedTypeScriptNext } from "./configs/recommended-nextjs.js";
+import { recommendedTypeScriptReact } from "./configs/recommended-react.js";
+import { recommendedTypeScript } from "./configs/recommended-typescript.js";
+import { tailwindConfig } from "./configs/tailwind.js";
+import { tanstackQueryConfig } from "./configs/tanstack-query.js";
+import { vitestConfig } from "./configs/vitest.js";
+import { detect } from "./detect.js";
+import { rules } from "./rules/index.js";
 
 interface SafewordPlugin {
   meta: {
@@ -72,8 +72,8 @@ interface SafewordPlugin {
 
 const plugin: SafewordPlugin = {
   meta: {
-    name: 'eslint-plugin-safeword',
-    version: '0.4.0',
+    name: "eslint-plugin-safeword",
+    version: "0.4.0",
   },
   configs: {
     recommended,
@@ -92,13 +92,13 @@ const plugin: SafewordPlugin = {
 
 export default plugin;
 
-export { astroConfig } from './configs/astro.js';
-export { playwrightConfig } from './configs/playwright.js';
-export { recommended } from './configs/recommended.js';
-export { recommendedTypeScriptNext } from './configs/recommended-nextjs.js';
-export { recommendedTypeScriptReact } from './configs/recommended-react.js';
-export { recommendedTypeScript } from './configs/recommended-typescript.js';
-export { tailwindConfig } from './configs/tailwind.js';
-export { tanstackQueryConfig } from './configs/tanstack-query.js';
-export { vitestConfig } from './configs/vitest.js';
-export { detect } from './detect.js';
+export { astroConfig } from "./configs/astro.js";
+export { playwrightConfig } from "./configs/playwright.js";
+export { recommended } from "./configs/recommended.js";
+export { recommendedTypeScriptNext } from "./configs/recommended-nextjs.js";
+export { recommendedTypeScriptReact } from "./configs/recommended-react.js";
+export { recommendedTypeScript } from "./configs/recommended-typescript.js";
+export { tailwindConfig } from "./configs/tailwind.js";
+export { tanstackQueryConfig } from "./configs/tanstack-query.js";
+export { vitestConfig } from "./configs/vitest.js";
+export { detect } from "./detect.js";

@@ -139,7 +139,7 @@ Functions exceeding max complexity (10) or cognitive complexity (15).
 **Investigation:** Vitest DOES support `expect(value, message)` syntax for custom error messages. This is valid code:
 
 ```typescript
-expect(parsed, 'Frontmatter must start with ---').not.toBeNull();
+expect(parsed, "Frontmatter must start with ---").not.toBeNull();
 ```
 
 **Root cause:** `eslint-plugin-vitest@0.5.4` (April 2024) doesn't recognize this syntax. Fix was [merged Aug 2024](https://github.com/vitest-dev/eslint-plugin-vitest/issues/503) but no new release yet.

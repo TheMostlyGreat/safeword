@@ -49,7 +49,7 @@ function Component({ show }) {
 
 // LLM mistake: hook in loop
 function Component({ items }) {
-  items.forEach(item => {
+  items.forEach((item) => {
     const [state, setState] = useState(0); // Error!
   });
 }
@@ -84,10 +84,10 @@ For now, keep both rules enabled.
 ```javascript
 // React/Next.js support (conditional)
 if (deps.react || deps.next) {
-  const reactHooks = await import('eslint-plugin-react-hooks');
+  const reactHooks = await import("eslint-plugin-react-hooks");
   configs.push({
-    name: 'react-hooks',
-    plugins: { 'react-hooks': reactHooks.default },
+    name: "react-hooks",
+    plugins: { "react-hooks": reactHooks.default },
     rules: reactHooks.default.configs.recommended.rules,
   });
 }

@@ -28,7 +28,7 @@ No rules to configure - it's a passthrough config that sets conflicting rules to
 ### Flat Config Usage
 
 ```js
-import eslintConfigPrettier from 'eslint-config-prettier';
+import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
   // ... other configs

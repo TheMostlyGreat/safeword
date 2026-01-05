@@ -38,8 +38,8 @@ LLMs make common Svelte mistakes:
 
 ```javascript
 // Svelte support
-if (deps.svelte || deps['@sveltejs/kit']) {
-  const svelte = await import('eslint-plugin-svelte');
+if (deps.svelte || deps["@sveltejs/kit"]) {
+  const svelte = await import("eslint-plugin-svelte");
   configs.push(...svelte.default.configs.recommended);
 }
 ```

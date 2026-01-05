@@ -1,12 +1,12 @@
 /* Safeword Theme - Oswald + IBM Plex Sans + Lilex */
 
 /* Import fonts */
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
 
 @font-face {
-  font-family: 'Monaspace Krypton';
-  src: url('https://cdn.jsdelivr.net/gh/githubnext/monaspace@v1.101/fonts/webfonts/MonaspaceKrypton-Regular.woff2')
-    format('woff2');
+  font-family: "Monaspace Krypton";
+  src: url("https://cdn.jsdelivr.net/gh/githubnext/monaspace@v1.101/fonts/webfonts/MonaspaceKrypton-Regular.woff2")
+    format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -66,7 +66,7 @@ h6,
 .sl-markdown-content h4,
 .sl-markdown-content h5,
 .sl-markdown-content h6 {
-  font-family: 'Oswald', sans-serif !important;
+  font-family: "Oswald", sans-serif !important;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -85,7 +85,7 @@ label,
 .sl-markdown-content li,
 .sl-markdown-content td,
 .sl-markdown-content th {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: "IBM Plex Sans", sans-serif;
 }
 
 /* Lilex for code/monospace */
@@ -98,7 +98,7 @@ samp,
 figure.frame *,
 .ec-line,
 .ec-line * {
-  font-family: 'Monaspace Krypton', monospace !important;
+  font-family: "Monaspace Krypton", monospace !important;
 }
 
 /* Inline code styling */
@@ -133,7 +133,7 @@ figure.frame .ec-line .code * {
 
 /* Chevron prompt for terminal */
 figure.frame .ec-line .code::before {
-  content: '> ';
+  content: "> ";
   color: #fff;
   opacity: 0.5;
 }
@@ -166,23 +166,23 @@ figure.frame .copy button div,
 }
 
 /* Search bar styling */
-button[aria-label='Search'] {
+button[aria-label="Search"] {
   background: #000 !important;
   border: none !important;
 }
 
-button[aria-label='Search'] * {
+button[aria-label="Search"] * {
   color: #888 !important;
 }
 
-button[aria-label='Search'] kbd {
+button[aria-label="Search"] kbd {
   color: #888 !important;
   border-color: #666 !important;
   background: transparent !important;
   opacity: 1 !important;
 }
 
-button[aria-label='Search'] kbd kbd {
+button[aria-label="Search"] kbd kbd {
   color: #888 !important;
 }
 
@@ -190,7 +190,7 @@ button[aria-label='Search'] kbd kbd {
 .site-title {
   border: 3px solid #000 !important;
   padding: 0.2em 0.4em !important;
-  font-family: 'Oswald', sans-serif !important;
+  font-family: "Oswald", sans-serif !important;
   text-transform: uppercase !important;
   font-weight: 600 !important;
   text-decoration: none !important;
@@ -201,14 +201,14 @@ button[aria-label='Search'] kbd kbd {
 }
 
 /* Sidebar styling */
-nav[aria-label='Main'] a,
+nav[aria-label="Main"] a,
 .sidebar-content a {
   color: #000 !important;
   text-decoration: none !important;
 }
 
-nav[aria-label='Main'] a[aria-current='page'],
-.sidebar-content a[aria-current='page'] {
+nav[aria-label="Main"] a[aria-current="page"],
+.sidebar-content a[aria-current="page"] {
   background: transparent !important;
   font-weight: 600;
 }

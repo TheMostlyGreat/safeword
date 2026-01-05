@@ -11,9 +11,9 @@
  * Note: Tests requiring Ruff are skipped if Ruff is not installed.
  */
 
-import { spawnSync } from 'node:child_process';
+import { spawnSync } from "node:child_process";
 
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
   createTemporaryDirectory,
@@ -26,11 +26,11 @@ import {
   removeTemporaryDirectory,
   runCli,
   writeTestFile,
-} from '../helpers';
+} from "../helpers";
 
 const RUFF_AVAILABLE = isRuffInstalled();
 
-describe('E2E: Add Language to Existing Project', () => {
+describe("E2E: Add Language to Existing Project", () => {
   let projectDirectory: string;
 
   beforeAll(async () => {
@@ -38,7 +38,7 @@ describe('E2E: Add Language to Existing Project', () => {
     createTypeScriptPackageJson(projectDirectory);
     initGitRepo(projectDirectory);
     // Initial setup with TypeScript only
-    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+    await runCli(["setup", "--yes"], { cwd: projectDirectory });
   }, 180_000);
 
   afterAll(() => {
@@ -47,22 +47,22 @@ describe('E2E: Add Language to Existing Project', () => {
     }
   });
 
-  it('starts with only TypeScript pack installed', () => {
+  it("starts with only TypeScript pack installed", () => {
     const config = readSafewordConfig(projectDirectory);
-    expect(config.installedPacks).toContain('typescript');
-    expect(config.installedPacks).not.toContain('python');
+    expect(config.installedPacks).toContain("typescript");
+    expect(config.installedPacks).not.toContain("python");
   });
 
-  it('does not have pyproject.toml initially', () => {
-    expect(fileExists(projectDirectory, 'pyproject.toml')).toBe(false);
+  it("does not have pyproject.toml initially", () => {
+    expect(fileExists(projectDirectory, "pyproject.toml")).toBe(false);
   });
 
-  describe('after adding Python and running upgrade', () => {
+  describe("after adding Python and running upgrade", () => {
     beforeAll(async () => {
       // Add Python to the project
       writeTestFile(
         projectDirectory,
-        'pyproject.toml',
+        "pyproject.toml",
         `[project]
 name = "test-project"
 version = "0.1.0"
@@ -70,41 +70,44 @@ version = "0.1.0"
       );
 
       // Run upgrade to detect and install Python pack
-      await runCli(['upgrade'], { cwd: projectDirectory });
+      await runCli(["upgrade"], { cwd: projectDirectory });
     }, 60_000);
 
-    it('installs Python pack', () => {
+    it("installs Python pack", () => {
       const config = readSafewordConfig(projectDirectory);
-      expect(config.installedPacks).toContain('typescript');
-      expect(config.installedPacks).toContain('python');
+      expect(config.installedPacks).toContain("typescript");
+      expect(config.installedPacks).toContain("python");
     });
 
-    it('adds Ruff config via extend pattern', () => {
-      const ruffToml = readTestFile(projectDirectory, 'ruff.toml');
+    it("adds Ruff config via extend pattern", () => {
+      const ruffToml = readTestFile(projectDirectory, "ruff.toml");
       expect(ruffToml).toContain('extend = ".safeword/ruff.toml"');
 
       // Actual strict rules in .safeword/ruff.toml
-      const safewordRuff = readTestFile(projectDirectory, '.safeword/ruff.toml');
-      expect(safewordRuff).toContain('line-length');
+      const safewordRuff = readTestFile(
+        projectDirectory,
+        ".safeword/ruff.toml",
+      );
+      expect(safewordRuff).toContain("line-length");
     });
 
-    it.skipIf(!RUFF_AVAILABLE)('Ruff works on Python files', () => {
-      writeTestFile(projectDirectory, 'test.py', 'x = 1\n');
+    it.skipIf(!RUFF_AVAILABLE)("Ruff works on Python files", () => {
+      writeTestFile(projectDirectory, "test.py", "x = 1\n");
 
-      const result = spawnSync('ruff', ['check', 'test.py'], {
+      const result = spawnSync("ruff", ["check", "test.py"], {
         cwd: projectDirectory,
-        encoding: 'utf8',
+        encoding: "utf8",
       });
 
       expect(result.status).toBe(0);
     });
 
-    it('ESLint still works on TypeScript files', () => {
-      writeTestFile(projectDirectory, 'test.ts', 'export const x = 1;\n');
+    it("ESLint still works on TypeScript files", () => {
+      writeTestFile(projectDirectory, "test.ts", "export const x = 1;\n");
 
-      const result = spawnSync('bunx', ['eslint', 'test.ts'], {
+      const result = spawnSync("bunx", ["eslint", "test.ts"], {
         cwd: projectDirectory,
-        encoding: 'utf8',
+        encoding: "utf8",
       });
 
       expect(result.status).toBe(0);

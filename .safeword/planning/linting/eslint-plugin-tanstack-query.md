@@ -71,18 +71,18 @@ tanstackRouter: Boolean(deps['@tanstack/react-router']),
 ```javascript
 // TanStack Query support (conditional) - bundled in eslint-plugin-safeword
 if (deps.tanstackQuery) {
-  const pluginQuery = await import('@tanstack/eslint-plugin-query');
+  const pluginQuery = await import("@tanstack/eslint-plugin-query");
   configs.push({
-    name: 'safeword/tanstack-query',
-    plugins: { '@tanstack/query': pluginQuery.default },
+    name: "safeword/tanstack-query",
+    plugins: { "@tanstack/query": pluginQuery.default },
     rules: {
-      '@tanstack/query/exhaustive-deps': 'error',
-      '@tanstack/query/stable-query-client': 'error',
-      '@tanstack/query/no-void-query-fn': 'error',
-      '@tanstack/query/no-rest-destructuring': 'error',
-      '@tanstack/query/no-unstable-deps': 'error',
-      '@tanstack/query/infinite-query-property-order': 'error',
-      '@tanstack/query/mutation-property-order': 'error',
+      "@tanstack/query/exhaustive-deps": "error",
+      "@tanstack/query/stable-query-client": "error",
+      "@tanstack/query/no-void-query-fn": "error",
+      "@tanstack/query/no-rest-destructuring": "error",
+      "@tanstack/query/no-unstable-deps": "error",
+      "@tanstack/query/infinite-query-property-order": "error",
+      "@tanstack/query/mutation-property-order": "error",
     },
   });
 }

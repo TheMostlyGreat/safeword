@@ -15,33 +15,33 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
-import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
+import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
 
 /** File patterns for Tailwind rules - targets files containing Tailwind classes */
-export const TAILWIND_FILES = ['**/*.{jsx,tsx,astro,html}'];
+export const TAILWIND_FILES = ["**/*.{jsx,tsx,astro,html}"];
 
 export const tailwindConfig: any[] = [
   {
-    name: 'safeword/tailwind',
+    name: "safeword/tailwind",
     files: TAILWIND_FILES,
     plugins: {
-      'better-tailwindcss': eslintPluginBetterTailwindcss,
+      "better-tailwindcss": eslintPluginBetterTailwindcss,
     },
     rules: {
       // Correctness rules - catch LLM mistakes
-      'better-tailwindcss/no-conflicting-classes': 'error',
-      'better-tailwindcss/no-unregistered-classes': 'error',
-      'better-tailwindcss/no-restricted-classes': 'error', // no-op by default, configurable
+      "better-tailwindcss/no-conflicting-classes": "error",
+      "better-tailwindcss/no-unregistered-classes": "error",
+      "better-tailwindcss/no-restricted-classes": "error", // no-op by default, configurable
 
       // Stylistic rules - enforce consistency
-      'better-tailwindcss/enforce-consistent-class-order': 'error',
-      'better-tailwindcss/enforce-consistent-line-wrapping': 'error',
-      'better-tailwindcss/enforce-consistent-variable-syntax': 'error',
-      'better-tailwindcss/enforce-consistent-important-position': 'error',
-      'better-tailwindcss/enforce-shorthand-classes': 'error',
-      'better-tailwindcss/no-duplicate-classes': 'error',
-      'better-tailwindcss/no-deprecated-classes': 'error',
-      'better-tailwindcss/no-unnecessary-whitespace': 'error',
+      "better-tailwindcss/enforce-consistent-class-order": "error",
+      "better-tailwindcss/enforce-consistent-line-wrapping": "error",
+      "better-tailwindcss/enforce-consistent-variable-syntax": "error",
+      "better-tailwindcss/enforce-consistent-important-position": "error",
+      "better-tailwindcss/enforce-shorthand-classes": "error",
+      "better-tailwindcss/no-duplicate-classes": "error",
+      "better-tailwindcss/no-deprecated-classes": "error",
+      "better-tailwindcss/no-unnecessary-whitespace": "error",
     },
   },
 ];

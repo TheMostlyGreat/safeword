@@ -7,11 +7,11 @@
  * TDD RED phase - these tests should FAIL until src/schema.ts is implemented.
  */
 
-import { readdirSync, statSync } from 'node:fs';
-import nodePath from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readdirSync, statSync } from "node:fs";
+import nodePath from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest";
 
 // Type guard for filtering out undefined values
 const isDefined = <T>(x: T | undefined): x is T => x !== undefined;
@@ -22,14 +22,14 @@ const __dirname = nodePath.dirname(__filename);
 // This import will fail until schema.ts is created (RED phase)
 // import { SAFEWORD_SCHEMA } from '../src/schema.js';
 
-describe('Schema - Single Source of Truth', () => {
+describe("Schema - Single Source of Truth", () => {
   // Helper to collect all files in templates/ directory
   /**
    *
    * @param dir
    * @param prefix
    */
-  function collectTemplateFiles(dir: string, prefix = ''): string[] {
+  function collectTemplateFiles(dir: string, prefix = ""): string[] {
     const files: string[] = [];
     const entries = readdirSync(dir, { withFileTypes: true });
 
@@ -47,29 +47,29 @@ describe('Schema - Single Source of Truth', () => {
     return files;
   }
 
-  const templatesDirectory = nodePath.join(__dirname, '../templates');
+  const templatesDirectory = nodePath.join(__dirname, "../templates");
 
-  describe('ownedDirs', () => {
-    it('should include all required .safeword subdirectories', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+  describe("ownedDirs", () => {
+    it("should include all required .safeword subdirectories", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
       const required = [
-        '.safeword',
-        '.safeword/hooks',
-        '.safeword/hooks/cursor',
-        '.safeword/hooks/lib',
-        '.safeword/scripts',
-        '.safeword/guides',
-        '.safeword/templates',
-        '.safeword/prompts',
-        '.safeword/planning',
-        '.safeword/planning/specs',
-        '.safeword/planning/test-definitions',
-        '.safeword/planning/design',
-        '.safeword/planning/issues',
-        '.safeword/planning/plans',
-        '.cursor',
-        '.cursor/rules',
-        '.cursor/commands',
+        ".safeword",
+        ".safeword/hooks",
+        ".safeword/hooks/cursor",
+        ".safeword/hooks/lib",
+        ".safeword/scripts",
+        ".safeword/guides",
+        ".safeword/templates",
+        ".safeword/prompts",
+        ".safeword/planning",
+        ".safeword/planning/specs",
+        ".safeword/planning/test-definitions",
+        ".safeword/planning/design",
+        ".safeword/planning/issues",
+        ".safeword/planning/plans",
+        ".cursor",
+        ".cursor/rules",
+        ".cursor/commands",
       ];
 
       for (const dir of required) {
@@ -78,28 +78,30 @@ describe('Schema - Single Source of Truth', () => {
     });
   });
 
-  describe('sharedDirs', () => {
-    it('should include .claude directories', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude');
-      expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude/skills');
-      expect(SAFEWORD_SCHEMA.sharedDirs).toContain('.claude/commands');
+  describe("sharedDirs", () => {
+    it("should include .claude directories", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
+      expect(SAFEWORD_SCHEMA.sharedDirs).toContain(".claude");
+      expect(SAFEWORD_SCHEMA.sharedDirs).toContain(".claude/skills");
+      expect(SAFEWORD_SCHEMA.sharedDirs).toContain(".claude/commands");
     });
   });
 
-  describe('preservedDirs', () => {
-    it('should preserve user content directories', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/learnings');
-      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/tickets');
-      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/tickets/completed');
-      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/logs');
+  describe("preservedDirs", () => {
+    it("should preserve user content directories", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain(".safeword/learnings");
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain(".safeword/tickets");
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain(
+        ".safeword/tickets/completed",
+      );
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain(".safeword/logs");
     });
   });
 
-  describe('ownedFiles', () => {
-    it('should have entry for every template file', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+  describe("ownedFiles", () => {
+    it("should have entry for every template file", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
       const templateFiles = collectTemplateFiles(templatesDirectory);
 
       const schemaFiles = Object.keys(SAFEWORD_SCHEMA.ownedFiles);
@@ -107,29 +109,36 @@ describe('Schema - Single Source of Truth', () => {
       // Check every template file has a schema entry
       for (const templateFile of templateFiles) {
         const hasEntry = schemaFiles.some(
-          schemaPath =>
+          (schemaPath) =>
             schemaPath.endsWith(templateFile) ||
-            templateFile.includes(schemaPath.split('/').pop() || ''),
+            templateFile.includes(schemaPath.split("/").pop() || ""),
         );
 
         if (!hasEntry) {
-          expect.fail(`Template file '${templateFile}' has no schema entry in ownedFiles`);
+          expect.fail(
+            `Template file '${templateFile}' has no schema entry in ownedFiles`,
+          );
         }
       }
     });
 
-    it('should not have orphan schema entries (files that do not exist)', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+    it("should not have orphan schema entries (files that do not exist)", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
 
       // Files that are generated (not from templates)
-      const generatedFiles = new Set(['.safeword/version']);
+      const generatedFiles = new Set([".safeword/version"]);
 
-      for (const [path, definition] of Object.entries(SAFEWORD_SCHEMA.ownedFiles)) {
+      for (const [path, definition] of Object.entries(
+        SAFEWORD_SCHEMA.ownedFiles,
+      )) {
         if (generatedFiles.has(path)) continue;
 
         // If it has a template reference, verify template exists
         if (definition.template) {
-          const templatePath = nodePath.join(templatesDirectory, definition.template);
+          const templatePath = nodePath.join(
+            templatesDirectory,
+            definition.template,
+          );
           const exists = (() => {
             try {
               statSync(templatePath);
@@ -149,53 +158,63 @@ describe('Schema - Single Source of Truth', () => {
     });
   });
 
-  describe('managedFiles', () => {
-    it('should include eslint.config.mjs, tsconfig.json, knip.json, and .prettierrc', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('eslint.config.mjs');
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('tsconfig.json');
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('knip.json');
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty('.prettierrc');
+  describe("managedFiles", () => {
+    it("should include eslint.config.mjs, tsconfig.json, knip.json, and .prettierrc", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("eslint.config.mjs");
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("tsconfig.json");
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("knip.json");
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty(".prettierrc");
     });
   });
 
-  describe('jsonMerges', () => {
-    it('should include package.json, .claude/settings.json, .mcp.json, Cursor configs, and .prettierrc', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('package.json');
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.claude/settings.json');
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.mcp.json');
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.cursor/mcp.json');
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.cursor/hooks.json');
+  describe("jsonMerges", () => {
+    it("should include package.json, .claude/settings.json, .mcp.json, Cursor configs, and .prettierrc", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty("package.json");
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(
+        ".claude/settings.json",
+      );
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".mcp.json");
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".cursor/mcp.json");
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".cursor/hooks.json");
       // .prettierrc is in jsonMerges for uninstall cleanup (removes plugins key)
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty('.prettierrc');
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".prettierrc");
     });
   });
 
-  describe('textPatches', () => {
-    it('should include AGENTS.md patch (creates if missing)', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty('AGENTS.md');
-      expect(SAFEWORD_SCHEMA.textPatches['AGENTS.md'].operation).toBe('prepend');
-      expect(SAFEWORD_SCHEMA.textPatches['AGENTS.md'].createIfMissing).toBe(true);
+  describe("textPatches", () => {
+    it("should include AGENTS.md patch (creates if missing)", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
+      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty("AGENTS.md");
+      expect(SAFEWORD_SCHEMA.textPatches["AGENTS.md"].operation).toBe(
+        "prepend",
+      );
+      expect(SAFEWORD_SCHEMA.textPatches["AGENTS.md"].createIfMissing).toBe(
+        true,
+      );
     });
 
-    it('should include CLAUDE.md patch (only if exists)', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty('CLAUDE.md');
-      expect(SAFEWORD_SCHEMA.textPatches['CLAUDE.md'].operation).toBe('prepend');
-      expect(SAFEWORD_SCHEMA.textPatches['CLAUDE.md'].createIfMissing).toBe(false);
+    it("should include CLAUDE.md patch (only if exists)", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
+      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty("CLAUDE.md");
+      expect(SAFEWORD_SCHEMA.textPatches["CLAUDE.md"].operation).toBe(
+        "prepend",
+      );
+      expect(SAFEWORD_SCHEMA.textPatches["CLAUDE.md"].createIfMissing).toBe(
+        false,
+      );
     });
   });
 
-  describe('packages', () => {
-    it('should include all required base packages', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+  describe("packages", () => {
+    it("should include all required base packages", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
       const required = [
-        'eslint',
-        'eslint-plugin-safeword', // bundles eslint-config-prettier
-        'dependency-cruiser',
-        'knip',
+        "eslint",
+        "eslint-plugin-safeword", // bundles eslint-config-prettier
+        "dependency-cruiser",
+        "knip",
       ];
 
       for (const pkg of required) {
@@ -203,20 +222,22 @@ describe('Schema - Single Source of Truth', () => {
       }
     });
 
-    it('should have prettier in standard conditional (non-Biome projects)', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      expect(SAFEWORD_SCHEMA.packages.conditional).toHaveProperty('standard');
-      expect(SAFEWORD_SCHEMA.packages.conditional.standard).toContain('prettier');
+    it("should have prettier in standard conditional (non-Biome projects)", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
+      expect(SAFEWORD_SCHEMA.packages.conditional).toHaveProperty("standard");
+      expect(SAFEWORD_SCHEMA.packages.conditional.standard).toContain(
+        "prettier",
+      );
     });
 
-    it('should have conditional packages for frameworks not in safeword plugin', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+    it("should have conditional packages for frameworks not in safeword plugin", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
       // These frameworks are NOT in eslint-plugin-safeword (or need prettier plugins)
       const requiredConditions = [
-        'astro', // prettier-plugin-astro (ESLint rules are in safeword)
-        'tailwind', // prettier-plugin-tailwindcss
-        'publishableLibrary', // publint
-        'shellcheck', // shellcheck for shell scripts
+        "astro", // prettier-plugin-astro (ESLint rules are in safeword)
+        "tailwind", // prettier-plugin-tailwindcss
+        "publishableLibrary", // publint
+        "shellcheck", // shellcheck for shell scripts
       ];
 
       for (const condition of requiredConditions) {
@@ -225,20 +246,24 @@ describe('Schema - Single Source of Truth', () => {
     });
   });
 
-  describe('Claude/Cursor parity', () => {
-    it('should have matching skills for Claude and Cursor (excluding core)', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+  describe("Claude/Cursor parity", () => {
+    it("should have matching skills for Claude and Cursor (excluding core)", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
 
       // Extract skill names from schema paths
       const claudeSkills = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
-        .filter(path => path.startsWith('.claude/skills/safeword-'))
-        .map(path => /safeword-([^/]+)/.exec(path)?.[1])
+        .filter((path) => path.startsWith(".claude/skills/safeword-"))
+        .map((path) => /safeword-([^/]+)/.exec(path)?.[1])
         .filter(isDefined)
         .toSorted((a, b) => a.localeCompare(b));
 
       const cursorRules = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
-        .filter(path => path.startsWith('.cursor/rules/safeword-') && !path.includes('core'))
-        .map(path => /safeword-([^.]+)/.exec(path)?.[1])
+        .filter(
+          (path) =>
+            path.startsWith(".cursor/rules/safeword-") &&
+            !path.includes("core"),
+        )
+        .map((path) => /safeword-([^.]+)/.exec(path)?.[1])
         .filter(isDefined)
         .toSorted((a, b) => a.localeCompare(b));
 
@@ -246,19 +271,19 @@ describe('Schema - Single Source of Truth', () => {
       expect(cursorRules).toEqual(claudeSkills);
     });
 
-    it('should have matching commands for Claude and Cursor', async () => {
-      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+    it("should have matching commands for Claude and Cursor", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
 
       // Extract command names from schema paths
       const claudeCommands = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
-        .filter(path => path.startsWith('.claude/commands/'))
-        .map(path => path.split('/').pop())
+        .filter((path) => path.startsWith(".claude/commands/"))
+        .map((path) => path.split("/").pop())
         .filter(isDefined)
         .toSorted((a, b) => a.localeCompare(b));
 
       const cursorCommands = Object.keys(SAFEWORD_SCHEMA.ownedFiles)
-        .filter(path => path.startsWith('.cursor/commands/'))
-        .map(path => path.split('/').pop())
+        .filter((path) => path.startsWith(".cursor/commands/"))
+        .map((path) => path.split("/").pop())
         .filter(isDefined)
         .toSorted((a, b) => a.localeCompare(b));
 

@@ -182,8 +182,8 @@ interface Languages {
 
 // Python-specific detection (returned only if languages.python)
 interface PythonProjectType {
-  framework: 'django' | 'flask' | 'fastapi' | null;
-  packageManager: 'poetry' | 'uv' | 'pip';
+  framework: "django" | "flask" | "fastapi" | null;
+  packageManager: "poetry" | "uv" | "pip";
 }
 
 // Extended ProjectContext (packages/cli/src/schema.ts)

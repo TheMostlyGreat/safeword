@@ -4,7 +4,7 @@
  * Tests for CI/headless operation.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import {
   createTemporaryDirectory,
@@ -13,9 +13,9 @@ import {
   removeTemporaryDirectory,
   runCli,
   TIMEOUT_BUN_INSTALL,
-} from '../helpers';
+} from "../helpers";
 
-describe('Test Suite 6: Non-Interactive Setup', () => {
+describe("Test Suite 6: Non-Interactive Setup", () => {
   let temporaryDirectory: string;
 
   beforeEach(() => {
@@ -26,36 +26,36 @@ describe('Test Suite 6: Non-Interactive Setup', () => {
     removeTemporaryDirectory(temporaryDirectory);
   });
 
-  describe('Test 6.1: --yes flag skips all prompts', () => {
-    it('should complete without hanging', async () => {
+  describe("Test 6.1: --yes flag skips all prompts", () => {
+    it("should complete without hanging", async () => {
       createTypeScriptPackageJson(temporaryDirectory);
       // No git init - should skip git prompt with --yes
 
-      const result = await runCli(['setup', '--yes'], {
+      const result = await runCli(["setup", "--yes"], {
         cwd: temporaryDirectory,
         timeout: TIMEOUT_BUN_INSTALL,
       });
 
       expect(result.exitCode).toBe(0);
-      expect(fileExists(temporaryDirectory, '.safeword')).toBe(true);
+      expect(fileExists(temporaryDirectory, ".safeword")).toBe(true);
 
       // Git should be skipped (no .git created)
-      expect(fileExists(temporaryDirectory, '.git')).toBe(false);
+      expect(fileExists(temporaryDirectory, ".git")).toBe(false);
     });
   });
 
-  describe('Test 6.2: No TTY uses defaults', () => {
-    it('should complete without stdin in non-TTY mode', async () => {
+  describe("Test 6.2: No TTY uses defaults", () => {
+    it("should complete without stdin in non-TTY mode", async () => {
       createTypeScriptPackageJson(temporaryDirectory);
       // No git init
 
       // Force non-TTY by setting environment
-      const result = await runCli(['setup'], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
         timeout: TIMEOUT_BUN_INSTALL,
         env: {
-          CI: 'true', // Many tools detect CI and use non-interactive mode
-          TERM: 'dumb',
+          CI: "true", // Many tools detect CI and use non-interactive mode
+          TERM: "dumb",
         },
       });
 
@@ -65,12 +65,14 @@ describe('Test Suite 6: Non-Interactive Setup', () => {
     });
   });
 
-  describe('Test 6.3: Warning shown when git skipped', () => {
-    it('should show warning about skipped git initialization', async () => {
+  describe("Test 6.3: Warning shown when git skipped", () => {
+    it("should show warning about skipped git initialization", async () => {
       createTypeScriptPackageJson(temporaryDirectory);
       // No git init
 
-      const result = await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
+      const result = await runCli(["setup", "--yes"], {
+        cwd: temporaryDirectory,
+      });
 
       expect(result.exitCode).toBe(0);
 
