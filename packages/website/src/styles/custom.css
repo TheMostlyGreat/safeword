@@ -378,6 +378,7 @@ p.hero-subtitle {
   color: #000 !important;
   cursor: pointer !important;
   text-decoration: none !important;
+  box-shadow: none !important;
   transition:
     background 0.15s,
     color 0.15s !important;
