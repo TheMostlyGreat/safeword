@@ -14,12 +14,23 @@ import safeword from 'eslint-plugin-safeword';
 
 export default [
   ...safeword.configs.recommendedTypeScript,
-  ...safeword.configs.react, // if using React
   ...safeword.configs.vitest, // if using Vitest
 ];
 ```
 
-**Available configs:** `recommendedTypeScript`, `react`, `vitest`, `playwright`, `astro`
+**Available configs:**
+
+| Config                       | Use case               |
+| ---------------------------- | ---------------------- |
+| `recommended`                | JavaScript only        |
+| `recommendedTypeScript`      | TypeScript             |
+| `recommendedTypeScriptReact` | TypeScript + React     |
+| `recommendedTypeScriptNext`  | TypeScript + Next.js   |
+| `vitest`                     | Add Vitest support     |
+| `playwright`                 | Add Playwright support |
+| `astro`                      | Add Astro support      |
+| `tailwind`                   | Add Tailwind support   |
+| `tanstackQuery`              | Add TanStack Query     |
 
 To add your own rules, extend the array:
 
