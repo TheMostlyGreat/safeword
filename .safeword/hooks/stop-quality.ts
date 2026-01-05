@@ -2,10 +2,11 @@
 // Safeword: Auto Quality Review Stop Hook
 // Triggers quality review when changes are proposed or made
 // Uses JSON summary if available, falls back to detecting edit tool usage
+// Phase-aware: reads ticket phase for context-appropriate review questions
 
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 
-import { QUALITY_REVIEW_MESSAGE } from './lib/quality.ts';
+import { getQualityMessage, type BddPhase } from './lib/quality.ts';
 
 interface HookInput {
   transcript_path?: string;
@@ -34,6 +35,46 @@ const EDIT_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const safewordDir = `${projectDir}/.safeword`;
+const issuesDir = `${projectDir}/.safeword-project/issues`;
+
+/**
+ * Read phase from the most recently modified ticket in .safeword-project/issues/
+ * Returns undefined if no tickets or no phase found.
+ */
+function getCurrentPhase(): BddPhase | undefined {
+  if (!existsSync(issuesDir)) {
+    return undefined;
+  }
+
+  try {
+    const files = readdirSync(issuesDir).filter(f => f.endsWith('.md'));
+    if (files.length === 0) return undefined;
+
+    // Find most recently modified ticket
+    let latestFile = '';
+    let latestMtime = 0;
+    for (const file of files) {
+      // Use sync approach for simplicity in hook
+      const content = readFileSync(`${issuesDir}/${file}`, 'utf-8');
+      const mtime = new Date(content.match(/last_modified: (.+)/)?.[1] ?? 0).getTime();
+      if (mtime > latestMtime) {
+        latestMtime = mtime;
+        latestFile = file;
+      }
+    }
+
+    if (!latestFile) return undefined;
+
+    const content = readFileSync(`${issuesDir}/${latestFile}`, 'utf-8');
+    const phaseMatch = content.match(/^phase:\s*(\S+)/m);
+    if (phaseMatch) {
+      return phaseMatch[1] as BddPhase;
+    }
+  } catch {
+    // Silent fail - use default message
+  }
+  return undefined;
+}
 
 // Not a safeword project, skip silently
 if (!existsSync(safewordDir)) {
@@ -173,6 +214,10 @@ for (const candidate of candidates) {
   }
 }
 
+// Get phase-aware quality message
+const currentPhase = getCurrentPhase();
+const qualityMessage = getQualityMessage(currentPhase);
+
 // Decision logic:
 // 1. If valid summary found → use it
 // 2. If no summary but edit tools used → trigger review (safety net)
@@ -181,7 +226,7 @@ for (const candidate of candidates) {
 if (summary) {
   // Use reported summary
   if (summary.proposedChanges || summary.madeChanges) {
-    console.log(JSON.stringify({ decision: 'block', reason: QUALITY_REVIEW_MESSAGE }));
+    console.log(JSON.stringify({ decision: 'block', reason: qualityMessage }));
     process.exit(0);
   }
 } else if (editToolsUsed) {
@@ -189,7 +234,7 @@ if (summary) {
   console.log(
     JSON.stringify({
       decision: 'block',
-      reason: `${QUALITY_REVIEW_MESSAGE}\n\n(Note: JSON summary was missing but edit tools were detected)`,
+      reason: `${qualityMessage}\n\n(Note: JSON summary was missing but edit tools were detected)`,
     }),
   );
   process.exit(0);
