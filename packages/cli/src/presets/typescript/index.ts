@@ -21,6 +21,7 @@
 
 import type { Rule } from "eslint";
 
+import { VERSION } from "../../version.js";
 import { detect } from "./detect.js";
 import { astroConfig } from "./eslint-configs/astro.js";
 import { prettierConfig } from "./eslint-configs/base.js";
@@ -63,7 +64,7 @@ interface SafewordEslint {
 export const eslintPlugin: SafewordEslint = {
   meta: {
     name: "safeword",
-    version: "0.15.3",
+    version: VERSION,
   },
   configs: {
     recommended,
