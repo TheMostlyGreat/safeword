@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
@@ -15,11 +14,45 @@ export default defineConfig({
     starlight({
       title: 'Safeword',
       customCss: ['./src/styles/custom.css'],
-      description: 'AI coding agent guardrails - hooks, skills, and quality controls',
+      description: 'The first coding agent discipline system for Cursor and Claude Code',
+      head: [
+        // Open Graph
+        { tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:title',
+            content: 'Safeword - The first coding agent discipline system',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:description',
+            content:
+              "Your agent doesn't get to finish until the tests pass. Discipline for Cursor and Claude Code.",
+          },
+        },
+        { tag: 'meta', attrs: { property: 'og:site_name', content: 'Safeword' } },
+        // Twitter
+        { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
+        {
+          tag: 'meta',
+          attrs: { name: 'twitter:title', content: 'Safeword - Coding agent discipline system' },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'twitter:description',
+            content: "Your agent doesn't get to finish until the tests pass.",
+          },
+        },
+      ],
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/TheMostlyGreat/safeword' },
       ],
       sidebar: [
+        { label: 'Quick Start', slug: 'getting-started/quick-start' },
         {
           label: 'Reference',
           items: [

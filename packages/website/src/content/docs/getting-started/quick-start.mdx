@@ -1,0 +1,81 @@
+---
+title: Quick Start
+description: One command. Your agent writes better code.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+One command. Your agent writes better code.
+
+## Install
+
+```bash
+bunx safeword@latest setup
+```
+
+Takes about 30 seconds. Works with TypeScript, Python, and Go projects.
+
+## What Changes
+
+You use Claude Code or Cursor the same way you always have. Type a prompt, get code. But now there's a safety net running in the background.
+
+<Tabs>
+  <TabItem label="Claude Code">
+    **Every edit gets linted automatically.** After your agent writes or modifies a file, Safeword runs your linter. If there are issues, your agent sees them immediately and fixes them—before you even notice.
+
+    **Every session ends with a quality check.** When you're done working, Safeword prompts your agent to review what it built. Catches things like missing error handling, security issues, or code that doesn't match the codebase style.
+
+  </TabItem>
+  <TabItem label="Cursor">
+    **Your agent follows structured workflows.** Safeword adds rules that guide how your agent approaches tasks. When debugging, it investigates before jumping to fixes. When building features, it writes tests first.
+
+    **Same prompts, better results.** You don't change how you work. The rules run in the background, steering your agent toward code that actually works.
+
+  </TabItem>
+</Tabs>
+
+## Try It
+
+Open your project and ask your agent to do something it would normally rush through:
+
+> "Add a function that validates an email address"
+
+Watch what happens. The agent writes the code, but now:
+
+1. Lint runs automatically (Claude Code) or rules guide the approach (Cursor)
+2. If there are issues, they get caught and fixed
+3. You get cleaner code on the first try
+
+## What Got Installed
+
+Safeword added a few folders to your project:
+
+| Folder            | What's in it                                          |
+| ----------------- | ----------------------------------------------------- |
+| `.claude/hooks/`  | Scripts that run automatically (lint, quality checks) |
+| `.claude/skills/` | Structured workflows for debugging, TDD, refactoring  |
+| `.safeword/`      | Config files and guides                               |
+| `.cursor/rules/`  | Rules for Cursor (if detected)                        |
+
+These files commit to your repo. When your team pulls, they get the same setup automatically.
+
+## Go Deeper
+
+Most developers stop here. The defaults work well and you don't need to configure anything.
+
+When you're ready to understand what's happening under the hood:
+
+- [Hooks](/reference/hooks) — The automatic checks that run on every edit
+- [Skills](/reference/skills) — Structured workflows like debugging and TDD
+- [Commands](/reference/commands) — Slash commands like `/commit` and `/lint`
+- [Configuration](/reference/configuration) — Customize what gets enforced
+
+## Staying Current
+
+Safeword improves over time. Update when you want the latest:
+
+```bash
+bunx safeword@latest upgrade
+```
+
+Your customizations are preserved. Only the core files get updated.

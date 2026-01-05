@@ -1,7 +1,5 @@
 ---
 id: XXX
-type: feature | bug | chore
-phase: discovery | scenarios | decomposition | implement | done
 status: in_progress
 created: YYYY-MM-DDTHH:MM:SSZ
 last_modified: YYYY-MM-DDTHH:MM:SSZ

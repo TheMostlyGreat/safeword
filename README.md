@@ -172,6 +172,7 @@ planning/
 
 **Skills** (in `.claude/skills/`): Specialized agent capabilities
 
+- `safeword-bdd-orchestrating/` - BDD orchestrator for feature-level work (scenarios first)
 - `safeword-brainstorming/` - Collaborative design through Socratic questioning
 - `safeword-debugging/` - Four-phase debugging (investigate before fixing)
 - `safeword-tdd-enforcing/` - RED → GREEN → REFACTOR discipline
@@ -186,6 +187,8 @@ planning/
 - `/drift` - Check if architecture docs match codebase reality
 - `/quality-review` - Deep code review with web research
 - `/cleanup-zombies` - Kill zombie processes on ports
+- `/bdd` - Force BDD flow for current task
+- `/tdd` - Force TDD flow (skip BDD phases)
 
 **MCP Servers** (in `.mcp.json` / `.cursor/mcp.json`): Auto-configured integrations
 

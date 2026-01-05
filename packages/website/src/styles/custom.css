@@ -14,6 +14,11 @@
 
 /* Red background theme */
 :root {
+  /* Content inset: centers content, with minimum padding for small viewports */
+  --sw-content-inset: max(var(--sl-content-pad-x), calc((100vw - var(--sl-content-width)) / 2));
+  /* Vertical line offset from content edge */
+  --sw-line-offset: calc(var(--sw-content-inset) - 1.5rem);
+
   --sl-color-bg: #ff0000;
   --sl-color-bg-nav: #ff0000;
   --sl-color-bg-sidebar: #ff0000;
@@ -46,11 +51,16 @@ main,
   color: #000;
 }
 
-/* Kill pane borders */
-*,
-*::before,
-*::after {
+/* Kill pane borders on splash page */
+[data-has-hero] *,
+[data-has-hero] *::before,
+[data-has-hero] *::after {
   border-color: transparent !important;
+}
+
+/* Body needs relative positioning for vertical line */
+[data-has-hero] body {
+  position: relative;
 }
 
 /* Oswald for headlines */
@@ -243,31 +253,66 @@ a:hover {
   color: #ff0000;
 }
 
-/* Splash page: hide search, theme toggle, and redundant H1 */
+/* Splash page: hide search, theme toggle, redundant H1, and edit link */
 [data-has-hero] button[aria-label='Search'],
 [data-has-hero] starlight-theme-select,
-[data-has-hero] .hero h1 {
+[data-has-hero] .hero h1,
+[data-has-hero] a[href*='edit/main'] {
   display: none !important;
 }
 
-/* Reduce hero spacing on splash page */
-[data-has-hero] .hero {
-  padding-block: 2rem 0 !important;
-  min-height: auto !important;
+/* Hero tagline - LOUD + left-aligned */
+[data-has-hero] .hero .tagline {
+  font-family: 'Oswald', sans-serif !important;
+  text-transform: uppercase;
+  font-size: clamp(1.8rem, 4.5vw, 3rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+  line-height: 1.15 !important;
+  max-width: 720px;
+  text-align: left;
 }
 
-/* Center logo on splash page and make it larger */
+/* Left-align all body content on splash page */
+[data-has-hero] .sl-markdown-content h2,
+[data-has-hero] .sl-markdown-content p,
+[data-has-hero] .sl-markdown-content .soul {
+  text-align: left;
+}
+
+/* Hide section anchor icons on splash page */
+[data-has-hero] .sl-markdown-content h2 a[href^='#'] {
+  display: none !important;
+}
+
+/* Tighter hero spacing on splash page */
+[data-has-hero] .hero {
+  padding-block: 0 1rem !important;
+  min-height: auto !important;
+  margin-bottom: 0;
+}
+
+/* Hero subtitle - product definition, distinct from body */
+p.hero-subtitle {
+  font-family: 'IBM Plex Sans', sans-serif !important;
+  font-size: 1.5rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  text-align: left !important;
+  margin: 1.5rem 0 2.5rem 0 !important;
+  opacity: 0.9;
+}
+
+/* Left-align logo on splash page and make it larger */
 [data-has-hero] header .site-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   font-size: 2em;
   padding: 0.3em 0.6em !important;
 }
 
-/* Remove sticky header on splash page */
+/* Remove sticky header on splash page and align with content */
 [data-has-hero] header {
   position: static;
+  padding: 3.5rem 0 0.5rem var(--sw-content-inset) !important;
 }
 
 /* Double GitHub button size on splash page */
@@ -289,4 +334,118 @@ a:hover {
 
 [role='tab'][aria-selected='true'] {
   border-color: #000 !important;
+}
+
+/* Soul statement - manifesto closer */
+.soul {
+  font-family: 'Oswald', sans-serif !important;
+  text-transform: uppercase;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  margin-top: 1.5rem !important;
+}
+
+/* Tighter section spacing on splash page */
+[data-has-hero] .sl-markdown-content h2 {
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+[data-has-hero] .sl-markdown-content p {
+  margin-bottom: 0.5rem !important;
+}
+
+[data-has-hero] .sl-markdown-content hr {
+  margin: 1.5rem 0 !important;
+}
+
+/* Reference links nav bar */
+.ref-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem !important;
+}
+
+.ref-links p {
+  display: contents;
+}
+
+.ref-links a {
+  font-family: 'Oswald', sans-serif !important;
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: none !important;
+  padding: 0.4em 0.8em;
+  border: 2px solid #000 !important;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.ref-links a:hover {
+  background: #000;
+  color: #ff0000 !important;
+}
+
+/* Splash page footer */
+.splash-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.splash-footer p {
+  margin: 0;
+}
+
+.splash-footer a {
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.splash-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ========== DOCS PAGE STYLES ========== */
+
+/* Hide "On this page" TOC and right sidebar border */
+nav[aria-label='On this page'],
+.right-sidebar-panel {
+  display: none !important;
+}
+
+.right-sidebar {
+  border-left: none !important;
+}
+
+/* Hide theme toggle on all pages */
+starlight-theme-select {
+  display: none !important;
+}
+
+/* Remove sidebar gridlines/borders */
+nav[aria-label='Main'],
+nav[aria-label='Main'] ul,
+nav[aria-label='Main'] li,
+nav[aria-label='Main'] a,
+.sidebar-content,
+.sidebar-pane,
+.sl-sidebar,
+[data-sl-sidebar-state] {
+  border: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* Increase GitHub icon size on docs pages */
+header a[href*='github'] {
+  transform: scale(1.5);
+  transform-origin: center;
 }

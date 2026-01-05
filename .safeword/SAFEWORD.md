@@ -80,21 +80,21 @@ Training data is stale. Follow this sequence:
 
 **Location:** `.safeword/planning/` at project root
 
-| Type             | Path                                   | Contents                          |
-| ---------------- | -------------------------------------- | --------------------------------- |
-| Specs            | `.safeword/planning/specs/`            | `feature-*.md` and `task-*.md`    |
-| Test definitions | `.safeword/planning/test-definitions/` | `feature-*.md` (L2 features only) |
-| Design docs      | `.safeword/planning/design/`           | Complex features (3+ components)  |
-| Issues           | `.safeword/planning/issues/`           | Issue tracking                    |
-| Execution plans  | `.safeword/planning/plans/`            | LLM-ready task breakdowns         |
+| Type             | Path                                   | Contents                         |
+| ---------------- | -------------------------------------- | -------------------------------- |
+| Specs            | `.safeword/planning/specs/`            | `feature-*.md` and `task-*.md`   |
+| Test definitions | `.safeword/planning/test-definitions/` | `feature-*.md` (features only)   |
+| Design docs      | `.safeword/planning/design/`           | Complex features (3+ components) |
+| Issues           | `.safeword/planning/issues/`           | Issue tracking                   |
+| Execution plans  | `.safeword/planning/plans/`            | LLM-ready task breakdowns        |
 
 **Artifact Levels:**
 
-| Level  | Artifacts                                            | Test Location       |
-| ------ | ---------------------------------------------------- | ------------------- |
-| **L2** | Feature Spec + Test Definitions (+ Design Doc if 3+) | `test-definitions/` |
-| **L1** | Task Spec                                            | Inline in spec      |
-| **L0** | Task Spec (minimal)                                  | Existing tests      |
+| Level       | Artifacts                                            | Test Location       |
+| ----------- | ---------------------------------------------------- | ------------------- |
+| **feature** | Feature Spec + Test Definitions (+ Design Doc if 3+) | `test-definitions/` |
+| **task**    | Task Spec                                            | Inline in spec      |
+| **patch**   | Task Spec (minimal)                                  | Existing tests      |
 
 **Archive:** Move completed docs to `archive/` subfolder within each.
 
@@ -188,29 +188,29 @@ status: in_progress
 
 **Triage first - answer IN ORDER, stop at first match:**
 
-| Question                                 | Level          | Artifacts                    |
-| ---------------------------------------- | -------------- | ---------------------------- |
-| User-facing feature with business value? | **L2 Feature** | Spec + Test Defs (+ Design)  |
-| Bug, improvement, internal, or refactor? | **L1 Task**    | Spec with inline tests       |
-| Typo, config, or trivial change?         | **L0 Micro**   | Minimal spec, existing tests |
+| Question                                 | Level       | Artifacts                    |
+| ---------------------------------------- | ----------- | ---------------------------- |
+| User-facing feature with business value? | **feature** | Spec + Test Defs (+ Design)  |
+| Bug, improvement, internal, or refactor? | **task**    | Spec with inline tests       |
+| Typo, config, or trivial change?         | **patch**   | Minimal spec, existing tests |
 
 **Then follow this order:**
 
 1. **Check/create ticket** if context-loss risk exists (see decision tree above)
 2. **Read/create spec** (`.safeword/planning/specs/`)
-3. **Read/create test definitions** (L2 only: `.safeword/planning/test-definitions/`)
+3. **Read/create test definitions** (feature only: `.safeword/planning/test-definitions/`)
 4. **Read/create design doc** if complex (3+ components)
 5. **TDD: RED → GREEN → REFACTOR**
 6. **Update ticket** with progress, ask user to confirm completion
 
 **Edge cases:**
 
-| Situation                 | Action                  |
-| ------------------------- | ----------------------- |
-| Spec exists, no test defs | Create test defs (L2)   |
-| Test defs exist, no spec  | Create spec first       |
-| Neither exist             | Create spec, then tests |
-| L0/L1 task                | Inline tests in spec    |
+| Situation                 | Action                     |
+| ------------------------- | -------------------------- |
+| Spec exists, no test defs | Create test defs (feature) |
+| Test defs exist, no spec  | Create spec first          |
+| Neither exist             | Create spec, then tests    |
+| patch/task                | Inline tests in spec       |
 
 ---
 

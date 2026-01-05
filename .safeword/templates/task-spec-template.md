@@ -5,7 +5,7 @@
 
 ---
 
-## Standard Task (L1)
+## Standard Task (task)
 
 Use for: bugs, improvements, internal work, refactors.
 
@@ -33,7 +33,7 @@ Use for: bugs, improvements, internal work, refactors.
 
 ---
 
-## Micro Task (L0)
+## Micro Task (patch)
 
 Use for: typos, config changes, trivial fixes. Still scoped to prevent creep.
 
@@ -61,7 +61,7 @@ Use for: typos, config changes, trivial fixes. Still scoped to prevent creep.
 
 ## Examples
 
-### L1: Bug Fix
+### task: Bug Fix
 
 ```markdown
 # Task: Fix login timeout after 30 minutes
@@ -83,7 +83,7 @@ Use for: typos, config changes, trivial fixes. Still scoped to prevent creep.
 - [ ] Unit: inactive session expires correctly after timeout
 ```
 
-### L1: Improvement
+### task: Improvement
 
 ```markdown
 # Task: Add retry logic to API client
@@ -106,7 +106,7 @@ Use for: typos, config changes, trivial fixes. Still scoped to prevent creep.
 - [ ] Unit: gives up after max retries
 ```
 
-### L0: Micro
+### patch: Micro
 
 ```markdown
 # Task: Fix typo in auth error message
@@ -128,7 +128,7 @@ Use for: typos, config changes, trivial fixes. Still scoped to prevent creep.
 
 ---
 
-## Why L0 Needs Scope
+## Why patch Needs Scope
 
 Even trivial tasks need boundaries. Without explicit "Out of Scope":
 
@@ -142,10 +142,10 @@ The spec takes 30 seconds to write and prevents hours of scope creep.
 
 ## Relationship to Feature Specs
 
-| Type                  | Use When                                | Artifacts                            |
-| --------------------- | --------------------------------------- | ------------------------------------ |
-| **Feature Spec (L2)** | User-facing feature with business value | Feature spec + test definitions file |
-| **Task Spec (L1)**    | Bug, improvement, internal, refactor    | Task spec with inline tests          |
-| **Task Spec (L0)**    | Typo, config, trivial                   | Minimal task spec, existing tests    |
+| Type                       | Use When                                | Artifacts                            |
+| -------------------------- | --------------------------------------- | ------------------------------------ |
+| **Feature Spec (feature)** | User-facing feature with business value | Feature spec + test definitions file |
+| **Task Spec (task)**       | Bug, improvement, internal, refactor    | Task spec with inline tests          |
+| **Task Spec (patch)**      | Typo, config, trivial                   | Minimal task spec, existing tests    |
 
-For L2 features, use: `.safeword/templates/feature-spec-template.md`
+For features, use: `.safeword/templates/feature-spec-template.md`

@@ -44,7 +44,6 @@
   "devDependencies": {
     "@types/node": "^20.10.0",
     "@vitest/coverage-v8": "^4.0.16",
-    "dependency-cruiser": "^17.3.6",
     "eslint": "^9.39.2",
     "eslint-plugin-safeword": "^0.7.0",
     "knip": "^5.79.0",

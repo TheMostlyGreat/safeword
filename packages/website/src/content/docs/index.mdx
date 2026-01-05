@@ -1,12 +1,14 @@
 ---
-title: Safeword
-description: The first agent discipline system
+title: The first coding agent discipline system
+description: The first coding agent discipline system for Cursor and Claude Code
 template: splash
 hero:
   tagline: Your agent doesn't get to finish until the tests pass.
 ---
 
-**The first agent discipline system.**
+<p class="hero-subtitle">
+  <span>Safeword is the first coding agent discipline system for Cursor and Claude Code.</span>
+</p>
 
 ---
 
@@ -14,9 +16,9 @@ hero:
 
 Your agent ships fast. But it skips tests, ignores lint, and pushes whatever "looks right."
 
-Your seniors stop trusting it. Your vibe-coders can't tell working code from confident garbage.
+Your senior engineers stop trusting it. Your vibe-coders can't tell working code from confident garbage.
 
-AI doesn't decide when it's done. You do.
+<p class="soul">AI doesn't decide when it's done. You do.</p>
 
 ---
 
@@ -36,7 +38,7 @@ AI doesn't decide when it's done. You do.
 bunx safeword@latest setup
 ```
 
-Works with **Claude Code** and **Cursor**. Auto-detects **TypeScript**, **Python**, **Go**.
+Works with **Cursor** and **Claude Code**. Auto-detects **TypeScript**, **Python**, **Go**.
 
 ---
 
@@ -56,4 +58,67 @@ bunx safeword@latest upgrade
 
 ## Reference
 
-[Quick Start](/getting-started/quick-start) · [CLI](/reference/cli) · [Hooks](/reference/hooks) · [Skills](/reference/skills) · [Configuration](/reference/configuration)
+<nav class="ref-links">
+
+[Quick Start](/getting-started/quick-start)
+[CLI](/reference/cli)
+[Hooks](/reference/hooks)
+[Skills](/reference/skills)
+[Configuration](/reference/configuration)
+
+</nav>
+
+---
+
+<footer class="splash-footer">
+
+[GitHub](https://github.com/TheMostlyGreat/safeword) · MIT License · © {new Date().getFullYear()}
+
+</footer>
+
+<script is:inline>{`
+  (function() {
+    var lineHeight = 0;
+    var lineOffset = '76px';
+    var line = null;
+
+    function calculateDimensions() {
+      var footer = document.querySelector('.splash-footer');
+      if (!footer) return;
+
+      var el = footer, top = 0;
+      while (el) { top += el.offsetTop; el = el.offsetParent; }
+      lineHeight = top + footer.offsetHeight;
+
+      var style = getComputedStyle(document.documentElement);
+      lineOffset = style.getPropertyValue('--sw-line-offset') || '76px';
+    }
+
+    function createLine() {
+      if (line) line.remove();
+      calculateDimensions();
+
+      line = document.createElement('div');
+      line.id = 'sw-vertical-line';
+      document.documentElement.appendChild(line);
+      updateLine();
+    }
+
+    function updateLine() {
+      if (!line) return;
+      var scrollY = window.scrollY || window.pageYOffset;
+      var viewportHeight = window.innerHeight;
+      var visibleEnd = Math.min(lineHeight - scrollY, viewportHeight);
+
+      if (visibleEnd <= 0) {
+        line.style.display = 'none';
+      } else {
+        line.style.cssText = 'position:fixed;top:0;left:' + lineOffset + ';width:4px;height:' + visibleEnd + 'px;background:#000;pointer-events:none;z-index:9999;';
+      }
+    }
+
+    createLine();
+    window.addEventListener('resize', createLine);
+    window.addEventListener('scroll', updateLine);
+  })();
+`}</script>

@@ -46,6 +46,30 @@ userMessage: `Character: ${dynamicState}\nAction: ${userInput}`;
 systemPrompt: `Rules + Character: ${dynamicState}`;
 ```
 
+### Context Management
+
+**Observation Masking:**
+
+- Summarize large tool outputs (>2k tokens) before adding to context
+- Reference artifacts by path, don't inline full content
+- Example: "File has 500 lines, 3 functions: parseConfig(), validate(), apply()" vs full file
+
+**Per-Phase Loading:**
+
+- Load only phase-relevant artifacts at each step
+- Work logs: Summarize previous sessions, don't replay verbatim
+- Test definitions: Load current slice, not all scenarios
+
+**Summarization Strategies:**
+
+- Use LLM to summarize exploration results before continuing
+- Compress completed work into bullet points
+- Keep active context focused on current task
+
+**Research basis:** "Context rot"—as tokens increase, model recall degrades. Good context management keeps starting context under 17k tokens.
+
+---
+
 ### Testing AI Outputs
 
 **LLM-as-Judge Pattern:**
