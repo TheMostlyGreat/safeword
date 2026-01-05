@@ -8,8 +8,8 @@
 // Re-export ESLint configs
 export * from "./eslint/index.js";
 
-// Detection (to be added)
-// export * from "./detection/index.js";
+// Detection
+export { detect } from "./detection/index.js";
 
 // Tools (to be added)
 // export * from "./tools/index.js";
