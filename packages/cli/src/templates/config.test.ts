@@ -20,10 +20,10 @@ describe("getEslintConfig", () => {
     expect(config).toContain("dirname");
   });
 
-  it("should import eslint-plugin-safeword and destructure detect/configs", () => {
+  it("should import safeword/eslint and destructure detect/configs", () => {
     const config = getEslintConfig();
 
-    expect(config).toContain('import safeword from "eslint-plugin-safeword"');
+    expect(config).toContain('import safeword from "safeword/eslint"');
     expect(config).toContain("const { detect, configs } = safeword");
   });
 

@@ -1,5 +1,5 @@
 /**
- * Framework detection utilities for eslint-plugin-safeword
+ * Framework detection utilities for safeword ESLint preset
  *
  * Single source of truth for package detection. Used by:
  * - Generated eslint.config.mjs at lint time

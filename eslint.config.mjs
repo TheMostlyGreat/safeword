@@ -1,12 +1,12 @@
 /**
  * Safeword Monorepo ESLint Configuration
  *
- * Uses eslint-plugin-safeword for all rules + project-specific boundaries.
+ * Uses safeword for all rules + project-specific boundaries.
  */
 
 import eslintConfigPrettier from "eslint-config-prettier";
 import boundaries from "eslint-plugin-boundaries";
-import safeword from "./packages/eslint-plugin/dist/index.js";
+import safeword from "./packages/cli/dist/presets/typescript/index.js";
 
 // Ignores
 const ignores = [
@@ -25,7 +25,6 @@ const boundariesConfig = {
   settings: {
     "boundaries/elements": [
       { type: "cli", pattern: "packages/cli/**", mode: "full" },
-      { type: "plugin", pattern: "packages/eslint-plugin/**", mode: "full" },
       { type: "website", pattern: "packages/website/**", mode: "full" },
     ],
   },
@@ -35,10 +34,8 @@ const boundariesConfig = {
       {
         default: "disallow",
         rules: [
-          // CLI can import from CLI and plugin (for eslint-plugin-safeword dep)
-          { from: ["cli"], allow: ["cli", "plugin"] },
-          // Plugin is a leaf - can only import from itself
-          { from: ["plugin"], allow: ["plugin"] },
+          // CLI is the main package - can only import from itself
+          { from: ["cli"], allow: ["cli"] },
           // Website is isolated - no cross-package imports
           { from: ["website"], allow: ["website"] },
         ],

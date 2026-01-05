@@ -51,7 +51,7 @@ function printUpgradeSummary(
     const pm = detectPackageManager(cwd);
     const uninstallCmd = pm === "yarn" ? "yarn remove" : `${pm} uninstall`;
     warn(
-      `\n${result.packagesToRemove.length} package(s) are now bundled in eslint-plugin-safeword:`,
+      `\n${result.packagesToRemove.length} package(s) are now bundled in safeword:`,
     );
     for (const pkg of result.packagesToRemove) listItem(pkg);
     info("\nIf you don't use these elsewhere, you can remove them:");

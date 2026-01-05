@@ -16,8 +16,8 @@ import { describe, expect, it } from "vitest";
 // Type guard for filtering out undefined values
 const isDefined = <T>(x: T | undefined): x is T => x !== undefined;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = nodePath.dirname(__filename);
+const __filename = import.meta.filename;
+const __dirname = import.meta.dirname;
 
 // This import will fail until schema.ts is created (RED phase)
 // import { SAFEWORD_SCHEMA } from '../src/schema.js';
@@ -161,49 +161,45 @@ describe("Schema - Single Source of Truth", () => {
   describe("managedFiles", () => {
     it("should include eslint.config.mjs, tsconfig.json, knip.json, and .prettierrc", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("eslint.config.mjs");
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("tsconfig.json");
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("knip.json");
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty(".prettierrc");
+      const managedKeys = Object.keys(SAFEWORD_SCHEMA.managedFiles);
+      expect(managedKeys).toContain("eslint.config.mjs");
+      expect(managedKeys).toContain("tsconfig.json");
+      expect(managedKeys).toContain("knip.json");
+      expect(managedKeys).toContain(".prettierrc");
     });
   });
 
   describe("jsonMerges", () => {
     it("should include package.json, .claude/settings.json, .mcp.json, Cursor configs, and .prettierrc", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty("package.json");
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(
-        ".claude/settings.json",
-      );
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".mcp.json");
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".cursor/mcp.json");
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".cursor/hooks.json");
+      const jsonMergeKeys = Object.keys(SAFEWORD_SCHEMA.jsonMerges);
+      expect(jsonMergeKeys).toContain("package.json");
+      expect(jsonMergeKeys).toContain(".claude/settings.json");
+      expect(jsonMergeKeys).toContain(".mcp.json");
+      expect(jsonMergeKeys).toContain(".cursor/mcp.json");
+      expect(jsonMergeKeys).toContain(".cursor/hooks.json");
       // .prettierrc is in jsonMerges for uninstall cleanup (removes plugins key)
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".prettierrc");
+      expect(jsonMergeKeys).toContain(".prettierrc");
     });
   });
 
   describe("textPatches", () => {
     it("should include AGENTS.md patch (creates if missing)", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty("AGENTS.md");
-      expect(SAFEWORD_SCHEMA.textPatches["AGENTS.md"].operation).toBe(
-        "prepend",
-      );
-      expect(SAFEWORD_SCHEMA.textPatches["AGENTS.md"].createIfMissing).toBe(
-        true,
-      );
+      const textPatchKeys = Object.keys(SAFEWORD_SCHEMA.textPatches);
+      expect(textPatchKeys).toContain("AGENTS.md");
+      const agentsPatch = SAFEWORD_SCHEMA.textPatches["AGENTS.md"];
+      expect(agentsPatch.operation).toBe("prepend");
+      expect(agentsPatch.createIfMissing).toBe(true);
     });
 
     it("should include CLAUDE.md patch (only if exists)", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty("CLAUDE.md");
-      expect(SAFEWORD_SCHEMA.textPatches["CLAUDE.md"].operation).toBe(
-        "prepend",
-      );
-      expect(SAFEWORD_SCHEMA.textPatches["CLAUDE.md"].createIfMissing).toBe(
-        false,
-      );
+      const textPatchKeys = Object.keys(SAFEWORD_SCHEMA.textPatches);
+      expect(textPatchKeys).toContain("CLAUDE.md");
+      const claudePatch = SAFEWORD_SCHEMA.textPatches["CLAUDE.md"];
+      expect(claudePatch.operation).toBe("prepend");
+      expect(claudePatch.createIfMissing).toBe(false);
     });
   });
 
@@ -212,7 +208,7 @@ describe("Schema - Single Source of Truth", () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
       const required = [
         "eslint",
-        "eslint-plugin-safeword", // bundles eslint-config-prettier
+        "safeword", // bundles eslint-config-prettier
         "dependency-cruiser",
         "knip",
       ];
@@ -232,7 +228,7 @@ describe("Schema - Single Source of Truth", () => {
 
     it("should have conditional packages for frameworks not in safeword plugin", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      // These frameworks are NOT in eslint-plugin-safeword (or need prettier plugins)
+      // These frameworks are NOT bundled in safeword (or need prettier plugins)
       const requiredConditions = [
         "astro", // prettier-plugin-astro (ESLint rules are in safeword)
         "tailwind", // prettier-plugin-tailwindcss

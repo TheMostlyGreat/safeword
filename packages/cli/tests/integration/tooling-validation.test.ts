@@ -23,6 +23,7 @@ import {
   removeTemporaryDirectory,
   runCli,
   runEslint,
+  SAFEWORD_VERSION,
   TIMEOUT_SETUP,
   writeTestFile,
 } from "../helpers";
@@ -193,6 +194,7 @@ describe("E2E: React ESLint Violation Detection", () => {
   beforeAll(async () => {
     projectDirectory = createTemporaryDirectory();
     // Create React package.json with @types/react for proper TypeScript checking
+    // Include local safeword to ensure tests use the current build
     writeTestFile(
       projectDirectory,
       "package.json",
@@ -208,6 +210,7 @@ describe("E2E: React ESLint Violation Detection", () => {
             "@types/react": "^18.0.0",
             "@types/react-dom": "^18.0.0",
             typescript: "^5.0.0",
+            safeword: SAFEWORD_VERSION,
           },
         },
         null,

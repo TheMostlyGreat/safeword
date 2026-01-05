@@ -9,7 +9,7 @@
  * Philosophy: LLMs make React-specific mistakes. These rules catch them.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unnecessary-condition -- ESLint config types are incompatible across plugin packages */
+/* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import reactPlugin from "eslint-plugin-react";
@@ -26,7 +26,7 @@ import { recommendedTypeScript } from "./recommended-typescript.js";
 const reactHooksConfig = reactHooksPlugin.configs?.flat?.["recommended-latest"];
 if (!reactHooksConfig) {
   throw new Error(
-    "eslint-plugin-safeword requires eslint-plugin-react-hooks >= 7.0.0 with flat config support. " +
+    "safeword requires eslint-plugin-react-hooks >= 7.0.0 with flat config support. " +
       "Please upgrade react-hooks: npm install eslint-plugin-react-hooks@latest",
   );
 }

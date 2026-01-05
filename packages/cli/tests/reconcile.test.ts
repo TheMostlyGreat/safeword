@@ -264,7 +264,7 @@ describe("Reconcile - Reconciliation Engine", () => {
       // Should include all base packages
       expect(result.packagesToInstall).toContain("eslint");
       expect(result.packagesToInstall).toContain("prettier");
-      expect(result.packagesToInstall).toContain("eslint-plugin-safeword");
+      expect(result.packagesToInstall).toContain("safeword");
     });
 
     it("should include conditional packages based on project type", async () => {
@@ -278,7 +278,7 @@ describe("Reconcile - Reconciliation Engine", () => {
 
       const result = await reconcile(SAFEWORD_SCHEMA, "install", ctx);
 
-      // Astro and tailwind prettier plugins are NOT bundled in eslint-plugin-safeword
+      // Astro and tailwind prettier plugins are NOT bundled in safeword
       expect(result.packagesToInstall).toContain("prettier-plugin-astro");
       expect(result.packagesToInstall).toContain("prettier-plugin-tailwindcss");
     });
@@ -795,7 +795,7 @@ describe("Reconcile - Reconciliation Engine", () => {
 
       // Base packages + prettier (from "standard" conditional for non-Biome projects)
       expect(result).toContain("eslint");
-      expect(result).toContain("eslint-plugin-safeword");
+      expect(result).toContain("safeword");
       expect(result).toContain("dependency-cruiser");
       expect(result).toContain("knip");
       expect(result).toContain("prettier"); // standard conditional
@@ -811,7 +811,7 @@ describe("Reconcile - Reconciliation Engine", () => {
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
       expect(result).toContain("eslint");
-      expect(result).toContain("eslint-plugin-safeword");
+      expect(result).toContain("safeword");
       expect(result).not.toContain("prettier");
     });
 
@@ -856,7 +856,7 @@ describe("Reconcile - Reconciliation Engine", () => {
 
       const result = computePackagesToInstall(SAFEWORD_SCHEMA, projectType, {});
 
-      // Conditional packages NOT bundled in eslint-plugin-safeword
+      // Conditional packages NOT bundled in safeword
       expect(result).toContain("prettier-plugin-astro");
       expect(result).toContain("prettier-plugin-tailwindcss");
       expect(result).toContain("publint");
@@ -883,7 +883,7 @@ describe("Reconcile - Reconciliation Engine", () => {
       expect(result).not.toContain("eslint");
       expect(result).not.toContain("prettier");
       expect(result).not.toContain("knip");
-      expect(result).toContain("eslint-plugin-safeword"); // Not installed, should be included
+      expect(result).toContain("safeword"); // Not installed, should be included
     });
 
     it("should include base packages regardless of git status", async () => {
@@ -904,7 +904,7 @@ describe("Reconcile - Reconciliation Engine", () => {
       expect(result).toContain("eslint");
       expect(result).toContain("prettier");
       expect(result).toContain("knip");
-      expect(result).toContain("eslint-plugin-safeword");
+      expect(result).toContain("safeword");
     });
   });
 });

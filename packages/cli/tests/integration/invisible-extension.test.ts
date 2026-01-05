@@ -155,7 +155,7 @@ export default [
         );
 
         // Should be standalone (no import from project config)
-        expect(safewordConfig).toContain("eslint-plugin-safeword");
+        expect(safewordConfig).toContain("safeword/eslint");
         expect(safewordConfig).toContain("safewordStrictRules");
       },
       SETUP_TIMEOUT,

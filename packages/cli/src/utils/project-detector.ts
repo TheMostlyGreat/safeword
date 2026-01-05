@@ -8,9 +8,9 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import nodePath from "node:path";
 
-import { detect } from "eslint-plugin-safeword";
+import { detect } from "../presets/typescript/detect.js";
 
-// Re-export detection constants from eslint-plugin-safeword (single source of truth)
+// Re-export detection constants from typescript preset (single source of truth)
 export const {
   TAILWIND_PACKAGES,
   TANSTACK_QUERY_PACKAGES,

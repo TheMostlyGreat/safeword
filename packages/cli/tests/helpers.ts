@@ -41,16 +41,16 @@ const __dirname = import.meta.dirname;
 const CLI_PATH = nodePath.join(__dirname, "../dist/cli.js");
 
 /**
- * Path to the local eslint-plugin-safeword package (for file: references in tests)
+ * Path to the local safeword CLI package (for file: references in tests)
  */
-const ESLINT_PLUGIN_PATH = nodePath.join(__dirname, "../../eslint-plugin");
+const SAFEWORD_PATH = nodePath.join(__dirname, "..");
 
 /**
- * eslint-plugin-safeword reference for test package.json files.
+ * safeword reference for test package.json files.
  * Uses file: protocol to install the local built package instead of from npm.
  * This ensures tests run against the current source code.
  */
-const ESLINT_PLUGIN_VERSION = `file:${ESLINT_PLUGIN_PATH}`;
+export const SAFEWORD_VERSION = `file:${SAFEWORD_PATH}`;
 
 /**
  * Path to the CLI source (for ts-node execution during development)
@@ -94,10 +94,17 @@ export function createPackageJson(
   dir: string,
   overrides: Record<string, unknown> = {},
 ): void {
+  // Merge devDependencies to ensure local safeword is always included
+  const existingDevelopmentDeps =
+    (overrides.devDependencies as Record<string, string>) ?? {};
   const pkg = {
     name: "test-project",
     version: "1.0.0",
     ...overrides,
+    devDependencies: {
+      safeword: SAFEWORD_VERSION,
+      ...existingDevelopmentDeps,
+    },
   };
   writeFileSync(
     nodePath.join(dir, "package.json"),
@@ -107,6 +114,7 @@ export function createPackageJson(
 
 /**
  * Creates a TypeScript package.json (with typescript in devDependencies)
+ * Also pre-installs local safeword to ensure tests use the current build.
  * @param dir
  * @param overrides
  */
@@ -117,6 +125,7 @@ export function createTypeScriptPackageJson(
   createPackageJson(dir, {
     devDependencies: {
       typescript: "^5.0.0",
+      safeword: SAFEWORD_VERSION,
     },
     ...overrides,
   });
@@ -124,6 +133,7 @@ export function createTypeScriptPackageJson(
 
 /**
  * Creates a React package.json
+ * Also pre-installs local safeword to ensure tests use the current build.
  * @param dir
  * @param overrides
  */
@@ -136,12 +146,16 @@ export function createReactPackageJson(
       react: "^18.0.0",
       "react-dom": "^18.0.0",
     },
+    devDependencies: {
+      safeword: SAFEWORD_VERSION,
+    },
     ...overrides,
   });
 }
 
 /**
  * Creates a Next.js package.json
+ * Also pre-installs local safeword to ensure tests use the current build.
  * @param dir
  * @param overrides
  */
@@ -154,6 +168,9 @@ export function createNextJsPackageJson(
       next: "^14.0.0",
       react: "^18.0.0",
       "react-dom": "^18.0.0",
+    },
+    devDependencies: {
+      safeword: SAFEWORD_VERSION,
     },
     ...overrides,
   });
@@ -314,8 +331,7 @@ export function initGitRepo(dir: string): void {
 
 /**
  * Creates a configured project (runs setup) for tests that need pre-configured state.
- * Includes base packages in devDependencies to prevent sync attempts during tests
- * (eslint-plugin-safeword isn't published yet).
+ * Includes base packages in devDependencies to prevent sync attempts during tests.
  * @param dir
  */
 export async function createConfiguredProject(dir: string): Promise<void> {
@@ -326,7 +342,7 @@ export async function createConfiguredProject(dir: string): Promise<void> {
       eslint: "^9.0.0",
       prettier: "^3.0.0",
       "eslint-config-prettier": "^9.0.0",
-      "eslint-plugin-safeword": ESLINT_PLUGIN_VERSION,
+      safeword: SAFEWORD_VERSION,
       knip: "^5.0.0",
     },
   });

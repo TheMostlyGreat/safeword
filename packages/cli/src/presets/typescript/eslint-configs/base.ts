@@ -15,7 +15,7 @@ import simpleImportSort from "eslint-plugin-simple-import-sort";
 import { configs as sonarConfigs } from "eslint-plugin-sonarjs";
 import unicorn from "eslint-plugin-unicorn";
 
-import { rules as safewordRules } from "../rules/index.js";
+import { rules as safewordRules } from "../eslint-rules/index.js";
 
 /**
  * File patterns for base JS/TS rules

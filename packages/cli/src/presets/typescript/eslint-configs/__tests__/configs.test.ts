@@ -8,8 +8,6 @@
  * - Catch invalid code with expected errors
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
-
 import { Linter } from "eslint";
 import { describe, expect, it } from "vitest";
 
@@ -137,17 +135,17 @@ describe("recommendedTypeScript config", () => {
         config !== null &&
         "languageOptions" in config
       ) {
-        const langOpts = config.languageOptions;
+        const langOptions = config.languageOptions;
         if (
-          langOpts &&
-          typeof langOpts === "object" &&
-          "parserOptions" in langOpts
+          langOptions &&
+          typeof langOptions === "object" &&
+          "parserOptions" in langOptions
         ) {
-          const parserOpts = langOpts.parserOptions;
+          const parserOptions = langOptions.parserOptions;
           return (
-            parserOpts &&
-            typeof parserOpts === "object" &&
-            "projectService" in parserOpts
+            parserOptions &&
+            typeof parserOptions === "object" &&
+            "projectService" in parserOptions
           );
         }
       }
@@ -197,7 +195,7 @@ describe("plugin exports", () => {
 
   it("has meta with name and version", () => {
     expect(plugin.meta).toBeDefined();
-    expect(plugin.meta.name).toBe("eslint-plugin-safeword");
+    expect(plugin.meta.name).toBe("safeword");
     expect(plugin.meta.version).toBeDefined();
   });
 
@@ -241,7 +239,7 @@ describe("default ignores", () => {
   });
 
   it("includes dist in ignores", () => {
-    const hasDistIgnore = recommended.some((config) => {
+    const hasDistributionIgnore = recommended.some((config) => {
       if (
         typeof config === "object" &&
         config !== null &&
@@ -258,7 +256,7 @@ describe("default ignores", () => {
       return false;
     });
 
-    expect(hasDistIgnore).toBe(true);
+    expect(hasDistributionIgnore).toBe(true);
   });
 });
 

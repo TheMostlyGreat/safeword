@@ -199,7 +199,7 @@ export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
         ? JSON.stringify(
             {
               ignore: [".safeword/**"],
-              ignoreDependencies: ["eslint-plugin-safeword"],
+              ignoreDependencies: ["safeword"],
             },
             undefined,
             2,
@@ -340,8 +340,8 @@ export const typescriptPackages = {
   base: [
     // Core tools (always needed for JS/TS)
     "eslint",
-    // Safeword plugin (bundles eslint-config-prettier + all ESLint plugins)
-    "eslint-plugin-safeword",
+    // Safeword (bundles eslint-config-prettier + all ESLint plugins)
+    "safeword",
     // Architecture and dead code tools (used by /audit)
     "dependency-cruiser",
     "knip",

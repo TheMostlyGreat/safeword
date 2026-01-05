@@ -1,7 +1,7 @@
 {
   "name": "safeword",
   "version": "0.15.3",
-  "description": "CLI for setting up and managing safeword development environments",
+  "description": "Zero-config code quality for AI-assisted development. bunx safeword setup and magic happens.",
   "type": "module",
   "bin": {
     "safeword": "dist/cli.js"
@@ -10,6 +10,10 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./eslint": {
+      "import": "./dist/presets/typescript/index.js",
+      "types": "./dist/presets/typescript/index.d.ts"
     }
   },
   "files": [
@@ -18,6 +22,15 @@
   ],
   "engines": {
     "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheMostlyGreat/safeword.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/TheMostlyGreat/safeword",
+  "bugs": {
+    "url": "https://github.com/TheMostlyGreat/safeword/issues"
   },
   "scripts": {
     "build": "tsup",
@@ -33,23 +46,59 @@
   },
   "dependencies": {
     "commander": "^12.1.0",
-    "eslint-plugin-safeword": "^0.7.0",
-    "yaml": "^2.7.0"
+    "yaml": "^2.7.0",
+    "@eslint/js": "^9.39.2",
+    "@next/eslint-plugin-next": "^16.1.1",
+    "@tanstack/eslint-plugin-query": "^5.91.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-astro": "^1.5.0",
+    "eslint-plugin-import-x": "^4.16.1",
+    "eslint-plugin-jsdoc": "^61.5.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-playwright": "^2.4.0",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-regexp": "^2.10.0",
+    "eslint-plugin-security": "^3.0.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-sonarjs": "^3.0.5",
+    "eslint-plugin-better-tailwindcss": "^3.8.0",
+    "eslint-plugin-unicorn": "^62.0.0",
+    "eslint-plugin-vitest": "^0.5.4",
+    "typescript-eslint": "^8.51.0"
   },
   "devDependencies": {
+    "@types/estree": "^1.0.8",
     "@types/node": "^20.10.0",
     "@vitest/coverage-v8": "^4.0.16",
+    "eslint": "^9.35.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
     "vitest": "^4.0.15"
   },
+  "peerDependencies": {
+    "eslint": "^9.35.0",
+    "typescript": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
   "keywords": [
     "cli",
     "safeword",
+    "eslint",
+    "eslint-plugin",
+    "llm",
+    "ai-coding",
+    "claude-code",
     "developer-experience",
     "linting",
-    "claude-code"
+    "typescript"
   ],
-  "author": "",
+  "author": "Alex Redmon",
   "license": "MIT"
 }

@@ -159,9 +159,10 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     ".safeword/lib/jq-fallback.sh",
   ],
 
-  // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
+  // Packages to uninstall on upgrade (now bundled in safeword)
   deprecatedPackages: [
-    // Individual ESLint plugins now bundled in eslint-plugin-safeword
+    // Individual ESLint plugins now bundled in safeword
+    "eslint-plugin-safeword", // Old separate package, now consolidated
     "@eslint/js",
     "eslint-plugin-import-x",
     "eslint-import-resolver-typescript",

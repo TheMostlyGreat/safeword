@@ -1,7 +1,7 @@
 /**
  * Configuration templates - ESLint config generation and hook settings
  *
- * ESLint flat config (v9+) using eslint-plugin-safeword for all rules.
+ * ESLint flat config (v9+) using safeword for all rules.
  * Framework detection uses safeword.detect utilities at runtime.
  *
  * See: https://eslint.org/docs/latest/use/configure/configuration-files
@@ -28,7 +28,8 @@ function getPrettierConfig(hasExistingFormatter: boolean): {
     return { import: "", configEntry: "" };
   }
   return {
-    import: 'import eslintConfigPrettier from "eslint-config-prettier";',
+    // Prettier config is bundled with safeword - no separate import needed
+    import: "const eslintConfigPrettier = safeword.prettierConfig;",
     configEntry: "  eslintConfigPrettier,",
   };
 }
@@ -63,7 +64,7 @@ const safewordStrictRules = {
 };`;
 
 /**
- * Generates an ESLint config using eslint-plugin-safeword.
+ * Generates an ESLint config using safeword.
  *
  * The generated config uses safeword.detect utilities to detect frameworks
  * and select the appropriate config at lint time.
@@ -83,8 +84,10 @@ export function getEslintConfig(hasExistingFormatter = false): string {
 function getStandardEslintConfig(): string {
   return `import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import safeword from "eslint-plugin-safeword";
-import eslintConfigPrettier from "eslint-config-prettier";
+import safeword from "safeword/eslint";
+
+// Prettier config is bundled with safeword
+const eslintConfigPrettier = safeword.prettierConfig;
 
 const { detect, configs } = safeword;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -122,7 +125,7 @@ export default [
 function getFormatterAgnosticEslintConfig(): string {
   return `import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import safeword from "eslint-plugin-safeword";
+import safeword from "safeword/eslint";
 
 const { detect, configs } = safeword;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -268,7 +271,7 @@ function getSafewordEslintConfigStandalone(
 // Used by hooks for LLM enforcement.
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import safeword from "eslint-plugin-safeword";
+import safeword from "safeword/eslint";
 ${prettier.import}
 
 const { detect, configs } = safeword;
