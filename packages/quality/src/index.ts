@@ -11,5 +11,5 @@ export * from "./eslint/index.js";
 // Detection
 export { detect } from "./detection/index.js";
 
-// Tools (to be added)
-// export * from "./tools/index.js";
+// Tools
+export * from "./tools/depcruise.js";
