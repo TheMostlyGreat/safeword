@@ -377,9 +377,34 @@ p.hero-subtitle {
   background: transparent !important;
   color: #000 !important;
   cursor: pointer !important;
+  text-decoration: none !important;
   transition:
     background 0.15s,
     color 0.15s !important;
+}
+
+/* Kill any gray underline from Starlight tabs */
+[role='tablist']::after,
+[role='tablist']::before,
+.tablist-wrapper::after,
+.tablist-wrapper::before,
+starlight-tabs::after,
+starlight-tabs::before {
+  display: none !important;
+  border: none !important;
+}
+
+/* Remove underline from tab links */
+[role='tab'] a,
+[role='tablist'] a,
+.tab a {
+  text-decoration: none !important;
+}
+
+/* Remove any wrapper borders */
+.tablist-wrapper,
+starlight-tabs {
+  border: none !important;
 }
 
 [role='tab']:hover:not([aria-selected='true']) {
