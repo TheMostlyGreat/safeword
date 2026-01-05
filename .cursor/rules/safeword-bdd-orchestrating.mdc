@@ -111,18 +111,73 @@ When user references a ticket, resume work:
 
 ---
 
-## Current Behavior (Iteration 3)
+## Phase 5: Technical Decomposition
+
+**Entry:** Agent enters `decomposition` phase (after scenarios validated)
+
+**Analyze scenarios for implementation:**
+
+1. **Identify components** — What parts of the system does each scenario touch?
+   - UI components
+   - API endpoints
+   - Data models
+   - Business logic modules
+2. **Assign test layers** — For each component:
+   - Pure logic (no I/O) → unit test
+   - API boundaries, database → integration test
+   - User flows → E2E test
+3. **Create task breakdown** — Order by dependencies:
+   - Data models first
+   - Business logic second
+   - API endpoints third
+   - UI components fourth
+   - E2E tests last (prove everything works)
+4. **Present to user** — Show components, test layers, task order
+
+**Exit:** User approves breakdown → update ticket to `phase: implement`
+
+---
+
+## Phase 6 Entry: TDD Handoff
+
+**Entry:** Agent enters `implement` phase
+
+**Handoff protocol:**
+
+1. Announce: "Entering implementation. TDD mode for each scenario."
+2. Invoke `safeword-tdd-enforcing` skill
+3. TDD skill takes over for RED → GREEN → REFACTOR cycles
+
+**For each scenario:**
+
+1. Write E2E test first (from scenario Given/When/Then)
+2. E2E fails (RED) — expected, nothing implemented yet
+3. TDD loop builds pieces until E2E passes
+4. Mark scenario `[x]` when E2E is GREEN
+
+**Walking skeleton (first scenario only):**
+
+If project has no E2E infrastructure, build skeleton first:
+
+- Thinnest possible slice proving architecture works
+- Form → API → response → UI (no real logic)
+- This becomes foundation for all scenarios
+
+---
+
+## Current Behavior (Iteration 4)
 
 1. Detect work level (see SAFEWORD.md "Work Level Detection")
 2. Announce with override hint
 3. **If ticket exists:** Read phase, resume at appropriate point
 4. **Phase 3:** Draft scenarios from spec, save to test-definitions
 5. **Phase 4:** Validate scenarios (atomic, observable, deterministic)
-6. **Update phase** in ticket when transitioning
-7. Delegate to `safeword-tdd-enforcing` for implementation (Phase 6)
-8. **REFACTOR:** Verify against guides before marking iteration complete
+6. **Phase 5:** Decompose into components, assign test layers, create task breakdown
+7. **Phase 6 Entry:** Hand off to `safeword-tdd-enforcing` for implementation
+8. **Update phase** in ticket when transitioning
+9. **REFACTOR:** Verify against guides before marking iteration complete
 
-Future iterations add: context check, discovery, decomposition.
+Future iterations add: context check, discovery.
 
 ---
 

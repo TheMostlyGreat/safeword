@@ -280,12 +280,83 @@
 
 ---
 
+## Iteration 4: Phase 5 Decomposition + Phase 6 Entry (Stories 6, 7 partial)
+
+### Suite 11: Phase 5 - Technical Decomposition
+
+#### Scenario 11.1: Agent identifies components from scenarios
+
+**Given** agent is at `phase: decomposition`
+**And** test-definitions has approved scenarios
+**When** agent analyzes scenarios
+**Then** agent identifies components/seams touched by each scenario
+**And** presents component list to user
+
+#### Scenario 11.2: Agent proposes test layers
+
+**Given** agent has identified components
+**When** agent plans implementation
+**Then** agent assigns test layers (unit, integration, E2E) per component
+**And** explains rationale (pure logic → unit, API boundaries → integration, user flows → E2E)
+
+#### Scenario 11.3: Agent creates task breakdown
+
+**Given** agent has identified components and test layers
+**When** decomposition completes
+**Then** agent creates implementation tasks in test-definitions
+**And** tasks are ordered (dependencies first, E2E last)
+
+#### Scenario 11.4: Phase updates after decomposition
+
+**Given** agent has completed decomposition
+**And** user approves task breakdown
+**When** decomposition phase completes
+**Then** ticket phase updates to `implement`
+
+---
+
+### Suite 12: Phase 6 Entry - TDD Handoff
+
+#### Scenario 12.1: BDD hands off to TDD for implementation
+
+**Given** ticket phase is `implement`
+**When** agent starts implementation phase
+**Then** agent invokes `safeword-tdd-enforcing` skill
+**And** announces "Entering implementation. TDD mode for each scenario."
+
+#### Scenario 12.2: First scenario triggers E2E test (RED)
+
+**Given** agent is in TDD skill (from BDD handoff)
+**And** first unchecked scenario exists
+**When** agent starts scenario implementation
+**Then** agent writes E2E test for scenario first (outside-in)
+**And** E2E test fails (RED)
+
+#### Scenario 12.3: Walking skeleton before first scenario (optional)
+
+**Given** project has no existing E2E infrastructure
+**When** agent starts first scenario
+**Then** agent suggests building walking skeleton first
+**And** skeleton proves architecture works end-to-end (form → API → response)
+
+---
+
+## Summary
+
+**Iteration 4 Total**: 7 scenarios
+
+- [ ] Passing: 0
+- [ ] Not Implemented: 7
+
+---
+
 ## Future Iterations (Not Yet Defined)
 
-- Iteration 4: Discovery (Stories 2, 3, 11)
-- Iteration 5: Implementation (Stories 6, 7, 8, 11)
-- Iteration 6: Decomposition (Story 10)
-- Iteration 7: Phase-Aware Quality (Story 12)
-- Iteration 8: Cleanup & Consolidation
+- Iteration 5: Discovery (Stories 2, 3) - context check + discovery loop
+- Iteration 6: Full Implementation Loop (Story 7) - complete TDD cycle inside BDD
+- Iteration 7: Done Phase (Story 8) - cleanup, verification
+- Iteration 8: Decomposition at Checkpoints (Story 10) - fractal splitting
+- Iteration 9: Phase-Aware Quality (Story 12)
+- Iteration 10: Cleanup & Consolidation
   - Evaluate `.safeword-project/` directory - rename, remove, or formalize in schema
   - Cross-platform skill single-source-of-truth (Issue #002)
