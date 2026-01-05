@@ -57,9 +57,7 @@ export default defineConfig({
           label: 'Reference',
           items: [
             { label: 'CLI', slug: 'reference/cli' },
-            { label: 'Commands', slug: 'reference/commands' },
-            { label: 'Skills', slug: 'reference/skills' },
-            { label: 'Hooks', slug: 'reference/hooks' },
+            { label: 'Hooks & Skills', slug: 'reference/hooks-and-skills' },
             { label: 'Configuration', slug: 'reference/configuration' },
           ],
         },
