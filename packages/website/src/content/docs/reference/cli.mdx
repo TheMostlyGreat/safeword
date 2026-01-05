@@ -21,17 +21,20 @@ bunx safeword@latest setup
 
 ### What gets installed
 
-| Category    | What                      | Purpose                                |
-| ----------- | ------------------------- | -------------------------------------- |
-| **Core**    | `.safeword/` directory    | Hooks, guides, templates, config       |
-| **Editor**  | `.claude/` or `.cursor/`  | Skills/rules, commands, hook settings  |
-| **Linting** | ESLint + Prettier (JS/TS) | Auto-formatting on file edits          |
-|             | Ruff + mypy (Python)      | Python linting and type checking       |
-|             | golangci-lint (Go)        | Go linting                             |
-| **Docs**    | `AGENTS.md`               | Links to SAFEWORD.md for agent context |
-| **MCP**     | `.mcp.json`               | Context7 + Playwright servers          |
+| What                    | Action              | Purpose                  |
+| ----------------------- | ------------------- | ------------------------ |
+| `.safeword/`            | Creates directory   | Hooks, guides, templates |
+| `.claude/settings.json` | Creates file        | Hook configuration       |
+| `.claude/skills/`       | Creates directory   | Workflow skills          |
+| `.cursor/hooks.json`    | Creates file        | Hook configuration       |
+| `.cursor/rules/`        | Creates directory   | Behavior rules           |
+| `eslint.config.mjs`     | Creates file        | Linting config (JS/TS)   |
+| `package.json`          | Adds packages       | ESLint, Prettier (JS/TS) |
+| `.golangci.yml`         | Creates file        | Linting config (Go)      |
+| `AGENTS.md`             | Creates or prepends | Links to SAFEWORD.md     |
+| `.mcp.json`             | Creates or merges   | MCP server config        |
 
-Setup auto-detects your stack and only installs relevant tooling. A TypeScript project won't get Python tools, and vice versa.
+Setup auto-detects your stack. A TypeScript project won't get Go or Python tooling.
 
 ## safeword upgrade
 
