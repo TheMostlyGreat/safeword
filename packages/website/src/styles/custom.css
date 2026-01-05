@@ -535,15 +535,6 @@ h1 {
   border-color: #000 !important;
 }
 
-/* Tabs border */
-[role='tablist'] {
-  border-color: #000 !important;
-}
-
-[role='tab'] {
-  border-color: #000 !important;
-}
-
 /* Fix ALL remaining gray borders to black */
 dialog,
 .mobile-preferences,
