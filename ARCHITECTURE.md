@@ -40,18 +40,16 @@ Safeword is a CLI tool that configures linting, hooks, and development guides fo
 
 ```text
 packages/
-├── cli/            # Main CLI tool (bunx safeword)
-├── eslint-plugin/  # ESLint plugin with LLM-optimized rules
+├── cli/            # Main CLI tool + ESLint configs (bunx safeword)
 └── website/        # Documentation site (Astro/Starlight)
 ```
 
-| Package                   | Purpose                                           | Published As             |
-| ------------------------- | ------------------------------------------------- | ------------------------ |
-| `packages/cli/`           | CLI that installs hooks, guides, linting configs  | `safeword`               |
-| `packages/eslint-plugin/` | ESLint plugin with rules optimized for LLM agents | `eslint-plugin-safeword` |
-| `packages/website/`       | Documentation website                             | Private (not published)  |
+| Package             | Purpose                                                 | Published As |
+| ------------------- | ------------------------------------------------------- | ------------ |
+| `packages/cli/`     | CLI + bundled ESLint configs (`safeword/eslint` export) | `safeword`   |
+| `packages/website/` | Documentation website                                   | Private      |
 
-**Dependency:** CLI depends on eslint-plugin (`eslint-plugin-safeword: workspace:^`)
+ESLint configs are bundled in the main package and accessed via `import safeword from "safeword/eslint"`.
 
 ---
 
@@ -67,6 +65,8 @@ packages/cli/
 │   │   ├── config.ts   # Pack config management (.safeword/config.json)
 │   │   ├── install.ts  # Pack installation logic
 │   │   └── types.ts    # Shared type definitions
+│   ├── presets/        # ESLint presets (exported as safeword/eslint)
+│   │   └── typescript/ # ESLint configs, rules, detection
 │   ├── templates/      # Template content helpers
 │   ├── utils/          # Detection, file ops, git, version
 │   ├── schema.ts       # Single source of truth for all managed files
