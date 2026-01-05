@@ -5,73 +5,91 @@ description: Safeword hooks reference
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Hooks are automatic actions that run at key moments during your coding session. You don't invoke them—they just work in the background.
+Hooks run automatically at key moments during your coding session. You don't invoke them—they work in the background.
 
-<Tabs>
+<Tabs syncKey="editor">
   <TabItem label="Claude Code">
     ### What runs automatically
 
-    | When                         | What happens                              |
-    | ---------------------------- | ----------------------------------------- |
-    | Session starts               | Shows Safeword version, checks for lint errors |
-    | You submit a prompt          | Adds timestamp, reminds agent to ask clarifying questions |
-    | Agent edits a file           | Runs the appropriate linter automatically |
-    | You stop the session         | Prompts for a quality review              |
+    | When                    | What happens                                          |
+    | ----------------------- | ----------------------------------------------------- |
+    | Session starts          | Verifies AGENTS.md link, shows version, checks lint   |
+    | You submit a prompt     | Adds timestamp, reminds agent to ask questions        |
+    | Agent edits a file      | Runs the appropriate linter                           |
+    | You stop the session    | Prompts for quality review                            |
 
     ### Auto-linting
 
-    After your agent writes or modifies a file, the right linter runs automatically:
+    After your agent writes or modifies a file, the right linter runs:
 
-    | File type                | Linter        |
-    | ------------------------ | ------------- |
-    | TypeScript / JavaScript  | ESLint        |
-    | Python                   | Ruff          |
-    | Go                       | golangci-lint |
+    | File type               | Linter        |
+    | ----------------------- | ------------- |
+    | TypeScript / JavaScript | ESLint        |
+    | Python                  | Ruff          |
+    | Go                      | golangci-lint |
 
     If a linter isn't installed, it's silently skipped.
 
-    **What you see:** When linting runs, you'll see `SAFEWORD: Linting...` in the output. If there are issues, your agent sees them and can fix them immediately.
+    **What you see:** `SAFEWORD: Linting...` appears in output. If there are issues, your agent sees them and fixes immediately.
 
     ### Customizing hooks
 
-    The default hooks get overwritten when you run `safeword upgrade`. To customize:
+    Default hooks get overwritten on `safeword upgrade`. To customize:
 
-    1. Copy the hook to a new name (e.g., `my-lint.ts`)
-    2. Update `.claude/settings.json` to point to your hook
-    3. Your custom hook won't be touched by upgrades
+    1. Copy the hook to `.safeword-project/` (e.g., `my-lint.ts`)
+    2. Update `.claude/settings.json` to point to your copy
+    3. Your custom hook stays safe from upgrades
 
-    Hook files live in `.safeword/hooks/`.
+    Hook config: `.claude/settings.json`
+    Hook files: `.safeword/hooks/`
 
   </TabItem>
   <TabItem label="Cursor">
-    Cursor now supports hooks via `.cursor/hooks.json`. Safeword installs both hooks and **rules** (`.cursor/rules/`) to guide your agent's behavior.
+    Safeword installs hooks (`.cursor/hooks.json`) and rules (`.cursor/rules/`) to guide your agent's behavior.
 
     ### What runs automatically
 
-    | When                         | What happens                              |
-    | ---------------------------- | ----------------------------------------- |
-    | Agent edits a file           | Runs the appropriate linter automatically |
-    | You stop the session         | Prompts for a quality review              |
+    | When                    | What happens                                          |
+    | ----------------------- | ----------------------------------------------------- |
+    | Agent edits a file      | Runs the appropriate linter                           |
+    | You stop the session    | Prompts for quality review                            |
+
+    ### Auto-linting
+
+    After your agent writes or modifies a file, the right linter runs:
+
+    | File type               | Linter        |
+    | ----------------------- | ------------- |
+    | TypeScript / JavaScript | ESLint        |
+    | Python                  | Ruff          |
+    | Go                      | golangci-lint |
+
+    If a linter isn't installed, it's silently skipped.
+
+    **What you see:** `SAFEWORD: Linting...` appears in output. If there are issues, your agent sees them and fixes immediately.
 
     ### What rules provide
 
-    | Rule              | What it does                                       |
-    | ----------------- | -------------------------------------------------- |
-    | Debugging         | Makes your agent investigate before jumping to fixes |
-    | TDD               | Enforces write-test-first discipline               |
-    | Refactoring       | One small change at a time, test after each        |
-    | Brainstorming     | Asks clarifying questions before proposing solutions |
-    | Quality Reviewing | Checks against current docs and best practices     |
+    Rules shape agent behavior through system prompts:
 
-    ### Customizing rules
+    | Rule              | What it does                                         |
+    | ----------------- | ---------------------------------------------------- |
+    | Debugging         | Investigate before jumping to fixes                  |
+    | TDD               | Write tests first, then implementation               |
+    | Refactoring       | One small change at a time, test after each          |
+    | Brainstorming     | Ask clarifying questions before proposing solutions  |
+    | Quality Reviewing | Check against current docs and best practices        |
 
-    Default rules get overwritten on `safeword upgrade`. To customize:
+    ### Customizing hooks and rules
 
-    1. Copy the rule to a new name (e.g., `my-debugging.mdc`)
-    2. Modify as needed
-    3. Your custom rule won't be touched by upgrades
+    Default hooks and rules get overwritten on `safeword upgrade`. To customize:
 
-    Rule files live in `.cursor/rules/`. Hook config is in `.cursor/hooks.json`.
+    1. Copy the file to `.safeword-project/`
+    2. For rules: reference your copy in your workflow
+    3. For hooks: update `.cursor/hooks.json` to point to your copy
+
+    Hook config: `.cursor/hooks.json`
+    Rule files: `.cursor/rules/`
 
   </TabItem>
 </Tabs>
