@@ -387,10 +387,6 @@ p.hero-subtitle {
   margin-bottom: 0.5rem !important;
 }
 
-[data-has-hero] .sl-markdown-content hr {
-  margin: 1.5rem 0 !important;
-}
-
 /* Reference links nav bar */
 .ref-links {
   display: flex;
