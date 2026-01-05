@@ -1,6 +1,6 @@
 ---
 name: bdd-orchestrating
-description: BDD orchestrator for feature-level work requiring multiple scenarios. Use when user says 'add', 'implement', 'build', 'feature', or work touches 3+ files with new state/flows. Also use when user runs /bdd. Do NOT use for bug fixes, typos, config changes, or 1-2 file tasks—use safeword-tdd-enforcing directly.
+description: BDD orchestrator for feature-level work requiring multiple scenarios. Use when user says 'add', 'implement', 'build', 'feature', 'iteration', 'phase', or work touches 3+ files with new state/flows. Also use when user runs /bdd. Do NOT use for bug fixes, typos, config changes, or 1-2 file tasks—use safeword-tdd-enforcing directly.
 allowed-tools: '*'
 ---
 
@@ -10,84 +10,126 @@ Behavior-first development for features. Discovery → Scenarios → Implementat
 
 **Iron Law:** DEFINE BEHAVIOR BEFORE IMPLEMENTATION
 
-## Work Level Detection
+## Phase Tracking
 
-Follow this decision tree. Stop at first match:
+Features progress through phases. Track in ticket frontmatter:
 
-```
-Is this explicitly a bug fix, typo, or config change?
-├─ Yes → patch (use TDD skill directly)
-└─ No ↓
-
-Does request mention "feature", "add", "implement", "support", "build"?
-├─ No → task (use TDD skill directly)
-└─ Yes ↓
-
-Will it require 3+ files AND (new state OR multiple user flows)?
-├─ Yes → feature (continue with BDD)
-└─ No / Unsure ↓
-
-Can ONE E2E test cover the observable change?
-├─ Yes → task (use TDD skill directly)
-└─ No → feature (continue with BDD)
-
-Fallback: task. User can `/bdd` to override.
+```yaml
+---
+type: feature
+phase: implement # intake | define-behavior | scenario-gate | decomposition | implement | done
+---
 ```
 
-**Detection signals:**
+**Phase meanings:**
 
-| Signal        | task → TDD                | feature → BDD                   |
-| ------------- | ------------------------- | ------------------------------- |
-| Files touched | 1-2 files                 | 3+ files                        |
-| Test count    | 1 E2E test sufficient     | Multiple scenarios needed       |
-| State changes | None or trivial           | New state machine / transitions |
-| User flows    | Single path               | Multiple paths / branching      |
-| Keywords      | "change", "fix", "update" | "add", "implement", "feature"   |
+| Phase             | What happens                         |
+| ----------------- | ------------------------------------ |
+| `intake`          | Context check, discovery (Phase 0-2) |
+| `define-behavior` | Writing Given/When/Then (Phase 3)    |
+| `scenario-gate`   | Validating scenarios (Phase 4)       |
+| `decomposition`   | Task breakdown (Phase 5)             |
+| `implement`       | Outside-in TDD (Phase 6)             |
+| `done`            | Cleanup, verification (Phase 7)      |
 
-**Examples:**
+**Update phase when:**
 
-| Request                      | Signals                           | Level   |
-| ---------------------------- | --------------------------------- | ------- |
-| "Change button color to red" | 1 file, 1 test, no state          | task    |
-| "Add dark mode toggle"       | 3+ files, new state, user prefs   | feature |
-| "Fix login error message"    | 1-2 files, 1 test                 | task    |
-| "Add user authentication"    | Many files, state machine, flows  | feature |
-| "Update API response format" | 1-2 files, 1 E2E test             | task    |
-| "Add shopping cart"          | Many files, state, multiple flows | feature |
-| "Fix typo in README"         | 1 file, no test needed            | patch   |
-
-**Edge cases:**
-
-- "Add a comment to function X" → patch (not a behavior change, despite "add")
-- "Implement the fix for bug #123" → task (bug fix, despite "implement")
-- "Build the Docker image" → patch (infrastructure, not product behavior)
-- "Add logging to the auth module" → task (observability, 1-2 files, no user flow)
-- "Feature flag for dark mode" → task if toggle only, feature if full dark mode
+- Completing a BDD phase → set next phase
+- Handing off to TDD → set `implement`
+- All scenarios pass → set `done`
 
 ---
 
-## Announcement
+## Resume Logic
 
-After detection, always announce:
+When user references a ticket, resume work:
 
-- **patch:** "Patch. Fixing directly."
-- **task:** "Task. Writing tests first. `/bdd` to override."
-- **feature:** "Feature. Defining behaviors first. `/tdd` to override."
+1. **Read ticket** → get current `phase:`
+2. **Find progress** → first unchecked `[ ]` in test-definitions
+3. **Check context** → read last work log entry
+4. **Announce resume** → "Resuming at [phase]. Last: [log entry]."
+
+**Resume by phase:**
+
+| Phase             | Resume action                          |
+| ----------------- | -------------------------------------- |
+| `intake`          | Start context check (Phase 0-2)        |
+| `define-behavior` | Continue drafting scenarios            |
+| `scenario-gate`   | Continue validating scenarios          |
+| `decomposition`   | Continue task breakdown                |
+| `implement`       | Find first unchecked scenario, run TDD |
+| `done`            | Run /verify and /audit checks          |
 
 ---
 
-## Current Behavior (Iteration 1)
+## Phase 3: Define Behavior
 
-1. Detect work level using algorithm above
+**Entry:** Agent enters `define-behavior` phase (after detection or resume)
+
+**Prerequisite check:**
+
+- If no spec exists → create minimal spec (goal, scope from user request)
+- If no ticket exists → create ticket with `phase: define-behavior`
+
+**Draft scenarios:**
+
+1. Read spec goal/scope
+2. Draft Given/When/Then scenarios covering:
+   - Happy path (main success)
+   - Failure modes (what can go wrong)
+   - Edge cases (boundaries, empty states)
+3. Present scenarios to user
+4. User can add/modify/remove scenarios
+5. Save to `.safeword-project/test-definitions/feature-{slug}.md`
+6. Each scenario gets `[ ]` checkbox for implementation tracking
+
+**Exit:** User approves scenario list → update ticket to `phase: scenario-gate`
+
+---
+
+## Phase 4: Scenario Quality Gate
+
+**Entry:** Agent enters `scenario-gate` phase
+
+**Validate each scenario against three criteria:**
+
+| Criterion         | Check                          | Red flag                        |
+| ----------------- | ------------------------------ | ------------------------------- |
+| **Atomic**        | Tests ONE behavior             | Multiple When/Then pairs        |
+| **Observable**    | Has externally visible outcome | Internal state only             |
+| **Deterministic** | Same result on repeated runs   | Time/random/external dependency |
+
+**Report issues:**
+
+- Group by type (atomicity, observability, determinism)
+- Suggest fix for each issue
+- Example: "Scenario 3 tests login AND session creation. Split into two scenarios."
+
+**Exit options:**
+
+- All pass → update ticket to `decomposition`
+- Issues found → user fixes or acknowledges → update ticket to `decomposition`
+
+---
+
+## Current Behavior (Iteration 3)
+
+1. Detect work level (see SAFEWORD.md "Work Level Detection")
 2. Announce with override hint
-3. Delegate to `safeword-tdd-enforcing` for implementation
+3. **If ticket exists:** Read phase, resume at appropriate point
+4. **Phase 3:** Draft scenarios from spec, save to test-definitions
+5. **Phase 4:** Validate scenarios (atomic, observable, deterministic)
+6. **Update phase** in ticket when transitioning
+7. Delegate to `safeword-tdd-enforcing` for implementation (Phase 6)
+8. **REFACTOR:** Verify against guides before marking iteration complete
 
-Future iterations add: context check, discovery, scenarios, validation, decomposition.
+Future iterations add: context check, discovery, decomposition.
 
 ---
 
 ## Key Takeaways
 
 - **patch/task** → delegate to TDD immediately
-- **feature** → BDD phases first (Iteration 1: just announce, then TDD)
+- **feature** → BDD phases first, track in ticket `phase:` field
+- **Resume** → read ticket, find first unchecked scenario, continue
 - When unsure → default to task, user can `/bdd` to override

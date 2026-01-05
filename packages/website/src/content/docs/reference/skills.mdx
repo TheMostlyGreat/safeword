@@ -3,37 +3,92 @@ title: Skills
 description: Safeword skills reference
 ---
 
-Structured workflows that guide AI agents through tasks with discipline and best practices. Skills activate automatically based on task context.
+Skills are structured workflows that kick in automatically when your agent recognizes certain tasks. You don't invoke them directly—they activate based on what you're asking for.
 
-| Skill                       | Purpose                                           |
-| --------------------------- | ------------------------------------------------- |
-| `safeword-brainstorming`    | Collaborative design through Socratic questioning |
-| `safeword-debugging`        | Four-phase debugging (investigate before fixing)  |
-| `safeword-tdd-enforcing`    | RED → GREEN → REFACTOR discipline                 |
-| `safeword-quality-reviewer` | Deep code review with web research                |
-| `safeword-refactoring`      | Small-step refactoring with test verification     |
-| `safeword-writing-plans`    | Detailed implementation plans for agents          |
+**How it works:** When you say "debug this test failure" or "refactor this function", your agent recognizes the pattern and follows the skill's methodology instead of jumping straight to code changes.
 
-## safeword-brainstorming
+| Skill             | Triggers on                                   |
+| ----------------- | --------------------------------------------- |
+| Brainstorming     | "design", "explore options", "think through"  |
+| Debugging         | "debug", "fix this error", "test is failing"  |
+| TDD               | "implement", "add feature", "build"           |
+| BDD               | Complex features touching 3+ files            |
+| Quality Reviewing | "review", "check security", "verify versions" |
+| Refactoring       | "refactor", "clean up", "extract", "rename"   |
+| Writing Plans     | "write plan", "break down into tasks"         |
 
-Use before implementation when refining rough ideas into specs. Guides through Socratic questioning, alternative exploration, and incremental validation.
+---
 
-## safeword-debugging
+## Brainstorming
 
-Four-phase framework: **Investigate** → **Hypothesize** → **Test** → **Fix**. Ensures root cause identification before applying solutions.
+Helps you think through a problem before writing code. Asks clarifying questions, explores alternatives, and validates assumptions incrementally.
 
-## safeword-tdd-enforcing
+**Example:** "I need to add caching but I'm not sure how to approach it"
 
-Strict test discipline: **RED** (write failing test) → **GREEN** (minimum code to pass) → **REFACTOR** (improve while tests pass).
+Your agent will ask questions like "What's the cache invalidation strategy?" and "Should this be in-memory or distributed?" before proposing solutions.
 
-## safeword-quality-reviewer
+---
 
-Deep review with web research. Checks library versions, security patterns, and best practices against official docs.
+## Debugging
 
-## safeword-refactoring
+Investigates before fixing. Follows: **Investigate** → **Hypothesize** → **Test** → **Fix**.
 
-One change → test → commit cycle. For structural improvements only—not for adding features or fixing bugs.
+**Example:** "This test is failing but I don't know why"
 
-## safeword-writing-plans
+Instead of immediately changing code, your agent will read the test, trace the execution path, form a hypothesis, and verify it before making changes.
 
-Creates execution plans with exact file paths, complete code examples, and verification steps.
+---
+
+## TDD (Test-Driven Development)
+
+Enforces the discipline of writing tests first: **RED** (failing test) → **GREEN** (make it pass) → **REFACTOR** (clean up).
+
+**Example:** "Add a function that validates email addresses"
+
+Your agent will write the test first, run it to see it fail, then write the minimum code to make it pass.
+
+---
+
+## BDD (Behavior-Driven Development)
+
+For complex features that span multiple files. Follows: **Discovery** → **Define Scenarios** → **Decompose** → **Implement**.
+
+**Example:** "Add user authentication with OAuth"
+
+Your agent will first define the expected behavior with Given/When/Then scenarios, break it into tasks, then implement each task using TDD.
+
+---
+
+## Quality Reviewing
+
+Deep review that checks your code against current best practices using web search.
+
+**Example:** "Review this authentication code"
+
+Your agent will check against official library docs, look for known security issues, and verify you're using current versions.
+
+---
+
+## Refactoring
+
+Small, safe changes with test verification after each step: **One change** → **Test** → **Commit**.
+
+**Example:** "Clean up this messy function"
+
+Your agent will make one small improvement, run tests, commit, then repeat—never batching multiple changes.
+
+---
+
+## Writing Plans
+
+Creates detailed implementation plans before coding. Useful for complex features that need coordination.
+
+**Example:** "Plan out how we'd add multi-tenancy"
+
+Your agent will produce a step-by-step plan with file paths, code examples, and verification steps.
+
+<footer class="docs-footer">
+
+[GitHub](https://github.com/TheMostlyGreat/safeword) · MIT License · © 2026
+
+</footer>

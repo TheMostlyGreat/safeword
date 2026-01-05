@@ -3,9 +3,11 @@ title: CLI
 description: Safeword command-line interface reference
 ---
 
+All commands run via `bunx safeword@latest` (or just `bunx safeword` if you have it installed locally).
+
 ## safeword setup
 
-Initialize safeword in a project.
+Initialize Safeword in a project. Run this once when you first add Safeword to a repo.
 
 ```bash
 bunx safeword@latest setup [options]
@@ -14,26 +16,22 @@ bunx safeword@latest setup [options]
 | Option        | Description               |
 | ------------- | ------------------------- |
 | `--yes`, `-y` | Skip confirmation prompts |
-| `--force`     | Overwrite existing files  |
+
+**When to use:** First time setting up Safeword in a project, or after cloning a repo that doesn't have Safeword yet.
 
 ## safeword upgrade
 
-Update safeword files to latest version.
+Update Safeword files to the latest version.
 
 ```bash
-bunx safeword@latest upgrade [options]
+bunx safeword@latest upgrade
 ```
 
-| Option      | Description                            |
-| ----------- | -------------------------------------- |
-| `--dry-run` | Show what would change without writing |
-| `--force`   | Overwrite modified owned files         |
-
-Updates owned files while preserving your customizations to managed files.
+**When to use:** After a new Safeword release, or when you want the latest improvements. Your customizations to skills and hooks are preserved—only the core files get updated.
 
 ## safeword check
 
-Verify installation and report issues.
+Verify your installation and report issues.
 
 ```bash
 bunx safeword@latest check [options]
@@ -43,9 +41,11 @@ bunx safeword@latest check [options]
 | ----------- | ------------------------- |
 | `--offline` | Skip remote version check |
 
+**When to use:** If something seems broken, or to verify everything is set up correctly. Shows missing files, version info, and potential problems.
+
 ## safeword reset
 
-Remove all safeword files.
+Remove all Safeword files from your project.
 
 ```bash
 bunx safeword reset [options]
@@ -56,9 +56,11 @@ bunx safeword reset [options]
 | `--yes`, `-y` | Skip confirmation                     |
 | `--full`      | Also remove linting config + packages |
 
+**When to use:** If you want to uninstall Safeword completely. The `--full` flag also removes the linting setup (ESLint config, packages in package.json).
+
 ## safeword diff
 
-Show differences between local and template files.
+Show differences between your local files and the latest templates.
 
 ```bash
 bunx safeword@latest diff [file] [options]
@@ -67,3 +69,23 @@ bunx safeword@latest diff [file] [options]
 | Option | Description           |
 | ------ | --------------------- |
 | `-v`   | Show full diff output |
+
+**When to use:** Before upgrading, to see what would change. Or to check if you've customized any files.
+
+---
+
+## File Ownership
+
+Safeword manages two types of files:
+
+**Owned files** — Safeword controls these completely. They get overwritten on upgrade. Examples: core hooks, lint scripts.
+
+**Managed files** — You can customize these. Safeword won't overwrite your changes during upgrade. Examples: skills, custom hooks you've added.
+
+Run `safeword diff` to see which files you've modified.
+
+<footer class="docs-footer">
+
+[GitHub](https://github.com/TheMostlyGreat/safeword) · MIT License · © 2026
+
+</footer>

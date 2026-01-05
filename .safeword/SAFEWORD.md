@@ -184,15 +184,66 @@ status: in_progress
 
 ---
 
+## Work Level Detection
+
+**⚠️ MANDATORY: Run this decision tree on EVERY request BEFORE doing any work.**
+
+Stop at first match:
+
+```text
+Is this explicitly a bug fix, typo, or config change?
+├─ Yes → patch
+└─ No ↓
+
+Does request mention "feature", "add", "implement", "support", "build", "iteration", "phase"?
+├─ No → task
+└─ Yes ↓
+
+Will it require 3+ files AND (new state OR multiple user flows)?
+├─ Yes → feature
+└─ No / Unsure ↓
+
+Can ONE test cover the observable change?
+├─ Yes → task
+└─ No → feature
+
+Fallback: task. User can /bdd to override.
+```
+
+**Always announce after detection:**
+
+- **patch:** "Patch. Fixing directly."
+- **task:** "Task. Writing tests first. `/bdd` to override." → Follow TDD skill
+- **feature:** "Feature. Defining behaviors first. `/tdd` to override." → Follow BDD skill phases
+
+**Examples:**
+
+| Request                      | Signals                         | Level   |
+| ---------------------------- | ------------------------------- | ------- |
+| "Fix typo in README"         | 1 file, no test needed          | patch   |
+| "Fix login error message"    | 1-2 files, 1 test               | task    |
+| "Change button color to red" | 1 file, 1 test, no state        | task    |
+| "Add dark mode toggle"       | 3+ files, new state, user prefs | feature |
+| "Add user authentication"    | Many files, state machine       | feature |
+| "Move onto iteration 2"      | New work chunk, scope in spec   | feature |
+| "Implement iteration 3 of X" | Iteration = sub-feature of spec | feature |
+| "Continue to phase 3"        | Phase = spec continuation       | feature |
+
+**Edge cases:**
+
+- "Add a comment to function X" → patch (not behavior change)
+- "Implement the fix for bug #123" → task (bug fix despite "implement")
+- "Build the Docker image" → patch (infrastructure, not product)
+
+---
+
 ## Feature Development
 
-**Triage first - answer IN ORDER, stop at first match:**
-
-| Question                                 | Level       | Artifacts                    |
-| ---------------------------------------- | ----------- | ---------------------------- |
-| User-facing feature with business value? | **feature** | Spec + Test Defs (+ Design)  |
-| Bug, improvement, internal, or refactor? | **task**    | Spec with inline tests       |
-| Typo, config, or trivial change?         | **patch**   | Minimal spec, existing tests |
+| Level       | Artifacts                    |
+| ----------- | ---------------------------- |
+| **feature** | Spec + Test Defs (+ Design)  |
+| **task**    | Spec with inline tests       |
+| **patch**   | Minimal spec, existing tests |
 
 **Then follow this order:**
 
@@ -321,7 +372,7 @@ When markdown lint reports MD040 (missing language), choose:
 
 1. **Clarity → Simplicity → Correctness** (in that order)
 2. **Test what you can test**—never ask user to verify
-3. **ALWAYS USE STRICT TDD: RED → GREEN → REFACTOR**—never skip steps
+3. **Run Work Level Detection on EVERY request**—announce patch/task/feature
 4. **Commit after each GREEN phase**
 5. **Read the matching guide** when a trigger fires
 6. **Always read the latest documentation for the relevant tool**

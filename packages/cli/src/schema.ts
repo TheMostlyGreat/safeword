@@ -208,13 +208,14 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/hooks/lib/lint.ts': { template: 'hooks/lib/lint.ts' },
     '.safeword/hooks/lib/quality.ts': { template: 'hooks/lib/quality.ts' },
 
-    // Hooks (7 files) - TypeScript with Bun runtime
+    // Hooks (8 files) - TypeScript with Bun runtime
     '.safeword/hooks/session-verify-agents.ts': { template: 'hooks/session-verify-agents.ts' },
     '.safeword/hooks/session-version.ts': { template: 'hooks/session-version.ts' },
     '.safeword/hooks/session-lint-check.ts': { template: 'hooks/session-lint-check.ts' },
     '.safeword/hooks/prompt-timestamp.ts': { template: 'hooks/prompt-timestamp.ts' },
     '.safeword/hooks/prompt-questions.ts': { template: 'hooks/prompt-questions.ts' },
     '.safeword/hooks/post-tool-lint.ts': { template: 'hooks/post-tool-lint.ts' },
+    '.safeword/hooks/post-tool-guide-check.ts': { template: 'hooks/post-tool-guide-check.ts' },
     '.safeword/hooks/stop-quality.ts': { template: 'hooks/stop-quality.ts' },
 
     // Guides (11 files)

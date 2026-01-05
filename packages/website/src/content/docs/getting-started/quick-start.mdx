@@ -27,35 +27,52 @@ You use Claude Code or Cursor the same way you always have. Type a prompt, get c
 
   </TabItem>
   <TabItem label="Cursor">
-    **Your agent follows structured workflows.** Safeword adds rules that guide how your agent approaches tasks. When debugging, it investigates before jumping to fixes. When building features, it writes tests first.
+    **Your agent follows structured workflows.** Safeword adds rules (`.cursor/rules/`) that guide how your agent approaches tasks. When debugging, it investigates before jumping to fixes. When building features, it follows your codebase patterns.
 
-    **Same prompts, better results.** You don't change how you work. The rules run in the background, steering your agent toward code that actually works.
+    **Better decisions, automatically.** The rules kick in based on what you're asking for—no special commands needed.
 
   </TabItem>
 </Tabs>
 
 ## Try It
 
-Open your project and ask your agent to do something it would normally rush through:
+Open your project and ask your agent to build something real:
 
-> "Add a function that validates an email address"
+> "Add an API endpoint that returns user profile data"
 
-Watch what happens. The agent writes the code, but now:
+<Tabs>
+  <TabItem label="Claude Code">
+    Watch what happens:
 
-1. Lint runs automatically (Claude Code) or rules guide the approach (Cursor)
-2. If there are issues, they get caught and fixed
-3. You get cleaner code on the first try
+    1. Your agent writes the endpoint
+    2. Lint runs automatically — you'll see `SAFEWORD: Linting...` in the output
+    3. If there are issues, your agent fixes them before you even see the code
+    4. When you stop the session, a quality review runs automatically
+
+  </TabItem>
+  <TabItem label="Cursor">
+    Watch what happens:
+
+    1. Your agent investigates your existing API patterns first
+    2. It follows the structure of your codebase
+    3. If you ask it to debug something, it'll investigate before jumping to fixes
+
+    The rules in `.cursor/rules/` guide this behavior automatically.
+
+  </TabItem>
+</Tabs>
 
 ## What Got Installed
 
 Safeword added a few folders to your project:
 
-| Folder            | What's in it                                          |
-| ----------------- | ----------------------------------------------------- |
-| `.claude/hooks/`  | Scripts that run automatically (lint, quality checks) |
-| `.claude/skills/` | Structured workflows for debugging, TDD, refactoring  |
-| `.safeword/`      | Config files and guides                               |
-| `.cursor/rules/`  | Rules for Cursor (if detected)                        |
+| Folder              | What's in it                                          |
+| ------------------- | ----------------------------------------------------- |
+| `.safeword/hooks/`  | Scripts that run automatically (lint, quality checks) |
+| `.claude/skills/`   | Structured workflows for debugging, TDD, refactoring  |
+| `.claude/commands/` | Slash commands like `/lint` and `/audit`              |
+| `.safeword/`        | Config files, guides, and ESLint setup                |
+| `.cursor/rules/`    | Rules for Cursor (if detected)                        |
 
 These files commit to your repo. When your team pulls, they get the same setup automatically.
 
@@ -67,7 +84,7 @@ When you're ready to understand what's happening under the hood:
 
 - [Hooks](/reference/hooks) — The automatic checks that run on every edit
 - [Skills](/reference/skills) — Structured workflows like debugging and TDD
-- [Commands](/reference/commands) — Slash commands like `/commit` and `/lint`
+- [Commands](/reference/commands) — Slash commands like `/lint` and `/audit`
 - [Configuration](/reference/configuration) — Customize what gets enforced
 
 ## Staying Current
@@ -79,3 +96,9 @@ bunx safeword@latest upgrade
 ```
 
 Your customizations are preserved. Only the core files get updated.
+
+<footer class="docs-footer">
+
+[GitHub](https://github.com/TheMostlyGreat/safeword) · MIT License · © 2026
+
+</footer>

@@ -5,69 +5,79 @@ description: Safeword hooks reference
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Automation and guardrails that guide your coding session.
+Hooks are automatic actions that run at key moments during your coding session. You don't invoke them—they just work in the background.
 
 <Tabs>
   <TabItem label="Claude Code">
-    TypeScript scripts executed with Bun at specific trigger points.
+    ### What runs automatically
 
-    | Hook                       | Trigger          | Purpose                           |
-    | -------------------------- | ---------------- | --------------------------------- |
-    | `session-version.ts`       | SessionStart     | Display safeword version          |
-    | `session-verify-agents.ts` | SessionStart     | Verify AGENTS.md link exists      |
-    | `session-lint-check.ts`    | SessionStart     | Check for lint errors             |
-    | `prompt-timestamp.ts`      | UserPromptSubmit | Inject timestamp into prompts     |
-    | `prompt-questions.ts`      | UserPromptSubmit | Remind agent to ask questions     |
-    | `post-tool-lint.ts`        | PostToolUse      | Auto-lint after file edits        |
-    | `stop-quality.ts`          | Stop             | Prompt for quality review on stop |
+    | When                         | What happens                              |
+    | ---------------------------- | ----------------------------------------- |
+    | Session starts               | Shows Safeword version, checks for lint errors |
+    | You submit a prompt          | Adds timestamp, reminds agent to ask clarifying questions |
+    | Agent edits a file           | Runs the appropriate linter automatically |
+    | You stop the session         | Prompts for a quality review              |
 
-    ### Auto-Linting
+    ### Auto-linting
 
-    The `post-tool-lint.ts` hook routes files to the correct linter:
+    After your agent writes or modifies a file, the right linter runs automatically:
 
-    | Extension         | Linter        |
-    | ----------------- | ------------- |
-    | `.js`, `.ts`, etc | ESLint        |
-    | `.py`, `.pyi`     | Ruff          |
-    | `.go`             | golangci-lint |
+    | File type                | Linter        |
+    | ------------------------ | ------------- |
+    | TypeScript / JavaScript  | ESLint        |
+    | Python                   | Ruff          |
+    | Go                       | golangci-lint |
 
-    Linters run silently if not installed.
+    If a linter isn't installed, it's silently skipped.
 
-    ### Custom Hooks
+    **What you see:** When linting runs, you'll see `SAFEWORD: Linting...` in the output. If there are issues, your agent sees them and can fix them immediately.
 
-    Hooks are "owned" files—overwritten on `safeword upgrade`. To customize:
+    ### Customizing hooks
+
+    The default hooks get overwritten when you run `safeword upgrade`. To customize:
 
     1. Copy the hook to a new name (e.g., `my-lint.ts`)
-    2. Update `.claude/settings.json` to use your hook
+    2. Update `.claude/settings.json` to point to your hook
     3. Your custom hook won't be touched by upgrades
+
+    Hook files live in `.safeword/hooks/`.
 
   </TabItem>
   <TabItem label="Cursor">
-    Cursor uses **rules files** (`.cursor/rules/*.mdc`) rather than event-driven hooks.
+    Cursor now supports hooks via `.cursor/hooks.json`. Safeword installs both hooks and **rules** (`.cursor/rules/`) to guide your agent's behavior.
 
-    Safeword installs rules that provide similar guidance:
+    ### What runs automatically
 
-    | Rule                           | Purpose                                   |
-    | ------------------------------ | ----------------------------------------- |
-    | `safeword-debugging.mdc`       | Four-phase debugging discipline           |
-    | `safeword-tdd-enforcing.mdc`   | RED → GREEN → REFACTOR enforcement        |
-    | `safeword-refactoring.mdc`     | Small-step refactoring with tests         |
-    | `safeword-brainstorming.mdc`   | Collaborative design through questioning  |
-    | `safeword-quality-reviewer.mdc`| Deep code review guidance                 |
+    | When                         | What happens                              |
+    | ---------------------------- | ----------------------------------------- |
+    | Agent edits a file           | Runs the appropriate linter automatically |
+    | You stop the session         | Prompts for a quality review              |
 
-    ### Differences from Claude Code
+    ### What rules provide
 
-    - **No event triggers** — Rules are persistent instructions, not event-driven
-    - **No auto-linting** — Run `/lint` manually or configure Cursor's format-on-save
-    - **No session hooks** — Rules apply continuously during the session
+    | Rule              | What it does                                       |
+    | ----------------- | -------------------------------------------------- |
+    | Debugging         | Makes your agent investigate before jumping to fixes |
+    | TDD               | Enforces write-test-first discipline               |
+    | Refactoring       | One small change at a time, test after each        |
+    | Brainstorming     | Asks clarifying questions before proposing solutions |
+    | Quality Reviewing | Checks against current docs and best practices     |
 
-    ### Custom Rules
+    ### Customizing rules
 
-    Rules are "owned" files—overwritten on `safeword upgrade`. To customize:
+    Default rules get overwritten on `safeword upgrade`. To customize:
 
     1. Copy the rule to a new name (e.g., `my-debugging.mdc`)
     2. Modify as needed
     3. Your custom rule won't be touched by upgrades
 
+    Rule files live in `.cursor/rules/`. Hook config is in `.cursor/hooks.json`.
+
   </TabItem>
 </Tabs>
+
+<footer class="docs-footer">
+
+[GitHub](https://github.com/TheMostlyGreat/safeword) · MIT License · © 2026
+
+</footer>

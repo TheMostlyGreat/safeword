@@ -3,27 +3,40 @@ title: Configuration
 description: Safeword configuration reference
 ---
 
-## File Categories
+Most projects work great with the defaults. This page covers customization when you need it.
 
-### Owned Files
+## ESLint Setup
 
-Overwritten on every `safeword upgrade`:
+Safeword includes an ESLint plugin with sensible defaults. Your `eslint.config.mjs`:
 
-- `.safeword/hooks/*`, `.safeword/guides/*`, `.safeword/templates/*`
-- `.claude/skills/*`, `.claude/commands/*`
-- `.cursor/rules/*`
+```js
+import safeword from 'eslint-plugin-safeword';
 
-### Managed Files
+export default [
+  ...safeword.configs.recommendedTypeScript,
+  ...safeword.configs.react, // if using React
+  ...safeword.configs.vitest, // if using Vitest
+];
+```
 
-Created if missing, never overwritten:
+**Available configs:** `recommendedTypeScript`, `react`, `vitest`, `playwright`, `astro`
 
-- `eslint.config.mjs`, `.prettierrc`
-- `.claude/settings.json`
-- `AGENTS.md`
+To add your own rules, extend the array:
 
-## Language Packs
+```js
+export default [
+  ...safeword.configs.recommendedTypeScript,
+  {
+    rules: {
+      'no-console': 'warn',
+    },
+  },
+];
+```
 
-Auto-detected from your project. Tracked in `.safeword/config.json`.
+## Language Detection
+
+Safeword auto-detects your stack and configures linting accordingly:
 
 | Language   | Linting           | Type Checking |
 | ---------- | ----------------- | ------------- |
@@ -31,24 +44,48 @@ Auto-detected from your project. Tracked in `.safeword/config.json`.
 | Python     | Ruff              | mypy          |
 | Go         | golangci-lint     | go vet        |
 
-## ESLint Plugin
-
-```js
-import safeword from 'eslint-plugin-safeword';
-
-export default [
-  ...safeword.configs.recommendedTypeScript,
-  ...safeword.configs.react, // optional
-  ...safeword.configs.vitest, // optional
-];
-```
-
-Available: `recommendedTypeScript`, `react`, `vitest`, `playwright`, `astro`
+Detection is stored in `.safeword/config.json`. To force a refresh, delete that file and run `safeword setup` again.
 
 ## Hook Configuration
 
-Hooks are configured in `.claude/settings.json` under the `hooks` key. See [Hooks reference](/reference/hooks) for available hooks.
+Hooks are configured in `.claude/settings.json`. See [Hooks reference](/reference/hooks) for what runs automatically.
+
+To disable a specific hook, remove it from the `hooks` array in settings.
+
+## Customizing Without Losing Upgrades
+
+Safeword has two types of files:
+
+**Overwritten on upgrade** (you shouldn't edit these directly):
+
+- `.safeword/hooks/*`, `.safeword/guides/*`, `.safeword/templates/*`
+- `.claude/skills/*`, `.claude/commands/*`
+- `.cursor/rules/*`
+
+**Never overwritten** (safe to customize):
+
+- `eslint.config.mjs`, `.prettierrc`
+- `.claude/settings.json`
+- `AGENTS.md`
+
+**To customize something that gets overwritten:**
+
+1. Copy it to `.safeword-project/` (e.g., `.safeword-project/my-hook.ts`)
+2. Update `.claude/settings.json` to point to your copy
+3. Your version won't be touched by upgrades
 
 ## Project-Specific Content
 
-Content that won't be touched by upgrades goes in `.safeword-project/`.
+Put custom content in `.safeword-project/`:
+
+- Custom hooks
+- Project-specific guides
+- Team conventions
+
+This folder is yours—Safeword will never modify it.
+
+<footer class="docs-footer">
+
+[GitHub](https://github.com/TheMostlyGreat/safeword) · MIT License · © 2026
+
+</footer>

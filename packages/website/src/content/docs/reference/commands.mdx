@@ -3,36 +3,118 @@ title: Commands
 description: Safeword slash commands reference
 ---
 
-Quick actions available via slash syntax in Claude Code.
+Slash commands are quick actions you can type in Claude Code. Just type the command and hit enter.
 
-| Command            | Purpose                                 |
-| ------------------ | --------------------------------------- |
-| `/lint`            | Run linters and formatters on your code |
-| `/audit`           | Architecture and dead code analysis     |
-| `/drift`           | Check if docs match the actual codebase |
-| `/quality-review`  | Deep code review with web research      |
-| `/cleanup-zombies` | Kill zombie dev server processes        |
+| Command            | What it does                                           |
+| ------------------ | ------------------------------------------------------ |
+| `/lint`            | Fix code style issues                                  |
+| `/audit`           | Find dead code and architecture drift                  |
+| `/drift`           | Sync docs with actual code structure                   |
+| `/quality-review`  | Deep review against latest best practices              |
+| `/cleanup-zombies` | Kill stuck processes hogging ports                     |
+| `/tdd`             | Start test-driven development workflow                 |
+| `/bdd`             | Start behavior-driven development for complex features |
+| `/refactor`        | Start safe refactoring workflow                        |
+
+---
 
 ## /lint
 
-Routes files to the correct linter based on extension:
+Runs the right linter for each file type:
 
-- **TypeScript/JavaScript** → ESLint + Prettier
-- **Python** → Ruff + mypy
-- **Go** → golangci-lint
+- **TypeScript/JavaScript** — ESLint + Prettier
+- **Python** — Ruff + mypy
+- **Go** — golangci-lint
+
+**When to use:** After writing code, before committing, or when you see style warnings.
+
+---
 
 ## /audit
 
-Analyzes architecture compliance, dead code, and dependency issues.
+Scans your codebase for:
+
+- Dead code (unused exports, unreachable functions)
+- Circular dependencies
+- Files that don't match your architecture patterns
+
+**When to use:** During refactoring, before a big PR, or when the codebase feels messy.
+
+---
 
 ## /drift
 
-Compares `ARCHITECTURE.md` against actual structure. Creates or updates docs if missing.
+Compares your `ARCHITECTURE.md` against your actual file structure. Creates the doc if it doesn't exist.
+
+**When to use:** When onboarding new devs, after major refactors, or when docs feel stale.
+
+---
 
 ## /quality-review
 
-Checks library versions, security patterns, and best practices against official docs.
+Reviews your recent changes against:
+
+- Official library documentation
+- Current security best practices
+- Latest package versions
+
+Uses web search to verify against up-to-date sources.
+
+**When to use:** Before merging important features, when using unfamiliar libraries, or for security-sensitive code.
+
+---
 
 ## /cleanup-zombies
 
-Kills orphaned dev servers, stuck test runners, and port conflicts.
+Finds and kills:
+
+- Dev servers that didn't shut down cleanly
+- Test runners stuck in watch mode
+- Processes blocking ports you need
+
+**When to use:** When `port 3000 is already in use` or your machine feels sluggish.
+
+---
+
+## /tdd
+
+Starts a test-driven development session. Your agent will:
+
+1. Define scope before coding
+2. Write a failing test first (RED)
+3. Write minimum code to pass (GREEN)
+4. Refactor while keeping tests green
+
+**When to use:** When implementing new features or fixing bugs where you want test coverage.
+
+---
+
+## /bdd
+
+Starts behavior-driven development for complex features. Your agent will:
+
+1. Discover requirements through conversation
+2. Define scenarios with Given/When/Then
+3. Break into implementable tasks
+4. Implement each task using TDD
+
+**When to use:** For features spanning multiple files or requiring coordination across components.
+
+---
+
+## /refactor
+
+Starts safe refactoring with small steps. Your agent will:
+
+1. Make one small change
+2. Run tests to verify
+3. Commit if green
+4. Repeat
+
+**When to use:** When cleaning up code, extracting functions, or improving structure.
+
+<footer class="docs-footer">
+
+[GitHub](https://github.com/TheMostlyGreat/safeword) · MIT License · © 2026
+
+</footer>

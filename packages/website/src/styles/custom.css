@@ -51,11 +51,22 @@ main,
   color: #000;
 }
 
-/* Kill pane borders on splash page */
+/* Kill pane borders on splash page (except logo) */
 [data-has-hero] *,
 [data-has-hero] *::before,
 [data-has-hero] *::after {
   border-color: transparent !important;
+}
+
+/* Restore logo border on splash page */
+[data-has-hero] .site-title {
+  border-color: #000 !important;
+}
+
+/* Hide all horizontal lines/separators on splash page */
+[data-has-hero] hr,
+[data-has-hero] .sl-markdown-content hr {
+  display: none !important;
 }
 
 /* Body needs relative positioning for vertical line */
@@ -323,6 +334,26 @@ p.hero-subtitle {
   margin-top: 0.3em;
 }
 
+/* Splash page docs link - positioned in header area, scrolls with page */
+.splash-docs-link {
+  position: absolute;
+  top: 3.6rem;
+  right: 5.5rem;
+  font-family: 'Oswald', sans-serif !important;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  text-decoration: none !important;
+  border: none !important;
+  background: transparent;
+  transition: opacity 0.15s;
+}
+
+.splash-docs-link:hover {
+  opacity: 0.6;
+}
+
 /* Tab styling - black underline to match theme */
 [role='tablist'] {
   border-color: #000 !important;
@@ -415,6 +446,28 @@ p.hero-subtitle {
 
 /* ========== DOCS PAGE STYLES ========== */
 
+/* Remove header bottom border on docs pages */
+:not([data-has-hero]) header {
+  border-bottom: none !important;
+}
+
+/* Remove vertical divider line near social links (but not logo) */
+header .sl-flex:not(.site-title),
+header .social-icons,
+header [class*='social'],
+header nav[aria-label='Social'] {
+  border: none !important;
+  border-left: none !important;
+}
+
+/* Kill all dividers in header */
+header::after,
+header::before,
+header *::after,
+header *::before {
+  border: none !important;
+}
+
 /* Hide "On this page" TOC and right sidebar border */
 nav[aria-label='On this page'],
 .right-sidebar-panel {
@@ -448,4 +501,103 @@ nav[aria-label='Main'] a,
 header a[href*='github'] {
   transform: scale(1.5);
   transform-origin: center;
+}
+
+/* Fix gray borders to black */
+header {
+  border-color: #000 !important;
+}
+
+blockquote {
+  border-color: #000 !important;
+  border-left-color: #000 !important;
+}
+
+table,
+thead,
+tbody,
+tr,
+th,
+td {
+  border-color: #000 !important;
+}
+
+/* Nav footer pagination links */
+.sl-markdown-content ~ div a,
+a[rel='next'],
+a[rel='prev'],
+.pagination-links a {
+  border-color: #000 !important;
+}
+
+/* H1 underline */
+h1 {
+  border-color: #000 !important;
+}
+
+/* Tabs border */
+[role='tablist'] {
+  border-color: #000 !important;
+}
+
+[role='tab'] {
+  border-color: #000 !important;
+}
+
+/* Fix ALL remaining gray borders to black */
+dialog,
+.mobile-preferences,
+nav.astro-egcu6jst,
+summary,
+.toggle,
+.dropdown,
+details,
+details summary,
+details[open] summary {
+  border-color: #000 !important;
+}
+
+/* Sidebar link borders */
+nav[aria-label='Main'] a {
+  border-color: #000 !important;
+}
+
+/* Figcaption/header borders in code blocks */
+figcaption.header {
+  border-color: #000 !important;
+}
+
+/* Nuclear option: force all borders to black on docs pages */
+:not([data-has-hero]) * {
+  border-color: #000 !important;
+}
+
+/* Footer nav pagination - square corners to match logo */
+a[rel='next'],
+a[rel='prev'],
+.pagination-links a {
+  border-radius: 0 !important;
+}
+
+/* Docs page footer */
+.docs-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #000;
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.docs-footer p {
+  margin: 0;
+}
+
+.docs-footer a {
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.docs-footer a:hover {
+  text-decoration: underline;
 }
