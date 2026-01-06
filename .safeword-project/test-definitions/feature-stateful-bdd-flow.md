@@ -280,83 +280,88 @@
 
 ---
 
-## Iteration 4: Phase 5 Decomposition + Phase 6 Entry (Stories 6, 7 partial)
+## Iteration 4: Discovery - Phase 0-2 (Stories 2, 3)
 
-### Suite 11: Phase 5 - Technical Decomposition
+### Suite 11: Context Check (Story 2)
 
-#### Scenario 11.1: Agent identifies components from scenarios
+#### Scenario 11.1: No spec triggers context questions ✅
 
-**Given** agent is at `phase: decomposition`
-**And** test-definitions has approved scenarios
-**When** agent analyzes scenarios
-**Then** agent identifies components/seams touched by each scenario
-**And** presents component list to user
+**Given** no spec exists
+**When** feature detected
+**Then** agent asks context questions (goal, scope, out-of-scope)
 
-#### Scenario 11.2: Agent proposes test layers
+#### Scenario 11.2: Incomplete spec triggers missing field questions ✅
 
-**Given** agent has identified components
-**When** agent plans implementation
-**Then** agent assigns test layers (unit, integration, E2E) per component
-**And** explains rationale (pure logic → unit, API boundaries → integration, user flows → E2E)
+**Given** spec exists but incomplete (missing goal OR scope)
+**When** agent reads spec
+**Then** agent asks only for missing fields
 
-#### Scenario 11.3: Agent creates task breakdown
+#### Scenario 11.3: User answers create/update spec ✅
 
-**Given** agent has identified components and test layers
-**When** decomposition completes
-**Then** agent creates implementation tasks in test-definitions
-**And** tasks are ordered (dependencies first, E2E last)
-
-#### Scenario 11.4: Phase updates after decomposition
-
-**Given** agent has completed decomposition
-**And** user approves task breakdown
-**When** decomposition phase completes
-**Then** ticket phase updates to `implement`
+**Given** agent asked context questions
+**When** user provides answers
+**Then** spec file created/updated with answers
 
 ---
 
-### Suite 12: Phase 6 Entry - TDD Handoff
+### Suite 12: Discovery Loop (Story 3)
 
-#### Scenario 12.1: BDD hands off to TDD for implementation
+#### Scenario 12.1: Complete spec triggers discovery offer ✅
 
-**Given** ticket phase is `implement`
-**When** agent starts implementation phase
-**Then** agent invokes `safeword-tdd-enforcing` skill
-**And** announces "Entering implementation. TDD mode for each scenario."
+**Given** spec has goal AND scope (from any source)
+**When** context check completes
+**Then** agent offers "Want to spitball?"
 
-#### Scenario 12.2: First scenario triggers E2E test (RED)
+#### Scenario 12.2: Declining discovery transitions to define-behavior ✅
 
-**Given** agent is in TDD skill (from BDD handoff)
-**And** first unchecked scenario exists
-**When** agent starts scenario implementation
-**Then** agent writes E2E test for scenario first (outside-in)
-**And** E2E test fails (RED)
+**Given** discovery offered
+**When** user declines or says "ready"
+**Then** ticket phase set to `define-behavior`
 
-#### Scenario 12.3: Walking skeleton before first scenario (optional)
+#### Scenario 12.3: Accepting discovery triggers PM questions ✅
 
-**Given** project has no existing E2E infrastructure
-**When** agent starts first scenario
-**Then** agent suggests building walking skeleton first
-**And** skeleton proves architecture works end-to-end (form → API → response)
+**Given** user accepts discovery
+**When** round starts
+**Then** agent asks 2-3 PM-style questions
+
+#### Scenario 12.4: Discovery answers captured in spec ✅
+
+**Given** user answered questions
+**When** round completes
+**Then** insights captured in spec Discovery section
+
+#### Scenario 12.5: Under max rounds offers another round ✅
+
+**Given** discovery round complete
+**When** under max rounds (5)
+**Then** agent offers "Another round or ready?"
+
+#### Scenario 12.6: Max rounds auto-transitions ✅
+
+**Given** discovery round complete
+**When** at max rounds (5)
+**Then** ticket phase set to `define-behavior`
 
 ---
 
 ## Summary
 
-**Iteration 4 Total**: 7 scenarios
+**Iteration 4 Total**: 9 scenarios
 
-- [ ] Passing: 0
-- [ ] Not Implemented: 7
+- ✅ Passing: 9
+- ❌ Not Implemented: 0
 
 ---
 
-## Future Iterations (Not Yet Defined)
+## Future Iterations
 
-- Iteration 5: Discovery (Stories 2, 3) - context check + discovery loop
-- Iteration 6: Full Implementation Loop (Story 7) - complete TDD cycle inside BDD
-- Iteration 7: Done Phase (Story 8) - cleanup, verification
-- Iteration 8: Decomposition at Checkpoints (Story 10) - fractal splitting
-- Iteration 9: Phase-Aware Quality (Story 12)
-- Iteration 10: Cleanup & Consolidation
-  - Evaluate `.safeword-project/` directory - rename, remove, or formalize in schema
-  - Cross-platform skill single-source-of-truth (Issue #002)
+Per snowflake order in ticket:
+
+- Iteration 5: Implementation (Stories 6, 7, 8, 11) - Phase 5-7 decomposition + outside-in TDD + done
+- Iteration 6: Decomposition at Checkpoints (Story 10) - fractal splitting
+- Iteration 7: Phase-aware quality (Story 12) - ✅ DONE (implemented in stop hook)
+
+## Cleanup & Consolidation (Post-Feature)
+
+- Evaluate `.safeword-project/` directory - rename, remove, or formalize in schema
+- Cross-platform skill single-source-of-truth (Issue #002)

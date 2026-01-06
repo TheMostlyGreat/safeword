@@ -100,8 +100,10 @@ Use for project-specific guides that shouldn't be overwritten by framework updat
 
 2. **Schema registration**: Every file in `packages/cli/templates/` MUST have an entry in `packages/cli/src/schema.ts`. Without it, the file exists but never gets installed. Run `bun run test -- --testNamePattern="should have entry"` to verify.
 
-3. **Eval failures**: Usually means the guide needs clearer instructions, not that the test is wrong. Fix the guide.
+3. **`bun test` vs `bun run test`**: This project uses Vitest. Always use `bun run test` (runs package.json script) not `bun test` (runs Bun's built-in test runner, which will fail on Vitest tests).
 
-4. **Hook paths**: Always use `"$CLAUDE_PROJECT_DIR"/.safeword/hooks/...` format (quoted variable) for Claude Code hooks.
+4. **Eval failures**: Usually means the guide needs clearer instructions, not that the test is wrong. Fix the guide.
 
-5. **Monorepo publishing**: `workspace:^` resolves at `bun install` time, not publish time. For 0.x packages, `^0.6.0` excludes 0.7.0. Run `bun install` after version bumps, or use explicit versions for cross-package deps.
+5. **Hook paths**: Always use `"$CLAUDE_PROJECT_DIR"/.safeword/hooks/...` format (quoted variable) for Claude Code hooks.
+
+6. **Monorepo publishing**: `workspace:^` resolves at `bun install` time, not publish time. For 0.x packages, `^0.6.0` excludes 0.7.0. Run `bun install` after version bumps, or use explicit versions for cross-package deps.

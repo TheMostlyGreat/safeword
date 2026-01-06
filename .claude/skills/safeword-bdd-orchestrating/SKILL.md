@@ -62,14 +62,51 @@ When user references a ticket, resume work:
 
 ---
 
+## Phase 0-2: Context Check & Discovery
+
+**Entry:** Agent detects feature-level work OR resumes ticket at `intake` phase.
+
+### Context Check
+
+Check if spec exists with required context:
+
+1. **Read spec** (or note if missing)
+2. **Check for goal AND scope sections**
+3. **If missing or incomplete** → ask context questions:
+   - "What's the goal? What should users be able to do?"
+   - "What's in scope? What are we building?"
+   - "What's explicitly out of scope?"
+4. **Create/update spec** with answers
+
+**Exit context check:** Spec has goal AND scope sections.
+
+### Discovery (Optional)
+
+After context check, offer discovery:
+
+> "Want to spitball edge cases before we dive in?"
+
+**If user declines** (or says "ready") → update ticket to `define-behavior`, proceed to Phase 3.
+
+**If user accepts** → run discovery rounds:
+
+1. Ask 2-3 PM-style questions per round (see AGENTS.md "PM-Style Questions"):
+   - Round 1: User experience ("What does success feel like?")
+   - Round 2: Failure modes ("What breaks? What are consequences?")
+   - Round 3: Boundaries ("What's the minimum? Maximum?")
+   - Round 4: Scenarios ("Walk through a concrete situation")
+   - Round 5: Regret ("If we skip this, what support tickets come?")
+2. Capture insights in spec under "## Discovery" section
+3. After each round: "Another round or ready to proceed?"
+4. **Max 5 rounds** — after round 5, proceed automatically
+
+**Exit discovery:** User says "ready" OR max rounds reached → update ticket to `define-behavior`.
+
+---
+
 ## Phase 3: Define Behavior
 
-**Entry:** Agent enters `define-behavior` phase (after detection or resume)
-
-**Prerequisite check:**
-
-- If no spec exists → create minimal spec (goal, scope from user request)
-- If no ticket exists → create ticket with `phase: define-behavior`
+**Entry:** Agent enters `define-behavior` phase (after discovery or resume)
 
 **Draft scenarios:**
 
@@ -166,19 +203,17 @@ If project has no E2E infrastructure, build skeleton first:
 
 ---
 
-## Current Behavior (Iteration 4)
+## Current Behavior
 
 1. Detect work level (see SAFEWORD.md "Work Level Detection")
 2. Announce with override hint
 3. **If ticket exists:** Read phase, resume at appropriate point
-4. **Phase 3:** Draft scenarios from spec, save to test-definitions
-5. **Phase 4:** Validate scenarios (atomic, observable, deterministic)
-6. **Phase 5:** Decompose into components, assign test layers, create task breakdown
-7. **Phase 6 Entry:** Hand off to `safeword-tdd-enforcing` for implementation
-8. **Update phase** in ticket when transitioning
-9. **REFACTOR:** Verify against guides before marking iteration complete
-
-Future iterations add: context check, discovery.
+4. **Phase 0-2:** Context check (goal/scope), optional discovery
+5. **Phase 3:** Draft scenarios from spec, save to test-definitions
+6. **Phase 4:** Validate scenarios (atomic, observable, deterministic)
+7. **Phase 5:** Decompose into components, assign test layers, create task breakdown
+8. **Phase 6 Entry:** Hand off to `safeword-tdd-enforcing` for implementation
+9. **Update phase** in ticket when transitioning
 
 ---
 
