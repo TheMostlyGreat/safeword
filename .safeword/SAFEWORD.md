@@ -30,6 +30,29 @@
 
 ---
 
+## Quality Config Changes
+
+**Policy:** Fix code, don't weaken configs. Never disable rules to silence errors.
+
+| Protected Files | Examples                                          |
+| --------------- | ------------------------------------------------- |
+| ESLint          | `eslint.config.*`, `.eslintrc.*`, eslint-configs/ |
+| TypeScript      | `tsconfig*.json`                                  |
+| Vitest/Test     | `vitest.config.*`, jest.config.\*                 |
+| Prettier        | `.prettierrc*`, `prettier.config.*`               |
+| Presets         | `**/presets/**/*.ts`                              |
+| CI              | `.github/workflows/*.yml`                         |
+
+**Escalation path** (before modifying any protected file):
+
+1. Research: Confirm this is a false positive or inappropriate rule
+2. Evidence: Find docs, issues, or examples proving the rule is wrong for this context
+3. Ask: Present evidence to user, get explicit approval
+
+**Forbidden without approval:** `eslint-disable`, `@ts-ignore`, `as any`, `.skip(`, rule overrides
+
+---
+
 ## Before Using Any Library API
 
 Training data is stale. Follow this sequence:

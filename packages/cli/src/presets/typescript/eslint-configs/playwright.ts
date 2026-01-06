@@ -68,10 +68,22 @@ export const playwrightConfig: any[] = [
       // EXCEPTION: stays at warn (legitimate TDD pattern)
       "playwright/no-skipped-test": "warn",
 
-      // Relax base rules for test files
-      "@typescript-eslint/no-empty-function": "off", // Empty catch blocks for expected errors
-      "security/detect-non-literal-fs-filename": "off", // Tests use fixtures from known paths
-      "unicorn/no-null": "off", // Playwright API uses null (e.g., waitForFunction signature)
+      // Relax base rules for test files - each override has documented justification:
+      //
+      // no-empty-function: Tests often need empty callbacks for mocks/stubs:
+      //   const mockFn = vi.fn(() => {});  // Valid mock with no implementation
+      //   await expect(action).rejects.toThrow(); // Empty catch in expect wrapper
+      "@typescript-eslint/no-empty-function": "off",
+      //
+      // detect-non-literal-fs-filename: Tests read fixtures from known safe paths:
+      //   const fixture = readFileSync(join(__dirname, 'fixtures', testCase.input));
+      // Test fixtures are developer-controlled, not user input.
+      "security/detect-non-literal-fs-filename": "off",
+      //
+      // no-null: Playwright API explicitly uses null in signatures:
+      //   await page.waitForFunction(() => window.loaded, null, { timeout: 5000 });
+      // See: https://playwright.dev/docs/api/class-page#page-wait-for-function
+      "unicorn/no-null": "off",
     },
   },
 ];

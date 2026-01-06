@@ -72,7 +72,11 @@ export const recommendedTypeScript: any[] = [
     name: "safeword/typescript-rules",
     files: TS_FILES,
     rules: {
-      // Allow interface vs type - both are valid
+      // consistent-type-definitions: Disabled because both interface and type are valid:
+      //   - interface: Better error messages, extendable, declaration merging
+      //   - type: Union/intersection types, mapped types, template literals
+      // Forcing one over the other limits expressiveness. Teams should choose per-case.
+      // See: https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces
       "@typescript-eslint/consistent-type-definitions": "off",
 
       // LLMs use `any` when stuck - force them to use `unknown` instead

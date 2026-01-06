@@ -41,9 +41,17 @@ export const vitestConfig: any[] = [
       "vitest/no-focused-tests": "error", // No .only() in CI
       "vitest/max-nested-describe": ["error", { max: 5 }], // Limit describe nesting depth
 
-      // Relax base rules for test files
-      "@typescript-eslint/no-empty-function": "off", // Empty catch blocks for expected errors
-      "security/detect-non-literal-fs-filename": "off", // Tests use fixtures from known paths
+      // Relax base rules for test files - each override has documented justification:
+      //
+      // no-empty-function: Tests often need empty callbacks for mocks/stubs:
+      //   const mockFn = vi.fn(() => {});  // Valid mock with no implementation
+      //   await expect(action).rejects.toThrow(); // Empty catch in expect wrapper
+      "@typescript-eslint/no-empty-function": "off",
+      //
+      // detect-non-literal-fs-filename: Tests read fixtures from known safe paths:
+      //   const fixture = readFileSync(join(__dirname, 'fixtures', testCase.input));
+      // Test fixtures are developer-controlled, not user input.
+      "security/detect-non-literal-fs-filename": "off",
       // Disable max-nested-callbacks for tests - it flags .filter()/.some() inside it() blocks
       // which is a false positive. Use vitest/max-nested-describe for test structure instead.
       "max-nested-callbacks": "off",

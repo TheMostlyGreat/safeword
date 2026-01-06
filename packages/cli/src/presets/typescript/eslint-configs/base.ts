@@ -107,8 +107,15 @@ const basePluginsUnscoped: any[] = [
       "import-x/no-duplicates": "error", // LLMs create duplicate imports
       "import-x/no-cycle": "error", // Circular dependencies A → B → A
       "import-x/no-self-import": "error", // File imports itself (copy-paste bug)
-      // Turn off rules with high false-positive rate (binary: error or off)
+      // Turn off rules with high false-positive rate - documented justification:
+      //
+      // no-named-as-default: Flags valid patterns like `import Button from './Button'`
+      // when Button.tsx has both default and named exports. Very common in React.
+      // Issue: https://github.com/import-js/eslint-plugin-import/issues/1618
       "import-x/no-named-as-default": "off",
+      //
+      // no-named-as-default-member: Same issue - flags accessing static members
+      // on default imports, e.g., `Button.displayName`. Common React pattern.
       "import-x/no-named-as-default-member": "off",
     },
   },
@@ -185,9 +192,19 @@ const basePluginsUnscoped: any[] = [
   {
     name: "safeword/unicorn-rules",
     rules: {
-      // Keep off - legitimate use cases
-      "unicorn/no-process-exit": "off", // CLI apps use process.exit
-      "unicorn/prefer-module": "off", // CJS still valid in Node.js ecosystem
+      // Keep off - documented justification for each:
+      //
+      // no-process-exit: CLI tools legitimately use process.exit() for:
+      //   - Error handling with non-zero exit codes
+      //   - Clean shutdown after completing work
+      // Forcing throw-only would break CLI UX and exit code contracts.
+      "unicorn/no-process-exit": "off",
+      //
+      // prefer-module: CommonJS is still valid in Node.js ecosystem:
+      //   - Config files (jest.config.js, .eslintrc.cjs)
+      //   - Packages with CJS-only dependencies
+      //   - Gradual ESM migration in progress
+      "unicorn/prefer-module": "off",
       // Escalated to error for LLM code
       "unicorn/switch-case-braces": "error",
       "unicorn/catch-error-name": "error",
