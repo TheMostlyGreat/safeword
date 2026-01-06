@@ -79,6 +79,8 @@ Check if spec exists with required context:
 
 **Exit context check:** Spec has goal AND scope sections.
 
+**Edge case:** User gives partial answer (goal but not scope) → Ask only for missing field, don't re-ask answered questions.
+
 ### Discovery (Optional)
 
 After context check, offer discovery:
@@ -100,6 +102,12 @@ After context check, offer discovery:
 4. **Max 5 rounds** — after round 5, proceed automatically
 
 **Exit discovery:** User says "ready" OR max rounds reached → update ticket to `define-behavior`.
+
+**Example round:**
+
+> Agent: "Round 2 - Failure modes. What happens when a session expires mid-flow? What's the worst-case scenario?"
+> User: "They lose progress. We'd get support tickets about lost work."
+> Agent: "Got it - session expiry = data loss risk. Another round or ready?"
 
 ---
 

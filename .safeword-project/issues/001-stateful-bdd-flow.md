@@ -33,6 +33,7 @@ last_modified: 2026-01-04T15:38:00Z
 
 ---
 
+- 2026-01-06T03:20:00Z Refactor: Iteration 4 - added edge case (partial answers), example discovery round per LLM guide
 - 2026-01-06T03:05:00Z Complete: Iteration 4 - Phase 0-2 (Context Check & Discovery) - 9 scenarios, added to BDD skill
 - 2026-01-06T01:45:00Z Complete: Story 12 - Phase-aware quality review (stop hook reads ticket phase, adapts prompts)
 - 2026-01-05T05:55:00Z Refactor: Verified Iteration 3 against LLM guide and skill authoring guide (134 lines, all checks pass)
