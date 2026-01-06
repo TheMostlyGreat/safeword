@@ -52,9 +52,10 @@ export const vitestConfig: any[] = [
       //   const fixture = readFileSync(join(__dirname, 'fixtures', testCase.input));
       // Test fixtures are developer-controlled, not user input.
       "security/detect-non-literal-fs-filename": "off",
-      // Disable max-nested-callbacks for tests - it flags .filter()/.some() inside it() blocks
-      // which is a false positive. Use vitest/max-nested-describe for test structure instead.
-      "max-nested-callbacks": "off",
+      // Keep max-nested-callbacks at reasonable threshold for tests.
+      // Default is 10; we use 6 to catch excessive nesting early while allowing
+      // typical patterns like: describe → it → array.filter → callback.
+      "max-nested-callbacks": ["error", { max: 6 }],
     },
   },
 ];
