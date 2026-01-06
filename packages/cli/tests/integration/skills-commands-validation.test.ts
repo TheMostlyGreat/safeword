@@ -9,16 +9,15 @@
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
 const __dirname = import.meta.dirname;
-const TEMPLATES_DIR = join(__dirname, "../../templates");
-const SKILLS_DIR = join(TEMPLATES_DIR, "skills");
-const COMMANDS_DIR = join(TEMPLATES_DIR, "commands");
-const CURSOR_RULES_DIR = join(TEMPLATES_DIR, "cursor/rules");
+const TEMPLATES_DIR = path.join(__dirname, "../../templates");
+const SKILLS_DIR = path.join(TEMPLATES_DIR, "skills");
+const COMMANDS_DIR = path.join(TEMPLATES_DIR, "commands");
+const CURSOR_RULES_DIR = path.join(TEMPLATES_DIR, "cursor/rules");
 
 // Claude Code validation constants
 const SKILL_NAME_MAX_LENGTH = 64;
@@ -156,10 +155,10 @@ function extractMarkdownLinks(
   // Reset lastIndex for global regex
   const pattern = new RegExp(MARKDOWN_LINK_PATTERN.source, "g");
   while ((match = pattern.exec(content)) !== null) {
-    const path = match[2];
+    const linkPath = match[2];
     // Skip external URLs and anchor links
-    if (path && !path.startsWith("http") && !path.startsWith("#")) {
-      links.push({ text: match[1], path });
+    if (linkPath && !linkPath.startsWith("http") && !linkPath.startsWith("#")) {
+      links.push({ text: match[1], path: linkPath });
     }
   }
   return links;
@@ -204,13 +203,16 @@ function readAndParseFrontmatter(filePath: string): {
  * Find broken markdown file links in content
  * Returns array of broken link strings for error messages
  */
-function findBrokenMarkdownLinks(body: string, baseDir: string): string[] {
+function findBrokenMarkdownLinks(
+  body: string,
+  baseDirectory: string,
+): string[] {
   const links = extractMarkdownLinks(body);
   const brokenLinks: string[] = [];
 
   for (const link of links) {
     if (link.path.endsWith(".md")) {
-      const fullPath = join(baseDir, link.path);
+      const fullPath = path.join(baseDirectory, link.path);
       if (!existsSync(fullPath)) {
         brokenLinks.push(`[${link.text}](${link.path})`);
       }
@@ -229,7 +231,7 @@ describe("Skills Validation (Claude Code Format)", () => {
 
   for (const skillDir of skillDirectories) {
     describe(`skill: ${skillDir}`, () => {
-      const skillPath = join(SKILLS_DIR, skillDir, "SKILL.md");
+      const skillPath = path.join(SKILLS_DIR, skillDir, "SKILL.md");
       const { content, parsed } = readAndParseFrontmatter(skillPath);
 
       it("should have SKILL.md file", () => {
@@ -374,7 +376,7 @@ describe("Skills Validation (Claude Code Format)", () => {
         if (parsed?.body) {
           const brokenLinks = findBrokenMarkdownLinks(
             parsed.body,
-            join(SKILLS_DIR, skillDir),
+            path.join(SKILLS_DIR, skillDir),
           );
           expect(
             brokenLinks,
@@ -424,8 +426,8 @@ describe("Commands Validation (Claude Code Format)", () => {
 
   for (const commandFile of commandFiles) {
     describe(`command: ${commandFile}`, () => {
-      const commandPath = join(COMMANDS_DIR, commandFile);
-      const commandName = basename(commandFile, ".md");
+      const commandPath = path.join(COMMANDS_DIR, commandFile);
+      const commandName = path.basename(commandFile, ".md");
       const { content, parsed } = readAndParseFrontmatter(commandPath);
 
       it("should have content", () => {
@@ -574,7 +576,7 @@ describe("Skills and Commands Cross-Validation", () => {
     const mismatches: string[] = [];
 
     for (const skillDir of skillDirectories) {
-      const skillPath = join(SKILLS_DIR, skillDir, "SKILL.md");
+      const skillPath = path.join(SKILLS_DIR, skillDir, "SKILL.md");
       try {
         const content = readFileSync(skillPath, "utf8");
         const parsed = parseFrontmatter(content);
@@ -600,7 +602,7 @@ describe("Skills and Commands Cross-Validation", () => {
     const names: string[] = [];
 
     for (const skillDir of skillDirectories) {
-      const skillPath = join(SKILLS_DIR, skillDir, "SKILL.md");
+      const skillPath = path.join(SKILLS_DIR, skillDir, "SKILL.md");
       try {
         const content = readFileSync(skillPath, "utf8");
         const parsed = parseFrontmatter(content);
@@ -623,7 +625,7 @@ describe("Skills and Commands Cross-Validation", () => {
 
   it("should not have duplicate command names", () => {
     const commandFiles = getCommandFiles();
-    const names = commandFiles.map((f) => basename(f, ".md"));
+    const names = commandFiles.map((f) => path.basename(f, ".md"));
     const duplicates = names.filter(
       (name, index) => names.indexOf(name) !== index,
     );
@@ -643,8 +645,8 @@ describe("Cursor Rules Validation (.mdc Format)", () => {
 
   for (const ruleFile of ruleFiles) {
     describe(`rule: ${ruleFile}`, () => {
-      const rulePath = join(CURSOR_RULES_DIR, ruleFile);
-      const ruleName = basename(ruleFile, ".mdc");
+      const rulePath = path.join(CURSOR_RULES_DIR, ruleFile);
+      const ruleName = path.basename(ruleFile, ".mdc");
       const { content, parsed } = readAndParseFrontmatter(rulePath);
 
       it("should have content", () => {
@@ -713,7 +715,7 @@ describe("Skills-Cursor Parity", () => {
       d.startsWith("safeword-"),
     );
     const ruleFiles = new Set(
-      getCursorRuleFiles().map((f) => basename(f, ".mdc")),
+      getCursorRuleFiles().map((f) => path.basename(f, ".mdc")),
     );
 
     const missingRules: string[] = [];
@@ -733,7 +735,7 @@ describe("Skills-Cursor Parity", () => {
     const skillDirectories = getSkillDirectories();
     // safeword-core is a special entry point rule, not a skill
     const ruleFiles = getCursorRuleFiles()
-      .map((f) => basename(f, ".mdc"))
+      .map((f) => path.basename(f, ".mdc"))
       .filter(
         (name) => name.startsWith("safeword-") && name !== "safeword-core",
       );
@@ -753,7 +755,7 @@ describe("Skills-Cursor Parity", () => {
 
   it("should not have duplicate cursor rule names", () => {
     const ruleFiles = getCursorRuleFiles();
-    const names = ruleFiles.map((f) => basename(f, ".mdc"));
+    const names = ruleFiles.map((f) => path.basename(f, ".mdc"));
     const duplicates = names.filter(
       (name, index) => names.indexOf(name) !== index,
     );

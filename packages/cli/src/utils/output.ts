@@ -35,13 +35,6 @@ export function error(message: string): void {
 }
 
 /**
- * Print a blank line
- */
-function blank(): void {
-  console.log("");
-}
-
-/**
  * Print a section header
  * @param title
  */

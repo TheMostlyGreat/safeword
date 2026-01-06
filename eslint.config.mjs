@@ -17,6 +17,9 @@ const ignores = [
   ".safeword/", // Generated hooks - linted separately by installed safeword config
   "examples/",
   "eslint.config.mjs", // Self - JS file can't use typed rules
+  "packages/cli/templates/", // Template files copied to customer projects - not part of CLI build
+  ".dependency-cruiser.cjs", // CommonJS config file
+  "packages/cli/scripts/*.js", // Node.js scripts with CommonJS globals
 ];
 
 // Monorepo boundaries configuration

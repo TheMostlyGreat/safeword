@@ -11,7 +11,7 @@
  */
 
 import { execSync, spawnSync } from "node:child_process";
-import { dirname } from "node:path";
+import path from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -574,14 +574,14 @@ describe("E2E: Python Lint Hook", () => {
 
       // Find actual bun path (process.execPath gives node when running via vitest)
       const bunPath = execSync("which bun", { encoding: "utf8" }).trim();
-      const bunDir = dirname(bunPath);
+      const bunDirectory = path.dirname(bunPath);
 
       // Run with PATH that has bun but likely not ruff
       const result = spawnSync(
         "bash",
         [
           "-c",
-          `PATH=/bin:/usr/bin:${bunDir} bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.py"`,
+          `PATH=/bin:/usr/bin:${bunDirectory} bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.py"`,
         ],
         {
           cwd: projectDirectory,

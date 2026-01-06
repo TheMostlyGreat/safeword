@@ -7,7 +7,7 @@
 
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import path from "node:path";
 
 import { info, listItem, success, warn } from "./output.js";
 
@@ -17,11 +17,14 @@ type PackageManager = "npm" | "yarn" | "pnpm" | "bun";
  * Detect package manager by lockfile (bun > pnpm > yarn > npm)
  */
 export function detectPackageManager(cwd: string): PackageManager {
-  if (existsSync(join(cwd, "bun.lockb")) || existsSync(join(cwd, "bun.lock")))
+  if (
+    existsSync(path.join(cwd, "bun.lockb")) ||
+    existsSync(path.join(cwd, "bun.lock"))
+  )
     return "bun";
-  if (existsSync(join(cwd, "pnpm-lock.yaml"))) return "pnpm";
-  if (existsSync(join(cwd, "yarn.lock"))) return "yarn";
-  if (existsSync(join(cwd, "package-lock.json"))) return "npm";
+  if (existsSync(path.join(cwd, "pnpm-lock.yaml"))) return "pnpm";
+  if (existsSync(path.join(cwd, "yarn.lock"))) return "yarn";
+  if (existsSync(path.join(cwd, "package-lock.json"))) return "npm";
   return "npm";
 }
 

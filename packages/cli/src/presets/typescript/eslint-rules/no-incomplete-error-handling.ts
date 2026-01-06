@@ -13,7 +13,7 @@
  *   catch (error) { throw new AppError('context', { cause: error }); }
  */
 
-/* eslint-disable sonarjs/cognitive-complexity, sonarjs/no-nested-conditional, jsdoc/require-returns, jsdoc/require-param-description */
+/* eslint-disable sonarjs/cognitive-complexity, sonarjs/no-nested-conditional */
 
 import type { Rule } from "eslint";
 import type { CallExpression, CatchClause, Statement } from "estree";

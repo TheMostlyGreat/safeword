@@ -7,7 +7,7 @@
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import path from "node:path";
 
 /**
  * TanStack Query package names across all supported frameworks.
@@ -92,7 +92,7 @@ function collectAllDeps(rootDir: string): DepsRecord {
   };
 
   // Read root package.json
-  const rootPackagePath = join(rootDir, "package.json");
+  const rootPackagePath = path.join(rootDir, "package.json");
   mergeDeps(rootPackagePath);
 
   // Check for workspaces (npm/yarn/pnpm)
@@ -115,13 +115,13 @@ function collectAllDeps(rootDir: string): DepsRecord {
   // Scan workspace directories (simple glob: only supports "dir/*" patterns)
   for (const pattern of patterns) {
     if (!pattern.endsWith("/*")) continue;
-    const baseDir = join(rootDir, pattern.slice(0, -2));
+    const baseDir = path.join(rootDir, pattern.slice(0, -2));
     if (!existsSync(baseDir)) continue;
     try {
       const entries = readdirSync(baseDir, { withFileTypes: true });
       for (const entry of entries) {
         if (entry.isDirectory()) {
-          mergeDeps(join(baseDir, entry.name, "package.json"));
+          mergeDeps(path.join(baseDir, entry.name, "package.json"));
         }
       }
     } catch {
@@ -201,7 +201,9 @@ function hasExistingFormatter(cwd: string, scripts: ScriptsRecord): boolean {
   if ("format" in scripts) return true;
 
   // Check for formatter config files
-  return FORMATTER_CONFIG_FILES.some((file) => existsSync(join(cwd, file)));
+  return FORMATTER_CONFIG_FILES.some((file) =>
+    existsSync(path.join(cwd, file)),
+  );
 }
 
 /**

@@ -5,8 +5,6 @@
  * so LLMs must fix them before moving on.
  */
 
-/* eslint-disable jsdoc/require-returns -- Test file with dynamic config introspection */
-
 import { Linter } from "eslint";
 import { describe, expect, it } from "vitest";
 

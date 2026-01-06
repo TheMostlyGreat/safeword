@@ -1,5 +1,4 @@
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
