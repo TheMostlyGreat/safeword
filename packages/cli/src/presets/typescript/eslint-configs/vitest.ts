@@ -44,6 +44,9 @@ export const vitestConfig: any[] = [
       // Relax base rules for test files
       "@typescript-eslint/no-empty-function": "off", // Empty catch blocks for expected errors
       "security/detect-non-literal-fs-filename": "off", // Tests use fixtures from known paths
+      // Disable max-nested-callbacks for tests - it flags .filter()/.some() inside it() blocks
+      // which is a false positive. Use vitest/max-nested-describe for test structure instead.
+      "max-nested-callbacks": "off",
     },
   },
 ];
