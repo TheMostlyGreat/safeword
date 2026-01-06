@@ -274,6 +274,279 @@ describe('E2E: UserPromptSubmit Hooks', () => {
   });
 });
 
+describe('E2E: Phase-Aware Quality Review', () => {
+  // Ticket frontmatter template
+  function createTicketContent(options: {
+    id: string;
+    type?: string;
+    phase?: string;
+    status?: string;
+    lastModified: string;
+  }): string {
+    const lines = ['---', `id: ${options.id}`];
+    if (options.type) lines.push(`type: ${options.type}`);
+    if (options.phase) lines.push(`phase: ${options.phase}`);
+    if (options.status) lines.push(`status: ${options.status}`);
+    lines.push(`last_modified: ${options.lastModified}`, '---', '', `# Ticket ${options.id}`, '');
+    return lines.join('\n');
+  }
+
+  // Helper to create issues directory with tickets
+  function setupIssuesDir(
+    targetDirectory: string,
+    tickets: Parameters<typeof createTicketContent>[0][],
+  ): void {
+    const issuesDir = `${targetDirectory}/.safeword-project/issues`;
+    execSync(`mkdir -p "${issuesDir}"`, { cwd: targetDirectory });
+    // Clear existing tickets
+    execSync(`rm -f "${issuesDir}"/*.md`, { cwd: targetDirectory });
+    for (const ticket of tickets) {
+      writeTestFile(
+        targetDirectory,
+        `.safeword-project/issues/${ticket.id}.md`,
+        createTicketContent(ticket),
+      );
+    }
+  }
+
+  // Helper to clear issues directory
+  function clearIssuesDir(targetDirectory: string): void {
+    execSync(`rm -rf "${targetDirectory}/.safeword-project/issues"`, { cwd: targetDirectory });
+  }
+
+  // Helper to create transcript with changes
+  function createChangesTranscript(targetDirectory: string): string {
+    const transcriptPath = `${targetDirectory}/.safeword/test-transcript.jsonl`;
+    const message = {
+      type: 'assistant',
+      message: {
+        content: [
+          {
+            type: 'text',
+            text: 'Made changes.\n\n{"proposedChanges": false, "madeChanges": true}',
+          },
+        ],
+      },
+    };
+    writeTestFile(targetDirectory, '.safeword/test-transcript.jsonl', JSON.stringify(message));
+    return transcriptPath;
+  }
+
+  // Helper to run stop hook and extract quality message
+  function runStopHookForPhase(targetDirectory: string): { reason: string } {
+    const transcriptPath = createChangesTranscript(targetDirectory);
+    const input = JSON.stringify({ transcript_path: transcriptPath });
+    const result = spawnSync(
+      'bash',
+      ['-c', `echo '${input}' | bun .safeword/hooks/stop-quality.ts`],
+      {
+        cwd: targetDirectory,
+        env: { ...process.env, CLAUDE_PROJECT_DIR: targetDirectory },
+        encoding: 'utf8',
+      },
+    );
+    try {
+      return JSON.parse(result.stdout.trim());
+    } catch {
+      return { reason: '' };
+    }
+  }
+
+  describe('Happy Path - Phase Detection', () => {
+    it('Scenario 1: Shows intake prompts during discovery phase', () => {
+      setupIssuesDir(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'intake',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      expect(result.reason).toContain('Discovery Phase');
+      expect(result.reason).toContain('edge cases covered');
+    });
+
+    it('Scenario 2: Shows scenario prompts during define-behavior phase', () => {
+      setupIssuesDir(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'define-behavior',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      expect(result.reason).toContain('Scenario Phase');
+      expect(result.reason).toContain('atomic');
+      expect(result.reason).toContain('observable');
+    });
+
+    it('Scenario 3: Shows implementation prompts during implement phase', () => {
+      setupIssuesDir(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'implement',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      expect(result.reason).toContain('Is it correct?');
+      expect(result.reason).toContain('latest docs');
+    });
+
+    it('Scenario 4: Shows done prompts during cleanup phase', () => {
+      setupIssuesDir(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'done',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      expect(result.reason).toContain('Done Phase');
+      expect(result.reason).toContain('dead code');
+      expect(result.reason).toContain('/verify');
+    });
+  });
+
+  describe('Edge Cases - Fallbacks', () => {
+    it('Scenario 5: Falls back to implement when no phase field', () => {
+      setupIssuesDir(projectDirectory, [
+        { id: '001', type: 'feature', status: 'in_progress', lastModified: '2026-01-06T10:00:00Z' },
+      ]);
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      // Default implementation review
+      expect(result.reason).toContain('Is it correct?');
+    });
+
+    it('Scenario 6: Falls back to implement for unknown phase', () => {
+      setupIssuesDir(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'invalid-phase',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      // Default implementation review
+      expect(result.reason).toContain('Is it correct?');
+    });
+  });
+
+  describe('Edge Cases - Ticket Filtering', () => {
+    it('Scenario 7: Ignores backlog tickets (status filtering)', () => {
+      setupIssuesDir(projectDirectory, [
+        // Older but in_progress - should be used
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'intake',
+          status: 'in_progress',
+          lastModified: '2026-01-06T09:00:00Z',
+        },
+        // Newer but backlog - should be ignored
+        {
+          id: '002',
+          type: 'feature',
+          phase: 'implement',
+          status: 'backlog',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      // Should use intake from ticket 001, not implement from ticket 002
+      expect(result.reason).toContain('Discovery Phase');
+    });
+
+    it('Scenario 8: Ignores epic tickets (type filtering)', () => {
+      setupIssuesDir(projectDirectory, [
+        // Epic with newest timestamp - should be ignored
+        {
+          id: '001',
+          type: 'epic',
+          phase: 'implement',
+          status: 'in_progress',
+          lastModified: '2026-01-06T11:00:00Z',
+        },
+        // Feature - should be used
+        {
+          id: '002',
+          type: 'feature',
+          phase: 'intake',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      // Should use intake from feature, not implement from epic
+      expect(result.reason).toContain('Discovery Phase');
+    });
+
+    it('Scenario 9: Falls back when no in_progress tickets', () => {
+      setupIssuesDir(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'intake',
+          status: 'done',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+        {
+          id: '002',
+          type: 'feature',
+          phase: 'define-behavior',
+          status: 'backlog',
+          lastModified: '2026-01-06T09:00:00Z',
+        },
+      ]);
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      // Default implementation review (fallback)
+      expect(result.reason).toContain('Is it correct?');
+    });
+
+    it('Scenario 10: Falls back when issues directory empty', () => {
+      clearIssuesDir(projectDirectory);
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      // Default implementation review (fallback)
+      expect(result.reason).toContain('Is it correct?');
+    });
+  });
+
+  // Cleanup after all phase tests
+  afterAll(() => {
+    clearIssuesDir(projectDirectory);
+  });
+});
+
 describe('E2E: Stop Hook', () => {
   // Helper to create a mock transcript with an assistant message
   function createMockTranscript(targetDirectory: string, assistantText: string): string {
