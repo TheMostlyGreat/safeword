@@ -322,23 +322,30 @@ p.hero-subtitle {
 
 /* Remove sticky header on splash page and align with content */
 [data-has-hero] header {
-  position: static;
-  padding: 3.5rem 0 0.5rem var(--sw-content-inset) !important;
+  position: relative;
+  padding: 2.5rem 0 2.5rem var(--sw-content-inset) !important;
+  align-items: center !important;
+  pointer-events: none;
+}
+
+/* Re-enable pointer events on header links */
+[data-has-hero] header a {
+  pointer-events: auto;
 }
 
 /* Double GitHub button size on splash page */
 [data-has-hero] header a[href*='github'] {
   transform: scale(2);
-  transform-origin: top right;
-  align-self: flex-start;
-  margin-top: 0.3em;
+  transform-origin: center right;
 }
 
-/* Splash page docs link - positioned in header area, scrolls with page */
+/* Splash page docs link - positioned in header row */
 .splash-docs-link {
-  position: absolute;
-  top: 3.6rem;
+  position: fixed;
+  top: 40px;
+  transform: translateY(-50%);
   right: 5.5rem;
+  z-index: 9999;
   font-family: 'Oswald', sans-serif !important;
   text-transform: uppercase;
   font-weight: 600;
@@ -352,6 +359,12 @@ p.hero-subtitle {
 
 .splash-docs-link:hover {
   opacity: 0.6;
+}
+
+.splash-docs-link p {
+  font-family: 'Oswald', sans-serif !important;
+  text-transform: uppercase;
+  margin: 0 !important;
 }
 
 /* Tab styling - segmented control */
