@@ -11,7 +11,7 @@
  * - Incorrect async/await patterns
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- ESLint config types are incompatible across plugin packages */
+/* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
 import { importX } from "eslint-plugin-import-x";
 import { configs as tseslintConfigs } from "typescript-eslint";

@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const TEMPLATES_DIR = join(__dirname, "../../templates");
 const SKILLS_DIR = join(TEMPLATES_DIR, "skills");
 const COMMANDS_DIR = join(TEMPLATES_DIR, "commands");

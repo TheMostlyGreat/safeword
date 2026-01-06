@@ -13,7 +13,7 @@
  *   catch (error) { throw new AppError('context', { cause: error }); }
  */
 
-/* eslint-disable sonarjs/cognitive-complexity, sonarjs/no-nested-conditional, @typescript-eslint/no-unnecessary-condition, jsdoc/require-returns, jsdoc/require-param-description */
+/* eslint-disable sonarjs/cognitive-complexity, sonarjs/no-nested-conditional, jsdoc/require-returns, jsdoc/require-param-description */
 
 import type { Rule } from "eslint";
 import type { CallExpression, CatchClause, Statement } from "estree";
@@ -35,9 +35,9 @@ function isLoggingCall(node: CallExpression): boolean {
     callee.object.type === "Identifier" &&
     callee.property.type === "Identifier"
   ) {
-    const obj = callee.object.name.toLowerCase();
+    const object = callee.object.name.toLowerCase();
     const method = callee.property.name.toLowerCase();
-    return LOG_OBJECTS.has(obj) && LOG_METHODS.has(method);
+    return LOG_OBJECTS.has(object) && LOG_METHODS.has(method);
   }
 
   return false;

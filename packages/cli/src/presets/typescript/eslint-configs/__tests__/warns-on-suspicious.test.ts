@@ -24,7 +24,7 @@ function lintJs(code: string, ruleId: string) {
   return results.filter((r) => r.ruleId === ruleId);
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, security/detect-object-injection -- ESLint config types vary across plugins */
+/* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types vary across plugins */
 /**
  * Get the final rule config from a flat config array.
  * @param config - Array of ESLint flat config objects
@@ -58,7 +58,7 @@ function expectErrorSeverity(config: any[], ruleId: string): void {
   const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
   expect(severity === "error" || severity === ERROR).toBe(true);
 }
-/* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, security/detect-object-injection */
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 describe("Story 5: Security Rules at Error", () => {
   describe("all security rules at error severity (LLMs ignore warnings)", () => {

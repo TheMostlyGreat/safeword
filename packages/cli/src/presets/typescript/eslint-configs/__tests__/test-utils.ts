@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, security/detect-object-injection */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * Test utilities for ESLint config tests.

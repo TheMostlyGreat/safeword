@@ -24,7 +24,11 @@ export const vitestConfig: any[] = [
     },
     rules: {
       // Recommended rules (all at error)
-      "vitest/expect-expect": "error",
+      // Allow expect* helper functions (e.g., expectErrorSeverity) as assertion functions
+      "vitest/expect-expect": [
+        "error",
+        { assertFunctionNames: ["expect", "expect*"] },
+      ],
       "vitest/no-identical-title": "error",
       "vitest/no-commented-out-tests": "error",
       "vitest/valid-title": "error",
@@ -35,6 +39,7 @@ export const vitestConfig: any[] = [
 
       // Additional strict rules
       "vitest/no-focused-tests": "error", // No .only() in CI
+      "vitest/max-nested-describe": ["error", { max: 5 }], // Limit describe nesting depth
 
       // Relax base rules for test files
       "@typescript-eslint/no-empty-function": "off", // Empty catch blocks for expected errors

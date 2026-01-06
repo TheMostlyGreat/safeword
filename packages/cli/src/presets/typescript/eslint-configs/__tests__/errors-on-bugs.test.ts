@@ -27,7 +27,7 @@ function lintJs(code: string, ruleId: string) {
   return results.filter((r) => r.ruleId === ruleId);
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, security/detect-object-injection -- ESLint config types vary across plugins */
+/* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types vary across plugins */
 
 /**
  * Check if a files pattern matches TypeScript files.
@@ -96,7 +96,7 @@ function expectErrorSeverity(config: any[], ruleId: string): void {
   const severity = Array.isArray(ruleConfig) ? ruleConfig[0] : ruleConfig;
   expect(severity === "error" || severity === ERROR).toBe(true);
 }
-/* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, security/detect-object-injection */
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 describe("Story 4: Errors on Bugs", () => {
   describe("security rules (recommended)", () => {

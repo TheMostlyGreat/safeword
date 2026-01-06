@@ -7,7 +7,7 @@
  * Philosophy: LLMs make Next.js-specific mistakes. All rules at error severity.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- ESLint config types are incompatible across plugin packages */
+/* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
 import nextPlugin from "@next/eslint-plugin-next";
 

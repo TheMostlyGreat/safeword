@@ -14,6 +14,7 @@ const ignores = [
   "**/dist/",
   "**/build/",
   "**/coverage/",
+  ".safeword/", // Generated hooks - linted separately by installed safeword config
   "examples/",
   "eslint.config.mjs", // Self - JS file can't use typed rules
 ];
@@ -124,6 +125,21 @@ const configs = [
       "sonarjs/publicly-writable-directories": "off",
       "sonarjs/no-alphabetical-sort": "off",
       "regexp/no-dupe-disjunctions": "off",
+      // Test helpers often use callback references
+      "unicorn/no-array-callback-reference": "off",
+      // Disable for tests - it catches .filter()/.some() callbacks, not actual callback hell
+      // Use vitest/max-nested-describe instead for test structure
+      "max-nested-callbacks": "off",
+    },
+  },
+
+  // ESLint RuleTester files - use dynamic test generation
+  {
+    name: "ruletester-files-override",
+    files: ["packages/cli/src/presets/typescript/eslint-rules/__tests__/*.ts"],
+    rules: {
+      // RuleTester.run() generates tests dynamically - sonarjs can't detect them
+      "sonarjs/no-empty-test-file": "off",
     },
   },
 

@@ -9,7 +9,7 @@
  * For TypeScript projects, use `recommendedTypeScript` instead.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- ESLint config types are incompatible across plugin packages */
+/* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
 import pluginJsdoc from "eslint-plugin-jsdoc";
 

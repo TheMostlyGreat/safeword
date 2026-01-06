@@ -16,7 +16,7 @@ import nodePath from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Get the directory of this module (for locating templates)
-const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 
 /**
  * Get path to bundled templates directory.
