@@ -130,9 +130,8 @@ const configs = [
       "regexp/no-dupe-disjunctions": "off",
       // Test helpers often use callback references
       "unicorn/no-array-callback-reference": "off",
-      // Disable for tests - it catches .filter()/.some() callbacks, not actual callback hell
-      // Use vitest/max-nested-describe instead for test structure
-      "max-nested-callbacks": "off",
+      // Raise threshold for tests (base.ts uses max:3, too strict for test patterns)
+      "max-nested-callbacks": ["error", { max: 6 }],
     },
   },
 
