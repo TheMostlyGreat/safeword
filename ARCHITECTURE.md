@@ -1,7 +1,7 @@
 # Safeword Architecture
 
-**Version:** 1.3
-**Last Updated:** 2026-01-05
+**Version:** 1.4
+**Last Updated:** 2026-01-07
 **Status:** Production
 
 ---
@@ -60,7 +60,7 @@ packages/
 ```text
 packages/cli/
 ├── src/
-│   ├── commands/       # CLI commands (setup, upgrade, check, diff, reset)
+│   ├── commands/       # CLI commands (setup, upgrade, check, diff, reset, sync-config)
 │   ├── packs/          # Language packs + registry
 │   │   ├── {lang}/     # index.ts, files.ts, setup.ts per language
 │   │   ├── registry.ts # Central pack registry and detection
@@ -74,14 +74,14 @@ packages/cli/
 ├── templates/
 │   ├── SAFEWORD.md     # Core instructions (installed to .safeword/)
 │   ├── AGENTS.md       # Project context template
-│   ├── commands/       # Slash commands (/lint, /audit, /drift)
+│   ├── commands/       # Slash commands (/lint, /audit, /drift, /done, /bdd, /tdd)
 │   ├── cursor/         # Cursor IDE rules (.mdc files)
 │   ├── doc-templates/  # Feature specs, design docs, tickets
 │   ├── guides/         # Methodology guides (TDD, planning, etc.)
 │   ├── hooks/          # Claude Code hooks (lint, quality review)
 │   ├── prompts/        # Prompt templates for commands
 │   ├── scripts/        # Shell scripts (cleanup, bisect)
-│   └── skills/         # Claude Code skills (debugging, TDD, etc.)
+│   └── skills/         # Claude Code skills (BDD orchestration, TDD, debugging, etc.)
 ```
 
 ---
@@ -255,6 +255,32 @@ interface ProjectContext {
 | Trade-off      | Can't add languages without safeword release                                                            |
 | Alternatives   | Separate npm packages (rejected: version coordination complexity), user-defined packs (deferred: YAGNI) |
 | Implementation | `packages/cli/src/packs/*.ts`                                                                           |
+
+### Unified BDD+TDD Workflow (Inline TDD in BDD Skill)
+
+**Status:** Accepted
+**Date:** 2026-01-07
+
+| Field          | Value                                                                                                      |
+| -------------- | ---------------------------------------------------------------------------------------------------------- |
+| What           | TDD (RED→GREEN→REFACTOR) is inline in BDD skill Phase 6, not a separate handoff                            |
+| Why            | Skill-to-skill handoffs are unreliable; agent memory doesn't guarantee the delegated skill will be invoked |
+| Trade-off      | BDD skill is larger; TDD skill remains for direct `/tdd` invocation                                        |
+| Alternatives   | Separate TDD skill with handoff (rejected: soft enforcement), subagent delegation (rejected: no nesting)   |
+| Implementation | `packages/cli/templates/skills/safeword-bdd-orchestrating/SKILL.md` Phase 6-7                              |
+
+### Hard Block for Done Phase (Exit Code 2)
+
+**Status:** Accepted
+**Date:** 2026-01-07
+
+| Field          | Value                                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------- |
+| What           | Done phase in quality hook uses exit 2 (hard block) requiring evidence before completion                |
+| Why            | Prevents premature "done" claims; agent must show test output (e.g., "✓ 156/156 tests pass")            |
+| Trade-off      | Slightly more friction at completion time                                                               |
+| Alternatives   | Soft block with reminder (rejected: too easy to ignore), no enforcement (rejected: allows false claims) |
+| Implementation | `packages/cli/templates/hooks/stop-quality.ts` - `hardBlockDone()` with evidence pattern matching       |
 
 ---
 
