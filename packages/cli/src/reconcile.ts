@@ -457,6 +457,67 @@ function computeInstallPlan(
   };
 }
 
+interface FileActionResult {
+  actions: Action[];
+  created: string[];
+  updated: string[];
+}
+
+/**
+ * Plan actions for owned files (always update if content changed).
+ */
+function planOwnedFilesActions(
+  ownedFiles: Record<string, FileDefinition>,
+  ctx: ProjectContext,
+): FileActionResult {
+  const actions: Action[] = [];
+  const created: string[] = [];
+  const updated: string[] = [];
+
+  for (const [filePath, definition] of Object.entries(ownedFiles)) {
+    if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
+
+    const fullPath = nodePath.join(ctx.cwd, filePath);
+    const newContent = resolveFileContent(definition, ctx);
+
+    if (newContent === undefined) continue;
+    if (!fileNeedsUpdate(fullPath, newContent)) continue;
+
+    actions.push({ type: "write", path: filePath, content: newContent });
+    if (exists(fullPath)) {
+      updated.push(filePath);
+    } else {
+      created.push(filePath);
+    }
+  }
+
+  return { actions, created, updated };
+}
+
+/**
+ * Plan actions for managed files (only create if missing).
+ */
+function planManagedFilesActions(
+  managedFiles: Record<string, ManagedFileDefinition>,
+  ctx: ProjectContext,
+): FileActionResult {
+  const actions: Action[] = [];
+  const created: string[] = [];
+
+  for (const [filePath, definition] of Object.entries(managedFiles)) {
+    const fullPath = nodePath.join(ctx.cwd, filePath);
+    const newContent = resolveFileContent(definition, ctx);
+
+    if (newContent === undefined) continue;
+    if (exists(fullPath)) continue; // Don't update during upgrade
+
+    actions.push({ type: "write", path: filePath, content: newContent });
+    created.push(filePath);
+  }
+
+  return { actions, created, updated: [] };
+}
+
 /**
  *
  * @param schema
@@ -484,41 +545,16 @@ function computeUpgradePlan(
   actions.push(...missingDirectories.actions);
   wouldCreate.push(...missingDirectories.created);
 
-  // 2. Update owned files if content changed (skip .husky files if not a git repo)
-  for (const [filePath, definition] of Object.entries(schema.ownedFiles)) {
-    if (shouldSkipForNonGit(filePath, ctx.isGitRepo)) continue;
+  // 2. Update owned files if content changed
+  const ownedFilesResult = planOwnedFilesActions(schema.ownedFiles, ctx);
+  actions.push(...ownedFilesResult.actions);
+  wouldCreate.push(...ownedFilesResult.created);
+  wouldUpdate.push(...ownedFilesResult.updated);
 
-    const fullPath = nodePath.join(ctx.cwd, filePath);
-    const newContent = resolveFileContent(definition, ctx);
-
-    // Skip files where generator returned undefined (e.g., non-JS projects)
-    if (newContent === undefined) continue;
-
-    if (!fileNeedsUpdate(fullPath, newContent)) continue;
-
-    actions.push({ type: "write", path: filePath, content: newContent });
-    if (exists(fullPath)) {
-      wouldUpdate.push(filePath);
-    } else {
-      wouldCreate.push(filePath);
-    }
-  }
-
-  // 3. Update managed files only if content matches current template
-  for (const [filePath, definition] of Object.entries(schema.managedFiles)) {
-    const fullPath = nodePath.join(ctx.cwd, filePath);
-    const newContent = resolveFileContent(definition, ctx);
-
-    // Skip files where generator returned undefined (e.g., non-JS projects)
-    if (newContent === undefined) continue;
-
-    if (!exists(fullPath)) {
-      // Missing - create it
-      actions.push({ type: "write", path: filePath, content: newContent });
-      wouldCreate.push(filePath);
-    }
-    // If file exists, don't update during upgrade - user may have customized it
-  }
+  // 3. Create missing managed files (don't update existing)
+  const managedFilesResult = planManagedFilesActions(schema.managedFiles, ctx);
+  actions.push(...managedFilesResult.actions);
+  wouldCreate.push(...managedFilesResult.created);
 
   // 4. Remove deprecated files (renamed or removed in newer versions)
   const deprecatedFiles = planExistingFilesRemoval(

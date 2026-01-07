@@ -301,6 +301,83 @@ function findExistingGolangciConfig(cwd: string): string | undefined {
 }
 
 /**
+ * Detect JavaScript framework dependencies from package.json.
+ */
+function detectFrameworks(
+  deps: Record<string, string>,
+  developmentDeps: Record<string, string>,
+  allDeps: Record<string, string>,
+): Pick<
+  ProjectType,
+  | "typescript"
+  | "react"
+  | "nextjs"
+  | "astro"
+  | "vitest"
+  | "playwright"
+  | "tailwind"
+  | "tanstackQuery"
+> {
+  const hasNextJs = "next" in deps;
+  return {
+    typescript: "typescript" in allDeps,
+    react: "react" in deps || "react" in developmentDeps || hasNextJs,
+    nextjs: hasNextJs,
+    astro: "astro" in deps || "astro" in developmentDeps,
+    vitest: "vitest" in developmentDeps,
+    playwright: "@playwright/test" in developmentDeps,
+    tailwind: TAILWIND_PACKAGES.some((pkg) => pkg in allDeps),
+    tanstackQuery: TANSTACK_QUERY_PACKAGES.some((pkg) => pkg in allDeps),
+  };
+}
+
+/**
+ * Detect if package is publishable (has entry points and not private).
+ */
+function detectPublishable(packageJson: PackageJsonWithScripts): boolean {
+  const hasEntryPoints = !!(
+    packageJson.main ||
+    packageJson.module ||
+    packageJson.exports
+  );
+  return hasEntryPoints && packageJson.private !== true;
+}
+
+/**
+ * Detect existing tooling configuration from file system.
+ */
+function detectExistingTooling(
+  cwd: string | undefined,
+  scripts: Record<string, string>,
+): Pick<
+  ProjectType,
+  | "existingLinter"
+  | "existingFormatter"
+  | "existingEslintConfig"
+  | "legacyEslint"
+  | "existingRuffConfig"
+  | "existingMypyConfig"
+  | "existingImportLinterConfig"
+  | "existingGolangciConfig"
+> {
+  const eslintConfig = cwd ? findExistingEslintConfig(cwd) : undefined;
+  return {
+    existingLinter: hasExistingLinter(scripts),
+    existingFormatter: cwd
+      ? hasExistingFormatter(cwd, scripts)
+      : "format" in scripts,
+    existingEslintConfig: eslintConfig,
+    legacyEslint: eslintConfig?.startsWith(".eslintrc") ?? false,
+    existingRuffConfig: cwd ? hasExistingRuffConfig(cwd) : false,
+    existingMypyConfig: cwd ? hasExistingMypyConfig(cwd) : false,
+    existingImportLinterConfig: cwd
+      ? hasExistingImportLinterConfig(cwd)
+      : false,
+    existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : undefined,
+  };
+}
+
+/**
  * Detects project type from package.json contents and optional file scanning
  * @param packageJson - Package.json contents including scripts
  * @param cwd - Working directory for file-based detection
@@ -309,66 +386,15 @@ export function detectProjectType(
   packageJson: PackageJsonWithScripts,
   cwd?: string,
 ): ProjectType {
-  const deps = packageJson.dependencies || {};
-  const developmentDeps = packageJson.devDependencies || {};
+  const deps = packageJson.dependencies ?? {};
+  const developmentDeps = packageJson.devDependencies ?? {};
   const allDeps = { ...deps, ...developmentDeps };
-  const scripts = packageJson.scripts || {};
-
-  const hasTypescript = "typescript" in allDeps;
-  const hasReact = "react" in deps || "react" in developmentDeps;
-  const hasNextJs = "next" in deps;
-  const hasAstro = "astro" in deps || "astro" in developmentDeps;
-  const hasVitest = "vitest" in developmentDeps;
-  const hasPlaywright = "@playwright/test" in developmentDeps;
-  // Tailwind v4 can be installed via tailwindcss, @tailwindcss/vite, or @tailwindcss/postcss
-  const hasTailwind = TAILWIND_PACKAGES.some((pkg) => pkg in allDeps);
-
-  // TanStack Query detection
-  const hasTanstackQuery = TANSTACK_QUERY_PACKAGES.some(
-    (pkg) => pkg in allDeps,
-  );
-
-  // Publishable library: has entry points and is not marked private
-  const hasEntryPoints = !!(
-    packageJson.main ||
-    packageJson.module ||
-    packageJson.exports
-  );
-  const isPublishable = hasEntryPoints && packageJson.private !== true;
-
-  // Shell scripts: detected by scanning for .sh files
-  const hasShell = cwd ? hasShellScripts(cwd) : false;
-
-  // Generic tooling detection: detect intent, not specific tools
-  const hasLinter = hasExistingLinter(scripts);
-  const hasFormatter = cwd
-    ? hasExistingFormatter(cwd, scripts)
-    : "format" in scripts;
-
-  // Detect existing ESLint config and whether it's legacy format
-  const eslintConfig = cwd ? findExistingEslintConfig(cwd) : undefined;
-  const isLegacyEslint = eslintConfig?.startsWith(".eslintrc") ?? false;
+  const scripts = packageJson.scripts ?? {};
 
   return {
-    typescript: hasTypescript,
-    react: hasReact || hasNextJs, // Next.js implies React
-    nextjs: hasNextJs,
-    astro: hasAstro,
-    vitest: hasVitest,
-    playwright: hasPlaywright,
-    tailwind: hasTailwind,
-    tanstackQuery: hasTanstackQuery,
-    publishableLibrary: isPublishable,
-    shell: hasShell,
-    existingLinter: hasLinter,
-    existingFormatter: hasFormatter,
-    existingEslintConfig: eslintConfig,
-    legacyEslint: isLegacyEslint,
-    existingRuffConfig: cwd ? hasExistingRuffConfig(cwd) : false,
-    existingMypyConfig: cwd ? hasExistingMypyConfig(cwd) : false,
-    existingImportLinterConfig: cwd
-      ? hasExistingImportLinterConfig(cwd)
-      : false,
-    existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : undefined,
+    ...detectFrameworks(deps, developmentDeps, allDeps),
+    publishableLibrary: detectPublishable(packageJson),
+    shell: cwd ? hasShellScripts(cwd) : false,
+    ...detectExistingTooling(cwd, scripts),
   };
 }

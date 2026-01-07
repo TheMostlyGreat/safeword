@@ -46,6 +46,64 @@ interface PackageJson {
 }
 
 /**
+ * Get workspace patterns from package.json.
+ * Supports both array format and yarn workspaces object format.
+ */
+function getWorkspacePatterns(cwd: string): string[] {
+  const packageJsonPath = nodePath.join(cwd, "package.json");
+  const rootPackageJson = readJson(packageJsonPath) as PackageJson | undefined;
+  if (!rootPackageJson?.workspaces) return [];
+
+  return Array.isArray(rootPackageJson.workspaces)
+    ? rootPackageJson.workspaces
+    : (rootPackageJson.workspaces.packages ?? []);
+}
+
+/**
+ * Process a glob workspace pattern (e.g., "packages/*").
+ * Scans directory and adds format scripts to each package.
+ */
+function processGlobWorkspacePattern(
+  cwd: string,
+  workspacePath: string,
+): string[] {
+  const updated: string[] = [];
+  const fullPath = nodePath.join(cwd, workspacePath);
+
+  if (!exists(fullPath)) return [];
+
+  try {
+    const entries = readdirSync(fullPath, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+
+      const packagePath = nodePath.join(fullPath, entry.name);
+      if (addFormatScriptIfMissing(packagePath)) {
+        updated.push(nodePath.join(workspacePath, entry.name, "package.json"));
+      }
+    }
+  } catch {
+    // Directory not readable, skip
+  }
+
+  return updated;
+}
+
+/**
+ * Process an explicit workspace path (e.g., "tools/scripts").
+ */
+function processExplicitWorkspacePath(
+  cwd: string,
+  workspacePath: string,
+): string[] {
+  const fullPath = nodePath.join(cwd, workspacePath);
+  if (addFormatScriptIfMissing(fullPath)) {
+    return [nodePath.join(workspacePath, "package.json")];
+  }
+  return [];
+}
+
+/**
  * Add format scripts to workspace packages that don't have them.
  * Only runs if root project uses Prettier (not an existing formatter like Biome).
  */
@@ -56,49 +114,20 @@ function setupWorkspaceFormatScripts(
   // Skip if root uses an existing formatter (Biome, dprint, etc.)
   if (ctx.projectType.existingFormatter) return [];
 
-  const packageJsonPath = nodePath.join(cwd, "package.json");
-  const rootPackageJson = readJson(packageJsonPath) as PackageJson | undefined;
-  if (!rootPackageJson?.workspaces) return [];
-
-  // Resolve workspace patterns to paths
-  const workspacePatterns = Array.isArray(rootPackageJson.workspaces)
-    ? rootPackageJson.workspaces
-    : (rootPackageJson.workspaces.packages ?? []);
+  const workspacePatterns = getWorkspacePatterns(cwd);
+  if (workspacePatterns.length === 0) return [];
 
   const updated: string[] = [];
 
   for (const pattern of workspacePatterns) {
-    // Handle both explicit paths and simple glob patterns like "packages/*"
-    const workspacePath = pattern.endsWith("/*")
-      ? pattern.slice(0, -2) // Remove /* suffix, we'll scan the directory
-      : pattern;
+    const isGlobPattern = pattern.endsWith("/*");
+    const workspacePath = isGlobPattern ? pattern.slice(0, -2) : pattern;
 
-    const fullPath = nodePath.join(cwd, workspacePath);
+    const patternUpdates = isGlobPattern
+      ? processGlobWorkspacePattern(cwd, workspacePath)
+      : processExplicitWorkspacePath(cwd, workspacePath);
 
-    if (pattern.endsWith("/*")) {
-      // Scan directory for subdirectories
-      if (!exists(fullPath)) continue;
-      try {
-        const entries = readdirSync(fullPath, { withFileTypes: true });
-        for (const entry of entries) {
-          if (entry.isDirectory() && !entry.name.startsWith(".")) {
-            const pkgPath = nodePath.join(fullPath, entry.name);
-            if (addFormatScriptIfMissing(pkgPath)) {
-              updated.push(
-                nodePath.join(workspacePath, entry.name, "package.json"),
-              );
-            }
-          }
-        }
-      } catch {
-        // Directory not readable, skip
-      }
-    } else {
-      // Explicit path
-      if (addFormatScriptIfMissing(fullPath)) {
-        updated.push(nodePath.join(workspacePath, "package.json"));
-      }
-    }
+    updated.push(...patternUpdates);
   }
 
   return updated;
@@ -208,6 +237,63 @@ interface SetupSummaryOptions {
   pythonImportLinter?: boolean;
 }
 
+/**
+ * Print list of created files.
+ */
+function printCreatedFiles(
+  createdFiles: string[],
+  packageJsonCreated: boolean,
+): void {
+  if (createdFiles.length === 0 && !packageJsonCreated) return;
+
+  info("\nCreated:");
+  if (packageJsonCreated) listItem("package.json");
+  for (const file of createdFiles) listItem(file);
+}
+
+/**
+ * Print list of modified files.
+ */
+function printModifiedFiles(modifiedFiles: string[]): void {
+  if (modifiedFiles.length === 0) return;
+
+  info("\nModified:");
+  for (const file of modifiedFiles) listItem(file);
+}
+
+/**
+ * Print language-specific next steps.
+ */
+function printLanguageNextSteps(options: {
+  cwd: string;
+  languages: Languages;
+  pythonInstallFailed: boolean;
+  pythonImportLinter: boolean;
+  golangciCreated: boolean;
+}): void {
+  const {
+    cwd,
+    languages,
+    pythonInstallFailed,
+    pythonImportLinter,
+    golangciCreated,
+  } = options;
+
+  // Python: show install command only if auto-install failed
+  if (languages.python && pythonInstallFailed) {
+    listItem(
+      `Install Python tools: ${getPythonInstallCommand(cwd, getPythonTools(pythonImportLinter))}`,
+    );
+  }
+
+  // Go: show if .golangci.yml was created (Go tools are installed globally)
+  if (languages.golang && golangciCreated) {
+    listItem(
+      "Install Go tools: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest",
+    );
+  }
+}
+
 function printSetupSummary(options: SetupSummaryOptions): void {
   const {
     cwd,
@@ -220,50 +306,137 @@ function printSetupSummary(options: SetupSummaryOptions): void {
     pythonInstallFailed = false,
     pythonImportLinter = false,
   } = options;
+
   header("Setup Complete");
 
-  // Schema-created files (including .golangci.yml, .safeword/ruff.toml) are in result.created
-  const allCreated = [
+  // Collect created files (schema files + arch files + python config files)
+  const createdFiles = [
     ...result.created,
     ...archFiles,
     ...pythonFiles.filter((f) => f !== "pyproject.toml"),
   ];
-  if (allCreated.length > 0 || packageJsonCreated) {
-    info("\nCreated:");
-    if (packageJsonCreated) listItem("package.json");
-    for (const file of allCreated) listItem(file);
-  }
+  printCreatedFiles(createdFiles, packageJsonCreated);
 
-  const allUpdated = [
+  // Collect modified files (schema updates + workspace updates + pyproject.toml)
+  const modifiedFiles = [
     ...result.updated,
     ...workspaceUpdates,
     ...pythonFiles.filter((f) => f === "pyproject.toml"),
   ];
-  if (allUpdated.length > 0) {
-    info("\nModified:");
-    for (const file of allUpdated) listItem(file);
-  }
+  printModifiedFiles(modifiedFiles);
 
+  // Next steps
   info("\nNext steps:");
   listItem("Run `safeword check` to verify setup");
 
-  // Python-specific guidance: show install command only if auto-install failed
-  if (languages.python && pythonInstallFailed) {
-    listItem(
-      `Install Python tools: ${getPythonInstallCommand(cwd, getPythonTools(pythonImportLinter))}`,
-    );
-  }
-
-  // Go-specific guidance: show if .golangci.yml was created (Go tools are installed globally)
-  if (languages.golang && result.created.includes(".golangci.yml")) {
-    listItem(
-      "Install Go tools: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest",
-    );
-  }
+  printLanguageNextSteps({
+    cwd,
+    languages,
+    pythonInstallFailed,
+    pythonImportLinter,
+    golangciCreated: result.created.includes(".golangci.yml"),
+  });
 
   listItem("Commit the new files to git");
 
   success(`\nSafeword ${VERSION} installed successfully!`);
+}
+
+/**
+ * Setup JavaScript project: architecture detection, depcruise config, workspace scripts
+ */
+function setupJavaScriptProject(
+  cwd: string,
+  ctx: ProjectContext,
+  packagesToInstall: string[],
+): { archFiles: string[]; workspaceUpdates: string[] } {
+  const archFiles: string[] = [];
+  const arch = buildArchitecture(cwd);
+
+  if (hasArchitectureDetected(arch)) {
+    const syncResult = syncConfigCore(cwd, arch);
+    if (syncResult.generatedConfig) {
+      archFiles.push(".safeword/depcruise-config.cjs");
+    }
+    if (syncResult.createdMainConfig) {
+      archFiles.push(".dependency-cruiser.cjs");
+    }
+    logArchitectureDetected(arch);
+  }
+
+  const workspaceUpdates = setupWorkspaceFormatScripts(cwd, ctx);
+  if (workspaceUpdates.length > 0) {
+    info(
+      `\nAdded format scripts to ${workspaceUpdates.length} workspace package(s)`,
+    );
+  }
+
+  installDependencies(cwd, packagesToInstall, "linting dependencies");
+
+  return { archFiles, workspaceUpdates };
+}
+
+/**
+ * Log detected architecture elements and workspaces
+ */
+function logArchitectureDetected(
+  arch: ReturnType<typeof buildArchitecture>,
+): void {
+  const detected: string[] = [];
+  if (arch.elements.length > 0) {
+    detected.push(arch.elements.map((element) => element.location).join(", "));
+  }
+  if (arch.workspaces && arch.workspaces.length > 0) {
+    detected.push(`workspaces: ${arch.workspaces.join(", ")}`);
+  }
+  info(`\nArchitecture detected: ${detected.join("; ")}`);
+  info("Generated dependency-cruiser config for /audit command");
+}
+
+/**
+ * Log detected language and skip message
+ */
+function logDetectedLanguage(languages: Languages): void {
+  if (languages.python && !languages.javascript) {
+    info("Python project detected (skipping JS tooling)");
+  }
+  if (languages.golang && !languages.javascript) {
+    info("Go project detected (skipping JS tooling)");
+  }
+}
+
+/**
+ * Register detected language packs
+ */
+function registerLanguagePacks(cwd: string): void {
+  const detectedPacks = detectLanguagePacks(cwd);
+  for (const packId of detectedPacks) {
+    addInstalledPack(cwd, packId);
+  }
+}
+
+/**
+ * Setup Python project (dependencies installation).
+ * Config files are created by reconciliation.
+ */
+function setupPythonProject(
+  languages: Languages,
+  cwd: string,
+): PythonSetupStatus {
+  if (!languages.python) {
+    return { files: [], installFailed: false, importLinter: false };
+  }
+  return setupPython(cwd);
+}
+
+/**
+ * Setup Go project tooling.
+ * Config files (.golangci.yml) are created by reconciliation.
+ */
+function setupGoProject(languages: Languages): void {
+  if (languages.golang) {
+    setupGoTooling();
+  }
 }
 
 export async function setup(_options: SetupOptions): Promise<void> {
@@ -291,74 +464,19 @@ export async function setup(_options: SetupOptions): Promise<void> {
     };
     const isNonJsOnly =
       (languages.python || languages.golang) && !languages.javascript;
-    if (languages.python && !languages.javascript)
-      info("Python project detected (skipping JS tooling)");
-    if (languages.golang && !languages.javascript)
-      info("Go project detected (skipping JS tooling)");
+
+    logDetectedLanguage(languages);
+
     const result = await reconcile(SAFEWORD_SCHEMA, "install", ctx);
     success("Created .safeword directory and configuration");
 
-    // Detect architecture and workspaces, generate depcruise configs if found
-    // (only for JS projects)
-    const archFiles: string[] = [];
-    let workspaceUpdates: string[] = [];
-
-    if (!isNonJsOnly) {
-      const arch = buildArchitecture(cwd);
-
-      if (hasArchitectureDetected(arch)) {
-        const syncResult = syncConfigCore(cwd, arch);
-        if (syncResult.generatedConfig)
-          archFiles.push(".safeword/depcruise-config.cjs");
-        if (syncResult.createdMainConfig)
-          archFiles.push(".dependency-cruiser.cjs");
-
-        const detected: string[] = [];
-        if (arch.elements.length > 0) {
-          detected.push(
-            arch.elements.map((element) => element.location).join(", "),
-          );
-        }
-        if (arch.workspaces && arch.workspaces.length > 0) {
-          detected.push(`workspaces: ${arch.workspaces.join(", ")}`);
-        }
-        info(`\nArchitecture detected: ${detected.join("; ")}`);
-        info("Generated dependency-cruiser config for /audit command");
-      }
-
-      // Add format scripts to workspace packages (monorepo support)
-      workspaceUpdates = setupWorkspaceFormatScripts(cwd, ctx);
-      if (workspaceUpdates.length > 0) {
-        info(
-          `\nAdded format scripts to ${workspaceUpdates.length} workspace package(s)`,
-        );
-      }
-
-      // Install JS dependencies (ESLint, Prettier, etc.)
-      installDependencies(
-        cwd,
-        result.packagesToInstall,
-        "linting dependencies",
-      );
-    }
-
-    // Python-specific setup (install dependencies)
-    // Note: Config files (ruff.toml, mypy.ini, .importlinter) are created by reconcile (managedFiles)
-    const pythonStatus = languages.python
-      ? setupPython(cwd)
-      : { files: [], installFailed: false, importLinter: false };
-
-    // Go-specific setup (future: layer detection for depguard)
-    // Note: .golangci.yml is created by reconcile (managedFiles)
-    if (languages.golang) {
-      setupGoTooling(); // Currently no-op, kept for future layer detection
-    }
-
-    // Track installed packs in config.json
-    const detectedPacks = detectLanguagePacks(cwd);
-    for (const packId of detectedPacks) {
-      addInstalledPack(cwd, packId);
-    }
+    // Language-specific setup
+    const { archFiles, workspaceUpdates } = isNonJsOnly
+      ? { archFiles: [], workspaceUpdates: [] }
+      : setupJavaScriptProject(cwd, ctx, result.packagesToInstall);
+    const pythonStatus = setupPythonProject(languages, cwd);
+    setupGoProject(languages);
+    registerLanguagePacks(cwd);
 
     printSetupSummary({
       cwd,

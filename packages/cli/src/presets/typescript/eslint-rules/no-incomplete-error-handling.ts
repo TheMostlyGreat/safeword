@@ -13,8 +13,6 @@
  *   catch (error) { throw new AppError('context', { cause: error }); }
  */
 
-/* eslint-disable sonarjs/cognitive-complexity, sonarjs/no-nested-conditional */
-
 import type { Rule } from "eslint";
 import type { CallExpression, CatchClause, Statement } from "estree";
 
@@ -44,40 +42,71 @@ function isLoggingCall(node: CallExpression): boolean {
 }
 
 /**
+ * Check if a single statement terminates control flow.
+ */
+function isTerminatingBranch(stmt: Statement): boolean {
+  if (stmt.type === "ThrowStatement" || stmt.type === "ReturnStatement") {
+    return true;
+  }
+  if (stmt.type === "BlockStatement") {
+    return hasTerminatingStatement(stmt.body);
+  }
+  return false;
+}
+
+/**
+ * Check if an if statement terminates (both branches must terminate).
+ */
+function ifStatementTerminates(
+  stmt: Statement & { type: "IfStatement" },
+): boolean {
+  const consequentTerminates = isTerminatingBranch(stmt.consequent);
+  const alternateTerminates = stmt.alternate
+    ? isTerminatingBranch(stmt.alternate)
+    : false;
+  return consequentTerminates && alternateTerminates;
+}
+
+/**
  * Checks if statements include a throw or return (error is properly handled)
  * @param statements
  */
 function hasTerminatingStatement(statements: Statement[]): boolean {
   for (const stmt of statements) {
-    switch (stmt.type) {
-      case "ThrowStatement":
-      case "ReturnStatement": {
-        return true;
-      }
-
-      case "IfStatement": {
-        // Both branches must terminate
-        const consequentTerminates =
-          stmt.consequent.type === "BlockStatement"
-            ? hasTerminatingStatement(stmt.consequent.body)
-            : stmt.consequent.type === "ThrowStatement" ||
-              stmt.consequent.type === "ReturnStatement";
-
-        const alternateTerminates = stmt.alternate
-          ? stmt.alternate.type === "BlockStatement"
-            ? hasTerminatingStatement(stmt.alternate.body)
-            : stmt.alternate.type === "ThrowStatement" ||
-              stmt.alternate.type === "ReturnStatement"
-          : false;
-
-        if (consequentTerminates && alternateTerminates) {
-          return true;
-        }
-        break;
-      }
+    if (stmt.type === "ThrowStatement" || stmt.type === "ReturnStatement") {
+      return true;
+    }
+    if (stmt.type === "IfStatement" && ifStatementTerminates(stmt)) {
+      return true;
     }
   }
   return false;
+}
+
+/**
+ * Check if a single statement is a logging call.
+ */
+function isLoggingStatement(stmt: Statement): boolean {
+  return (
+    stmt.type === "ExpressionStatement" &&
+    stmt.expression.type === "CallExpression" &&
+    isLoggingCall(stmt.expression)
+  );
+}
+
+/**
+ * Get nested statements from a statement (for recursive search).
+ */
+function getNestedStatements(stmt: Statement): Statement[] {
+  if (stmt.type === "BlockStatement") {
+    return stmt.body;
+  }
+  if (stmt.type === "IfStatement") {
+    const nested = [stmt.consequent];
+    if (stmt.alternate) nested.push(stmt.alternate);
+    return nested;
+  }
+  return [];
 }
 
 /**
@@ -86,28 +115,10 @@ function hasTerminatingStatement(statements: Statement[]): boolean {
  */
 function containsLoggingCall(statements: Statement[]): boolean {
   for (const stmt of statements) {
-    // Direct logging call
-    if (
-      stmt.type === "ExpressionStatement" &&
-      stmt.expression.type === "CallExpression" &&
-      isLoggingCall(stmt.expression)
-    ) {
-      return true;
-    }
+    if (isLoggingStatement(stmt)) return true;
 
-    // Check nested blocks
-    if (stmt.type === "IfStatement") {
-      if (containsLoggingCall([stmt.consequent])) {
-        return true;
-      }
-      if (stmt.alternate && containsLoggingCall([stmt.alternate])) {
-        return true;
-      }
-    }
-
-    if (stmt.type === "BlockStatement" && containsLoggingCall(stmt.body)) {
-      return true;
-    }
+    const nested = getNestedStatements(stmt);
+    if (nested.length > 0 && containsLoggingCall(nested)) return true;
   }
   return false;
 }

@@ -222,6 +222,45 @@ export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
 // JSON Merges
 // ============================================================================
 
+/**
+ * Add a script if it doesn't exist.
+ */
+function addScriptIfMissing(
+  scripts: Record<string, string>,
+  name: string,
+  command: string,
+): void {
+  if (!scripts[name]) scripts[name] = command;
+}
+
+/**
+ * Merge lint scripts based on project type.
+ */
+function mergeLintScripts(
+  scripts: Record<string, string>,
+  projectType: { existingLinter: boolean },
+): void {
+  if (projectType.existingLinter) {
+    // Project with existing linter: add lint:eslint for safeword-specific rules
+    addScriptIfMissing(scripts, "lint:eslint", "eslint .");
+  } else {
+    // No existing linter: ESLint is the primary linter
+    addScriptIfMissing(scripts, "lint", "eslint .");
+  }
+}
+
+/**
+ * Merge format scripts if no existing formatter.
+ */
+function mergeFormatScripts(
+  scripts: Record<string, string>,
+  projectType: { existingFormatter: boolean },
+): void {
+  if (projectType.existingFormatter) return;
+  addScriptIfMissing(scripts, "format", "prettier --write .");
+  addScriptIfMissing(scripts, "format:check", "prettier --check .");
+}
+
 export const typescriptJsonMerges: Record<string, JsonMergeDefinition> = {
   "package.json": {
     keys: [
@@ -240,37 +279,19 @@ export const typescriptJsonMerges: Record<string, JsonMergeDefinition> = {
       const scripts = { ...(existing.scripts as Record<string, string>) };
       const result = { ...existing };
 
-      if (ctx.projectType.existingLinter) {
-        // Project with existing linter: add lint:eslint for safeword-specific rules
-        if (!scripts["lint:eslint"]) scripts["lint:eslint"] = "eslint .";
-        // Don't touch their existing lint script
-      } else {
-        // No existing linter: ESLint is the primary linter
-        if (!scripts.lint) scripts.lint = "eslint .";
+      mergeLintScripts(scripts, ctx.projectType);
+      mergeFormatScripts(scripts, ctx.projectType);
+      addScriptIfMissing(scripts, "knip", "knip");
+
+      // Conditional scripts based on project type
+      if (ctx.projectType.publishableLibrary) {
+        addScriptIfMissing(scripts, "publint", "publint");
       }
-
-      if (!ctx.projectType.existingFormatter) {
-        // No existing formatter: add Prettier
-        if (!scripts.format) scripts.format = "prettier --write .";
-        if (!scripts["format:check"])
-          scripts["format:check"] = "prettier --check .";
-      }
-
-      // Always add knip for dead code detection
-      if (!scripts.knip) scripts.knip = "knip";
-
-      // Conditional: publint for publishable libraries
-      if (ctx.projectType.publishableLibrary && !scripts.publint) {
-        scripts.publint = "publint";
-      }
-
-      // Conditional: lint:sh for projects with shell scripts
-      if (ctx.projectType.shell && !scripts["lint:sh"]) {
-        scripts["lint:sh"] = "shellcheck **/*.sh";
+      if (ctx.projectType.shell) {
+        addScriptIfMissing(scripts, "lint:sh", "shellcheck **/*.sh");
       }
 
       result.scripts = scripts;
-
       return result;
     },
     unmerge: (existing) => {

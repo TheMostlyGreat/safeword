@@ -61,53 +61,79 @@ function spreadsAccumulator(spread: SpreadElement, accName: string): boolean {
 }
 
 /**
+ * Check object expression properties for accumulator spread.
+ */
+function findSpreadInObject(
+  node: Node & { type: "ObjectExpression" },
+  accName: string,
+): SpreadElement | undefined {
+  for (const property of node.properties) {
+    if (
+      property.type === "SpreadElement" &&
+      spreadsAccumulator(property, accName)
+    ) {
+      return property;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Check array expression elements for accumulator spread.
+ */
+function findSpreadInArray(
+  node: Node & { type: "ArrayExpression" },
+  accName: string,
+): SpreadElement | undefined {
+  for (const element of node.elements) {
+    if (
+      element?.type === "SpreadElement" &&
+      spreadsAccumulator(element, accName)
+    ) {
+      return element;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Recursively check if an expression contains a spread of the accumulator
  */
 function containsAccumulatorSpread(
   node: Node,
   accName: string,
 ): SpreadElement | undefined {
-  if (node.type === "SpreadElement" && spreadsAccumulator(node, accName)) {
-    return node;
-  }
+  switch (node.type) {
+    case "SpreadElement": {
+      return spreadsAccumulator(node, accName) ? node : undefined;
+    }
 
-  if (node.type === "ObjectExpression") {
-    for (const property of node.properties) {
-      if (
-        property.type === "SpreadElement" &&
-        spreadsAccumulator(property, accName)
-      ) {
-        return property;
-      }
+    case "ObjectExpression": {
+      return findSpreadInObject(node, accName);
+    }
+
+    case "ArrayExpression": {
+      return findSpreadInArray(node, accName);
+    }
+
+    case "ConditionalExpression": {
+      return (
+        containsAccumulatorSpread(node.consequent, accName) ??
+        containsAccumulatorSpread(node.alternate, accName)
+      );
+    }
+
+    case "LogicalExpression": {
+      return (
+        containsAccumulatorSpread(node.left, accName) ??
+        containsAccumulatorSpread(node.right, accName)
+      );
+    }
+
+    default: {
+      return undefined;
     }
   }
-
-  if (node.type === "ArrayExpression") {
-    for (const element of node.elements) {
-      if (
-        element?.type === "SpreadElement" &&
-        spreadsAccumulator(element, accName)
-      ) {
-        return element;
-      }
-    }
-  }
-
-  if (node.type === "ConditionalExpression") {
-    return (
-      containsAccumulatorSpread(node.consequent, accName) ??
-      containsAccumulatorSpread(node.alternate, accName)
-    );
-  }
-
-  if (node.type === "LogicalExpression") {
-    return (
-      containsAccumulatorSpread(node.left, accName) ??
-      containsAccumulatorSpread(node.right, accName)
-    );
-  }
-
-  return undefined;
 }
 
 /**

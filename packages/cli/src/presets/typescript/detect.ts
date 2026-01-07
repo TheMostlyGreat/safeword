@@ -75,58 +75,81 @@ type DepsRecord = Record<string, string | undefined>;
 type ScriptsRecord = Record<string, string | undefined>;
 
 /**
- * Collect all dependencies from root and workspace package.json files.
- * Supports npm/yarn workspaces and common monorepo patterns.
+ * Read dependencies from a package.json file.
  */
-function collectAllDeps(rootDir: string): DepsRecord {
-  const allDeps: DepsRecord = {};
+function readPackageDeps(pkgPath: string): DepsRecord {
+  try {
+    if (!existsSync(pkgPath)) return {};
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+    return { ...pkg.dependencies, ...pkg.devDependencies };
+  } catch {
+    return {};
+  }
+}
 
-  const mergeDeps = (pkgPath: string): void => {
-    try {
-      if (!existsSync(pkgPath)) return;
-      const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
-      Object.assign(allDeps, pkg.dependencies, pkg.devDependencies);
-    } catch {
-      // Ignore invalid package.json files
-    }
-  };
-
-  // Read root package.json
-  const rootPackagePath = path.join(rootDir, "package.json");
-  mergeDeps(rootPackagePath);
-
-  // Check for workspaces (npm/yarn/pnpm)
-  let workspacePatterns: string[] = [];
+/**
+ * Get workspace patterns from root package.json.
+ */
+function getWorkspacePatternsFromPackage(rootPackagePath: string): string[] {
   try {
     const rootPackage = JSON.parse(readFileSync(rootPackagePath, "utf8"));
     if (Array.isArray(rootPackage.workspaces)) {
-      workspacePatterns = rootPackage.workspaces;
-    } else if (rootPackage.workspaces?.packages) {
-      workspacePatterns = rootPackage.workspaces.packages;
+      return rootPackage.workspaces;
+    }
+    if (rootPackage.workspaces?.packages) {
+      return rootPackage.workspaces.packages;
     }
   } catch {
     // No workspaces defined
   }
+  return [];
+}
 
-  // Also check common monorepo directories even without workspaces config
+/**
+ * Scan a workspace directory for package.json files.
+ */
+function scanWorkspaceDirectory(
+  rootDirectory: string,
+  pattern: string,
+): DepsRecord {
+  if (!pattern.endsWith("/*")) return {};
+
+  const baseDirectory = path.join(rootDirectory, pattern.slice(0, -2));
+  if (!existsSync(baseDirectory)) return {};
+
+  const allDeps: DepsRecord = {};
+  try {
+    const entries = readdirSync(baseDirectory, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        Object.assign(
+          allDeps,
+          readPackageDeps(path.join(baseDirectory, entry.name, "package.json")),
+        );
+      }
+    }
+  } catch {
+    // Ignore read errors
+  }
+  return allDeps;
+}
+
+/**
+ * Collect all dependencies from root and workspace package.json files.
+ * Supports npm/yarn workspaces and common monorepo patterns.
+ */
+function collectAllDeps(rootDirectory: string): DepsRecord {
+  const rootPackagePath = path.join(rootDirectory, "package.json");
+  const allDeps = readPackageDeps(rootPackagePath);
+
+  // Get patterns from workspaces config + common monorepo directories
+  const workspacePatterns = getWorkspacePatternsFromPackage(rootPackagePath);
   const commonPatterns = ["apps/*", "packages/*"];
   const patterns = [...new Set([...workspacePatterns, ...commonPatterns])];
 
-  // Scan workspace directories (simple glob: only supports "dir/*" patterns)
+  // Scan each workspace pattern
   for (const pattern of patterns) {
-    if (!pattern.endsWith("/*")) continue;
-    const baseDir = path.join(rootDir, pattern.slice(0, -2));
-    if (!existsSync(baseDir)) continue;
-    try {
-      const entries = readdirSync(baseDir, { withFileTypes: true });
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          mergeDeps(path.join(baseDir, entry.name, "package.json"));
-        }
-      }
-    } catch {
-      // Ignore read errors
-    }
+    Object.assign(allDeps, scanWorkspaceDirectory(rootDirectory, pattern));
   }
 
   return allDeps;
