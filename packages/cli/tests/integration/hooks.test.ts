@@ -315,15 +315,16 @@ describe('E2E: Phase-Aware Quality Review', () => {
   }
 
   // Helper to create transcript with changes
-  function createChangesTranscript(targetDirectory: string): string {
+  function createChangesTranscript(targetDirectory: string, customText?: string): string {
     const transcriptPath = `${targetDirectory}/.safeword/test-transcript.jsonl`;
+    const text = customText ?? 'Made changes.\n\n{"proposedChanges": false, "madeChanges": true}';
     const message = {
       type: 'assistant',
       message: {
         content: [
           {
             type: 'text',
-            text: 'Made changes.\n\n{"proposedChanges": false, "madeChanges": true}',
+            text,
           },
         ],
       },
@@ -333,8 +334,17 @@ describe('E2E: Phase-Aware Quality Review', () => {
   }
 
   // Helper to run stop hook and extract quality message
-  function runStopHookForPhase(targetDirectory: string): { reason: string } {
-    const transcriptPath = createChangesTranscript(targetDirectory);
+  // Returns { reason, exitCode, stderr } to handle both soft blocks (exit 0, JSON stdout)
+  // and hard blocks (exit 2, stderr message)
+  function runStopHookForPhase(
+    targetDirectory: string,
+    customText?: string,
+  ): {
+    reason: string;
+    exitCode: number;
+    stderr: string;
+  } {
+    const transcriptPath = createChangesTranscript(targetDirectory, customText);
     const input = JSON.stringify({ transcript_path: transcriptPath });
     const result = spawnSync(
       'bash',
@@ -345,10 +355,20 @@ describe('E2E: Phase-Aware Quality Review', () => {
         encoding: 'utf8',
       },
     );
+    const exitCode = result.status ?? 0;
+    const stderr = result.stderr?.trim() ?? '';
+
+    // Exit 2 = hard block, message in stderr
+    if (exitCode === 2) {
+      return { reason: stderr, exitCode, stderr };
+    }
+
+    // Exit 0 = soft block or allow, try to parse JSON from stdout
     try {
-      return JSON.parse(result.stdout.trim());
+      const parsed = JSON.parse(result.stdout.trim());
+      return { reason: parsed.reason ?? '', exitCode, stderr };
     } catch {
-      return { reason: '' };
+      return { reason: '', exitCode, stderr };
     }
   }
 
@@ -405,7 +425,7 @@ describe('E2E: Phase-Aware Quality Review', () => {
       expect(result.reason).toContain('latest docs');
     });
 
-    it('Scenario 4: Shows done prompts during cleanup phase', () => {
+    it('Scenario 4: Hard blocks done phase without evidence', () => {
       setupIssuesDir(projectDirectory, [
         {
           id: '001',
@@ -418,9 +438,32 @@ describe('E2E: Phase-Aware Quality Review', () => {
 
       const result = runStopHookForPhase(projectDirectory);
 
-      expect(result.reason).toContain('Done Phase');
-      expect(result.reason).toContain('dead code');
-      expect(result.reason).toContain('/verify');
+      // Done phase uses hard block (exit 2) with stderr message
+      expect(result.exitCode).toBe(2);
+      expect(result.reason).toContain('SAFEWORD');
+      expect(result.reason).toContain('Done phase requires evidence');
+      expect(result.reason).toContain('/done');
+    });
+
+    it('Scenario 4b: Allows done phase with evidence present', () => {
+      setupIssuesDir(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'done',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+
+      // Transcript contains evidence patterns
+      const evidenceText =
+        '## Done Checklist\n\n**Test Suite:** ✓ 42/42 tests pass\n**Scenarios:** All 5 scenarios marked complete\n\n{"proposedChanges": false, "madeChanges": true}';
+      const result = runStopHookForPhase(projectDirectory, evidenceText);
+
+      // Evidence found - should allow stop (exit 0, no block)
+      expect(result.exitCode).toBe(0);
+      expect(result.reason).toBe(''); // No block reason when allowed
     });
   });
 

@@ -228,34 +228,78 @@ for (const candidate of candidates) {
 const currentPhase = getCurrentPhase();
 const qualityMessage = getQualityMessage(currentPhase);
 
-// Decision logic:
-// 1. If valid summary found → use it
-// 2. If no summary but edit tools used → trigger review (safety net)
-// 3. If no summary and no edit tools → remind about required format
+/**
+ * Evidence patterns for done phase validation.
+ * Agent must show these patterns to prove completion.
+ */
+const DONE_EVIDENCE_PATTERNS = [
+  /✓\s*\d+\/\d+\s*tests?\s*pass/i, // "✓ 156/156 tests pass"
+  /\d+\/\d+\s*tests?\s*pass/i, // "156/156 tests pass"
+  /all\s+\d+\s+scenarios?\s+marked/i, // "All 10 scenarios marked complete"
+];
 
+/**
+ * Message shown when done phase blocks due to missing evidence.
+ */
+const DONE_HARD_BLOCK_MESSAGE = `SAFEWORD: Done phase requires evidence. Run /done and show results.
+
+Expected evidence formats:
+- "✓ X/X tests pass"
+- "All N scenarios marked complete"
+
+Run tests, show output, then try again.`;
+
+/**
+ * Check if transcript contains evidence of completion.
+ */
+function hasCompletionEvidence(text: string): boolean {
+  return DONE_EVIDENCE_PATTERNS.some(pattern => pattern.test(text));
+}
+
+/**
+ * Hard block for done phase - uses exit 2 to force Claude to continue.
+ * Claude receives stderr and must provide evidence before stopping.
+ */
+function hardBlockDone(reason: string): never {
+  console.error(reason);
+  process.exit(2);
+}
+
+/**
+ * Soft block for other phases - uses JSON decision to prompt review.
+ */
+function softBlock(reason: string): never {
+  console.log(JSON.stringify({ decision: 'block', reason }));
+  process.exit(0);
+}
+
+// Decision logic:
+// 1. Done phase with missing evidence → hard block (exit 2)
+// 2. Done phase with evidence → allow (exit 0)
+// 3. Other phases → soft block with quality review
+
+if (currentPhase === 'done') {
+  // Done phase: require evidence before allowing stop
+  if (hasCompletionEvidence(combinedText)) {
+    // Evidence found - allow stop
+    process.exit(0);
+  }
+  // No evidence - hard block, force Claude to run /done
+  hardBlockDone(DONE_HARD_BLOCK_MESSAGE);
+}
+
+// Other phases: use summary-based soft blocking
 if (summary) {
   // Use reported summary
   if (summary.proposedChanges || summary.madeChanges) {
-    console.log(JSON.stringify({ decision: 'block', reason: qualityMessage }));
-    process.exit(0);
+    softBlock(qualityMessage);
   }
 } else if (editToolsUsed) {
   // Fallback: edit tools detected but no summary - trigger review anyway
-  console.log(
-    JSON.stringify({
-      decision: 'block',
-      reason: `${qualityMessage}\n\n(Note: JSON summary was missing but edit tools were detected)`,
-    }),
-  );
-  process.exit(0);
+  softBlock(`${qualityMessage}\n\n(Note: JSON summary was missing but edit tools were detected)`);
 } else {
   // No summary and no edit tools - remind about required format
-  console.log(
-    JSON.stringify({
-      decision: 'block',
-      reason:
-        'SAFEWORD: Response missing required JSON summary. Add to end of response:\n{"proposedChanges": boolean, "madeChanges": boolean}',
-    }),
+  softBlock(
+    'SAFEWORD: Response missing required JSON summary. Add to end of response:\n{"proposedChanges": boolean, "madeChanges": boolean}',
   );
-  process.exit(0);
 }
