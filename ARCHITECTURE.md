@@ -74,7 +74,7 @@ packages/cli/
 ├── templates/
 │   ├── SAFEWORD.md     # Core instructions (installed to .safeword/)
 │   ├── AGENTS.md       # Project context template
-│   ├── commands/       # Slash commands (/lint, /audit, /drift, /done, /bdd, /tdd)
+│   ├── commands/       # Slash commands (/lint, /audit, /done, /bdd, /tdd)
 │   ├── cursor/         # Cursor IDE rules (.mdc files)
 │   ├── doc-templates/  # Feature specs, design docs, tickets
 │   ├── guides/         # Methodology guides (TDD, planning, etc.)

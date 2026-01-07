@@ -90,7 +90,7 @@ describe('NPM Package Structure', () => {
     const files = readdirSync(commandsPath);
 
     expect(files).toContain('quality-review.md');
-    expect(files).toContain('drift.md');
+    expect(files).toContain('audit.md');
     expect(files).toContain('lint.md');
   });
 

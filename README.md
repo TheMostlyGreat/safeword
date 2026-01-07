@@ -31,7 +31,7 @@ test -f .claude/settings.json && echo ".claude/settings.json ✓"
 - `.safeword/guides/` - TDD methodology, testing, code philosophy
 - `.safeword/hooks/` - Claude Code hooks (auto-linting, quality review)
 - `.claude/settings.json` - Hook configuration for Claude Code
-- `.claude/commands/` - Slash commands (`/lint`, `/quality-review`, `/drift`)
+- `.claude/commands/` - Slash commands (`/lint`, `/quality-review`, `/audit`)
 - `AGENTS.md` - Project context with framework reference (also patches `CLAUDE.md` if it exists)
 
 **Commit these to your repo** for team consistency.
@@ -184,7 +184,6 @@ planning/
 
 - `/lint` - Run linters and formatters
 - `/audit` - Run architecture and dead code analysis
-- `/drift` - Check if architecture docs match codebase reality
 - `/quality-review` - Deep code review with web research
 - `/cleanup-zombies` - Kill zombie processes on ports
 - `/bdd` - Force BDD flow for current task
