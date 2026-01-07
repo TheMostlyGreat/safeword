@@ -24,16 +24,8 @@ module.exports = {
       comment:
         "Packages should not import from each other - keeps packages independent",
       severity: "error",
-      from: { path: "^packages/cli/" },
-      to: { path: "^packages/website/" },
-    },
-    {
-      name: "no-cross-package-imports-reverse",
-      comment:
-        "Packages should not import from each other - keeps packages independent",
-      severity: "error",
-      from: { path: "^packages/website/" },
-      to: { path: "^packages/cli/" },
+      from: { path: "^packages/([^/]+)/" },
+      to: { path: "^packages/", pathNot: "^packages/$1/" },
     },
 
     // =========================================================================
