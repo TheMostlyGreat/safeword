@@ -4,9 +4,6 @@ description: Use when implementing features, fixing bugs, or making code changes
 allowed-tools: '*'
 ---
 
-> **Deprecated:** TDD is now inline in `safeword-bdd-orchestrating` (Phase 6).
-> Use `/bdd` for features, `/tdd` to skip to Phase 6. This file remains for reference.
-
 # TDD Enforcer
 
 Scope work before coding. Write tests before implementation.
