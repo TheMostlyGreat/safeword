@@ -331,7 +331,7 @@ If any run fails inconsistently, investigate before marking done.
 
 ### Cross-Scenario Refactoring
 
-After all scenarios pass, look for cleanup opportunities across the feature:
+After all scenarios pass, run `/refactor` to look for cleanup opportunities:
 
 | Pattern                     | Action                                    |
 | --------------------------- | ----------------------------------------- |
@@ -340,7 +340,7 @@ After all scenarios pass, look for cleanup opportunities across the feature:
 | Repeated mock configuration | Create mock factory                       |
 | Copy-pasted business logic  | Extract shared module                     |
 
-This is OPTIONAL — only refactor if clear wins exist. Don't gold-plate.
+Only refactor if clear wins exist. Don't gold-plate.
 
 ### Scenario Tagging (if using test runner that supports it)
 
