@@ -46,7 +46,7 @@ describe("E2E: Conditional Setup - Project Type Detection", () => {
       createTypeScriptPackageJson(projectDirectory);
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -72,7 +72,7 @@ describe("E2E: Conditional Setup - Project Type Detection", () => {
       createPackageJson(projectDirectory); // No TypeScript
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -100,7 +100,7 @@ describe("E2E: Conditional Setup - Project Type Detection", () => {
       });
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -130,7 +130,7 @@ describe("E2E: Conditional Setup - Project Type Detection", () => {
       });
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -162,7 +162,7 @@ describe("E2E: Conditional Setup - Project Type Detection", () => {
       });
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -198,7 +198,7 @@ describe("E2E: Conditional Setup - Project Type Detection", () => {
       });
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -229,7 +229,7 @@ describe("E2E: Conditional Setup - Project Type Detection", () => {
       });
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -255,7 +255,7 @@ describe("E2E: Conditional Setup - Project Type Detection", () => {
       });
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -289,7 +289,7 @@ describe("E2E: Conditional Setup - Existing Config Preservation", () => {
       const existingConfig = "// My custom ESLint config\nexport default [];\n";
       writeTestFile(projectDirectory, "eslint.config.mjs", existingConfig);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -312,7 +312,7 @@ describe("E2E: Conditional Setup - Existing Config Preservation", () => {
       const existingConfig = '{ "semi": false, "singleQuote": true }';
       writeTestFile(projectDirectory, ".prettierrc", existingConfig);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -342,7 +342,7 @@ describe("E2E: Conditional Setup - Existing Config Preservation", () => {
       });
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -386,7 +386,7 @@ describe("E2E: Conditional Setup - Existing Config Preservation", () => {
         ),
       );
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -438,7 +438,7 @@ describe("E2E: Conditional Setup - Git Integration", () => {
       createTypeScriptPackageJson(projectDirectory);
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -464,7 +464,7 @@ describe("E2E: Conditional Setup - Git Integration", () => {
       createTypeScriptPackageJson(projectDirectory);
       // Note: NOT calling initGitRepo
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });
@@ -500,7 +500,7 @@ describe("E2E: Conditional Setup - Package.json Creation", () => {
       // Note: NOT creating package.json
       initGitRepo(projectDirectory);
 
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: SETUP_TIMEOUT,
       });

@@ -31,10 +31,6 @@ import {
   syncConfigCore,
 } from "./sync-config.js";
 
-interface SetupOptions {
-  yes?: boolean;
-}
-
 interface PackageJson {
   name?: string;
   version?: string;
@@ -439,7 +435,7 @@ function setupGoProject(languages: Languages): void {
   }
 }
 
-export async function setup(_options: SetupOptions): Promise<void> {
+export async function setup(): Promise<void> {
   const cwd = process.cwd();
   const safewordDirectory = nodePath.join(cwd, ".safeword");
 

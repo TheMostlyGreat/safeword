@@ -55,7 +55,7 @@ describe("Test Suite 0: Technical Constraints", () => {
       initGitRepo(temporaryDirectory);
 
       const { result, timeMs } = await measureTime(async () =>
-        runCli(["setup", "--yes"], {
+        runCli(["setup"], {
           cwd: temporaryDirectory,
           timeout: TIMEOUT_SETUP,
         }),
@@ -88,7 +88,7 @@ describe("Test Suite 0: Technical Constraints", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
         timeout: TIMEOUT_SETUP,
       });

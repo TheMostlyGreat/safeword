@@ -50,7 +50,7 @@ requires-python = ">=3.10"
     writeTestFile(projectDirectory, "src/__init__.py", "");
     writeTestFile(projectDirectory, "src/main.py", 'print("hello")\n');
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], {
+    await runCli(["setup"], {
       cwd: projectDirectory,
       timeout: TIMEOUT_SETUP,
     });
@@ -103,7 +103,7 @@ describe("E2E: mypy Type Error Detection", () => {
     projectDirectory = createTemporaryDirectory();
     createPythonProject(projectDirectory);
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], {
+    await runCli(["setup"], {
       cwd: projectDirectory,
       timeout: TIMEOUT_SETUP,
     });
@@ -241,7 +241,7 @@ describe("E2E: React ESLint Violation Detection", () => {
     // Create src directory
     writeTestFile(projectDirectory, "src/.gitkeep", "");
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], {
+    await runCli(["setup"], {
       cwd: projectDirectory,
       timeout: TIMEOUT_SETUP,
     });

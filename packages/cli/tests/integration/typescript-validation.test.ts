@@ -43,7 +43,7 @@ describe("E2E: TypeScript Project Setup", () => {
       'export const hello = "world";\n',
     );
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], {
+    await runCli(["setup"], {
       cwd: projectDirectory,
       timeout: TIMEOUT_SETUP,
     });
@@ -95,7 +95,7 @@ describe("E2E: Type-Checked ESLint Rules", () => {
       "export const placeholder = 1;\n",
     );
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], {
+    await runCli(["setup"], {
       cwd: projectDirectory,
       timeout: TIMEOUT_SETUP,
     });
@@ -214,7 +214,7 @@ describe("E2E: JavaScript-Only Project", () => {
       'module.exports = { hello: "world" };\n',
     );
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], {
+    await runCli(["setup"], {
       cwd: projectDirectory,
       timeout: TIMEOUT_SETUP,
     });

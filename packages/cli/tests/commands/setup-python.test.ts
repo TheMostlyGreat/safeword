@@ -62,7 +62,7 @@ describe("Test Suite 3: Conditional Setup for Python Projects", () => {
         createPythonProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // Should NOT have node_modules with eslint
         expect(fileExists(projectDirectory, "node_modules/eslint")).toBe(false);
@@ -81,7 +81,7 @@ describe("Test Suite 3: Conditional Setup for Python Projects", () => {
         createPythonProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // package.json should NOT be created
         expect(fileExists(projectDirectory, "package.json")).toBe(false);
@@ -97,7 +97,7 @@ describe("Test Suite 3: Conditional Setup for Python Projects", () => {
         createPythonProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        const result = await runCli(["setup", "--yes"], {
+        const result = await runCli(["setup"], {
           cwd: projectDirectory,
         });
 
@@ -117,7 +117,7 @@ describe("Test Suite 3: Conditional Setup for Python Projects", () => {
         createPythonProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // .safeword directory should exist
         expect(fileExists(projectDirectory, ".safeword")).toBe(true);
@@ -137,7 +137,7 @@ describe("Test Suite 3: Conditional Setup for Python Projects", () => {
         createPythonProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // Hooks should exist
         expect(fileExists(projectDirectory, ".safeword/hooks")).toBe(true);
@@ -153,7 +153,7 @@ describe("Test Suite 3: Conditional Setup for Python Projects", () => {
         createPolyglotProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        const result = await runCli(["setup", "--yes"], {
+        const result = await runCli(["setup"], {
           cwd: projectDirectory,
         });
 

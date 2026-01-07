@@ -289,7 +289,7 @@ describe('E2E: {Lang} Golden Path', () => {
     projectDirectory = createTemporaryDirectory();
     create{Lang}Project(projectDirectory);
     initGitRepo(projectDirectory);
-    await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+    await runCli(['setup'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
   }, 180_000);
 
   afterAll(() => {

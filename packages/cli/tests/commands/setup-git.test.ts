@@ -32,7 +32,7 @@ describe("Test Suite 7: Git Repository Handling", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       // No git init
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -46,7 +46,7 @@ describe("Test Suite 7: Git Repository Handling", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -60,7 +60,7 @@ describe("Test Suite 7: Git Repository Handling", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       // No git init
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -75,7 +75,7 @@ describe("Test Suite 7: Git Repository Handling", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const packageJson = JSON.parse(
         readTestFile(temporaryDirectory, "package.json"),
@@ -95,7 +95,7 @@ describe("Test Suite 7: Git Repository Handling", () => {
       });
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const packageJson = JSON.parse(
         readTestFile(temporaryDirectory, "package.json"),

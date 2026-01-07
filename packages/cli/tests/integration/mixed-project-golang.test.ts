@@ -79,7 +79,7 @@ func main() {
     );
 
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], { cwd: projectDirectory });
+    await runCli(["setup"], { cwd: projectDirectory });
   }, 180_000);
 
   afterAll(() => {

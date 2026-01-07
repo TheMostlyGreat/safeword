@@ -41,7 +41,7 @@ describe("Setup - Architecture Integration", () => {
         "export const x = 1;",
       );
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -81,7 +81,7 @@ describe("Setup - Architecture Integration", () => {
         "export const y = 1;",
       );
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -105,7 +105,7 @@ describe("Setup - Architecture Integration", () => {
       // Create simple project without architecture directories
       writeTestFile(temporaryDirectory, "index.ts", 'console.log("hello");');
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -138,7 +138,7 @@ describe("Setup - Architecture Integration", () => {
         "export const Button = () => null;",
       );
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -161,7 +161,7 @@ describe("Setup - Architecture Integration", () => {
         "export const x = 1;",
       );
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 

@@ -327,7 +327,7 @@ Tests for Story 3 - setup behavior for Python-only projects.
 **Steps**:
 
 1. Create temp directory with only pyproject.toml
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Check installed packages
 
 **Expected**:
@@ -346,7 +346,7 @@ Tests for Story 3 - setup behavior for Python-only projects.
 **Steps**:
 
 1. Create temp directory with only pyproject.toml
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Check for package.json
 
 **Expected**:
@@ -364,7 +364,7 @@ Tests for Story 3 - setup behavior for Python-only projects.
 **Steps**:
 
 1. Create Python-only project
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Capture output
 
 **Expected**:
@@ -383,7 +383,7 @@ Tests for Story 3 - setup behavior for Python-only projects.
 **Steps**:
 
 1. Create Python-only project
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Check .safeword directory
 
 **Expected**:
@@ -402,7 +402,7 @@ Tests for Story 3 - setup behavior for Python-only projects.
 **Steps**:
 
 1. Create Python-only project
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Check .safeword/hooks directory
 
 **Expected**:
@@ -421,7 +421,7 @@ Tests for Story 3 - setup behavior for Python-only projects.
 **Steps**:
 
 1. Create directory with both package.json and pyproject.toml
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Check tooling
 
 **Expected**:

@@ -35,7 +35,7 @@ describe("Test Suite 2: Setup - Core Files", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -58,7 +58,7 @@ describe("Test Suite 2: Setup - Core Files", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const version = readTestFile(
         temporaryDirectory,
@@ -74,7 +74,7 @@ describe("Test Suite 2: Setup - Core Files", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       expect(fileExists(temporaryDirectory, "AGENTS.md")).toBe(true);
 
@@ -92,7 +92,7 @@ describe("Test Suite 2: Setup - Core Files", () => {
       const existingContent = "# My Project\n\nExisting content here.\n";
       writeTestFile(temporaryDirectory, "AGENTS.md", existingContent);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const content = readTestFile(temporaryDirectory, "AGENTS.md");
 
@@ -135,7 +135,7 @@ describe("Test Suite 2: Setup - Core Files", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -162,7 +162,7 @@ describe("Test Suite 2: Setup - Core Files", () => {
       );
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const config = readSafewordConfig(temporaryDirectory);
       expect(config.installedPacks).toContain("python");

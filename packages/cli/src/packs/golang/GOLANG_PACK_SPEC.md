@@ -207,7 +207,7 @@ describe('E2E: Go Golden Path', () => {
     projectDirectory = createTemporaryDirectory();
     createGoProject(projectDirectory);
     initGitRepo(projectDirectory);
-    await runCli(['setup', '--yes'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+    await runCli(['setup'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
   }, 180_000);
 
   afterAll(() => {
@@ -251,7 +251,7 @@ describe('Conditional Setup for Go Projects', () => {
     const dir = createTemporaryDirectory();
     createGoProject(dir);
     initGitRepo(dir);
-    await runCli(['setup', '--yes'], { cwd: dir });
+    await runCli(['setup'], { cwd: dir });
 
     expect(fileExists(dir, 'package.json')).toBe(false);
     expect(fileExists(dir, 'eslint.config.mjs')).toBe(false);

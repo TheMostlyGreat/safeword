@@ -94,7 +94,7 @@ describe("Suite 1: Ruff Config Generation", () => {
       initGitRepo(projectDirectory);
 
       // Act
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });
@@ -143,7 +143,7 @@ testpaths = ["tests"]
       initGitRepo(projectDirectory);
 
       // Act
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });
@@ -178,7 +178,7 @@ describe("Suite 2: Architecture Validation", () => {
       initGitRepo(projectDirectory);
 
       // Act
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });
@@ -208,7 +208,7 @@ describe("Suite 2: Architecture Validation", () => {
       initGitRepo(projectDirectory);
 
       // Act
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });
@@ -269,7 +269,7 @@ describe("Suite 5: mypy Configuration", () => {
       initGitRepo(projectDirectory);
 
       // Act
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });
@@ -309,7 +309,7 @@ strict = true
       initGitRepo(projectDirectory);
 
       // Act
-      await runCli(["setup", "--yes"], {
+      await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });
@@ -340,7 +340,7 @@ describe("Suite 6: Auto-Install Python Tools", () => {
       initGitRepo(projectDirectory);
 
       // Act
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });
@@ -360,7 +360,7 @@ describe("Suite 6: Auto-Install Python Tools", () => {
       initGitRepo(projectDirectory);
 
       // Act
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });
@@ -395,7 +395,7 @@ dev = ["ruff>=0.8.0"]
       initGitRepo(projectDirectory);
 
       // Act
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });
@@ -426,7 +426,7 @@ name = "test"
       initGitRepo(projectDirectory);
 
       // Act
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });
@@ -446,7 +446,7 @@ name = "test"
       initGitRepo(projectDirectory);
 
       // Act
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: projectDirectory,
         timeout: TIMEOUT_SETUP,
       });

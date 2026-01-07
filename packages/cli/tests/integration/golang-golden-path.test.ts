@@ -37,7 +37,7 @@ describe("E2E: Go Golden Path", () => {
     projectDirectory = createTemporaryDirectory();
     createGoProject(projectDirectory);
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], { cwd: projectDirectory });
+    await runCli(["setup"], { cwd: projectDirectory });
   }, 180_000); // 3 min timeout for setup
 
   afterAll(() => {

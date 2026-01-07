@@ -38,7 +38,7 @@ describe("E2E: Add Go to Existing TypeScript Project", () => {
     createTypeScriptPackageJson(projectDirectory);
     initGitRepo(projectDirectory);
     // Initial setup with TypeScript only
-    await runCli(["setup", "--yes"], { cwd: projectDirectory });
+    await runCli(["setup"], { cwd: projectDirectory });
   }, 180_000);
 
   afterAll(() => {

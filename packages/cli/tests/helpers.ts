@@ -347,7 +347,7 @@ export async function createConfiguredProject(dir: string): Promise<void> {
     },
   });
   initGitRepo(dir);
-  await runCli(["setup", "--yes"], { cwd: dir });
+  await runCli(["setup"], { cwd: dir });
 }
 
 /**

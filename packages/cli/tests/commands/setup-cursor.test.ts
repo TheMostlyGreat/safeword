@@ -32,7 +32,7 @@ describe("Test Suite: Setup - Cursor IDE Support", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       expect(
         fileExists(temporaryDirectory, ".cursor/rules/safeword-core.mdc"),
@@ -52,7 +52,7 @@ describe("Test Suite: Setup - Cursor IDE Support", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       expect(fileExists(temporaryDirectory, ".cursor/commands")).toBe(true);
       expect(fileExists(temporaryDirectory, ".cursor/commands/lint.md")).toBe(
@@ -70,7 +70,7 @@ describe("Test Suite: Setup - Cursor IDE Support", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const claudeLint = readTestFile(
         temporaryDirectory,
@@ -89,7 +89,7 @@ describe("Test Suite: Setup - Cursor IDE Support", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       expect(fileExists(temporaryDirectory, ".cursor/hooks.json")).toBe(true);
 
@@ -106,7 +106,7 @@ describe("Test Suite: Setup - Cursor IDE Support", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       expect(
         fileExists(
@@ -123,7 +123,7 @@ describe("Test Suite: Setup - Cursor IDE Support", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const hooksConfig = JSON.parse(
         readTestFile(temporaryDirectory, ".cursor/hooks.json"),
@@ -142,7 +142,7 @@ describe("Test Suite: Setup - Cursor IDE Support", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       expect(fileExists(temporaryDirectory, ".cursor/mcp.json")).toBe(true);
 
@@ -167,7 +167,7 @@ describe("Test Suite: Setup - Cursor IDE Support", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
       expect(fileExists(temporaryDirectory, ".cursor")).toBe(true);
 
       await runCli(["reset", "--yes"], { cwd: temporaryDirectory });
@@ -178,7 +178,7 @@ describe("Test Suite: Setup - Cursor IDE Support", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
       expect(fileExists(temporaryDirectory, ".safeword/hooks/cursor")).toBe(
         true,
       );

@@ -104,7 +104,7 @@
 **Steps**:
 
 1. Create Python project with `pyproject.toml`
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Read `.safeword/config.json`
 
 **Expected**:

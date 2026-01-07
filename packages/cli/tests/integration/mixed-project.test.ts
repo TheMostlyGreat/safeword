@@ -63,7 +63,7 @@ version = "0.1.0"
     );
 
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], { cwd: projectDirectory });
+    await runCli(["setup"], { cwd: projectDirectory });
   }, 180_000);
 
   afterAll(() => {

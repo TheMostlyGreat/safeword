@@ -63,7 +63,7 @@ describe("Test Suite: Conditional Setup for Go Projects", () => {
         createGoProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // Should NOT have node_modules with eslint
         expect(fileExists(projectDirectory, "node_modules/eslint")).toBe(false);
@@ -82,7 +82,7 @@ describe("Test Suite: Conditional Setup for Go Projects", () => {
         createGoProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // package.json should NOT be created
         expect(fileExists(projectDirectory, "package.json")).toBe(false);
@@ -98,7 +98,7 @@ describe("Test Suite: Conditional Setup for Go Projects", () => {
         createGoProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // .golangci.yml should be created
         expect(fileExists(projectDirectory, ".golangci.yml")).toBe(true);
@@ -118,7 +118,7 @@ describe("Test Suite: Conditional Setup for Go Projects", () => {
         createGoProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        const result = await runCli(["setup", "--yes"], {
+        const result = await runCli(["setup"], {
           cwd: projectDirectory,
         });
 
@@ -138,7 +138,7 @@ describe("Test Suite: Conditional Setup for Go Projects", () => {
         createGoProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // .safeword directory should exist
         expect(fileExists(projectDirectory, ".safeword")).toBe(true);
@@ -158,7 +158,7 @@ describe("Test Suite: Conditional Setup for Go Projects", () => {
         createGoProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // Hooks should exist
         expect(fileExists(projectDirectory, ".safeword/hooks")).toBe(true);
@@ -177,7 +177,7 @@ describe("Test Suite: Conditional Setup for Go Projects", () => {
         createJsGoProject(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // Should have ESLint configured (JS tooling)
         expect(fileExists(projectDirectory, "eslint.config.mjs")).toBe(true);
@@ -205,7 +205,7 @@ linters:
 `;
         writeTestFile(projectDirectory, ".golangci.yml", customConfig);
 
-        await runCli(["setup", "--yes"], { cwd: projectDirectory });
+        await runCli(["setup"], { cwd: projectDirectory });
 
         // Should preserve custom config
         const config = readTestFile(projectDirectory, ".golangci.yml");

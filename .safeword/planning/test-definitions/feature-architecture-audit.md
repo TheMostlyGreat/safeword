@@ -219,7 +219,7 @@ Tests for automatic architecture detection during `safeword setup`.
 **Steps**:
 
 1. Create project with `src/utils/` directory
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Check for config files
 
 **Expected**:
@@ -238,7 +238,7 @@ Tests for automatic architecture detection during `safeword setup`.
 **Steps**:
 
 1. Create simple project without architecture directories
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Check for config files
 
 **Expected**:
@@ -256,7 +256,7 @@ Tests for automatic architecture detection during `safeword setup`.
 **Steps**:
 
 1. Create project with `src/utils/`, `src/components/`
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Check stdout
 
 **Expected**:
@@ -273,7 +273,7 @@ Tests for automatic architecture detection during `safeword setup`.
 **Steps**:
 
 1. Create project with architecture directories
-2. Run `safeword setup --yes`
+2. Run `safeword setup`
 3. Check summary output
 
 **Expected**:

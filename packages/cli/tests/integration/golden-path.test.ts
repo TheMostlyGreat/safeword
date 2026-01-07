@@ -31,7 +31,7 @@ describe("E2E: Golden Path", () => {
     projectDirectory = createTemporaryDirectory();
     createTypeScriptPackageJson(projectDirectory);
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], { cwd: projectDirectory });
+    await runCli(["setup"], { cwd: projectDirectory });
   }, 180_000); // 3 min timeout for bun install
 
   afterAll(() => {

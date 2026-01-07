@@ -26,12 +26,12 @@ describe("Test Suite 6: Non-Interactive Setup", () => {
     removeTemporaryDirectory(temporaryDirectory);
   });
 
-  describe("Test 6.1: --yes flag skips all prompts", () => {
+  describe("Test 6.1: Setup runs non-interactively", () => {
     it("should complete without hanging", async () => {
       createTypeScriptPackageJson(temporaryDirectory);
-      // No git init - should skip git prompt with --yes
+      // No git init - setup runs non-interactively by default
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
         timeout: TIMEOUT_BUN_INSTALL,
       });
@@ -70,7 +70,7 @@ describe("Test Suite 6: Non-Interactive Setup", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       // No git init
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 

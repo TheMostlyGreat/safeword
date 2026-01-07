@@ -55,10 +55,6 @@ describe("Test Suite 1: Version and Help", () => {
     });
 
     it("should display command-specific flags in command help", async () => {
-      // Check setup --help for --yes flag
-      const setupHelp = await runCli(["setup", "--help"]);
-      expect(setupHelp.stdout).toMatch(/--yes|-y/);
-
       // Check diff --help for --verbose flag
       const diffHelp = await runCli(["diff", "--help"]);
       expect(diffHelp.stdout).toMatch(/--verbose|-v/);

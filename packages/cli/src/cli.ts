@@ -16,10 +16,9 @@ program
 program
   .command("setup")
   .description("Set up safeword in the current project")
-  .option("-y, --yes", "Accept all defaults (non-interactive mode)")
-  .action(async (options) => {
+  .action(async () => {
     const { setup } = await import("./commands/setup.js");
-    await setup(options);
+    await setup();
   });
 
 program

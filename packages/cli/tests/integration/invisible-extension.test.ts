@@ -51,7 +51,7 @@ export default [
 `;
         writeTestFile(projectDirectory, "eslint.config.mjs", existingConfig);
 
-        await runCli(["setup", "--yes"], {
+        await runCli(["setup"], {
           cwd: projectDirectory,
           timeout: SETUP_TIMEOUT,
         });
@@ -100,7 +100,7 @@ export default [
         );
         writeTestFile(projectDirectory, ".eslintrc.json", legacyConfig);
 
-        await runCli(["setup", "--yes"], {
+        await runCli(["setup"], {
           cwd: projectDirectory,
           timeout: SETUP_TIMEOUT,
         });
@@ -137,7 +137,7 @@ export default [
         createTypeScriptPackageJson(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], {
+        await runCli(["setup"], {
           cwd: projectDirectory,
           timeout: SETUP_TIMEOUT,
         });
@@ -181,7 +181,7 @@ select = ["E", "F"]
 `;
         writeTestFile(projectDirectory, "pyproject.toml", pyprojectContent);
 
-        await runCli(["setup", "--yes"], {
+        await runCli(["setup"], {
           cwd: projectDirectory,
           timeout: SETUP_TIMEOUT,
         });
@@ -223,7 +223,7 @@ version = "1.0.0"
 `;
         writeTestFile(projectDirectory, "pyproject.toml", pyprojectContent);
 
-        await runCli(["setup", "--yes"], {
+        await runCli(["setup"], {
           cwd: projectDirectory,
           timeout: SETUP_TIMEOUT,
         });
@@ -273,7 +273,7 @@ formatters:
 `;
         writeTestFile(projectDirectory, ".golangci.yml", golangciConfig);
 
-        await runCli(["setup", "--yes"], {
+        await runCli(["setup"], {
           cwd: projectDirectory,
           timeout: SETUP_TIMEOUT,
         });
@@ -315,7 +315,7 @@ formatters:
           "module example.com/myproject\n\ngo 1.21\n",
         );
 
-        await runCli(["setup", "--yes"], {
+        await runCli(["setup"], {
           cwd: projectDirectory,
           timeout: SETUP_TIMEOUT,
         });
@@ -348,7 +348,7 @@ formatters:
         createTypeScriptPackageJson(projectDirectory);
         initGitRepo(projectDirectory);
 
-        await runCli(["setup", "--yes"], {
+        await runCli(["setup"], {
           cwd: projectDirectory,
           timeout: SETUP_TIMEOUT,
         });

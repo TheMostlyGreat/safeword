@@ -39,7 +39,7 @@ describe("Test Suite 4: Setup - Linting (Integration)", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       expect(fileExists(temporaryDirectory, "eslint.config.mjs")).toBe(true);
 
@@ -52,7 +52,7 @@ describe("Test Suite 4: Setup - Linting (Integration)", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const content = readTestFile(temporaryDirectory, "eslint.config.mjs");
       expect(content).toMatch(/typescript|@typescript-eslint/i);
@@ -64,7 +64,7 @@ describe("Test Suite 4: Setup - Linting (Integration)", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       expect(fileExists(temporaryDirectory, ".prettierrc")).toBe(true);
 
@@ -79,7 +79,7 @@ describe("Test Suite 4: Setup - Linting (Integration)", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const packageJson = JSON.parse(
         readTestFile(temporaryDirectory, "package.json"),
@@ -95,7 +95,7 @@ describe("Test Suite 4: Setup - Linting (Integration)", () => {
       });
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const packageJson = JSON.parse(
         readTestFile(temporaryDirectory, "package.json"),
@@ -110,7 +110,7 @@ describe("Test Suite 4: Setup - Linting (Integration)", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const packageJson = JSON.parse(
         readTestFile(temporaryDirectory, "package.json"),
@@ -126,7 +126,7 @@ describe("Test Suite 4: Setup - Linting (Integration)", () => {
       });
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const packageJson = JSON.parse(
         readTestFile(temporaryDirectory, "package.json"),
@@ -144,7 +144,7 @@ describe("Test Suite 4: Setup - Linting (Integration)", () => {
       // Make package.json read-only
       chmodSync(nodePath.join(temporaryDirectory, "package.json"), 0o444);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -163,7 +163,7 @@ describe("Test Suite 4: Setup - Linting (Integration)", () => {
       createTypeScriptPackageJson(temporaryDirectory);
       initGitRepo(temporaryDirectory);
 
-      await runCli(["setup", "--yes"], { cwd: temporaryDirectory });
+      await runCli(["setup"], { cwd: temporaryDirectory });
 
       const packageJson = JSON.parse(
         readTestFile(temporaryDirectory, "package.json"),

@@ -278,14 +278,14 @@ it("leaves project clean after interrupted setup", async () => {
   mkdirSync(path.join(dir, ".safeword"));
   chmodSync(path.join(dir, ".safeword"), 0o444);
 
-  const result = await runCli(["setup", "--yes"], { cwd: dir });
+  const result = await runCli(["setup"], { cwd: dir });
   expect(result.exitCode).not.toBe(0);
 
   // Remove read-only, retry should work
   chmodSync(path.join(dir, ".safeword"), 0o755);
   rmdirSync(path.join(dir, ".safeword"));
 
-  const retry = await runCli(["setup", "--yes"], { cwd: dir });
+  const retry = await runCli(["setup"], { cwd: dir });
   expect(retry.exitCode).toBe(0);
 });
 ```

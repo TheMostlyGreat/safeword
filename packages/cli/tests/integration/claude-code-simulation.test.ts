@@ -31,7 +31,7 @@ describe("E2E: Claude Code Hook Path Resolution", () => {
     projectDirectory = createTemporaryDirectory();
     createTypeScriptPackageJson(projectDirectory);
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], { cwd: projectDirectory });
+    await runCli(["setup"], { cwd: projectDirectory });
     differentDirectory = createTemporaryDirectory();
   }, 180_000);
 

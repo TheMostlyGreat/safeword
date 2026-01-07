@@ -117,7 +117,7 @@ describe("Check Command - Reconcile Integration", () => {
       // Run actual setup (this is an integration test)
       const cliPath = nodePath.join(process.cwd(), "src/cli.ts");
       try {
-        execSync(`bunx tsx ${cliPath} setup --yes`, {
+        execSync(`bunx tsx ${cliPath} setup`, {
           cwd: temporaryDirectory,
           stdio: "pipe",
           timeout: 60_000,

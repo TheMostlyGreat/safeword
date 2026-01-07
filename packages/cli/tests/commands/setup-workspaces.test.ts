@@ -83,7 +83,7 @@ describe("Setup - Workspace Format Scripts", () => {
       });
       initGitRepo(temporaryDirectory);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -112,7 +112,7 @@ describe("Setup - Workspace Format Scripts", () => {
       });
       initGitRepo(temporaryDirectory);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -134,7 +134,7 @@ describe("Setup - Workspace Format Scripts", () => {
       createWorkspacePackage(temporaryDirectory, "packages/utils", {});
       initGitRepo(temporaryDirectory);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -162,7 +162,7 @@ describe("Setup - Workspace Format Scripts", () => {
       writeFileSync(nodePath.join(temporaryDirectory, "biome.json"), "{}");
       initGitRepo(temporaryDirectory);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -194,7 +194,7 @@ describe("Setup - Workspace Format Scripts", () => {
       createWorkspacePackage(temporaryDirectory, "packages/app", {});
       initGitRepo(temporaryDirectory);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
@@ -220,7 +220,7 @@ describe("Setup - Workspace Format Scripts", () => {
       // Don't create packages/missing
       initGitRepo(temporaryDirectory);
 
-      const result = await runCli(["setup", "--yes"], {
+      const result = await runCli(["setup"], {
         cwd: temporaryDirectory,
       });
 
