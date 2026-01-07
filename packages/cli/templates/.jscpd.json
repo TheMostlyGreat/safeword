@@ -1,0 +1,5 @@
+{
+  "ignore": [".claude/**", ".cursor/**", ".safeword/**"],
+  "minLines": 10,
+  "reporters": ["console"]
+}
