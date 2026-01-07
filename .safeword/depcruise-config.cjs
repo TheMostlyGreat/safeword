@@ -19,6 +19,22 @@ module.exports = {
       from: {},
       to: { dependencyTypes: ["deprecated"] },
     },
+    {
+      name: "no-cross-package-imports",
+      comment:
+        "Packages should not import from each other - keeps packages independent",
+      severity: "error",
+      from: { path: "^packages/cli/" },
+      to: { path: "^packages/website/" },
+    },
+    {
+      name: "no-cross-package-imports-reverse",
+      comment:
+        "Packages should not import from each other - keeps packages independent",
+      severity: "error",
+      from: { path: "^packages/website/" },
+      to: { path: "^packages/cli/" },
+    },
 
     // =========================================================================
     // WARNING RULES (flag issues but don't block)

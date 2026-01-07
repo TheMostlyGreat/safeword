@@ -28,13 +28,12 @@
     "dotenv-cli": "^11.0.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-boundaries": "^5.3.1",
-    "safeword": "workspace:*",
     "husky": "^9.1.7",
     "knip": "^5.78.0",
     "markdownlint-cli2": "^0.20.0",
     "prettier": "^3.7.4",
     "promptfoo": "^0.120.8",
+    "safeword": "workspace:*",
     "shellcheck": "^4.1.0"
   },
   "lint-staged": {

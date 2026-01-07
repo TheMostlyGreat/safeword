@@ -1,11 +1,11 @@
 /**
  * Safeword Monorepo ESLint Configuration
  *
- * Uses safeword for all rules + project-specific boundaries.
+ * Uses safeword presets for all rules.
+ * Package isolation enforced by dependency-cruiser (see .dependency-cruiser.cjs).
  */
 
 import eslintConfigPrettier from "eslint-config-prettier";
-import boundaries from "eslint-plugin-boundaries";
 import safeword from "./packages/cli/dist/presets/typescript/index.js";
 
 // Ignores
@@ -22,41 +22,12 @@ const ignores = [
   "packages/cli/scripts/*.js", // Node.js scripts with CommonJS globals
 ];
 
-// Monorepo boundaries configuration
-const boundariesConfig = {
-  name: "monorepo-boundaries",
-  plugins: { boundaries },
-  settings: {
-    "boundaries/elements": [
-      { type: "cli", pattern: "packages/cli/**", mode: "full" },
-      { type: "website", pattern: "packages/website/**", mode: "full" },
-    ],
-  },
-  rules: {
-    "boundaries/element-types": [
-      "error",
-      {
-        default: "disallow",
-        rules: [
-          // CLI is the main package - can only import from itself
-          { from: ["cli"], allow: ["cli"] },
-          // Website is isolated - no cross-package imports
-          { from: ["website"], allow: ["website"] },
-        ],
-      },
-    ],
-    "boundaries/no-unknown": "off",
-    "boundaries/no-unknown-files": "off",
-  },
-};
-
 // Start with ignores + safeword TypeScript config
 const configs = [
   { ignores },
   ...safeword.configs.recommendedTypeScript,
   ...safeword.configs.vitest,
   ...safeword.configs.playwright,
-  boundariesConfig,
   eslintConfigPrettier,
 
   // Config files override - disable strict TS rules for dynamic imports
