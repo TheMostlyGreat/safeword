@@ -392,24 +392,85 @@ Check for splitting at these points. Splitting is **suggested, not mandatory**�
 
 ### When to Split
 
-| Checkpoint  | Trigger                                 | Action                     |
-| ----------- | --------------------------------------- | -------------------------- |
-| **Entry**   | Multiple distinct outcomes, vague scope | Split into epic + features |
-| **Phase 3** | >15 scenarios OR 3+ distinct clusters   | Split by user journey      |
-| **Phase 5** | >20 tasks OR 5+ major components        | Split by component/layer   |
+| Checkpoint   | Trigger                               | Action                       |
+| ------------ | ------------------------------------- | ---------------------------- |
+| **Entry**    | 2+ user stories OR vague scope        | Split into epic + features   |
+| **Phase 3**  | >15 scenarios OR 3+ distinct clusters | Split by user journey        |
+| **Phase 5**  | >20 tasks OR 5+ major components      | Split by component/layer     |
+| **Phase 6**  | >10 tests per slice                   | Break into smaller slices    |
+| **TDD Loop** | >5 unit tests for single E2E          | Break E2E into smaller steps |
 
-**Epic detection heuristic:** Can't describe in ONE "As a [user] I want [thing] so that [value]" → probably an epic.
+### Entry Checkpoint: Examples + Reasoning
+
+**Before suggesting a split, reason through the request:**
+
+```
+STEP 1: Count distinct user stories
+- List each "As a [user] I want [thing]" you can identify
+- 1 story → feature
+- 2 parallel stories → suggest 2 features
+- 2 coupled stories (shared state) → 1 feature with 2 journeys
+- 3+ stories OR can't enumerate → epic
+
+STEP 2: Check against examples
+- Does this match epic or feature patterns below?
+
+STEP 3: Assess depth
+- How many sequential steps in the longest flow?
+- Deeper flows (6+ steps, state machines) → likely epic
+```
+
+**Epic examples (suggest split):**
+
+| Request                     | Why Epic                                                         |
+| --------------------------- | ---------------------------------------------------------------- |
+| "Add user authentication"   | Multiple flows (login, logout, session, register), state machine |
+| "Build analytics dashboard" | Multiple views, data sources, user roles                         |
+| "Add e-commerce checkout"   | Cart, payment, inventory, shipping - many concerns               |
+
+**Feature examples (proceed as-is):**
+
+| Request                | Why Feature                            |
+| ---------------------- | -------------------------------------- |
+| "Add password reset"   | Single flow, clear boundaries          |
+| "Add dark mode toggle" | One state change, affects styling only |
+| "Add export to CSV"    | Single action, well-defined output     |
+
+**Two-story example (suggest split into 2 features):**
+
+Request: "Add password reset and email verification"
+
+- Story 1: "As a user, I want to reset my password"
+- Story 2: "As a user, I want to verify my email"
+- These are **parallel** (independent flows) → suggest 2 feature tickets
+
+**Two-story example (keep as 1 feature):**
+
+Request: "Add login with remember me"
+
+- Story 1: "As a user, I want to log in"
+- Story 2: "As a user, I want to stay logged in"
+- These are **coupled** (shared session state) → 1 feature with 2 journeys
 
 ### Split Protocol
 
 When user accepts a split:
 
-1. **Create parent ticket** (epic) with `children:` array
-2. **Create child tickets** with:
-   - `parent:` linking to epic
-   - `phase:` set to appropriate restart point (see below)
-3. **Commit:** "chore: split [name] into N features"
-4. **Ask:** "Which feature should we start with?"
+**If no ticket exists yet:**
+
+1. Create epic ticket with `children:` array
+2. Create child tickets with `parent:` link
+3. Commit: "chore: split [name] into N features"
+4. Ask: "Which feature should we start with?"
+
+**If ticket already exists (promote to epic):**
+
+1. Update existing ticket: `type: feature` → `type: epic`
+2. Add `children:` array with new child ticket IDs
+3. Create child tickets with `parent:` linking to promoted ticket
+4. Add work log entry: "Promoted to epic, split into N features"
+5. Commit: "chore: promote [id] to epic, split into N features"
+6. Ask: "Which feature should we start with?"
 
 **Restart points after split:**
 
@@ -418,8 +479,10 @@ When user accepts a split:
 | Entry    | `intake`            | New features need their own discovery   |
 | Phase 3  | `scenario-gate`     | Scenarios exist, validate regrouped set |
 | Phase 5  | `implement`         | Decomposition done, start implementing  |
+| Phase 6  | `implement`         | Stay in implementation                  |
+| TDD Loop | `implement`         | Stay in TDD loop                        |
 
-### Example: Entry Split
+### Example: Entry Split (New Ticket)
 
 ```
 Epic: 001-user-auth
@@ -435,7 +498,109 @@ Epic: 001-user-auth
     └── phase: intake
 ```
 
+### Example: Entry Split (Existing Ticket Promoted)
+
+```
+Before:
+015-account-security
+├── type: feature
+└── phase: intake
+
+After:
+015-account-security (promoted)
+├── type: epic          ← changed
+├── children: [016, 017] ← added
+│
+├── 016-password-reset
+│   ├── parent: 015
+│   └── phase: intake
+│
+└── 017-email-verification
+    ├── parent: 015
+    └── phase: intake
+```
+
 Parent completes when ALL children reach `done`.
+
+### Phase 6 & TDD Loop Checkpoints
+
+These are **lightweight splits** - no new tickets, just reorganize work:
+
+**Phase 6 (>10 tests per slice):**
+
+- Add `## Implementation Slices` section to test-definitions
+- Each slice gets its own subsection with status marker
+- Example:
+
+  ```markdown
+  ## Implementation Slices
+
+  ### Slice 1: Auth Layer [in_progress]
+
+  - [x] Scenario 1.1
+  - [ ] Scenario 1.2
+
+  ### Slice 2: Validation Layer [pending]
+
+  - [ ] Scenario 2.1
+  ```
+
+**TDD Loop (>5 unit tests for single E2E):**
+
+- Break E2E into intermediate checkpoints
+- Each intermediate step gets its own commit
+- Example: Instead of one E2E "user completes checkout", break into:
+  1. E2E: User adds item to cart
+  2. E2E: User enters shipping info
+  3. E2E: User completes payment
+
+### Split Suggestion UX
+
+When threshold is breached, present split suggestion in two stages:
+
+**Stage 1: Summary (always show)**
+
+```
+"This looks like [N] distinct [features/journeys/slices].
+
+Threshold breached: [which threshold]
+Recommendation: Split into [N] [features/slices]
+
+[Accept] [See details] [Proceed anyway]"
+```
+
+**Stage 2: Details (on request)**
+
+If user selects "See details", show proposed structure:
+
+```
+"Proposed split:
+
+Feature 1: Password Reset
+- Scenarios: 1-5 (request, email, validation, success, errors)
+- Components: auth-service, email-service, reset-form
+
+Feature 2: Email Verification
+- Scenarios: 6-10 (signup, verify, resend, expiry, errors)
+- Components: auth-service, email-service, verify-flow
+
+Each becomes a separate ticket with its own BDD cycle."
+```
+
+### User Override
+
+User can always decline a split:
+
+**"Proceed anyway"** → Agent continues with original scope:
+
+- Log in work log: "Split suggested (N [features/slices]) but user declined"
+- Continue at current phase
+- Do NOT re-suggest at same checkpoint in same session
+
+**Re-suggestion at later checkpoint:**
+
+- If user declined at Entry but Phase 3 triggers (>15 scenarios)
+- Agent CAN suggest again with note: "Previously declined split at Entry. Phase 3 now has [N] scenarios, which also triggers split suggestion."
 
 ---
 
@@ -444,6 +609,6 @@ Parent completes when ALL children reach `done`.
 - **patch/task** → TDD directly (RED → GREEN → REFACTOR)
 - **feature** → full BDD flow (Phases 0-7), track in ticket `phase:` field
 - **Resume** → read ticket, find first unchecked scenario, continue
-- **Split** → check thresholds at Entry, Phase 3, Phase 5; user decides
+- **Split** → check thresholds at Entry, Phase 3, Phase 5, Phase 6, TDD Loop; user decides
 - **Done gate** → run /done before marking ticket complete
 - When unsure → default to task, user can `/bdd` to override
