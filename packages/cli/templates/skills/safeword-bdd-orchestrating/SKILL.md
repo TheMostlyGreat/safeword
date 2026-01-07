@@ -1,6 +1,6 @@
 ---
 name: bdd-orchestrating
-description: BDD orchestrator for feature-level work requiring multiple scenarios. Use when user says 'add', 'implement', 'build', 'feature', 'iteration', 'phase', or work touches 3+ files with new state/flows. Also use when user runs /bdd. Do NOT use for bug fixes, typos, config changes, or 1-2 file tasks.
+description: BDD orchestrator for feature-level work requiring multiple scenarios. Use when user says 'add', 'implement', 'build', 'feature', 'iteration', 'story', 'phase', or references an iteration/story from a spec. Also use when work touches 3+ files with new state/flows, or when user runs /bdd. Do NOT use for bug fixes, typos, config changes, or 1-2 file tasks.
 allowed-tools: '*'
 ---
 
@@ -194,6 +194,24 @@ After context check, offer discovery:
 
 Announce: "Entering implementation. TDD mode for each scenario."
 
+### Outside-In Test Layering
+
+Build tests from the outside in:
+
+1. **E2E first** — Prove the user-facing behavior works end-to-end
+2. **Integration** — Test component boundaries with real dependencies where practical
+3. **Unit** — Test isolated logic, mock external dependencies only when necessary
+
+This ensures you're testing real behavior, not implementation details.
+
+### Test Fixtures
+
+For complex test data:
+
+- Create factory functions (e.g., `createTestUser()`) instead of inline objects
+- Keep fixtures close to tests that use them
+- Name fixtures by scenario, not by data shape (e.g., `userWithExpiredSubscription`)
+
 ### Walking Skeleton (first scenario only)
 
 If project has no E2E infrastructure, build skeleton first:
@@ -299,6 +317,38 @@ Then try a smaller change or skip refactoring.
 - [ ] Full test suite passes
 - [ ] Build succeeds
 - [ ] Lint passes
+- [ ] Run `/audit` — no errors (warnings OK)
+
+### Flake Detection
+
+Run tests multiple times (3x recommended) to catch flaky tests:
+
+```bash
+for i in {1..3}; do bun test || echo "FLAKE DETECTED on run $i"; done
+```
+
+If any run fails inconsistently, investigate before marking done.
+
+### Cross-Scenario Refactoring
+
+After all scenarios pass, look for cleanup opportunities across the feature:
+
+| Pattern                     | Action                                    |
+| --------------------------- | ----------------------------------------- |
+| Duplicate setup code        | Extract shared fixture or helper          |
+| Similar test assertions     | Create custom matcher or assertion helper |
+| Repeated mock configuration | Create mock factory                       |
+| Copy-pasted business logic  | Extract shared module                     |
+
+This is OPTIONAL — only refactor if clear wins exist. Don't gold-plate.
+
+### Scenario Tagging (if using test runner that supports it)
+
+Consider tagging scenarios for selective test runs:
+
+- `@smoke` — Critical path tests, run on every commit
+- `@regression` — Full test suite, run before release
+- `@slow` — Long-running tests, exclude from watch mode
 
 ### Parent Epic (if applicable)
 
@@ -317,15 +367,23 @@ If ticket has `parent:` field:
 ## Current Behavior
 
 1. Detect work level (see SAFEWORD.md "Work Level Detection")
-2. Announce with override hint
-3. **If ticket exists:** Read phase, resume at appropriate point
-4. **Phase 0-2:** Context check (goal/scope), optional discovery
-5. **Phase 3:** Draft scenarios from spec, save to test-definitions
-6. **Phase 4:** Validate scenarios (atomic, observable, deterministic)
-7. **Phase 5:** Decompose into components, assign test layers, create task breakdown
-8. **Phase 6:** TDD implementation (RED → GREEN → REFACTOR for each scenario)
-9. **Phase 7:** Done gate checklist, parent epic update, final commit
-10. **Update phase** in ticket when transitioning
+2. **If user references iteration/story/phase from a spec:**
+   - Check if child ticket exists for that iteration
+   - If not → create ticket, run full BDD (this IS feature-level work)
+   - If yes → resume at current phase
+3. Announce with override hint
+4. **If ticket exists:** Read phase, resume at appropriate point
+5. **Artifact-first rule:** Before doing work, create/verify the phase artifact:
+   - Phase 0-2 → ticket at `.safeword-project/issues/XXX-*.md`
+   - Phase 3 → test-definitions at `.safeword-project/test-definitions/XXX-*.md`
+   - Phase 5 → task breakdown in ticket
+6. **Phase 0-2:** Context check (goal/scope), optional discovery
+7. **Phase 3:** Draft scenarios from spec, save to test-definitions
+8. **Phase 4:** Validate scenarios (atomic, observable, deterministic)
+9. **Phase 5:** Decompose into components, assign test layers, create task breakdown
+10. **Phase 6:** TDD implementation (RED → GREEN → REFACTOR for each scenario)
+11. **Phase 7:** Done gate checklist, parent epic update, final commit
+12. **Update phase** in ticket when transitioning
 
 ---
 

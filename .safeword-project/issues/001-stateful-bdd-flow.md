@@ -3,9 +3,9 @@ id: 001
 type: epic
 phase: implement
 status: in_progress
-children: [006]
+children: [006, 007, 008, 009]
 created: 2026-01-04T15:38:00Z
-last_modified: 2026-01-06T14:38:00Z
+last_modified: 2026-01-07T06:16:00Z
 ---
 
 # Stateful BDD Flow
