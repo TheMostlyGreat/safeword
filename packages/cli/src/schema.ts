@@ -158,6 +158,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/commands/tdd.md',
     '.cursor/commands/tdd.md',
     '.safeword/commands/tdd.md',
+    // Brainstorming skill removed - never used, BDD discovery phase covers this (v0.16.0)
+    '.claude/skills/safeword-brainstorming/SKILL.md',
+    '.cursor/rules/safeword-brainstorming.mdc',
   ],
 
   // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
@@ -194,6 +197,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/lib', // Shell libraries no longer needed with Bun (v0.13.0)
     '.claude/skills/safeword-enforcing-tdd', // Renamed to safeword-tdd-enforcing (v0.16.0)
     '.claude/skills/safeword-tdd-enforcing', // Removed - BDD includes TDD (v0.16.0)
+    '.claude/skills/safeword-brainstorming', // Removed - BDD discovery phase covers this (v0.16.0)
   ],
 
   // Files owned by safeword (overwritten on upgrade if content changed)
@@ -274,10 +278,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.safeword/scripts/cleanup-zombies.sh': { template: 'scripts/cleanup-zombies.sh' },
 
-    // Claude skills (6) and commands (8)
-    '.claude/skills/safeword-brainstorming/SKILL.md': {
-      template: 'skills/safeword-brainstorming/SKILL.md',
-    },
+    // Claude skills (5) and commands (8)
     '.claude/skills/safeword-debugging/SKILL.md': {
       template: 'skills/safeword-debugging/SKILL.md',
     },
@@ -302,11 +303,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/commands/quality-review.md': { template: 'commands/quality-review.md' },
     '.claude/commands/refactor.md': { template: 'commands/refactor.md' },
 
-    // Cursor rules (7 files)
+    // Cursor rules (6 files)
     '.cursor/rules/safeword-core.mdc': { template: 'cursor/rules/safeword-core.mdc' },
-    '.cursor/rules/safeword-brainstorming.mdc': {
-      template: 'cursor/rules/safeword-brainstorming.mdc',
-    },
     '.cursor/rules/safeword-debugging.mdc': {
       template: 'cursor/rules/safeword-debugging.mdc',
     },

@@ -15,8 +15,8 @@ Convert specs into detailed implementation plans for LLM agents.
 Answer IN ORDER. Stop at first match:
 
 1. Spec exists and is approved? → Use this skill
-2. No spec yet? → Use brainstorming skill first
-3. Simple task, obvious steps? → Skip (use tdd-enforcing directly)
+2. No spec yet? → Use BDD skill (Phase 0-2 handles discovery)
+3. Simple task, obvious steps? → Skip (use BDD Phase 6 TDD directly)
 
 ---
 
