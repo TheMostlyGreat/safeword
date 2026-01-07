@@ -103,6 +103,7 @@ function containsAccumulatorSpread(
   node: Node,
   accName: string,
 ): SpreadElement | undefined {
+  // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check -- Only specific node types can contain spreads; all others return undefined via default
   switch (node.type) {
     case "SpreadElement": {
       return spreadsAccumulator(node, accName) ? node : undefined;
