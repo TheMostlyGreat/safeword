@@ -16,8 +16,8 @@ import { describe, expect, it } from 'vitest';
 // Type guard for filtering out undefined values
 const isDefined = <T>(x: T | undefined): x is T => x !== undefined;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = nodePath.dirname(__filename);
+const __filename = import.meta.filename;
+const __dirname = import.meta.dirname;
 
 // This import will fail until schema.ts is created (RED phase)
 // import { SAFEWORD_SCHEMA } from '../src/schema.js';
@@ -38,6 +38,8 @@ describe('Schema - Single Source of Truth', () => {
       const fullPath = nodePath.join(dir, entry.name);
 
       if (entry.isDirectory()) {
+        // Skip _shared directories - they contain include files, not installable templates
+        if (entry.name.startsWith('_')) continue;
         files.push(...collectTemplateFiles(fullPath, relativePath));
       } else {
         files.push(relativePath);

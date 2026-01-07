@@ -496,3 +496,88 @@ export function runEslint(
     encoding: 'utf8',
   });
 }
+
+/**
+ * Gets reconcile test utilities without running reconcile.
+ * Use this when you need to set up files before running reconcile.
+ * @param dir - Project directory
+ * @param options - Setup options
+ * @param options.packageJson - Custom package.json content (created if provided)
+ */
+export async function getReconcileTestUtilities(
+  dir: string,
+  options: { packageJson?: Record<string, unknown> } = {},
+): Promise<{
+  reconcile: typeof import('../src/reconcile.js').reconcile;
+  SAFEWORD_SCHEMA: typeof import('../src/schema.js').SAFEWORD_SCHEMA;
+  createProjectContext: typeof import('../src/utils/context.js').createProjectContext;
+}> {
+  const { packageJson } = options;
+
+  const { reconcile } = await import('../src/reconcile.js');
+  const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+  const { createProjectContext } = await import('../src/utils/context.js');
+
+  if (packageJson) {
+    writeFileSync(nodePath.join(dir, 'package.json'), JSON.stringify(packageJson, undefined, 2));
+  }
+
+  return { reconcile, SAFEWORD_SCHEMA, createProjectContext };
+}
+
+/**
+ * Sets up a project for reconcile tests by creating package.json and running install.
+ * Reduces boilerplate in reconcile-based tests.
+ * @param dir - Project directory
+ * @param options - Setup options
+ * @param options.mode - Reconcile mode (defaults to 'install')
+ * @param options.packageJson - Custom package.json content
+ * @returns Reconcile result and utilities for further testing
+ */
+export async function setupReconcileTest(
+  dir: string,
+  options: {
+    mode?: 'install' | 'upgrade' | 'uninstall';
+    packageJson?: Record<string, unknown>;
+  } = {},
+): Promise<{
+  reconcile: typeof import('../src/reconcile.js').reconcile;
+  SAFEWORD_SCHEMA: typeof import('../src/schema.js').SAFEWORD_SCHEMA;
+  ctx: ReturnType<typeof import('../src/utils/context.js').createProjectContext>;
+  result: Awaited<ReturnType<typeof import('../src/reconcile.js').reconcile>>;
+}> {
+  const { mode = 'install', packageJson = { name: 'test', version: '1.0.0' } } = options;
+
+  const { reconcile, SAFEWORD_SCHEMA, createProjectContext } = await getReconcileTestUtilities(
+    dir,
+    {
+      packageJson,
+    },
+  );
+
+  const ctx = createProjectContext(dir);
+  const result = await reconcile(SAFEWORD_SCHEMA, mode, ctx);
+
+  return { reconcile, SAFEWORD_SCHEMA, ctx, result };
+}
+
+/**
+ * Runs the post-tool-lint hook on a file.
+ * Simulates Claude Code PostToolUse event for lint testing.
+ * @param projectDir - Project directory with safeword hooks installed
+ * @param filePath - Absolute path to the file being linted
+ */
+export function runLintHook(projectDir: string, filePath: string): SpawnSyncReturns<string> {
+  const hookInput = JSON.stringify({
+    session_id: 'test-session',
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Write',
+    tool_input: { file_path: filePath },
+  });
+
+  return spawnSync('bash', ['-c', `echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`], {
+    cwd: projectDir,
+    env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
+    encoding: 'utf8',
+  });
+}

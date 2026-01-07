@@ -8,33 +8,34 @@
  */
 
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import {
+  createTemporaryDirectory,
+  getReconcileTestUtilities,
+  removeTemporaryDirectory,
+  setupReconcileTest,
+} from '../helpers';
 
 describe('Setup Command - Reconcile Integration', () => {
   let temporaryDirectory: string;
 
   beforeEach(() => {
-    temporaryDirectory = mkdtempSync(nodePath.join(tmpdir(), 'safeword-setup-reconcile-'));
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    rmSync(temporaryDirectory, { recursive: true, force: true });
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
   describe('reconcile mode=install', () => {
     it('should compute all install actions correctly', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
-
-      // Create minimal package.json
-      writeFileSync(
-        nodePath.join(temporaryDirectory, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } = await getReconcileTestUtilities(
+        temporaryDirectory,
+        { packageJson: { name: 'test', version: '1.0.0' } },
       );
 
       const ctx = createProjectContext(temporaryDirectory);
@@ -73,17 +74,7 @@ describe('Setup Command - Reconcile Integration', () => {
     });
 
     it('should create all directories when applied', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
-
-      writeFileSync(
-        nodePath.join(temporaryDirectory, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
-      );
-
-      const ctx = createProjectContext(temporaryDirectory);
-      await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
+      await setupReconcileTest(temporaryDirectory);
 
       // Check directories created
       expect(existsSync(nodePath.join(temporaryDirectory, '.safeword'))).toBe(true);
@@ -99,17 +90,7 @@ describe('Setup Command - Reconcile Integration', () => {
     });
 
     it('should create all owned files when applied', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
-
-      writeFileSync(
-        nodePath.join(temporaryDirectory, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
-      );
-
-      const ctx = createProjectContext(temporaryDirectory);
-      await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
+      await setupReconcileTest(temporaryDirectory);
 
       // Check core files
       expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/SAFEWORD.md'))).toBe(true);
@@ -139,13 +120,9 @@ describe('Setup Command - Reconcile Integration', () => {
     });
 
     it('should create managed files only if missing', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
-
-      writeFileSync(
-        nodePath.join(temporaryDirectory, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } = await getReconcileTestUtilities(
+        temporaryDirectory,
+        { packageJson: { name: 'test', version: '1.0.0' } },
       );
 
       // Create existing eslint config with custom content
@@ -169,17 +146,7 @@ describe('Setup Command - Reconcile Integration', () => {
     });
 
     it('should apply JSON merges for settings.json', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
-
-      writeFileSync(
-        nodePath.join(temporaryDirectory, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
-      );
-
-      const ctx = createProjectContext(temporaryDirectory);
-      await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
+      await setupReconcileTest(temporaryDirectory);
 
       // Settings should be created with hooks
       expect(existsSync(nodePath.join(temporaryDirectory, '.claude/settings.json'))).toBe(true);
@@ -191,17 +158,7 @@ describe('Setup Command - Reconcile Integration', () => {
     });
 
     it('should apply JSON merges for package.json scripts', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
-
-      writeFileSync(
-        nodePath.join(temporaryDirectory, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
-      );
-
-      const ctx = createProjectContext(temporaryDirectory);
-      await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
+      await setupReconcileTest(temporaryDirectory);
 
       // Package.json should have scripts added
       const packageJson = JSON.parse(
@@ -213,17 +170,7 @@ describe('Setup Command - Reconcile Integration', () => {
     });
 
     it('should create AGENTS.md via text patch', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
-
-      writeFileSync(
-        nodePath.join(temporaryDirectory, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
-      );
-
-      const ctx = createProjectContext(temporaryDirectory);
-      await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
+      await setupReconcileTest(temporaryDirectory);
 
       // AGENTS.md should be created with safeword link
       expect(existsSync(nodePath.join(temporaryDirectory, 'AGENTS.md'))).toBe(true);
@@ -232,13 +179,9 @@ describe('Setup Command - Reconcile Integration', () => {
     });
 
     it('should prepend to existing AGENTS.md', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
-
-      writeFileSync(
-        nodePath.join(temporaryDirectory, 'package.json'),
-        JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } = await getReconcileTestUtilities(
+        temporaryDirectory,
+        { packageJson: { name: 'test', version: '1.0.0' } },
       );
 
       // Create existing AGENTS.md
@@ -257,24 +200,15 @@ describe('Setup Command - Reconcile Integration', () => {
     });
 
     it('should detect framework-specific packages', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
-
-      // Create package.json with Astro dependency
-      writeFileSync(
-        nodePath.join(temporaryDirectory, 'package.json'),
-        JSON.stringify(
-          {
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } = await getReconcileTestUtilities(
+        temporaryDirectory,
+        {
+          packageJson: {
             name: 'test',
             version: '1.0.0',
-            devDependencies: {
-              astro: '^4.0.0',
-            },
+            devDependencies: { astro: '^4.0.0' },
           },
-          undefined,
-          2,
-        ),
+        },
       );
 
       const ctx = createProjectContext(temporaryDirectory);

@@ -24,6 +24,7 @@ import {
   readTestFile,
   removeTemporaryDirectory,
   runCli,
+  runLintHook,
   writeTestFile,
 } from '../helpers';
 
@@ -126,31 +127,11 @@ version = "0.1.0"
   });
 
   describe('Lint hook routes to correct linter', () => {
-    function runLintHook(filePath: string) {
-      // Use post-tool-lint.ts with JSON input (same approach as golden-path tests)
-      const hookInput = JSON.stringify({
-        session_id: 'test-session',
-        hook_event_name: 'PostToolUse',
-        tool_name: 'Write',
-        tool_input: { file_path: filePath },
-      });
-
-      return spawnSync(
-        'bash',
-        ['-c', `echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`],
-        {
-          cwd: projectDirectory,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
-          encoding: 'utf8',
-        },
-      );
-    }
-
     it('routes .ts files to ESLint', () => {
       const filePath = nodePath.join(projectDirectory, 'src/lint-ts.ts');
       writeTestFile(projectDirectory, 'src/lint-ts.ts', 'const x=1\n');
 
-      const result = runLintHook(filePath);
+      const result = runLintHook(projectDirectory, filePath);
       expect(result.status).toBe(0);
 
       // ESLint/Prettier should format
@@ -162,7 +143,7 @@ version = "0.1.0"
       const filePath = nodePath.join(projectDirectory, 'src/lint-py.py');
       writeTestFile(projectDirectory, 'src/lint-py.py', 'x=1;y=2');
 
-      const result = runLintHook(filePath);
+      const result = runLintHook(projectDirectory, filePath);
       expect(result.status).toBe(0);
 
       // Ruff should format

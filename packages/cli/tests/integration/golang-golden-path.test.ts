@@ -25,6 +25,7 @@ import {
   readTestFile,
   removeTemporaryDirectory,
   runCli,
+  runLintHook,
   writeTestFile,
 } from '../helpers';
 
@@ -131,20 +132,8 @@ func main(){println("no spaces")}`,
 func hookTest(){println("test")}`,
     );
 
-    // Simulate Claude Code PostToolUse hook input
-    const hookInput = JSON.stringify({
-      session_id: 'test-session',
-      hook_event_name: 'PostToolUse',
-      tool_name: 'Write',
-      tool_input: { file_path: filePath },
-    });
-
-    // Run the hook
-    execSync(`echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`, {
-      cwd: projectDirectory,
-      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
-      encoding: 'utf8',
-    });
+    // Run the lint hook
+    runLintHook(projectDirectory, filePath);
 
     // File should be formatted by golangci-lint fmt
     const result = readTestFile(projectDirectory, 'hook-test.go');

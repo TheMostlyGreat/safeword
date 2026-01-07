@@ -25,6 +25,7 @@ import {
   readTestFile,
   removeTemporaryDirectory,
   runCli,
+  runLintHook,
   writeTestFile,
 } from '../helpers';
 
@@ -151,30 +152,11 @@ func bad() {
   });
 
   describe('Lint hook routes to correct linter', () => {
-    function runLintHook(filePath: string) {
-      const hookInput = JSON.stringify({
-        session_id: 'test-session',
-        hook_event_name: 'PostToolUse',
-        tool_name: 'Write',
-        tool_input: { file_path: filePath },
-      });
-
-      return spawnSync(
-        'bash',
-        ['-c', `echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`],
-        {
-          cwd: projectDirectory,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
-          encoding: 'utf8',
-        },
-      );
-    }
-
     it('routes .ts files to ESLint', () => {
       const filePath = nodePath.join(projectDirectory, 'src/lint-ts.ts');
       writeTestFile(projectDirectory, 'src/lint-ts.ts', 'const x=1\n');
 
-      const result = runLintHook(filePath);
+      const result = runLintHook(projectDirectory, filePath);
       expect(result.status).toBe(0);
 
       // ESLint/Prettier should format
@@ -191,7 +173,7 @@ func bad() {
 func lintGo(){println("test")}`,
       );
 
-      const result = runLintHook(filePath);
+      const result = runLintHook(projectDirectory, filePath);
       expect(result.status).toBe(0);
 
       // golangci-lint fmt should format

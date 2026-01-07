@@ -8,27 +8,29 @@
  */
 
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import {
+  createTemporaryDirectory,
+  getReconcileTestUtilities,
+  removeTemporaryDirectory,
+} from '../helpers';
 
 describe('Reset Command - Reconcile Integration', () => {
   let temporaryDirectory: string;
 
   beforeEach(() => {
-    temporaryDirectory = mkdtempSync(nodePath.join(tmpdir(), 'safeword-reset-reconcile-'));
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    rmSync(temporaryDirectory, { recursive: true, force: true });
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
-  // Helper to create a configured project
-  /**
-   *
-   */
+  // Helper to create a configured project for uninstall testing
   function createConfiguredProject() {
     // package.json
     writeFileSync(
@@ -111,9 +113,8 @@ describe('Reset Command - Reconcile Integration', () => {
 
   describe('reconcile mode=uninstall', () => {
     it('should remove .claude owned files', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } =
+        await getReconcileTestUtilities(temporaryDirectory);
 
       createConfiguredProject();
 
@@ -130,9 +131,8 @@ describe('Reset Command - Reconcile Integration', () => {
     });
 
     it('should unmerge JSON settings (remove safeword hooks, keep custom)', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } =
+        await getReconcileTestUtilities(temporaryDirectory);
 
       createConfiguredProject();
 
@@ -153,9 +153,8 @@ describe('Reset Command - Reconcile Integration', () => {
     });
 
     it('should remove safeword link from AGENTS.md via text-unpatch', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } =
+        await getReconcileTestUtilities(temporaryDirectory);
 
       createConfiguredProject();
 
@@ -169,9 +168,8 @@ describe('Reset Command - Reconcile Integration', () => {
     });
 
     it('should clean up safeword-owned directories', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } =
+        await getReconcileTestUtilities(temporaryDirectory);
 
       createConfiguredProject();
 
@@ -184,9 +182,8 @@ describe('Reset Command - Reconcile Integration', () => {
     });
 
     it('should remove owned directories (except preserved)', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } =
+        await getReconcileTestUtilities(temporaryDirectory);
 
       createConfiguredProject();
 
@@ -210,9 +207,8 @@ describe('Reset Command - Reconcile Integration', () => {
     });
 
     it('should unmerge MCP servers', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } =
+        await getReconcileTestUtilities(temporaryDirectory);
 
       createConfiguredProject();
 
@@ -228,9 +224,8 @@ describe('Reset Command - Reconcile Integration', () => {
     });
 
     it('should preserve managed files (eslint, prettier)', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } =
+        await getReconcileTestUtilities(temporaryDirectory);
 
       createConfiguredProject();
 
@@ -245,9 +240,8 @@ describe('Reset Command - Reconcile Integration', () => {
 
   describe('reconcile mode=uninstall-full', () => {
     it('should also remove managed files', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } =
+        await getReconcileTestUtilities(temporaryDirectory);
 
       createConfiguredProject();
 
@@ -261,9 +255,8 @@ describe('Reset Command - Reconcile Integration', () => {
     });
 
     it('should compute packages to remove', async () => {
-      const { reconcile } = await import('../../src/reconcile.js');
-      const { SAFEWORD_SCHEMA } = await import('../../src/schema.js');
-      const { createProjectContext } = await import('../../src/utils/context.js');
+      const { reconcile, SAFEWORD_SCHEMA, createProjectContext } =
+        await getReconcileTestUtilities(temporaryDirectory);
 
       createConfiguredProject();
 

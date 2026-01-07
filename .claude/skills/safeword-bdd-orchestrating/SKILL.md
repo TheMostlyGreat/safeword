@@ -247,28 +247,7 @@ If project has no E2E infrastructure, build skeleton first:
 3. Run FULL test suite → verify no regressions
 4. Commit: `feat: [scenario name]`
 
-**Verification Gate:** Evidence before claims.
-
-| Claim            | Requires                      | Not Sufficient              |
-| ---------------- | ----------------------------- | --------------------------- |
-| "Tests pass"     | Fresh test output: 0 failures | "should pass", previous run |
-| "Build succeeds" | Build command: exit 0         | "linter passed"             |
-
-**Anti-Pattern: Mock Implementations**
-
-Don't hardcode values to pass tests:
-
-```typescript
-// ❌ BAD - Hardcoded to pass test
-function calculate(x) {
-  return 42;
-}
-
-// ✅ GOOD - Actual logic
-function calculate(x) {
-  return x * 2;
-}
-```
+@./\_shared/tdd-verification.md
 
 #### 6.3 REFACTOR - Clean Up
 

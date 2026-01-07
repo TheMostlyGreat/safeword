@@ -152,6 +152,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Skill renamed from enforcing-tdd to tdd-enforcing (v0.16.0)
     '.claude/skills/safeword-enforcing-tdd/SKILL.md',
     '.cursor/rules/safeword-enforcing-tdd.mdc',
+    // TDD skill and command removed - BDD skill includes full TDD in Phase 6 (v0.16.0)
+    '.claude/skills/safeword-tdd-enforcing/SKILL.md',
+    '.cursor/rules/safeword-tdd-enforcing.mdc',
+    '.claude/commands/tdd.md',
+    '.cursor/commands/tdd.md',
+    '.safeword/commands/tdd.md',
   ],
 
   // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
@@ -187,10 +193,15 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.husky', // Pre-commit hooks no longer managed by safeword
     '.safeword/lib', // Shell libraries no longer needed with Bun (v0.13.0)
     '.claude/skills/safeword-enforcing-tdd', // Renamed to safeword-tdd-enforcing (v0.16.0)
+    '.claude/skills/safeword-tdd-enforcing', // Removed - BDD includes TDD (v0.16.0)
   ],
 
   // Files owned by safeword (overwritten on upgrade if content changed)
   ownedFiles: {
+    // Project root config files (for audit/quality tools)
+    '.jscpd.json': { template: '.jscpd.json' },
+    'knip.json': { template: 'knip.json' },
+
     // Core files
     '.safeword/AGENTS.md': { template: 'AGENTS.md' },
     '.safeword/SAFEWORD.md': { template: 'SAFEWORD.md' },
@@ -263,15 +274,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.safeword/scripts/cleanup-zombies.sh': { template: 'scripts/cleanup-zombies.sh' },
 
-    // Claude skills and commands (9 files)
+    // Claude skills (6) and commands (8)
     '.claude/skills/safeword-brainstorming/SKILL.md': {
       template: 'skills/safeword-brainstorming/SKILL.md',
     },
     '.claude/skills/safeword-debugging/SKILL.md': {
       template: 'skills/safeword-debugging/SKILL.md',
-    },
-    '.claude/skills/safeword-tdd-enforcing/SKILL.md': {
-      template: 'skills/safeword-tdd-enforcing/SKILL.md',
     },
     '.claude/skills/safeword-quality-reviewing/SKILL.md': {
       template: 'skills/safeword-quality-reviewing/SKILL.md',
@@ -286,7 +294,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       template: 'skills/safeword-bdd-orchestrating/SKILL.md',
     },
     '.claude/commands/bdd.md': { template: 'commands/bdd.md' },
-    '.claude/commands/tdd.md': { template: 'commands/tdd.md' },
     '.claude/commands/done.md': { template: 'commands/done.md' },
     '.claude/commands/drift.md': { template: 'commands/drift.md' },
     '.claude/commands/audit.md': { template: 'commands/audit.md' },
@@ -303,9 +310,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.cursor/rules/safeword-debugging.mdc': {
       template: 'cursor/rules/safeword-debugging.mdc',
     },
-    '.cursor/rules/safeword-tdd-enforcing.mdc': {
-      template: 'cursor/rules/safeword-tdd-enforcing.mdc',
-    },
     '.cursor/rules/safeword-quality-reviewing.mdc': {
       template: 'cursor/rules/safeword-quality-reviewing.mdc',
     },
@@ -319,9 +323,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       template: 'cursor/rules/safeword-bdd-orchestrating.mdc',
     },
 
-    // Cursor commands (9 files - same as Claude)
+    // Cursor commands (8 files - same as Claude)
     '.cursor/commands/bdd.md': { template: 'commands/bdd.md' },
-    '.cursor/commands/tdd.md': { template: 'commands/tdd.md' },
     '.cursor/commands/done.md': { template: 'commands/done.md' },
     '.cursor/commands/drift.md': { template: 'commands/drift.md' },
     '.cursor/commands/audit.md': { template: 'commands/audit.md' },

@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const TEMPLATES_DIR = join(__dirname, '../../templates');
 const SKILLS_DIR = join(TEMPLATES_DIR, 'skills');
 const COMMANDS_DIR = join(TEMPLATES_DIR, 'commands');
@@ -107,12 +107,12 @@ function parseFrontmatter(
 }
 
 /**
- * Get all skill directories
+ * Get all skill directories (excludes _shared which contains include files)
  */
 function getSkillDirectories(): string[] {
   try {
     return readdirSync(SKILLS_DIR, { withFileTypes: true })
-      .filter(d => d.isDirectory())
+      .filter(d => d.isDirectory() && !d.name.startsWith('_'))
       .map(d => d.name);
   } catch {
     return [];
