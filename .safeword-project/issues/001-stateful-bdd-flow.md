@@ -34,6 +34,7 @@ last_modified: 2026-01-07T06:16:00Z
 
 ---
 
+- 2026-01-07T21:00:00Z Complete: Iteration 7 (010) - Decomposition checkpoints with examples-first detection
 - 2026-01-06T14:38:00Z Split: Created ticket 006 for Iteration 5. Promoted 001 to epic. Iterations 1-4 done pre-split.
 - 2026-01-06T14:35:00Z Reorg: Story 12 becomes Iteration 5 (was shortcut, now formal BDD). Starting Phase 0-2 discovery.
 - 2026-01-06T03:20:00Z Refactor: Iteration 4 - added edge case (partial answers), example discovery round per LLM guide
