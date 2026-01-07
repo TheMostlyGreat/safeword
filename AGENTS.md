@@ -61,6 +61,64 @@ When gathering context, ask like a good PM—not like a system collecting form f
 | Scenarios       | "Walk through a concrete situation. What happens?"          |
 | Regret          | "If we skip this, what support tickets will we get?"        |
 
+### Skills, Subagents, and Hooks: Know the Difference
+
+Claude Code has three mechanisms for controlling agent behavior. Understanding their enforcement levels prevents design mistakes.
+
+| Mechanism     | What It Does                         | Enforcement | Can Chain? |
+| ------------- | ------------------------------------ | ----------- | ---------- |
+| **Skills**    | Guidance documents in same context   | Soft        | No         |
+| **Subagents** | Isolated execution, separate context | Soft        | No nesting |
+| **Hooks**     | Shell commands on lifecycle events   | Hard        | N/A        |
+
+**Skills** add knowledge to the current conversation. Claude decides when to apply them based on semantic matching. They cannot invoke other skills or guarantee execution.
+
+**Subagents** run in isolated context windows with configurable tool access. They're good for task isolation but:
+
+- Cannot spawn other subagents (no nesting)
+- Don't inherit skills unless explicitly configured
+- Claude decides when to delegate (soft enforcement)
+
+**Hooks** execute shell commands at lifecycle events (PreToolUse, PostToolUse, etc.). They provide hard enforcement:
+
+- Exit code 2 blocks execution until acknowledged
+- Run at app level, not relying on Claude to decide
+- Perfect for validation, formatting, notifications
+
+**Design principles:**
+
+1. **Don't rely on skill-to-skill handoffs** — they depend on agent memory
+2. **Don't expect subagents to chain** — no nesting allowed
+3. **Use hooks for guaranteed enforcement** — they always run
+4. **Inline guidance when handoffs fail** — merge skills instead of delegating
+
+### Frequent Commits as Checkpoints
+
+Small, atomic commits after each meaningful change create rollback points and reviewable history.
+
+**When to commit:**
+
+- After each test passes (GREEN phase)
+- Before refactoring (safe point to revert)
+- After successful refactor
+- When switching context or tasks
+
+**Research sources:**
+
+- Addy Osmani: Small iteration loops, "waterfall in 15 minutes" ([source](https://addyosmani.com/blog/ai-coding-workflow/))
+- Spotify: Independent verifiers validate completion ([source](https://engineering.atspotify.com/2025/12/feedback-loops-background-coding-agents-part-3))
+
+### Evidence-Based Completion
+
+Don't claim done without proof. Completion prompts should require observable evidence.
+
+**Pattern:**
+
+- ❌ "All tests pass" (claim without proof)
+- ✅ "✓ 156/156 tests pass" (evidence)
+
+**Implementation:** Quality hook's done-phase prompt requires showing specific counts/outputs before allowing completion claim.
+
 ## Architecture Decisions
 
 ### Reconciliation Engine (`reconcile.ts`)

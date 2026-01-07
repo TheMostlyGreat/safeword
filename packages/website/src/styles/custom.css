@@ -335,7 +335,7 @@ p.hero-subtitle {
 
 /* Double GitHub button size on splash page */
 [data-has-hero] header a[href*='github'] {
-  transform: scale(2);
+  transform: scale(1.5);
   transform-origin: center right;
 }
 
@@ -344,7 +344,7 @@ p.hero-subtitle {
   position: fixed;
   top: 40px;
   transform: translateY(-50%);
-  right: 5.5rem;
+  right: 6rem;
   z-index: 9999;
   font-family: 'Oswald', sans-serif !important;
   text-transform: uppercase;

@@ -1,6 +1,6 @@
 ---
 name: bdd-orchestrating
-description: BDD orchestrator for feature-level work requiring multiple scenarios. Use when user says 'add', 'implement', 'build', 'feature', 'iteration', 'phase', or work touches 3+ files with new state/flows. Also use when user runs /bdd. Do NOT use for bug fixes, typos, config changes, or 1-2 file tasks—use safeword-tdd-enforcing directly.
+description: BDD orchestrator for feature-level work requiring multiple scenarios. Use when user says 'add', 'implement', 'build', 'feature', 'iteration', 'phase', or work touches 3+ files with new state/flows. Also use when user runs /bdd. Do NOT use for bug fixes, typos, config changes, or 1-2 file tasks.
 allowed-tools: '*'
 ---
 
@@ -80,6 +80,8 @@ Check if spec exists with required context:
 
 **Exit context check:** Spec has goal AND scope sections.
 
+**Edge case:** User gives partial answer (goal but not scope) → Ask only for missing field, don't re-ask answered questions.
+
 ### Discovery (Optional)
 
 After context check, offer discovery:
@@ -101,6 +103,12 @@ After context check, offer discovery:
 4. **Max 5 rounds** — after round 5, proceed automatically
 
 **Exit discovery:** User says "ready" OR max rounds reached → update ticket to `define-behavior`.
+
+**Example round:**
+
+> Agent: "Round 2 - Failure modes. What happens when a session expires mid-flow? What's the worst-case scenario?"
+> User: "They lose progress. We'd get support tickets about lost work."
+> Agent: "Got it - session expiry = data loss risk. Another round or ready?"
 
 ---
 
@@ -172,34 +180,137 @@ After context check, offer discovery:
    - E2E tests last (prove everything works)
 4. **Present to user** — Show components, test layers, task order
 
+**Complex features** (3+ components, new tech choices, schema changes) may warrant documentation first. See `.safeword/guides/design-doc-guide.md` for feature-level decisions, `.safeword/guides/architecture-guide.md` for cross-cutting choices.
+
 **Exit:** User approves breakdown → update ticket to `phase: implement`
 
 ---
 
-## Phase 6 Entry: TDD Handoff
+## Phase 6: Implementation (TDD)
 
-**Entry:** Agent enters `implement` phase
+**Entry:** Agent enters `implement` phase (after decomposition complete)
 
-**Handoff protocol:**
+**Iron Law:** NO IMPLEMENTATION UNTIL TEST FAILS FOR THE RIGHT REASON
 
-1. Announce: "Entering implementation. TDD mode for each scenario."
-2. Invoke `safeword-tdd-enforcing` skill
-3. TDD skill takes over for RED → GREEN → REFACTOR cycles
+Announce: "Entering implementation. TDD mode for each scenario."
 
-**For each scenario:**
-
-1. Write E2E test first (from scenario Given/When/Then)
-2. E2E fails (RED) — expected, nothing implemented yet
-3. TDD loop builds pieces until E2E passes
-4. Mark scenario `[x]` when E2E is GREEN
-
-**Walking skeleton (first scenario only):**
+### Walking Skeleton (first scenario only)
 
 If project has no E2E infrastructure, build skeleton first:
 
 - Thinnest possible slice proving architecture works
 - Form → API → response → UI (no real logic)
 - This becomes foundation for all scenarios
+
+### For Each Scenario (RED → GREEN → REFACTOR):
+
+#### 6.1 RED - Write Failing Test
+
+1. Pick ONE test from test-definitions (first unchecked `[ ]`)
+2. Write E2E test code (from Given/When/Then)
+3. Run test → verify fails for RIGHT reason (behavior missing, not syntax)
+4. Commit: `test: [scenario name]`
+
+**Red Flags → STOP:**
+
+| Flag                    | Action                           |
+| ----------------------- | -------------------------------- |
+| Test passes immediately | Rewrite - you're testing nothing |
+| Syntax error            | Fix syntax, not behavior         |
+| Wrote implementation    | Delete it, return to test        |
+| Multiple tests at once  | Pick ONE                         |
+
+#### 6.2 GREEN - Minimal Implementation
+
+**Iron Law:** ONLY WRITE CODE THE TEST REQUIRES
+
+1. Write minimal code to pass test
+2. Run test → verify passes
+3. Run FULL test suite → verify no regressions
+4. Commit: `feat: [scenario name]`
+
+**Verification Gate:** Evidence before claims.
+
+| Claim            | Requires                      | Not Sufficient              |
+| ---------------- | ----------------------------- | --------------------------- |
+| "Tests pass"     | Fresh test output: 0 failures | "should pass", previous run |
+| "Build succeeds" | Build command: exit 0         | "linter passed"             |
+
+**Anti-Pattern: Mock Implementations**
+
+Don't hardcode values to pass tests:
+
+```typescript
+// ❌ BAD - Hardcoded to pass test
+function calculate(x) {
+  return 42;
+}
+
+// ✅ GOOD - Actual logic
+function calculate(x) {
+  return x * 2;
+}
+```
+
+#### 6.3 REFACTOR - Clean Up
+
+**Iron Law:** TESTS MUST PASS BEFORE AND AFTER EVERY CHANGE
+
+| Smell                     | Action                           |
+| ------------------------- | -------------------------------- |
+| Duplication introduced    | Extract shared function/constant |
+| Unclear name              | Rename to reveal intent          |
+| Long function (>20 lines) | Extract helper                   |
+| Magic number/string       | Extract constant                 |
+| No obvious improvements   | Skip refactor, proceed to 6.4    |
+
+**Protocol:**
+
+1. Run tests → must pass (baseline)
+2. Make ONE refactoring change
+3. Run tests → must still pass
+4. Commit: `refactor: [what improved]`
+5. Repeat if more smells exist
+
+**Revert if tests fail:**
+
+```bash
+git checkout -- <changed-files>
+```
+
+Then try a smaller change or skip refactoring.
+
+#### 6.4 Mark & Iterate
+
+1. Mark scenario `[x]` in test-definitions
+2. Return to 6.1 for next scenario, or proceed to Phase 7 if all done
+
+---
+
+## Phase 7: Done Gate
+
+**Entry:** All scenarios marked `[x]` in test-definitions
+
+**Before marking ticket `status: done`, complete this checklist:**
+
+### Required (run /done to automate)
+
+- [ ] All scenarios `[x]` in test-definitions
+- [ ] Full test suite passes
+- [ ] Build succeeds
+- [ ] Lint passes
+
+### Parent Epic (if applicable)
+
+If ticket has `parent:` field:
+
+1. Add completion entry to parent's work log
+2. If all `children:` done → update parent `status: done`
+
+### Final Commit
+
+1. Update ticket: `phase: done`, `status: done`, `last_modified: [now]`
+2. Commit: `feat(scope): [summary]`
 
 ---
 
@@ -212,14 +323,70 @@ If project has no E2E infrastructure, build skeleton first:
 5. **Phase 3:** Draft scenarios from spec, save to test-definitions
 6. **Phase 4:** Validate scenarios (atomic, observable, deterministic)
 7. **Phase 5:** Decompose into components, assign test layers, create task breakdown
-8. **Phase 6 Entry:** Hand off to `safeword-tdd-enforcing` for implementation
-9. **Update phase** in ticket when transitioning
+8. **Phase 6:** TDD implementation (RED → GREEN → REFACTOR for each scenario)
+9. **Phase 7:** Done gate checklist, parent epic update, final commit
+10. **Update phase** in ticket when transitioning
+
+---
+
+## Decomposition Checkpoints
+
+Check for splitting at these points. Splitting is **suggested, not mandatory**—user decides.
+
+### When to Split
+
+| Checkpoint  | Trigger                                 | Action                     |
+| ----------- | --------------------------------------- | -------------------------- |
+| **Entry**   | Multiple distinct outcomes, vague scope | Split into epic + features |
+| **Phase 3** | >15 scenarios OR 3+ distinct clusters   | Split by user journey      |
+| **Phase 5** | >20 tasks OR 5+ major components        | Split by component/layer   |
+
+**Epic detection heuristic:** Can't describe in ONE "As a [user] I want [thing] so that [value]" → probably an epic.
+
+### Split Protocol
+
+When user accepts a split:
+
+1. **Create parent ticket** (epic) with `children:` array
+2. **Create child tickets** with:
+   - `parent:` linking to epic
+   - `phase:` set to appropriate restart point (see below)
+3. **Commit:** "chore: split [name] into N features"
+4. **Ask:** "Which feature should we start with?"
+
+**Restart points after split:**
+
+| Split At | Child Restarts From | Why                                     |
+| -------- | ------------------- | --------------------------------------- |
+| Entry    | `intake`            | New features need their own discovery   |
+| Phase 3  | `scenario-gate`     | Scenarios exist, validate regrouped set |
+| Phase 5  | `implement`         | Decomposition done, start implementing  |
+
+### Example: Entry Split
+
+```
+Epic: 001-user-auth
+├── type: epic
+├── children: [002, 003]
+│
+├── 002-login-flow
+│   ├── parent: 001
+│   └── phase: intake
+│
+└── 003-registration-flow
+    ├── parent: 001
+    └── phase: intake
+```
+
+Parent completes when ALL children reach `done`.
 
 ---
 
 ## Key Takeaways
 
-- **patch/task** → delegate to TDD immediately
-- **feature** → BDD phases first, track in ticket `phase:` field
+- **patch/task** → TDD directly (RED → GREEN → REFACTOR)
+- **feature** → full BDD flow (Phases 0-7), track in ticket `phase:` field
 - **Resume** → read ticket, find first unchecked scenario, continue
+- **Split** → check thresholds at Entry, Phase 3, Phase 5; user decides
+- **Done gate** → run /done before marking ticket complete
 - When unsure → default to task, user can `/bdd` to override

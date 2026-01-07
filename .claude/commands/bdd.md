@@ -1,8 +1,8 @@
 ---
-description: Force BDD flow for current task (use when task should be treated as feature)
+description: Orchestrate BDD flow for this task (define behaviors before implementation)
 ---
 
-# Force BDD Flow
+# Orchestrate BDD
 
 Override detection and use BDD workflow for this task.
 
@@ -15,9 +15,8 @@ Override detection and use BDD workflow for this task.
 ## Behavior
 
 1. Switch to `safeword-bdd-orchestrating` skill
-2. Hand off to TDD for implementation
-
-Future iterations will add: context check, discovery, scenarios, validation, decomposition.
+2. Run through BDD phases: context check, discovery, scenarios, validation, decomposition
+3. Continue with inline TDD (Phase 6: RED → GREEN → REFACTOR)
 
 ## Example
 
@@ -25,6 +24,6 @@ Future iterations will add: context check, discovery, scenarios, validation, dec
 User: Change the auth flow to use OAuth
 Agent: Task. Writing tests first. `/bdd` to override.
 User: /bdd
-Agent: Feature. Defining behaviors first. `/tdd` to override.
-       [hands off to TDD for implementation]
+Agent: Feature. Defining behaviors first...
+       What's the goal? What should users be able to do?
 ```

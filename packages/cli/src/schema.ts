@@ -287,6 +287,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.claude/commands/bdd.md': { template: 'commands/bdd.md' },
     '.claude/commands/tdd.md': { template: 'commands/tdd.md' },
+    '.claude/commands/done.md': { template: 'commands/done.md' },
     '.claude/commands/drift.md': { template: 'commands/drift.md' },
     '.claude/commands/audit.md': { template: 'commands/audit.md' },
     '.claude/commands/cleanup-zombies.md': { template: 'commands/cleanup-zombies.md' },
@@ -318,9 +319,10 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       template: 'cursor/rules/safeword-bdd-orchestrating.mdc',
     },
 
-    // Cursor commands (8 files - same as Claude)
+    // Cursor commands (9 files - same as Claude)
     '.cursor/commands/bdd.md': { template: 'commands/bdd.md' },
     '.cursor/commands/tdd.md': { template: 'commands/tdd.md' },
+    '.cursor/commands/done.md': { template: 'commands/done.md' },
     '.cursor/commands/drift.md': { template: 'commands/drift.md' },
     '.cursor/commands/audit.md': { template: 'commands/audit.md' },
     '.cursor/commands/cleanup-zombies.md': { template: 'commands/cleanup-zombies.md' },

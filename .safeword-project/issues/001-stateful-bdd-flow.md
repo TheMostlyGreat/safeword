@@ -1,10 +1,11 @@
 ---
 id: 001
-type: feature
+type: epic
 phase: implement
 status: in_progress
+children: [006]
 created: 2026-01-04T15:38:00Z
-last_modified: 2026-01-04T15:38:00Z
+last_modified: 2026-01-06T14:38:00Z
 ---
 
 # Stateful BDD Flow
@@ -15,15 +16,15 @@ last_modified: 2026-01-04T15:38:00Z
 
 ## Snowflake Implementation Order
 
-| Iter | Stories         | Capability                 | Deliverable                               |
-| ---- | --------------- | -------------------------- | ----------------------------------------- |
-| 1    | 1, 11 (partial) | Detection + announcement   | "Feature detected" → handoff to TDD       |
-| 2    | 9, 11 (partial) | Phase tracking + resume    | Ticket `phase:` field, resume mid-feature |
-| 3    | 4, 5            | Scenarios (Phase 3-4)      | Draft + validate Given/When/Then          |
-| 4    | 2, 3, 11        | Discovery (Phase 0-2)      | Context check + optional spitballing      |
-| 5    | 6, 7, 8, 11     | Implementation (Phase 5-7) | Outside-in TDD, done checklist            |
-| 6    | 10              | Decomposition              | Split suggestions at thresholds           |
-| 7    | 12              | Phase-aware quality        | Review adapts to current phase            |
+| Iter | Stories         | Capability                   | Deliverable                               |
+| ---- | --------------- | ---------------------------- | ----------------------------------------- |
+| 1    | 1, 11 (partial) | Detection + announcement     | "Feature detected" → handoff to TDD       |
+| 2    | 9, 11 (partial) | Phase tracking + resume      | Ticket `phase:` field, resume mid-feature |
+| 3    | 4, 5            | Scenarios (Phase 3-4)        | Draft + validate Given/When/Then          |
+| 4    | 2, 3, 11        | Discovery (Phase 0-2)        | Context check + optional spitballing      |
+| 5    | 12              | Phase-aware quality (formal) | BDD scenarios for quality hook behavior   |
+| 6    | 6, 7, 8, 11     | Implementation (Phase 5-7)   | Outside-in TDD, done checklist            |
+| 7    | 10              | Decomposition                | Split suggestions at thresholds           |
 
 ## Planning Docs
 
@@ -33,6 +34,8 @@ last_modified: 2026-01-04T15:38:00Z
 
 ---
 
+- 2026-01-06T14:38:00Z Split: Created ticket 006 for Iteration 5. Promoted 001 to epic. Iterations 1-4 done pre-split.
+- 2026-01-06T14:35:00Z Reorg: Story 12 becomes Iteration 5 (was shortcut, now formal BDD). Starting Phase 0-2 discovery.
 - 2026-01-06T03:20:00Z Refactor: Iteration 4 - added edge case (partial answers), example discovery round per LLM guide
 - 2026-01-06T03:05:00Z Complete: Iteration 4 - Phase 0-2 (Context Check & Discovery) - 9 scenarios, added to BDD skill
 - 2026-01-06T01:45:00Z Complete: Story 12 - Phase-aware quality review (stop hook reads ticket phase, adapts prompts)

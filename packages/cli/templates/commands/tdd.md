@@ -1,8 +1,8 @@
 ---
-description: Force TDD flow for current task (skip BDD phases, go straight to tests)
+description: Enforce TDD flow for this task (skip BDD, write tests first)
 ---
 
-# Force TDD Flow
+# Enforce TDD
 
 Override detection and skip BDD workflow, going directly to TDD.
 
@@ -14,8 +14,8 @@ Override detection and skip BDD workflow, going directly to TDD.
 
 ## Behavior
 
-1. Skip BDD phases (0-4)
-2. Hand off directly to `safeword-tdd-enforcing` skill
+1. Skip BDD discovery/scenario phases (0-4)
+2. Jump directly to Phase 6 (TDD) in `safeword-bdd-orchestrating` skill
 3. Begin with RED phase (write failing tests)
 
 ## Example

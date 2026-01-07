@@ -213,8 +213,8 @@ Fallback: task. User can /bdd to override.
 **Always announce after detection:**
 
 - **patch:** "Patch. Fixing directly."
-- **task:** "Task. Writing tests first. `/bdd` to override." → Follow TDD skill
-- **feature:** "Feature. Defining behaviors first. `/tdd` to override." → Follow BDD skill phases
+- **task:** "Task. Writing tests first. `/bdd` to override." → TDD (RED → GREEN → REFACTOR)
+- **feature:** "Feature. Defining behaviors first. `/tdd` to override." → BDD phases (0-7), TDD inline at Phase 6
 
 **Examples:**
 
