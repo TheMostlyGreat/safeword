@@ -262,6 +262,7 @@ export const golangOwnedFiles: Record<string, FileDefinition> = {
 export const golangManagedFiles: Record<string, ManagedFileDefinition> = {
   // Project-level Go linter config (created only if no existing golangci config)
   ".golangci.yml": {
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
     generator: (ctx) => {
       // Skip if project already has golangci config (safeword will use .safeword/.golangci.yml)
       if (ctx.projectType.existingGolangciConfig) return;
