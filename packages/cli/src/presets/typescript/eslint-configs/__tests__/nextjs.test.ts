@@ -10,7 +10,11 @@
 import { describe, expect, it } from "vitest";
 
 import { recommendedTypeScriptNext } from "../recommended-nextjs.js";
-import { getAllRules, getRuleConfig, getSeverityNumber } from "./test-utils.js";
+import {
+  getAllRules,
+  getRuleConfig,
+  getSeverityNumber,
+} from "./test-utilities.js";
 
 const ERROR = 2;
 const WARN = 1;

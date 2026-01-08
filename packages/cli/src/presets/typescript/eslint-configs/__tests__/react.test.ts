@@ -10,7 +10,7 @@
 import { describe, expect, it } from "vitest";
 
 import { recommendedTypeScriptReact } from "../recommended-react.js";
-import { getRuleConfig, getSeverityNumber } from "./test-utils.js";
+import { getRuleConfig, getSeverityNumber } from "./test-utilities.js";
 
 const ERROR = 2;
 

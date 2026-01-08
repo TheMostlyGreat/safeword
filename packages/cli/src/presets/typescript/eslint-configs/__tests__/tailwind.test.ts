@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 
 import { TAILWIND_FILES, tailwindConfig } from "../tailwind.js";
-import { getAllRules, getRuleConfig, getSeverity } from "./test-utils.js";
+import { getAllRules, getRuleConfig, getSeverity } from "./test-utilities.js";
 
 describe("Tailwind config", () => {
   it("exports tailwindConfig as an array", () => {

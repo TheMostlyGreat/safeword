@@ -11,7 +11,11 @@ import { describe, expect, it } from "vitest";
 
 import { playwrightConfig } from "../playwright.js";
 import { vitestConfig } from "../vitest.js";
-import { getAllRules, getRuleConfig, getSeverityNumber } from "./test-utils.js";
+import {
+  getAllRules,
+  getRuleConfig,
+  getSeverityNumber,
+} from "./test-utilities.js";
 
 const ERROR = 2;
 const WARN = 1;

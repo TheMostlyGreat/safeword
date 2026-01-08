@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 
 import { astroConfig } from "../astro.js";
-import { getAllRules, getRuleConfig, getSeverity } from "./test-utils.js";
+import { getAllRules, getRuleConfig, getSeverity } from "./test-utilities.js";
 
 describe("Astro config", () => {
   it("exports astroConfig as an array", () => {
