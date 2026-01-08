@@ -31,7 +31,7 @@ describe("boundaries.ts", () => {
   });
 
   // Helper to create directories
-  function createDir(...paths: string[]): void {
+  function createDirectory(...paths: string[]): void {
     for (const p of paths) {
       mkdirSync(nodePath.join(temporaryDirectory, p), { recursive: true });
     }
@@ -49,7 +49,7 @@ describe("boundaries.ts", () => {
 
     describe("standard project structure", () => {
       it("detects src/utils directory", () => {
-        createDir("src/utils");
+        createDirectory("src/utils");
 
         const result = detectArchitecture(temporaryDirectory);
 
@@ -63,7 +63,7 @@ describe("boundaries.ts", () => {
       });
 
       it("detects src/components directory", () => {
-        createDir("src/components");
+        createDirectory("src/components");
 
         const result = detectArchitecture(temporaryDirectory);
 
@@ -73,12 +73,17 @@ describe("boundaries.ts", () => {
       });
 
       it("detects multiple architecture layers", () => {
-        createDir("src/types", "src/utils", "src/components", "src/features");
+        createDirectory(
+          "src/types",
+          "src/utils",
+          "src/components",
+          "src/features",
+        );
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.elements).toHaveLength(4);
-        const layers = result.elements.map((e) => e.layer);
+        const layers = result.elements.map((element) => element.layer);
         expect(layers).toContain("types");
         expect(layers).toContain("utils");
         expect(layers).toContain("components");
@@ -86,44 +91,48 @@ describe("boundaries.ts", () => {
       });
 
       it("detects root-level directories without src/", () => {
-        createDir("utils", "components");
+        createDirectory("utils", "components");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.elements).toHaveLength(2);
-        expect(result.elements.find((e) => e.layer === "utils")?.pattern).toBe(
-          "utils/**",
-        );
         expect(
-          result.elements.find((e) => e.layer === "components")?.pattern,
+          result.elements.find((element) => element.layer === "utils")?.pattern,
+        ).toBe("utils/**");
+        expect(
+          result.elements.find((element) => element.layer === "components")
+            ?.pattern,
         ).toBe("components/**");
       });
 
       it("detects alternative directory names", () => {
-        createDir("src/helpers", "src/ui", "src/api");
+        createDirectory("src/helpers", "src/ui", "src/api");
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.elements).toHaveLength(3);
-        expect(result.elements.find((e) => e.layer === "utils")?.location).toBe(
-          "src/helpers",
-        );
         expect(
-          result.elements.find((e) => e.layer === "components")?.location,
+          result.elements.find((element) => element.layer === "utils")
+            ?.location,
+        ).toBe("src/helpers");
+        expect(
+          result.elements.find((element) => element.layer === "components")
+            ?.location,
         ).toBe("src/ui");
         expect(
-          result.elements.find((e) => e.layer === "services")?.location,
+          result.elements.find((element) => element.layer === "services")
+            ?.location,
         ).toBe("src/api");
       });
 
       it("prefers src/ over root level for same layer", () => {
-        createDir("src/utils", "utils");
+        createDirectory("src/utils", "utils");
 
         const result = detectArchitecture(temporaryDirectory);
 
         // Should only have one utils entry (src/utils scanned first)
         const utilitiesElements = result.elements.filter(
-          (e) => e.layer === "utils",
+          (element) => element.layer === "utils",
         );
         expect(utilitiesElements).toHaveLength(1);
         expect(utilitiesElements[0].pattern).toBe("src/utils/**");
@@ -132,7 +141,7 @@ describe("boundaries.ts", () => {
 
     describe("monorepo detection", () => {
       it("detects packages/ as monorepo", () => {
-        createDir("packages/core", "packages/ui");
+        createDirectory("packages/core", "packages/ui");
 
         const result = detectArchitecture(temporaryDirectory);
 
@@ -140,7 +149,7 @@ describe("boundaries.ts", () => {
       });
 
       it("detects apps/ as monorepo", () => {
-        createDir("apps/web", "apps/mobile");
+        createDirectory("apps/web", "apps/mobile");
 
         const result = detectArchitecture(temporaryDirectory);
 
@@ -148,7 +157,7 @@ describe("boundaries.ts", () => {
       });
 
       it("detects libs/ as monorepo", () => {
-        createDir("libs/shared");
+        createDirectory("libs/shared");
 
         const result = detectArchitecture(temporaryDirectory);
 
@@ -156,20 +165,23 @@ describe("boundaries.ts", () => {
       });
 
       it("scans inside monorepo packages", () => {
-        createDir("packages/core/src/utils", "packages/ui/src/components");
+        createDirectory(
+          "packages/core/src/utils",
+          "packages/ui/src/components",
+        );
 
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.isMonorepo).toBe(true);
         expect(result.elements).toHaveLength(2);
 
-        const patterns = result.elements.map((e) => e.pattern);
+        const patterns = result.elements.map((element) => element.pattern);
         expect(patterns).toContain("packages/core/src/utils/**");
         expect(patterns).toContain("packages/ui/src/components/**");
       });
 
       it("ignores hidden directories in monorepo root", () => {
-        createDir("packages/.hidden", "packages/visible");
+        createDirectory("packages/.hidden", "packages/visible");
 
         const result = detectArchitecture(temporaryDirectory);
 
@@ -178,7 +190,7 @@ describe("boundaries.ts", () => {
       });
 
       it("combines monorepo and root-level architecture", () => {
-        createDir("packages/core/src/utils", "src/shared");
+        createDirectory("packages/core/src/utils", "src/shared");
 
         const result = detectArchitecture(temporaryDirectory);
 
@@ -190,12 +202,12 @@ describe("boundaries.ts", () => {
     describe("deduplication", () => {
       it("deduplicates elements with same pattern", () => {
         // This shouldn't normally happen, but test dedup logic
-        createDir("src/utils");
+        createDirectory("src/utils");
 
         const result = detectArchitecture(temporaryDirectory);
 
         const utilitiesElements = result.elements.filter(
-          (e) => e.layer === "utils",
+          (element) => element.layer === "utils",
         );
         expect(utilitiesElements).toHaveLength(1);
       });
