@@ -154,7 +154,7 @@ describe("Sync Config Command", () => {
       writeTestFile(
         temporaryDirectory,
         "package.json",
-        JSON.stringify(packageJson, null, 2),
+        JSON.stringify(packageJson, undefined, 2),
       );
 
       const result = await runCli(["sync-config"], { cwd: temporaryDirectory });
