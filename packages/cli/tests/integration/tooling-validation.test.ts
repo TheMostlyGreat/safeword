@@ -213,7 +213,7 @@ describe("E2E: React ESLint Violation Detection", () => {
             safeword: SAFEWORD_VERSION,
           },
         },
-        null,
+        undefined,
         2,
       ),
     );
@@ -234,7 +234,7 @@ describe("E2E: React ESLint Violation Detection", () => {
           },
           include: ["src"],
         },
-        null,
+        undefined,
         2,
       ),
     );
