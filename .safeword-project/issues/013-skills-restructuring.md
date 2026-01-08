@@ -43,3 +43,13 @@ This epic covers restructuring skills for better LLM performance.
 - Just-in-time loading, few-shot examples > extensive rules
 - Performance cliff at 70-80% context
 - Simple masking halves cost while matching summarization performance
+
+## Minor Guide Cleanups (During Implementation)
+
+Small fixes to apply when touching related files:
+
+| Guide               | Change                                        | Rationale                                                                                                                                       |
+| ------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| design-doc-guide.md | Remove escalation check (lines 3-11) entirely | Decision belongs in BDD Phase 5 flow, not in operational guide; by the time LLM loads this guide, it has already decided to create a design doc |
+
+These are too small for separate tickets but should be done when implementing 013a-c.
