@@ -24,15 +24,15 @@
     "deps:validate": "depcruise packages/*/src --config .dependency-cruiser.cjs --output-type err"
   },
   "devDependencies": {
-    "dependency-cruiser": "^17.3.5",
+    "dependency-cruiser": "^17.3.6",
     "dotenv-cli": "^11.0.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
-    "knip": "^5.78.0",
+    "knip": "^5.80.0",
     "markdownlint-cli2": "^0.20.0",
     "prettier": "^3.7.4",
-    "promptfoo": "^0.120.8",
+    "promptfoo": "^0.120.10",
     "safeword": "workspace:*",
     "shellcheck": "^4.1.0"
   },
@@ -55,5 +55,9 @@
     "*.sh": [
       "shellcheck"
     ]
+  },
+  "dependencies": {
+    "eslint-plugin-jsdoc": "^61.7.1",
+    "typescript-eslint": "^8.52.0"
   }
 }

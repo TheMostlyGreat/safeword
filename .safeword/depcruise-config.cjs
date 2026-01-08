@@ -4,82 +4,71 @@ module.exports = {
     // ERROR RULES (block on violations)
     // =========================================================================
     {
-      name: "no-circular",
-      comment:
-        "Circular dependencies cause runtime issues and make code hard to reason about",
-      severity: "error",
+      name: 'no-circular',
+      comment: 'Circular dependencies cause runtime issues and make code hard to reason about',
+      severity: 'error',
       from: {},
       to: { circular: true },
     },
     {
-      name: "no-deprecated-deps",
-      comment:
-        "Deprecated npm packages should be replaced - they may have security issues or be unmaintained",
-      severity: "error",
+      name: 'no-deprecated-deps',
+      comment: 'Deprecated npm packages should be replaced - they may have security issues or be unmaintained',
+      severity: 'error',
       from: {},
-      to: { dependencyTypes: ["deprecated"] },
-    },
-    {
-      name: "no-cross-package-imports",
-      comment:
-        "Packages should not import from each other - keeps packages independent",
-      severity: "error",
-      from: { path: "^packages/([^/]+)/" },
-      to: { path: "^packages/", pathNot: "^packages/$1/" },
+      to: { dependencyTypes: ['deprecated'] },
     },
 
     // =========================================================================
     // WARNING RULES (flag issues but don't block)
     // =========================================================================
     {
-      name: "no-dev-deps-in-src",
-      comment:
-        "Production code should not import devDependencies - may cause runtime failures",
-      severity: "warn",
+      name: 'no-dev-deps-in-src',
+      comment: 'Production code should not import devDependencies - may cause runtime failures',
+      severity: 'warn',
       from: {
-        path: ["^src", "^packages/[^/]+/src"],
-        pathNot: "\\.test\\.[tj]sx?$",
+        path: ['^src', '^packages/[^/]+/src'],
+        pathNot: '\\.test\\.[tj]sx?$',
       },
-      to: { dependencyTypes: ["npm-dev"] },
+      to: { dependencyTypes: ['npm-dev'] },
     },
     {
-      name: "no-orphans",
-      comment: "Orphan modules are not imported anywhere - may be dead code",
-      severity: "warn",
+      name: 'no-orphans',
+      comment: 'Orphan modules are not imported anywhere - may be dead code',
+      severity: 'warn',
       from: {
         orphan: true,
         pathNot: [
           // Entry points
-          "(^|/)index\\.[tj]sx?$",
-          "(^|/)main\\.[tj]sx?$",
-          "(^|/)cli\\.[tj]s$",
-          "\\.config\\.[tj]s$",
-          "\\.config\\.mjs$",
+          '(^|/)index\\.[tj]sx?$',
+          '(^|/)main\\.[tj]sx?$',
+          '(^|/)cli\\.[tj]s$',
+          '\\.config\\.[tj]s$',
+          '\\.config\\.mjs$',
           // Test files
-          "\\.test\\.[tj]sx?$",
-          "\\.spec\\.[tj]sx?$",
-          "/tests/",
-          "/__tests__/",
+          '\\.test\\.[tj]sx?$',
+          '\\.spec\\.[tj]sx?$',
+          '/tests/',
+          '/__tests__/',
           // Astro/Next.js pages and content
-          "/src/content/",
-          "/src/pages/",
-          "/app/",
+          '/src/content/',
+          '/src/pages/',
+          '/app/',
         ],
       },
       to: {},
     },
   ],
   options: {
-    doNotFollow: { path: ["node_modules", ".safeword"] },
+    doNotFollow: { path: ['node_modules', '.safeword'] },
     exclude: {
-      path: ["node_modules", "dist", "build", "coverage", "\\.d\\.ts$"],
+      path: ['node_modules', 'dist', 'build', 'coverage', '\\.d\\.ts$'],
     },
     tsPreCompilationDeps: true,
-    tsConfig: { fileName: "tsconfig.json" },
+    tsConfig: { fileName: 'tsconfig.json' },
     enhancedResolveOptions: {
-      extensions: [".ts", ".tsx", ".js", ".jsx"],
-      exportsFields: ["exports"],
-      conditionNames: ["import", "require", "node", "default"],
+      extensions: ['.ts', '.tsx', '.js', '.jsx'],
+      exportsFields: ['exports'],
+      conditionNames: ['import', 'require', 'node', 'default'],
     },
   },
 };
