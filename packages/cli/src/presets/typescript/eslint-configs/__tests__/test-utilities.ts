@@ -24,6 +24,7 @@ export function getRuleConfig(config: any[], ruleId: string): any {
  * Handles all ESLint config formats: number, string, or array.
  * Returns the original value (string or number).
  */
+// eslint-disable-next-line sonarjs/function-return-type -- Intentionally returns number | string | undefined to match ESLint's severity types
 export function getSeverity(ruleConfig: any): number | string | undefined {
   if (ruleConfig === undefined) return undefined;
   if (typeof ruleConfig === "number") return ruleConfig;
