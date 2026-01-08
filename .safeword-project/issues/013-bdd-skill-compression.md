@@ -1,25 +1,13 @@
 ---
 id: '013'
-title: Restructure skills for LLM optimization
-type: epic
+title: Restructure BDD skill for LLM optimization
+type: feature
 status: ready
 priority: medium
 created: 2026-01-08
-children: ['013a', '013b']
 ---
 
-# Restructure Skills for LLM Optimization
-
-This epic covers restructuring skills for better LLM performance.
-
-## Children
-
-- **013a**: BDD skill compression and phase-based splitting
-- **013b**: Quality review skill - phase-aware with web research
-
----
-
-# 013a: BDD Skill Compression
+# Restructure BDD Skill for LLM Optimization
 
 ## Problem
 
@@ -59,26 +47,9 @@ The BDD skill is 630 lines—too large for optimal LLM performance:
 - **Chroma:** Performance cliff at 70-80% context, lost-in-middle effect
 - **JetBrains NeurIPS 2025:** Simple masking halves cost while matching summarization performance
 
-## Solution: Phase-Based File Structure + Skill Delegation
+## Solution: Phase-Based File Structure
 
 Split the monolithic 630-line skill into focused, phase-specific files that load on demand.
-
-### Refactoring Delegation
-
-**Remove Phase 6.3 REFACTOR content entirely.** Delegate all refactoring to `/refactor` skill:
-
-| Phase        | Current                                          | Change                                                  |
-| ------------ | ------------------------------------------------ | ------------------------------------------------------- |
-| 6.3 REFACTOR | 28 lines inline (smells table, protocol, revert) | Replace with: "Run `/refactor` for cleanup after GREEN" |
-| 7 Done Gate  | Already says "run /refactor"                     | Keep as-is                                              |
-
-**Rationale:**
-
-- Eliminates duplication between BDD skill and refactoring skill
-- Refactoring skill has full catalog (3 tiers), characterization tests, edge cases
-- BDD skill stays focused on orchestration, not specialist work
-
-**Line savings:** ~25 lines removed from SKILL.md
 
 ### Claude Code Structure
 
@@ -196,10 +167,8 @@ Phase 6/7 essentials are inline because they're the most common phases.
 
 | Metric          | Before | After |
 | --------------- | ------ | ----- |
-| Total lines     | 630    | ~450  |
+| Total lines     | 630    | ~475  |
 | Under 500 lines | ❌     | ✅    |
-
-_Additional ~25 lines saved by delegating Phase 6.3 to /refactor skill._
 
 ## Files to Create/Modify
 
