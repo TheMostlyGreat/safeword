@@ -168,6 +168,7 @@ ${layerList}
 export const pythonManagedFiles: Record<string, ManagedFileDefinition> = {
   // Project-level ruff config (created only if no existing ruff config)
   "ruff.toml": {
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
     generator: (ctx) => {
       // Skip if not a Python project
       if (!ctx.languages?.python) return;
@@ -179,6 +180,7 @@ export const pythonManagedFiles: Record<string, ManagedFileDefinition> = {
 
   // Project-level mypy config (created only if no existing mypy config)
   "mypy.ini": {
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
     generator: (ctx) => {
       // Skip if not a Python project
       if (!ctx.languages?.python) return;
@@ -190,6 +192,7 @@ export const pythonManagedFiles: Record<string, ManagedFileDefinition> = {
 
   // Project-level import-linter config (created only if layers detected and no existing config)
   ".importlinter": {
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
     generator: (ctx) => {
       // Skip if not a Python project
       if (!ctx.languages?.python) return;
