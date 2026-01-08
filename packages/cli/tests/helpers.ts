@@ -195,6 +195,7 @@ interface CliResult {
  * @param options.env
  * @param options.timeout
  */
+// eslint-disable-next-line complexity -- Test helper with necessary error handling
 export async function runCli(
   args: string[],
   options: {
@@ -244,6 +245,7 @@ export async function runCli(
  * @param options.env
  * @param options.timeout
  */
+// eslint-disable-next-line complexity -- Test helper with necessary error handling
 export function runCliSync(
   args: string[],
   options: {
