@@ -139,7 +139,8 @@ export function detectPythonPackageManager(cwd: string): PythonPackageManager {
  * @param cwd - Project root directory
  * @param tools - Tools to install (defaults to ['ruff'])
  */
-// eslint-disable-next-line sonarjs/no-inconsistent-returns -- All cases exhaustively handled
+// Exhaustive switch over PythonPackageManager union - sonarjs can't detect TypeScript exhaustiveness
+// eslint-disable-next-line sonarjs/no-inconsistent-returns
 export function getPythonInstallCommand(
   cwd: string,
   tools: string[] = ["ruff"],

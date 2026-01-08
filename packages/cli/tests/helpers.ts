@@ -195,7 +195,6 @@ interface CliResult {
  * @param options.env
  * @param options.timeout
  */
-// eslint-disable-next-line complexity -- Test helper with necessary error handling
 export async function runCli(
   args: string[],
   options: {
@@ -219,7 +218,7 @@ export async function runCli(
       cwd,
       env: { ...process.env, ...env },
       timeout,
-      ...(input ? { input } : {}),
+      input,
     });
     return { stdout, stderr, exitCode: 0 };
   } catch (error: unknown) {
@@ -229,10 +228,11 @@ export async function runCli(
       code?: number;
       status?: number;
     };
+    const exitCode = execError.code ?? execError.status ?? 1;
     return {
       stdout: execError.stdout ?? "",
       stderr: execError.stderr ?? "",
-      exitCode: execError.code ?? execError.status ?? 1,
+      exitCode,
     };
   }
 }
@@ -245,7 +245,7 @@ export async function runCli(
  * @param options.env
  * @param options.timeout
  */
-// eslint-disable-next-line complexity -- Test helper with necessary error handling
+// eslint-disable-next-line complexity -- Complexity 11, threshold 10; extracting helpers would add indirection without benefit
 export function runCliSync(
   args: string[],
   options: {
@@ -273,11 +273,9 @@ export function runCliSync(
       stderr?: string | Buffer;
       status?: number;
     };
-    return {
-      stdout: execError.stdout?.toString() ?? "",
-      stderr: execError.stderr?.toString() ?? "",
-      exitCode: execError.status ?? 1,
-    };
+    const stdout = execError.stdout?.toString() ?? "";
+    const stderr = execError.stderr?.toString() ?? "";
+    return { stdout, stderr, exitCode: execError.status ?? 1 };
   }
 }
 

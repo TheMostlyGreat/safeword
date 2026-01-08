@@ -66,7 +66,7 @@ function parseYamlValue(raw: string): string | boolean {
  * Parse YAML frontmatter from markdown file content.
  * Returns undefined if no valid frontmatter found.
  */
-// eslint-disable-next-line complexity -- Frontmatter parsing requires multiple checks
+// eslint-disable-next-line complexity -- Complexity 11, threshold 10; YAML parsing requires multiple validation steps
 function parseFrontmatter(
   content: string,
 ): { frontmatter: ParsedFrontmatter; body: string } | undefined {

@@ -132,12 +132,15 @@ export const typescriptOwnedFiles: Record<string, FileDefinition> = {
           )
         : undefined,
   },
+
   ".safeword/.prettierrc": {
-    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
+    // Rule conflict: unicorn/no-useless-undefined removes explicit undefined, sonarjs/no-inconsistent-returns wants it
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns
     generator: (ctx) => {
       // Skip for non-JS projects or projects with existing formatter (they use Biome, etc.)
-      if (!ctx.languages?.javascript) return;
-      if (ctx.projectType.existingFormatter) return;
+      if (!ctx.languages?.javascript || ctx.projectType.existingFormatter) {
+        return;
+      }
       // Add plugins based on project type
       const plugins = getPrettierPlugins(ctx.projectType);
       const config =
@@ -156,7 +159,8 @@ export const typescriptOwnedFiles: Record<string, FileDefinition> = {
 export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
   // Project-level ESLint config (created only if no existing ESLint config)
   "eslint.config.mjs": {
-    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
+    // Rule conflict: unicorn/no-useless-undefined removes explicit undefined, sonarjs/no-inconsistent-returns wants it
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns
     generator: (ctx) => {
       // Skip if project already has ESLint config (safeword will use .safeword/eslint.config.mjs)
       if (ctx.projectType.existingEslintConfig) return;
@@ -166,7 +170,8 @@ export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
   },
   // Minimal tsconfig for ESLint type-checked linting (only if missing)
   "tsconfig.json": {
-    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
+    // Rule conflict: unicorn/no-useless-undefined removes explicit undefined, sonarjs/no-inconsistent-returns wants it
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns
     generator: (ctx) => {
       // Skip for non-JS projects (Python-only)
       if (!ctx.languages?.javascript) return;
@@ -212,7 +217,8 @@ export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
   },
   // Project-level Prettier config (created only if no existing formatter)
   ".prettierrc": {
-    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
+    // Rule conflict: unicorn/no-useless-undefined removes explicit undefined, sonarjs/no-inconsistent-returns wants it
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns
     generator: (ctx) => {
       // Skip for non-JS projects or projects with existing formatter
       if (!ctx.languages?.javascript) return;

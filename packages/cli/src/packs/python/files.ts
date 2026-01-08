@@ -168,38 +168,29 @@ ${layerList}
 export const pythonManagedFiles: Record<string, ManagedFileDefinition> = {
   // Project-level ruff config (created only if no existing ruff config)
   "ruff.toml": {
-    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
-    generator: (ctx) => {
-      // Skip if not a Python project
-      if (!ctx.languages?.python) return;
-      // Skip if project already has ruff config
-      if (ctx.projectType.existingRuffConfig) return;
-      return generateProjectRuffConfig();
-    },
+    generator: (ctx) =>
+      ctx.languages?.python && !ctx.projectType.existingRuffConfig
+        ? generateProjectRuffConfig()
+        : undefined,
   },
 
   // Project-level mypy config (created only if no existing mypy config)
   "mypy.ini": {
-    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
-    generator: (ctx) => {
-      // Skip if not a Python project
-      if (!ctx.languages?.python) return;
-      // Skip if project already has mypy config
-      if (ctx.projectType.existingMypyConfig) return;
-      return generateProjectMypyConfig();
-    },
+    generator: (ctx) =>
+      ctx.languages?.python && !ctx.projectType.existingMypyConfig
+        ? generateProjectMypyConfig()
+        : undefined,
   },
 
   // Project-level import-linter config (created only if layers detected and no existing config)
   ".importlinter": {
-    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
+    // Rule conflict: unicorn/no-useless-undefined removes explicit undefined, sonarjs/no-inconsistent-returns wants it
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns
     generator: (ctx) => {
-      // Skip if not a Python project
       if (!ctx.languages?.python) return;
-      // Skip if project already has import-linter config
       if (ctx.projectType.existingImportLinterConfig) return;
 
-      // Detect layers
+      // Detect layers - need at least 2 for boundary enforcement
       const layers = detectPythonLayers(ctx.cwd);
       if (layers.length < 2) return;
 
