@@ -50,7 +50,7 @@ Training data is stale. Follow this sequence:
 | Choosing test type, doing TDD, OR test is failing            | `./.safeword/guides/testing-guide.md`           |
 | Creating OR updating a design doc                            | `./.safeword/guides/design-doc-guide.md`        |
 | Making architectural decision OR writing ADR                 | `./.safeword/guides/architecture-guide.md`      |
-| Designing data models, schemas, or database changes          | `./.safeword/guides/data-architecture-guide.md` |
+| Data-heavy project needing formal data architecture          | `./.safeword/guides/data-architecture-guide.md` |
 | Writing learnings OR agent config (CLAUDE.md, .cursor/rules) | `./.safeword/guides/llm-writing-guide.md`       |
 | Updating CLAUDE.md, SAFEWORD.md, or any context file         | `./.safeword/guides/context-files-guide.md`     |
 | Hit same bug 3+ times OR discovered undocumented gotcha      | `./.safeword/guides/learning-extraction.md`     |
