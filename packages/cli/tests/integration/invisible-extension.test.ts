@@ -95,7 +95,7 @@ export default [
             extends: ["eslint:recommended"],
             rules: { "no-debugger": "error" },
           },
-          null,
+          undefined,
           2,
         );
         writeTestFile(projectDirectory, ".eslintrc.json", legacyConfig);
