@@ -20,7 +20,6 @@ export const typescriptPack: LanguagePack = {
     return exists(nodePath.join(cwd, "package.json"));
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Required by LanguagePack interface
   setup(_cwd: string, _ctx: SetupContext): SetupResult {
     // ESLint/Prettier configs created by schema.ts (ownedFiles/managedFiles)
     return setupTypescriptTooling();

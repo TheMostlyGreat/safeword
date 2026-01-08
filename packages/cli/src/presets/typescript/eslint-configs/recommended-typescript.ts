@@ -97,6 +97,16 @@ export const recommendedTypeScript: any[] = [
         },
       ],
 
+      // Underscore prefix convention for intentionally unused vars (matches TypeScript behavior)
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+
       // Design rules not in strict+stylistic (high LLM value)
       "@typescript-eslint/consistent-type-imports": "error", // import type { X } for types
       "@typescript-eslint/switch-exhaustiveness-check": "error", // Missing case in union switch

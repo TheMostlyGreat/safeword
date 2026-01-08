@@ -19,7 +19,6 @@ export const pythonPack: LanguagePack = {
     return exists(nodePath.join(cwd, "pyproject.toml"));
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Required by LanguagePack interface
   setup(_cwd: string, _ctx: SetupContext): SetupResult {
     // Config files created by schema.ts (ownedFiles/managedFiles)
     return setupPythonTooling();

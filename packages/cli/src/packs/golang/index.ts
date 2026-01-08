@@ -19,7 +19,6 @@ export const golangPack: LanguagePack = {
     return exists(nodePath.join(cwd, "go.mod"));
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Required by LanguagePack interface
   setup(_cwd: string, _ctx: SetupContext): SetupResult {
     // .golangci.yml is created by schema.ts (managedFiles)
     return setupGoTooling();
