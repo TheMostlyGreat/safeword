@@ -85,9 +85,11 @@ describe("SETTINGS_HOOKS", () => {
     const matcher = SETTINGS_HOOKS.PostToolUse[0].matcher;
 
     // Must be valid regex
+    // eslint-disable-next-line security/detect-non-literal-regexp -- Testing user-defined matcher pattern
     expect(() => new RegExp(matcher)).not.toThrow();
 
     // Claude Code uses unanchored regex matching
+    // eslint-disable-next-line security/detect-non-literal-regexp -- Testing user-defined matcher pattern
     const regex = new RegExp(matcher);
 
     // Should match file-modifying tools
