@@ -43,15 +43,15 @@ function createWorkspacePackage(
   name: string,
   scripts: Record<string, string> = {},
 ): void {
-  const pkgDir = nodePath.join(dir, name);
-  mkdirSync(pkgDir, { recursive: true });
+  const packageDirectory = nodePath.join(dir, name);
+  mkdirSync(packageDirectory, { recursive: true });
   const pkg = {
     name: `@test/${nodePath.basename(name)}`,
     version: "1.0.0",
     scripts,
   };
   writeFileSync(
-    nodePath.join(pkgDir, "package.json"),
+    nodePath.join(packageDirectory, "package.json"),
     JSON.stringify(pkg, undefined, 2),
   );
 }
