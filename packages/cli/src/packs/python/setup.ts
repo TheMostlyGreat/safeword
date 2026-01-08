@@ -139,6 +139,7 @@ export function detectPythonPackageManager(cwd: string): PythonPackageManager {
  * @param cwd - Project root directory
  * @param tools - Tools to install (defaults to ['ruff'])
  */
+// eslint-disable-next-line sonarjs/no-inconsistent-returns -- All cases exhaustively handled
 export function getPythonInstallCommand(
   cwd: string,
   tools: string[] = ["ruff"],
@@ -156,8 +157,7 @@ export function getPythonInstallCommand(
     case "pipenv": {
       return `pipenv install --dev ${toolList}`;
     }
-    case "pip":
-    default: {
+    case "pip": {
       return `pip install ${toolList}`;
     }
   }
