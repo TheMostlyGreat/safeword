@@ -107,8 +107,9 @@ const BIOME_JSON_MERGE: JsonMergeDefinition = {
 
     // Remove files key entirely if empty
     if (Object.keys(cleanedFiles).length === 0) {
-      const { files: _, ...rest } = existing;
-      return rest;
+      const result = { ...existing };
+      delete result.files;
+      return result;
     }
 
     return { ...existing, files: cleanedFiles };
@@ -132,6 +133,7 @@ export const typescriptOwnedFiles: Record<string, FileDefinition> = {
         : undefined,
   },
   ".safeword/.prettierrc": {
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
     generator: (ctx) => {
       // Skip for non-JS projects or projects with existing formatter (they use Biome, etc.)
       if (!ctx.languages?.javascript) return;
@@ -154,6 +156,7 @@ export const typescriptOwnedFiles: Record<string, FileDefinition> = {
 export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
   // Project-level ESLint config (created only if no existing ESLint config)
   "eslint.config.mjs": {
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
     generator: (ctx) => {
       // Skip if project already has ESLint config (safeword will use .safeword/eslint.config.mjs)
       if (ctx.projectType.existingEslintConfig) return;
@@ -163,6 +166,7 @@ export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
   },
   // Minimal tsconfig for ESLint type-checked linting (only if missing)
   "tsconfig.json": {
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
     generator: (ctx) => {
       // Skip for non-JS projects (Python-only)
       if (!ctx.languages?.javascript) return;
@@ -208,6 +212,7 @@ export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
   },
   // Project-level Prettier config (created only if no existing formatter)
   ".prettierrc": {
+    // eslint-disable-next-line sonarjs/no-inconsistent-returns -- Returns string or undefined based on conditions
     generator: (ctx) => {
       // Skip for non-JS projects or projects with existing formatter
       if (!ctx.languages?.javascript) return;
