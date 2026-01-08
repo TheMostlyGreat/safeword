@@ -345,6 +345,20 @@ When markdown lint reports MD040 (missing language), choose:
 
 ---
 
+## Publishing
+
+Use `bun publish` (not `npm publish`):
+
+```bash
+cd packages/cli && bun publish
+```
+
+The prepublishOnly script: checks bun is used → builds → tests → publishes.
+
+Note: `--access public` only needed for first publish of scoped packages.
+
+---
+
 ## Learnings
 
 **Location:** `.safeword/learnings/`
