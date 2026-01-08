@@ -51,7 +51,7 @@ Training data is stale. Follow this sequence:
 | Creating OR updating a design doc                         | `./.safeword/guides/design-doc-guide.md`        |
 | Making architectural decision OR writing ADR              | `./.safeword/guides/architecture-guide.md`      |
 | Designing data models, schemas, or database changes       | `./.safeword/guides/data-architecture-guide.md` |
-| Calling LLM APIs OR writing LLM-consumable docs           | `./.safeword/guides/llm-guide.md`               |
+| Writing LLM-consumable docs (skills, commands, hooks)     | `./.safeword/guides/llm-writing-guide.md`       |
 | Updating CLAUDE.md, SAFEWORD.md, or any context file      | `./.safeword/guides/context-files-guide.md`     |
 | Hit same bug 3+ times OR discovered undocumented gotcha   | `./.safeword/guides/learning-extraction.md`     |
 | Process hanging, port in use, or zombie process suspected | `./.safeword/guides/zombie-process-cleanup.md`  |

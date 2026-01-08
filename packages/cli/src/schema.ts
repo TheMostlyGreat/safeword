@@ -161,6 +161,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Brainstorming skill removed - never used, BDD discovery phase covers this (v0.16.0)
     '.claude/skills/safeword-brainstorming/SKILL.md',
     '.cursor/rules/safeword-brainstorming.mdc',
+    // Writing-plans skill removed - redundant with BDD decomposition + Claude Code native plan mode (v0.16.0)
+    '.claude/skills/safeword-writing-plans/SKILL.md',
+    '.cursor/rules/safeword-writing-plans.mdc',
   ],
 
   // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
@@ -198,6 +201,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/skills/safeword-enforcing-tdd', // Renamed to safeword-tdd-enforcing (v0.16.0)
     '.claude/skills/safeword-tdd-enforcing', // Removed - BDD includes TDD (v0.16.0)
     '.claude/skills/safeword-brainstorming', // Removed - BDD discovery phase covers this (v0.16.0)
+    '.claude/skills/safeword-writing-plans', // Removed - redundant with BDD + native plan mode (v0.16.0)
   ],
 
   // Files owned by safeword (overwritten on upgrade if content changed)
@@ -243,7 +247,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.safeword/guides/design-doc-guide.md': { template: 'guides/design-doc-guide.md' },
     '.safeword/guides/learning-extraction.md': { template: 'guides/learning-extraction.md' },
-    '.safeword/guides/llm-guide.md': { template: 'guides/llm-guide.md' },
+    '.safeword/guides/llm-writing-guide.md': { template: 'guides/llm-writing-guide.md' },
     '.safeword/guides/planning-guide.md': { template: 'guides/planning-guide.md' },
     '.safeword/guides/testing-guide.md': { template: 'guides/testing-guide.md' },
     '.safeword/guides/zombie-process-cleanup.md': { template: 'guides/zombie-process-cleanup.md' },
@@ -288,9 +292,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/skills/safeword-refactoring/SKILL.md': {
       template: 'skills/safeword-refactoring/SKILL.md',
     },
-    '.claude/skills/safeword-writing-plans/SKILL.md': {
-      template: 'skills/safeword-writing-plans/SKILL.md',
-    },
     '.claude/skills/safeword-bdd-orchestrating/SKILL.md': {
       template: 'skills/safeword-bdd-orchestrating/SKILL.md',
     },
@@ -312,9 +313,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.cursor/rules/safeword-refactoring.mdc': {
       template: 'cursor/rules/safeword-refactoring.mdc',
-    },
-    '.cursor/rules/safeword-writing-plans.mdc': {
-      template: 'cursor/rules/safeword-writing-plans.mdc',
     },
     '.cursor/rules/safeword-bdd-orchestrating.mdc': {
       template: 'cursor/rules/safeword-bdd-orchestrating.mdc',

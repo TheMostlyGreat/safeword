@@ -1,6 +1,6 @@
 # Architecture & Design Documentation Guide
 
-**See:** `@.safeword/guides/llm-guide.md` for LLM-consumable documentation principles.
+**See:** `@.safeword/guides/llm-writing-guide.md` for LLM-consumable documentation principles.
 
 ---
 

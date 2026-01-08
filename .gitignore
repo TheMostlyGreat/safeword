@@ -11,6 +11,9 @@ examples/
 # Test artifacts
 eval-results.json
 
+# Safeword - Local cache
+.safeword/.update-cache.json
+
 # Claude Code - Personal settings
 .claude/settings.local.json
 .claude/todos/

@@ -91,11 +91,11 @@ Key directories created in your project:
 
 **Purpose**: Working with LLMs and documentation structure
 
-| Guide                         | Purpose                                                                  | When to Read         |
-| ----------------------------- | ------------------------------------------------------------------------ | -------------------- |
-| **llm-guide.md**              | LLM integration (caching, evals) + writing docs for LLMs (13 principles) | Building AI features |
-| **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation                              | Managing dev servers |
-| **cli-reference.md**          | Safeword CLI command reference and usage                                 | Using CLI commands   |
+| Guide                         | Purpose                                                      | When to Read                    |
+| ----------------------------- | ------------------------------------------------------------ | ------------------------------- |
+| **llm-writing-guide.md**      | Writing docs that LLMs follow (MECE, examples, recency bias) | Writing skills, commands, hooks |
+| **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation                  | Managing dev servers            |
+| **cli-reference.md**          | Safeword CLI command reference and usage                     | Using CLI commands              |
 
 ---
 

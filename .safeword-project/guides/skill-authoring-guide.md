@@ -4,6 +4,8 @@ How to write Claude Skills that are discoverable, effective, and production-read
 
 **Source:** [Official Claude Skill Best Practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
 
+**Related:** [LLM Writing Guide](../../.safeword/guides/llm-writing-guide.md) for general principles
+
 ---
 
 ## Skill Structure
@@ -66,7 +68,7 @@ The description is the **primary signal** for skill discovery. Claude uses pure 
 
 ### The WHEN + WHEN NOT Pattern
 
-Generic descriptions fail. Specific boundaries succeed.
+Generic descriptions fail. Specific boundaries succeed. Testing shows ~20% activation with generic descriptions vs 80%+ with the WHEN + WHEN NOT pattern.
 
 ```yaml
 # BAD - Too vague, will misfire

@@ -1,6 +1,6 @@
 # Code Philosophy & Practices
 
-**Note:** This file provides instructions for LLM-based coding agents. For comprehensive framework on writing clear, actionable LLM-consumable instructions, see `@.safeword/guides/llm-guide.md`.
+**Note:** This file provides instructions for LLM-based coding agents. For comprehensive framework on writing clear, actionable LLM-consumable instructions, see `@.safeword/guides/llm-writing-guide.md`.
 
 ---
 

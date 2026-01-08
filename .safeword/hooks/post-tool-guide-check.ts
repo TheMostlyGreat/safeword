@@ -46,7 +46,7 @@ if (!isTemplate) {
 // Build compliance message
 const checks: string[] = [];
 
-checks.push('- Verify against `.safeword/guides/llm-guide.md` (MECE, explicit, examples)');
+checks.push('- Verify against `.safeword/guides/llm-writing-guide.md` (MECE, explicit, examples)');
 
 if (isSkill) {
   checks.push('- Verify against `.safeword/guides/context-files-guide.md` (triggers, scope, size)');
