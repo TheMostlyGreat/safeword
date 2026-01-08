@@ -17,7 +17,7 @@
     "format:sh": "shfmt -w -i 2 -ci **/*.sh .safeword/hooks/* packages/cli/templates/hooks/* packages/cli/templates/scripts/* 2>/dev/null || echo 'shfmt not installed (brew install shfmt)'",
     "format:check": "prettier --check .",
     "knip": "knip",
-    "prepare": "husky || true",
+    "prepare": "husky",
     "lint:eslint": "eslint .",
     "deps": "depcruise packages/*/src --config .dependency-cruiser.cjs",
     "deps:graph": "depcruise packages/*/src --config .dependency-cruiser.cjs --output-type dot | dot -T svg > dependency-graph.svg",

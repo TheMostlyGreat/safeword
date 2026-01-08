@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# Run all quality checks before commit
+# Fail fast on first error
+
+set -e
+
+echo "Running pre-commit checks..."
+
+# Lint
+echo "→ Linting..."
+bun run lint
+
+# Format check (don't auto-fix, just verify)
+echo "→ Checking formatting..."
+bun run format:check
+
+# Tests
+echo "→ Running tests..."
+bun test
+
+echo "✓ All checks passed"
