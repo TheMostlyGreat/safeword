@@ -45,7 +45,7 @@ function createPolyglotProject(dir: string): void {
           typescript: "^5.0.0",
         },
       },
-      null,
+      undefined,
       2,
     ),
   );
