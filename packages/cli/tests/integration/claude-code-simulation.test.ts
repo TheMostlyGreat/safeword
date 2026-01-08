@@ -40,6 +40,7 @@ describe("E2E: Claude Code Hook Path Resolution", () => {
     if (differentDirectory) removeTemporaryDirectory(differentDirectory);
   });
 
+  // eslint-disable-next-line complexity -- Test with nested loops for hook extraction
   it('all hooks execute without "not found" errors from different cwd', () => {
     const settings = JSON.parse(
       readTestFile(projectDirectory, ".claude/settings.json"),
