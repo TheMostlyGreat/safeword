@@ -48,8 +48,9 @@ This epic covers restructuring skills for better LLM performance.
 
 Small fixes to apply when touching related files:
 
-| Guide               | Change                                        | Rationale                                                                                                                                       |
-| ------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| design-doc-guide.md | Remove escalation check (lines 3-11) entirely | Decision belongs in BDD Phase 5 flow, not in operational guide; by the time LLM loads this guide, it has already decided to create a design doc |
+| Guide                  | Change                                                                | Rationale                                                                                                                                       |
+| ---------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| design-doc-guide.md    | Remove escalation check (lines 3-11) entirely                         | Decision belongs in BDD Phase 5 flow, not in operational guide; by the time LLM loads this guide, it has already decided to create a design doc |
+| context-files-guide.md | Remove Quality Checklist (lines 420-431), reference llm-writing-guide | Duplicates llm-writing-guide; that guide is canonical for LLM writing quality principles                                                        |
 
 These are too small for separate tickets but should be done when implementing 013a-c.
