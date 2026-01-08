@@ -152,6 +152,16 @@ See `ARCHITECTURE.md` for full structure including all packages and templates.
 
 Use for project-specific guides that shouldn't be overwritten by framework updates.
 
+**Read the matching guide when ANY trigger fires:**
+
+| Trigger                                | Guide                                                   |
+| -------------------------------------- | ------------------------------------------------------- |
+| Creating or modifying a skill          | `.safeword-project/guides/skill-authoring-guide.md`     |
+| Creating or modifying a hook           | `.safeword-project/guides/hooks-authoring-guide.md`     |
+| Creating or modifying a command        | `.safeword-project/guides/command-authoring-guide.md`   |
+| Adding files to CLI templates (schema) | `.safeword-project/guides/schema-registration-guide.md` |
+| Calling LLMs from code (APIs, caching) | `.safeword-project/guides/llm-integration-guide.md`     |
+
 ## Common Gotchas
 
 1. **templates/ vs .safeword/**: Edit `packages/cli/templates/` first, then `bunx safeword upgrade` to sync. Never edit `.safeword/` directly for framework changes.
