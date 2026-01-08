@@ -189,14 +189,10 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '@next/eslint-plugin-next',
     'eslint-plugin-astro',
     '@vitest/eslint-plugin',
-    // Pre-commit hooks no longer managed by safeword
-    'husky',
-    'lint-staged',
   ],
 
   // Directories to delete on upgrade (no longer managed by safeword)
   deprecatedDirs: [
-    '.husky', // Pre-commit hooks no longer managed by safeword
     '.safeword/lib', // Shell libraries no longer needed with Bun (v0.13.0)
     '.claude/skills/safeword-enforcing-tdd', // Renamed to safeword-tdd-enforcing (v0.16.0)
     '.claude/skills/safeword-tdd-enforcing', // Removed - BDD includes TDD (v0.16.0)
