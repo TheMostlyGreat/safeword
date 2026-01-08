@@ -24,15 +24,15 @@ import {
   writeSafewordConfig,
 } from "../helpers.js";
 
-let testDir: string;
+let testDirectory: string;
 
 beforeEach(() => {
-  testDir = createTemporaryDirectory();
+  testDirectory = createTemporaryDirectory();
 });
 
 afterEach(() => {
-  if (testDir) {
-    removeTemporaryDirectory(testDir);
+  if (testDirectory) {
+    removeTemporaryDirectory(testDirectory);
   }
 });
 
@@ -65,12 +65,12 @@ describe("Pack Registry", () => {
 
   it("Test 1.2: Detects languages from project markers", () => {
     // Create project with both Python and TypeScript markers
-    createPythonProject(testDir);
-    createPackageJson(testDir, {
+    createPythonProject(testDirectory);
+    createPackageJson(testDirectory, {
       devDependencies: { typescript: "^5.0.0" },
     });
 
-    const detected = detectLanguages(testDir);
+    const detected = detectLanguages(testDirectory);
 
     // Should detect both (order doesn't matter)
     expect(detected).toContain("python");
@@ -86,15 +86,15 @@ describe("Pack Registry", () => {
 describe("Config Tracking", () => {
   it("Test 1.3: Reads installed packs from config", () => {
     // Empty config → empty array
-    writeSafewordConfig(testDir, { installedPacks: [] });
-    expect(getInstalledPacks(testDir)).toEqual([]);
-    expect(isPackInstalled(testDir, "python")).toBe(false);
+    writeSafewordConfig(testDirectory, { installedPacks: [] });
+    expect(getInstalledPacks(testDirectory)).toEqual([]);
+    expect(isPackInstalled(testDirectory, "python")).toBe(false);
 
     // With installed pack
-    writeSafewordConfig(testDir, { installedPacks: ["python"] });
-    expect(getInstalledPacks(testDir)).toEqual(["python"]);
-    expect(isPackInstalled(testDir, "python")).toBe(true);
-    expect(isPackInstalled(testDir, "go")).toBe(false);
+    writeSafewordConfig(testDirectory, { installedPacks: ["python"] });
+    expect(getInstalledPacks(testDirectory)).toEqual(["python"]);
+    expect(isPackInstalled(testDirectory, "python")).toBe(true);
+    expect(isPackInstalled(testDirectory, "go")).toBe(false);
   });
 });
 
@@ -104,14 +104,14 @@ describe("Config Tracking", () => {
 
 describe("Pack Installation", () => {
   it("Test 1.4: Installs pack and updates config", () => {
-    createPythonProject(testDir);
-    initGitRepo(testDir);
-    writeSafewordConfig(testDir, { installedPacks: [] });
+    createPythonProject(testDirectory);
+    initGitRepo(testDirectory);
+    writeSafewordConfig(testDirectory, { installedPacks: [] });
 
-    installPack("python", testDir);
+    installPack("python", testDirectory);
 
     // Config updated
-    const config = readSafewordConfig(testDir);
+    const config = readSafewordConfig(testDirectory);
     expect(config.installedPacks).toContain("python");
 
     // Pack setup ran - setupPythonTooling now returns empty (reconciliation handles files)
@@ -120,18 +120,20 @@ describe("Pack Installation", () => {
   });
 
   it("Test 1.5: Skips already-installed packs", () => {
-    createPythonProject(testDir);
-    initGitRepo(testDir);
-    writeSafewordConfig(testDir, { installedPacks: ["python"] });
-    const initialPyproject = readTestFile(testDir, "pyproject.toml");
+    createPythonProject(testDirectory);
+    initGitRepo(testDirectory);
+    writeSafewordConfig(testDirectory, { installedPacks: ["python"] });
+    const initialPyproject = readTestFile(testDirectory, "pyproject.toml");
 
-    installPack("python", testDir);
+    installPack("python", testDirectory);
 
     // Config unchanged
-    const config = readSafewordConfig(testDir);
+    const config = readSafewordConfig(testDirectory);
     expect(config.installedPacks).toEqual(["python"]);
 
     // Setup not called (pyproject unchanged)
-    expect(readTestFile(testDir, "pyproject.toml")).toBe(initialPyproject);
+    expect(readTestFile(testDirectory, "pyproject.toml")).toBe(
+      initialPyproject,
+    );
   });
 });
