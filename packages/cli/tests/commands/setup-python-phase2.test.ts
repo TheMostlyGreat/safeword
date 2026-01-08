@@ -410,7 +410,8 @@ dev = ["ruff>=0.8.0"]
   it(
     "Test 6.4: Shows poetry install command for poetry projects",
     async () => {
-      // Arrange - poetry project (pip fallback to show message)
+      // Arrange - poetry project with invalid config (python key not allowed)
+      // This makes poetry fail immediately with "Additional properties are not allowed"
       writeTestFile(
         projectDirectory,
         "pyproject.toml",
@@ -420,9 +421,10 @@ version = "0.1.0"
 
 [tool.poetry]
 name = "test"
+python = "^3.12"
 `,
       );
-      // Note: No poetry.lock, so install will fail and show fallback message
+      // Note: Invalid poetry config ensures immediate failure (no network calls)
       initGitRepo(projectDirectory);
 
       // Act

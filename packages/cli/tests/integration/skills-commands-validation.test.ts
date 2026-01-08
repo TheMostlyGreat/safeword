@@ -790,19 +790,19 @@ describe("Validation Logic Tests", () => {
     it("rejects content without frontmatter", () => {
       const content = "# Just a heading\n\nNo frontmatter here.";
       const parsed = parseFrontmatter(content);
-      expect(parsed).toBeNull();
+      expect(parsed).toBeUndefined();
     });
 
     it("rejects frontmatter not starting on line 1", () => {
       const content = "\n---\nname: test\n---\nBody";
       const parsed = parseFrontmatter(content);
-      expect(parsed).toBeNull();
+      expect(parsed).toBeUndefined();
     });
 
     it("rejects unclosed frontmatter", () => {
       const content = "---\nname: test\nNo closing delimiter";
       const parsed = parseFrontmatter(content);
-      expect(parsed).toBeNull();
+      expect(parsed).toBeUndefined();
     });
 
     it("detects uppercase in skill name", () => {
