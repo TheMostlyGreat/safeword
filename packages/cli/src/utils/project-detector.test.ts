@@ -396,21 +396,25 @@ describe("detectProjectType", () => {
  */
 
 describe("detectLanguages", () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = createTemporaryDirectory();
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    removeTemporaryDirectory(tempDir);
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
   describe("Test 1.1: Detects pyproject.toml as Python project", () => {
     it("should detect python from pyproject.toml", () => {
-      writeTestFile(tempDir, "pyproject.toml", '[project]\nname = "test"\n');
+      writeTestFile(
+        temporaryDirectory,
+        "pyproject.toml",
+        '[project]\nname = "test"\n',
+      );
 
-      const result: Languages = detectLanguages(tempDir);
+      const result: Languages = detectLanguages(temporaryDirectory);
 
       expect(result.python).toBe(true);
       expect(result.javascript).toBe(false);
@@ -419,9 +423,9 @@ describe("detectLanguages", () => {
 
   describe("Test 1.2: Detects requirements.txt as Python fallback", () => {
     it("should detect python from requirements.txt when pyproject.toml absent", () => {
-      writeTestFile(tempDir, "requirements.txt", "django>=4.0\n");
+      writeTestFile(temporaryDirectory, "requirements.txt", "django>=4.0\n");
 
-      const result: Languages = detectLanguages(tempDir);
+      const result: Languages = detectLanguages(temporaryDirectory);
 
       expect(result.python).toBe(true);
     });
@@ -429,10 +433,14 @@ describe("detectLanguages", () => {
 
   describe("Test 1.9: Detects polyglot project (JS + Python)", () => {
     it("should detect both languages when package.json and pyproject.toml exist", () => {
-      writeTestFile(tempDir, "package.json", '{"name": "test"}');
-      writeTestFile(tempDir, "pyproject.toml", '[project]\nname = "test"\n');
+      writeTestFile(temporaryDirectory, "package.json", '{"name": "test"}');
+      writeTestFile(
+        temporaryDirectory,
+        "pyproject.toml",
+        '[project]\nname = "test"\n',
+      );
 
-      const result: Languages = detectLanguages(tempDir);
+      const result: Languages = detectLanguages(temporaryDirectory);
 
       expect(result.python).toBe(true);
       expect(result.javascript).toBe(true);
@@ -441,9 +449,13 @@ describe("detectLanguages", () => {
 
   describe("Test 1.10: Works without package.json", () => {
     it("should complete detection without package.json", () => {
-      writeTestFile(tempDir, "pyproject.toml", '[project]\nname = "test"\n');
+      writeTestFile(
+        temporaryDirectory,
+        "pyproject.toml",
+        '[project]\nname = "test"\n',
+      );
 
-      const result: Languages = detectLanguages(tempDir);
+      const result: Languages = detectLanguages(temporaryDirectory);
 
       expect(result.python).toBe(true);
       expect(result.javascript).toBe(false);
@@ -452,25 +464,26 @@ describe("detectLanguages", () => {
 });
 
 describe("detectPythonType", () => {
-  let tempDir: string;
+  let temporaryDirectory: string;
 
   beforeEach(() => {
-    tempDir = createTemporaryDirectory();
+    temporaryDirectory = createTemporaryDirectory();
   });
 
   afterEach(() => {
-    removeTemporaryDirectory(tempDir);
+    removeTemporaryDirectory(temporaryDirectory);
   });
 
   describe("Test 1.3: Detects Django framework", () => {
     it("should detect django from pyproject.toml dependencies", () => {
       writeTestFile(
-        tempDir,
+        temporaryDirectory,
         "pyproject.toml",
         '[project]\ndependencies = ["django>=4.0"]\n',
       );
 
-      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+      const result: PythonProjectType | undefined =
+        detectPythonType(temporaryDirectory);
 
       expect(result).toBeDefined();
       expect(result?.framework).toBe("django");
@@ -480,12 +493,13 @@ describe("detectPythonType", () => {
   describe("Test 1.4: Detects Flask framework", () => {
     it("should detect flask from pyproject.toml dependencies", () => {
       writeTestFile(
-        tempDir,
+        temporaryDirectory,
         "pyproject.toml",
         '[project]\ndependencies = ["flask>=2.0"]\n',
       );
 
-      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+      const result: PythonProjectType | undefined =
+        detectPythonType(temporaryDirectory);
 
       expect(result).toBeDefined();
       expect(result?.framework).toBe("flask");
@@ -495,12 +509,13 @@ describe("detectPythonType", () => {
   describe("Test 1.5: Detects FastAPI framework", () => {
     it("should detect fastapi from pyproject.toml dependencies", () => {
       writeTestFile(
-        tempDir,
+        temporaryDirectory,
         "pyproject.toml",
         '[project]\ndependencies = ["fastapi>=0.100"]\n',
       );
 
-      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+      const result: PythonProjectType | undefined =
+        detectPythonType(temporaryDirectory);
 
       expect(result).toBeDefined();
       expect(result?.framework).toBe("fastapi");
@@ -510,12 +525,13 @@ describe("detectPythonType", () => {
   describe("Test 1.6: Detects Poetry package manager", () => {
     it("should detect poetry from [tool.poetry] section", () => {
       writeTestFile(
-        tempDir,
+        temporaryDirectory,
         "pyproject.toml",
         '[tool.poetry]\nname = "test"\n',
       );
 
-      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+      const result: PythonProjectType | undefined =
+        detectPythonType(temporaryDirectory);
 
       expect(result).toBeDefined();
       expect(result?.packageManager).toBe("poetry");
@@ -524,10 +540,15 @@ describe("detectPythonType", () => {
 
   describe("Test 1.7: Detects uv package manager", () => {
     it("should detect uv from uv.lock file", () => {
-      writeTestFile(tempDir, "pyproject.toml", '[project]\nname = "test"\n');
-      writeTestFile(tempDir, "uv.lock", "# uv lockfile\n");
+      writeTestFile(
+        temporaryDirectory,
+        "pyproject.toml",
+        '[project]\nname = "test"\n',
+      );
+      writeTestFile(temporaryDirectory, "uv.lock", "# uv lockfile\n");
 
-      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+      const result: PythonProjectType | undefined =
+        detectPythonType(temporaryDirectory);
 
       expect(result).toBeDefined();
       expect(result?.packageManager).toBe("uv");
@@ -536,9 +557,10 @@ describe("detectPythonType", () => {
 
   describe("Test 1.8: Defaults to pip package manager", () => {
     it("should default to pip when no other manager detected", () => {
-      writeTestFile(tempDir, "requirements.txt", "requests>=2.0\n");
+      writeTestFile(temporaryDirectory, "requirements.txt", "requests>=2.0\n");
 
-      const result: PythonProjectType | undefined = detectPythonType(tempDir);
+      const result: PythonProjectType | undefined =
+        detectPythonType(temporaryDirectory);
 
       expect(result).toBeDefined();
       expect(result?.packageManager).toBe("pip");
