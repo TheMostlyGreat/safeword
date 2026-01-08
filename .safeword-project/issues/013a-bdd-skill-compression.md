@@ -106,6 +106,10 @@ All files under 100 lines. Agent loads phase-specific rules based on description
 2. `packages/cli/templates/cursor/rules/safeword-bdd-orchestrating.mdc` (delete, replace with above)
 3. `packages/cli/src/schema.ts` (register new files)
 
+## Minor Consolidation
+
+During implementation, remove Given/When/Then format details from `planning-guide.md` (~20 lines) - BDD skill Phase 3 (bdd-scenarios.mdc) covers scenario drafting operationally.
+
 ## Acceptance Criteria
 
 - [ ] SKILL.md under 500 lines
@@ -114,3 +118,4 @@ All files under 100 lines. Agent loads phase-specific rules based on description
 - [ ] Phase 7 runs `/refactor` for cross-scenario cleanup
 - [ ] Verify `/refactor` skill activates when called from BDD flow
 - [ ] Schema updated with new Cursor files
+- [ ] Given/When/Then format removed from planning-guide.md (reference bdd-scenarios.mdc)

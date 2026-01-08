@@ -44,19 +44,19 @@ Training data is stale. Follow this sequence:
 
 **Read the matching guide when ANY trigger fires:**
 
-| Trigger                                                   | Guide                                           |
-| --------------------------------------------------------- | ----------------------------------------------- |
-| Starting feature/task OR writing specs/test definitions   | `./.safeword/guides/planning-guide.md`          |
-| Choosing test type, doing TDD, OR test is failing         | `./.safeword/guides/testing-guide.md`           |
-| Creating OR updating a design doc                         | `./.safeword/guides/design-doc-guide.md`        |
-| Making architectural decision OR writing ADR              | `./.safeword/guides/architecture-guide.md`      |
-| Designing data models, schemas, or database changes       | `./.safeword/guides/data-architecture-guide.md` |
-| Writing LLM-consumable docs (skills, commands, hooks)     | `./.safeword/guides/llm-writing-guide.md`       |
-| Updating CLAUDE.md, SAFEWORD.md, or any context file      | `./.safeword/guides/context-files-guide.md`     |
-| Hit same bug 3+ times OR discovered undocumented gotcha   | `./.safeword/guides/learning-extraction.md`     |
-| Process hanging, port in use, or zombie process suspected | `./.safeword/guides/zombie-process-cleanup.md`  |
-| Using `safeword` CLI commands                             | `./.safeword/guides/cli-reference.md`           |
-| Debugging issues OR need git/cross-platform guidance      | `./.safeword/guides/code-philosophy.md`         |
+| Trigger                                                      | Guide                                           |
+| ------------------------------------------------------------ | ----------------------------------------------- |
+| Starting feature/task OR writing specs/test definitions      | `./.safeword/guides/planning-guide.md`          |
+| Choosing test type, doing TDD, OR test is failing            | `./.safeword/guides/testing-guide.md`           |
+| Creating OR updating a design doc                            | `./.safeword/guides/design-doc-guide.md`        |
+| Making architectural decision OR writing ADR                 | `./.safeword/guides/architecture-guide.md`      |
+| Designing data models, schemas, or database changes          | `./.safeword/guides/data-architecture-guide.md` |
+| Writing learnings OR agent config (CLAUDE.md, .cursor/rules) | `./.safeword/guides/llm-writing-guide.md`       |
+| Updating CLAUDE.md, SAFEWORD.md, or any context file         | `./.safeword/guides/context-files-guide.md`     |
+| Hit same bug 3+ times OR discovered undocumented gotcha      | `./.safeword/guides/learning-extraction.md`     |
+| Process hanging, port in use, or zombie process suspected    | `./.safeword/guides/zombie-process-cleanup.md`  |
+| Using `safeword` CLI commands                                | `./.safeword/guides/cli-reference.md`           |
+| Debugging issues OR need git/cross-platform guidance         | `./.safeword/guides/code-philosophy.md`         |
 
 ---
 
