@@ -133,8 +133,8 @@ function setupWorkspaceFormatScripts(
  * Add format script to a package if it doesn't have one.
  * Returns true if the script was added.
  */
-function addFormatScriptIfMissing(packageDir: string): boolean {
-  const packageJsonPath = nodePath.join(packageDir, "package.json");
+function addFormatScriptIfMissing(packageDirectory: string): boolean {
+  const packageJsonPath = nodePath.join(packageDirectory, "package.json");
   if (!exists(packageJsonPath)) return false;
 
   const packageJson = readJson(packageJsonPath) as PackageJson | undefined;
