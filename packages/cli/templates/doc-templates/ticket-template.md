@@ -1,9 +1,18 @@
 ---
 id: XXX
+type: task
+phase: intake
 status: in_progress
 created: YYYY-MM-DDTHH:MM:SSZ
 last_modified: YYYY-MM-DDTHH:MM:SSZ
 ---
+
+<!--
+type: patch | task | feature
+phase: intake | define-behavior | scenario-gate | decomposition | implement | done
+  - patch/task: typically skip to 'implement' or omit phase
+  - feature: progresses through all phases via BDD workflow
+-->
 
 # Title
 
@@ -48,13 +57,13 @@ last_modified: YYYY-MM-DDTHH:MM:SSZ
 
 ## Optional Sections (Add When Needed)
 
-### Planning Docs
+### Related Files
 
-{Only for complex features that need feature specs, test definitions, design docs}
+{All artifacts colocate in this ticket folder}
 
-- .safeword/planning/specs/feature-XXX-name.md
-- .safeword/planning/test-definitions/XXX-feature-name.md
-- .safeword/planning/design/XXX-feature-name.md
+- ./test-definitions.md (BDD scenarios - features only)
+- ./spec.md (feature spec - epics only)
+- ./design.md (design doc - complex features only)
 
 ### Scope
 

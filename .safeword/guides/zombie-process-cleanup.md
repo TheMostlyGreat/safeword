@@ -238,9 +238,47 @@ ps aux | grep "/Users/alex/projects/my-project"
 
 ---
 
+## Advanced: Finding the Source
+
+When zombies keep coming back, find which test is creating them.
+
+### When to Use
+
+| Symptom                                    | Script                       |
+| ------------------------------------------ | ---------------------------- |
+| Test leaves files behind (.git, temp dirs) | `bisect-test-pollution.sh`   |
+| Test leaves processes behind (chromium)    | `bisect-zombie-processes.sh` |
+
+### Find Test That Creates Files
+
+```bash
+# Usage: ./bisect-test-pollution.sh <file_to_check> <test_pattern> [search_dir]
+./.safeword/scripts/bisect-test-pollution.sh '.git' '*.test.ts' src
+```
+
+Runs each test individually, checks if `<file_to_check>` appears after.
+
+### Find Test That Leaves Processes
+
+```bash
+# Usage: ./bisect-zombie-processes.sh <process_pattern> <test_pattern> [search_dir]
+./.safeword/scripts/bisect-zombie-processes.sh 'chromium' '*.test.ts' tests
+```
+
+Runs each test individually, checks if `<process_pattern>` is left running.
+
+**Both scripts:**
+
+- Auto-detect package manager (bun/pnpm/yarn/npm)
+- Stop at first offending test
+- Show investigation commands
+
+---
+
 ## Key Takeaways
 
 - Use `./.safeword/scripts/cleanup-zombies.sh` for quick, safe cleanup
 - Always preview with `--dry-run` first when unsure
 - Never use `killall node` (affects all projects)
 - Clean up before AND after development sessions
+- If zombies recur, use bisect scripts to find the source

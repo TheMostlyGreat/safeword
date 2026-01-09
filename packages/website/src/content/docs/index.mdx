@@ -1,43 +1,130 @@
 ---
-title: Safeword
-description: AI coding agent guardrails - hooks, skills, and quality controls
+title: The first coding agent discipline system
+description: The first coding agent discipline system for Cursor and Claude Code
 template: splash
 hero:
-  tagline: Portable patterns and guides that enforce TDD workflow, quality standards, and best practices across all your projects.
-  actions:
-    - text: Get Started
-      link: /getting-started/quick-start/
-      icon: right-arrow
-      variant: primary
-    - text: View on GitHub
-      link: https://github.com/TheMostlyGreat/safeword
-      icon: external
-      variant: minimal
+  tagline: Your agent doesn't get to finish until the tests pass.
 ---
 
-import { Card, CardGrid } from "@astrojs/starlight/components";
+<a href="/getting-started/quick-start" class="splash-docs-link">
+  Docs
+</a>
 
-## Features
+<p class="hero-subtitle">
+  <span>
+    Safeword is the first coding agent discipline system for Cursor and Claude
+    Code.
+  </span>
+</p>
 
-<CardGrid stagger>
-  <Card title="Hooks" icon="setting">
-    Auto-lint on file changes, quality review on session end, version tracking
-  </Card>
-  <Card title="Skills" icon="puzzle">
-    Structured workflows for TDD, debugging, refactoring, brainstorming
-  </Card>
-  <Card title="Commands" icon="rocket">
-    Slash commands for linting, auditing, drift detection
-  </Card>
-  <Card title="Multi-language" icon="translate">
-    JavaScript/TypeScript, Python (Ruff), Go (golangci-lint)
-  </Card>
-</CardGrid>
+---
 
-## Quick Install
+## The Problem
+
+Your agent ships fast. But it skips tests, ignores lint, and pushes whatever "looks right."
+
+Your senior engineers stop trusting it. Your vibe-coders can't tell working code from confident garbage.
+
+<p class="soul">AI doesn't decide when it's done. You do.</p>
+
+---
+
+## The Fix
+
+**Automatic Enforcement** — Every edit gets linted. Every session ends with review. Your agent can't skip it.
+
+**Strict Quality** — Code, architecture, docs, dependencies. Nothing slips through.
+
+**Structured Discipline** — TDD enforced. Debugging structured. Refactoring gated.
+
+---
+
+## Install
 
 ```bash
 bunx safeword@latest setup
 ```
 
-Your project will have hooks, skills, guides, and linting configured in seconds.
+Works with **Cursor** and **Claude Code**. Auto-detects **TypeScript**, **Python**, **Go**.
+
+---
+
+## What Happens
+
+Safeword installs hooks and skills that activate automatically. Commits to your repo—team gets discipline the moment they pull.
+
+---
+
+## Stay Current
+
+```bash
+bunx safeword@latest upgrade
+```
+
+---
+
+## Reference
+
+<nav class="ref-links">
+
+[Quick Start](/getting-started/quick-start)
+[CLI](/reference/cli)
+[Hooks & Skills](/reference/hooks-and-skills)
+[Configuration](/reference/configuration)
+
+</nav>
+
+---
+
+<footer class="splash-footer">
+
+[GitHub](https://github.com/TheMostlyGreat/safeword) · MIT License · © {new Date().getFullYear()}
+
+</footer>
+
+<script is:inline>{`
+  (function() {
+    var lineHeight = 0;
+    var lineOffset = '76px';
+    var line = null;
+
+    function calculateDimensions() {
+      var footer = document.querySelector('.splash-footer');
+      if (!footer) return;
+
+      var el = footer, top = 0;
+      while (el) { top += el.offsetTop; el = el.offsetParent; }
+      lineHeight = top + footer.offsetHeight;
+
+      var style = getComputedStyle(document.documentElement);
+      lineOffset = style.getPropertyValue('--sw-line-offset') || '76px';
+    }
+
+    function createLine() {
+      if (line) line.remove();
+      calculateDimensions();
+
+      line = document.createElement('div');
+      line.id = 'sw-vertical-line';
+      document.documentElement.appendChild(line);
+      updateLine();
+    }
+
+    function updateLine() {
+      if (!line) return;
+      var scrollY = window.scrollY || window.pageYOffset;
+      var viewportHeight = window.innerHeight;
+      var visibleEnd = Math.min(lineHeight - scrollY, viewportHeight);
+
+      if (visibleEnd <= 0) {
+        line.style.display = 'none';
+      } else {
+        line.style.cssText = 'position:fixed;top:0;left:' + lineOffset + ';width:4px;height:' + visibleEnd + 'px;background:#000;pointer-events:none;z-index:9999;';
+      }
+    }
+
+    createLine();
+    window.addEventListener('resize', createLine);
+    window.addEventListener('scroll', updateLine);
+  })();
+`}</script>

@@ -180,7 +180,7 @@ Before saving, verify:
 
 **Important:** Design docs are instructions that LLMs read and follow.
 
-**See:** `@.safeword/guides/llm-guide.md` for comprehensive framework on writing clear, actionable documentation that LLMs can reliably follow.
+**See:** `@.safeword/guides/llm-writing-guide.md` for comprehensive framework on writing clear, actionable documentation that LLMs can reliably follow.
 
 ---
 

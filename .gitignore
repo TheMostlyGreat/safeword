@@ -11,6 +11,9 @@ examples/
 # Test artifacts
 eval-results.json
 
+# Safeword - Local cache
+.safeword/.update-cache.json
+
 # Claude Code - Personal settings
 .claude/settings.local.json
 .claude/todos/
@@ -18,3 +21,6 @@ eval-results.json
 .claude/mcp/arcade.json
 dependency-graph.svg
 .playwright-mcp/
+
+# Brand assets (internal)
+brand/

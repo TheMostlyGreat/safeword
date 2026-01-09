@@ -1,6 +1,6 @@
 # Architecture & Design Documentation Guide
 
-**See:** `@.safeword/guides/llm-guide.md` for LLM-consumable documentation principles.
+**See:** `@.safeword/guides/llm-writing-guide.md` for LLM-consumable documentation principles.
 
 ---
 
@@ -275,11 +275,12 @@ Answer **IN ORDER**:
 
 ```plaintext
 project/
-├── ARCHITECTURE.md              # Single comprehensive doc
-├── .safeword/planning/
-│   ├── specs/
-│   ├── test-definitions/
-│   └── design/                  # Feature-specific design docs
+├── ARCHITECTURE.md                    # Single comprehensive doc
+├── .safeword-project/tickets/
+│   └── {id}-{slug}/
+│       ├── ticket.md
+│       ├── test-definitions.md
+│       └── design.md                  # Feature-specific design docs
 └── src/
 ```
 
@@ -386,11 +387,18 @@ export default defineConfig([
 
 ## Data Architecture
 
-**For data-heavy projects**, see `@.safeword/guides/data-architecture-guide.md` for:
+**Escalate to `data-architecture-guide.md` when ANY apply:**
 
-- Core principles (data quality, governance, accessibility)
-- What to document (conceptual/logical/physical models, flows, policies)
-- Integration with TDD workflow
+- Adding a second data store (database, cache, queue)
+- Complex schema (5+ entities OR cross-feature relationships)
+- Designing ETL, sync, or data pipeline flows
+- Data compliance requirements (GDPR, HIPAA, audit trails)
+- Performance-critical queries needing optimization strategy
+- Multi-service data ownership questions
+
+**The guide covers:** Data quality principles, governance policies, flow documentation, performance targets.
+
+**Skip for:** Single-store CRUD, simple schema additions, feature-scoped entities.
 
 ---
 

@@ -78,9 +78,11 @@ async function ensurePackInstalled(
     return false;
   }
 
-  // Auto-commit .safeword/ (excluding planning/)
+  // Auto-commit .safeword/ (excluding learnings/ and logs/)
   // Use -- .safeword/ to only commit safeword files, not other staged changes
-  await $`git add .safeword/ ':!.safeword/planning/'`.nothrow().quiet();
+  await $`git add .safeword/ ':!.safeword/learnings/' ':!.safeword/logs/'`
+    .nothrow()
+    .quiet();
   const commitResult =
     await $`git commit -m "chore: safeword auto-upgrade (${packName} pack)" -- .safeword/`
       .nothrow()

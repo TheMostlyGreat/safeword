@@ -9,12 +9,14 @@
 
 import { readdirSync, statSync } from "node:fs";
 import nodePath from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
 // Type guard for filtering out undefined values
 const isDefined = <T>(x: T | undefined): x is T => x !== undefined;
 
+const __filename = import.meta.filename;
 const __dirname = import.meta.dirname;
 
 // This import will fail until schema.ts is created (RED phase)
@@ -36,6 +38,8 @@ describe("Schema - Single Source of Truth", () => {
       const fullPath = nodePath.join(dir, entry.name);
 
       if (entry.isDirectory()) {
+        // Skip _shared directories - they contain include files, not installable templates
+        if (entry.name.startsWith("_")) continue;
         files.push(...collectTemplateFiles(fullPath, relativePath));
       } else {
         files.push(relativePath);
@@ -59,12 +63,6 @@ describe("Schema - Single Source of Truth", () => {
         ".safeword/guides",
         ".safeword/templates",
         ".safeword/prompts",
-        ".safeword/planning",
-        ".safeword/planning/specs",
-        ".safeword/planning/test-definitions",
-        ".safeword/planning/design",
-        ".safeword/planning/issues",
-        ".safeword/planning/plans",
         ".cursor",
         ".cursor/rules",
         ".cursor/commands",
@@ -72,6 +70,22 @@ describe("Schema - Single Source of Truth", () => {
 
       for (const dir of required) {
         expect(SAFEWORD_SCHEMA.ownedDirs).toContain(dir);
+      }
+    });
+
+    it("should NOT include deprecated planning directories", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
+      const deprecated = [
+        ".safeword/planning",
+        ".safeword/planning/specs",
+        ".safeword/planning/test-definitions",
+        ".safeword/planning/design",
+        ".safeword/planning/issues",
+        ".safeword/planning/plans",
+      ];
+
+      for (const dir of deprecated) {
+        expect(SAFEWORD_SCHEMA.ownedDirs).not.toContain(dir);
       }
     });
   });
@@ -89,11 +103,30 @@ describe("Schema - Single Source of Truth", () => {
     it("should preserve user content directories", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain(".safeword/learnings");
-      expect(SAFEWORD_SCHEMA.preservedDirs).toContain(".safeword/tickets");
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain(".safeword/logs");
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain(
+        ".safeword-project/tickets",
+      );
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain(
+        ".safeword-project/tickets/completed",
+      );
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain(".safeword-project/tmp");
+    });
+
+    it("should NOT include old .safeword/tickets paths", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
+      expect(SAFEWORD_SCHEMA.preservedDirs).not.toContain(".safeword/tickets");
+      expect(SAFEWORD_SCHEMA.preservedDirs).not.toContain(
         ".safeword/tickets/completed",
       );
-      expect(SAFEWORD_SCHEMA.preservedDirs).toContain(".safeword/logs");
+    });
+  });
+
+  describe("deprecatedDirs", () => {
+    it("should include old planning and tickets directories", async () => {
+      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
+      expect(SAFEWORD_SCHEMA.deprecatedDirs).toContain(".safeword/planning");
+      expect(SAFEWORD_SCHEMA.deprecatedDirs).toContain(".safeword/tickets");
     });
   });
 
@@ -159,45 +192,49 @@ describe("Schema - Single Source of Truth", () => {
   describe("managedFiles", () => {
     it("should include eslint.config.mjs, tsconfig.json, knip.json, and .prettierrc", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      const managedKeys = Object.keys(SAFEWORD_SCHEMA.managedFiles);
-      expect(managedKeys).toContain("eslint.config.mjs");
-      expect(managedKeys).toContain("tsconfig.json");
-      expect(managedKeys).toContain("knip.json");
-      expect(managedKeys).toContain(".prettierrc");
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("eslint.config.mjs");
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("tsconfig.json");
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("knip.json");
+      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty(".prettierrc");
     });
   });
 
   describe("jsonMerges", () => {
     it("should include package.json, .claude/settings.json, .mcp.json, Cursor configs, and .prettierrc", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      const jsonMergeKeys = Object.keys(SAFEWORD_SCHEMA.jsonMerges);
-      expect(jsonMergeKeys).toContain("package.json");
-      expect(jsonMergeKeys).toContain(".claude/settings.json");
-      expect(jsonMergeKeys).toContain(".mcp.json");
-      expect(jsonMergeKeys).toContain(".cursor/mcp.json");
-      expect(jsonMergeKeys).toContain(".cursor/hooks.json");
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty("package.json");
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(
+        ".claude/settings.json",
+      );
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".mcp.json");
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".cursor/mcp.json");
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".cursor/hooks.json");
       // .prettierrc is in jsonMerges for uninstall cleanup (removes plugins key)
-      expect(jsonMergeKeys).toContain(".prettierrc");
+      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".prettierrc");
     });
   });
 
   describe("textPatches", () => {
     it("should include AGENTS.md patch (creates if missing)", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      const textPatchKeys = Object.keys(SAFEWORD_SCHEMA.textPatches);
-      expect(textPatchKeys).toContain("AGENTS.md");
-      const agentsPatch = SAFEWORD_SCHEMA.textPatches["AGENTS.md"];
-      expect(agentsPatch.operation).toBe("prepend");
-      expect(agentsPatch.createIfMissing).toBe(true);
+      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty("AGENTS.md");
+      expect(SAFEWORD_SCHEMA.textPatches["AGENTS.md"].operation).toBe(
+        "prepend",
+      );
+      expect(SAFEWORD_SCHEMA.textPatches["AGENTS.md"].createIfMissing).toBe(
+        true,
+      );
     });
 
     it("should include CLAUDE.md patch (only if exists)", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      const textPatchKeys = Object.keys(SAFEWORD_SCHEMA.textPatches);
-      expect(textPatchKeys).toContain("CLAUDE.md");
-      const claudePatch = SAFEWORD_SCHEMA.textPatches["CLAUDE.md"];
-      expect(claudePatch.operation).toBe("prepend");
-      expect(claudePatch.createIfMissing).toBe(false);
+      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty("CLAUDE.md");
+      expect(SAFEWORD_SCHEMA.textPatches["CLAUDE.md"].operation).toBe(
+        "prepend",
+      );
+      expect(SAFEWORD_SCHEMA.textPatches["CLAUDE.md"].createIfMissing).toBe(
+        false,
+      );
     });
   });
 
@@ -206,7 +243,7 @@ describe("Schema - Single Source of Truth", () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
       const required = [
         "eslint",
-        "safeword", // bundles eslint-config-prettier
+        "safeword", // bundles eslint-config-prettier + all ESLint plugins
         "dependency-cruiser",
         "knip",
       ];
@@ -226,7 +263,7 @@ describe("Schema - Single Source of Truth", () => {
 
     it("should have conditional packages for frameworks not in safeword plugin", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      // These frameworks are NOT bundled in safeword (or need prettier plugins)
+      // These frameworks are NOT in eslint-plugin-safeword (or need prettier plugins)
       const requiredConditions = [
         "astro", // prettier-plugin-astro (ESLint rules are in safeword)
         "tailwind", // prettier-plugin-tailwindcss

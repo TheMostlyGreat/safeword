@@ -67,19 +67,19 @@ Training data is stale. Follow this sequence:
 
 **Read the matching guide when ANY trigger fires:**
 
-| Trigger                                                   | Guide                                           |
-| --------------------------------------------------------- | ----------------------------------------------- |
-| Starting feature/task OR writing specs/test definitions   | `./.safeword/guides/planning-guide.md`          |
-| Choosing test type, doing TDD, OR test is failing         | `./.safeword/guides/testing-guide.md`           |
-| Creating OR updating a design doc                         | `./.safeword/guides/design-doc-guide.md`        |
-| Making architectural decision OR writing ADR              | `./.safeword/guides/architecture-guide.md`      |
-| Designing data models, schemas, or database changes       | `./.safeword/guides/data-architecture-guide.md` |
-| Calling LLM APIs OR writing LLM-consumable docs           | `./.safeword/guides/llm-guide.md`               |
-| Updating CLAUDE.md, SAFEWORD.md, or any context file      | `./.safeword/guides/context-files-guide.md`     |
-| Hit same bug 3+ times OR discovered undocumented gotcha   | `./.safeword/guides/learning-extraction.md`     |
-| Process hanging, port in use, or zombie process suspected | `./.safeword/guides/zombie-process-cleanup.md`  |
-| Using `safeword` CLI commands                             | `./.safeword/guides/cli-reference.md`           |
-| Debugging issues OR need git/cross-platform guidance      | `./.safeword/guides/code-philosophy.md`         |
+| Trigger                                                      | Guide                                           |
+| ------------------------------------------------------------ | ----------------------------------------------- |
+| Starting feature/task OR writing specs/test definitions      | `./.safeword/guides/planning-guide.md`          |
+| Choosing test type, doing TDD, OR test is failing            | `./.safeword/guides/testing-guide.md`           |
+| Creating OR updating a design doc                            | `./.safeword/guides/design-doc-guide.md`        |
+| Making architectural decision OR writing ADR                 | `./.safeword/guides/architecture-guide.md`      |
+| Data-heavy project needing formal data architecture          | `./.safeword/guides/data-architecture-guide.md` |
+| Writing learnings OR agent config (CLAUDE.md, .cursor/rules) | `./.safeword/guides/llm-writing-guide.md`       |
+| Updating CLAUDE.md, SAFEWORD.md, or any context file         | `./.safeword/guides/context-files-guide.md`     |
+| Hit same bug 3+ times OR discovered undocumented gotcha      | `./.safeword/guides/learning-extraction.md`     |
+| Process hanging, port in use, or zombie process suspected    | `./.safeword/guides/zombie-process-cleanup.md`  |
+| Using `safeword` CLI commands                                | `./.safeword/guides/cli-reference.md`           |
+| Debugging issues OR need git/cross-platform guidance         | `./.safeword/guides/code-philosophy.md`         |
 
 ---
 
@@ -99,35 +99,34 @@ Training data is stale. Follow this sequence:
 
 ---
 
-## Planning Documentation
+## Ticket System
 
-**Location:** `.safeword/planning/` at project root
+**Purpose:** Context anchor to prevent LLM loops during complex work. Colocates all artifacts.
 
-| Type             | Path                                   | Contents                          |
-| ---------------- | -------------------------------------- | --------------------------------- |
-| Specs            | `.safeword/planning/specs/`            | `feature-*.md` and `task-*.md`    |
-| Test definitions | `.safeword/planning/test-definitions/` | `feature-*.md` (L2 features only) |
-| Design docs      | `.safeword/planning/design/`           | Complex features (3+ components)  |
-| Issues           | `.safeword/planning/issues/`           | Issue tracking                    |
-| Execution plans  | `.safeword/planning/plans/`            | LLM-ready task breakdowns         |
+**Location:** `.safeword-project/tickets/{id}-{slug}/`
+
+**Folder structure:**
+
+```text
+.safeword-project/tickets/
+├── 001-feature-name/
+│   ├── ticket.md           # Ticket definition (frontmatter + work log)
+│   ├── test-definitions.md # BDD scenarios (Given/When/Then)
+│   ├── spec.md             # Feature spec for epics (optional)
+│   └── design.md           # Design doc for complex features (optional)
+├── 002-another-task/
+│   └── ticket.md
+├── completed/              # Archive for done tickets
+└── tmp/                    # Scratch space (research, logs, etc.)
+```
 
 **Artifact Levels:**
 
-| Level  | Artifacts                                            | Test Location       |
-| ------ | ---------------------------------------------------- | ------------------- |
-| **L2** | Feature Spec + Test Definitions (+ Design Doc if 3+) | `test-definitions/` |
-| **L1** | Task Spec                                            | Inline in spec      |
-| **L0** | Task Spec (minimal)                                  | Existing tests      |
-
-**Archive:** Move completed docs to `archive/` subfolder within each.
-
----
-
-## Ticket System
-
-**Purpose:** Context anchor to prevent LLM loops during complex work.
-
-**Location:** `.safeword/tickets/{id}-{slug}.md`
+| Level       | Artifacts                                           |
+| ----------- | --------------------------------------------------- |
+| **feature** | ticket.md + test-definitions.md (+ spec.md if epic) |
+| **task**    | ticket.md with inline tests                         |
+| **patch**   | ticket.md (minimal), existing tests                 |
 
 **Create ticket? Answer IN ORDER, stop at first match:**
 
@@ -207,33 +206,84 @@ status: in_progress
 
 ---
 
+## Work Level Detection
+
+**⚠️ MANDATORY: Run this decision tree on EVERY request BEFORE doing any work.**
+
+Stop at first match:
+
+```text
+Is this explicitly a bug fix, typo, or config change?
+├─ Yes → patch
+└─ No ↓
+
+Does request mention "feature", "add", "implement", "support", "build", "iteration", "phase"?
+├─ No → task
+└─ Yes ↓
+
+Will it require 3+ files AND (new state OR multiple user flows)?
+├─ Yes → feature
+└─ No / Unsure ↓
+
+Can ONE test cover the observable change?
+├─ Yes → task
+└─ No → feature
+
+Fallback: task. User can /bdd to override.
+```
+
+**Always announce after detection:**
+
+- **patch:** "Patch. Fixing directly."
+- **task:** "Task. Writing tests first. `/bdd` to override." → TDD (RED → GREEN → REFACTOR)
+- **feature:** "Feature. Defining behaviors first. `/tdd` to override." → BDD phases (0-7), TDD inline at Phase 6
+
+**Examples:**
+
+| Request                      | Signals                         | Level   |
+| ---------------------------- | ------------------------------- | ------- |
+| "Fix typo in README"         | 1 file, no test needed          | patch   |
+| "Fix login error message"    | 1-2 files, 1 test               | task    |
+| "Change button color to red" | 1 file, 1 test, no state        | task    |
+| "Add dark mode toggle"       | 3+ files, new state, user prefs | feature |
+| "Add user authentication"    | Many files, state machine       | feature |
+| "Move onto iteration 2"      | New work chunk, scope in spec   | feature |
+| "Implement iteration 3 of X" | Iteration = sub-feature of spec | feature |
+| "Continue to phase 3"        | Phase = spec continuation       | feature |
+
+**Edge cases:**
+
+- "Add a comment to function X" → patch (not behavior change)
+- "Implement the fix for bug #123" → task (bug fix despite "implement")
+- "Build the Docker image" → patch (infrastructure, not product)
+
+---
+
 ## Feature Development
 
-**Triage first - answer IN ORDER, stop at first match:**
-
-| Question                                 | Level          | Artifacts                    |
-| ---------------------------------------- | -------------- | ---------------------------- |
-| User-facing feature with business value? | **L2 Feature** | Spec + Test Defs (+ Design)  |
-| Bug, improvement, internal, or refactor? | **L1 Task**    | Spec with inline tests       |
-| Typo, config, or trivial change?         | **L0 Micro**   | Minimal spec, existing tests |
+| Level       | Artifacts                    |
+| ----------- | ---------------------------- |
+| **feature** | Spec + Test Defs (+ Design)  |
+| **task**    | Spec with inline tests       |
+| **patch**   | Minimal spec, existing tests |
 
 **Then follow this order:**
 
-1. **Check/create ticket** if context-loss risk exists (see decision tree above)
-2. **Read/create spec** (`.safeword/planning/specs/`)
-3. **Read/create test definitions** (L2 only: `.safeword/planning/test-definitions/`)
-4. **Read/create design doc** if complex (3+ components)
+1. **Check/create ticket folder** if context-loss risk exists (`.safeword-project/tickets/{id}-{slug}/`)
+2. **Read/create ticket.md** in the folder
+3. **Read/create test-definitions.md** (feature only, in same folder)
+4. **Read/create design.md** if complex (3+ components, in same folder)
 5. **TDD: RED → GREEN → REFACTOR**
 6. **Update ticket** with progress, ask user to confirm completion
 
 **Edge cases:**
 
-| Situation                 | Action                  |
-| ------------------------- | ----------------------- |
-| Spec exists, no test defs | Create test defs (L2)   |
-| Test defs exist, no spec  | Create spec first       |
-| Neither exist             | Create spec, then tests |
-| L0/L1 task                | Inline tests in spec    |
+| Situation                 | Action                     |
+| ------------------------- | -------------------------- |
+| Spec exists, no test defs | Create test defs (feature) |
+| Test defs exist, no spec  | Create spec first          |
+| Neither exist             | Create spec, then tests    |
+| patch/task                | Inline tests in spec       |
 
 ---
 
@@ -344,7 +394,7 @@ When markdown lint reports MD040 (missing language), choose:
 
 1. **Clarity → Simplicity → Correctness** (in that order)
 2. **Test what you can test**—never ask user to verify
-3. **ALWAYS USE STRICT TDD: RED → GREEN → REFACTOR**—never skip steps
+3. **Run Work Level Detection on EVERY request**—announce patch/task/feature
 4. **Commit after each GREEN phase**
 5. **Read the matching guide** when a trigger fires
 6. **Always read the latest documentation for the relevant tool**

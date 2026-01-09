@@ -8,18 +8,22 @@ How to write specs, user stories, and test definitions before implementation.
 
 **Triage first - answer IN ORDER, stop at first match:**
 
-| Question                                 | Level          | Artifacts                                            |
-| ---------------------------------------- | -------------- | ---------------------------------------------------- |
-| User-facing feature with business value? | **L2 Feature** | Feature Spec + Test Definitions (+ Design Doc if 3+) |
-| Bug, improvement, internal, or refactor? | **L1 Task**    | Task Spec with inline tests                          |
-| Typo, config, or trivial change?         | **L0 Micro**   | Minimal Task Spec, existing tests                    |
+| Question                                 | Level       | Artifacts                                            |
+| ---------------------------------------- | ----------- | ---------------------------------------------------- |
+| User-facing feature with business value? | **feature** | Feature Spec + Test Definitions (+ Design Doc if 3+) |
+| Bug, improvement, internal, or refactor? | **task**    | Task Spec with inline tests                          |
+| Typo, config, or trivial change?         | **patch**   | Minimal Task Spec, existing tests                    |
 
-**Locations:**
+**Location:** `.safeword-project/tickets/{id}-{slug}/`
 
-- Specs: `.safeword/planning/specs/`
-- Test definitions: `.safeword/planning/test-definitions/`
+All artifacts colocate in the ticket folder:
 
-**If none fit:** Break down the work. A single task spanning all three levels should be split into separate L2 feature + L1 tasks.
+- `ticket.md` - Ticket definition
+- `test-definitions.md` - BDD scenarios
+- `spec.md` - Feature spec (epics only)
+- `design.md` - Design doc (complex features)
+
+**If none fit:** Break down the work. A single task spanning all three levels should be split into separate feature + tasks.
 
 ---
 
@@ -27,9 +31,9 @@ How to write specs, user stories, and test definitions before implementation.
 
 | Need                            | Template                                          |
 | ------------------------------- | ------------------------------------------------- |
-| L2 Feature spec                 | `.safeword/templates/feature-spec-template.md`    |
-| L1/L0 Task spec                 | `.safeword/templates/task-spec-template.md`       |
-| L2 Test definitions             | `.safeword/templates/test-definitions-feature.md` |
+| feature spec                    | `.safeword/templates/feature-spec-template.md`    |
+| task/patch spec                 | `.safeword/templates/task-spec-template.md`       |
+| feature Test definitions        | `.safeword/templates/test-definitions-feature.md` |
 | Complex feature design          | `.safeword/templates/design-doc-template.md`      |
 | Architectural decision          | `.safeword/templates/architecture-template.md`    |
 | Context anchor for complex work | `.safeword/templates/ticket-template.md`          |
@@ -248,7 +252,7 @@ Test: All existing tests pass, no new mutations
 6. Add status for each test
 7. Include detailed steps and expected outcomes
 8. Add summary with coverage breakdown
-9. Save to `.safeword/planning/test-definitions/feature-[slug].md`
+9. Save to `.safeword-project/tickets/{id}-{slug}/test-definitions.md`
 
 ---
 
@@ -396,21 +400,19 @@ User stories include Technical Constraints. These MUST have corresponding tests.
 
 ---
 
-## File Naming Convention
+## Ticket Folder Naming
 
-**Specs:** `.safeword/planning/specs/feature-[slug].md` or `task-[slug].md`
+**Structure:** `.safeword-project/tickets/{id}-{slug}/`
 
-**Test definitions:** `.safeword/planning/test-definitions/feature-[slug].md`
+**Good folder names:**
 
-**Good filenames:**
+- `001-campaign-switching/`
+- `012-fix-login-timeout/`
 
-- `feature-campaign-switching.md`
-- `task-fix-login-timeout.md`
+**Bad folder names:**
 
-**Bad filenames:**
-
-- `user-story-1.md` ← Not descriptive
-- `STORY_CAMPAIGN_FINAL_v2.md` ← Bloated
+- `story-1/` ← Not descriptive
+- `CAMPAIGN_FINAL_v2/` ← Bloated
 
 ---
 

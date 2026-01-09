@@ -1,0 +1,177 @@
+---
+title: Hooks & Skills
+description: Automatic behaviors and structured workflows
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+## Slash Commands
+
+Quick actions you type in Claude Code. Just type the command and hit enter.
+
+| Command            | What it does                              |
+| ------------------ | ----------------------------------------- |
+| `/lint`            | Fix code style issues                     |
+| `/audit`           | Find dead code and architecture drift     |
+| `/quality-review`  | Deep review against latest best practices |
+| `/cleanup-zombies` | Kill stuck processes hogging ports        |
+| `/tdd`             | Start test-driven development workflow    |
+| `/refactor`        | Start safe refactoring workflow           |
+
+---
+
+## Hooks
+
+Hooks run automatically at key moments. You don't invoke them—they work in the background.
+
+<Tabs syncKey="editor">
+  <TabItem label="Claude Code">
+    | When                    | What happens                                        |
+    | ----------------------- | --------------------------------------------------- |
+    | Session starts          | Verifies AGENTS.md link, shows version, checks lint |
+    | You submit a prompt     | Adds timestamp, reminds agent to ask questions      |
+    | Agent edits a file      | Runs the appropriate linter                         |
+    | You stop the session    | Prompts for quality review                          |
+
+    ### Auto-linting
+
+    After your agent writes or modifies a file, the right linter runs:
+
+    | File type               | Linter        |
+    | ----------------------- | ------------- |
+    | TypeScript / JavaScript | ESLint        |
+    | Python                  | Ruff          |
+    | Go                      | golangci-lint |
+
+    If a linter isn't installed, it's silently skipped.
+
+    **What you see:** `SAFEWORD: Linting...` appears in output. If there are issues, your agent sees them and fixes immediately.
+
+    ### Customizing hooks
+
+    Default hooks get overwritten on `safeword upgrade`. To customize:
+
+    1. Copy the hook to `.safeword-project/` (e.g., `my-lint.ts`)
+    2. Update `.claude/settings.json` to point to your copy
+    3. Your custom hook stays safe from upgrades
+
+    Hook config: `.claude/settings.json`
+    Hook files: `.safeword/hooks/`
+
+  </TabItem>
+  <TabItem label="Cursor">
+    Safeword installs hooks (`.cursor/hooks.json`) and rules (`.cursor/rules/`) to guide your agent's behavior.
+
+    | When                    | What happens                    |
+    | ----------------------- | ------------------------------- |
+    | Agent edits a file      | Runs the appropriate linter     |
+    | You stop the session    | Prompts for quality review      |
+
+    ### Auto-linting
+
+    After your agent writes or modifies a file, the right linter runs:
+
+    | File type               | Linter        |
+    | ----------------------- | ------------- |
+    | TypeScript / JavaScript | ESLint        |
+    | Python                  | Ruff          |
+    | Go                      | golangci-lint |
+
+    If a linter isn't installed, it's silently skipped.
+
+    **What you see:** `SAFEWORD: Linting...` appears in output. If there are issues, your agent sees them and fixes immediately.
+
+    ### Rules
+
+    Rules shape agent behavior through system prompts:
+
+    | Rule              | What it does                                        |
+    | ----------------- | --------------------------------------------------- |
+    | Debugging         | Investigate before jumping to fixes                 |
+    | TDD               | Write tests first, then implementation              |
+    | Refactoring       | One small change at a time, test after each         |
+    | Brainstorming     | Ask clarifying questions before proposing solutions |
+    | Quality Reviewing | Check against current docs and best practices       |
+
+    ### Customizing hooks and rules
+
+    Default hooks and rules get overwritten on `safeword upgrade`. To customize:
+
+    1. Copy the file to `.safeword-project/`
+    2. For rules: reference your copy in your workflow
+    3. For hooks: update `.cursor/hooks.json` to point to your copy
+
+    Hook config: `.cursor/hooks.json`
+    Rule files: `.cursor/rules/`
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Skills
+
+Skills are structured workflows that activate based on what you're asking for. When you say "debug this test failure" or "refactor this function", your agent follows the skill's methodology instead of jumping straight to code changes.
+
+| Skill             | Triggers on                                   |
+| ----------------- | --------------------------------------------- |
+| Brainstorming     | "design", "explore options", "think through"  |
+| Debugging         | "debug", "fix this error", "test is failing"  |
+| TDD               | "implement", "add feature", "build"           |
+| Quality Reviewing | "review", "check security", "verify versions" |
+| Refactoring       | "refactor", "clean up", "extract", "rename"   |
+| Writing Plans     | "write plan", "break down into tasks"         |
+
+### Brainstorming
+
+Helps you think through a problem before writing code. Asks clarifying questions, explores alternatives, and validates assumptions incrementally.
+
+**Example:** "I need to add caching but I'm not sure how to approach it"
+
+Your agent will ask questions like "What's the cache invalidation strategy?" and "Should this be in-memory or distributed?" before proposing solutions.
+
+### Debugging
+
+Investigates before fixing. Follows: **Investigate** → **Hypothesize** → **Test** → **Fix**.
+
+**Example:** "This test is failing but I don't know why"
+
+Instead of immediately changing code, your agent will read the test, trace the execution path, form a hypothesis, and verify it before making changes.
+
+### TDD (Test-Driven Development)
+
+Enforces the discipline of writing tests first: **RED** (failing test) → **GREEN** (make it pass) → **REFACTOR** (clean up).
+
+**Example:** "Add a function that validates email addresses"
+
+Your agent will write the test first, run it to see it fail, then write the minimum code to make it pass.
+
+### Quality Reviewing
+
+Deep review that checks your code against current best practices using web search.
+
+**Example:** "Review this authentication code"
+
+Your agent will check against official library docs, look for known security issues, and verify you're using current versions.
+
+### Refactoring
+
+Small, safe changes with test verification after each step: **One change** → **Test** → **Commit**.
+
+**Example:** "Clean up this messy function"
+
+Your agent will make one small improvement, run tests, commit, then repeat—never batching multiple changes.
+
+### Writing Plans
+
+Creates detailed implementation plans before coding. Useful for complex features that need coordination.
+
+**Example:** "Plan out how we'd add multi-tenancy"
+
+Your agent will produce a step-by-step plan with file paths, code examples, and verification steps.
+
+<footer class="docs-footer">
+
+[GitHub](https://github.com/TheMostlyGreat/safeword) · MIT License · © 2026
+
+</footer>

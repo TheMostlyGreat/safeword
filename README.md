@@ -31,7 +31,7 @@ test -f .claude/settings.json && echo ".claude/settings.json ✓"
 - `.safeword/guides/` - TDD methodology, testing, code philosophy
 - `.safeword/hooks/` - Claude Code hooks (auto-linting, quality review)
 - `.claude/settings.json` - Hook configuration for Claude Code
-- `.claude/commands/` - Slash commands (`/lint`, `/quality-review`, `/drift`)
+- `.claude/commands/` - Slash commands (`/lint`, `/quality-review`, `/audit`)
 - `AGENTS.md` - Project context with framework reference (also patches `CLAUDE.md` if it exists)
 
 **Commit these to your repo** for team consistency.
@@ -91,11 +91,11 @@ Key directories created in your project:
 
 **Purpose**: Working with LLMs and documentation structure
 
-| Guide                         | Purpose                                                                  | When to Read         |
-| ----------------------------- | ------------------------------------------------------------------------ | -------------------- |
-| **llm-guide.md**              | LLM integration (caching, evals) + writing docs for LLMs (13 principles) | Building AI features |
-| **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation                              | Managing dev servers |
-| **cli-reference.md**          | Safeword CLI command reference and usage                                 | Using CLI commands   |
+| Guide                         | Purpose                                                      | When to Read                    |
+| ----------------------------- | ------------------------------------------------------------ | ------------------------------- |
+| **llm-writing-guide.md**      | Writing docs that LLMs follow (MECE, examples, recency bias) | Writing skills, commands, hooks |
+| **zombie-process-cleanup.md** | Port-based cleanup, multi-project isolation                  | Managing dev servers            |
+| **cli-reference.md**          | Safeword CLI command reference and usage                     | Using CLI commands              |
 
 ---
 
@@ -172,9 +172,10 @@ planning/
 
 **Skills** (in `.claude/skills/`): Specialized agent capabilities
 
+- `safeword-bdd-orchestrating/` - BDD orchestrator for feature-level work (scenarios first)
 - `safeword-brainstorming/` - Collaborative design through Socratic questioning
 - `safeword-debugging/` - Four-phase debugging (investigate before fixing)
-- `safeword-enforcing-tdd/` - RED → GREEN → REFACTOR discipline
+- `safeword-tdd-enforcing/` - RED → GREEN → REFACTOR discipline
 - `safeword-quality-reviewer/` - Deep code review with web research
 - `safeword-refactoring/` - Small-step refactoring with test verification
 - `safeword-writing-plans/` - Create detailed execution plans for agents
@@ -183,9 +184,10 @@ planning/
 
 - `/lint` - Run linters and formatters
 - `/audit` - Run architecture and dead code analysis
-- `/drift` - Check if architecture docs match codebase reality
 - `/quality-review` - Deep code review with web research
 - `/cleanup-zombies` - Kill zombie processes on ports
+- `/bdd` - Force BDD flow for current task
+- `/tdd` - Force TDD flow (skip BDD phases)
 
 **MCP Servers** (in `.mcp.json` / `.cursor/mcp.json`): Auto-configured integrations
 

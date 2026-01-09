@@ -24,6 +24,7 @@ import {
   readTestFile,
   removeTemporaryDirectory,
   runCli,
+  runLintHook,
   writeTestFile,
 } from "../helpers";
 
@@ -36,7 +37,7 @@ describe("E2E: Python Golden Path", () => {
     projectDirectory = createTemporaryDirectory();
     createPythonProject(projectDirectory);
     initGitRepo(projectDirectory);
-    await runCli(["setup"], { cwd: projectDirectory });
+    await runCli(["setup", "--yes"], { cwd: projectDirectory });
   }, 180_000); // 3 min timeout for setup
 
   afterAll(() => {
@@ -104,20 +105,8 @@ describe("E2E: Python Golden Path", () => {
       // Intentionally badly formatted
       writeTestFile(projectDirectory, "src/hook-test.py", "x=1;y=2");
 
-      // Simulate Claude Code PostToolUse hook input
-      const hookInput = JSON.stringify({
-        session_id: "test-session",
-        hook_event_name: "PostToolUse",
-        tool_name: "Write",
-        tool_input: { file_path: filePath },
-      });
-
-      // Run the hook
-      execSync(`echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`, {
-        cwd: projectDirectory,
-        env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
-        encoding: "utf8",
-      });
+      // Run the lint hook
+      runLintHook(projectDirectory, filePath);
 
       // File should be formatted by Ruff
       const result = readTestFile(projectDirectory, "src/hook-test.py");

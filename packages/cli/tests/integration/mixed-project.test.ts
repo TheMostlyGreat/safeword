@@ -24,7 +24,7 @@ import {
   readTestFile,
   removeTemporaryDirectory,
   runCli,
-  SAFEWORD_VERSION,
+  runLintHook,
   writeTestFile,
 } from "../helpers";
 
@@ -37,13 +37,11 @@ describe("E2E: Mixed Project (TypeScript + Python)", () => {
     projectDirectory = createTemporaryDirectory();
 
     // Create a mixed package.json with both TypeScript and Python indicators
-    // Include local safeword to ensure tests use the current build
     const packageJson = {
       name: "mixed-project",
       version: "1.0.0",
       devDependencies: {
         typescript: "^5.0.0",
-        safeword: SAFEWORD_VERSION,
       },
     };
     writeTestFile(
@@ -63,7 +61,7 @@ version = "0.1.0"
     );
 
     initGitRepo(projectDirectory);
-    await runCli(["setup"], { cwd: projectDirectory });
+    await runCli(["setup", "--yes"], { cwd: projectDirectory });
   }, 180_000);
 
   afterAll(() => {
@@ -136,31 +134,11 @@ version = "0.1.0"
   });
 
   describe("Lint hook routes to correct linter", () => {
-    function runLintHook(filePath: string) {
-      // Use post-tool-lint.ts with JSON input (same approach as golden-path tests)
-      const hookInput = JSON.stringify({
-        session_id: "test-session",
-        hook_event_name: "PostToolUse",
-        tool_name: "Write",
-        tool_input: { file_path: filePath },
-      });
-
-      return spawnSync(
-        "bash",
-        ["-c", `echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`],
-        {
-          cwd: projectDirectory,
-          env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
-          encoding: "utf8",
-        },
-      );
-    }
-
     it("routes .ts files to ESLint", () => {
       const filePath = nodePath.join(projectDirectory, "src/lint-ts.ts");
       writeTestFile(projectDirectory, "src/lint-ts.ts", "const x=1\n");
 
-      const result = runLintHook(filePath);
+      const result = runLintHook(projectDirectory, filePath);
       expect(result.status).toBe(0);
 
       // ESLint/Prettier should format
@@ -172,7 +150,7 @@ version = "0.1.0"
       const filePath = nodePath.join(projectDirectory, "src/lint-py.py");
       writeTestFile(projectDirectory, "src/lint-py.py", "x=1;y=2");
 
-      const result = runLintHook(filePath);
+      const result = runLintHook(projectDirectory, filePath);
       expect(result.status).toBe(0);
 
       // Ruff should format

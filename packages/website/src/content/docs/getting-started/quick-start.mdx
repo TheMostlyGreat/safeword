@@ -1,10 +1,11 @@
 ---
 title: Quick Start
-description: Get up and running with Safeword in 30 seconds
-tableOfContents: false
+description: One command. Your agent writes better code.
 ---
 
-AI coding agents are powerful but need guidance. Safeword provides portable hooks, skills, and quality controls that enforce TDD workflow and best practices across all your projects.
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+One command. Your agent writes better code.
 
 ## Install
 
@@ -12,73 +13,90 @@ AI coding agents are powerful but need guidance. Safeword provides portable hook
 bunx safeword@latest setup
 ```
 
-Or with npm: `npx safeword@latest setup`
+Takes about 30 seconds. Works with TypeScript, Python, and Go projects.
 
-## What You Get
+## What Changes
 
-| Path                | Description                     |
-| ------------------- | ------------------------------- |
-| `.safeword/`        | Hooks, guides, and templates    |
-| `.claude/`          | Claude Code settings and skills |
-| `.cursor/rules/`    | Cursor AI rules                 |
-| `eslint.config.mjs` | ESLint with safeword plugin     |
-| `AGENTS.md`         | Project context file            |
+You use Claude Code or Cursor the same way you always have. Type a prompt, get code. But now there's a safety net running in the background.
 
-**Commit these to your repo** for team consistency.
+<Tabs>
+  <TabItem label="Claude Code">
+    **Every edit gets linted automatically.** After your agent writes or modifies a file, Safeword runs your linter. If there are issues, your agent sees them immediately and fixes them—before you even notice.
 
-## Verify
+    **Every session ends with a quality check.** When you're done working, Safeword prompts your agent to review what it built. Catches things like missing error handling, security issues, or code that doesn't match the codebase style.
+
+  </TabItem>
+  <TabItem label="Cursor">
+    **Your agent follows structured workflows.** Safeword adds rules (`.cursor/rules/`) that guide how your agent approaches tasks. When debugging, it investigates before jumping to fixes. When building features, it follows your codebase patterns.
+
+    **Better decisions, automatically.** The rules kick in based on what you're asking for—no special commands needed.
+
+  </TabItem>
+</Tabs>
+
+## Try It
+
+Open your project and ask your agent to build something real:
+
+> "Add an API endpoint that returns user profile data"
+
+<Tabs>
+  <TabItem label="Claude Code">
+    Watch what happens:
+
+    1. Your agent writes the endpoint
+    2. Lint runs automatically — you'll see `SAFEWORD: Linting...` in the output
+    3. If there are issues, your agent fixes them before you even see the code
+    4. When you stop the session, a quality review runs automatically
+
+  </TabItem>
+  <TabItem label="Cursor">
+    Watch what happens:
+
+    1. Your agent investigates your existing API patterns first
+    2. It follows the structure of your codebase
+    3. If you ask it to debug something, it'll investigate before jumping to fixes
+
+    The rules in `.cursor/rules/` guide this behavior automatically.
+
+  </TabItem>
+</Tabs>
+
+## What Got Installed
+
+Safeword added a few folders to your project:
+
+| Folder              | What's in it                                          |
+| ------------------- | ----------------------------------------------------- |
+| `.safeword/hooks/`  | Scripts that run automatically (lint, quality checks) |
+| `.claude/skills/`   | Structured workflows for debugging, TDD, refactoring  |
+| `.claude/commands/` | Slash commands like `/lint` and `/audit`              |
+| `.safeword/`        | Config files, guides, and ESLint setup                |
+| `.cursor/rules/`    | Rules for Cursor (if detected)                        |
+
+These files commit to your repo. When your team pulls, they get the same setup automatically.
+
+## Go Deeper
+
+Most developers stop here. The defaults work well and you don't need to configure anything.
+
+When you're ready to understand what's happening under the hood:
+
+- [Hooks & Skills](/reference/hooks-and-skills) — Automatic checks, slash commands, and structured workflows
+- [Configuration](/reference/configuration) — Customize what gets enforced
+
+## Staying Current
+
+Safeword improves over time. Update when you want the latest:
 
 ```bash
-bunx safeword@latest check
+bunx safeword@latest upgrade
 ```
 
-## Start Coding
+Your customizations are preserved. Only the core files get updated.
 
-Open your project in Claude Code or Cursor. Hooks activate automatically:
+<footer class="docs-footer">
 
-- **SessionStart** — Version check, lint check, AGENTS.md verification
-- **UserPromptSubmit** — Timestamp injection, question reminders
-- **PostToolUse** — Auto-lint changed files
-- **Stop** — Quality review prompt
+[GitHub](https://github.com/TheMostlyGreat/safeword) · MIT License · © 2026
 
-## Commands
-
-Quick actions via slash syntax:
-
-| Command            | Purpose                             |
-| ------------------ | ----------------------------------- |
-| `/lint`            | Run linters and formatters          |
-| `/audit`           | Architecture and dead code analysis |
-| `/drift`           | Check if docs match reality         |
-| `/quality-review`  | Deep code review with web research  |
-| `/cleanup-zombies` | Kill zombie dev server processes    |
-
-## Skills
-
-Structured workflows that guide the AI:
-
-| Skill                     | Purpose                                  |
-| ------------------------- | ---------------------------------------- |
-| `/safeword-debugging`     | Four-phase debugging (investigate first) |
-| `/safeword-enforcing-tdd` | RED → GREEN → REFACTOR discipline        |
-| `/safeword-refactoring`   | Small-step refactoring with tests        |
-| `/safeword-brainstorming` | Collaborative design through questioning |
-| `/safeword-writing-plans` | Create detailed execution plans          |
-
-## Language Support
-
-Auto-detected from your project:
-
-| Language   | Linting           |
-| ---------- | ----------------- |
-| TypeScript | ESLint + Prettier |
-| Python     | Ruff + mypy       |
-| Go         | golangci-lint     |
-
-## Next Steps
-
-- [CLI Reference](/reference/cli) — All CLI commands
-- [Commands](/reference/commands) — Slash command details
-- [Skills](/reference/skills) — Workflow descriptions
-- [Hooks](/reference/hooks) — Automation triggers
-- [Configuration](/reference/configuration) — Customization options
+</footer>

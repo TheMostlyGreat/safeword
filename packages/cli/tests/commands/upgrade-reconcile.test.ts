@@ -207,7 +207,9 @@ describe("Upgrade Command - Reconcile Integration", () => {
         existsSync(nodePath.join(temporaryDirectory, ".safeword/learnings")),
       ).toBe(true);
       expect(
-        existsSync(nodePath.join(temporaryDirectory, ".safeword/tickets")),
+        existsSync(
+          nodePath.join(temporaryDirectory, ".safeword-project/tickets"),
+        ),
       ).toBe(true);
       expect(
         existsSync(nodePath.join(temporaryDirectory, ".claude/commands")),

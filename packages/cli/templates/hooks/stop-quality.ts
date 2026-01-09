@@ -2,10 +2,11 @@
 // Safeword: Auto Quality Review Stop Hook
 // Triggers quality review when changes are proposed or made
 // Uses JSON summary if available, falls back to detecting edit tool usage
+// Phase-aware: reads ticket phase for context-appropriate review questions
 
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 
-import { QUALITY_REVIEW_MESSAGE } from "./lib/quality.ts";
+import { getQualityMessage, type BddPhase } from "./lib/quality.ts";
 
 interface HookInput {
   transcript_path?: string;
@@ -34,6 +35,67 @@ const EDIT_TOOLS = new Set(["Write", "Edit", "MultiEdit", "NotebookEdit"]);
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const safewordDir = `${projectDir}/.safeword`;
+const ticketsDir = `${projectDir}/.safeword-project/tickets`;
+
+/**
+ * Read phase from the most recently modified ticket in .safeword-project/tickets/
+ * Only considers tickets with status: in_progress (ignores backlog, done, etc.)
+ * Skips type: epic tickets (work happens in child features/tasks)
+ * Returns undefined if no matching tickets or no phase found.
+ */
+function getCurrentPhase(): BddPhase | undefined {
+  if (!existsSync(ticketsDir)) {
+    return undefined;
+  }
+
+  try {
+    // List ticket folders (exclude 'completed' and 'tmp')
+    const folders = readdirSync(ticketsDir).filter((f) => {
+      if (f === "completed" || f === "tmp") return false;
+      const ticketPath = `${ticketsDir}/${f}/ticket.md`;
+      return existsSync(ticketPath);
+    });
+    if (folders.length === 0) return undefined;
+
+    // Find most recently modified in_progress ticket (excluding epics)
+    let latestFolder = "";
+    let latestMtime = 0;
+    for (const folder of folders) {
+      const ticketPath = `${ticketsDir}/${folder}/ticket.md`;
+      const content = readFileSync(ticketPath, "utf-8");
+
+      // Skip tickets that aren't in_progress
+      const statusMatch = content.match(/^status:\s*(\S+)/m);
+      if (statusMatch?.[1] !== "in_progress") continue;
+
+      // Skip epic tickets (work happens in children)
+      const typeMatch = content.match(/^type:\s*(\S+)/m);
+      if (typeMatch?.[1] === "epic") continue;
+
+      const mtime = new Date(
+        content.match(/last_modified: (.+)/)?.[1] ?? 0,
+      ).getTime();
+      if (mtime > latestMtime) {
+        latestMtime = mtime;
+        latestFolder = folder;
+      }
+    }
+
+    if (!latestFolder) return undefined;
+
+    const content = readFileSync(
+      `${ticketsDir}/${latestFolder}/ticket.md`,
+      "utf-8",
+    );
+    const phaseMatch = content.match(/^phase:\s*(\S+)/m);
+    if (phaseMatch) {
+      return phaseMatch[1] as BddPhase;
+    }
+  } catch {
+    // Silent fail - use default message
+  }
+  return undefined;
+}
 
 // Not a safeword project, skip silently
 if (!existsSync(safewordDir)) {
@@ -185,36 +247,84 @@ for (const candidate of candidates) {
   }
 }
 
-// Decision logic:
-// 1. If valid summary found → use it
-// 2. If no summary but edit tools used → trigger review (safety net)
-// 3. If no summary and no edit tools → remind about required format
+// Get phase-aware quality message
+const currentPhase = getCurrentPhase();
+const qualityMessage = getQualityMessage(currentPhase);
 
+/**
+ * Evidence patterns for done phase validation.
+ * Agent must show these patterns to prove completion.
+ */
+const DONE_EVIDENCE_PATTERNS = [
+  /✓\s*\d+\/\d+\s*tests?\s*pass/i, // "✓ 156/156 tests pass"
+  /\d+\/\d+\s*tests?\s*pass/i, // "156/156 tests pass"
+  /all\s+\d+\s+scenarios?\s+marked/i, // "All 10 scenarios marked complete"
+];
+
+/**
+ * Message shown when done phase blocks due to missing evidence.
+ */
+const DONE_HARD_BLOCK_MESSAGE = `SAFEWORD: Done phase requires evidence. Run /done and show results.
+
+Expected evidence formats:
+- "✓ X/X tests pass"
+- "All N scenarios marked complete"
+
+Run tests, show output, then try again.`;
+
+/**
+ * Check if transcript contains evidence of completion.
+ */
+function hasCompletionEvidence(text: string): boolean {
+  return DONE_EVIDENCE_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+/**
+ * Hard block for done phase - uses exit 2 to force Claude to continue.
+ * Claude receives stderr and must provide evidence before stopping.
+ */
+function hardBlockDone(reason: string): never {
+  console.error(reason);
+  process.exit(2);
+}
+
+/**
+ * Soft block for other phases - uses JSON decision to prompt review.
+ */
+function softBlock(reason: string): never {
+  console.log(JSON.stringify({ decision: "block", reason }));
+  process.exit(0);
+}
+
+// Decision logic:
+// 1. Done phase with missing evidence → hard block (exit 2)
+// 2. Done phase with evidence → allow (exit 0)
+// 3. Other phases → soft block with quality review
+
+if (currentPhase === "done") {
+  // Done phase: require evidence before allowing stop
+  if (hasCompletionEvidence(combinedText)) {
+    // Evidence found - allow stop
+    process.exit(0);
+  }
+  // No evidence - hard block, force Claude to run /done
+  hardBlockDone(DONE_HARD_BLOCK_MESSAGE);
+}
+
+// Other phases: use summary-based soft blocking
 if (summary) {
   // Use reported summary
   if (summary.proposedChanges || summary.madeChanges) {
-    console.log(
-      JSON.stringify({ decision: "block", reason: QUALITY_REVIEW_MESSAGE }),
-    );
-    process.exit(0);
+    softBlock(qualityMessage);
   }
 } else if (editToolsUsed) {
   // Fallback: edit tools detected but no summary - trigger review anyway
-  console.log(
-    JSON.stringify({
-      decision: "block",
-      reason: `${QUALITY_REVIEW_MESSAGE}\n\n(Note: JSON summary was missing but edit tools were detected)`,
-    }),
+  softBlock(
+    `${qualityMessage}\n\n(Note: JSON summary was missing but edit tools were detected)`,
   );
-  process.exit(0);
 } else {
   // No summary and no edit tools - remind about required format
-  console.log(
-    JSON.stringify({
-      decision: "block",
-      reason:
-        'SAFEWORD: Response missing required JSON summary. Add to end of response:\n{"proposedChanges": boolean, "madeChanges": boolean}',
-    }),
+  softBlock(
+    'SAFEWORD: Response missing required JSON summary. Add to end of response:\n{"proposedChanges": boolean, "madeChanges": boolean}',
   );
-  process.exit(0);
 }

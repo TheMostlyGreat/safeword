@@ -19,6 +19,106 @@ A CLI tool that installs AI coding agent configurations into projects. **This re
 
 4. **Dogfooding**: This repo runs safeword on itself. Template changes are tested in real usage before release.
 
+## Agent Behavior Principles
+
+### Fire-and-Forget by Default, Power User Escape Hatches
+
+Users shouldn't have to "learn" safeword. It should feel automatic—like working with an experienced engineering team. You don't tell a good team how to do things; they just do them well.
+
+- **Default behavior is invisible**: Agent detects work type (patch/task/feature) and applies the right process automatically
+- **No teaching required**: User says "build X" and gets a quality process without asking for it
+- **Power users can override**: Explicit commands exist (`/bdd`, `/tdd-only`, etc.) but 90% of users never need them
+
+### Teammate Voice, Not System Logs
+
+Announcements should sound like a colleague updating you, not a system logging state.
+
+| System-y ❌                           | Teammate-y ✅                                                               |
+| ------------------------------------- | --------------------------------------------------------------------------- |
+| `→ Feature detected. Using BDD flow.` | `Starting feature work — I'll define behaviors first, then build with TDD.` |
+| `→ Phase 4: Scenario Quality Gate`    | `Let me check these scenarios are testable...`                              |
+| `→ Override: TDD only`                | `Got it — skipping behaviors, straight to TDD.`                             |
+
+Power users still understand what's happening. Newbies just hear a colleague explaining their approach.
+
+### Progressive Disclosure
+
+Don't front-load complexity. Gather minimum viable context, then offer to go deeper.
+
+- **Minimum first**: Get enough to start (goal, scope, out-of-scope)
+- **Offer discovery**: "I can start now, but want to spitball edge cases first?"
+- **User controls depth**: They choose how many rounds of refinement, then say "ready"
+
+### PM-Style Questions
+
+When gathering context, ask like a good PM—not like a system collecting form fields.
+
+| Category        | Question Style                                              |
+| --------------- | ----------------------------------------------------------- |
+| User experience | "What does success feel like? What does failure feel like?" |
+| Failure modes   | "What breaks? What are the consequences?"                   |
+| Boundaries      | "What's the minimum? Maximum? Where are the edges?"         |
+| Scenarios       | "Walk through a concrete situation. What happens?"          |
+| Regret          | "If we skip this, what support tickets will we get?"        |
+
+### Skills, Subagents, and Hooks: Know the Difference
+
+Claude Code has three mechanisms for controlling agent behavior. Understanding their enforcement levels prevents design mistakes.
+
+| Mechanism     | What It Does                         | Enforcement | Can Chain? |
+| ------------- | ------------------------------------ | ----------- | ---------- |
+| **Skills**    | Guidance documents in same context   | Soft        | No         |
+| **Subagents** | Isolated execution, separate context | Soft        | No nesting |
+| **Hooks**     | Shell commands on lifecycle events   | Hard        | N/A        |
+
+**Skills** add knowledge to the current conversation. Claude decides when to apply them based on semantic matching. They cannot invoke other skills or guarantee execution.
+
+**Subagents** run in isolated context windows with configurable tool access. They're good for task isolation but:
+
+- Cannot spawn other subagents (no nesting)
+- Don't inherit skills unless explicitly configured
+- Claude decides when to delegate (soft enforcement)
+
+**Hooks** execute shell commands at lifecycle events (PreToolUse, PostToolUse, etc.). They provide hard enforcement:
+
+- Exit code 2 blocks execution until acknowledged
+- Run at app level, not relying on Claude to decide
+- Perfect for validation, formatting, notifications
+
+**Design principles:**
+
+1. **Don't rely on skill-to-skill handoffs** — they depend on agent memory
+2. **Don't expect subagents to chain** — no nesting allowed
+3. **Use hooks for guaranteed enforcement** — they always run
+4. **Inline guidance when handoffs fail** — merge skills instead of delegating
+
+### Frequent Commits as Checkpoints
+
+Small, atomic commits after each meaningful change create rollback points and reviewable history.
+
+**When to commit:**
+
+- After each test passes (GREEN phase)
+- Before refactoring (safe point to revert)
+- After successful refactor
+- When switching context or tasks
+
+**Research sources:**
+
+- Addy Osmani: Small iteration loops, "waterfall in 15 minutes" ([source](https://addyosmani.com/blog/ai-coding-workflow/))
+- Spotify: Independent verifiers validate completion ([source](https://engineering.atspotify.com/2025/12/feedback-loops-background-coding-agents-part-3))
+
+### Evidence-Based Completion
+
+Don't claim done without proof. Completion prompts should require observable evidence.
+
+**Pattern:**
+
+- ❌ "All tests pass" (claim without proof)
+- ✅ "✓ 156/156 tests pass" (evidence)
+
+**Implementation:** Quality hook's done-phase prompt requires showing specific counts/outputs before allowing completion claim.
+
 ## Architecture Decisions
 
 ### Reconciliation Engine (`reconcile.ts`)
@@ -46,18 +146,32 @@ See `ARCHITECTURE.md` for full structure including all packages and templates.
 | `.safeword/`              | Installed config (dogfooding, tracked in git) |
 | `.claude/`, `.cursor/`    | IDE-specific configs synced from templates    |
 
-## Common Gotchas
-
-1. **templates/ vs .safeword/**: Edit `packages/cli/templates/` first, then `bunx safeword upgrade` to sync. Never edit `.safeword/` directly for framework changes.
-
-2. **Eval failures**: Usually means the guide needs clearer instructions, not that the test is wrong. Fix the guide.
-
-3. **Hook paths**: Always use `"$CLAUDE_PROJECT_DIR"/.safeword/hooks/...` format (quoted variable) for Claude Code hooks.
-
-4. **Monorepo publishing**: `workspace:^` resolves at `bun install` time, not publish time. For 0.x packages, `^0.6.0` excludes 0.7.0. Run `bun install` after version bumps, or use explicit versions for cross-package deps.
-
 ## Project-Specific Content
 
 **Location**: `.safeword-project/` (never touched by CLI reset/upgrade)
 
 Use for project-specific guides that shouldn't be overwritten by framework updates.
+
+**Read the matching guide when ANY trigger fires:**
+
+| Trigger                                | Guide                                                   |
+| -------------------------------------- | ------------------------------------------------------- |
+| Creating or modifying a skill          | `.safeword-project/guides/skill-authoring-guide.md`     |
+| Creating or modifying a hook           | `.safeword-project/guides/hooks-authoring-guide.md`     |
+| Creating or modifying a command        | `.safeword-project/guides/command-authoring-guide.md`   |
+| Adding files to CLI templates (schema) | `.safeword-project/guides/schema-registration-guide.md` |
+| Calling LLMs from code (APIs, caching) | `.safeword-project/guides/llm-integration-guide.md`     |
+
+## Common Gotchas
+
+1. **templates/ vs .safeword/**: Edit `packages/cli/templates/` first, then `bunx safeword upgrade` to sync. Never edit `.safeword/` directly for framework changes.
+
+2. **Schema registration**: Every file in `packages/cli/templates/` MUST have an entry in `packages/cli/src/schema.ts`. Without it, the file exists but never gets installed. Run `bun run test -- --testNamePattern="should have entry"` to verify.
+
+3. **`bun test` vs `bun run test`**: This project uses Vitest. Always use `bun run test` (runs package.json script) not `bun test` (runs Bun's built-in test runner, which will fail on Vitest tests).
+
+4. **Eval failures**: Usually means the guide needs clearer instructions, not that the test is wrong. Fix the guide.
+
+5. **Hook paths**: Always use `"$CLAUDE_PROJECT_DIR"/.safeword/hooks/...` format (quoted variable) for Claude Code hooks.
+
+6. **Monorepo publishing**: `workspace:^` resolves at `bun install` time, not publish time. For 0.x packages, `^0.6.0` excludes 0.7.0. Run `bun install` after version bumps, or use explicit versions for cross-package deps.

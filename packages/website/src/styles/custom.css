@@ -14,6 +14,14 @@
 
 /* Red background theme */
 :root {
+  /* Content inset: centers content, with minimum padding for small viewports */
+  --sw-content-inset: max(
+    var(--sl-content-pad-x),
+    calc((100vw - var(--sl-content-width)) / 2)
+  );
+  /* Vertical line offset from content edge */
+  --sw-line-offset: calc(var(--sw-content-inset) - 1.5rem);
+
   --sl-color-bg: #ff0000;
   --sl-color-bg-nav: #ff0000;
   --sl-color-bg-sidebar: #ff0000;
@@ -46,11 +54,27 @@ main,
   color: #000;
 }
 
-/* Kill pane borders */
-*,
-*::before,
-*::after {
+/* Kill pane borders on splash page (except logo) */
+[data-has-hero] *,
+[data-has-hero] *::before,
+[data-has-hero] *::after {
   border-color: transparent !important;
+}
+
+/* Restore logo border on splash page */
+[data-has-hero] .site-title {
+  border-color: #000 !important;
+}
+
+/* Hide all horizontal lines/separators on splash page */
+[data-has-hero] hr,
+[data-has-hero] .sl-markdown-content hr {
+  display: none !important;
+}
+
+/* Body needs relative positioning for vertical line */
+[data-has-hero] body {
+  position: relative;
 }
 
 /* Oswald for headlines */
@@ -150,14 +174,14 @@ figure.frame .copy button,
   width: 32px !important;
   height: 32px !important;
   opacity: 1 !important;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23888'%3E%3Cpath d='M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z'/%3E%3C/svg%3E")
-    center/60% no-repeat !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'%3E%3C/path%3E%3C/svg%3E")
+    center/50% no-repeat !important;
 }
 
 figure.frame .copy button:hover,
 .expressive-code .copy button:hover {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z'/%3E%3C/svg%3E")
-    center/60% no-repeat !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'%3E%3C/path%3E%3C/svg%3E")
+    center/50% no-repeat !important;
 }
 
 figure.frame .copy button div,
@@ -227,20 +251,6 @@ th {
   background: transparent !important;
 }
 
-/* Star badge in header */
-.star-badge {
-  background: rgba(0, 0, 0, 0.15) !important;
-  color: #000 !important;
-}
-
-.star-badge:hover {
-  background: rgba(0, 0, 0, 0.25) !important;
-}
-
-.star-badge svg {
-  color: #000 !important;
-}
-
 /* Links */
 a {
   color: #000;
@@ -255,4 +265,399 @@ a:hover {
 ::selection {
   background: #000;
   color: #ff0000;
+}
+
+/* Splash page: hide search, theme toggle, redundant H1, and edit link */
+[data-has-hero] button[aria-label="Search"],
+[data-has-hero] starlight-theme-select,
+[data-has-hero] .hero h1,
+[data-has-hero] a[href*="edit/main"] {
+  display: none !important;
+}
+
+/* Hero tagline - LOUD + left-aligned */
+[data-has-hero] .hero .tagline {
+  font-family: "Oswald", sans-serif !important;
+  text-transform: uppercase;
+  font-size: clamp(1.8rem, 4.5vw, 3rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+  line-height: 1.15 !important;
+  max-width: 720px;
+  text-align: left;
+}
+
+/* Left-align all body content on splash page */
+[data-has-hero] .sl-markdown-content h2,
+[data-has-hero] .sl-markdown-content p,
+[data-has-hero] .sl-markdown-content .soul {
+  text-align: left;
+}
+
+/* Hide section anchor icons on splash page */
+[data-has-hero] .sl-markdown-content h2 a[href^="#"] {
+  display: none !important;
+}
+
+/* Tighter hero spacing on splash page */
+[data-has-hero] .hero {
+  padding-block: 0 1rem !important;
+  min-height: auto !important;
+  margin-bottom: 0;
+}
+
+/* Hero subtitle - product definition, distinct from body */
+p.hero-subtitle {
+  font-family: "IBM Plex Sans", sans-serif !important;
+  font-size: 1.5rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  text-align: left !important;
+  margin: 1.5rem 0 2.5rem 0 !important;
+  opacity: 0.9;
+}
+
+/* Left-align logo on splash page and make it larger */
+[data-has-hero] header .site-title {
+  font-size: 2em;
+  padding: 0.3em 0.6em !important;
+}
+
+/* Remove sticky header on splash page and align with content */
+[data-has-hero] header {
+  position: relative;
+  padding: 2.5rem 0 2.5rem var(--sw-content-inset) !important;
+  align-items: center !important;
+  pointer-events: none;
+}
+
+/* Re-enable pointer events on header links */
+[data-has-hero] header a {
+  pointer-events: auto;
+}
+
+/* Double GitHub button size on splash page */
+[data-has-hero] header a[href*="github"] {
+  transform: scale(1.5);
+  transform-origin: center right;
+}
+
+/* Splash page docs link - positioned in header row */
+.splash-docs-link {
+  position: fixed;
+  top: 40px;
+  transform: translateY(-50%);
+  right: 6rem;
+  z-index: 9999;
+  font-family: "Oswald", sans-serif !important;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  text-decoration: none !important;
+  border: none !important;
+  background: transparent;
+  transition: opacity 0.15s;
+}
+
+.splash-docs-link:hover {
+  opacity: 0.6;
+}
+
+.splash-docs-link p {
+  font-family: "Oswald", sans-serif !important;
+  text-transform: uppercase;
+  margin: 0 !important;
+}
+
+/* Tab styling - segmented control */
+[role="tablist"] {
+  display: inline-flex !important;
+  gap: 0 !important;
+  background: rgba(0, 0, 0, 0.1) !important;
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+[role="tab"] {
+  font-family: "Oswald", sans-serif !important;
+  text-transform: uppercase !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  font-size: 0.9rem !important;
+  padding: 0.5em 1.2em !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #000 !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+  transition:
+    background 0.15s,
+    color 0.15s !important;
+}
+
+/* Kill any gray underline from Starlight tabs */
+[role="tablist"]::after,
+[role="tablist"]::before,
+.tablist-wrapper::after,
+.tablist-wrapper::before,
+starlight-tabs::after,
+starlight-tabs::before {
+  display: none !important;
+  border: none !important;
+}
+
+/* Remove underline from tab links */
+[role="tab"] a,
+[role="tablist"] a,
+.tab a {
+  text-decoration: none !important;
+}
+
+/* Remove any wrapper borders */
+.tablist-wrapper,
+starlight-tabs {
+  border: none !important;
+}
+
+[role="tab"]:hover:not([aria-selected="true"]) {
+  background: rgba(0, 0, 0, 0.15) !important;
+}
+
+[role="tab"][aria-selected="true"] {
+  background: #000 !important;
+  color: #ff0000 !important;
+  border: none !important;
+}
+
+/* Tab panel - remove default borders */
+[role="tabpanel"] {
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* Soul statement - manifesto closer */
+.soul {
+  font-family: "Oswald", sans-serif !important;
+  text-transform: uppercase;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  margin-top: 1.5rem !important;
+}
+
+/* Tighter section spacing on splash page */
+[data-has-hero] .sl-markdown-content h2 {
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+[data-has-hero] .sl-markdown-content p {
+  margin-bottom: 0.5rem !important;
+}
+
+/* Reference links nav bar */
+.ref-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem !important;
+}
+
+.ref-links p {
+  display: contents;
+}
+
+.ref-links a {
+  font-family: "Oswald", sans-serif !important;
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: none !important;
+  padding: 0.4em 0.8em;
+  border: 2px solid #000 !important;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.ref-links a:hover {
+  background: #000;
+  color: #ff0000 !important;
+}
+
+/* Splash page footer */
+.splash-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.splash-footer p {
+  margin: 0;
+}
+
+.splash-footer a {
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.splash-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ========== DOCS PAGE STYLES ========== */
+
+/* Remove header bottom border on docs pages */
+:not([data-has-hero]) header {
+  border-bottom: none !important;
+}
+
+/* Remove vertical divider line near social links (but not logo) */
+header .sl-flex:not(.site-title),
+header .social-icons,
+header [class*="social"],
+header nav[aria-label="Social"] {
+  border: none !important;
+  border-left: none !important;
+}
+
+/* Kill all dividers in header */
+header::after,
+header::before,
+header *::after,
+header *::before {
+  border: none !important;
+}
+
+/* Hide "On this page" TOC and right sidebar border */
+nav[aria-label="On this page"],
+.right-sidebar-panel {
+  display: none !important;
+}
+
+.right-sidebar {
+  border-left: none !important;
+}
+
+/* Hide theme toggle on all pages */
+starlight-theme-select {
+  display: none !important;
+}
+
+/* Remove sidebar gridlines/borders */
+nav[aria-label="Main"],
+nav[aria-label="Main"] ul,
+nav[aria-label="Main"] li,
+nav[aria-label="Main"] a,
+.sidebar-content,
+.sidebar-pane,
+.sl-sidebar,
+[data-sl-sidebar-state] {
+  border: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* Increase GitHub icon size on docs pages */
+header a[href*="github"] {
+  transform: scale(1.5);
+  transform-origin: center;
+}
+
+/* Fix gray borders to black */
+header {
+  border-color: #000 !important;
+}
+
+blockquote {
+  border-color: #000 !important;
+  border-left-color: #000 !important;
+}
+
+table,
+thead,
+tbody,
+tr,
+th,
+td {
+  border-color: #000 !important;
+}
+
+/* Nav footer pagination links */
+.sl-markdown-content ~ div a,
+a[rel="next"],
+a[rel="prev"],
+.pagination-links a {
+  border-color: #000 !important;
+}
+
+/* H1 underline */
+h1 {
+  border-color: #000 !important;
+}
+
+/* Fix ALL remaining gray borders to black */
+dialog,
+.mobile-preferences,
+nav.astro-egcu6jst,
+summary,
+.toggle,
+.dropdown,
+details,
+details summary,
+details[open] summary {
+  border-color: #000 !important;
+}
+
+/* Sidebar link borders */
+nav[aria-label="Main"] a {
+  border-color: #000 !important;
+}
+
+/* Figcaption/header borders in code blocks */
+figcaption.header {
+  border-color: #000 !important;
+}
+
+/* Nuclear option: force all borders to black on docs pages */
+:not([data-has-hero]) * {
+  border-color: #000 !important;
+}
+
+/* Footer nav pagination - square corners to match logo */
+a[rel="next"],
+a[rel="prev"],
+.pagination-links a {
+  border-radius: 0 !important;
+}
+
+/* Docs page footer */
+.docs-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #000;
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.docs-footer p {
+  margin: 0;
+}
+
+.docs-footer a {
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.docs-footer a:hover {
+  text-decoration: underline;
 }

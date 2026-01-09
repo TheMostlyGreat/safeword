@@ -23,8 +23,12 @@ Run these commands based on project type. Both Python and JS commands run for po
 
 # JS/TS linting (if package.json exists)
 [ -f package.json ] && {
-  # ESLint - fix code quality issues
-  bun run lint 2>&1 || true
+  # ESLint - use lint:eslint if exists (projects with existing linter), else lint
+  if grep -q '"lint:eslint"' package.json 2> /dev/null; then
+    bun run lint:eslint 2>&1 || true
+  else
+    bun run lint 2>&1 || true
+  fi
   # Prettier - format all files
   bun run format --if-present 2>&1 || true
   # TypeScript type check (if tsconfig.json exists)

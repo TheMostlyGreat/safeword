@@ -604,7 +604,7 @@ describe("Reconcile - Reconciliation Engine", () => {
       // Add a completed ticket (should be preserved - user content)
       const completedDirectory = nodePath.join(
         temporaryDirectory,
-        ".safeword/tickets/completed",
+        ".safeword-project/tickets/completed",
       );
       mkdirSync(completedDirectory, { recursive: true });
       writeFileSync(
@@ -628,15 +628,15 @@ describe("Reconcile - Reconciliation Engine", () => {
         existsSync(
           nodePath.join(
             temporaryDirectory,
-            ".safeword/tickets/completed/001-done.md",
+            ".safeword-project/tickets/completed/001-done.md",
           ),
         ),
       ).toBe(true);
 
-      // But .safeword parent still exists because of preserved content
-      expect(existsSync(nodePath.join(temporaryDirectory, ".safeword"))).toBe(
-        true,
-      );
+      // .safeword-project parent still exists because of preserved content
+      expect(
+        existsSync(nodePath.join(temporaryDirectory, ".safeword-project")),
+      ).toBe(true);
     });
   });
 

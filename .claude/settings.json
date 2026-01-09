@@ -54,17 +54,6 @@
         ]
       }
     ],
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun \"$CLAUDE_PROJECT_DIR\"/.safeword/hooks/pre-tool-config-guard.ts"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit|NotebookEdit",
@@ -76,11 +65,11 @@
         ]
       },
       {
-        "matcher": "Write|Edit|MultiEdit",
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "bun \"$CLAUDE_PROJECT_DIR\"/.safeword/hooks/post-tool-bypass-warn.ts"
+            "command": "bun \"$CLAUDE_PROJECT_DIR\"/.safeword/hooks/post-tool-guide-check.ts"
           }
         ]
       }

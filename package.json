@@ -17,7 +17,7 @@
     "format:sh": "shfmt -w -i 2 -ci **/*.sh .safeword/hooks/* packages/cli/templates/hooks/* packages/cli/templates/scripts/* 2>/dev/null || echo 'shfmt not installed (brew install shfmt)'",
     "format:check": "prettier --check .",
     "knip": "knip",
-    "prepare": "husky || true",
+    "prepare": "husky",
     "lint:eslint": "eslint .",
     "deps": "depcruise packages/*/src --config .dependency-cruiser.cjs",
     "deps:graph": "depcruise packages/*/src --config .dependency-cruiser.cjs --output-type dot | dot -T svg > dependency-graph.svg",
@@ -33,6 +33,7 @@
     "lint-staged": "^15.5.0",
     "markdownlint-cli2": "^0.20.0",
     "prettier": "^3.7.4",
+    "prettier-plugin-sh": "^0.18.0",
     "promptfoo": "^0.120.10",
     "safeword": "workspace:*",
     "shellcheck": "^4.1.0"

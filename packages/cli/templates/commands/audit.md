@@ -4,9 +4,11 @@ description: Run comprehensive code audit for architecture and dead code
 
 # Audit
 
-Run a comprehensive code audit. Execute these commands and report results.
+Run a comprehensive code audit. Execute checks and report results by severity.
 
 ## Instructions
+
+### 1. Code Quality Checks
 
 ```bash
 # =========================================================================
@@ -83,9 +85,68 @@ bunx jscpd . --gitignore --min-lines 10 --reporters console 2>&1 || true
 }
 ```
 
+### 2. Agent Config Checks
+
+Find and check all agent configuration files (excluding `.safeword/`):
+
+**Files to check:**
+
+- `CLAUDE.md`, `AGENTS.md` (root and subdirectories)
+- `.claude/CLAUDE.md` (root and subdirectories)
+- `.cursor/rules/*.mdc` or `.cursor/rules/*/` (root and subdirectories)
+- `.cursorrules` (legacy)
+
+**For each config file, check:**
+
+| Check      | Criteria                                                            | Severity |
+| ---------- | ------------------------------------------------------------------- | -------- |
+| Size limit | CLAUDE.md/AGENTS.md: ~150-200 instructions; Cursor rules: 500 lines | warn     |
+| Structure  | Has WHAT/WHY/HOW sections                                           | warn     |
+| Dead refs  | All referenced files/paths exist (skip URLs starting with http)     | error    |
+| Staleness  | Last modified 30+ days ago AND commits exist since                  | warn     |
+
+**Best practices sources:**
+
+- [Anthropic Engineering](https://www.anthropic.com/engineering/claude-code-best-practices)
+- [Cursor Docs](https://cursor.com/docs/context/rules)
+
+### 3. Project Documentation Checks
+
+**ARCHITECTURE.md:**
+
+- If missing → create from `.safeword/templates/architecture-template.md`
+- If exists → check for drift and gaps:
+  - **Drift (error):** Documented tech contradicts code (e.g., doc says "Redux", package.json has "zustand")
+  - **Gap (warn):** Major dependencies not documented
+
+**README.md:**
+
+- Check staleness (last modified vs recent commits)
+
+**Docs site (if exists):**
+
+- Detect `docs/`, `documentation/` with Starlight/Docusaurus/etc config
+- Check staleness of docs content
+
+---
+
 ## Report Format
 
-After running, report in this format:
+Report findings by severity with codes:
+
+### Errors (must fix)
+
+- [E001] Dead ref: `CLAUDE.md` references missing file `src/foo.ts`
+- [E002] Drift: `ARCHITECTURE.md` documents Redux, code uses Zustand
+
+### Warnings (should review)
+
+- [W001] Size: `CLAUDE.md` has 245 instructions (recommended: 150-200)
+- [W002] Structure: `AGENTS.md` missing recommended WHAT/WHY/HOW sections
+- [W003] Staleness: `README.md` last modified 45 days ago (12 commits since)
+- [W004] Gap: `@tanstack/query` not documented in ARCHITECTURE.md
+
+### Code Quality
 
 **Architecture:**
 
@@ -95,16 +156,21 @@ After running, report in this format:
 **Dead Code:**
 
 - Fixed by knip: [list of auto-fixed items]
-- Python (deadcode): [unused functions/classes]
-- Go (unused): [unused code from golangci-lint]
 
 **Duplication:**
 
 - Clone count: X (Y% of codebase)
-- [List significant duplicates if any]
 
 **Outdated Packages:**
 
-- TS/JS: [list or "all up to date"]
-- Python (uv/poetry/pip): [list or "all up to date"]
-- Go: [list or "all up to date"]
+- [list or "all up to date"]
+
+---
+
+### Summary
+
+```
+Errors: N | Warnings: N | Passed: N
+
+[Audit passed | Audit passed with warnings | Audit failed]
+```

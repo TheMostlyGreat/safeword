@@ -7,6 +7,7 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import nodePath from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
@@ -96,7 +97,7 @@ describe("NPM Package Structure", () => {
     const files = readdirSync(commandsPath);
 
     expect(files).toContain("quality-review.md");
-    expect(files).toContain("drift.md");
+    expect(files).toContain("audit.md");
     expect(files).toContain("lint.md");
   });
 
