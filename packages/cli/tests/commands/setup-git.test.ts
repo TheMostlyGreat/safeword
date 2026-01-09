@@ -1,7 +1,7 @@
 /**
  * Test Suite 7: Git Repository Handling
  *
- * Tests for git detection and Husky/lint-staged setup.
+ * Tests for git detection and setup behavior with/without git.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";

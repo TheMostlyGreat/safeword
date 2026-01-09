@@ -430,10 +430,10 @@ describe("E2E: Conditional Setup - Git Integration", () => {
     }
   });
 
-  // Note: Husky/lint-staged are no longer managed by safeword (v0.9.0+)
+  // Husky/lint-staged are intentionally NOT managed by safeword
   // Users set up their own pre-commit hooks if desired
   it(
-    "does not install husky or lint-staged (removed in v0.9.0)",
+    "does not install husky or lint-staged (not managed by safeword)",
     async () => {
       projectDirectory = createTemporaryDirectory();
       createTypeScriptPackageJson(projectDirectory);
@@ -481,7 +481,7 @@ describe("E2E: Conditional Setup - Git Integration", () => {
     SETUP_TIMEOUT,
   );
 
-  // Note: pre-commit hooks are no longer managed by safeword (v0.9.0+)
+  // Pre-commit hooks are intentionally NOT managed by safeword
   // Users can set up their own husky + lint-staged if desired
 });
 

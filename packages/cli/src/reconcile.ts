@@ -581,10 +581,10 @@ function computeUpgradePlan(
     actions.push({ type: "json-merge", path: filePath, definition });
   }
 
-  // 7. Text patches (only if marker missing, skip .husky in non-git repos)
+  // 7. Text patches (only if marker missing)
   actions.push(...planTextPatches(schema.textPatches, ctx.cwd, ctx.isGitRepo));
 
-  // 8. Compute packages to install (husky/lint-staged skipped if no git repo)
+  // 8. Compute packages to install
   const packagesToInstall = computePackagesToInstall(
     schema,
     ctx.projectType,
@@ -860,33 +860,24 @@ function fileNeedsUpdate(installedPath: string, newContent: string): boolean {
   return currentContent?.trim() !== newContent.trim();
 }
 
-// Packages that require git repo
-const GIT_ONLY_PACKAGES = new Set(["husky", "lint-staged"]);
-
 /**
  *
  * @param schema
  * @param projectType
  * @param installedDevDeps
- * @param isGitRepo
+ * @param _isGitRepo - Kept for backward compatibility, no longer used
  */
 export function computePackagesToInstall(
   schema: SafewordSchema,
   projectType: ProjectType,
   installedDevelopmentDeps: Record<string, string>,
-  isGitRepo = true,
+  _isGitRepo = true,
 ): string[] {
-  let needed = [...schema.packages.base];
-
-  // Filter out git-only packages when not in a git repo
-  if (!isGitRepo) {
-    needed = needed.filter((pkg) => !GIT_ONLY_PACKAGES.has(pkg));
-  }
-
-  // Add conditional packages based on project type
-  needed.push(
+  // Combine base packages with conditional packages
+  const needed = [
+    ...schema.packages.base,
     ...getConditionalPackages(schema.packages.conditional, projectType),
-  );
+  ];
 
   return needed.filter((pkg) => !(pkg in installedDevelopmentDeps));
 }
