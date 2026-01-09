@@ -14,7 +14,6 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
-import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
@@ -32,7 +31,6 @@ export const TIMEOUT_SETUP = 60_000;
 /** bun install operations under load or cold cache (120s) */
 export const TIMEOUT_BUN_INSTALL = 120_000;
 
-const __filename = import.meta.filename;
 const __dirname = import.meta.dirname;
 
 /**
@@ -51,11 +49,6 @@ const SAFEWORD_PATH = nodePath.join(__dirname, "..");
  * This ensures tests run against the current source code.
  */
 export const SAFEWORD_VERSION = `file:${SAFEWORD_PATH}`;
-
-/**
- * Path to the CLI source (for ts-node execution during development)
- */
-const CLI_SRC_PATH = nodePath.join(__dirname, "../src/cli.ts");
 
 /**
  * Creates a temporary directory for test isolation
@@ -191,7 +184,6 @@ interface CliResult {
  * @param args
  * @param options
  * @param options.cwd
- * @param options.input
  * @param options.env
  * @param options.timeout
  */
@@ -199,14 +191,12 @@ export async function runCli(
   args: string[],
   options: {
     cwd?: string;
-    input?: string;
     env?: Record<string, string>;
     timeout?: number;
   } = {},
 ): Promise<CliResult> {
   const {
     cwd = process.cwd(),
-    input,
     env = {},
     timeout = TIMEOUT_BUN_INSTALL,
   } = options;
@@ -218,7 +208,6 @@ export async function runCli(
       cwd,
       env: { ...process.env, ...env },
       timeout,
-      input,
     });
     return { stdout, stderr, exitCode: 0 };
   } catch (error: unknown) {

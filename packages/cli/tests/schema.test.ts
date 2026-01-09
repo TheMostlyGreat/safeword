@@ -9,14 +9,12 @@
 
 import { readdirSync, statSync } from "node:fs";
 import nodePath from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
 // Type guard for filtering out undefined values
 const isDefined = <T>(x: T | undefined): x is T => x !== undefined;
 
-const __filename = import.meta.filename;
 const __dirname = import.meta.dirname;
 
 // This import will fail until schema.ts is created (RED phase)
