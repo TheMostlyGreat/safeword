@@ -103,12 +103,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.safeword/guides',
     '.safeword/templates',
     '.safeword/prompts',
-    '.safeword/planning',
-    '.safeword/planning/specs',
-    '.safeword/planning/test-definitions',
-    '.safeword/planning/design',
-    '.safeword/planning/issues',
-    '.safeword/planning/plans',
     '.safeword/scripts',
     '.cursor',
     '.cursor/rules',
@@ -121,9 +115,10 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // Created on setup but NOT deleted on reset (preserves user data)
   preservedDirs: [
     '.safeword/learnings',
-    '.safeword/tickets',
-    '.safeword/tickets/completed',
     '.safeword/logs',
+    '.safeword-project/tickets',
+    '.safeword-project/tickets/completed',
+    '.safeword-project/tmp',
   ],
 
   // Files to delete on upgrade (renamed or removed in newer versions)
@@ -194,6 +189,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // Directories to delete on upgrade (no longer managed by safeword)
   deprecatedDirs: [
     '.safeword/lib', // Shell libraries no longer needed with Bun (v0.13.0)
+    '.safeword/planning', // Moved to .safeword-project/tickets/ (v0.16.0)
+    '.safeword/tickets', // Moved to .safeword-project/tickets/ (v0.16.0)
     '.claude/skills/safeword-enforcing-tdd', // Renamed to safeword-tdd-enforcing (v0.16.0)
     '.claude/skills/safeword-tdd-enforcing', // Removed - BDD includes TDD (v0.16.0)
     '.claude/skills/safeword-brainstorming', // Removed - BDD discovery phase covers this (v0.16.0)

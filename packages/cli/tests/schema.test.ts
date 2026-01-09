@@ -63,12 +63,6 @@ describe('Schema - Single Source of Truth', () => {
         '.safeword/guides',
         '.safeword/templates',
         '.safeword/prompts',
-        '.safeword/planning',
-        '.safeword/planning/specs',
-        '.safeword/planning/test-definitions',
-        '.safeword/planning/design',
-        '.safeword/planning/issues',
-        '.safeword/planning/plans',
         '.cursor',
         '.cursor/rules',
         '.cursor/commands',
@@ -76,6 +70,22 @@ describe('Schema - Single Source of Truth', () => {
 
       for (const dir of required) {
         expect(SAFEWORD_SCHEMA.ownedDirs).toContain(dir);
+      }
+    });
+
+    it('should NOT include deprecated planning directories', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      const deprecated = [
+        '.safeword/planning',
+        '.safeword/planning/specs',
+        '.safeword/planning/test-definitions',
+        '.safeword/planning/design',
+        '.safeword/planning/issues',
+        '.safeword/planning/plans',
+      ];
+
+      for (const dir of deprecated) {
+        expect(SAFEWORD_SCHEMA.ownedDirs).not.toContain(dir);
       }
     });
   });
@@ -93,9 +103,24 @@ describe('Schema - Single Source of Truth', () => {
     it('should preserve user content directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/learnings');
-      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/tickets');
-      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/tickets/completed');
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/logs');
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword-project/tickets');
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword-project/tickets/completed');
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword-project/tmp');
+    });
+
+    it('should NOT include old .safeword/tickets paths', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.preservedDirs).not.toContain('.safeword/tickets');
+      expect(SAFEWORD_SCHEMA.preservedDirs).not.toContain('.safeword/tickets/completed');
+    });
+  });
+
+  describe('deprecatedDirs', () => {
+    it('should include old planning and tickets directories', async () => {
+      const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      expect(SAFEWORD_SCHEMA.deprecatedDirs).toContain('.safeword/planning');
+      expect(SAFEWORD_SCHEMA.deprecatedDirs).toContain('.safeword/tickets');
     });
   });
 

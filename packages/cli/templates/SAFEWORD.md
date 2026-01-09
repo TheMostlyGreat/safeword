@@ -76,35 +76,34 @@ Training data is stale. Follow this sequence:
 
 ---
 
-## Planning Documentation
+## Ticket System
 
-**Location:** `.safeword/planning/` at project root
+**Purpose:** Context anchor to prevent LLM loops during complex work. Colocates all artifacts.
 
-| Type             | Path                                   | Contents                         |
-| ---------------- | -------------------------------------- | -------------------------------- |
-| Specs            | `.safeword/planning/specs/`            | `feature-*.md` and `task-*.md`   |
-| Test definitions | `.safeword/planning/test-definitions/` | `feature-*.md` (features only)   |
-| Design docs      | `.safeword/planning/design/`           | Complex features (3+ components) |
-| Issues           | `.safeword/planning/issues/`           | Issue tracking                   |
-| Execution plans  | `.safeword/planning/plans/`            | LLM-ready task breakdowns        |
+**Location:** `.safeword-project/tickets/{id}-{slug}/`
+
+**Folder structure:**
+
+```text
+.safeword-project/tickets/
+├── 001-feature-name/
+│   ├── ticket.md           # Ticket definition (frontmatter + work log)
+│   ├── test-definitions.md # BDD scenarios (Given/When/Then)
+│   ├── spec.md             # Feature spec for epics (optional)
+│   └── design.md           # Design doc for complex features (optional)
+├── 002-another-task/
+│   └── ticket.md
+├── completed/              # Archive for done tickets
+└── tmp/                    # Scratch space (research, logs, etc.)
+```
 
 **Artifact Levels:**
 
-| Level       | Artifacts                                            | Test Location       |
-| ----------- | ---------------------------------------------------- | ------------------- |
-| **feature** | Feature Spec + Test Definitions (+ Design Doc if 3+) | `test-definitions/` |
-| **task**    | Task Spec                                            | Inline in spec      |
-| **patch**   | Task Spec (minimal)                                  | Existing tests      |
-
-**Archive:** Move completed docs to `archive/` subfolder within each.
-
----
-
-## Ticket System
-
-**Purpose:** Context anchor to prevent LLM loops during complex work.
-
-**Location:** `.safeword/tickets/{id}-{slug}.md`
+| Level       | Artifacts                                           |
+| ----------- | --------------------------------------------------- |
+| **feature** | ticket.md + test-definitions.md (+ spec.md if epic) |
+| **task**    | ticket.md with inline tests                         |
+| **patch**   | ticket.md (minimal), existing tests                 |
 
 **Create ticket? Answer IN ORDER, stop at first match:**
 
@@ -247,10 +246,10 @@ Fallback: task. User can /bdd to override.
 
 **Then follow this order:**
 
-1. **Check/create ticket** if context-loss risk exists (see decision tree above)
-2. **Read/create spec** (`.safeword/planning/specs/`)
-3. **Read/create test definitions** (feature only: `.safeword/planning/test-definitions/`)
-4. **Read/create design doc** if complex (3+ components)
+1. **Check/create ticket folder** if context-loss risk exists (`.safeword-project/tickets/{id}-{slug}/`)
+2. **Read/create ticket.md** in the folder
+3. **Read/create test-definitions.md** (feature only, in same folder)
+4. **Read/create design.md** if complex (3+ components, in same folder)
 5. **TDD: RED → GREEN → REFACTOR**
 6. **Update ticket** with progress, ask user to confirm completion
 

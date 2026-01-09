@@ -35,28 +35,34 @@ const EDIT_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const safewordDir = `${projectDir}/.safeword`;
-const issuesDir = `${projectDir}/.safeword-project/issues`;
+const ticketsDir = `${projectDir}/.safeword-project/tickets`;
 
 /**
- * Read phase from the most recently modified ticket in .safeword-project/issues/
+ * Read phase from the most recently modified ticket in .safeword-project/tickets/
  * Only considers tickets with status: in_progress (ignores backlog, done, etc.)
  * Skips type: epic tickets (work happens in child features/tasks)
  * Returns undefined if no matching tickets or no phase found.
  */
 function getCurrentPhase(): BddPhase | undefined {
-  if (!existsSync(issuesDir)) {
+  if (!existsSync(ticketsDir)) {
     return undefined;
   }
 
   try {
-    const files = readdirSync(issuesDir).filter(f => f.endsWith('.md'));
-    if (files.length === 0) return undefined;
+    // List ticket folders (exclude 'completed' and 'tmp')
+    const folders = readdirSync(ticketsDir).filter(f => {
+      if (f === 'completed' || f === 'tmp') return false;
+      const ticketPath = `${ticketsDir}/${f}/ticket.md`;
+      return existsSync(ticketPath);
+    });
+    if (folders.length === 0) return undefined;
 
     // Find most recently modified in_progress ticket (excluding epics)
-    let latestFile = '';
+    let latestFolder = '';
     let latestMtime = 0;
-    for (const file of files) {
-      const content = readFileSync(`${issuesDir}/${file}`, 'utf-8');
+    for (const folder of folders) {
+      const ticketPath = `${ticketsDir}/${folder}/ticket.md`;
+      const content = readFileSync(ticketPath, 'utf-8');
 
       // Skip tickets that aren't in_progress
       const statusMatch = content.match(/^status:\s*(\S+)/m);
@@ -69,13 +75,13 @@ function getCurrentPhase(): BddPhase | undefined {
       const mtime = new Date(content.match(/last_modified: (.+)/)?.[1] ?? 0).getTime();
       if (mtime > latestMtime) {
         latestMtime = mtime;
-        latestFile = file;
+        latestFolder = folder;
       }
     }
 
-    if (!latestFile) return undefined;
+    if (!latestFolder) return undefined;
 
-    const content = readFileSync(`${issuesDir}/${latestFile}`, 'utf-8');
+    const content = readFileSync(`${ticketsDir}/${latestFolder}/ticket.md`, 'utf-8');
     const phaseMatch = content.match(/^phase:\s*(\S+)/m);
     if (phaseMatch) {
       return phaseMatch[1] as BddPhase;

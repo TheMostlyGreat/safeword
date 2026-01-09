@@ -125,7 +125,7 @@ After context check, offer discovery:
    - Edge cases (boundaries, empty states)
 3. Present scenarios to user
 4. User can add/modify/remove scenarios
-5. Save to `.safeword-project/test-definitions/feature-{slug}.md`
+5. Save to `.safeword-project/tickets/{id}-{slug}/test-definitions.md`
 6. Each scenario gets `[ ]` checkbox for implementation tracking
 
 **Exit:** User approves scenario list → update ticket to `phase: scenario-gate`
@@ -388,8 +388,8 @@ If ticket has `parent:` field:
 3. Announce with override hint
 4. **If ticket exists:** Read phase, resume at appropriate point
 5. **Artifact-first rule:** Before doing work, create/verify the phase artifact:
-   - Phase 0-2 → ticket at `.safeword-project/issues/XXX-*.md`
-   - Phase 3 → test-definitions at `.safeword-project/test-definitions/XXX-*.md`
+   - Phase 0-2 → ticket folder at `.safeword-project/tickets/{id}-{slug}/ticket.md`
+   - Phase 3 → test-definitions at `.safeword-project/tickets/{id}-{slug}/test-definitions.md`
    - Phase 5 → task breakdown in ticket
 6. **Phase 0-2:** Context check (goal/scope), optional discovery
 7. **Phase 3:** Draft scenarios from spec, save to test-definitions

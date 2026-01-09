@@ -14,10 +14,14 @@ How to write specs, user stories, and test definitions before implementation.
 | Bug, improvement, internal, or refactor? | **task**    | Task Spec with inline tests                          |
 | Typo, config, or trivial change?         | **patch**   | Minimal Task Spec, existing tests                    |
 
-**Locations:**
+**Location:** `.safeword-project/tickets/{id}-{slug}/`
 
-- Specs: `.safeword/planning/specs/`
-- Test definitions: `.safeword/planning/test-definitions/`
+All artifacts colocate in the ticket folder:
+
+- `ticket.md` - Ticket definition
+- `test-definitions.md` - BDD scenarios
+- `spec.md` - Feature spec (epics only)
+- `design.md` - Design doc (complex features)
 
 **If none fit:** Break down the work. A single task spanning all three levels should be split into separate feature + tasks.
 
@@ -248,7 +252,7 @@ Test: All existing tests pass, no new mutations
 6. Add status for each test
 7. Include detailed steps and expected outcomes
 8. Add summary with coverage breakdown
-9. Save to `.safeword/planning/test-definitions/feature-[slug].md`
+9. Save to `.safeword-project/tickets/{id}-{slug}/test-definitions.md`
 
 ---
 
@@ -396,21 +400,19 @@ User stories include Technical Constraints. These MUST have corresponding tests.
 
 ---
 
-## File Naming Convention
+## Ticket Folder Naming
 
-**Specs:** `.safeword/planning/specs/feature-[slug].md` or `task-[slug].md`
+**Structure:** `.safeword-project/tickets/{id}-{slug}/`
 
-**Test definitions:** `.safeword/planning/test-definitions/feature-[slug].md`
+**Good folder names:**
 
-**Good filenames:**
+- `001-campaign-switching/`
+- `012-fix-login-timeout/`
 
-- `feature-campaign-switching.md`
-- `task-fix-login-timeout.md`
+**Bad folder names:**
 
-**Bad filenames:**
-
-- `user-story-1.md` ← Not descriptive
-- `STORY_CAMPAIGN_FINAL_v2.md` ← Bloated
+- `story-1/` ← Not descriptive
+- `CAMPAIGN_FINAL_v2/` ← Bloated
 
 ---
 
