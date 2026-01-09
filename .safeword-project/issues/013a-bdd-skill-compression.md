@@ -35,14 +35,22 @@ Split the monolithic skill into focused, phase-specific files that load on deman
 
 **Line savings:** ~25 lines removed from SKILL.md
 
-### Claude Code Structure
+### Claude Code Structure (Phase-Based References)
 
 ```
 .claude/skills/safeword-bdd-orchestrating/
-└── SKILL.md (~450 lines, compressed single file)
+├── SKILL.md           (~150 lines) - Core dispatch, phase overview, resume logic
+├── DISCOVERY.md       (~50 lines)  - Phase 0-2 (intake, context, stories)
+├── SCENARIOS.md       (~40 lines)  - Phase 3-4 (Given/When/Then, quality gate)
+├── DECOMPOSITION.md   (~35 lines)  - Phase 5 (task breakdown)
+├── TDD.md             (~70 lines)  - Phase 6 (RED/GREEN, delegate /refactor)
+├── DONE.md            (~30 lines)  - Phase 7 (completion checklist)
+└── SPLITTING.md       (~40 lines)  - Split protocol (thresholds, examples)
 ```
 
-Claude Code handles multi-file less gracefully, so keep as single compressed file.
+Claude Code supports on-demand file references (one level deep). Main SKILL.md dispatches to phase files.
+
+**Structure mirrors Cursor exactly** - same content, different format.
 
 ### Cursor Structure (Progressive Disclosure)
 
@@ -83,28 +91,39 @@ All files under 100 lines. Agent loads phase-specific rules based on description
 
 ### Claude Code
 
-| Metric          | Before | After |
-| --------------- | ------ | ----- |
-| Total lines     | 630    | ~450  |
-| Under 500 lines | ❌     | ✅    |
+| Metric            | Before        | After                             |
+| ----------------- | ------------- | --------------------------------- |
+| Files             | 1 (630 lines) | 7 (SKILL.md ~150 + 6 phase files) |
+| SKILL.md lines    | 630           | ~150                              |
+| Phase files       | N/A           | All under 100 lines               |
+| On-demand loading | ❌            | ✅ Phase files load when needed   |
 
 ## Files to Create/Modify
 
-### New Cursor Files
+### New Claude Code Files (in `packages/cli/templates/skills/safeword-bdd-orchestrating/`)
 
-1. `.cursor/rules/bdd-core.mdc`
-2. `.cursor/rules/bdd-discovery.mdc`
-3. `.cursor/rules/bdd-scenarios.mdc`
-4. `.cursor/rules/bdd-decomposition.mdc`
-5. `.cursor/rules/bdd-tdd.mdc`
-6. `.cursor/rules/bdd-done.mdc`
-7. `.cursor/rules/bdd-splitting.mdc`
+1. `DISCOVERY.md` - Phase 0-2
+2. `SCENARIOS.md` - Phase 3-4
+3. `DECOMPOSITION.md` - Phase 5
+4. `TDD.md` - Phase 6
+5. `DONE.md` - Phase 7
+6. `SPLITTING.md` - Split protocol
+
+### New Cursor Files (in `packages/cli/templates/cursor/rules/`)
+
+1. `bdd-core.mdc`
+2. `bdd-discovery.mdc`
+3. `bdd-scenarios.mdc`
+4. `bdd-decomposition.mdc`
+5. `bdd-tdd.mdc`
+6. `bdd-done.mdc`
+7. `bdd-splitting.mdc`
 
 ### Modify
 
-1. `packages/cli/templates/skills/safeword-bdd-orchestrating/SKILL.md` (compress, delegate refactor)
-2. `packages/cli/templates/cursor/rules/safeword-bdd-orchestrating.mdc` (delete, replace with above)
-3. `packages/cli/src/schema.ts` (register new files)
+1. `packages/cli/templates/skills/safeword-bdd-orchestrating/SKILL.md` (compress to ~150 lines, add references)
+2. `packages/cli/templates/cursor/rules/safeword-bdd-orchestrating.mdc` (delete, replace with split files)
+3. `packages/cli/src/schema.ts` (register all new files)
 
 ## Minor Consolidation
 
@@ -112,10 +131,12 @@ During implementation, remove Given/When/Then format details from `planning-guid
 
 ## Acceptance Criteria
 
-- [ ] SKILL.md under 500 lines
+- [ ] Claude Code SKILL.md under 200 lines (dispatcher only)
+- [ ] Claude Code phase files all under 100 lines
 - [ ] All Cursor rules under 100 lines
-- [ ] Phase 6.3 replaced with `/refactor` invocation
-- [ ] Phase 7 runs `/refactor` for cross-scenario cleanup
+- [ ] Phase 6.3 replaced with `/refactor` invocation (both platforms)
+- [ ] Phase 7 runs `/refactor` for cross-scenario cleanup (both platforms)
 - [ ] Verify `/refactor` skill activates when called from BDD flow
-- [ ] Schema updated with new Cursor files
+- [ ] Schema updated with all new files (6 Claude + 7 Cursor)
 - [ ] Given/When/Then format removed from planning-guide.md (reference bdd-scenarios.mdc)
+- [ ] Parity test: Claude and Cursor have equivalent content
