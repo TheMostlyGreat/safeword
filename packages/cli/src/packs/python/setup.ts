@@ -183,7 +183,11 @@ export function installPythonDependencies(
   if (pm === "pip") return false;
 
   try {
-    execSync(getPythonInstallCommand(cwd, tools), { cwd, stdio: "pipe" });
+    execSync(getPythonInstallCommand(cwd, tools), {
+      cwd,
+      stdio: "pipe",
+      timeout: 60_000, // 60s timeout to prevent hanging on network/resolution issues
+    });
     return true;
   } catch {
     return false;
