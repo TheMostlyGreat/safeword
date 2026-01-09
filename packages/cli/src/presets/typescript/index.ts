@@ -5,15 +5,14 @@
  * This is the main entry point for the TypeScript language preset.
  *
  * Usage in user's eslint.config.mjs:
- *   import safeword from 'safeword';
- *   export default safeword.eslint.auto();
+ *   import safeword from 'safeword/eslint';
+ *   export default [...safeword.configs.recommendedTypeScript];
  *
- * Or manual configuration:
- *   import safeword from 'safeword';
+ * Or with multiple configs:
+ *   import safeword from 'safeword/eslint';
  *   export default [
- *     ...safeword.eslint.recommendedTypeScript,
- *     ...safeword.eslint.react,
- *     ...safeword.eslint.tailwind,
+ *     ...safeword.configs.recommendedTypeScript,
+ *     ...safeword.configs.vitest,
  *   ];
  */
 
