@@ -14,7 +14,7 @@ Find the most recently modified in_progress ticket:
 
 ```bash
 # Find in_progress tickets, excluding epics
-for f in .safeword-project/issues/*.md; do
+for f in .safeword-project/tickets/*/ticket.md; do
   [ -f "$f" ] || continue
   grep -q "^status: in_progress" "$f" && ! grep -q "^type: epic" "$f" && echo "$f"
 done | head -1
@@ -29,20 +29,22 @@ Read the ticket to get:
 
 Run these in sequence, reporting each result:
 
+1. **Run `/lint`** to auto-fix style issues first
+2. Then run verification:
+
 ```bash
 # Full test suite
 bun run test 2>&1
 
 # Build check
 bun run build 2>&1
-
-# Lint check
-bun run lint 2>&1 || npm run lint 2>&1
 ```
+
+The `/lint` command handles linting with auto-fix. Report any remaining unfixable errors.
 
 ### 3. Validate Test Definitions
 
-1. Find matching file: `.safeword-project/test-definitions/{ticket-slug}.md`
+1. Find matching file: `.safeword-project/tickets/{id}-{slug}/test-definitions.md`
 2. Count scenarios: total `- [` lines
 3. Count completed: `- [x]` lines
 4. Report: "Scenarios: X/Y complete"
