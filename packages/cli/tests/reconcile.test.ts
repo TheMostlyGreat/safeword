@@ -885,26 +885,5 @@ describe("Reconcile - Reconciliation Engine", () => {
       expect(result).not.toContain("knip");
       expect(result).toContain("safeword"); // Not installed, should be included
     });
-
-    it("should include base packages regardless of git status", async () => {
-      const { computePackagesToInstall } = await import("../src/reconcile.js");
-      const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-
-      const projectType = { ...DEFAULT_PROJECT_TYPE };
-
-      // isGitRepo = false
-      const result = computePackagesToInstall(
-        SAFEWORD_SCHEMA,
-        projectType,
-        {},
-        false,
-      );
-
-      // All base packages should be included
-      expect(result).toContain("eslint");
-      expect(result).toContain("prettier");
-      expect(result).toContain("knip");
-      expect(result).toContain("safeword");
-    });
   });
 });

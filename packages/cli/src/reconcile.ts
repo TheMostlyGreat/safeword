@@ -445,7 +445,6 @@ function computeInstallPlan(
     schema,
     ctx.projectType,
     ctx.developmentDeps,
-    ctx.isGitRepo,
   );
 
   return {
@@ -589,7 +588,6 @@ function computeUpgradePlan(
     schema,
     ctx.projectType,
     ctx.developmentDeps,
-    ctx.isGitRepo,
   );
 
   // 9. Compute deprecated packages to remove (only those actually installed)
@@ -865,13 +863,11 @@ function fileNeedsUpdate(installedPath: string, newContent: string): boolean {
  * @param schema
  * @param projectType
  * @param installedDevDeps
- * @param _isGitRepo - Kept for backward compatibility, no longer used
  */
 export function computePackagesToInstall(
   schema: SafewordSchema,
   projectType: ProjectType,
   installedDevelopmentDeps: Record<string, string>,
-  _isGitRepo = true,
 ): string[] {
   // Combine base packages with conditional packages
   const needed = [
