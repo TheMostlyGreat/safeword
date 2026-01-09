@@ -10,6 +10,7 @@ import nodePath from "node:path";
 import type {
   FileDefinition,
   JsonMergeDefinition,
+  ManagedFileDefinition,
   ProjectContext,
   SafewordSchema,
   TextPatchDefinition,

@@ -19,6 +19,7 @@ import {
 export type {
   FileDefinition,
   JsonMergeDefinition,
+  ManagedFileDefinition,
   ProjectContext,
 } from "./packs/types.js";
 import type {
