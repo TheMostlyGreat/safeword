@@ -53,5 +53,6 @@ Small fixes to apply when touching related files:
 | design-doc-guide.md    | Remove escalation check (lines 3-11) entirely                                                                                | Decision belongs in BDD Phase 5 flow, not in operational guide; by the time LLM loads this guide, it has already decided to create a design doc |
 | context-files-guide.md | Remove Quality Checklist (lines 420-431), reference llm-writing-guide                                                        | Duplicates llm-writing-guide; that guide is canonical for LLM writing quality principles                                                        |
 | architecture-guide.md  | Remove Design Document section (lines 74-93), Design Doc anti-patterns (lines 238-245), Design Doc checklist (lines 414-419) | BDD Phase 5 handles routing; design-doc-guide owns design doc content; arch guide should focus on ARCHITECTURE.md only                          |
+| code-philosophy.md     | Delete entirely; remove trigger from SAFEWORD.md                                                                             | ~70% duplicates SAFEWORD.md (Code Philosophy, Anti-Patterns, Response Format, Library verification); remaining content too thin for guide       |
 
 These are too small for separate tickets but should be done when implementing 013a-c.
