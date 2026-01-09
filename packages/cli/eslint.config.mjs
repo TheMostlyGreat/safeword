@@ -1,11 +1,8 @@
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import safeword from "eslint-plugin-safeword";
 import eslintConfigPrettier from "eslint-config-prettier";
+import safeword from "eslint-plugin-safeword";
 
 const { detect, configs } = safeword;
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const deps = detect.collectAllDeps(__dirname);
+const deps = detect.collectAllDeps(import.meta.dirname);
 const framework = detect.detectFramework(deps);
 
 // Map framework to base config
@@ -21,6 +18,7 @@ const baseConfigs = {
 
 export default [
   { ignores: detect.getIgnores(deps) },
+  // eslint-disable-next-line security/detect-object-injection -- framework is from detect.detectFramework(), not user input
   ...baseConfigs[framework],
   ...(detect.hasVitest(deps) ? configs.vitest : []),
   ...(detect.hasPlaywright(deps) ? configs.playwright : []),

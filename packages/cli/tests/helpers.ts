@@ -572,11 +572,7 @@ export function runEslint(
 export async function getReconcileTestUtilities(
   dir: string,
   options: { packageJson?: Record<string, unknown> } = {},
-): Promise<{
-  reconcile: typeof import("../src/reconcile.js").reconcile;
-  SAFEWORD_SCHEMA: typeof import("../src/schema.js").SAFEWORD_SCHEMA;
-  createProjectContext: typeof import("../src/utils/context.js").createProjectContext;
-}> {
+) {
   const { packageJson } = options;
 
   const { reconcile } = await import("../src/reconcile.js");
@@ -608,14 +604,7 @@ export async function setupReconcileTest(
     mode?: "install" | "upgrade" | "uninstall";
     packageJson?: Record<string, unknown>;
   } = {},
-): Promise<{
-  reconcile: typeof import("../src/reconcile.js").reconcile;
-  SAFEWORD_SCHEMA: typeof import("../src/schema.js").SAFEWORD_SCHEMA;
-  ctx: ReturnType<
-    typeof import("../src/utils/context.js").createProjectContext
-  >;
-  result: Awaited<ReturnType<typeof import("../src/reconcile.js").reconcile>>;
-}> {
+) {
   const { mode = "install", packageJson = { name: "test", version: "1.0.0" } } =
     options;
 
@@ -633,11 +622,11 @@ export async function setupReconcileTest(
 /**
  * Runs the post-tool-lint hook on a file.
  * Simulates Claude Code PostToolUse event for lint testing.
- * @param projectDir - Project directory with safeword hooks installed
+ * @param projectDirectory - Project directory with safeword hooks installed
  * @param filePath - Absolute path to the file being linted
  */
 export function runLintHook(
-  projectDir: string,
+  projectDirectory: string,
   filePath: string,
 ): SpawnSyncReturns<string> {
   const hookInput = JSON.stringify({
@@ -651,8 +640,8 @@ export function runLintHook(
     "bash",
     ["-c", `echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`],
     {
-      cwd: projectDir,
-      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
+      cwd: projectDirectory,
+      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
       encoding: "utf8",
     },
   );

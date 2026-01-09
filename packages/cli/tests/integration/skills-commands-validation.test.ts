@@ -9,16 +9,15 @@
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import nodePath from "node:path";
 
 import { describe, expect, it } from "vitest";
 
 const __dirname = import.meta.dirname;
-const TEMPLATES_DIR = join(__dirname, "../../templates");
-const SKILLS_DIR = join(TEMPLATES_DIR, "skills");
-const COMMANDS_DIR = join(TEMPLATES_DIR, "commands");
-const CURSOR_RULES_DIR = join(TEMPLATES_DIR, "cursor/rules");
+const TEMPLATES_DIR = nodePath.nodePath.join(__dirname, "../../templates");
+const SKILLS_DIR = nodePath.nodePath.join(TEMPLATES_DIR, "skills");
+const COMMANDS_DIR = nodePath.nodePath.join(TEMPLATES_DIR, "commands");
+const CURSOR_RULES_DIR = nodePath.nodePath.join(TEMPLATES_DIR, "cursor/rules");
 
 // Claude Code validation constants
 const SKILL_NAME_MAX_LENGTH = 64;
@@ -29,6 +28,7 @@ const MIN_BODY_LENGTH = 10;
 
 // allowed-tools patterns (Claude Code format)
 // Valid: '*', 'Read', 'Read, Grep, Glob', 'Bash(git:*)', 'mcp__server__tool'
+// eslint-disable-next-line sonarjs/regex-complexity -- intentionally complex to match Claude Code's allowed-tools format
 const ALLOWED_TOOLS_PATTERN = /^(\*|\w+(\([^)]+\))?(,\s*\w+(\([^)]+\))?)*)$/;
 
 // Markdown link pattern [text](path)
@@ -48,6 +48,7 @@ interface ParsedFrontmatter {
 /**
  * Parse a YAML value string, handling booleans and quoted strings.
  */
+// eslint-disable-next-line sonarjs/function-return-type -- intentionally returns union type for YAML parsing
 function parseYamlValue(raw: string): string | boolean {
   if (raw === "true") return true;
   if (raw === "false") return false;
@@ -63,16 +64,17 @@ function parseYamlValue(raw: string): string | boolean {
 
 /**
  * Parse YAML frontmatter from markdown file content.
- * Returns null if no valid frontmatter found.
+ * Returns undefined if no valid frontmatter found.
  */
+// eslint-disable-next-line complexity -- frontmatter parsing has inherent complexity
 function parseFrontmatter(
   content: string,
-): { frontmatter: ParsedFrontmatter; body: string } | null {
+): { frontmatter: ParsedFrontmatter; body: string } | undefined {
   const lines = content.split("\n");
 
   // Must start with --- on line 1 (no blank lines before)
   if (lines[0]?.trim() !== "---") {
-    return null;
+    return undefined;
   }
 
   // Find closing ---
@@ -85,7 +87,7 @@ function parseFrontmatter(
   }
 
   if (endIndex === -1) {
-    return null;
+    return undefined;
   }
 
   // Parse YAML-like frontmatter (simple key: value parsing)
@@ -104,7 +106,7 @@ function parseFrontmatter(
 
   const body = lines
     .slice(endIndex + 1)
-    .join("\n")
+    .nodePath.join("\n")
     .trim();
   return { frontmatter, body };
 }
@@ -154,6 +156,7 @@ function extractMarkdownLinks(
   const links: { text: string; path: string }[] = [];
   let match;
   // Reset lastIndex for global regex
+  // eslint-disable-next-line security/detect-non-literal-regexp -- pattern.source is a constant defined above
   const pattern = new RegExp(MARKDOWN_LINK_PATTERN.source, "g");
   while ((match = pattern.exec(content)) !== null) {
     const path = match[2];
@@ -196,7 +199,7 @@ function readAndParseFrontmatter(filePath: string): {
     const content = readFileSync(filePath, "utf8");
     return { content, parsed: parseFrontmatter(content) };
   } catch {
-    return { content: "", parsed: null };
+    return { content: "", parsed: undefined };
   }
 }
 
@@ -204,13 +207,16 @@ function readAndParseFrontmatter(filePath: string): {
  * Find broken markdown file links in content
  * Returns array of broken link strings for error messages
  */
-function findBrokenMarkdownLinks(body: string, baseDir: string): string[] {
+function findBrokenMarkdownLinks(
+  body: string,
+  baseDirectory: string,
+): string[] {
   const links = extractMarkdownLinks(body);
   const brokenLinks: string[] = [];
 
   for (const link of links) {
     if (link.path.endsWith(".md")) {
-      const fullPath = join(baseDir, link.path);
+      const fullPath = nodePath.join(baseDirectory, link.path);
       if (!existsSync(fullPath)) {
         brokenLinks.push(`[${link.text}](${link.path})`);
       }
@@ -221,15 +227,15 @@ function findBrokenMarkdownLinks(body: string, baseDir: string): string[] {
 }
 
 describe("Skills Validation (Claude Code Format)", () => {
-  const skillDirectories = getSkillDirectories();
+  const skillDirectoryectories = getSkillDirectories();
 
   it("should have at least one skill", () => {
-    expect(skillDirectories.length).toBeGreaterThan(0);
+    expect(skillDirectoryectories.length).toBeGreaterThan(0);
   });
 
-  for (const skillDir of skillDirectories) {
-    describe(`skill: ${skillDir}`, () => {
-      const skillPath = join(SKILLS_DIR, skillDir, "SKILL.md");
+  for (const skillDirectory of skillDirectoryectories) {
+    describe(`skill: ${skillDirectory}`, () => {
+      const skillPath = nodePath.join(SKILLS_DIR, skillDirectory, "SKILL.md");
       const { content, parsed } = readAndParseFrontmatter(skillPath);
 
       it("should have SKILL.md file", () => {
@@ -374,11 +380,11 @@ describe("Skills Validation (Claude Code Format)", () => {
         if (parsed?.body) {
           const brokenLinks = findBrokenMarkdownLinks(
             parsed.body,
-            join(SKILLS_DIR, skillDir),
+            nodePath.join(SKILLS_DIR, skillDirectory),
           );
           expect(
             brokenLinks,
-            `Broken markdown links: ${brokenLinks.join(", ")}`,
+            `Broken markdown links: ${brokenLinks.nodePath.join(", ")}`,
           ).toHaveLength(0);
         }
       });
@@ -400,8 +406,8 @@ describe("Skills Validation (Claude Code Format)", () => {
         if (desc) {
           // Description should indicate when to use the skill
           const hasUsageContext =
-            /\b(use when|use for|use if|when|trigger|invoke)\b/i.test(desc) ||
-            /\b(helps?|handles?|manages?|creates?|runs?|performs?)\b/i.test(
+            /\b(?:use when|use for|use if|when|trigger|invoke)\b/i.test(desc) ||
+            /\b(?:helps?|handles?|manages?|creates?|runs?|performs?)\b/i.test(
               desc,
             );
 
@@ -424,8 +430,8 @@ describe("Commands Validation (Claude Code Format)", () => {
 
   for (const commandFile of commandFiles) {
     describe(`command: ${commandFile}`, () => {
-      const commandPath = join(COMMANDS_DIR, commandFile);
-      const commandName = basename(commandFile, ".md");
+      const commandPath = nodePath.join(COMMANDS_DIR, commandFile);
+      const commandName = nodePath.basename(commandFile, ".md");
       const { content, parsed } = readAndParseFrontmatter(commandPath);
 
       it("should have content", () => {
@@ -544,7 +550,7 @@ describe("Commands Validation (Claude Code Format)", () => {
           const invalidPatterns = findInvalidArgumentPatterns(content);
           expect(
             invalidPatterns,
-            `Invalid argument patterns: ${invalidPatterns.join(", ")}. Use $1, $2, or $ARGUMENTS`,
+            `Invalid argument patterns: ${invalidPatterns.nodePath.join(", ")}. Use $1, $2, or $ARGUMENTS`,
           ).toHaveLength(0);
         }
       });
@@ -558,7 +564,7 @@ describe("Commands Validation (Claude Code Format)", () => {
           );
           expect(
             brokenLinks,
-            `Broken markdown links: ${brokenLinks.join(", ")}`,
+            `Broken markdown links: ${brokenLinks.nodePath.join(", ")}`,
           ).toHaveLength(0);
         }
       });
@@ -570,11 +576,11 @@ describe("Skills and Commands Cross-Validation", () => {
   it("should have consistent naming between skill dir and name field", () => {
     // Note: Claude Code doesn't require dir name = skill name,
     // but consistency helps maintainability
-    const skillDirectories = getSkillDirectories();
+    const skillDirectoryectories = getSkillDirectories();
     const mismatches: string[] = [];
 
-    for (const skillDir of skillDirectories) {
-      const skillPath = join(SKILLS_DIR, skillDir, "SKILL.md");
+    for (const skillDirectory of skillDirectoryectories) {
+      const skillPath = nodePath.join(SKILLS_DIR, skillDirectory, "SKILL.md");
       try {
         const content = readFileSync(skillPath, "utf8");
         const parsed = parseFrontmatter(content);
@@ -582,8 +588,12 @@ describe("Skills and Commands Cross-Validation", () => {
 
         // For safeword, we prefix dirs with "safeword-" but skills have short names
         // This is intentional - just document it
-        if (name && !skillDir.endsWith(name) && !skillDir.includes(name)) {
-          mismatches.push(`Dir "${skillDir}" has name "${name}"`);
+        if (
+          name &&
+          !skillDirectory.endsWith(name) &&
+          !skillDirectory.includes(name)
+        ) {
+          mismatches.push(`Dir "${skillDirectory}" has name "${name}"`);
         }
       } catch {
         // Skip if file doesn't exist
@@ -596,11 +606,11 @@ describe("Skills and Commands Cross-Validation", () => {
   });
 
   it("should not have duplicate skill names", () => {
-    const skillDirectories = getSkillDirectories();
+    const skillDirectoryectories = getSkillDirectories();
     const names: string[] = [];
 
-    for (const skillDir of skillDirectories) {
-      const skillPath = join(SKILLS_DIR, skillDir, "SKILL.md");
+    for (const skillDirectory of skillDirectoryectories) {
+      const skillPath = nodePath.join(SKILLS_DIR, skillDirectory, "SKILL.md");
       try {
         const content = readFileSync(skillPath, "utf8");
         const parsed = parseFrontmatter(content);
@@ -617,19 +627,19 @@ describe("Skills and Commands Cross-Validation", () => {
     );
     expect(
       duplicates,
-      `Duplicate skill names: ${duplicates.join(", ")}`,
+      `Duplicate skill names: ${duplicates.nodePath.join(", ")}`,
     ).toHaveLength(0);
   });
 
   it("should not have duplicate command names", () => {
     const commandFiles = getCommandFiles();
-    const names = commandFiles.map((f) => basename(f, ".md"));
+    const names = commandFiles.map((f) => nodePath.basename(f, ".md"));
     const duplicates = names.filter(
       (name, index) => names.indexOf(name) !== index,
     );
     expect(
       duplicates,
-      `Duplicate command names: ${duplicates.join(", ")}`,
+      `Duplicate command names: ${duplicates.nodePath.join(", ")}`,
     ).toHaveLength(0);
   });
 });
@@ -643,8 +653,8 @@ describe("Cursor Rules Validation (.mdc Format)", () => {
 
   for (const ruleFile of ruleFiles) {
     describe(`rule: ${ruleFile}`, () => {
-      const rulePath = join(CURSOR_RULES_DIR, ruleFile);
-      const ruleName = basename(ruleFile, ".mdc");
+      const rulePath = nodePath.join(CURSOR_RULES_DIR, ruleFile);
+      const ruleName = nodePath.basename(ruleFile, ".mdc");
       const { content, parsed } = readAndParseFrontmatter(rulePath);
 
       it("should have content", () => {
@@ -709,57 +719,57 @@ describe("Cursor Rules Validation (.mdc Format)", () => {
 
 describe("Skills-Cursor Parity", () => {
   it("each safeword skill should have corresponding cursor rule", () => {
-    const skillDirectories = getSkillDirectories().filter((d) =>
+    const skillDirectoryectories = getSkillDirectories().filter((d) =>
       d.startsWith("safeword-"),
     );
     const ruleFiles = new Set(
-      getCursorRuleFiles().map((f) => basename(f, ".mdc")),
+      getCursorRuleFiles().map((f) => nodePath.basename(f, ".mdc")),
     );
 
     const missingRules: string[] = [];
-    for (const skillDir of skillDirectories) {
-      if (!ruleFiles.has(skillDir)) {
-        missingRules.push(skillDir);
+    for (const skillDirectory of skillDirectoryectories) {
+      if (!ruleFiles.has(skillDirectory)) {
+        missingRules.push(skillDirectory);
       }
     }
 
     expect(
       missingRules,
-      `Skills missing cursor rules: ${missingRules.join(", ")}`,
+      `Skills missing cursor rules: ${missingRules.nodePath.join(", ")}`,
     ).toHaveLength(0);
   });
 
   it("each safeword cursor rule should have corresponding skill", () => {
-    const skillDirectories = getSkillDirectories();
+    const skillDirectoryectories = getSkillDirectories();
     // safeword-core is a special entry point rule, not a skill
     const ruleFiles = getCursorRuleFiles()
-      .map((f) => basename(f, ".mdc"))
+      .map((f) => nodePath.basename(f, ".mdc"))
       .filter(
         (name) => name.startsWith("safeword-") && name !== "safeword-core",
       );
 
     const orphanRules: string[] = [];
     for (const rule of ruleFiles) {
-      if (!skillDirectories.includes(rule)) {
+      if (!skillDirectoryectories.includes(rule)) {
         orphanRules.push(rule);
       }
     }
 
     expect(
       orphanRules,
-      `Cursor rules without skills: ${orphanRules.join(", ")}`,
+      `Cursor rules without skills: ${orphanRules.nodePath.join(", ")}`,
     ).toHaveLength(0);
   });
 
   it("should not have duplicate cursor rule names", () => {
     const ruleFiles = getCursorRuleFiles();
-    const names = ruleFiles.map((f) => basename(f, ".mdc"));
+    const names = ruleFiles.map((f) => nodePath.basename(f, ".mdc"));
     const duplicates = names.filter(
       (name, index) => names.indexOf(name) !== index,
     );
     expect(
       duplicates,
-      `Duplicate cursor rule names: ${duplicates.join(", ")}`,
+      `Duplicate cursor rule names: ${duplicates.nodePath.join(", ")}`,
     ).toHaveLength(0);
   });
 

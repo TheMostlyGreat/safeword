@@ -192,32 +192,33 @@ describe("Schema - Single Source of Truth", () => {
   describe("managedFiles", () => {
     it("should include eslint.config.mjs, tsconfig.json, knip.json, and .prettierrc", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("eslint.config.mjs");
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("tsconfig.json");
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty("knip.json");
-      expect(SAFEWORD_SCHEMA.managedFiles).toHaveProperty(".prettierrc");
+      // Note: toHaveProperty interprets "." as nested path, use `in` operator instead
+      expect("eslint.config.mjs" in SAFEWORD_SCHEMA.managedFiles).toBe(true);
+      expect("tsconfig.json" in SAFEWORD_SCHEMA.managedFiles).toBe(true);
+      expect("knip.json" in SAFEWORD_SCHEMA.managedFiles).toBe(true);
+      expect(".prettierrc" in SAFEWORD_SCHEMA.managedFiles).toBe(true);
     });
   });
 
   describe("jsonMerges", () => {
     it("should include package.json, .claude/settings.json, .mcp.json, Cursor configs, and .prettierrc", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty("package.json");
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(
-        ".claude/settings.json",
-      );
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".mcp.json");
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".cursor/mcp.json");
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".cursor/hooks.json");
+      // Note: toHaveProperty interprets "." and "/" as nested path, use `in` operator instead
+      expect("package.json" in SAFEWORD_SCHEMA.jsonMerges).toBe(true);
+      expect(".claude/settings.json" in SAFEWORD_SCHEMA.jsonMerges).toBe(true);
+      expect(".mcp.json" in SAFEWORD_SCHEMA.jsonMerges).toBe(true);
+      expect(".cursor/mcp.json" in SAFEWORD_SCHEMA.jsonMerges).toBe(true);
+      expect(".cursor/hooks.json" in SAFEWORD_SCHEMA.jsonMerges).toBe(true);
       // .prettierrc is in jsonMerges for uninstall cleanup (removes plugins key)
-      expect(SAFEWORD_SCHEMA.jsonMerges).toHaveProperty(".prettierrc");
+      expect(".prettierrc" in SAFEWORD_SCHEMA.jsonMerges).toBe(true);
     });
   });
 
   describe("textPatches", () => {
     it("should include AGENTS.md patch (creates if missing)", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty("AGENTS.md");
+      // Note: toHaveProperty interprets "." as nested path, use `in` operator instead
+      expect("AGENTS.md" in SAFEWORD_SCHEMA.textPatches).toBe(true);
       expect(SAFEWORD_SCHEMA.textPatches["AGENTS.md"].operation).toBe(
         "prepend",
       );
@@ -228,7 +229,8 @@ describe("Schema - Single Source of Truth", () => {
 
     it("should include CLAUDE.md patch (only if exists)", async () => {
       const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-      expect(SAFEWORD_SCHEMA.textPatches).toHaveProperty("CLAUDE.md");
+      // Note: toHaveProperty interprets "." as nested path, use `in` operator instead
+      expect("CLAUDE.md" in SAFEWORD_SCHEMA.textPatches).toBe(true);
       expect(SAFEWORD_SCHEMA.textPatches["CLAUDE.md"].operation).toBe(
         "prepend",
       );

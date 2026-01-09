@@ -11,7 +11,7 @@
  */
 
 import { execSync, spawnSync } from "node:child_process";
-import { dirname } from "node:path";
+import nodePath from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -309,14 +309,14 @@ describe("E2E: Phase-Aware Quality Review", () => {
   }
 
   // Helper to create issues directory with tickets
-  function setupIssuesDir(
+  function setupIssuesDirectory(
     targetDirectory: string,
     tickets: Parameters<typeof createTicketContent>[0][],
   ): void {
-    const issuesDir = `${targetDirectory}/.safeword-project/issues`;
-    execSync(`mkdir -p "${issuesDir}"`, { cwd: targetDirectory });
+    const issuesDirectory = `${targetDirectory}/.safeword-project/issues`;
+    execSync(`mkdir -p "${issuesDirectory}"`, { cwd: targetDirectory });
     // Clear existing tickets
-    execSync(`rm -f "${issuesDir}"/*.md`, { cwd: targetDirectory });
+    execSync(`rm -f "${issuesDirectory}"/*.md`, { cwd: targetDirectory });
     for (const ticket of tickets) {
       writeTestFile(
         targetDirectory,
@@ -327,7 +327,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
   }
 
   // Helper to clear issues directory
-  function clearIssuesDir(targetDirectory: string): void {
+  function clearIssuesDirectory(targetDirectory: string): void {
     execSync(`rm -rf "${targetDirectory}/.safeword-project/issues"`, {
       cwd: targetDirectory,
     });
@@ -336,19 +336,16 @@ describe("E2E: Phase-Aware Quality Review", () => {
   // Helper to create transcript with changes
   function createChangesTranscript(
     targetDirectory: string,
-    customText?: string,
+    customText = 'Made changes.\n\n{"proposedChanges": false, "madeChanges": true}',
   ): string {
     const transcriptPath = `${targetDirectory}/.safeword/test-transcript.jsonl`;
-    const text =
-      customText ??
-      'Made changes.\n\n{"proposedChanges": false, "madeChanges": true}';
     const message = {
       type: "assistant",
       message: {
         content: [
           {
             type: "text",
-            text,
+            text: customText,
           },
         ],
       },
@@ -402,7 +399,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
 
   describe("Happy Path - Phase Detection", () => {
     it("Scenario 1: Shows intake prompts during discovery phase", () => {
-      setupIssuesDir(projectDirectory, [
+      setupIssuesDirectory(projectDirectory, [
         {
           id: "001",
           type: "feature",
@@ -419,7 +416,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
     });
 
     it("Scenario 2: Shows scenario prompts during define-behavior phase", () => {
-      setupIssuesDir(projectDirectory, [
+      setupIssuesDirectory(projectDirectory, [
         {
           id: "001",
           type: "feature",
@@ -437,7 +434,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
     });
 
     it("Scenario 3: Shows implementation prompts during implement phase", () => {
-      setupIssuesDir(projectDirectory, [
+      setupIssuesDirectory(projectDirectory, [
         {
           id: "001",
           type: "feature",
@@ -454,7 +451,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
     });
 
     it("Scenario 4: Hard blocks done phase without evidence", () => {
-      setupIssuesDir(projectDirectory, [
+      setupIssuesDirectory(projectDirectory, [
         {
           id: "001",
           type: "feature",
@@ -474,7 +471,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
     });
 
     it("Scenario 4b: Allows done phase with evidence present", () => {
-      setupIssuesDir(projectDirectory, [
+      setupIssuesDirectory(projectDirectory, [
         {
           id: "001",
           type: "feature",
@@ -497,7 +494,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
 
   describe("Edge Cases - Fallbacks", () => {
     it("Scenario 5: Falls back to implement when no phase field", () => {
-      setupIssuesDir(projectDirectory, [
+      setupIssuesDirectory(projectDirectory, [
         {
           id: "001",
           type: "feature",
@@ -513,7 +510,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
     });
 
     it("Scenario 6: Falls back to implement for unknown phase", () => {
-      setupIssuesDir(projectDirectory, [
+      setupIssuesDirectory(projectDirectory, [
         {
           id: "001",
           type: "feature",
@@ -532,7 +529,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
 
   describe("Edge Cases - Ticket Filtering", () => {
     it("Scenario 7: Ignores backlog tickets (status filtering)", () => {
-      setupIssuesDir(projectDirectory, [
+      setupIssuesDirectory(projectDirectory, [
         // Older but in_progress - should be used
         {
           id: "001",
@@ -558,7 +555,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
     });
 
     it("Scenario 8: Ignores epic tickets (type filtering)", () => {
-      setupIssuesDir(projectDirectory, [
+      setupIssuesDirectory(projectDirectory, [
         // Epic with newest timestamp - should be ignored
         {
           id: "001",
@@ -584,7 +581,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
     });
 
     it("Scenario 9: Falls back when no in_progress tickets", () => {
-      setupIssuesDir(projectDirectory, [
+      setupIssuesDirectory(projectDirectory, [
         {
           id: "001",
           type: "feature",
@@ -608,7 +605,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
     });
 
     it("Scenario 10: Falls back when issues directory empty", () => {
-      clearIssuesDir(projectDirectory);
+      clearIssuesDirectory(projectDirectory);
 
       const result = runStopHookForPhase(projectDirectory);
 
@@ -619,7 +616,7 @@ describe("E2E: Phase-Aware Quality Review", () => {
 
   // Cleanup after all phase tests
   afterAll(() => {
-    clearIssuesDir(projectDirectory);
+    clearIssuesDirectory(projectDirectory);
   });
 });
 
@@ -912,14 +909,14 @@ describe("E2E: Python Lint Hook", () => {
 
       // Find actual bun path (process.execPath gives node when running via vitest)
       const bunPath = execSync("which bun", { encoding: "utf8" }).trim();
-      const bunDir = dirname(bunPath);
+      const bunDirectory = nodePath.dirname(bunPath);
 
       // Run with PATH that has bun but likely not ruff
       const result = spawnSync(
         "bash",
         [
           "-c",
-          `PATH=/bin:/usr/bin:${bunDir} bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.py"`,
+          `PATH=/bin:/usr/bin:${bunDirectory} bun .safeword/hooks/lib/lint.ts "${projectDirectory}/test.py"`,
         ],
         {
           cwd: projectDirectory,
