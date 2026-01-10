@@ -1,5 +1,6 @@
 import eslintConfigPrettier from 'eslint-config-prettier';
-import safeword from 'eslint-plugin-safeword';
+
+import safeword from './dist/presets/typescript/index.js';
 
 const { detect, configs } = safeword;
 const deps = detect.collectAllDeps(import.meta.dirname);
