@@ -224,7 +224,7 @@ describe('Setup Command - Reconcile Integration', () => {
         dryRun: true,
       });
 
-      // Should include Astro prettier plugin (NOT bundled in eslint-plugin-safeword)
+      // Should include Astro prettier plugin (NOT bundled in safeword/eslint)
       expect(result.packagesToInstall).toContain('prettier-plugin-astro');
     });
   });

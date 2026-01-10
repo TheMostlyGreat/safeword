@@ -161,9 +161,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.cursor/rules/safeword-writing-plans.mdc',
   ],
 
-  // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
+  // Packages to uninstall on upgrade (now bundled in safeword/eslint)
   deprecatedPackages: [
-    // Individual ESLint plugins now bundled in eslint-plugin-safeword
+    // Individual ESLint plugins now bundled in safeword/eslint
     '@eslint/js',
     'eslint-plugin-import-x',
     'eslint-import-resolver-typescript',

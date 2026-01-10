@@ -242,7 +242,7 @@ describe('Schema - Single Source of Truth', () => {
 
     it('should have conditional packages for frameworks not in safeword plugin', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      // These frameworks are NOT in eslint-plugin-safeword (or need prettier plugins)
+      // These frameworks are NOT in safeword/eslint (or need prettier plugins)
       const requiredConditions = [
         'astro', // prettier-plugin-astro (ESLint rules are in safeword)
         'tailwind', // prettier-plugin-tailwindcss

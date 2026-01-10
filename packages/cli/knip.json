@@ -1,4 +1,4 @@
 {
   "ignore": [".safeword/**"],
-  "ignoreDependencies": ["eslint-plugin-safeword", "dependency-cruiser"]
+  "ignoreDependencies": ["dependency-cruiser"]
 }
