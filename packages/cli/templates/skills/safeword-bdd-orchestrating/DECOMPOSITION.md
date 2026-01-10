@@ -31,4 +31,14 @@ Features with 3+ components, new tech choices, or schema changes may warrant doc
 - Feature-level decisions → `.safeword/guides/design-doc-guide.md`
 - Cross-cutting choices → `.safeword/guides/architecture-guide.md`
 
-**Exit:** User approves breakdown → update ticket to `phase: implement`
+## Phase 5 Exit (REQUIRED)
+
+Before proceeding to Phase 6:
+
+1. Task breakdown documented in ticket
+2. **Update frontmatter:** `phase: implement`
+3. **Add work log entry:**
+
+   ```
+   - {timestamp} Complete: Phase 5 - Decomposed into {N} tasks
+   ```

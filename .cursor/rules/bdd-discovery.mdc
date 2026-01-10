@@ -37,4 +37,10 @@ After each round: "Another round or ready?"
 
 **Max 5 rounds** → then proceed automatically.
 
-**Exit:** User says "ready" OR max rounds → update to `define-behavior`.
+## Phase 0-2 Exit (REQUIRED)
+
+Before proceeding:
+
+1. Verify ticket exists: `.safeword-project/tickets/{id}-{slug}/ticket.md`
+2. Update frontmatter: `phase: define-behavior`
+3. Add work log: `- {timestamp} Complete: Phase 0-2 - Context established`

@@ -36,4 +36,8 @@ alwaysApply: false
 - Feature-level → design-doc-guide.md
 - Cross-cutting → architecture-guide.md
 
-**Exit:** User approves breakdown → update to `implement`
+## Phase 5 Exit (REQUIRED)
+
+1. Task breakdown documented in ticket
+2. Update frontmatter: `phase: implement`
+3. Add work log: `- {timestamp} Complete: Phase 5 - Decomposed into {N} tasks`

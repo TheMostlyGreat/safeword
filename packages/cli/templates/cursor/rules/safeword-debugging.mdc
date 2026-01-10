@@ -132,6 +132,13 @@ Be specific:
 | Not fixed       | NEW hypothesis (return to 3.1)          |
 | Partially fixed | Found one issue, continue investigating |
 
+### Root Cause Checkpoint (REQUIRED)
+
+Before proceeding to Phase 4:
+
+1. **Document root cause** in ticket (under "## Root Cause" section)
+2. **If using tickets:** Update frontmatter to `subtype: bug-investigated`
+
 ### Phase 4: Implementation
 
 **1. Create Failing Test**

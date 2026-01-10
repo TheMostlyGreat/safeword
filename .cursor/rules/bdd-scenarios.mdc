@@ -9,7 +9,7 @@ alwaysApply: false
 
 **Entry:** `define-behavior` phase
 
-**Draft scenarios:**
+### 3.1 Draft Scenarios
 
 1. Read spec goal/scope
 2. Draft Given/When/Then covering:
@@ -17,10 +17,13 @@ alwaysApply: false
    - Failure modes (what can go wrong)
    - Edge cases (boundaries, empty states)
 3. Present to user, iterate
-4. Save to `.safeword-project/tickets/{id}-{slug}/test-definitions.md`
-5. Each scenario gets `[ ]` checkbox
+4. Each scenario gets `[ ]` checkbox
 
-**Exit:** User approves → update to `scenario-gate`
+### 3.2 Save & Exit (REQUIRED)
+
+1. Save to `.safeword-project/tickets/{id}-{slug}/test-definitions.md`
+2. Update frontmatter: `phase: scenario-gate`
+3. Add work log: `- {timestamp} Complete: Phase 3 - {N} scenarios defined`
 
 ---
 
@@ -39,4 +42,9 @@ alwaysApply: false
 - Group by type
 - Suggest fix: "Scenario 3 tests login AND session. Split into two."
 
-**Exit:** All pass OR user acknowledges → update to `decomposition`
+### Phase 4 Exit (REQUIRED)
+
+1. Each scenario validated (Atomic, Observable, Deterministic)
+2. Issues reported or confirmed clean
+3. Update frontmatter: `phase: decomposition`
+4. Add work log: `- {timestamp} Complete: Phase 4 - Scenarios validated`

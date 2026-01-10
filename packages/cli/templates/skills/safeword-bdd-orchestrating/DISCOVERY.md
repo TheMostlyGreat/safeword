@@ -45,3 +45,15 @@ After context check, offer discovery:
 > Agent: "Round 2 - Failure modes. What happens when a session expires mid-flow?"
 > User: "They lose progress. We'd get support tickets about lost work."
 > Agent: "Got it - session expiry = data loss risk. Another round or ready?"
+
+## Phase 0-2 Exit (REQUIRED)
+
+Before proceeding to Phase 3:
+
+1. **Verify ticket exists:** `.safeword-project/tickets/{id}-{slug}/ticket.md`
+2. **Update frontmatter:** `phase: define-behavior`
+3. **Add work log entry:**
+
+   ```
+   - {timestamp} Complete: Phase 0-2 - Context established
+   ```

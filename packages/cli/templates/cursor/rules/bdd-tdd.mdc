@@ -45,6 +45,11 @@ Run `/refactor` for cleanup after GREEN.
 
 ### 6.4 Mark & Iterate
 
-1. Mark scenario `[x]` in test-definitions
-2. Return to 6.1 for next scenario
-3. All done → proceed to Phase 7
+Before marking scenario complete:
+
+1. **Confirm refactor status** (say one of):
+   - "Refactored: [what improved]" + show commit
+   - "No refactoring needed: code is clean"
+2. Mark scenario `[x]` in test-definitions
+3. Return to 6.1 for next scenario
+4. All done → proceed to Phase 7

@@ -4,7 +4,7 @@
 
 **Entry:** Agent enters `define-behavior` phase (after discovery or resume)
 
-**Draft scenarios:**
+### 3.1 Draft Scenarios
 
 1. Read spec goal/scope
 2. Draft Given/When/Then scenarios covering:
@@ -13,10 +13,17 @@
    - Edge cases (boundaries, empty states)
 3. Present scenarios to user
 4. User can add/modify/remove scenarios
-5. Save to `.safeword-project/tickets/{id}-{slug}/test-definitions.md`
-6. Each scenario gets `[ ]` checkbox for implementation tracking
+5. Each scenario gets `[ ]` checkbox for implementation tracking
 
-**Exit:** User approves scenario list → update ticket to `phase: scenario-gate`
+### 3.2 Save & Exit (REQUIRED)
+
+1. **Save scenarios** to `.safeword-project/tickets/{id}-{slug}/test-definitions.md`
+2. **Update frontmatter:** `phase: scenario-gate`
+3. **Add work log entry:**
+
+   ```
+   - {timestamp} Complete: Phase 3 - {N} scenarios defined
+   ```
 
 ---
 
@@ -38,7 +45,15 @@
 - Suggest fix for each issue
 - Example: "Scenario 3 tests login AND session creation. Split into two scenarios."
 
-**Exit options:**
+### Phase 4 Exit (REQUIRED)
 
-- All pass → update ticket to `decomposition`
-- Issues found → user fixes or acknowledges → update ticket to `decomposition`
+Before proceeding to Phase 5:
+
+1. Each scenario validated (Atomic, Observable, Deterministic)
+2. Issues reported or confirmed clean
+3. **Update frontmatter:** `phase: decomposition`
+4. **Add work log entry:**
+
+   ```
+   - {timestamp} Complete: Phase 4 - Scenarios validated
+   ```
