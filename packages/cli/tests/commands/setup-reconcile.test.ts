@@ -298,7 +298,7 @@ describe("Setup Command - Reconcile Integration", () => {
 
       const cliPath = nodePath.join(process.cwd(), "src/cli.ts");
       try {
-        const result = execSync(`bunx tsx ${cliPath} setup --yes`, {
+        const result = execSync(`bunx tsx ${cliPath} setup`, {
           cwd: temporaryDirectory,
           encoding: "utf8",
           timeout: 60_000,

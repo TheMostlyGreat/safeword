@@ -16,7 +16,6 @@ program
 program
   .command("setup")
   .description("Set up safeword in the current project")
-  .option("-y, --yes", "Skip confirmation prompts (for automated testing)")
   .action(async () => {
     const { setup } = await import("./commands/setup.js");
     await setup();
