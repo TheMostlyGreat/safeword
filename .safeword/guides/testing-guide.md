@@ -113,58 +113,27 @@ Which test type catches which bug?
 
 ---
 
-## TDD Workflow (RED → GREEN → REFACTOR)
+## TDD Quick Reference (Tasks)
 
-Write tests BEFORE implementation. Tests define expected behavior, code makes them pass.
+For tasks (1-2 files), follow this cycle:
 
-### Phase 1: RED (Write Failing Test)
+1. **RED** - Write one failing test for the expected behavior
+2. **GREEN** - Write minimum code to pass the test
+3. **REFACTOR** - Clean up, run `/refactor` if needed
 
-1. Write test based on expected input/output
-2. **CRITICAL:** Run test and confirm it fails for the right reason
-3. **DO NOT write any implementation code yet**
-4. Commit: `test: [behavior]`
+Commit after each GREEN phase.
 
-**Red Flags → STOP:**
+### Escalation Check
 
-| Flag                    | Action                           |
-| ----------------------- | -------------------------------- |
-| Test passes immediately | Rewrite - you're testing nothing |
-| Syntax error            | Fix syntax, not behavior         |
-| Wrote implementation    | Delete it, return to test        |
-| Multiple tests          | Pick ONE                         |
+If during implementation you discover:
 
-### Phase 2: GREEN (Make Test Pass)
+- 3+ files need changes, OR
+- Multiple user flows affected, OR
+- New state management needed
 
-1. Write **minimum** code to make test pass
-2. Run test - verify it passes
-3. No extra features (YAGNI)
-4. Commit: `feat:` or `fix:`
+**Stop and escalate:** "This is bigger than expected. Switching to `/bdd` for proper behavior definition."
 
-**Anti-Pattern: Mock Implementations**
-
-LLMs sometimes hardcode values to pass tests. This is not TDD.
-
-```typescript
-// ❌ BAD - Hardcoded to pass test
-function calculateDiscount(amount, tier) {
-  return 80; // Passes test but isn't real
-}
-
-// ✅ GOOD - Actual logic
-function calculateDiscount(amount, tier) {
-  if (tier === 'VIP') return amount * 0.8;
-  return amount;
-}
-```
-
-### Phase 3: REFACTOR (Clean Up)
-
-1. Tests pass before changes
-2. Improve code (rename, extract, dedupe)
-3. Tests pass after changes
-4. Commit if changed: `refactor: [improvement]`
-
-**NOT Allowed:** New behavior, changing assertions, adding tests.
+For full TDD workflow with verification gates, red flags, walking skeleton, and phase orchestration, start feature work or run `/bdd`.
 
 ---
 

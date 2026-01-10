@@ -57,9 +57,9 @@ Fetch official documentation for libraries in use.
 ```markdown
 ## Quality Review
 
-**Versions:** [checkmark/warning/x] [Latest version check]
-**Documentation:** [checkmark/warning/x] [Current docs check]
-**Security:** [checkmark/warning/x] [Vulnerability check]
+**Versions:** [✓/⚠️/❌] [Latest version check]
+**Documentation:** [✓/⚠️/❌] [Current docs check]
+**Security:** [✓/⚠️/❌] [Vulnerability check]
 
 **Verdict:** [APPROVE / REQUEST CHANGES / NEEDS DISCUSSION]
 
