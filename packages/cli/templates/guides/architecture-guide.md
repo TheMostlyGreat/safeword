@@ -71,28 +71,6 @@ Answer **IN ORDER**. Stop at the first "Yes":
 
 ---
 
-## Design Document
-
-**Use when**: Designing a specific feature implementation
-
-**Characteristics**:
-
-- Feature-focused (~121 lines)
-- Implementation details (components, data flow, user flow)
-- References architecture doc (don't duplicate)
-
-**Location**: `planning/design/` or `docs/design/`
-
-**Edge cases:**
-
-- Feature needs new data model → Schema in Architecture Doc first, then reference
-- Feature spans 3+ components → Still Design Doc (component count doesn't change doc type)
-- Feature establishes pattern others follow → Pattern in Architecture Doc, implementation in Design Doc
-
-**See:** `@.safeword/guides/design-doc-guide.md` for detailed guidance
-
----
-
 ## Best Practices
 
 ### 1. One Architecture Doc Per Project/Package
@@ -234,15 +212,6 @@ Update in place with version/status tracking:
 **❌ BAD:** `GET /api/users → Returns users from PostgreSQL` (implementation detail)
 
 **✅ GOOD:** `API Design: RESTful routes with input validation at boundary` (principle)
-
-### Design Doc Anti-Patterns
-
-| Anti-Pattern                   | Fix                              |
-| ------------------------------ | -------------------------------- |
-| Repeating architecture content | Reference Architecture Doc       |
-| Skipping user flow             | Include step-by-step interaction |
-| Missing test mapping           | Link to test definitions         |
-| >200 lines                     | Split or extract to Architecture |
 
 ---
 
@@ -411,13 +380,6 @@ export default defineConfig([
 - [ ] Version and Status in header
 - [ ] Code references for key patterns
 - [ ] No implementation details
-
-**Design Doc:**
-
-- [ ] References Architecture Doc (no duplication)
-- [ ] User flow step-by-step
-- [ ] Test mapping links
-- [ ] ~121 lines target
 
 ---
 

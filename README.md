@@ -65,12 +65,11 @@ Key directories created in your project:
 
 **Purpose**: Reusable methodology applicable to all projects
 
-| Guide                      | Purpose                                                       | When to Read            |
-| -------------------------- | ------------------------------------------------------------- | ----------------------- |
-| **code-philosophy.md**     | Core coding principles, TDD philosophy, self-review checklist | Before writing code     |
-| **planning-guide.md**      | Feature planning workflow, spec creation, TDD integration     | Starting any feature    |
-| **testing-guide.md**       | TDD workflow (RED/GREEN/REFACTOR), test pyramid, test types   | Writing tests           |
-| **learning-extraction.md** | Extract learnings from debugging, recognition triggers        | After complex debugging |
+| Guide                      | Purpose                                                     | When to Read            |
+| -------------------------- | ----------------------------------------------------------- | ----------------------- |
+| **planning-guide.md**      | Feature planning workflow, spec creation, TDD integration   | Starting any feature    |
+| **testing-guide.md**       | TDD workflow (RED/GREEN/REFACTOR), test pyramid, test types | Writing tests           |
+| **learning-extraction.md** | Extract learnings from debugging, recognition triggers      | After complex debugging |
 
 ---
 

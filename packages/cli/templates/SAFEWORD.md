@@ -56,7 +56,6 @@ Training data is stale. Follow this sequence:
 | Hit same bug 3+ times OR discovered undocumented gotcha      | `./.safeword/guides/learning-extraction.md`     |
 | Process hanging, port in use, or zombie process suspected    | `./.safeword/guides/zombie-process-cleanup.md`  |
 | Using `safeword` CLI commands                                | `./.safeword/guides/cli-reference.md`           |
-| Debugging issues OR need git/cross-platform guidance         | `./.safeword/guides/code-philosophy.md`         |
 
 ---
 

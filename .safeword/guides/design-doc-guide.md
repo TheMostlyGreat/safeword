@@ -1,17 +1,5 @@
 # Design Doc Guide for Claude Code
 
-## Escalation Check
-
-**STOP if ANY apply—use `architecture-guide.md` first:**
-
-- [ ] Need to choose a technology or library
-- [ ] Need to design a data model or schema
-- [ ] Pattern will affect 2+ features
-
-Then return here.
-
----
-
 ## How to Fill Out Design Doc
 
 **Template:** `@.safeword/templates/design-doc-template.md`

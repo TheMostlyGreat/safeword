@@ -42,7 +42,6 @@ Read relevant standards:
 
 - `CLAUDE.md` or `SAFEWORD.md` - Project-specific guidelines
 - `ARCHITECTURE.md` - Architectural principles
-- `@./.safeword/guides/code-philosophy.md` - Core coding principles
 
 ### 3. Evaluate Correctness
 

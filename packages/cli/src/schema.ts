@@ -243,15 +243,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.safeword/hooks/stop-quality.ts': { template: 'hooks/stop-quality.ts' },
 
-    // Guides (11 files)
+    // Guides (10 files)
     '.safeword/guides/architecture-guide.md': {
       template: 'guides/architecture-guide.md',
     },
     '.safeword/guides/cli-reference.md': {
       template: 'guides/cli-reference.md',
-    },
-    '.safeword/guides/code-philosophy.md': {
-      template: 'guides/code-philosophy.md',
     },
     '.safeword/guides/context-files-guide.md': {
       template: 'guides/context-files-guide.md',

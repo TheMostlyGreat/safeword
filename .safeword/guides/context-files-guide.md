@@ -415,20 +415,7 @@ Brief description. Current status.
 
 **Critical:** These files are instructions consumed by LLMs.
 
-**See:** `@.safeword/guides/llm-writing-guide.md` for core principles for writing LLM-consumable documentation.
-
-### Quality Checklist
-
-Before committing:
-
-- [ ] All decision logic uses MECE principle (mutually exclusive, collectively exhaustive)
-- [ ] All project-specific terms are defined
-- [ ] No contradictions between sections
-- [ ] Rules have concrete examples
-- [ ] Edge cases explicitly covered
-- [ ] Vague terms replaced with actionable principles
-- [ ] No redundancy (each fact stated once)
-- [ ] File under 200 lines (or uses imports)
+**See:** `@.safeword/guides/llm-writing-guide.md` for core principles and quality checklist.
 
 ---
 
