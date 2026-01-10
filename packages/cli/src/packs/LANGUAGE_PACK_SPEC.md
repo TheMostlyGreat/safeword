@@ -193,7 +193,7 @@ if (result.exitCode !== 0 && result.stderr.length > 0) {
 **Shell scripts:** Handled as a special case (not a full language pack):
 
 ```typescript
-const SHELL_EXTENSIONS = new Set(["sh"]);
+const SHELL_EXTENSIONS = new Set(['sh']);
 
 if (SHELL_EXTENSIONS.has(extension)) {
   await $`bunx shellcheck ${file}`.nothrow().quiet();
@@ -319,7 +319,7 @@ Test code must trigger linters that are actually enabled. Research what your lin
 // ❌ Go: unused functions in `package main` are NOT caught (golangci-lint)
 writeTestFile(
   dir,
-  "bad.go",
+  'bad.go',
   `package main
 func unused() {} // NOT detected!
 `,
@@ -328,7 +328,7 @@ func unused() {} // NOT detected!
 // ✅ Go: unused imports ARE caught by 'unused' linter
 writeTestFile(
   dir,
-  "bad.go",
+  'bad.go',
   `package main
 import "fmt" // unused import - DETECTED
 func bad() { println("not using fmt") }
@@ -422,7 +422,7 @@ pretty = True
 }
 
 export const pythonManagedFiles = {
-  "mypy.ini": {
+  'mypy.ini': {
     generator: (ctx) => {
       if (!ctx.languages?.python) return null;
       if (ctx.projectType.existingMypyConfig) return null; // Skip if user has config
@@ -492,7 +492,7 @@ Pattern: Detect layer directories (domain, services, api, etc.), generate contra
 ```typescript
 // files.ts - Python import-linter config
 export const pythonManagedFiles = {
-  ".importlinter": {
+  '.importlinter': {
     generator: (ctx) => {
       if (!ctx.languages?.python) return null;
       if (ctx.projectType.existingImportLinterConfig) return null;

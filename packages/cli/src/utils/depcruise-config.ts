@@ -5,10 +5,10 @@
  * Used by `safeword sync-config` command and `/audit` slash command.
  */
 
-import nodePath from "node:path";
+import nodePath from 'node:path';
 
-import type { DetectedArchitecture } from "./boundaries.js";
-import { readJson } from "./fs.js";
+import type { DetectedArchitecture } from './boundaries.js';
+import { readJson } from './fs.js';
 
 export interface DepCruiseArchitecture extends DetectedArchitecture {
   workspaces?: string[];
@@ -23,7 +23,7 @@ interface PackageJson {
  * Supports both array format and object format (yarn workspaces)
  */
 export function detectWorkspaces(cwd: string): string[] | undefined {
-  const packageJsonPath = nodePath.join(cwd, "package.json");
+  const packageJsonPath = nodePath.join(cwd, 'package.json');
   const packageJson = readJson(packageJsonPath) as PackageJson | undefined;
 
   if (!packageJson?.workspaces) return undefined;
@@ -42,9 +42,9 @@ export function detectWorkspaces(cwd: string): string[] | undefined {
 function generateMonorepoRules(workspaces: string[]): string {
   const rules: string[] = [];
 
-  const hasLibs = workspaces.some((w) => w.startsWith("libs"));
-  const hasPackages = workspaces.some((w) => w.startsWith("packages"));
-  const hasApps = workspaces.some((w) => w.startsWith("apps"));
+  const hasLibs = workspaces.some((w) => w.startsWith('libs'));
+  const hasPackages = workspaces.some((w) => w.startsWith('packages'));
+  const hasApps = workspaces.some((w) => w.startsWith('apps'));
 
   // libs cannot import packages or apps
   if (hasLibs && (hasPackages || hasApps)) {
@@ -66,18 +66,14 @@ function generateMonorepoRules(workspaces: string[]): string {
     }`);
   }
 
-  return rules.join(",\n");
+  return rules.join(',\n');
 }
 
 /**
  * Generate .safeword/depcruise-config.js content (forbidden rules + options)
  */
-export function generateDepCruiseConfigFile(
-  arch: DepCruiseArchitecture,
-): string {
-  const monorepoRules = arch.workspaces
-    ? generateMonorepoRules(arch.workspaces)
-    : "";
+export function generateDepCruiseConfigFile(arch: DepCruiseArchitecture): string {
+  const monorepoRules = arch.workspaces ? generateMonorepoRules(arch.workspaces) : '';
   const hasMonorepoRules = monorepoRules.length > 0;
 
   return String.raw`module.exports = {
@@ -98,7 +94,7 @@ export function generateDepCruiseConfigFile(
       severity: 'error',
       from: {},
       to: { dependencyTypes: ['deprecated'] },
-    },${hasMonorepoRules ? `\n${monorepoRules},` : ""}
+    },${hasMonorepoRules ? `\n${monorepoRules},` : ''}
 
     // =========================================================================
     // WARNING RULES (flag issues but don't block)

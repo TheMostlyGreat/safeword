@@ -87,8 +87,8 @@ Create `src/versions.ts`:
  * Update these when releasing new safeword versions.
  */
 export const TOOL_VERSIONS = {
-  jscpd: "4.0.5",
-  publint: "0.3.16",
+  jscpd: '4.0.5',
+  publint: '0.3.16',
 } as const;
 ```
 
@@ -129,14 +129,14 @@ conditional: {
 User's `eslint.config.mjs`:
 
 ```javascript
-import safeword from "safeword";
+import safeword from 'safeword';
 export default safeword.eslint.auto();
 ```
 
 Or manual:
 
 ```javascript
-import safeword from "safeword";
+import safeword from 'safeword';
 export default [
   ...safeword.eslint.recommendedTypeScript,
   ...safeword.eslint.react,
@@ -150,7 +150,7 @@ export default [
 // src/index.ts
 
 // CLI commands (for programmatic use)
-export { setup, upgrade, reset, check } from "./cli/index.js";
+export { setup, upgrade, reset, check } from './cli/index.js';
 
 // ESLint presets (for user's eslint.config.mjs)
 export const eslint = {
@@ -167,7 +167,7 @@ export const eslint = {
 };
 
 // Detection utilities (for generated configs)
-export { detect } from "./presets/typescript/detect.js";
+export { detect } from './presets/typescript/detect.js';
 ```
 
 ## Migration Steps

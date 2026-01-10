@@ -4,10 +4,10 @@
  * Tests for setup error when already configured.
  */
 
-import { mkdirSync } from "node:fs";
-import nodePath from "node:path";
+import { mkdirSync } from 'node:fs';
+import nodePath from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   createTemporaryDirectory,
@@ -17,9 +17,9 @@ import {
   removeTemporaryDirectory,
   runCli,
   writeTestFile,
-} from "../helpers";
+} from '../helpers';
 
-describe("Test Suite 5: Setup Blocks on Existing", () => {
+describe('Test Suite 5: Setup Blocks on Existing', () => {
   let temporaryDirectory: string;
 
   beforeEach(() => {
@@ -30,45 +30,44 @@ describe("Test Suite 5: Setup Blocks on Existing", () => {
     removeTemporaryDirectory(temporaryDirectory);
   });
 
-  describe("Test 5.1: Error when .safeword exists", () => {
-    it("should error with exit 1 when .safeword/ already exists", async () => {
+  describe('Test 5.1: Error when .safeword exists', () => {
+    it('should error with exit 1 when .safeword/ already exists', async () => {
       createTypeScriptPackageJson(temporaryDirectory);
 
       // Create existing .safeword directory
-      mkdirSync(nodePath.join(temporaryDirectory, ".safeword"));
+      mkdirSync(nodePath.join(temporaryDirectory, '.safeword'));
 
-      const result = await runCli(["setup"], { cwd: temporaryDirectory });
+      const result = await runCli(['setup'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(1);
-      expect(result.stderr.toLowerCase()).toContain("already configured");
-      expect(result.stderr.toLowerCase()).toContain("upgrade");
+      expect(result.stderr.toLowerCase()).toContain('already configured');
+      expect(result.stderr.toLowerCase()).toContain('upgrade');
     });
   });
 
-  describe("Test 5.2: No files modified on error", () => {
-    it("should not modify files when erroring", async () => {
+  describe('Test 5.2: No files modified on error', () => {
+    it('should not modify files when erroring', async () => {
       createTypeScriptPackageJson(temporaryDirectory);
 
       // Create existing .safeword directory
-      mkdirSync(nodePath.join(temporaryDirectory, ".safeword"));
+      mkdirSync(nodePath.join(temporaryDirectory, '.safeword'));
 
       // Create AGENTS.md with known content
-      const originalContent =
-        "# Original AGENTS.md\n\nThis should not change.\n";
-      writeTestFile(temporaryDirectory, "AGENTS.md", originalContent);
+      const originalContent = '# Original AGENTS.md\n\nThis should not change.\n';
+      writeTestFile(temporaryDirectory, 'AGENTS.md', originalContent);
 
-      const result = await runCli(["setup"], { cwd: temporaryDirectory });
+      const result = await runCli(['setup'], { cwd: temporaryDirectory });
 
       expect(result.exitCode).toBe(1);
 
       // AGENTS.md should be unchanged
-      const content = readTestFile(temporaryDirectory, "AGENTS.md");
+      const content = readTestFile(temporaryDirectory, 'AGENTS.md');
       expect(content).toBe(originalContent);
 
       // No new files should be created
-      expect(fileExists(temporaryDirectory, ".claude")).toBe(false);
-      expect(fileExists(temporaryDirectory, "eslint.config.mjs")).toBe(false);
-      expect(fileExists(temporaryDirectory, ".prettierrc")).toBe(false);
+      expect(fileExists(temporaryDirectory, '.claude')).toBe(false);
+      expect(fileExists(temporaryDirectory, 'eslint.config.mjs')).toBe(false);
+      expect(fileExists(temporaryDirectory, '.prettierrc')).toBe(false);
     });
   });
 });

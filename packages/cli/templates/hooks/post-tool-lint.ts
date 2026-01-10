@@ -2,7 +2,7 @@
 // Safeword: Auto-lint changed files (PostToolUse)
 // Silently auto-fixes, only outputs unfixable errors
 
-import { lintFile } from "./lib/lint.ts";
+import { lintFile } from './lib/lint.ts';
 
 interface HookInput {
   tool_input?: {
@@ -16,8 +16,7 @@ let input: HookInput;
 try {
   input = await Bun.stdin.json();
 } catch (error) {
-  if (process.env.DEBUG)
-    console.error("[post-tool-lint] stdin parse error:", error);
+  if (process.env.DEBUG) console.error('[post-tool-lint] stdin parse error:', error);
   process.exit(0);
 }
 

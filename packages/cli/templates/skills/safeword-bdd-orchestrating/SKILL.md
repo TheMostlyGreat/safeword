@@ -1,7 +1,7 @@
 ---
 name: bdd-orchestrating
 description: BDD orchestrator for feature-level work requiring multiple scenarios. Use when user says 'add', 'implement', 'build', 'feature', 'iteration', 'story', 'phase', or references an iteration/story from a spec. Also use when work touches 3+ files with new state/flows, or when user runs /bdd. Do NOT use for bug fixes, typos, config changes, or 1-2 file tasks.
-allowed-tools: "*"
+allowed-tools: '*'
 ---
 
 # BDD Orchestrator
@@ -277,7 +277,7 @@ function calculateDiscount(amount, tier) {
 
 // ✅ GOOD - Actual logic
 function calculateDiscount(amount, tier) {
-  if (tier === "VIP") return amount * 0.8;
+  if (tier === 'VIP') return amount * 0.8;
   return amount;
 }
 ```

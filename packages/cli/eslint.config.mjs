@@ -1,5 +1,5 @@
-import eslintConfigPrettier from "eslint-config-prettier";
-import safeword from "eslint-plugin-safeword";
+import eslintConfigPrettier from 'eslint-config-prettier';
+import safeword from 'eslint-plugin-safeword';
 
 const { detect, configs } = safeword;
 const deps = detect.collectAllDeps(import.meta.dirname);

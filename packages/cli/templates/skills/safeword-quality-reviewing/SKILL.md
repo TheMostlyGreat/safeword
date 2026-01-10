@@ -1,7 +1,7 @@
 ---
 name: quality-reviewing
 description: Deep code review with web research to verify against latest ecosystem. Use when user says 'double check against latest', 'verify versions', 'check security', 'review against docs', or needs deep analysis beyond automatic quality hook.
-allowed-tools: "*"
+allowed-tools: '*'
 ---
 
 # Quality Reviewing

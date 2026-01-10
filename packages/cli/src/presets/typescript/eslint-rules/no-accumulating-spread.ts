@@ -17,14 +17,14 @@
  *   items.map(item => item.name)
  */
 
-import type { Rule } from "eslint";
+import type { Rule } from 'eslint';
 import type {
   ArrowFunctionExpression,
   CallExpression,
   FunctionExpression,
   Node,
   SpreadElement,
-} from "estree";
+} from 'estree';
 
 /**
  * Check if a node is a call to .reduce()
@@ -32,9 +32,9 @@ import type {
 function isReduceCall(node: CallExpression): boolean {
   const { callee } = node;
   return (
-    callee.type === "MemberExpression" &&
-    callee.property.type === "Identifier" &&
-    callee.property.name === "reduce"
+    callee.type === 'MemberExpression' &&
+    callee.property.type === 'Identifier' &&
+    callee.property.name === 'reduce'
   );
 }
 
@@ -45,7 +45,7 @@ function getAccumulatorName(
   callback: ArrowFunctionExpression | FunctionExpression,
 ): string | undefined {
   const firstParameter = callback.params[0];
-  if (firstParameter?.type === "Identifier") {
+  if (firstParameter?.type === 'Identifier') {
     return firstParameter.name;
   }
   return undefined;
@@ -55,23 +55,18 @@ function getAccumulatorName(
  * Check if a spread element spreads the accumulator
  */
 function spreadsAccumulator(spread: SpreadElement, accName: string): boolean {
-  return (
-    spread.argument.type === "Identifier" && spread.argument.name === accName
-  );
+  return spread.argument.type === 'Identifier' && spread.argument.name === accName;
 }
 
 /**
  * Check object expression properties for accumulator spread.
  */
 function findSpreadInObject(
-  node: Node & { type: "ObjectExpression" },
+  node: Node & { type: 'ObjectExpression' },
   accName: string,
 ): SpreadElement | undefined {
   for (const property of node.properties) {
-    if (
-      property.type === "SpreadElement" &&
-      spreadsAccumulator(property, accName)
-    ) {
+    if (property.type === 'SpreadElement' && spreadsAccumulator(property, accName)) {
       return property;
     }
   }
@@ -82,14 +77,11 @@ function findSpreadInObject(
  * Check array expression elements for accumulator spread.
  */
 function findSpreadInArray(
-  node: Node & { type: "ArrayExpression" },
+  node: Node & { type: 'ArrayExpression' },
   accName: string,
 ): SpreadElement | undefined {
   for (const element of node.elements) {
-    if (
-      element?.type === "SpreadElement" &&
-      spreadsAccumulator(element, accName)
-    ) {
+    if (element?.type === 'SpreadElement' && spreadsAccumulator(element, accName)) {
       return element;
     }
   }
@@ -99,32 +91,29 @@ function findSpreadInArray(
 /**
  * Recursively check if an expression contains a spread of the accumulator
  */
-function containsAccumulatorSpread(
-  node: Node,
-  accName: string,
-): SpreadElement | undefined {
+function containsAccumulatorSpread(node: Node, accName: string): SpreadElement | undefined {
   // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check -- Only specific node types can contain spreads; all others return undefined via default
   switch (node.type) {
-    case "SpreadElement": {
+    case 'SpreadElement': {
       return spreadsAccumulator(node, accName) ? node : undefined;
     }
 
-    case "ObjectExpression": {
+    case 'ObjectExpression': {
       return findSpreadInObject(node, accName);
     }
 
-    case "ArrayExpression": {
+    case 'ArrayExpression': {
       return findSpreadInArray(node, accName);
     }
 
-    case "ConditionalExpression": {
+    case 'ConditionalExpression': {
       return (
         containsAccumulatorSpread(node.consequent, accName) ??
         containsAccumulatorSpread(node.alternate, accName)
       );
     }
 
-    case "LogicalExpression": {
+    case 'LogicalExpression': {
       return (
         containsAccumulatorSpread(node.left, accName) ??
         containsAccumulatorSpread(node.right, accName)
@@ -141,26 +130,23 @@ function containsAccumulatorSpread(
  * Check arrow function body for accumulator spread
  */
 function checkArrowBody(
-  body: ArrowFunctionExpression["body"],
+  body: ArrowFunctionExpression['body'],
   accName: string,
 ): SpreadElement | undefined {
   // Direct return: (acc, item) => ({ ...acc, ... })
-  if (body.type === "ObjectExpression" || body.type === "ArrayExpression") {
+  if (body.type === 'ObjectExpression' || body.type === 'ArrayExpression') {
     return containsAccumulatorSpread(body, accName);
   }
 
   // Parenthesized or conditional
-  if (
-    body.type === "ConditionalExpression" ||
-    body.type === "LogicalExpression"
-  ) {
+  if (body.type === 'ConditionalExpression' || body.type === 'LogicalExpression') {
     return containsAccumulatorSpread(body, accName);
   }
 
   // Block body - check return statements
-  if (body.type === "BlockStatement") {
+  if (body.type === 'BlockStatement') {
     for (const stmt of body.body) {
-      if (stmt.type === "ReturnStatement" && stmt.argument) {
+      if (stmt.type === 'ReturnStatement' && stmt.argument) {
         const found = containsAccumulatorSpread(stmt.argument, accName);
         if (found) return found;
       }
@@ -172,16 +158,15 @@ function checkArrowBody(
 
 const rule: Rule.RuleModule = {
   meta: {
-    type: "problem",
+    type: 'problem',
     docs: {
-      description:
-        "Disallow spreading accumulator in reduce (causes O(n²) complexity)",
+      description: 'Disallow spreading accumulator in reduce (causes O(n²) complexity)',
       recommended: true,
     },
     messages: {
       accumulatingSpread:
-        "Spreading accumulator in reduce() causes O(n²) complexity. " +
-        "Mutate the accumulator instead, or use map/filter/Object.fromEntries.",
+        'Spreading accumulator in reduce() causes O(n²) complexity. ' +
+        'Mutate the accumulator instead, or use map/filter/Object.fromEntries.',
     },
     schema: [],
   },
@@ -194,8 +179,7 @@ const rule: Rule.RuleModule = {
         const callback = node.arguments[0];
         if (
           !callback ||
-          (callback.type !== "ArrowFunctionExpression" &&
-            callback.type !== "FunctionExpression")
+          (callback.type !== 'ArrowFunctionExpression' && callback.type !== 'FunctionExpression')
         ) {
           return;
         }
@@ -207,7 +191,7 @@ const rule: Rule.RuleModule = {
         if (spreadNode) {
           context.report({
             node: spreadNode,
-            messageId: "accumulatingSpread",
+            messageId: 'accumulatingSpread',
           });
         }
       },

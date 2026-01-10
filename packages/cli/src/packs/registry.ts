@@ -4,11 +4,11 @@
  * Central registry of language packs with lookup helpers.
  */
 
-import { getInstalledPacks } from "./config.js";
-import { golangPack } from "./golang/index.js";
-import { pythonPack } from "./python/index.js";
-import type { LanguagePack } from "./types.js";
-import { typescriptPack } from "./typescript/index.js";
+import { getInstalledPacks } from './config.js';
+import { golangPack } from './golang/index.js';
+import { pythonPack } from './python/index.js';
+import type { LanguagePack } from './types.js';
+import { typescriptPack } from './typescript/index.js';
 
 /**
  * All registered language packs.
@@ -25,9 +25,7 @@ export const LANGUAGE_PACKS: Record<string, LanguagePack> = {
  * @param ext - File extension including dot (e.g., '.py')
  * @returns The matching pack or undefined
  */
-export function findPackForExtension(
-  extension: string,
-): LanguagePack | undefined {
+export function findPackForExtension(extension: string): LanguagePack | undefined {
   for (const pack of Object.values(LANGUAGE_PACKS)) {
     if (pack.extensions.includes(extension)) {
       return pack;

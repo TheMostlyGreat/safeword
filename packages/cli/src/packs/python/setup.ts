@@ -9,11 +9,11 @@
  * - Package manager detection for install guidance
  */
 
-import { execSync } from "node:child_process";
-import nodePath from "node:path";
+import { execSync } from 'node:child_process';
+import nodePath from 'node:path';
 
-import { exists, readFileSafe } from "../../utils/fs.js";
-import type { SetupResult } from "../types.js";
+import { exists, readFileSafe } from '../../utils/fs.js';
+import type { SetupResult } from '../types.js';
 
 /**
  * Python layer patterns for architecture detection.
@@ -22,10 +22,10 @@ import type { SetupResult } from "../types.js";
  * @see .safeword/planning/design/phase2-python-tooling.md → Layer detection heuristic
  */
 const PYTHON_LAYERS: Record<string, string[]> = {
-  domain: ["domain", "models", "entities", "core"],
-  services: ["services", "usecases", "application"],
-  infra: ["infra", "infrastructure", "adapters", "repositories"],
-  api: ["api", "routes", "handlers", "views", "controllers"],
+  domain: ['domain', 'models', 'entities', 'core'],
+  services: ['services', 'usecases', 'application'],
+  infra: ['infra', 'infrastructure', 'adapters', 'repositories'],
+  api: ['api', 'routes', 'handlers', 'views', 'controllers'],
 };
 
 /**
@@ -41,7 +41,7 @@ export function detectPythonLayers(cwd: string): string[] {
   for (const [layer, patterns] of Object.entries(PYTHON_LAYERS)) {
     for (const pattern of patterns) {
       // Check common locations: src/{pattern}, {pattern}
-      const srcPath = nodePath.join(cwd, "src", pattern);
+      const srcPath = nodePath.join(cwd, 'src', pattern);
       const rootPath = nodePath.join(cwd, pattern);
 
       if (exists(srcPath) || exists(rootPath)) {
@@ -52,7 +52,7 @@ export function detectPythonLayers(cwd: string): string[] {
   }
 
   // Return in correct dependency order (domain → services → infra → api)
-  const layerOrder = ["domain", "services", "infra", "api"];
+  const layerOrder = ['domain', 'services', 'infra', 'api'];
   return layerOrder.filter((layer) => detected.includes(layer));
 }
 
@@ -63,7 +63,7 @@ export function detectPythonLayers(cwd: string): string[] {
  * @returns Package name or 'src' as fallback
  */
 export function detectRootPackage(cwd: string): string {
-  const pyprojectPath = nodePath.join(cwd, "pyproject.toml");
+  const pyprojectPath = nodePath.join(cwd, 'pyproject.toml');
   const content = readFileSafe(pyprojectPath);
 
   if (content) {
@@ -72,27 +72,27 @@ export function detectRootPackage(cwd: string): string {
     const nameMatch = /^name\s*=\s*"([^"]+)"/m.exec(content);
     if (nameMatch) {
       // Convert kebab-case to snake_case for Python imports
-      return nameMatch[1].replaceAll("-", "_");
+      return nameMatch[1].replaceAll('-', '_');
     }
   }
 
   // Fallback: check for src/ directory
-  if (exists(nodePath.join(cwd, "src"))) {
-    return "src";
+  if (exists(nodePath.join(cwd, 'src'))) {
+    return 'src';
   }
 
   // Last resort: use directory name
-  return nodePath.basename(cwd).replaceAll("-", "_");
+  return nodePath.basename(cwd).replaceAll('-', '_');
 }
 
-type PythonPackageManager = "uv" | "poetry" | "pipenv" | "pip";
+type PythonPackageManager = 'uv' | 'poetry' | 'pipenv' | 'pip';
 
 /**
  * Check if ruff is already declared as a dependency in pyproject.toml.
  * Only checks dependency sections, not [tool.ruff] config.
  */
 export function hasRuffDependency(cwd: string): boolean {
-  const pyprojectPath = nodePath.join(cwd, "pyproject.toml");
+  const pyprojectPath = nodePath.join(cwd, 'pyproject.toml');
   const content = readFileSafe(pyprojectPath);
   if (!content) return false;
 
@@ -108,29 +108,29 @@ export function hasRuffDependency(cwd: string): boolean {
  */
 export function detectPythonPackageManager(cwd: string): PythonPackageManager {
   // Check for uv (uv.lock or .python-version with uv markers)
-  if (exists(nodePath.join(cwd, "uv.lock"))) {
-    return "uv";
+  if (exists(nodePath.join(cwd, 'uv.lock'))) {
+    return 'uv';
   }
 
   // Check for Poetry
-  if (exists(nodePath.join(cwd, "poetry.lock"))) {
-    return "poetry";
+  if (exists(nodePath.join(cwd, 'poetry.lock'))) {
+    return 'poetry';
   }
 
   // Check for poetry in pyproject.toml
-  const pyprojectPath = nodePath.join(cwd, "pyproject.toml");
+  const pyprojectPath = nodePath.join(cwd, 'pyproject.toml');
   const pyprojectContent = readFileSafe(pyprojectPath);
-  if (pyprojectContent?.includes("[tool.poetry]")) {
-    return "poetry";
+  if (pyprojectContent?.includes('[tool.poetry]')) {
+    return 'poetry';
   }
 
   // Check for Pipenv
-  if (exists(nodePath.join(cwd, "Pipfile"))) {
-    return "pipenv";
+  if (exists(nodePath.join(cwd, 'Pipfile'))) {
+    return 'pipenv';
   }
 
   // Default to pip
-  return "pip";
+  return 'pip';
 }
 
 /**
@@ -141,24 +141,21 @@ export function detectPythonPackageManager(cwd: string): PythonPackageManager {
  */
 // Exhaustive switch over PythonPackageManager union - sonarjs can't detect TypeScript exhaustiveness
 // eslint-disable-next-line sonarjs/no-inconsistent-returns
-export function getPythonInstallCommand(
-  cwd: string,
-  tools: string[] = ["ruff"],
-): string {
+export function getPythonInstallCommand(cwd: string, tools: string[] = ['ruff']): string {
   const pm = detectPythonPackageManager(cwd);
-  const toolList = tools.join(" ");
+  const toolList = tools.join(' ');
 
   switch (pm) {
-    case "uv": {
+    case 'uv': {
       return `uv add --dev ${toolList}`;
     }
-    case "poetry": {
+    case 'poetry': {
       return `poetry add --group dev ${toolList}`;
     }
-    case "pipenv": {
+    case 'pipenv': {
       return `pipenv install --dev ${toolList}`;
     }
-    case "pip": {
+    case 'pip': {
       return `pip install ${toolList}`;
     }
   }
@@ -172,20 +169,17 @@ export function getPythonInstallCommand(
  * @param tools - Tools to install (e.g., ['ruff', 'mypy', 'import-linter'])
  * @returns true if installation succeeded, false otherwise
  */
-export function installPythonDependencies(
-  cwd: string,
-  tools: string[],
-): boolean {
+export function installPythonDependencies(cwd: string, tools: string[]): boolean {
   if (tools.length === 0) return true;
 
   // pip projects need manual install due to PEP 668
   const pm = detectPythonPackageManager(cwd);
-  if (pm === "pip") return false;
+  if (pm === 'pip') return false;
 
   try {
     execSync(getPythonInstallCommand(cwd, tools), {
       cwd,
-      stdio: "pipe",
+      stdio: 'pipe',
       timeout: 60_000, // 60s timeout to prevent hanging on network/resolution issues
     });
     return true;

@@ -4,32 +4,28 @@
  * Uses reconcile() with mode='install' to create all managed files.
  */
 
-import { readdirSync } from "node:fs";
-import nodePath from "node:path";
+import { readdirSync } from 'node:fs';
+import nodePath from 'node:path';
 
-import { addInstalledPack } from "../packs/config.js";
-import { setupGoTooling } from "../packs/golang/setup.js";
+import { addInstalledPack } from '../packs/config.js';
+import { setupGoTooling } from '../packs/golang/setup.js';
 import {
   detectPythonLayers,
   detectPythonPackageManager,
   getPythonInstallCommand,
   hasRuffDependency,
   installPythonDependencies,
-} from "../packs/python/setup.js";
-import { detectLanguages as detectLanguagePacks } from "../packs/registry.js";
-import { reconcile, type ReconcileResult } from "../reconcile.js";
-import { type ProjectContext, SAFEWORD_SCHEMA } from "../schema.js";
-import { createProjectContext } from "../utils/context.js";
-import { exists, readJson, writeJson } from "../utils/fs.js";
-import { installDependencies } from "../utils/install.js";
-import { error, header, info, listItem, success } from "../utils/output.js";
-import { detectLanguages, type Languages } from "../utils/project-detector.js";
-import { VERSION } from "../version.js";
-import {
-  buildArchitecture,
-  hasArchitectureDetected,
-  syncConfigCore,
-} from "./sync-config.js";
+} from '../packs/python/setup.js';
+import { detectLanguages as detectLanguagePacks } from '../packs/registry.js';
+import { reconcile, type ReconcileResult } from '../reconcile.js';
+import { type ProjectContext, SAFEWORD_SCHEMA } from '../schema.js';
+import { createProjectContext } from '../utils/context.js';
+import { exists, readJson, writeJson } from '../utils/fs.js';
+import { installDependencies } from '../utils/install.js';
+import { error, header, info, listItem, success } from '../utils/output.js';
+import { detectLanguages, type Languages } from '../utils/project-detector.js';
+import { VERSION } from '../version.js';
+import { buildArchitecture, hasArchitectureDetected, syncConfigCore } from './sync-config.js';
 
 interface PackageJson {
   name?: string;
@@ -37,7 +33,7 @@ interface PackageJson {
   scripts?: Record<string, string>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
-  "lint-staged"?: Record<string, string[]>;
+  'lint-staged'?: Record<string, string[]>;
   workspaces?: string[] | { packages?: string[] };
 }
 
@@ -46,7 +42,7 @@ interface PackageJson {
  * Supports both array format and yarn workspaces object format.
  */
 function getWorkspacePatterns(cwd: string): string[] {
-  const packageJsonPath = nodePath.join(cwd, "package.json");
+  const packageJsonPath = nodePath.join(cwd, 'package.json');
   const rootPackageJson = readJson(packageJsonPath) as PackageJson | undefined;
   if (!rootPackageJson?.workspaces) return [];
 
@@ -59,10 +55,7 @@ function getWorkspacePatterns(cwd: string): string[] {
  * Process a glob workspace pattern (e.g., "packages/*").
  * Scans directory and adds format scripts to each package.
  */
-function processGlobWorkspacePattern(
-  cwd: string,
-  workspacePath: string,
-): string[] {
+function processGlobWorkspacePattern(cwd: string, workspacePath: string): string[] {
   const updated: string[] = [];
   const fullPath = nodePath.join(cwd, workspacePath);
 
@@ -71,11 +64,11 @@ function processGlobWorkspacePattern(
   try {
     const entries = readdirSync(fullPath, { withFileTypes: true });
     for (const entry of entries) {
-      if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+      if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
 
       const packagePath = nodePath.join(fullPath, entry.name);
       if (addFormatScriptIfMissing(packagePath)) {
-        updated.push(nodePath.join(workspacePath, entry.name, "package.json"));
+        updated.push(nodePath.join(workspacePath, entry.name, 'package.json'));
       }
     }
   } catch {
@@ -88,13 +81,10 @@ function processGlobWorkspacePattern(
 /**
  * Process an explicit workspace path (e.g., "tools/scripts").
  */
-function processExplicitWorkspacePath(
-  cwd: string,
-  workspacePath: string,
-): string[] {
+function processExplicitWorkspacePath(cwd: string, workspacePath: string): string[] {
   const fullPath = nodePath.join(cwd, workspacePath);
   if (addFormatScriptIfMissing(fullPath)) {
-    return [nodePath.join(workspacePath, "package.json")];
+    return [nodePath.join(workspacePath, 'package.json')];
   }
   return [];
 }
@@ -103,10 +93,7 @@ function processExplicitWorkspacePath(
  * Add format scripts to workspace packages that don't have them.
  * Only runs if root project uses Prettier (not an existing formatter like Biome).
  */
-function setupWorkspaceFormatScripts(
-  cwd: string,
-  ctx: ProjectContext,
-): string[] {
+function setupWorkspaceFormatScripts(cwd: string, ctx: ProjectContext): string[] {
   // Skip if root uses an existing formatter (Biome, dprint, etc.)
   if (ctx.projectType.existingFormatter) return [];
 
@@ -116,7 +103,7 @@ function setupWorkspaceFormatScripts(
   const updated: string[] = [];
 
   for (const pattern of workspacePatterns) {
-    const isGlobPattern = pattern.endsWith("/*");
+    const isGlobPattern = pattern.endsWith('/*');
     const workspacePath = isGlobPattern ? pattern.slice(0, -2) : pattern;
 
     const patternUpdates = isGlobPattern
@@ -134,7 +121,7 @@ function setupWorkspaceFormatScripts(
  * Returns true if the script was added.
  */
 function addFormatScriptIfMissing(packageDirectory: string): boolean {
-  const packageJsonPath = nodePath.join(packageDirectory, "package.json");
+  const packageJsonPath = nodePath.join(packageDirectory, 'package.json');
   if (!exists(packageJsonPath)) return false;
 
   const packageJson = readJson(packageJsonPath) as PackageJson | undefined;
@@ -145,7 +132,7 @@ function addFormatScriptIfMissing(packageDirectory: string): boolean {
 
   // Add format script
   const scripts = packageJson.scripts ?? {};
-  scripts.format = "prettier --write .";
+  scripts.format = 'prettier --write .';
   packageJson.scripts = scripts;
   writeJson(packageJsonPath, packageJson);
 
@@ -157,7 +144,7 @@ function addFormatScriptIfMissing(packageDirectory: string): boolean {
  * Returns true if created, false if already exists or skipped.
  */
 function ensurePackageJson(cwd: string): boolean {
-  const packageJsonPath = nodePath.join(cwd, "package.json");
+  const packageJsonPath = nodePath.join(cwd, 'package.json');
   if (exists(packageJsonPath)) return false;
 
   // Skip for non-JS-only projects (no JS tooling needed)
@@ -165,10 +152,10 @@ function ensurePackageJson(cwd: string): boolean {
   const hasNonJs = languages.python || languages.golang;
   if (hasNonJs && !languages.javascript) return false;
 
-  const dirName = nodePath.basename(cwd) || "project";
+  const dirName = nodePath.basename(cwd) || 'project';
   const defaultPackageJson: PackageJson = {
     name: dirName,
-    version: "0.1.0",
+    version: '0.1.0',
     scripts: {},
   };
   writeJson(packageJsonPath, defaultPackageJson);
@@ -183,8 +170,8 @@ interface PythonSetupStatus {
 
 /** Base Python tools to install. Import-linter added when layers detected. */
 function getPythonTools(includeImportLinter: boolean): string[] {
-  const tools = ["ruff", "mypy", "deadcode"];
-  if (includeImportLinter) tools.push("import-linter");
+  const tools = ['ruff', 'mypy', 'deadcode'];
+  if (includeImportLinter) tools.push('import-linter');
   return tools;
 }
 
@@ -204,13 +191,13 @@ function setupPython(cwd: string): PythonSetupStatus {
   if (!hasRuffDependency(cwd)) {
     const tools = getPythonTools(hasLayers);
     const pm = detectPythonPackageManager(cwd);
-    if (pm === "pip") {
+    if (pm === 'pip') {
       installFailed = true;
     } else {
-      info(`\nInstalling Python tools (${tools.join(", ")})...`);
+      info(`\nInstalling Python tools (${tools.join(', ')})...`);
       const installed = installPythonDependencies(cwd, tools);
       if (installed) {
-        success("Python tools installed");
+        success('Python tools installed');
       } else {
         installFailed = true;
       }
@@ -236,14 +223,11 @@ interface SetupSummaryOptions {
 /**
  * Print list of created files.
  */
-function printCreatedFiles(
-  createdFiles: string[],
-  packageJsonCreated: boolean,
-): void {
+function printCreatedFiles(createdFiles: string[], packageJsonCreated: boolean): void {
   if (createdFiles.length === 0 && !packageJsonCreated) return;
 
-  info("\nCreated:");
-  if (packageJsonCreated) listItem("package.json");
+  info('\nCreated:');
+  if (packageJsonCreated) listItem('package.json');
   for (const file of createdFiles) listItem(file);
 }
 
@@ -253,7 +237,7 @@ function printCreatedFiles(
 function printModifiedFiles(modifiedFiles: string[]): void {
   if (modifiedFiles.length === 0) return;
 
-  info("\nModified:");
+  info('\nModified:');
   for (const file of modifiedFiles) listItem(file);
 }
 
@@ -267,13 +251,7 @@ function printLanguageNextSteps(options: {
   pythonImportLinter: boolean;
   golangciCreated: boolean;
 }): void {
-  const {
-    cwd,
-    languages,
-    pythonInstallFailed,
-    pythonImportLinter,
-    golangciCreated,
-  } = options;
+  const { cwd, languages, pythonInstallFailed, pythonImportLinter, golangciCreated } = options;
 
   // Python: show install command only if auto-install failed
   if (languages.python && pythonInstallFailed) {
@@ -285,7 +263,7 @@ function printLanguageNextSteps(options: {
   // Go: show if .golangci.yml was created (Go tools are installed globally)
   if (languages.golang && golangciCreated) {
     listItem(
-      "Install Go tools: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest",
+      'Install Go tools: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest',
     );
   }
 }
@@ -303,13 +281,13 @@ function printSetupSummary(options: SetupSummaryOptions): void {
     pythonImportLinter = false,
   } = options;
 
-  header("Setup Complete");
+  header('Setup Complete');
 
   // Collect created files (schema files + arch files + python config files)
   const createdFiles = [
     ...result.created,
     ...archFiles,
-    ...pythonFiles.filter((f) => f !== "pyproject.toml"),
+    ...pythonFiles.filter((f) => f !== 'pyproject.toml'),
   ];
   printCreatedFiles(createdFiles, packageJsonCreated);
 
@@ -317,23 +295,23 @@ function printSetupSummary(options: SetupSummaryOptions): void {
   const modifiedFiles = [
     ...result.updated,
     ...workspaceUpdates,
-    ...pythonFiles.filter((f) => f === "pyproject.toml"),
+    ...pythonFiles.filter((f) => f === 'pyproject.toml'),
   ];
   printModifiedFiles(modifiedFiles);
 
   // Next steps
-  info("\nNext steps:");
-  listItem("Run `safeword check` to verify setup");
+  info('\nNext steps:');
+  listItem('Run `safeword check` to verify setup');
 
   printLanguageNextSteps({
     cwd,
     languages,
     pythonInstallFailed,
     pythonImportLinter,
-    golangciCreated: result.created.includes(".golangci.yml"),
+    golangciCreated: result.created.includes('.golangci.yml'),
   });
 
-  listItem("Commit the new files to git");
+  listItem('Commit the new files to git');
 
   success(`\nSafeword ${VERSION} installed successfully!`);
 }
@@ -352,22 +330,20 @@ function setupJavaScriptProject(
   if (hasArchitectureDetected(arch)) {
     const syncResult = syncConfigCore(cwd, arch);
     if (syncResult.generatedConfig) {
-      archFiles.push(".safeword/depcruise-config.cjs");
+      archFiles.push('.safeword/depcruise-config.cjs');
     }
     if (syncResult.createdMainConfig) {
-      archFiles.push(".dependency-cruiser.cjs");
+      archFiles.push('.dependency-cruiser.cjs');
     }
     logArchitectureDetected(arch);
   }
 
   const workspaceUpdates = setupWorkspaceFormatScripts(cwd, ctx);
   if (workspaceUpdates.length > 0) {
-    info(
-      `\nAdded format scripts to ${workspaceUpdates.length} workspace package(s)`,
-    );
+    info(`\nAdded format scripts to ${workspaceUpdates.length} workspace package(s)`);
   }
 
-  installDependencies(cwd, packagesToInstall, "linting dependencies");
+  installDependencies(cwd, packagesToInstall, 'linting dependencies');
 
   return { archFiles, workspaceUpdates };
 }
@@ -375,18 +351,16 @@ function setupJavaScriptProject(
 /**
  * Log detected architecture elements and workspaces
  */
-function logArchitectureDetected(
-  arch: ReturnType<typeof buildArchitecture>,
-): void {
+function logArchitectureDetected(arch: ReturnType<typeof buildArchitecture>): void {
   const detected: string[] = [];
   if (arch.elements.length > 0) {
-    detected.push(arch.elements.map((element) => element.location).join(", "));
+    detected.push(arch.elements.map((element) => element.location).join(', '));
   }
   if (arch.workspaces && arch.workspaces.length > 0) {
-    detected.push(`workspaces: ${arch.workspaces.join(", ")}`);
+    detected.push(`workspaces: ${arch.workspaces.join(', ')}`);
   }
-  info(`\nArchitecture detected: ${detected.join("; ")}`);
-  info("Generated dependency-cruiser config for /audit command");
+  info(`\nArchitecture detected: ${detected.join('; ')}`);
+  info('Generated dependency-cruiser config for /audit command');
 }
 
 /**
@@ -394,10 +368,10 @@ function logArchitectureDetected(
  */
 function logDetectedLanguage(languages: Languages): void {
   if (languages.python && !languages.javascript) {
-    info("Python project detected (skipping JS tooling)");
+    info('Python project detected (skipping JS tooling)');
   }
   if (languages.golang && !languages.javascript) {
-    info("Go project detected (skipping JS tooling)");
+    info('Go project detected (skipping JS tooling)');
   }
 }
 
@@ -415,10 +389,7 @@ function registerLanguagePacks(cwd: string): void {
  * Setup Python project (dependencies installation).
  * Config files are created by reconciliation.
  */
-function setupPythonProject(
-  languages: Languages,
-  cwd: string,
-): PythonSetupStatus {
+function setupPythonProject(languages: Languages, cwd: string): PythonSetupStatus {
   if (!languages.python) {
     return { files: [], installFailed: false, importLinter: false };
   }
@@ -437,34 +408,33 @@ function setupGoProject(languages: Languages): void {
 
 export async function setup(): Promise<void> {
   const cwd = process.cwd();
-  const safewordDirectory = nodePath.join(cwd, ".safeword");
+  const safewordDirectory = nodePath.join(cwd, '.safeword');
 
   if (exists(safewordDirectory)) {
-    error("Already configured. Run `safeword upgrade` to update.");
+    error('Already configured. Run `safeword upgrade` to update.');
     process.exit(1);
   }
 
   const packageJsonCreated = ensurePackageJson(cwd);
 
-  header("Safeword Setup");
+  header('Safeword Setup');
   info(`Version: ${VERSION}`);
-  if (packageJsonCreated) info("Created package.json (none found)");
+  if (packageJsonCreated) info('Created package.json (none found)');
 
   try {
-    info("\nCreating safeword configuration...");
+    info('\nCreating safeword configuration...');
     const ctx = createProjectContext(cwd);
     const languages = ctx.languages ?? {
       javascript: false,
       python: false,
       golang: false,
     };
-    const isNonJsOnly =
-      (languages.python || languages.golang) && !languages.javascript;
+    const isNonJsOnly = (languages.python || languages.golang) && !languages.javascript;
 
     logDetectedLanguage(languages);
 
-    const result = await reconcile(SAFEWORD_SCHEMA, "install", ctx);
-    success("Created .safeword directory and configuration");
+    const result = await reconcile(SAFEWORD_SCHEMA, 'install', ctx);
+    success('Created .safeword directory and configuration');
 
     // Language-specific setup
     const { archFiles, workspaceUpdates } = isNonJsOnly
@@ -486,9 +456,7 @@ export async function setup(): Promise<void> {
       pythonImportLinter: pythonStatus.importLinter,
     });
   } catch (error_) {
-    error(
-      `Setup failed: ${error_ instanceof Error ? error_.message : "Unknown error"}`,
-    );
+    error(`Setup failed: ${error_ instanceof Error ? error_.message : 'Unknown error'}`);
     process.exit(1);
   }
 }

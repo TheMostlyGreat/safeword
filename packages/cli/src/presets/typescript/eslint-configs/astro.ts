@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types are incompatible across plugin packages */
 
-import astroPlugin from "eslint-plugin-astro";
+import astroPlugin from 'eslint-plugin-astro';
 
 /**
  * Astro config
@@ -23,23 +23,23 @@ import astroPlugin from "eslint-plugin-astro";
  */
 export const astroConfig: any[] = [
   // Spread flat/recommended (5 config objects: plugin setup, file patterns, prettier overrides, rules)
-  ...astroPlugin.configs["flat/recommended"],
+  ...astroPlugin.configs['flat/recommended'],
 
   // Accessibility rules adapted for Astro (requires eslint-plugin-jsx-a11y installed)
-  ...astroPlugin.configs["flat/jsx-a11y-strict"],
+  ...astroPlugin.configs['flat/jsx-a11y-strict'],
 
   // Add LLM-critical rules
   {
-    name: "safeword/astro",
+    name: 'safeword/astro',
     rules: {
       // XSS prevention - LLMs often use set:html for rendering user content
-      "astro/no-set-html-directive": "error",
+      'astro/no-set-html-directive': 'error',
 
       // CSP safety - inline scripts can break Content Security Policy
-      "astro/no-unsafe-inline-scripts": "error",
+      'astro/no-unsafe-inline-scripts': 'error',
 
       // Astro convention - LLMs try to export from .astro components (not allowed)
-      "astro/no-exports-from-components": "error",
+      'astro/no-exports-from-components': 'error',
     },
   },
 ];

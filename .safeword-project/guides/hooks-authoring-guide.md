@@ -126,14 +126,14 @@ const filePath = data.tool_input?.file_path || '';
 
 // Block dangerous commands
 const dangerous = ['rm -rf /', 'mkfs', ':(){ :|:& };:'];
-if (dangerous.some(d => cmd.includes(d))) {
+if (dangerous.some((d) => cmd.includes(d))) {
   console.error(`Blocked: ${cmd}`);
   process.exit(2);
 }
 
 // Block protected paths
 const protectedPaths = ['.env', '.git/', 'credentials', '.ssh/'];
-if (protectedPaths.some(p => filePath.includes(p))) {
+if (protectedPaths.some((p) => filePath.includes(p))) {
   console.error(`Blocked: protected path ${filePath}`);
   process.exit(2);
 }

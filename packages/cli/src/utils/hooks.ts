@@ -18,10 +18,7 @@ interface HookEntry {
  */
 function isHookEntry(h: unknown): h is HookEntry {
   return (
-    typeof h === "object" &&
-    h !== null &&
-    "hooks" in h &&
-    Array.isArray((h as HookEntry).hooks)
+    typeof h === 'object' && h !== null && 'hooks' in h && Array.isArray((h as HookEntry).hooks)
   );
 }
 
@@ -32,8 +29,7 @@ function isHookEntry(h: unknown): h is HookEntry {
 function isSafewordHook(h: unknown): boolean {
   if (!isHookEntry(h)) return false;
   return h.hooks.some(
-    (cmd) =>
-      typeof cmd.command === "string" && cmd.command.includes(".safeword"),
+    (cmd) => typeof cmd.command === 'string' && cmd.command.includes('.safeword'),
   );
 }
 

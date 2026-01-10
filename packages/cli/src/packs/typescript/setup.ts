@@ -8,7 +8,7 @@
  * This file exists for consistency with other language packs.
  */
 
-import type { SetupResult } from "../types.js";
+import type { SetupResult } from '../types.js';
 
 /**
  * Set up TypeScript tooling configuration.

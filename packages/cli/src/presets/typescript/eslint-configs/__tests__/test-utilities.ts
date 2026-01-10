@@ -27,8 +27,8 @@ export function getRuleConfig(config: any[], ruleId: string): any {
 // eslint-disable-next-line sonarjs/function-return-type -- Intentionally returns number | string | undefined to match ESLint's severity types
 export function getSeverity(ruleConfig: any): number | string | undefined {
   if (ruleConfig === undefined) return undefined;
-  if (typeof ruleConfig === "number") return ruleConfig;
-  if (typeof ruleConfig === "string") return ruleConfig;
+  if (typeof ruleConfig === 'number') return ruleConfig;
+  if (typeof ruleConfig === 'string') return ruleConfig;
   if (Array.isArray(ruleConfig)) return ruleConfig[0];
   return undefined;
 }
@@ -38,10 +38,10 @@ export function getSeverity(ruleConfig: any): number | string | undefined {
  * Normalizes string severities to their numeric equivalents.
  */
 export function getSeverityNumber(ruleConfig: unknown): number {
-  if (typeof ruleConfig === "number") return ruleConfig;
-  if (typeof ruleConfig === "string") {
-    if (ruleConfig === "error") return 2;
-    if (ruleConfig === "warn") return 1;
+  if (typeof ruleConfig === 'number') return ruleConfig;
+  if (typeof ruleConfig === 'string') {
+    if (ruleConfig === 'error') return 2;
+    if (ruleConfig === 'warn') return 1;
     return 0;
   }
   if (Array.isArray(ruleConfig) && ruleConfig.length > 0) {
