@@ -72,7 +72,7 @@ const BIOME_JSON_MERGE: JsonMergeDefinition = {
       },
     };
   },
-  unmerge: existing => {
+  unmerge: (existing, _ctx) => {
     const files = (existing.files as Record<string, unknown>) ?? {};
     const existingIncludes = Array.isArray(files.includes) ? files.includes : [];
 
@@ -275,7 +275,7 @@ export const typescriptJsonMerges: Record<string, JsonMergeDefinition> = {
       result.scripts = scripts;
       return result;
     },
-    unmerge: existing => {
+    unmerge: (existing, _ctx) => {
       const result = { ...existing };
       const scripts = { ...(existing.scripts as Record<string, string>) };
 
@@ -310,19 +310,45 @@ export const typescriptJsonMerges: Record<string, JsonMergeDefinition> = {
         }
       }
 
-      // Always update plugins based on project type (safeword owns this)
-      const plugins = getPrettierPlugins(ctx.projectType);
-      if (plugins.length > 0) {
-        result.plugins = plugins;
+      // Merge plugins: preserve user's plugins + add safeword's
+      const safewordPlugins = getPrettierPlugins(ctx.projectType);
+      const existingPlugins = Array.isArray(result.plugins) ? (result.plugins as string[]) : [];
+
+      // Combine existing + safeword plugins (deduplicated)
+      const allPlugins = [...existingPlugins];
+      for (const plugin of safewordPlugins) {
+        if (!allPlugins.includes(plugin)) {
+          allPlugins.push(plugin);
+        }
+      }
+
+      // Ensure tailwind plugin is always last (required for proper class sorting)
+      const tailwindIndex = allPlugins.indexOf('prettier-plugin-tailwindcss');
+      if (tailwindIndex !== -1 && tailwindIndex !== allPlugins.length - 1) {
+        allPlugins.splice(tailwindIndex, 1);
+        allPlugins.push('prettier-plugin-tailwindcss');
+      }
+
+      if (allPlugins.length > 0) {
+        result.plugins = allPlugins;
       } else {
         delete result.plugins;
       }
 
       return result;
     },
-    unmerge: existing => {
+    unmerge: (existing, ctx) => {
       const result = { ...existing } as Record<string, unknown>;
-      delete result.plugins; // Remove plugins on uninstall (packages being removed)
+      // Only remove safeword's plugins, preserve user's custom plugins
+      const safewordPlugins = new Set(getPrettierPlugins(ctx.projectType));
+      if (Array.isArray(result.plugins)) {
+        const remaining = (result.plugins as string[]).filter(p => !safewordPlugins.has(p));
+        if (remaining.length > 0) {
+          result.plugins = remaining;
+        } else {
+          delete result.plugins;
+        }
+      }
       return result;
     },
   },

@@ -706,7 +706,7 @@ function executeAction(action: Action, ctx: ProjectContext, result: ExecutionRes
       break;
     }
     case 'json-unmerge': {
-      executeJsonUnmerge(ctx.cwd, action.path, action.definition);
+      executeJsonUnmerge(ctx.cwd, action.path, action.definition, ctx);
       break;
     }
     case 'text-patch': {
@@ -846,14 +846,19 @@ function executeJsonMerge(
  * @param path
  * @param definition
  */
-function executeJsonUnmerge(cwd: string, path: string, definition: JsonMergeDefinition): void {
+function executeJsonUnmerge(
+  cwd: string,
+  path: string,
+  definition: JsonMergeDefinition,
+  ctx: ProjectContext,
+): void {
   const fullPath = nodePath.join(cwd, path);
   if (!exists(fullPath)) return;
 
   const existing = readJson(fullPath) as Record<string, unknown> | undefined;
   if (!existing) return;
 
-  const unmerged = definition.unmerge(existing);
+  const unmerged = definition.unmerge(existing, ctx);
 
   // Check if file should be removed
   if (definition.removeFileIfEmpty) {

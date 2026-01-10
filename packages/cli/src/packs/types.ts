@@ -53,7 +53,7 @@ export interface JsonMergeDefinition {
   keys: string[]; // Dot-notation keys we manage
   conditionalKeys?: Record<string, string[]>; // Keys added based on project type
   merge: (existing: Record<string, unknown>, ctx: ProjectContext) => Record<string, unknown>;
-  unmerge: (existing: Record<string, unknown>) => Record<string, unknown>;
+  unmerge: (existing: Record<string, unknown>, ctx: ProjectContext) => Record<string, unknown>;
   removeFileIfEmpty?: boolean; // Delete file if our keys were the only content
   skipIfMissing?: boolean; // Don't create file if it doesn't exist (for optional integrations)
 }
