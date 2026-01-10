@@ -80,6 +80,28 @@ describe('getEslintConfig', () => {
   });
 });
 
+describe('getEslintConfig monorepo support', () => {
+  it('should use detect.findNextConfigPaths for monorepo detection', () => {
+    const config = getEslintConfig();
+
+    expect(config).toContain('detect.findNextConfigPaths');
+  });
+
+  it('should include configs.nextOnlyRules for file-scoped Next.js rules', () => {
+    const config = getEslintConfig();
+
+    expect(config).toContain('configs.nextOnlyRules');
+  });
+
+  it('should scope Next.js rules using files: property in monorepo', () => {
+    const config = getEslintConfig();
+
+    // Should have logic to apply nextOnlyRules with files scoping
+    expect(config).toContain('files:');
+    expect(config).toContain('nextPaths');
+  });
+});
+
 describe('SETTINGS_HOOKS', () => {
   it('should define all required hook types', () => {
     expect(SETTINGS_HOOKS).toHaveProperty('SessionStart');

@@ -199,6 +199,73 @@ function hasExistingFormatter(cwd: string, _scripts: ScriptsRecord): boolean {
 }
 
 /**
+ * Next.js config file names to look for.
+ */
+const NEXT_CONFIG_FILES = ['next.config.js', 'next.config.mjs', 'next.config.ts'] as const;
+
+/**
+ * Check if a directory contains a Next.js config file.
+ */
+function hasNextConfig(directory: string): boolean {
+  return NEXT_CONFIG_FILES.some(file => existsSync(path.join(directory, file)));
+}
+
+/**
+ * Scan a workspace directory for Next.js config files.
+ * Returns relative glob patterns for directories containing Next.js configs.
+ */
+function scanDirectoryForNextConfigs(rootDirectory: string, workspacePattern: string): string[] {
+  if (!workspacePattern.endsWith('/*')) return [];
+
+  const baseDirectory = workspacePattern.slice(0, -2); // Remove '/*'
+  const fullBaseDirectory = path.join(rootDirectory, baseDirectory);
+
+  if (!existsSync(fullBaseDirectory)) return [];
+
+  const nextPaths: string[] = [];
+  try {
+    const entries = readdirSync(fullBaseDirectory, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const packageDirectory = path.join(fullBaseDirectory, entry.name);
+      if (hasNextConfig(packageDirectory)) {
+        nextPaths.push(`${baseDirectory}/${entry.name}/**/*.{ts,tsx}`);
+      }
+    }
+  } catch {
+    // Ignore read errors
+  }
+  return nextPaths;
+}
+
+/**
+ * Find Next.js config paths for ESLint rule scoping in monorepos.
+ *
+ * Returns:
+ * - `undefined` if Next.js config exists at root (single app, no scoping needed)
+ * - `string[]` of glob patterns for directories containing Next.js apps
+ * - Empty array if no Next.js configs found anywhere
+ *
+ * Used to scope Next.js-specific ESLint rules to only the packages that use Next.js,
+ * allowing other packages (React, Astro, etc.) to avoid irrelevant Next.js rules.
+ */
+function findNextConfigPaths(rootDirectory: string): string[] | undefined {
+  // Check for root Next.js config - means single app, no scoping needed
+  if (hasNextConfig(rootDirectory)) {
+    return undefined;
+  }
+
+  // Get workspace patterns from package.json + common monorepo directories
+  const rootPackagePath = path.join(rootDirectory, 'package.json');
+  const workspacePatterns = getWorkspacePatternsFromPackage(rootPackagePath);
+  const commonPatterns = ['apps/*', 'packages/*'];
+  const patterns = [...new Set([...workspacePatterns, ...commonPatterns])];
+
+  // Scan each workspace pattern for Next.js configs
+  return patterns.flatMap(pattern => scanDirectoryForNextConfigs(rootDirectory, pattern));
+}
+
+/**
  * All detection utilities bundled together.
  */
 export const detect = {
@@ -207,6 +274,7 @@ export const detect = {
   TANSTACK_QUERY_PACKAGES,
   PLAYWRIGHT_PACKAGES,
   ALTERNATIVE_FORMATTER_FILES,
+  NEXT_CONFIG_FILES,
 
   // Core utilities
   collectAllDeps,
@@ -218,6 +286,9 @@ export const detect = {
   hasTanstackQuery,
   hasVitest,
   hasPlaywright,
+
+  // Monorepo detection
+  findNextConfigPaths,
 
   // Existing tooling detection
   hasExistingLinter,

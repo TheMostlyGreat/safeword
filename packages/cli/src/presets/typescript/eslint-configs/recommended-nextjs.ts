@@ -14,15 +14,13 @@ import nextPlugin from '@next/eslint-plugin-next';
 import { recommendedTypeScriptReact } from './recommended-react.js';
 
 /**
- * Next.js + TypeScript recommended config
+ * Next.js-only rules for monorepo scoping
  *
- * Extends React config with Next.js-specific rules for catching
- * common LLM mistakes: using <img> instead of <Image>, <a> instead of <Link>.
+ * Contains ONLY Next.js-specific ESLint rules without React rules.
+ * Use with `files:` scoping in monorepos where only some packages use Next.js,
+ * while React rules apply to all React packages.
  */
-export const recommendedTypeScriptNext: any[] = [
-  // All React + TypeScript rules
-  ...recommendedTypeScriptReact,
-
+export const nextOnlyRules: any[] = [
   // Next.js plugin with core-web-vitals config (stricter)
   nextPlugin.configs['core-web-vitals'],
 
@@ -45,4 +43,18 @@ export const recommendedTypeScriptNext: any[] = [
       '@next/next/no-unwanted-polyfillio': 'error',
     },
   },
+];
+
+/**
+ * Next.js + TypeScript recommended config
+ *
+ * Extends React config with Next.js-specific rules for catching
+ * common LLM mistakes: using <img> instead of <Image>, <a> instead of <Link>.
+ */
+export const recommendedTypeScriptNext: any[] = [
+  // All React + TypeScript rules
+  ...recommendedTypeScriptReact,
+
+  // Next.js-only rules
+  ...nextOnlyRules,
 ];

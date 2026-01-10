@@ -26,7 +26,7 @@ import { astroConfig } from './eslint-configs/astro.js';
 import { prettierConfig } from './eslint-configs/base.js';
 import { playwrightConfig } from './eslint-configs/playwright.js';
 import { recommended } from './eslint-configs/recommended.js';
-import { recommendedTypeScriptNext } from './eslint-configs/recommended-nextjs.js';
+import { nextOnlyRules, recommendedTypeScriptNext } from './eslint-configs/recommended-nextjs.js';
 import { recommendedTypeScriptReact } from './eslint-configs/recommended-react.js';
 import { recommendedTypeScript } from './eslint-configs/recommended-typescript.js';
 import { tailwindConfig } from './eslint-configs/tailwind.js';
@@ -44,6 +44,8 @@ interface SafewordEslint {
     recommendedTypeScript: any[];
     recommendedTypeScriptReact: any[];
     recommendedTypeScriptNext: any[];
+    /** Next.js-only rules for monorepo file scoping */
+    nextOnlyRules: any[];
     astro: any[];
     tailwind: any[];
     tanstackQuery: any[];
@@ -70,6 +72,7 @@ export const eslintPlugin: SafewordEslint = {
     recommendedTypeScript,
     recommendedTypeScriptReact,
     recommendedTypeScriptNext,
+    nextOnlyRules,
     astro: astroConfig,
     tailwind: tailwindConfig,
     tanstackQuery: tanstackQueryConfig,
@@ -87,7 +90,7 @@ export { astroConfig } from './eslint-configs/astro.js';
 export { prettierConfig } from './eslint-configs/base.js';
 export { playwrightConfig } from './eslint-configs/playwright.js';
 export { recommended } from './eslint-configs/recommended.js';
-export { recommendedTypeScriptNext } from './eslint-configs/recommended-nextjs.js';
+export { nextOnlyRules, recommendedTypeScriptNext } from './eslint-configs/recommended-nextjs.js';
 export { recommendedTypeScriptReact } from './eslint-configs/recommended-react.js';
 export { recommendedTypeScript } from './eslint-configs/recommended-typescript.js';
 export { tailwindConfig } from './eslint-configs/tailwind.js';
