@@ -45,13 +45,20 @@ describe('getEslintConfig', () => {
     expect(config).toContain('baseConfigs[framework]');
   });
 
-  it('should use detect helpers for optional configs', () => {
+  it('should include testing and query configs unconditionally (file-scoped)', () => {
     const config = getEslintConfig();
 
-    expect(config).toContain('detect.hasVitest(deps)');
-    expect(config).toContain('detect.hasPlaywright(deps)');
+    // Vitest, Playwright, TanStack Query are always included (file-scoped, no false positives)
+    expect(config).toContain('configs.vitest');
+    expect(config).toContain('configs.playwright');
+    expect(config).toContain('configs.tanstackQuery');
+  });
+
+  it('should use detection only for Tailwind (plugin needs config to validate classes)', () => {
+    const config = getEslintConfig();
+
+    // Tailwind still needs detection because plugin may require tailwind.config.js
     expect(config).toContain('detect.hasTailwind(deps)');
-    expect(config).toContain('detect.hasTanstackQuery(deps)');
   });
 
   it('should use detect.getIgnores for dynamic ignores', () => {

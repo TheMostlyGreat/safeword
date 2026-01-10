@@ -108,10 +108,13 @@ const baseConfigs = {
 export default [
   { ignores: detect.getIgnores(deps) },
   ...baseConfigs[framework],
-  ...(detect.hasVitest(deps) ? configs.vitest : []),
-  ...(detect.hasPlaywright(deps) ? configs.playwright : []),
+  // Testing configs - always included (file-scoped to *.test.* and *.e2e.*)
+  ...configs.vitest,
+  ...configs.playwright,
+  // TanStack Query - always included (rules only match useQuery/useMutation patterns)
+  ...configs.tanstackQuery,
+  // Tailwind - only if detected (plugin needs tailwind config to validate classes)
   ...(detect.hasTailwind(deps) ? configs.tailwind : []),
-  ...(detect.hasTanstackQuery(deps) ? configs.tanstackQuery : []),
   eslintConfigPrettier,
 ];
 `;
@@ -146,10 +149,13 @@ const baseConfigs = {
 export default [
   { ignores: detect.getIgnores(deps) },
   ...baseConfigs[framework],
-  ...(detect.hasVitest(deps) ? configs.vitest : []),
-  ...(detect.hasPlaywright(deps) ? configs.playwright : []),
+  // Testing configs - always included (file-scoped to *.test.* and *.e2e.*)
+  ...configs.vitest,
+  ...configs.playwright,
+  // TanStack Query - always included (rules only match useQuery/useMutation patterns)
+  ...configs.tanstackQuery,
+  // Tailwind - only if detected (plugin needs tailwind config to validate classes)
   ...(detect.hasTailwind(deps) ? configs.tailwind : []),
-  ...(detect.hasTanstackQuery(deps) ? configs.tanstackQuery : []),
 ];
 `;
 }
@@ -285,10 +291,13 @@ ${SAFEWORD_STRICT_RULES_FULL}
 export default [
   { ignores: detect.getIgnores(deps) },
   ...baseConfigs[framework],
-  ...(detect.hasVitest(deps) ? configs.vitest : []),
-  ...(detect.hasPlaywright(deps) ? configs.playwright : []),
+  // Testing configs - always included (file-scoped to *.test.* and *.e2e.*)
+  ...configs.vitest,
+  ...configs.playwright,
+  // TanStack Query - always included (rules only match useQuery/useMutation patterns)
+  ...configs.tanstackQuery,
+  // Tailwind - only if detected (plugin needs tailwind config to validate classes)
   ...(detect.hasTailwind(deps) ? configs.tailwind : []),
-  ...(detect.hasTanstackQuery(deps) ? configs.tanstackQuery : []),
   safewordStrictRules,
 ${prettier.configEntry}
 ];
