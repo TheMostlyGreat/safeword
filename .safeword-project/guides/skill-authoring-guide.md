@@ -2,7 +2,7 @@
 
 How to write Claude Skills that are discoverable, effective, and production-ready.
 
-**Source:** [Official Claude Skill Best Practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
+**Source:** [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills)
 
 **Related:** [LLM Writing Guide](../../.safeword/guides/llm-writing-guide.md) for general principles
 
@@ -29,6 +29,8 @@ skill-name/
 
 ## Naming
 
+**Uniqueness requirement:** No two skills, commands, subagents, guides, or hooks may share the same name. Duplicates cause ambiguous activation and unpredictable behavior.
+
 Use **gerund form** (verb + -ing). This clearly describes the activity.
 
 | Form       | Examples                                      | Status     |
@@ -39,11 +41,14 @@ Use **gerund form** (verb + -ing). This clearly describes the activity.
 
 **Keyword-first pattern:** For methodology skills (BDD, TDD), put the keyword first for searchability: `bdd-orchestrating`, `tdd-enforcing`. Users searching "bdd" or "tdd" find them faster.
 
-**Rules:**
+**Official Claude Code requirements:**
 
-- Lowercase letters, numbers, hyphens only
+- Lowercase letters, numbers, and hyphens only
 - Max 64 characters
+- Directory name must match `name` field in SKILL.md frontmatter
 - No reserved words: `anthropic`, `claude`
+
+**Precedence:** If two skills share a name, higher scope wins: managed → personal → project → plugin.
 
 ---
 

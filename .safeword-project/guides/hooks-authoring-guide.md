@@ -160,6 +160,18 @@ process.exit(0);
 
 ## Best Practices
 
+### Naming
+
+**Uniqueness requirement:** No two skills, commands, subagents, guides, or hooks may share the same name. Duplicates cause ambiguous activation and unpredictable behavior.
+
+**Hook file naming:**
+
+- Use lowercase letters, numbers, and hyphens only
+- Be descriptive: `validate-edits.ts`, `quality-gate.ts`, `lint-check.ts`
+- Avoid vague names: `hook.ts`, `check.ts`, `run.ts`
+
+### Implementation
+
 1. **Keep hooks fast** — They block execution. Quick validation on PreToolUse, full tests on Stop.
 2. **Exit code 2 to block** — Always provide clear error message via stderr.
 3. **Quote shell variables** — `"$file_path"` not `$file_path` (prevents injection).

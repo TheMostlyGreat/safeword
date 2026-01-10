@@ -135,22 +135,16 @@ Perform a comprehensive code review of the selected code.
 
 ## Best Practices
 
-### 1. Keep Commands Focused
+### 1. Use Unique, Descriptive Names
 
-One clear purpose per command. If you need multiple steps, consider a skill instead.
+**Uniqueness requirement:** No two skills, commands, subagents, guides, or hooks may share the same name. Duplicates cause ambiguous activation and unpredictable behavior.
 
-```markdown
-# BAD - Too many concerns
+**Official Claude Code requirements:**
 
-Review code, generate tests, update documentation, and deploy.
-
-# GOOD - Single purpose
-
-Review the provided code for security vulnerabilities.
-Focus on: injection, auth bypass, data exposure.
-```
-
-### 2. Use Descriptive Names
+- Lowercase letters, numbers, and hyphens only
+- Filename becomes command name (e.g., `review-security.md` → `/review-security`)
+- Max 64 characters for consistency with skills
+- No reserved words: `anthropic`, `claude`
 
 Filename should clearly indicate what the command does.
 
@@ -164,6 +158,21 @@ run.md
 review-security.md
 generate-component.md
 commit-with-tests.md
+```
+
+### 2. Keep Commands Focused
+
+One clear purpose per command. If you need multiple steps, consider a skill instead.
+
+```markdown
+# BAD - Too many concerns
+
+Review code, generate tests, update documentation, and deploy.
+
+# GOOD - Single purpose
+
+Review the provided code for security vulnerabilities.
+Focus on: injection, auth bypass, data exposure.
 ```
 
 ### 3. Include the Description (Claude Code)
