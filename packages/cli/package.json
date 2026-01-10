@@ -50,7 +50,6 @@
     "@vitest/coverage-v8": "^4.0.16",
     "eslint-plugin-safeword": "^0.7.0",
     "knip": "^5.79.0",
-    "prettier-plugin-sh": "^0.18.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
     "vitest": "^4.0.15"
