@@ -31,8 +31,8 @@ const TAILWIND_PACKAGES = ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/pos
 const PLAYWRIGHT_PACKAGES = ['@playwright/test', 'playwright'] as const;
 
 /**
- * Known formatter config files.
- * If any exist, user likely has their own formatter setup.
+ * All known formatter config files (for documentation/reference).
+ * Includes Biome, dprint, Rome, and Prettier.
  */
 const FORMATTER_CONFIG_FILES = [
   // Biome
@@ -65,6 +65,21 @@ const FORMATTER_CONFIG_FILES = [
   'prettier.config.ts',
   'prettier.config.cts',
   'prettier.config.mts',
+] as const;
+
+/**
+ * Non-Prettier formatter config files.
+ * Used to detect if project uses an alternative formatter (Biome, dprint, Rome).
+ * Prettier is safeword's default, so we don't skip config creation when Prettier exists.
+ */
+const NON_PRETTIER_FORMATTER_FILES = [
+  'biome.json',
+  'biome.jsonc',
+  'dprint.json',
+  '.dprint.json',
+  'dprint.jsonc',
+  '.dprint.jsonc',
+  'rome.json',
 ] as const;
 
 type DepsRecord = Record<string, string | undefined>;
@@ -209,15 +224,15 @@ function hasExistingLinter(scripts: ScriptsRecord): boolean {
 }
 
 /**
- * Check if project has an existing formatter setup.
- * True if package.json has a "format" script OR any formatter config file exists.
+ * Check if project has an existing NON-PRETTIER formatter setup.
+ * Only returns true for Biome, dprint, or Rome - not Prettier.
+ *
+ * We don't check for "format" script because safeword adds that script itself.
+ * We don't check for Prettier configs because Prettier is safeword's default formatter.
  */
-function hasExistingFormatter(cwd: string, scripts: ScriptsRecord): boolean {
-  // Check for format script
-  if ('format' in scripts) return true;
-
-  // Check for formatter config files
-  return FORMATTER_CONFIG_FILES.some(file => existsSync(path.join(cwd, file)));
+function hasExistingFormatter(cwd: string, _scripts: ScriptsRecord): boolean {
+  // Only check for non-Prettier formatter config files
+  return NON_PRETTIER_FORMATTER_FILES.some(file => existsSync(path.join(cwd, file)));
 }
 
 /**
@@ -229,6 +244,7 @@ export const detect = {
   TANSTACK_QUERY_PACKAGES,
   PLAYWRIGHT_PACKAGES,
   FORMATTER_CONFIG_FILES,
+  NON_PRETTIER_FORMATTER_FILES,
 
   // Core utilities
   collectAllDeps,
