@@ -14,6 +14,7 @@ const ignores = [
   '**/dist/',
   '**/build/',
   '**/coverage/',
+  '**/.astro/', // Astro generated types - not our code
   '.safeword/', // Generated hooks - linted separately by installed safeword config
   '.safeword-project/', // Project-specific hooks - not part of distributed package
   'examples/',

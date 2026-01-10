@@ -200,11 +200,11 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
         timeout: SETUP_TIMEOUT,
       });
 
-      // Check ESLint config uses safeword plugin with dynamic vitest detection
+      // Check ESLint config uses safeword plugin
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('safeword/eslint"');
-      // Config is now dynamic - Vitest config is conditionally included
-      expect(eslintConfig).toContain('detect.hasVitest(deps) ? configs.vitest');
+      // Vitest/Playwright configs are always included (file-scoped, no false positives)
+      expect(eslintConfig).toContain('...configs.vitest');
       expect(eslintConfig).toContain('baseConfigs[framework]');
 
       // Check package.json has safeword (bundles Vitest plugin)
