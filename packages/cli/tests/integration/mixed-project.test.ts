@@ -25,6 +25,7 @@ import {
   removeTemporaryDirectory,
   runCli,
   runLintHook,
+  SAFEWORD_VERSION,
   writeTestFile,
 } from "../helpers";
 
@@ -37,11 +38,13 @@ describe("E2E: Mixed Project (TypeScript + Python)", () => {
     projectDirectory = createTemporaryDirectory();
 
     // Create a mixed package.json with both TypeScript and Python indicators
+    // Pre-install local safeword to ensure tests use the current build
     const packageJson = {
       name: "mixed-project",
       version: "1.0.0",
       devDependencies: {
         typescript: "^5.0.0",
+        safeword: SAFEWORD_VERSION,
       },
     };
     writeTestFile(

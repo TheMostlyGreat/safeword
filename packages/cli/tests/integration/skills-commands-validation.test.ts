@@ -14,10 +14,10 @@ import nodePath from "node:path";
 import { describe, expect, it } from "vitest";
 
 const __dirname = import.meta.dirname;
-const TEMPLATES_DIR = nodePath.nodePath.join(__dirname, "../../templates");
-const SKILLS_DIR = nodePath.nodePath.join(TEMPLATES_DIR, "skills");
-const COMMANDS_DIR = nodePath.nodePath.join(TEMPLATES_DIR, "commands");
-const CURSOR_RULES_DIR = nodePath.nodePath.join(TEMPLATES_DIR, "cursor/rules");
+const TEMPLATES_DIR = nodePath.join(__dirname, "../../templates");
+const SKILLS_DIR = nodePath.join(TEMPLATES_DIR, "skills");
+const COMMANDS_DIR = nodePath.join(TEMPLATES_DIR, "commands");
+const CURSOR_RULES_DIR = nodePath.join(TEMPLATES_DIR, "cursor/rules");
 
 // Claude Code validation constants
 const SKILL_NAME_MAX_LENGTH = 64;
@@ -106,7 +106,7 @@ function parseFrontmatter(
 
   const body = lines
     .slice(endIndex + 1)
-    .nodePath.join("\n")
+    .join("\n")
     .trim();
   return { frontmatter, body };
 }
@@ -384,7 +384,7 @@ describe("Skills Validation (Claude Code Format)", () => {
           );
           expect(
             brokenLinks,
-            `Broken markdown links: ${brokenLinks.nodePath.join(", ")}`,
+            `Broken markdown links: ${brokenLinks.join(", ")}`,
           ).toHaveLength(0);
         }
       });
@@ -550,7 +550,7 @@ describe("Commands Validation (Claude Code Format)", () => {
           const invalidPatterns = findInvalidArgumentPatterns(content);
           expect(
             invalidPatterns,
-            `Invalid argument patterns: ${invalidPatterns.nodePath.join(", ")}. Use $1, $2, or $ARGUMENTS`,
+            `Invalid argument patterns: ${invalidPatterns.join(", ")}. Use $1, $2, or $ARGUMENTS`,
           ).toHaveLength(0);
         }
       });
@@ -564,7 +564,7 @@ describe("Commands Validation (Claude Code Format)", () => {
           );
           expect(
             brokenLinks,
-            `Broken markdown links: ${brokenLinks.nodePath.join(", ")}`,
+            `Broken markdown links: ${brokenLinks.join(", ")}`,
           ).toHaveLength(0);
         }
       });
@@ -627,7 +627,7 @@ describe("Skills and Commands Cross-Validation", () => {
     );
     expect(
       duplicates,
-      `Duplicate skill names: ${duplicates.nodePath.join(", ")}`,
+      `Duplicate skill names: ${duplicates.join(", ")}`,
     ).toHaveLength(0);
   });
 
@@ -639,7 +639,7 @@ describe("Skills and Commands Cross-Validation", () => {
     );
     expect(
       duplicates,
-      `Duplicate command names: ${duplicates.nodePath.join(", ")}`,
+      `Duplicate command names: ${duplicates.join(", ")}`,
     ).toHaveLength(0);
   });
 });
@@ -735,7 +735,7 @@ describe("Skills-Cursor Parity", () => {
 
     expect(
       missingRules,
-      `Skills missing cursor rules: ${missingRules.nodePath.join(", ")}`,
+      `Skills missing cursor rules: ${missingRules.join(", ")}`,
     ).toHaveLength(0);
   });
 
@@ -757,7 +757,7 @@ describe("Skills-Cursor Parity", () => {
 
     expect(
       orphanRules,
-      `Cursor rules without skills: ${orphanRules.nodePath.join(", ")}`,
+      `Cursor rules without skills: ${orphanRules.join(", ")}`,
     ).toHaveLength(0);
   });
 
@@ -769,7 +769,7 @@ describe("Skills-Cursor Parity", () => {
     );
     expect(
       duplicates,
-      `Duplicate cursor rule names: ${duplicates.nodePath.join(", ")}`,
+      `Duplicate cursor rule names: ${duplicates.join(", ")}`,
     ).toHaveLength(0);
   });
 
@@ -790,19 +790,19 @@ describe("Validation Logic Tests", () => {
     it("rejects content without frontmatter", () => {
       const content = "# Just a heading\n\nNo frontmatter here.";
       const parsed = parseFrontmatter(content);
-      expect(parsed).toBeNull();
+      expect(parsed).toBeUndefined();
     });
 
     it("rejects frontmatter not starting on line 1", () => {
       const content = "\n---\nname: test\n---\nBody";
       const parsed = parseFrontmatter(content);
-      expect(parsed).toBeNull();
+      expect(parsed).toBeUndefined();
     });
 
     it("rejects unclosed frontmatter", () => {
       const content = "---\nname: test\nNo closing delimiter";
       const parsed = parseFrontmatter(content);
-      expect(parsed).toBeNull();
+      expect(parsed).toBeUndefined();
     });
 
     it("detects uppercase in skill name", () => {

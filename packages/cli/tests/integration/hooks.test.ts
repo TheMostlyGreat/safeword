@@ -308,27 +308,32 @@ describe("E2E: Phase-Aware Quality Review", () => {
     return lines.join("\n");
   }
 
-  // Helper to create issues directory with tickets
+  // Helper to create tickets directory with tickets
   function setupIssuesDirectory(
     targetDirectory: string,
     tickets: Parameters<typeof createTicketContent>[0][],
   ): void {
-    const issuesDirectory = `${targetDirectory}/.safeword-project/issues`;
-    execSync(`mkdir -p "${issuesDirectory}"`, { cwd: targetDirectory });
+    const ticketsDirectory = `${targetDirectory}/.safeword-project/tickets`;
+    execSync(`mkdir -p "${ticketsDirectory}"`, { cwd: targetDirectory });
     // Clear existing tickets
-    execSync(`rm -f "${issuesDirectory}"/*.md`, { cwd: targetDirectory });
+    execSync(`rm -rf "${ticketsDirectory}"/*`, { cwd: targetDirectory });
     for (const ticket of tickets) {
+      // Create folder structure: .safeword-project/tickets/{id}/ticket.md
+      const folderPath = `.safeword-project/tickets/${ticket.id}`;
+      execSync(`mkdir -p "${targetDirectory}/${folderPath}"`, {
+        cwd: targetDirectory,
+      });
       writeTestFile(
         targetDirectory,
-        `.safeword-project/issues/${ticket.id}.md`,
+        `${folderPath}/ticket.md`,
         createTicketContent(ticket),
       );
     }
   }
 
-  // Helper to clear issues directory
+  // Helper to clear tickets directory
   function clearIssuesDirectory(targetDirectory: string): void {
-    execSync(`rm -rf "${targetDirectory}/.safeword-project/issues"`, {
+    execSync(`rm -rf "${targetDirectory}/.safeword-project/tickets"/*`, {
       cwd: targetDirectory,
     });
   }

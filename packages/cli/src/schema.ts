@@ -209,7 +209,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   ownedFiles: {
     // Project root config files (for audit/quality tools)
     ".jscpd.json": { template: ".jscpd.json" },
-    "knip.json": { template: "knip.json" },
+    // Note: knip.json is in typescriptManagedFiles (with context-aware ignoreDependencies)
 
     // Core files
     ".safeword/AGENTS.md": { template: "AGENTS.md" },

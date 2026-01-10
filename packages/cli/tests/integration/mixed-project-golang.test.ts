@@ -26,6 +26,7 @@ import {
   removeTemporaryDirectory,
   runCli,
   runLintHook,
+  SAFEWORD_VERSION,
   writeTestFile,
 } from "../helpers";
 
@@ -38,11 +39,13 @@ describe("E2E: Mixed Project (TypeScript + Go)", () => {
     projectDirectory = createTemporaryDirectory();
 
     // Create a mixed package.json with TypeScript
+    // Pre-install local safeword to ensure tests use the current build
     const packageJson = {
       name: "mixed-ts-go-project",
       version: "1.0.0",
       devDependencies: {
         typescript: "^5.0.0",
+        safeword: SAFEWORD_VERSION,
       },
     };
     writeTestFile(
