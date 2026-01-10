@@ -102,7 +102,7 @@ describe('Setup - Template Bundling (Story 1)', () => {
     // Create user content
     writeTestFile(
       temporaryDirectory,
-      '.safeword/learnings/my-learning.md',
+      '.safeword-project/learnings/my-learning.md',
       '# My Learning\n\nImportant info.',
     );
 
@@ -112,8 +112,8 @@ describe('Setup - Template Bundling (Story 1)', () => {
     expect(result.stderr).toContain('Already configured');
 
     // User content should be untouched
-    expect(fileExists(temporaryDirectory, '.safeword/learnings/my-learning.md')).toBe(true);
-    const content = readTestFile(temporaryDirectory, '.safeword/learnings/my-learning.md');
+    expect(fileExists(temporaryDirectory, '.safeword-project/learnings/my-learning.md')).toBe(true);
+    const content = readTestFile(temporaryDirectory, '.safeword-project/learnings/my-learning.md');
     expect(content).toContain('My Learning');
   });
 

@@ -173,7 +173,7 @@ describe('Test Suite 9: Upgrade', () => {
       // Create user learning file
       writeTestFile(
         temporaryDirectory,
-        '.safeword/learnings/my-custom-learning.md',
+        '.safeword-project/learnings/my-custom-learning.md',
         '# My Learning\n\nImportant discovery about the codebase.',
       );
 
@@ -183,11 +183,14 @@ describe('Test Suite 9: Upgrade', () => {
       await runCli(['upgrade'], { cwd: temporaryDirectory });
 
       // User learning should be preserved
-      expect(fileExists(temporaryDirectory, '.safeword/learnings/my-custom-learning.md')).toBe(
-        true,
-      );
+      expect(
+        fileExists(temporaryDirectory, '.safeword-project/learnings/my-custom-learning.md'),
+      ).toBe(true);
 
-      const content = readTestFile(temporaryDirectory, '.safeword/learnings/my-custom-learning.md');
+      const content = readTestFile(
+        temporaryDirectory,
+        '.safeword-project/learnings/my-custom-learning.md',
+      );
       expect(content).toContain('My Learning');
       expect(content).toContain('Important discovery');
     });

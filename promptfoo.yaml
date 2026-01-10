@@ -2641,8 +2641,8 @@ tests:
         ## Before Extracting
 
         ALWAYS check for existing learnings first:
-        ls .safeword/learnings/*react*.md
-        ls .safeword/learnings/*hooks*.md
+        ls .safeword-project/learnings/*react*.md
+        ls .safeword-project/learnings/*hooks*.md
 
         If found, update instead of creating new.
     assert:
@@ -2655,45 +2655,42 @@ tests:
 
   - description: 'learn-003: Place learnings correctly'
     vars:
-      input: 'I learned that React useState is async - where should I document this?'
+      input: 'I learned something about our custom auth flow - where should I document this?'
       context: |
         file_path: .safeword/guides/learning-extraction.md (excerpt)
         ---
         ## Location Decision Tree
 
-        Global (.safeword/learnings/):
-        - Applies to ALL projects using this tech
-        - Universal patterns
-
-        Project-specific:
-        - Only applies to this codebase
-        - Custom architecture patterns
+        Choose destination:
+        - Architectural? → SAFEWORD.md "Architecture Decisions"
+        - Short gotcha? → SAFEWORD.md "Common Gotchas"
+        - Needs examples/explanation? → .safeword-project/learnings/[concept].md
     assert:
       - type: llm-rubric
         value: |
-          The response should select global learnings (applies to ALL React projects).
-          EXCELLENT: Selects .safeword/learnings/ (global), explains why, cites decision tree
+          The response should recommend project learnings or SAFEWORD.md based on complexity.
+          EXCELLENT: Selects .safeword-project/learnings/ or SAFEWORD.md, explains decision tree
           ACCEPTABLE: Selects correct location
-          POOR: Selects project-specific location for universal React pattern
+          POOR: Doesn't use decision tree or gives wrong location
 
   - description: 'learn-004: Respect instruction precedence'
     vars:
-      input: 'The global learning says use Redux, but the project learning says use Zustand. Which should I follow?'
+      input: 'The project learning says use Zustand, but SAFEWORD.md Common Gotchas says avoid global state. Which should I follow?'
       context: |
         file_path: .safeword/guides/learning-extraction.md (excerpt)
         ---
-        ## Instruction Precedence
+        ## Precedence
 
-        1. Project-specific (highest)
-        2. Global learnings
-        3. Framework defaults (lowest)
+        1. Explicit user instruction (highest priority)
+        2. Project .safeword-project/learnings/ (project-specific)
+        3. Project ./SAFEWORD.md → Common Gotchas (inline reference)
     assert:
       - type: llm-rubric
         value: |
-          The response should follow project learning (higher precedence).
+          The response should follow project learning (higher precedence than SAFEWORD.md).
           EXCELLENT: Follows project learning, explains precedence order
           ACCEPTABLE: Follows project learning
-          POOR: Follows global learning or asks which to use
+          POOR: Follows SAFEWORD.md or asks which to use
 
   - description: 'learn-005: Use templates'
     vars:
@@ -2719,7 +2716,7 @@ tests:
 
   - description: 'learn-006: Cross-reference in SAFEWORD'
     vars:
-      input: 'I just created a learning at .safeword/learnings/electron-contexts.md about Electron renderer context'
+      input: 'I just created a learning at .safeword-project/learnings/electron-contexts.md about Electron renderer context'
       context: |
         file_path: .safeword/guides/learning-extraction.md (excerpt)
         ---

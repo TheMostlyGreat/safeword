@@ -119,7 +119,7 @@ Key directories created in your project:
 
 **Purpose**: Extracted knowledge that compounds across sessions
 
-**Location**: `.safeword/learnings/[concept].md`
+**Location**: `.safeword-project/learnings/[concept].md`
 
 **What goes here**:
 
@@ -235,13 +235,13 @@ SAFEWORD.md then imports guides via the Quick Reference table. Claude Code auto-
 ### Check for Existing Learnings
 
 ```bash
-ls .safeword/learnings/
+ls .safeword-project/learnings/
 ```
 
 ### Extract New Learning
 
 1. Follow recognition triggers in `learning-extraction.md`
-2. Create `.safeword/learnings/[concept].md`
+2. Create `.safeword-project/learnings/[concept].md`
 3. Use template: Problem → Gotcha → Examples → Testing Trap
 
 ---
@@ -259,7 +259,7 @@ Commit `.safeword/` and `.claude/` in your project repo for team consistency.
 1. `AGENTS.md` links to `.safeword/SAFEWORD.md` (also patches `CLAUDE.md` if present)
 2. `SAFEWORD.md` imports guides via Quick Reference table
 3. Guides cross-reference each other and templates
-4. Learnings stored in `.safeword/learnings/`
+4. Learnings stored in `.safeword-project/learnings/`
 
 **Result**: Modular, maintainable documentation with clear separation of concerns
 

@@ -346,7 +346,7 @@ When markdown lint reports MD040 (missing language), choose:
 
 ## Learnings
 
-**Location:** `.safeword/learnings/`
+**Location:** `.safeword-project/learnings/`
 
 **Check learnings FIRST when:**
 
@@ -354,7 +354,7 @@ When markdown lint reports MD040 (missing language), choose:
 2. Working with unfamiliar technology in this codebase
 3. Issue involves testing, processes, or integrations
 
-**How:** `ls .safeword/learnings/` then read relevant files.
+**How:** `ls .safeword-project/learnings/` then read relevant files.
 
 **Extract new learning when ANY apply:**
 
@@ -363,7 +363,7 @@ When markdown lint reports MD040 (missing language), choose:
 - Undocumented gotcha discovered
 - Integration struggle between tools
 
-**Before extracting:** Check `.safeword/learnings/` for existing similar learnings—update, don't duplicate.
+**Before extracting:** Check for existing similar learnings—update, don't duplicate.
 
 ---
 

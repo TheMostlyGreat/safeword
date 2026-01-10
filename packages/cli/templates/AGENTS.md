@@ -8,6 +8,4 @@ AI code quality tool - enforces best practices through hooks, linting, and guide
 
 To customize behavior, add overrides to `CLAUDE.md` or `.cursor/rules/` instead.
 
-Preserved on upgrade: `.safeword/learnings/`, `.safeword-project/tickets/`
-
 See [SAFEWORD.md](./SAFEWORD.md) for full agent instructions.

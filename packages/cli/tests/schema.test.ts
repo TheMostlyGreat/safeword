@@ -102,8 +102,13 @@ describe('Schema - Single Source of Truth', () => {
   describe('preservedDirs', () => {
     it('should preserve user content directories', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+      // Legacy locations preserved for manual migration
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/learnings');
-      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/logs');
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/planning');
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword/tickets');
+      // Current locations
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword-project/learnings');
+      expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword-project/learnings/archive');
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword-project/tickets');
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword-project/tickets/completed');
       expect(SAFEWORD_SCHEMA.preservedDirs).toContain('.safeword-project/tmp');

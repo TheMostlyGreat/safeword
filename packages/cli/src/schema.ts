@@ -114,8 +114,13 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
   // Created on setup but NOT deleted on reset (preserves user data)
   preservedDirs: [
+    // Legacy locations (preserved for manual migration)
     '.safeword/learnings',
-    '.safeword/logs',
+    '.safeword/planning',
+    '.safeword/tickets',
+    // Current locations
+    '.safeword-project/learnings',
+    '.safeword-project/learnings/archive',
     '.safeword-project/tickets',
     '.safeword-project/tickets/completed',
     '.safeword-project/tmp',
@@ -159,6 +164,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     // Writing-plans skill removed - redundant with BDD decomposition + Claude Code native plan mode (v0.16.0)
     '.claude/skills/safeword-writing-plans/SKILL.md',
     '.cursor/rules/safeword-writing-plans.mdc',
+    // Quality-reviewer typo - correct name is quality-reviewing
+    '.cursor/rules/safeword-quality-reviewer.mdc',
   ],
 
   // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
@@ -189,12 +196,14 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
   // Directories to delete on upgrade (no longer managed by safeword)
   deprecatedDirs: [
     '.safeword/lib', // Shell libraries no longer needed with Bun (v0.13.0)
-    '.safeword/planning', // Moved to .safeword-project/tickets/ (v0.16.0)
-    '.safeword/tickets', // Moved to .safeword-project/tickets/ (v0.16.0)
+    '.safeword/logs', // No longer needed
     '.claude/skills/safeword-enforcing-tdd', // Renamed to safeword-tdd-enforcing (v0.16.0)
     '.claude/skills/safeword-tdd-enforcing', // Removed - BDD includes TDD (v0.16.0)
     '.claude/skills/safeword-brainstorming', // Removed - BDD discovery phase covers this (v0.16.0)
     '.claude/skills/safeword-writing-plans', // Removed - redundant with BDD + native plan mode (v0.16.0)
+    '.claude/skills/safeword-quality-reviewer', // Typo - correct name is safeword-quality-reviewing
+    // NOTE: .safeword/learnings, .safeword/planning, .safeword/tickets are NOT deprecated
+    // They're preserved for manual migration to .safeword-project/
   ],
 
   // Files owned by safeword (overwritten on upgrade if content changed)

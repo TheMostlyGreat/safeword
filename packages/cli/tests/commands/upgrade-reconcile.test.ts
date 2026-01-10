@@ -165,14 +165,16 @@ describe('Upgrade Command - Reconcile Integration', () => {
       createConfiguredProject('0.5.0');
 
       // Don't create some directories that should exist
-      // .safeword/learnings should be created
+      // .safeword-project/learnings should be created
 
       const ctx = createProjectContext(temporaryDirectory);
       await reconcile(SAFEWORD_SCHEMA, 'upgrade', ctx);
 
       // Directories should be created
-      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/learnings'))).toBe(true);
-      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword/tickets'))).toBe(true);
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword-project/learnings'))).toBe(
+        true,
+      );
+      expect(existsSync(nodePath.join(temporaryDirectory, '.safeword-project/tickets'))).toBe(true);
       expect(existsSync(nodePath.join(temporaryDirectory, '.claude/commands'))).toBe(true);
     });
 
@@ -185,9 +187,11 @@ describe('Upgrade Command - Reconcile Integration', () => {
       createConfiguredProject('0.5.0');
 
       // Create user learning file
-      mkdirSync(nodePath.join(temporaryDirectory, '.safeword/learnings'), { recursive: true });
+      mkdirSync(nodePath.join(temporaryDirectory, '.safeword-project/learnings'), {
+        recursive: true,
+      });
       writeFileSync(
-        nodePath.join(temporaryDirectory, '.safeword/learnings/my-custom-learning.md'),
+        nodePath.join(temporaryDirectory, '.safeword-project/learnings/my-custom-learning.md'),
         '# My Learning\n\nImportant.',
       );
 
@@ -196,10 +200,12 @@ describe('Upgrade Command - Reconcile Integration', () => {
 
       // User file should be preserved
       expect(
-        existsSync(nodePath.join(temporaryDirectory, '.safeword/learnings/my-custom-learning.md')),
+        existsSync(
+          nodePath.join(temporaryDirectory, '.safeword-project/learnings/my-custom-learning.md'),
+        ),
       ).toBe(true);
       const content = readFileSync(
-        nodePath.join(temporaryDirectory, '.safeword/learnings/my-custom-learning.md'),
+        nodePath.join(temporaryDirectory, '.safeword-project/learnings/my-custom-learning.md'),
         'utf8',
       );
       expect(content).toContain('My Learning');
