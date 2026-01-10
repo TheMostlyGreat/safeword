@@ -164,8 +164,8 @@ function detectFramework(
   deps: DepsRecord,
 ): 'next' | 'react' | 'astro' | 'typescript' | 'javascript' {
   if ('next' in deps) return 'next';
+  if ('astro' in deps) return 'astro'; // Check before React (Astro+React has both)
   if ('react' in deps) return 'react';
-  if ('astro' in deps) return 'astro';
   if ('typescript' in deps || 'typescript-eslint' in deps) return 'typescript';
   return 'javascript';
 }
