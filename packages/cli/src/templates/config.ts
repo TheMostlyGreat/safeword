@@ -95,7 +95,7 @@ const deps = detect.collectAllDeps(__dirname);
 const framework = detect.detectFramework(deps);
 
 // Monorepo support: detect Next.js apps to scope Next.js-only rules
-// - Returns null for single-app Next.js projects (use full Next config)
+// - Returns undefined for single-app Next.js projects (use full Next config)
 // - Returns string[] of glob patterns for monorepos (scope Next.js rules)
 const nextPaths = detect.findNextConfigPaths(__dirname);
 
@@ -146,7 +146,7 @@ const deps = detect.collectAllDeps(__dirname);
 const framework = detect.detectFramework(deps);
 
 // Monorepo support: detect Next.js apps to scope Next.js-only rules
-// - Returns null for single-app Next.js projects (use full Next config)
+// - Returns undefined for single-app Next.js projects (use full Next config)
 // - Returns string[] of glob patterns for monorepos (scope Next.js rules)
 const nextPaths = detect.findNextConfigPaths(__dirname);
 
