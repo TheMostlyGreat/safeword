@@ -34,6 +34,37 @@ function getPrettierConfig(hasExistingFormatter: boolean): {
   };
 }
 
+/**
+ * Generate monorepo detection snippet for ESLint configs.
+ * Avoids duplication across config generators.
+ *
+ * @param directoryVariable - Variable name for the root directory (e.g., '__dirname' or 'projectDir')
+ */
+function getMonorepoSnippet(directoryVariable: string): string {
+  return `// Monorepo support: detect Next.js apps to scope Next.js-only rules
+// - Returns undefined for single-app Next.js projects (use full Next config)
+// - Returns string[] of glob patterns for monorepos (scope Next.js rules)
+const nextPaths = detect.findNextConfigPaths(${directoryVariable});
+
+// Map framework to base config
+// Note: Astro config only lints .astro files, so we combine it with TypeScript config
+// to also lint .ts files in Astro projects
+// Note: In monorepos, Next.js uses React config + scoped Next.js rules
+const baseConfigs = {
+  next: nextPaths ? configs.recommendedTypeScriptReact : configs.recommendedTypeScriptNext,
+  react: configs.recommendedTypeScriptReact,
+  astro: [...configs.recommendedTypeScript, ...configs.astro],
+  typescript: configs.recommendedTypeScript,
+  javascript: configs.recommended,
+};
+
+// Build scoped Next.js rules for monorepos
+// Each Next.js app gets its own scoped config with files: pattern
+const scopedNextConfigs = nextPaths?.flatMap((filePath) =>
+  configs.nextOnlyRules.map((config) => ({ ...config, files: [filePath] }))
+) ?? [];`;
+}
+
 const SAFEWORD_STRICT_RULES_FULL = `// Safeword strict rules - applied after project rules (win on conflict)
 const safewordStrictRules = {
   rules: {
@@ -94,28 +125,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const deps = detect.collectAllDeps(__dirname);
 const framework = detect.detectFramework(deps);
 
-// Monorepo support: detect Next.js apps to scope Next.js-only rules
-// - Returns undefined for single-app Next.js projects (use full Next config)
-// - Returns string[] of glob patterns for monorepos (scope Next.js rules)
-const nextPaths = detect.findNextConfigPaths(__dirname);
-
-// Map framework to base config
-// Note: Astro config only lints .astro files, so we combine it with TypeScript config
-// to also lint .ts files in Astro projects
-// Note: In monorepos, Next.js uses React config + scoped Next.js rules
-const baseConfigs = {
-  next: nextPaths ? configs.recommendedTypeScriptReact : configs.recommendedTypeScriptNext,
-  react: configs.recommendedTypeScriptReact,
-  astro: [...configs.recommendedTypeScript, ...configs.astro],
-  typescript: configs.recommendedTypeScript,
-  javascript: configs.recommended,
-};
-
-// Build scoped Next.js rules for monorepos
-// Each Next.js app gets its own scoped config with files: pattern
-const scopedNextConfigs = nextPaths?.flatMap((filePath) =>
-  configs.nextOnlyRules.map((config) => ({ ...config, files: [filePath] }))
-) ?? [];
+${getMonorepoSnippet('__dirname')}
 
 export default [
   { ignores: detect.getIgnores(deps) },
@@ -145,28 +155,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const deps = detect.collectAllDeps(__dirname);
 const framework = detect.detectFramework(deps);
 
-// Monorepo support: detect Next.js apps to scope Next.js-only rules
-// - Returns undefined for single-app Next.js projects (use full Next config)
-// - Returns string[] of glob patterns for monorepos (scope Next.js rules)
-const nextPaths = detect.findNextConfigPaths(__dirname);
-
-// Map framework to base config
-// Note: Astro config only lints .astro files, so we combine it with TypeScript config
-// to also lint .ts files in Astro projects
-// Note: In monorepos, Next.js uses React config + scoped Next.js rules
-const baseConfigs = {
-  next: nextPaths ? configs.recommendedTypeScriptReact : configs.recommendedTypeScriptNext,
-  react: configs.recommendedTypeScriptReact,
-  astro: [...configs.recommendedTypeScript, ...configs.astro],
-  typescript: configs.recommendedTypeScript,
-  javascript: configs.recommended,
-};
-
-// Build scoped Next.js rules for monorepos
-// Each Next.js app gets its own scoped config with files: pattern
-const scopedNextConfigs = nextPaths?.flatMap((filePath) =>
-  configs.nextOnlyRules.map((config) => ({ ...config, files: [filePath] }))
-) ?? [];
+${getMonorepoSnippet('__dirname')}
 
 export default [
   { ignores: detect.getIgnores(deps) },
@@ -299,21 +288,7 @@ const projectDir = dirname(__dirname);
 const deps = detect.collectAllDeps(projectDir);
 const framework = detect.detectFramework(deps);
 
-// Monorepo support: detect Next.js apps to scope Next.js-only rules
-const nextPaths = detect.findNextConfigPaths(projectDir);
-
-const baseConfigs = {
-  next: nextPaths ? configs.recommendedTypeScriptReact : configs.recommendedTypeScriptNext,
-  react: configs.recommendedTypeScriptReact,
-  astro: [...configs.recommendedTypeScript, ...configs.astro],
-  typescript: configs.recommendedTypeScript,
-  javascript: configs.recommended,
-};
-
-// Build scoped Next.js rules for monorepos
-const scopedNextConfigs = nextPaths?.flatMap((filePath) =>
-  configs.nextOnlyRules.map((config) => ({ ...config, files: [filePath] }))
-) ?? [];
+${getMonorepoSnippet('projectDir')}
 
 ${SAFEWORD_STRICT_RULES_FULL}
 
