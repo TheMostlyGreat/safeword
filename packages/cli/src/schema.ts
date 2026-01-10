@@ -301,12 +301,9 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       template: 'doc-templates/work-log-template.md',
     },
 
-    // Prompts (2 files)
+    // Prompts (1 file)
     '.safeword/prompts/architecture.md': {
       template: 'prompts/architecture.md',
-    },
-    '.safeword/prompts/quality-review.md': {
-      template: 'prompts/quality-review.md',
     },
 
     // Scripts (3 files)

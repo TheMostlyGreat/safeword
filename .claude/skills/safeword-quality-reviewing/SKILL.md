@@ -1,142 +1,65 @@
 ---
 name: quality-reviewing
-description: Deep code review with web research to verify against latest ecosystem. Use when user says 'double check against latest', 'verify versions', 'check security', 'review against docs', or needs deep analysis beyond automatic quality hook.
+description: Deep code review with web research. USE WHEN user says 'double check against latest', 'verify versions', 'check security'. Complements automatic quality hook with ecosystem verification.
 allowed-tools: '*'
 ---
 
 # Quality Reviewing
 
-Deep quality review with web research to verify code against the latest ecosystem state.
+Deep review with web research to verify against current ecosystem. Complements automatic hook.
 
-**Primary differentiator**: Web research to verify against current versions, documentation, and best practices.
+**When to use this skill (not automatic hook):**
 
-**Triggers**:
+- **Explicit web research**: "double check against latest docs", "verify versions", "check security"
+- **Deep dive needed**: Performance, architecture, trade-offs beyond automatic hook
+- **Pre-change review**: Review before making changes (hook only triggers after)
 
-- **Explicit web research request**: "double check against latest docs", "verify we're using latest version", "check for security issues"
-- **Deep dive needed**: User wants analysis beyond automatic hook (performance, architecture alternatives, trade-offs)
-- **No SAFEWORD.md/CLAUDE.md**: Projects without context files (automatic hook won't run, manual review needed)
-- **Pre-change review**: User wants review before making changes (automatic hook only triggers after changes)
+**Relationship:** Automatic hook does fast check with existing knowledge. This skill does deep dive with web research (2-3 min).
 
-**Relationship to automatic quality hook**:
+## 1. Detect Phase
 
-- **Automatic hook**: Fast quality check using existing knowledge + project context (guaranteed, runs on every change)
-- **This skill**: Deep review with web research when verification against current ecosystem is needed (on-demand, 2-3 min)
+If in BDD workflow, read current ticket from `.safeword-project/tickets/` and apply phase-appropriate research:
 
-## Review Protocol
+| Phase           | Research Focus                                  |
+| --------------- | ----------------------------------------------- |
+| intake          | Similar features in ecosystem, scope patterns   |
+| define-behavior | Testing patterns, BDD best practices            |
+| decomposition   | Architecture patterns, test layer strategy      |
+| implement       | **Library versions, deprecated APIs, security** |
+| done            | CI/CD patterns, release checklists              |
 
-### 1. Identify What Changed
+## 2. Verify Versions (Primary Value)
 
-Understand context:
-
-- What files were just modified?
-- What problem is being solved?
-- What was the implementation approach?
-
-### 2. Read Project Standards
-
-```bash
-ls CLAUDE.md SAFEWORD.md ARCHITECTURE.md .claude/
-```
-
-Read relevant standards:
-
-- `CLAUDE.md` or `SAFEWORD.md` - Project-specific guidelines
-- `ARCHITECTURE.md` - Architectural principles
-
-### 3. Evaluate Correctness
-
-**Will it work?**
-
-- Does the logic make sense?
-- Are there obvious bugs?
-
-**Edge cases:**
-
-- Empty inputs, null/undefined, boundary conditions (0, -1, max)?
-- Concurrent access, network failures?
-
-**Error handling:**
-
-- Are errors caught appropriately?
-- Helpful error messages?
-- Cleanup handled (resources, connections)?
-
-**Logic errors:**
-
-- Off-by-one errors, race conditions, wrong assumptions?
-
-### 4. Evaluate Anti-Bloat
-
-- Are all dependencies necessary? Could we use stdlib/built-ins?
-- Are abstractions solving real problems or imaginary ones?
-- YAGNI: Is this feature actually needed now?
-
-### 5. Evaluate Elegance
-
-- Is the code easy to understand?
-- Are names clear and descriptive?
-- Is the intent obvious?
-- Will this be easy to change later?
-
-### 6. Check Standards Compliance
-
-**Project standards** (from CLAUDE.md/SAFEWORD.md/ARCHITECTURE.md):
-
-- Does it follow established patterns?
-- Does it violate any documented principles?
-
-**Library best practices:**
-
-- Are we using libraries correctly?
-- Are we following official documentation?
-
-### 7. Verify Latest Versions - PRIMARY VALUE
-
-**CRITICAL**: This is your main differentiator from automatic hook. ALWAYS check versions.
+**CRITICAL**: This is your main differentiator from automatic hook.
 
 Search for: "[library name] latest stable version 2025"
 Search for: "[library name] security vulnerabilities"
 
 **Flag if outdated:**
 
-- Major versions behind → WARN (e.g., React 17 when 19 is stable)
-- Minor versions behind → NOTE (e.g., React 19.0.0 when 19.1.0 is stable)
-- Security vulnerabilities → CRITICAL (must upgrade)
-- Using latest → Confirm
+- Major versions behind -> WARN (e.g., React 17 when 19 is stable)
+- Minor versions behind -> NOTE
+- Security vulnerabilities -> CRITICAL (must upgrade)
+- Using latest -> Confirm
 
-**Common libraries**: React, TypeScript, Vite, Next.js, Node.js, Vitest, Playwright, Jest, esbuild
+## 3. Verify Documentation (Primary Value)
 
-### 8. Verify Latest Documentation - PRIMARY VALUE
-
-**CRITICAL**: This is your main differentiator from automatic hook. ALWAYS verify against current docs.
-
-Fetch and check official documentation sites for the libraries in use.
+Fetch official documentation for libraries in use.
 
 **Look for:**
 
-- Are we using deprecated APIs?
-- Are there newer, better patterns?
-- Did the library's recommendations change recently?
+- Deprecated APIs being used?
+- Newer, better patterns available?
+- Recent recommendation changes?
 
 ## Output Format
-
-**Simple question** ("is it correct?"):
-
-```text
-**Correctness:** ✓ Logic is sound, edge cases handled, no obvious errors.
-```
-
-**Full review** ("double check and critique"):
 
 ```markdown
 ## Quality Review
 
-**Correctness:** [✓/⚠️/❌] [Brief assessment]
-**Anti-Bloat:** [✓/⚠️/❌] [Brief assessment]
-**Elegance:** [✓/⚠️/❌] [Brief assessment]
-**Standards:** [✓/⚠️/❌] [Brief assessment]
-**Versions:** [✓/⚠️/❌] [Latest version check]
-**Documentation:** [✓/⚠️/❌] [Current docs check]
+**Versions:** [checkmark/warning/x] [Latest version check]
+**Documentation:** [checkmark/warning/x] [Current docs check]
+**Security:** [checkmark/warning/x] [Vulnerability check]
 
 **Verdict:** [APPROVE / REQUEST CHANGES / NEEDS DISCUSSION]
 
@@ -144,14 +67,9 @@ Fetch and check official documentation sites for the libraries in use.
 **Suggested improvements:** [List or "None"]
 ```
 
-## Critical Reminders
+## Reminders
 
-1. **Primary value: Web research** - Verify against current ecosystem (versions, docs, security)
-2. **Complement automatic hook** - Hook does fast check with existing knowledge, you do deep dive with web research
-3. **Explicit triggers matter** - "double check against latest docs", "verify versions", "check security" = invoke web research
-4. **Always check latest docs** - Verify patterns are current, not outdated
-5. **Always verify versions** - Flag outdated dependencies
-6. **Be thorough but concise** - Cover all areas but keep explanations brief
-7. **Provide actionable feedback** - Specific line numbers, concrete suggestions
-8. **Clear verdict** - Always end with APPROVE/REQUEST CHANGES/NEEDS DISCUSSION
-9. **Separate critical vs nice-to-have** - User needs to know what's blocking vs optional
+1. **Primary value: Web research** - Verify versions, docs, security
+2. **Complement automatic hook** - Hook checks correctness/elegance/bloat, you verify ecosystem
+3. **Phase matters** - Adapt research focus to current BDD phase
+4. **Be concise** - Hook already prompts for general quality, focus on what it can't do
