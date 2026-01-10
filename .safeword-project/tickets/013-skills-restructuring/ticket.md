@@ -5,7 +5,7 @@ type: epic
 status: ready
 priority: medium
 created: 2026-01-08
-children: ['013a', '013b', '013c', '013d']
+children: ['013a', '013b', '013c', '013d', '013e']
 ---
 
 # Restructure Skills for LLM Optimization
@@ -18,6 +18,7 @@ This epic covers restructuring skills for better LLM performance.
 - **013b**: [Quality review skill - phase-aware with web research](./013b-quality-review-restructure.md)
 - **013c**: [Testing guide consolidation](./013c-testing-guide-consolidation.md)
 - **013d**: [BDD flow enforcement improvements](../013d-bdd-flow-enforcement/ticket.md)
+- **013e**: [Schema file validation command](../013e-schema-file-validation/ticket.md)
 
 ## Shared Research
 
