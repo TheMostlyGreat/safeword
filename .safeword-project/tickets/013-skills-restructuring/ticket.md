@@ -2,7 +2,7 @@
 id: '013'
 title: Restructure skills for LLM optimization
 type: epic
-status: ready
+status: done
 priority: medium
 created: 2026-01-08
 children: ['013a', '013b', '013c', '013d', '013e']
