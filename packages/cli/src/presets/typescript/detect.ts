@@ -82,6 +82,16 @@ function getWorkspacePatternsFromPackage(rootPackagePath: string): string[] {
 }
 
 /**
+ * Get all monorepo workspace patterns (from package.json + common directories).
+ */
+function getMonorepoPatterns(rootDirectory: string): string[] {
+  const rootPackagePath = path.join(rootDirectory, 'package.json');
+  const workspacePatterns = getWorkspacePatternsFromPackage(rootPackagePath);
+  const commonPatterns = ['apps/*', 'packages/*'];
+  return [...new Set([...workspacePatterns, ...commonPatterns])];
+}
+
+/**
  * Scan a workspace directory for package.json files.
  */
 function scanWorkspaceDirectory(rootDirectory: string, pattern: string): DepsRecord {
@@ -115,13 +125,8 @@ function collectAllDeps(rootDirectory: string): DepsRecord {
   const rootPackagePath = path.join(rootDirectory, 'package.json');
   const allDeps = readPackageDeps(rootPackagePath);
 
-  // Get patterns from workspaces config + common monorepo directories
-  const workspacePatterns = getWorkspacePatternsFromPackage(rootPackagePath);
-  const commonPatterns = ['apps/*', 'packages/*'];
-  const patterns = [...new Set([...workspacePatterns, ...commonPatterns])];
-
   // Scan each workspace pattern
-  for (const pattern of patterns) {
+  for (const pattern of getMonorepoPatterns(rootDirectory)) {
     Object.assign(allDeps, scanWorkspaceDirectory(rootDirectory, pattern));
   }
 
@@ -255,14 +260,10 @@ function findNextConfigPaths(rootDirectory: string): string[] | undefined {
     return undefined;
   }
 
-  // Get workspace patterns from package.json + common monorepo directories
-  const rootPackagePath = path.join(rootDirectory, 'package.json');
-  const workspacePatterns = getWorkspacePatternsFromPackage(rootPackagePath);
-  const commonPatterns = ['apps/*', 'packages/*'];
-  const patterns = [...new Set([...workspacePatterns, ...commonPatterns])];
-
   // Scan each workspace pattern for Next.js configs
-  return patterns.flatMap(pattern => scanDirectoryForNextConfigs(rootDirectory, pattern));
+  return getMonorepoPatterns(rootDirectory).flatMap(pattern =>
+    scanDirectoryForNextConfigs(rootDirectory, pattern),
+  );
 }
 
 /**
