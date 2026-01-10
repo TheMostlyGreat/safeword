@@ -1,38 +1,38 @@
 ---
 id: 013e
 type: task
-phase: implement
-status: pending
+phase: done
+status: done
 parent: '013'
 created: 2025-01-09T11:45:00Z
-last_modified: 2025-01-09T11:45:00Z
+last_modified: 2026-01-10T19:43:00Z
 ---
 
 # Schema File Validation Command
 
-**Goal:** Add a CLI command that verifies all template files are registered in the schema.
+**Goal:** Add a test that verifies schema ↔ template file integrity.
 
 **Why:** Prevents orphaned files that exist in templates but never get installed, caught manually today during cleanup review.
 
 ## Requirements
 
-1. **Internal dev tooling** (not customer-facing): Test or script that runs in CI for safeword repo only
-2. **Validates**:
-   - Every file in `packages/cli/templates/` has a corresponding entry in `schema.ts` (ownedFiles, managedFiles, or as a template reference)
-   - Reports untracked files as errors
-3. **CI integration**: Should be runnable in CI to catch missing registrations before merge
+1. **Internal dev tooling** (not customer-facing): Test file that runs with `npm test`
+2. **Two-way validation**:
+   - Template files → Schema: Every file in `templates/` has a `template:` reference
+   - Schema → Template files: Every `template:` reference points to existing file
+3. **CI integration**: Runs automatically with test suite
 
-## Implementation Notes
+## Discovery Findings
 
-- Scan `packages/cli/templates/` recursively
-- Compare against `SAFEWORD_SCHEMA.ownedFiles` template references
-- Exclude directories (only validate files)
-- Exit code 1 if untracked files found
+- **Output:** Simple - just list failures, no auto-fix
+- **Nested dirs:** Yes - recurse into `skills/*/`, `hooks/lib/`, etc.
+- **Schema entry types:**
+  - `{ template: 'path' }` → validate these (should have file)
+  - `{ content: () => ... }` → skip (generated content)
+  - `{ generator: () => ... }` → skip (dynamic generation)
+- **Language packs:** Out of scope - all use generators, no template files
+- **Implementation:** Test file (`tests/schema-validation.test.ts`)
 
 ## Work Log
 
----
-
-{Keep work log in reverse-chronological order. Newest entries at top.}
-
----
+- 2026-01-10 11:43 - Discovery complete, proceeding to scenarios

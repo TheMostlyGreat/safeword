@@ -125,27 +125,28 @@ describe('Schema - Single Source of Truth', () => {
   });
 
   describe('ownedFiles', () => {
-    it('should have entry for every template file', async () => {
+    it('should have entry for every template file (template → schema)', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
       const templateFiles = collectTemplateFiles(templatesDirectory);
 
-      const schemaFiles = Object.keys(SAFEWORD_SCHEMA.ownedFiles);
+      // Collect all template: property values from schema
+      const schemaTemplatePaths = new Set(
+        Object.values(SAFEWORD_SCHEMA.ownedFiles)
+          .map(definition => definition.template)
+          .filter(isDefined),
+      );
 
-      // Check every template file has a schema entry
+      // Check every template file has a schema entry with template: pointing to it
       for (const templateFile of templateFiles) {
-        const hasEntry = schemaFiles.some(
-          schemaPath =>
-            schemaPath.endsWith(templateFile) ||
-            templateFile.includes(schemaPath.split('/').pop() || ''),
-        );
-
-        if (!hasEntry) {
-          expect.fail(`Template file '${templateFile}' has no schema entry in ownedFiles`);
+        if (!schemaTemplatePaths.has(templateFile)) {
+          expect.fail(
+            `Template file '${templateFile}' has no schema entry with template: '${templateFile}'`,
+          );
         }
       }
     });
 
-    it('should not have orphan schema entries (files that do not exist)', async () => {
+    it('should not have orphan schema entries (schema → template)', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
 
       // Files that are generated (not from templates)
