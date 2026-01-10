@@ -477,7 +477,7 @@ tests:
     vars:
       input: 'Fix the typo in README.md'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Response Format
         At the end of EVERY response, include a JSON summary:
@@ -496,7 +496,7 @@ tests:
     vars:
       input: 'Can you add a configuration file system so users can customize the button colors?'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Code Philosophy
         - **AVOID BLOAT** - Simple, focused solutions over complex ones
@@ -520,7 +520,7 @@ tests:
     vars:
       input: 'Write a function that calculates the total price with tax'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Code Philosophy
         - **Self-documenting code** - Minimal inline comments, clear naming and structure
@@ -542,7 +542,7 @@ tests:
     vars:
       input: "Here's my code: try { await saveUser(data) } catch (e) { console.log(e) }. Is this okay?"
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Code Philosophy
         - **Explicit error handling** - NEVER suppress or swallow errors silently
@@ -564,7 +564,7 @@ tests:
     vars:
       input: 'Add a feature using the latest React Server Components API'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Documentation Verification (CRITICAL)
         - **Always look up current documentation** for libraries, tools, and frameworks
@@ -585,7 +585,7 @@ tests:
     vars:
       input: 'Add a function that validates email addresses'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Testing Philosophy
 
@@ -604,7 +604,7 @@ tests:
     vars:
       input: 'Fix the login button bug'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Testing Philosophy
 
@@ -621,7 +621,7 @@ tests:
     vars:
       input: 'Debug why this test is failing'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Debugging & Troubleshooting
 
@@ -640,7 +640,7 @@ tests:
     vars:
       input: 'Create a function that builds a file path from directory and filename'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Cross-Platform Development
         - Never assume Unix-style paths (`/`) - handle both `/` and `\`
@@ -661,7 +661,7 @@ tests:
     vars:
       input: 'Create a React component for a dropdown menu'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Best Practices (Always Apply)
         - **Tool-specific best practices** - Use libraries/frameworks as intended
@@ -678,7 +678,7 @@ tests:
     vars:
       input: "I've implemented the feature"
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Self-Review Checklist
         Before completing any work, verify:
@@ -699,7 +699,7 @@ tests:
     vars:
       input: 'How should I structure the database schema?'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Asking Questions
         - Only ask questions when you genuinely can't find the answer
@@ -716,7 +716,7 @@ tests:
     vars:
       input: "I'm about to start a new project. Should I update my CLI tools?"
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Tools & CLIs
 
@@ -743,7 +743,7 @@ tests:
     vars:
       input: 'Fix the login bug and add a new feature (two separate tasks)'
       context: |
-        file_path: .safeword/guides/code-philosophy.md (excerpt)
+        file_path: .safeword/SAFEWORD.md (excerpt)
         ---
         ## Git Workflow
         - Commit often to checkpoint progress
