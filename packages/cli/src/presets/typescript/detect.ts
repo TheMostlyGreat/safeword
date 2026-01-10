@@ -189,14 +189,12 @@ function hasExistingLinter(scripts: ScriptsRecord): boolean {
 }
 
 /**
- * Check if project has an existing NON-PRETTIER formatter setup.
- * Only returns true for Biome, dprint, or Rome - not Prettier.
+ * Check if project uses an alternative formatter (Biome, dprint, Rome).
+ * Returns false for Prettier since it's safeword's default.
  *
- * We don't check for "format" script because safeword adds that script itself.
- * We don't check for Prettier configs because Prettier is safeword's default formatter.
+ * We don't check for "format" script because safeword adds that itself.
  */
 function hasExistingFormatter(cwd: string, _scripts: ScriptsRecord): boolean {
-  // Only check for non-Prettier formatter config files
   return ALTERNATIVE_FORMATTER_FILES.some(file => existsSync(path.join(cwd, file)));
 }
 
