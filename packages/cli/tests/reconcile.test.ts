@@ -36,7 +36,7 @@ const DEFAULT_PROJECT_TYPE = {
   existingFormatter: false,
   existingEslintConfig: undefined,
   legacyEslint: false,
-  existingRuffConfig: false,
+  existingRuffConfig: undefined,
   existingMypyConfig: false,
   existingImportLinterConfig: false,
   existingGolangciConfig: undefined,

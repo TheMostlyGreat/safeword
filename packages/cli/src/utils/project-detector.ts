@@ -81,8 +81,8 @@ export interface ProjectType {
   existingEslintConfig: string | undefined;
   /** True if existing ESLint config is legacy format (.eslintrc.*) requiring FlatCompat */
   legacyEslint: boolean;
-  /** True if project has [tool.ruff] in pyproject.toml or ruff.toml */
-  existingRuffConfig: boolean;
+  /** Path to existing ruff config ('ruff.toml' or 'pyproject.toml'), undefined if none */
+  existingRuffConfig: 'ruff.toml' | 'pyproject.toml' | undefined;
   /** True if project has [tool.mypy] in pyproject.toml or mypy.ini */
   existingMypyConfig: boolean;
   /** True if project has [tool.importlinter] in pyproject.toml or .importlinter */
@@ -226,22 +226,22 @@ function findExistingEslintConfig(cwd: string): string | undefined {
 }
 
 /**
- * Check if project has existing Ruff config.
+ * Find existing Ruff config location.
  * @param cwd - Working directory to scan
- * @returns True if ruff.toml exists OR [tool.ruff] in pyproject.toml
+ * @returns 'ruff.toml' if standalone config exists, 'pyproject.toml' if [tool.ruff] exists, undefined if none
  */
-function hasExistingRuffConfig(cwd: string): boolean {
-  // Check for standalone ruff.toml
-  if (existsSync(nodePath.join(cwd, 'ruff.toml'))) return true;
+function findExistingRuffConfig(cwd: string): 'ruff.toml' | 'pyproject.toml' | undefined {
+  // Check for standalone ruff.toml first (takes precedence)
+  if (existsSync(nodePath.join(cwd, 'ruff.toml'))) return 'ruff.toml';
 
   // Check for [tool.ruff] in pyproject.toml
   const pyprojectPath = nodePath.join(cwd, PYPROJECT_TOML);
-  if (!existsSync(pyprojectPath)) return false;
+  if (!existsSync(pyprojectPath)) return undefined;
   try {
     const content = readFileSync(pyprojectPath, 'utf8');
-    return content.includes('[tool.ruff]');
+    return content.includes('[tool.ruff]') ? 'pyproject.toml' : undefined;
   } catch {
-    return false;
+    return undefined;
   }
 }
 
@@ -362,7 +362,7 @@ function detectExistingTooling(
     existingFormatter: cwd ? hasExistingFormatter(cwd, scripts) : 'format' in scripts,
     existingEslintConfig: eslintConfig,
     legacyEslint: eslintConfig?.startsWith('.eslintrc') ?? false,
-    existingRuffConfig: cwd ? hasExistingRuffConfig(cwd) : false,
+    existingRuffConfig: cwd ? findExistingRuffConfig(cwd) : undefined,
     existingMypyConfig: cwd ? hasExistingMypyConfig(cwd) : false,
     existingImportLinterConfig: cwd ? hasExistingImportLinterConfig(cwd) : false,
     existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : undefined,

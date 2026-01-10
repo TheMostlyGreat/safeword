@@ -100,11 +100,12 @@ describe('Test Suite: Setup - Cursor IDE Support', () => {
 
       await runCli(['setup', '--yes'], { cwd: temporaryDirectory });
 
+      // Paths are relative to .cursor/hooks.json, so ../ goes up to project root
       const hooksConfig = JSON.parse(readTestFile(temporaryDirectory, '.cursor/hooks.json'));
       expect(hooksConfig.hooks.afterFileEdit[0].command).toBe(
-        'bun ./.safeword/hooks/cursor/after-file-edit.ts',
+        'bun ../.safeword/hooks/cursor/after-file-edit.ts',
       );
-      expect(hooksConfig.hooks.stop[0].command).toBe('bun ./.safeword/hooks/cursor/stop.ts');
+      expect(hooksConfig.hooks.stop[0].command).toBe('bun ../.safeword/hooks/cursor/stop.ts');
     });
   });
 

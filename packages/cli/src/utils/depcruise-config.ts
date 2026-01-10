@@ -70,7 +70,7 @@ function generateMonorepoRules(workspaces: string[]): string {
 }
 
 /**
- * Generate .safeword/depcruise-config.js content (forbidden rules + options)
+ * Generate .safeword/depcruise-config.cjs content (forbidden rules + options)
  */
 export function generateDepCruiseConfigFile(arch: DepCruiseArchitecture): string {
   const monorepoRules = arch.workspaces ? generateMonorepoRules(arch.workspaces) : '';
@@ -160,7 +160,7 @@ export function generateDepCruiseMainConfig(): string {
   return `/**
  * Dependency Cruiser Configuration
  *
- * Imports auto-generated rules from .safeword/depcruise-config.js
+ * Imports auto-generated rules from .safeword/depcruise-config.cjs
  * ADD YOUR CUSTOM RULES BELOW the spread operator.
  */
 

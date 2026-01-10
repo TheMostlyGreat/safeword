@@ -46,21 +46,20 @@ max-complexity = 10`;
  *
  * Used by hooks via --config .safeword/ruff.toml flag.
  *
- * @param existingRuffConfig - True if project has existing ruff config
+ * @param existingRuffConfig - Path to existing config ('ruff.toml' or 'pyproject.toml'), or undefined
  */
-function generateRuffBaseConfig(existingRuffConfig = false): string {
+function generateRuffBaseConfig(
+  existingRuffConfig: 'ruff.toml' | 'pyproject.toml' | undefined,
+): string {
   if (existingRuffConfig) {
     // Extend project's existing Ruff config with safeword's stricter rules
-    // Note: Ruff's extend works with both ruff.toml and pyproject.toml
-    // Using pyproject.toml as the extend target covers both cases since:
-    // - If [tool.ruff] exists in pyproject.toml, it will be extended
-    // - If ruff.toml exists, ruff reads it first, then pyproject.toml is a no-op fallback
+    // Path is relative to .safeword/ directory, so ../ goes up to project root
     return `# Safeword Ruff config - extends project config with stricter rules
 # Used by hooks for LLM enforcement. Human pre-commits use project config.
 # Re-run \`safeword upgrade\` to regenerate after project config changes.
 
-# Inherit from project's pyproject.toml [tool.ruff] section
-extend = "../pyproject.toml"
+# Inherit from project's ${existingRuffConfig}
+extend = "../${existingRuffConfig}"
 
 # Safeword overrides (stricter than project defaults)
 line-length = 100
