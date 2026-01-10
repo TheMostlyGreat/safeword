@@ -54,7 +54,7 @@ Key directories created in your project:
 
 - `.safeword/guides/` - Core methodology and best practices
 - `.safeword/templates/` - Fillable document structures
-- `.safeword/planning/` - Planning documentation (specs, test-definitions, design, issues)
+- `.safeword-project/tickets/` - Tickets for complex/multi-step work (context anchors)
 - `.safeword/hooks/` - Automation scripts for Claude Code
 - `.claude/commands/` - Slash commands
 - `.claude/skills/` - Specialized agent capabilities
@@ -132,29 +132,26 @@ Key directories created in your project:
 
 ---
 
-## Planning
+## Tickets
 
-**Purpose**: Feature planning and design documentation
+**Purpose**: Context anchors for complex/multi-step work to prevent LLM loops
+
+**Location**: `.safeword-project/tickets/{id}-{slug}/`
 
 **Structure**:
 
 ```plaintext
-planning/
-├── specs/              Feature and task specs
-├── test-definitions/   Test definition documents
-├── design/             Design docs and research
-├── issues/             Issue capture and tracking
-├── plans/              LLM-ready execution plans
-└── archive/            Completed work
+.safeword-project/tickets/
+├── 001-feature-name/
+│   ├── ticket.md           # Ticket definition (frontmatter + work log)
+│   ├── test-definitions.md # BDD scenarios (Given/When/Then)
+│   ├── spec.md             # Feature spec for epics (optional)
+│   └── design.md           # Design doc for complex features (optional)
+├── completed/              # Archive for done tickets
+└── tmp/                    # Scratch space (research, logs, etc.)
 ```
 
-**What goes here**:
-
-- User stories for features
-- Test definitions for TDD workflow
-- Design documents for complex features
-- Research and analysis documents
-- Issue tracking and capture
+**When to create**: Multiple attempts likely, multi-step with dependencies, investigation needed, or risk of losing context
 
 ---
 
@@ -172,22 +169,20 @@ planning/
 
 **Skills** (in `.claude/skills/`): Specialized agent capabilities
 
-- `safeword-bdd-orchestrating/` - BDD orchestrator for feature-level work (scenarios first)
-- `safeword-brainstorming/` - Collaborative design through Socratic questioning
+- `safeword-bdd-orchestrating/` - BDD orchestrator for feature-level work (includes TDD in Phase 6)
 - `safeword-debugging/` - Four-phase debugging (investigate before fixing)
-- `safeword-tdd-enforcing/` - RED → GREEN → REFACTOR discipline
-- `safeword-quality-reviewer/` - Deep code review with web research
+- `safeword-quality-reviewing/` - Deep code review with web research
 - `safeword-refactoring/` - Small-step refactoring with test verification
-- `safeword-writing-plans/` - Create detailed execution plans for agents
 
 **Commands** (in `.claude/commands/`): Slash commands
 
-- `/lint` - Run linters and formatters
 - `/audit` - Run architecture and dead code analysis
-- `/quality-review` - Deep code review with web research
-- `/cleanup-zombies` - Kill zombie processes on ports
 - `/bdd` - Force BDD flow for current task
-- `/tdd` - Force TDD flow (skip BDD phases)
+- `/cleanup-zombies` - Kill zombie processes on ports
+- `/done` - Run completion checklist for current feature
+- `/lint` - Run linters and formatters
+- `/quality-review` - Deep code review with web research
+- `/refactor` - Systematic refactoring with small-step discipline
 
 **MCP Servers** (in `.mcp.json` / `.cursor/mcp.json`): Auto-configured integrations
 
@@ -389,9 +384,9 @@ The eval suite tests that LLMs correctly follow guide instructions:
 Edit `promptfoo.yaml` and add a test case:
 
 ```yaml
-- description: 'test-id: Description'
+- description: "test-id: Description"
   vars:
-    input: 'User prompt to test'
+    input: "User prompt to test"
     context: |
       Relevant excerpt from guide
   assert:

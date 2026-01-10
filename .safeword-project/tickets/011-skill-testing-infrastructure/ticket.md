@@ -60,19 +60,19 @@ export async function runClaudeHeadless(
   },
 ): Promise<{ result: string; cost: number }> {
   const cmd = [
-    'claude',
-    '-p',
+    "claude",
+    "-p",
     JSON.stringify(prompt),
-    '--output-format',
-    'json',
-    '--max-turns',
+    "--output-format",
+    "json",
+    "--max-turns",
     String(options?.maxTurns ?? 1),
   ];
   if (options?.systemPromptFile) {
-    cmd.push('--system-prompt-file', options.systemPromptFile);
+    cmd.push("--system-prompt-file", options.systemPromptFile);
   }
   if (options?.allowedTools) {
-    cmd.push('--allowedTools', options.allowedTools.join(','));
+    cmd.push("--allowedTools", options.allowedTools.join(","));
   }
   // Execute and parse JSON response
 }
@@ -81,16 +81,18 @@ export async function runClaudeHeadless(
 ### Classification Test Example
 
 ```typescript
-describe('BDD Skill Entry Checkpoint', () => {
-  it('classifies single user story as feature', async () => {
+describe("BDD Skill Entry Checkpoint", () => {
+  it("classifies single user story as feature", async () => {
     const result = await runClaudeHeadless(
       'Classify: "Add password reset". Options: patch, task, feature, epic.',
-      { systemPromptFile: '.claude/skills/safeword-bdd-orchestrating/SKILL.md' },
+      {
+        systemPromptFile: ".claude/skills/safeword-bdd-orchestrating/SKILL.md",
+      },
     );
     expect(result.result).toMatch(/feature/i);
   });
 
-  it('suggests split for two parallel stories', async () => {
+  it("suggests split for two parallel stories", async () => {
     const result = await runClaudeHeadless(
       'Classify: "Add password reset and email verification". Should this be one feature or split?',
     );
@@ -103,17 +105,17 @@ describe('BDD Skill Entry Checkpoint', () => {
 
 ```typescript
 // packages/cli/tests/skills/thresholds.test.ts
-import { shouldSuggestSplit } from '../../src/skills/decomposition';
+import { shouldSuggestSplit } from "../../src/skills/decomposition";
 
-describe('Decomposition Thresholds', () => {
-  it('triggers Phase 3 split at >15 scenarios', () => {
-    expect(shouldSuggestSplit('phase3', 15)).toBe(false);
-    expect(shouldSuggestSplit('phase3', 16)).toBe(true);
+describe("Decomposition Thresholds", () => {
+  it("triggers Phase 3 split at >15 scenarios", () => {
+    expect(shouldSuggestSplit("phase3", 15)).toBe(false);
+    expect(shouldSuggestSplit("phase3", 16)).toBe(true);
   });
 
-  it('triggers Phase 5 split at >20 tasks', () => {
-    expect(shouldSuggestSplit('phase5-tasks', 20)).toBe(false);
-    expect(shouldSuggestSplit('phase5-tasks', 21)).toBe(true);
+  it("triggers Phase 5 split at >20 tasks", () => {
+    expect(shouldSuggestSplit("phase5-tasks", 20)).toBe(false);
+    expect(shouldSuggestSplit("phase5-tasks", 21)).toBe(true);
   });
 });
 ```
@@ -122,16 +124,16 @@ describe('Decomposition Thresholds', () => {
 
 ```typescript
 // packages/cli/tests/integration/skill-artifacts.test.ts
-describe('Split Artifact Creation', () => {
-  it('promotes existing ticket to epic on split', async () => {
+describe("Split Artifact Creation", () => {
+  it("promotes existing ticket to epic on split", async () => {
     const projectDir = createTemporaryDirectory();
-    await createTicket(projectDir, { id: '015', type: 'feature' });
+    await createTicket(projectDir, { id: "015", type: "feature" });
 
-    await simulateSplitAcceptance(projectDir, '015', ['016', '017']);
+    await simulateSplitAcceptance(projectDir, "015", ["016", "017"]);
 
-    const ticket = readTicket(projectDir, '015');
-    expect(ticket.type).toBe('epic');
-    expect(ticket.children).toEqual(['016', '017']);
+    const ticket = readTicket(projectDir, "015");
+    expect(ticket.type).toBe("epic");
+    expect(ticket.children).toEqual(["016", "017"]);
   });
 });
 ```

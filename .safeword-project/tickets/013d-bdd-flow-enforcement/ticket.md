@@ -3,7 +3,7 @@ id: 013d
 type: task
 phase: backlog
 status: pending
-parent: '013'
+parent: "013"
 created: 2026-01-08T05:00:00Z
 last_modified: 2026-01-08T05:00:00Z
 ---
@@ -154,12 +154,12 @@ On every stop, verify cumulative artifacts exist for claimed phase:
 ```typescript
 // In stop-quality.ts
 const FEATURE_PHASE_ORDER = [
-  'intake',
-  'define-behavior',
-  'scenario-gate',
-  'decomposition',
-  'implement',
-  'done',
+  "intake",
+  "define-behavior",
+  "scenario-gate",
+  "decomposition",
+  "implement",
+  "done",
 ];
 
 function getCumulativeRequirements(
@@ -168,20 +168,20 @@ function getCumulativeRequirements(
   ticketType: string,
 ): Check[] {
   // Patches: no enforcement
-  if (ticketType === 'patch') return [];
+  if (ticketType === "patch") return [];
 
   const checks: Check[] = [];
 
   // All types need ticket.md
-  checks.push({ file: `${ticketDir}/ticket.md`, message: 'Missing ticket.md' });
+  checks.push({ file: `${ticketDir}/ticket.md`, message: "Missing ticket.md" });
 
   // Features: test-definitions.md required at scenario-gate+
-  if (ticketType === 'feature') {
+  if (ticketType === "feature") {
     const phaseIndex = FEATURE_PHASE_ORDER.indexOf(phase);
     if (phaseIndex >= 2) {
       checks.push({
         file: `${ticketDir}/test-definitions.md`,
-        message: 'Missing test-definitions.md',
+        message: "Missing test-definitions.md",
       });
     }
   }
@@ -195,7 +195,11 @@ function getCumulativeRequirements(
 }
 
 // Soft block if cumulative requirements not met
-for (const req of getCumulativeRequirements(currentPhase, ticketDir, ticketType)) {
+for (const req of getCumulativeRequirements(
+  currentPhase,
+  ticketDir,
+  ticketType,
+)) {
   if (!existsSync(req.file)) {
     softBlock(`Phase ${currentPhase} requires: ${req.message}`);
   }
@@ -215,19 +219,23 @@ Evidence requirements vary by type:
 | patch   | `✓ X/X tests pass` only (if ticket exists)    |
 
 ```typescript
-if (currentPhase === 'done') {
+if (currentPhase === "done") {
   const hasTestEvidence = /✓\s*\d+\/\d+\s*tests?\s*pass/i.test(combinedText);
-  const hasScenarioEvidence = /all\s+\d+\s+scenarios?\s+marked/i.test(combinedText);
+  const hasScenarioEvidence = /all\s+\d+\s+scenarios?\s+marked/i.test(
+    combinedText,
+  );
 
-  if (ticketType === 'feature') {
+  if (ticketType === "feature") {
     // Features need both test pass and scenarios complete
     if (!hasTestEvidence || !hasScenarioEvidence) {
-      hardBlockDone('Feature requires: tests pass + scenarios complete. Run /done.');
+      hardBlockDone(
+        "Feature requires: tests pass + scenarios complete. Run /done.",
+      );
     }
   } else {
     // Tasks and patches just need tests pass
     if (!hasTestEvidence) {
-      hardBlockDone('Tests must pass before marking done. Run /done.');
+      hardBlockDone("Tests must pass before marking done. Run /done.");
     }
   }
 }

@@ -4,12 +4,16 @@
  * Shared helpers for creating ProjectContext objects used by reconcile().
  */
 
-import nodePath from 'node:path';
+import nodePath from "node:path";
 
-import type { ProjectContext } from '../schema.js';
-import { readJson } from './fs.js';
-import { isGitRepo } from './git.js';
-import { detectLanguages, detectProjectType, type PackageJson } from './project-detector.js';
+import type { ProjectContext } from "../schema.js";
+import { readJson } from "./fs.js";
+import { isGitRepo } from "./git.js";
+import {
+  detectLanguages,
+  detectProjectType,
+  type PackageJson,
+} from "./project-detector.js";
 
 /**
  * Create a ProjectContext from the current working directory.
@@ -18,7 +22,9 @@ import { detectLanguages, detectProjectType, type PackageJson } from './project-
  * @param cwd - Working directory
  */
 export function createProjectContext(cwd: string): ProjectContext {
-  const packageJson = readJson(nodePath.join(cwd, 'package.json')) as PackageJson | undefined;
+  const packageJson = readJson(nodePath.join(cwd, "package.json")) as
+    | PackageJson
+    | undefined;
 
   return {
     cwd,

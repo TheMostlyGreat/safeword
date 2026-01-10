@@ -141,40 +141,40 @@ For the E2E test gaps and Go/Python linting work:
 
 ```typescript
 // 1a. Plugin exports
-import safeword from 'eslint-plugin-safeword';
+import safeword from "eslint-plugin-safeword";
 expect(safeword.configs.recommended).toBeInstanceOf(Array);
-expect(safeword.rules['no-incomplete-error-handling']).toBeDefined();
+expect(safeword.rules["no-incomplete-error-handling"]).toBeDefined();
 
 // 1b. Custom rule with RuleTester
-import { RuleTester } from 'eslint';
-import noIncompleteErrorHandling from '../src/rules/no-incomplete-error-handling';
+import { RuleTester } from "eslint";
+import noIncompleteErrorHandling from "../src/rules/no-incomplete-error-handling";
 
 const tester = new RuleTester({ languageOptions: { ecmaVersion: 2022 } });
-tester.run('no-incomplete-error-handling', noIncompleteErrorHandling, {
+tester.run("no-incomplete-error-handling", noIncompleteErrorHandling, {
   valid: [
-    'try { foo(); } catch (e) { console.error(e); throw e; }',
-    'try { foo(); } catch (e) { console.error(e); return null; }',
+    "try { foo(); } catch (e) { console.error(e); throw e; }",
+    "try { foo(); } catch (e) { console.error(e); return null; }",
   ],
   invalid: [
     {
-      code: 'try { foo(); } catch (e) { console.error(e); }',
-      errors: [{ messageId: 'incompleteErrorHandling' }],
+      code: "try { foo(); } catch (e) { console.error(e); }",
+      errors: [{ messageId: "incompleteErrorHandling" }],
     },
   ],
 });
 
 // 1c. Detection utilities
-import { detectFramework, hasTailwind } from '../src/detect';
-expect(detectFramework({ next: '14.0.0' })).toBe('next');
-expect(hasTailwind({ tailwindcss: '3.0.0' })).toBe(true);
+import { detectFramework, hasTailwind } from "../src/detect";
+expect(detectFramework({ next: "14.0.0" })).toBe("next");
+expect(hasTailwind({ tailwindcss: "3.0.0" })).toBe(true);
 
 // 1d. Config integration (eslint.config.mjs works)
-import { ESLint } from 'eslint';
+import { ESLint } from "eslint";
 const eslint = new ESLint({
   overrideConfigFile: true,
   overrideConfig: safeword.configs.recommended,
 });
-const results = await eslint.lintText('var unused;');
+const results = await eslint.lintText("var unused;");
 expect(results[0].errorCount).toBeGreaterThan(0);
 ```
 
@@ -221,11 +221,11 @@ it('handles hook errors gracefully', () => {
 **How to test:**
 
 ```typescript
-it('SAFEWORD.md has required sections', () => {
-  const content = readTestFile(dir, '.safeword/SAFEWORD.md');
-  expect(content).toContain('## Guides');
-  expect(content).toContain('## Templates');
-  expect(content).toContain('## Response Format');
+it("SAFEWORD.md has required sections", () => {
+  const content = readTestFile(dir, ".safeword/SAFEWORD.md");
+  expect(content).toContain("## Guides");
+  expect(content).toContain("## Templates");
+  expect(content).toContain("## Response Format");
 });
 ```
 
@@ -245,16 +245,16 @@ it('SAFEWORD.md has required sections', () => {
 **How to test:**
 
 ```typescript
-it('upgrades from v0.11 to v0.12', async () => {
+it("upgrades from v0.11 to v0.12", async () => {
   // Create a v0.11 project structure (old hook format)
-  writeTestFile(dir, '.safeword/version', '0.11.0');
-  writeTestFile(dir, '.safeword/hooks/lint.sh', '#!/bin/bash\neslint .');
+  writeTestFile(dir, ".safeword/version", "0.11.0");
+  writeTestFile(dir, ".safeword/hooks/lint.sh", "#!/bin/bash\neslint .");
 
-  await runCli(['upgrade'], { cwd: dir });
+  await runCli(["upgrade"], { cwd: dir });
 
   // Old hooks removed, new hooks added
-  expect(fileExists(dir, '.safeword/hooks/lint.sh')).toBe(false);
-  expect(fileExists(dir, '.safeword/hooks/post-tool-lint.ts')).toBe(true);
+  expect(fileExists(dir, ".safeword/hooks/lint.sh")).toBe(false);
+  expect(fileExists(dir, ".safeword/hooks/post-tool-lint.ts")).toBe(true);
 });
 ```
 
@@ -273,19 +273,19 @@ it('upgrades from v0.11 to v0.12', async () => {
 **How to test:**
 
 ```typescript
-it('leaves project clean after interrupted setup', async () => {
+it("leaves project clean after interrupted setup", async () => {
   // Make a file read-only to cause failure mid-setup
-  mkdirSync(path.join(dir, '.safeword'));
-  chmodSync(path.join(dir, '.safeword'), 0o444);
+  mkdirSync(path.join(dir, ".safeword"));
+  chmodSync(path.join(dir, ".safeword"), 0o444);
 
-  const result = await runCli(['setup', '--yes'], { cwd: dir });
+  const result = await runCli(["setup"], { cwd: dir });
   expect(result.exitCode).not.toBe(0);
 
   // Remove read-only, retry should work
-  chmodSync(path.join(dir, '.safeword'), 0o755);
-  rmdirSync(path.join(dir, '.safeword'));
+  chmodSync(path.join(dir, ".safeword"), 0o755);
+  rmdirSync(path.join(dir, ".safeword"));
 
-  const retry = await runCli(['setup', '--yes'], { cwd: dir });
+  const retry = await runCli(["setup"], { cwd: dir });
   expect(retry.exitCode).toBe(0);
 });
 ```

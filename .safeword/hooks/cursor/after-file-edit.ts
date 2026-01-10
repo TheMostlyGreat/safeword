@@ -2,9 +2,9 @@
 // Safeword: Cursor adapter for afterFileEdit
 // Auto-lints changed files, sets marker for stop hook
 
-import { existsSync } from 'node:fs';
+import { existsSync } from "node:fs";
 
-import { lintFile } from '../lib/lint.ts';
+import { lintFile } from "../lib/lint.ts";
 
 interface CursorInput {
   workspace_roots?: string[];
@@ -22,7 +22,7 @@ try {
 
 const workspace = input.workspace_roots?.[0];
 const file = input.file_path;
-const convId = input.conversation_id ?? 'default';
+const convId = input.conversation_id ?? "default";
 
 // Exit silently if no file or file doesn't exist
 if (!file || !(await Bun.file(file).exists())) {
@@ -35,13 +35,13 @@ if (workspace) {
 }
 
 // Check for .safeword directory
-if (!existsSync('.safeword')) {
+if (!existsSync(".safeword")) {
   process.exit(0);
 }
 
 // Set marker file for stop hook to know edits were made
 const markerFile = `/tmp/safeword-cursor-edited-${convId}`;
-await Bun.write(markerFile, '');
+await Bun.write(markerFile, "");
 
 // Lint the file
 await lintFile(file, process.cwd());

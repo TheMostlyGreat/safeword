@@ -10,6 +10,10 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./eslint": {
+      "import": "./dist/presets/typescript/index.js",
+      "types": "./dist/presets/typescript/index.d.ts"
     }
   },
   "files": [

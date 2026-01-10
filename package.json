@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "bun run --cwd packages/cli test && bun run --cwd packages/eslint-plugin test",
+    "test": "bun run --cwd packages/cli test",
     "lint": "eslint .",
     "format": "prettier --write .",
     "eval": "dotenv -e .env -- promptfoo eval -c promptfoo.yaml",
@@ -24,18 +24,18 @@
     "deps:validate": "depcruise packages/*/src --config .dependency-cruiser.cjs --output-type err"
   },
   "devDependencies": {
-    "dependency-cruiser": "^17.3.5",
+    "dependency-cruiser": "^17.3.6",
     "dotenv-cli": "^11.0.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-boundaries": "^5.3.1",
-    "eslint-plugin-safeword": "workspace:*",
     "husky": "^9.1.7",
-    "knip": "^5.78.0",
+    "knip": "^5.80.0",
+    "lint-staged": "^15.5.0",
     "markdownlint-cli2": "^0.20.0",
     "prettier": "^3.7.4",
     "prettier-plugin-sh": "^0.18.0",
-    "promptfoo": "^0.120.8",
+    "promptfoo": "^0.120.10",
+    "safeword": "workspace:*",
     "shellcheck": "^4.1.0"
   },
   "lint-staged": {
@@ -57,5 +57,12 @@
     "*.sh": [
       "shellcheck"
     ]
+  },
+  "dependencies": {
+    "eslint-plugin-jsdoc": "^61.7.1",
+    "typescript-eslint": "^8.52.0"
+  },
+  "overrides": {
+    "zod-validation-error": "^4.0.0"
   }
 }

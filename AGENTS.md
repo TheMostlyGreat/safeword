@@ -19,6 +19,8 @@ A CLI tool that installs AI coding agent configurations into projects. **This re
 
 4. **Dogfooding**: This repo runs safeword on itself. Template changes are tested in real usage before release.
 
+5. **Unique Names**: No two skills, commands, subagents, guides, or hooks may share the same name. Duplicates cause ambiguous activation and unpredictable behavior.
+
 ## Agent Behavior Principles
 
 ### Fire-and-Forget by Default, Power User Escape Hatches
@@ -27,7 +29,7 @@ Users shouldn't have to "learn" safeword. It should feel automatic—like workin
 
 - **Default behavior is invisible**: Agent detects work type (patch/task/feature) and applies the right process automatically
 - **No teaching required**: User says "build X" and gets a quality process without asking for it
-- **Power users can override**: Explicit commands exist (`/bdd`, `/tdd-only`, etc.) but 90% of users never need them
+- **Power users can override**: Explicit commands exist (`/bdd`, `/refactor`, etc.) but 90% of users never need them
 
 ### Teammate Voice, Not System Logs
 

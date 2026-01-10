@@ -58,13 +58,21 @@ How to write hooks for Claude Code and Cursor that enforce quality gates and aut
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
-        "hooks": [{ "type": "command", "command": "bun .claude/hooks/validate.ts", "timeout": 60 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun .claude/hooks/validate.ts",
+            "timeout": 60
+          }
+        ]
       }
     ],
     "Stop": [
       {
         "matcher": "*",
-        "hooks": [{ "type": "command", "command": "bun .claude/hooks/quality.ts" }]
+        "hooks": [
+          { "type": "command", "command": "bun .claude/hooks/quality.ts" }
+        ]
       }
     ]
   }
@@ -115,19 +123,19 @@ const input = await Bun.stdin.text();
 if (!input) process.exit(0);
 
 const data = JSON.parse(input);
-const cmd = data.tool_input?.command || '';
-const filePath = data.tool_input?.file_path || '';
+const cmd = data.tool_input?.command || "";
+const filePath = data.tool_input?.file_path || "";
 
 // Block dangerous commands
-const dangerous = ['rm -rf /', 'mkfs', ':(){ :|:& };:'];
-if (dangerous.some(d => cmd.includes(d))) {
+const dangerous = ["rm -rf /", "mkfs", ":(){ :|:& };:"];
+if (dangerous.some((d) => cmd.includes(d))) {
   console.error(`Blocked: ${cmd}`);
   process.exit(2);
 }
 
 // Block protected paths
-const protectedPaths = ['.env', '.git/', 'credentials', '.ssh/'];
-if (protectedPaths.some(p => filePath.includes(p))) {
+const protectedPaths = [".env", ".git/", "credentials", ".ssh/"];
+if (protectedPaths.some((p) => filePath.includes(p))) {
   console.error(`Blocked: protected path ${filePath}`);
   process.exit(2);
 }
@@ -139,17 +147,17 @@ process.exit(0);
 
 ```typescript
 #!/usr/bin/env bun
-import { $ } from 'bun';
+import { $ } from "bun";
 
 const test = await $`bun test`.quiet().nothrow();
 if (test.exitCode !== 0) {
-  console.error('Tests failed. Fix before completing.');
+  console.error("Tests failed. Fix before completing.");
   process.exit(2);
 }
 
 const lint = await $`bun run lint`.quiet().nothrow();
 if (lint.exitCode !== 0) {
-  console.error('Lint errors. Fix before completing.');
+  console.error("Lint errors. Fix before completing.");
   process.exit(2);
 }
 

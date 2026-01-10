@@ -10,9 +10,9 @@
  * This only tests that hooks are reachable from different cwd.
  */
 
-import { spawnSync } from 'node:child_process';
+import { spawnSync } from "node:child_process";
 
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
   createTemporaryDirectory,
@@ -21,9 +21,9 @@ import {
   readTestFile,
   removeTemporaryDirectory,
   runCli,
-} from '../helpers';
+} from "../helpers";
 
-describe('E2E: Claude Code Hook Path Resolution', () => {
+describe("E2E: Claude Code Hook Path Resolution", () => {
   let projectDirectory: string;
   let differentDirectory: string;
 
@@ -31,7 +31,7 @@ describe('E2E: Claude Code Hook Path Resolution', () => {
     projectDirectory = createTemporaryDirectory();
     createTypeScriptPackageJson(projectDirectory);
     initGitRepo(projectDirectory);
-    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+    await runCli(["setup"], { cwd: projectDirectory });
     differentDirectory = createTemporaryDirectory();
   }, 180_000);
 
@@ -40,15 +40,20 @@ describe('E2E: Claude Code Hook Path Resolution', () => {
     if (differentDirectory) removeTemporaryDirectory(differentDirectory);
   });
 
+  // eslint-disable-next-line complexity -- Complexity 12, threshold 10; nested loops match nested hook structure in settings
   it('all hooks execute without "not found" errors from different cwd', () => {
-    const settings = JSON.parse(readTestFile(projectDirectory, '.claude/settings.json'));
+    const settings = JSON.parse(
+      readTestFile(projectDirectory, ".claude/settings.json"),
+    );
     const commands: string[] = [];
 
     // Extract all hook commands
     for (const entries of Object.values(settings.hooks || {})) {
-      for (const entry of entries as { hooks: { type: string; command: string }[] }[]) {
+      for (const entry of entries as {
+        hooks: { type: string; command: string }[];
+      }[]) {
         for (const hook of entry.hooks) {
-          if (hook.type === 'command') commands.push(hook.command);
+          if (hook.type === "command") commands.push(hook.command);
         }
       }
     }
@@ -57,20 +62,27 @@ describe('E2E: Claude Code Hook Path Resolution', () => {
 
     const failures: string[] = [];
     for (const command of commands) {
-      const result = spawnSync('/bin/sh', ['-c', command], {
+      const result = spawnSync("/bin/sh", ["-c", command], {
         cwd: differentDirectory, // Simulates Claude Code running from different directory
         env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
-        encoding: 'utf8',
+        encoding: "utf8",
         timeout: 10_000,
       });
 
-      if (result.status === 127 || /not found|no such file/i.test(result.stderr + result.stdout)) {
-        failures.push(`${command}\n  → ${result.stderr || result.stdout || 'exit 127'}`);
+      if (
+        result.status === 127 ||
+        /not found|no such file/i.test(result.stderr + result.stdout)
+      ) {
+        failures.push(
+          `${command}\n  → ${result.stderr || result.stdout || "exit 127"}`,
+        );
       }
     }
 
     if (failures.length > 0) {
-      expect.fail(`Hooks not reachable from different cwd:\n\n${failures.join('\n\n')}`);
+      expect.fail(
+        `Hooks not reachable from different cwd:\n\n${failures.join("\n\n")}`,
+      );
     }
   });
 });

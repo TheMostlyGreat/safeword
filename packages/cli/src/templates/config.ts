@@ -1,7 +1,7 @@
 /**
  * Configuration templates - ESLint config generation and hook settings
  *
- * ESLint flat config (v9+) using eslint-plugin-safeword for all rules.
+ * ESLint flat config (v9+) using safeword for all rules.
  * Framework detection uses safeword.detect utilities at runtime.
  *
  * See: https://eslint.org/docs/latest/use/configure/configuration-files
@@ -25,11 +25,12 @@ function getPrettierConfig(hasExistingFormatter: boolean): {
   configEntry: string;
 } {
   if (hasExistingFormatter) {
-    return { import: '', configEntry: '' };
+    return { import: "", configEntry: "" };
   }
   return {
-    import: 'import eslintConfigPrettier from "eslint-config-prettier";',
-    configEntry: '  eslintConfigPrettier,',
+    // Prettier config is bundled with safeword - no separate import needed
+    import: "const eslintConfigPrettier = safeword.prettierConfig;",
+    configEntry: "  eslintConfigPrettier,",
   };
 }
 
@@ -63,7 +64,7 @@ const safewordStrictRules = {
 };`;
 
 /**
- * Generates an ESLint config using eslint-plugin-safeword.
+ * Generates an ESLint config using safeword.
  *
  * The generated config uses safeword.detect utilities to detect frameworks
  * and select the appropriate config at lint time.
@@ -83,8 +84,10 @@ export function getEslintConfig(hasExistingFormatter = false): string {
 function getStandardEslintConfig(): string {
   return `import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import safeword from "eslint-plugin-safeword";
-import eslintConfigPrettier from "eslint-config-prettier";
+import safeword from "safeword/eslint";
+
+// Prettier config is bundled with safeword
+const eslintConfigPrettier = safeword.prettierConfig;
 
 const { detect, configs } = safeword;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -122,7 +125,7 @@ export default [
 function getFormatterAgnosticEslintConfig(): string {
   return `import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import safeword from "eslint-plugin-safeword";
+import safeword from "safeword/eslint";
 
 const { detect, configs } = safeword;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -165,10 +168,16 @@ export function getSafewordEslintConfig(
 ): string {
   if (existingConfig) {
     // Check if it's a legacy config (.eslintrc.*)
-    if (existingConfig.startsWith('.eslintrc')) {
-      return getSafewordEslintConfigLegacy(existingConfig, hasExistingFormatter);
+    if (existingConfig.startsWith(".eslintrc")) {
+      return getSafewordEslintConfigLegacy(
+        existingConfig,
+        hasExistingFormatter,
+      );
     }
-    return getSafewordEslintConfigExtending(existingConfig, hasExistingFormatter);
+    return getSafewordEslintConfigExtending(
+      existingConfig,
+      hasExistingFormatter,
+    );
   }
 
   // No existing config - generate standalone (same as project-level)
@@ -253,14 +262,16 @@ ${prettier.configEntry}
 /**
  * Standalone safeword ESLint config (no project config to extend)
  */
-function getSafewordEslintConfigStandalone(hasExistingFormatter: boolean): string {
+function getSafewordEslintConfigStandalone(
+  hasExistingFormatter: boolean,
+): string {
   const prettier = getPrettierConfig(hasExistingFormatter);
 
   return `// Safeword ESLint config - standalone (no project config to extend)
 // Used by hooks for LLM enforcement.
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import safeword from "eslint-plugin-safeword";
+import safeword from "safeword/eslint";
 ${prettier.import}
 
 const { detect, configs } = safeword;
@@ -295,8 +306,10 @@ ${prettier.configEntry}
 // Cursor hooks configuration (.cursor/hooks.json format)
 // See: https://cursor.com/docs/agent/hooks
 export const CURSOR_HOOKS = {
-  afterFileEdit: [{ command: 'bun ./.safeword/hooks/cursor/after-file-edit.ts' }],
-  stop: [{ command: 'bun ./.safeword/hooks/cursor/stop.ts' }],
+  afterFileEdit: [
+    { command: "bun ./.safeword/hooks/cursor/after-file-edit.ts" },
+  ],
+  stop: [{ command: "bun ./.safeword/hooks/cursor/stop.ts" }],
 };
 
 // Claude Code hooks configuration (.claude/settings.json format)
@@ -305,24 +318,27 @@ export const SETTINGS_HOOKS = {
     {
       hooks: [
         {
-          type: 'command',
-          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-verify-agents.ts',
+          type: "command",
+          command:
+            'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-verify-agents.ts',
         },
       ],
     },
     {
       hooks: [
         {
-          type: 'command',
-          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-version.ts',
+          type: "command",
+          command:
+            'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-version.ts',
         },
       ],
     },
     {
       hooks: [
         {
-          type: 'command',
-          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-lint-check.ts',
+          type: "command",
+          command:
+            'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-lint-check.ts',
         },
       ],
     },
@@ -331,16 +347,18 @@ export const SETTINGS_HOOKS = {
     {
       hooks: [
         {
-          type: 'command',
-          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/prompt-timestamp.ts',
+          type: "command",
+          command:
+            'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/prompt-timestamp.ts',
         },
       ],
     },
     {
       hooks: [
         {
-          type: 'command',
-          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/prompt-questions.ts',
+          type: "command",
+          command:
+            'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/prompt-questions.ts',
         },
       ],
     },
@@ -349,7 +367,7 @@ export const SETTINGS_HOOKS = {
     {
       hooks: [
         {
-          type: 'command',
+          type: "command",
           command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/stop-quality.ts',
         },
       ],
@@ -357,20 +375,12 @@ export const SETTINGS_HOOKS = {
   ],
   PostToolUse: [
     {
-      matcher: 'Write|Edit|MultiEdit|NotebookEdit',
+      matcher: "Write|Edit|MultiEdit|NotebookEdit",
       hooks: [
         {
-          type: 'command',
-          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/post-tool-lint.ts',
-        },
-      ],
-    },
-    {
-      matcher: 'Write|Edit|MultiEdit|NotebookEdit',
-      hooks: [
-        {
-          type: 'command',
-          command: 'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/post-tool-guide-check.ts',
+          type: "command",
+          command:
+            'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/post-tool-lint.ts',
         },
       ],
     },

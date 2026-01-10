@@ -7,25 +7,33 @@
  * Adding a new file? Add it here and it will be handled by setup/upgrade/reset.
  */
 
-import { golangManagedFiles, golangOwnedFiles } from './packs/golang/files.js';
-import { pythonManagedFiles, pythonOwnedFiles } from './packs/python/files.js';
+import { golangManagedFiles, golangOwnedFiles } from "./packs/golang/files.js";
+import { pythonManagedFiles, pythonOwnedFiles } from "./packs/python/files.js";
 import {
   typescriptJsonMerges,
   typescriptManagedFiles,
   typescriptOwnedFiles,
   typescriptPackages,
-} from './packs/typescript/files.js';
+} from "./packs/typescript/files.js";
 // Re-export shared types from packs/types.ts (breaks circular dependency)
-export type { FileDefinition, JsonMergeDefinition, ProjectContext } from './packs/types.js';
-import type { FileDefinition, JsonMergeDefinition, ManagedFileDefinition } from './packs/types.js';
-import { CURSOR_HOOKS, SETTINGS_HOOKS } from './templates/config.js';
-import { AGENTS_MD_LINK } from './templates/content.js';
-import { filterOutSafewordHooks } from './utils/hooks.js';
-import { MCP_SERVERS } from './utils/install.js';
-import { VERSION } from './version.js';
+export type {
+  FileDefinition,
+  JsonMergeDefinition,
+  ProjectContext,
+} from "./packs/types.js";
+import type {
+  FileDefinition,
+  JsonMergeDefinition,
+  ManagedFileDefinition,
+} from "./packs/types.js";
+import { CURSOR_HOOKS, SETTINGS_HOOKS } from "./templates/config.js";
+import { AGENTS_MD_LINK } from "./templates/content.js";
+import { filterOutSafewordHooks } from "./utils/hooks.js";
+import { MCP_SERVERS } from "./utils/install.js";
+import { VERSION } from "./version.js";
 
 export interface TextPatchDefinition {
-  operation: 'prepend' | 'append';
+  operation: "prepend" | "append";
   content: string;
   marker: string; // Used to detect if already applied & for removal
   createIfMissing: boolean;
@@ -57,9 +65,9 @@ export interface SafewordSchema {
  * MCP servers JSON merge - shared between .mcp.json and .cursor/mcp.json
  */
 const MCP_JSON_MERGE: JsonMergeDefinition = {
-  keys: ['mcpServers.context7', 'mcpServers.playwright'],
+  keys: ["mcpServers.context7", "mcpServers.playwright"],
   removeFileIfEmpty: true,
-  merge: existing => {
+  merge: (existing) => {
     const mcpServers = (existing.mcpServers as Record<string, unknown>) ?? {};
     return {
       ...existing,
@@ -70,7 +78,7 @@ const MCP_JSON_MERGE: JsonMergeDefinition = {
       },
     };
   },
-  unmerge: existing => {
+  unmerge: (existing) => {
     const result = { ...existing };
     const mcpServers = { ...(existing.mcpServers as Record<string, unknown>) };
 
@@ -96,129 +104,120 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
   // Directories fully owned by safeword (created on setup, deleted on reset)
   ownedDirs: [
-    '.safeword',
-    '.safeword/hooks',
-    '.safeword/hooks/cursor',
-    '.safeword/hooks/lib',
-    '.safeword/guides',
-    '.safeword/templates',
-    '.safeword/prompts',
-    '.safeword/scripts',
-    '.cursor',
-    '.cursor/rules',
-    '.cursor/commands',
+    ".safeword",
+    ".safeword/hooks",
+    ".safeword/hooks/cursor",
+    ".safeword/hooks/lib",
+    ".safeword/guides",
+    ".safeword/templates",
+    ".safeword/prompts",
+    ".safeword/scripts",
+    ".cursor",
+    ".cursor/rules",
+    ".cursor/commands",
   ],
 
   // Directories we add to but don't own (not deleted on reset)
-  sharedDirs: ['.claude', '.claude/skills', '.claude/commands'],
+  sharedDirs: [".claude", ".claude/skills", ".claude/commands"],
 
   // Created on setup but NOT deleted on reset (preserves user data)
   preservedDirs: [
-    // Legacy locations (preserved for manual migration)
-    '.safeword/learnings',
-    '.safeword/planning',
-    '.safeword/tickets',
-    // Current locations
-    '.safeword-project/learnings',
-    '.safeword-project/learnings/archive',
-    '.safeword-project/tickets',
-    '.safeword-project/tickets/completed',
-    '.safeword-project/tmp',
+    ".safeword/learnings",
+    ".safeword/logs",
+    ".safeword-project/tickets",
+    ".safeword-project/tickets/completed",
+    ".safeword-project/tmp",
   ],
 
   // Files to delete on upgrade (renamed or removed in newer versions)
   deprecatedFiles: [
-    '.safeword/templates/user-stories-template.md',
+    ".safeword/templates/user-stories-template.md",
     // Consolidated into planning-guide.md and testing-guide.md (v0.8.0)
-    '.safeword/guides/development-workflow.md',
-    '.safeword/guides/tdd-best-practices.md',
-    '.safeword/guides/user-story-guide.md',
-    '.safeword/guides/test-definitions-guide.md',
+    ".safeword/guides/development-workflow.md",
+    ".safeword/guides/tdd-best-practices.md",
+    ".safeword/guides/user-story-guide.md",
+    ".safeword/guides/test-definitions-guide.md",
     // Boundaries config now project-specific (v0.9.0)
-    '.safeword/eslint-boundaries.config.mjs',
+    ".safeword/eslint-boundaries.config.mjs",
     // Shell hooks replaced with TypeScript/Bun (v0.13.0)
-    '.safeword/hooks/session-verify-agents.sh',
-    '.safeword/hooks/session-version.sh',
-    '.safeword/hooks/session-lint-check.sh',
-    '.safeword/hooks/prompt-timestamp.sh',
-    '.safeword/hooks/prompt-questions.sh',
-    '.safeword/hooks/post-tool-lint.sh',
-    '.safeword/hooks/stop-quality.sh',
-    '.safeword/hooks/cursor/after-file-edit.sh',
-    '.safeword/hooks/cursor/stop.sh',
+    ".safeword/hooks/session-verify-agents.sh",
+    ".safeword/hooks/session-version.sh",
+    ".safeword/hooks/session-lint-check.sh",
+    ".safeword/hooks/prompt-timestamp.sh",
+    ".safeword/hooks/prompt-questions.sh",
+    ".safeword/hooks/post-tool-lint.sh",
+    ".safeword/hooks/stop-quality.sh",
+    ".safeword/hooks/cursor/after-file-edit.sh",
+    ".safeword/hooks/cursor/stop.sh",
     // Shell libraries no longer needed with Bun
-    '.safeword/lib/common.sh',
-    '.safeword/lib/jq-fallback.sh',
+    ".safeword/lib/common.sh",
+    ".safeword/lib/jq-fallback.sh",
     // Skill renamed from enforcing-tdd to tdd-enforcing (v0.16.0)
-    '.claude/skills/safeword-enforcing-tdd/SKILL.md',
-    '.cursor/rules/safeword-enforcing-tdd.mdc',
+    ".claude/skills/safeword-enforcing-tdd/SKILL.md",
+    ".cursor/rules/safeword-enforcing-tdd.mdc",
     // TDD skill and command removed - BDD skill includes full TDD in Phase 6 (v0.16.0)
-    '.claude/skills/safeword-tdd-enforcing/SKILL.md',
-    '.cursor/rules/safeword-tdd-enforcing.mdc',
-    '.claude/commands/tdd.md',
-    '.cursor/commands/tdd.md',
-    '.safeword/commands/tdd.md',
+    ".claude/skills/safeword-tdd-enforcing/SKILL.md",
+    ".cursor/rules/safeword-tdd-enforcing.mdc",
+    ".claude/commands/tdd.md",
+    ".cursor/commands/tdd.md",
+    ".safeword/commands/tdd.md",
     // Brainstorming skill removed - never used, BDD discovery phase covers this (v0.16.0)
-    '.claude/skills/safeword-brainstorming/SKILL.md',
-    '.cursor/rules/safeword-brainstorming.mdc',
+    ".claude/skills/safeword-brainstorming/SKILL.md",
+    ".cursor/rules/safeword-brainstorming.mdc",
     // Writing-plans skill removed - redundant with BDD decomposition + Claude Code native plan mode (v0.16.0)
-    '.claude/skills/safeword-writing-plans/SKILL.md',
-    '.cursor/rules/safeword-writing-plans.mdc',
-    // Quality-reviewer typo - correct name is quality-reviewing
-    '.cursor/rules/safeword-quality-reviewer.mdc',
+    ".claude/skills/safeword-writing-plans/SKILL.md",
+    ".cursor/rules/safeword-writing-plans.mdc",
   ],
 
   // Packages to uninstall on upgrade (now bundled in eslint-plugin-safeword)
   deprecatedPackages: [
     // Individual ESLint plugins now bundled in eslint-plugin-safeword
-    '@eslint/js',
-    'eslint-plugin-import-x',
-    'eslint-import-resolver-typescript',
-    'eslint-plugin-sonarjs',
-    'eslint-plugin-unicorn',
-    'eslint-plugin-boundaries',
-    'eslint-plugin-playwright',
-    'eslint-plugin-promise',
-    'eslint-plugin-regexp',
-    'eslint-plugin-jsdoc',
-    'eslint-plugin-simple-import-sort',
-    'eslint-plugin-security',
+    "@eslint/js",
+    "eslint-plugin-import-x",
+    "eslint-import-resolver-typescript",
+    "eslint-plugin-sonarjs",
+    "eslint-plugin-unicorn",
+    "eslint-plugin-boundaries",
+    "eslint-plugin-playwright",
+    "eslint-plugin-promise",
+    "eslint-plugin-regexp",
+    "eslint-plugin-jsdoc",
+    "eslint-plugin-simple-import-sort",
+    "eslint-plugin-security",
     // Conditional ESLint plugins now in safeword
-    'typescript-eslint',
-    'eslint-plugin-react',
-    'eslint-plugin-react-hooks',
-    'eslint-plugin-jsx-a11y',
-    '@next/eslint-plugin-next',
-    'eslint-plugin-astro',
-    '@vitest/eslint-plugin',
+    "typescript-eslint",
+    "eslint-plugin-react",
+    "eslint-plugin-react-hooks",
+    "eslint-plugin-jsx-a11y",
+    "@next/eslint-plugin-next",
+    "eslint-plugin-astro",
+    "@vitest/eslint-plugin",
   ],
 
   // Directories to delete on upgrade (no longer managed by safeword)
   deprecatedDirs: [
-    '.safeword/lib', // Shell libraries no longer needed with Bun (v0.13.0)
-    '.safeword/logs', // No longer needed
-    '.claude/skills/safeword-enforcing-tdd', // Renamed to safeword-tdd-enforcing (v0.16.0)
-    '.claude/skills/safeword-tdd-enforcing', // Removed - BDD includes TDD (v0.16.0)
-    '.claude/skills/safeword-brainstorming', // Removed - BDD discovery phase covers this (v0.16.0)
-    '.claude/skills/safeword-writing-plans', // Removed - redundant with BDD + native plan mode (v0.16.0)
-    '.claude/skills/safeword-quality-reviewer', // Typo - correct name is safeword-quality-reviewing
-    // NOTE: .safeword/learnings, .safeword/planning, .safeword/tickets are NOT deprecated
-    // They're preserved for manual migration to .safeword-project/
+    ".safeword/lib", // Shell libraries no longer needed with Bun (v0.13.0)
+    ".safeword/planning", // Moved to .safeword-project/tickets/ (v0.16.0)
+    ".safeword/tickets", // Moved to .safeword-project/tickets/ (v0.16.0)
+    ".claude/skills/safeword-enforcing-tdd", // Renamed to safeword-tdd-enforcing (v0.16.0)
+    ".claude/skills/safeword-tdd-enforcing", // Removed - BDD includes TDD (v0.16.0)
+    ".claude/skills/safeword-brainstorming", // Removed - BDD discovery phase covers this (v0.16.0)
+    ".claude/skills/safeword-writing-plans", // Removed - redundant with BDD + native plan mode (v0.16.0)
   ],
 
   // Files owned by safeword (overwritten on upgrade if content changed)
   ownedFiles: {
     // Project root config files (for audit/quality tools)
-    '.jscpd.json': { template: '.jscpd.json' },
-    'knip.json': { template: 'knip.json' },
+    ".jscpd.json": { template: ".jscpd.json" },
+    // Note: knip.json is in typescriptManagedFiles (with context-aware ignoreDependencies)
 
     // Core files
-    '.safeword/AGENTS.md': { template: 'AGENTS.md' },
-    '.safeword/SAFEWORD.md': { template: 'SAFEWORD.md' },
-    '.safeword/version': { content: () => VERSION },
+    ".safeword/AGENTS.md": { template: "AGENTS.md" },
+    ".safeword/SAFEWORD.md": { template: "SAFEWORD.md" },
+    ".safeword/version": { content: () => VERSION },
     // config.json is created by packs system but needs to be registered for cleanup on uninstall
     // Generator returns undefined = never created/updated by schema, but still deleted on uninstall
-    '.safeword/config.json': { generator: (): undefined => undefined },
+    ".safeword/config.json": { generator: (): undefined => undefined },
 
     // Language-specific safeword configs for hooks (extend project configs if they exist)
     ...typescriptOwnedFiles,
@@ -226,112 +225,167 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     ...golangOwnedFiles,
 
     // Hooks shared library (2 files) - TypeScript with Bun runtime
-    '.safeword/hooks/lib/lint.ts': { template: 'hooks/lib/lint.ts' },
-    '.safeword/hooks/lib/quality.ts': { template: 'hooks/lib/quality.ts' },
+    ".safeword/hooks/lib/lint.ts": { template: "hooks/lib/lint.ts" },
+    ".safeword/hooks/lib/quality.ts": { template: "hooks/lib/quality.ts" },
 
     // Hooks (8 files) - TypeScript with Bun runtime
-    '.safeword/hooks/session-verify-agents.ts': { template: 'hooks/session-verify-agents.ts' },
-    '.safeword/hooks/session-version.ts': { template: 'hooks/session-version.ts' },
-    '.safeword/hooks/session-lint-check.ts': { template: 'hooks/session-lint-check.ts' },
-    '.safeword/hooks/prompt-timestamp.ts': { template: 'hooks/prompt-timestamp.ts' },
-    '.safeword/hooks/prompt-questions.ts': { template: 'hooks/prompt-questions.ts' },
-    '.safeword/hooks/post-tool-lint.ts': { template: 'hooks/post-tool-lint.ts' },
-    '.safeword/hooks/post-tool-guide-check.ts': { template: 'hooks/post-tool-guide-check.ts' },
-    '.safeword/hooks/stop-quality.ts': { template: 'hooks/stop-quality.ts' },
+    ".safeword/hooks/session-verify-agents.ts": {
+      template: "hooks/session-verify-agents.ts",
+    },
+    ".safeword/hooks/session-version.ts": {
+      template: "hooks/session-version.ts",
+    },
+    ".safeword/hooks/session-lint-check.ts": {
+      template: "hooks/session-lint-check.ts",
+    },
+    ".safeword/hooks/prompt-timestamp.ts": {
+      template: "hooks/prompt-timestamp.ts",
+    },
+    ".safeword/hooks/prompt-questions.ts": {
+      template: "hooks/prompt-questions.ts",
+    },
+    ".safeword/hooks/post-tool-lint.ts": {
+      template: "hooks/post-tool-lint.ts",
+    },
+    ".safeword/hooks/stop-quality.ts": { template: "hooks/stop-quality.ts" },
 
     // Guides (11 files)
-    '.safeword/guides/architecture-guide.md': { template: 'guides/architecture-guide.md' },
-    '.safeword/guides/cli-reference.md': { template: 'guides/cli-reference.md' },
-    '.safeword/guides/code-philosophy.md': { template: 'guides/code-philosophy.md' },
-    '.safeword/guides/context-files-guide.md': { template: 'guides/context-files-guide.md' },
-    '.safeword/guides/data-architecture-guide.md': {
-      template: 'guides/data-architecture-guide.md',
+    ".safeword/guides/architecture-guide.md": {
+      template: "guides/architecture-guide.md",
     },
-    '.safeword/guides/design-doc-guide.md': { template: 'guides/design-doc-guide.md' },
-    '.safeword/guides/learning-extraction.md': { template: 'guides/learning-extraction.md' },
-    '.safeword/guides/llm-writing-guide.md': { template: 'guides/llm-writing-guide.md' },
-    '.safeword/guides/planning-guide.md': { template: 'guides/planning-guide.md' },
-    '.safeword/guides/testing-guide.md': { template: 'guides/testing-guide.md' },
-    '.safeword/guides/zombie-process-cleanup.md': { template: 'guides/zombie-process-cleanup.md' },
+    ".safeword/guides/cli-reference.md": {
+      template: "guides/cli-reference.md",
+    },
+    ".safeword/guides/code-philosophy.md": {
+      template: "guides/code-philosophy.md",
+    },
+    ".safeword/guides/context-files-guide.md": {
+      template: "guides/context-files-guide.md",
+    },
+    ".safeword/guides/data-architecture-guide.md": {
+      template: "guides/data-architecture-guide.md",
+    },
+    ".safeword/guides/design-doc-guide.md": {
+      template: "guides/design-doc-guide.md",
+    },
+    ".safeword/guides/learning-extraction.md": {
+      template: "guides/learning-extraction.md",
+    },
+    ".safeword/guides/llm-writing-guide.md": {
+      template: "guides/llm-writing-guide.md",
+    },
+    ".safeword/guides/planning-guide.md": {
+      template: "guides/planning-guide.md",
+    },
+    ".safeword/guides/testing-guide.md": {
+      template: "guides/testing-guide.md",
+    },
+    ".safeword/guides/zombie-process-cleanup.md": {
+      template: "guides/zombie-process-cleanup.md",
+    },
 
     // Templates (7 files)
-    '.safeword/templates/architecture-template.md': {
-      template: 'doc-templates/architecture-template.md',
+    ".safeword/templates/architecture-template.md": {
+      template: "doc-templates/architecture-template.md",
     },
-    '.safeword/templates/design-doc-template.md': {
-      template: 'doc-templates/design-doc-template.md',
+    ".safeword/templates/design-doc-template.md": {
+      template: "doc-templates/design-doc-template.md",
     },
-    '.safeword/templates/task-spec-template.md': {
-      template: 'doc-templates/task-spec-template.md',
+    ".safeword/templates/task-spec-template.md": {
+      template: "doc-templates/task-spec-template.md",
     },
-    '.safeword/templates/test-definitions-feature.md': {
-      template: 'doc-templates/test-definitions-feature.md',
+    ".safeword/templates/test-definitions-feature.md": {
+      template: "doc-templates/test-definitions-feature.md",
     },
-    '.safeword/templates/ticket-template.md': { template: 'doc-templates/ticket-template.md' },
-    '.safeword/templates/feature-spec-template.md': {
-      template: 'doc-templates/feature-spec-template.md',
+    ".safeword/templates/ticket-template.md": {
+      template: "doc-templates/ticket-template.md",
     },
-    '.safeword/templates/work-log-template.md': { template: 'doc-templates/work-log-template.md' },
+    ".safeword/templates/feature-spec-template.md": {
+      template: "doc-templates/feature-spec-template.md",
+    },
+    ".safeword/templates/work-log-template.md": {
+      template: "doc-templates/work-log-template.md",
+    },
 
     // Prompts (2 files)
-    '.safeword/prompts/architecture.md': { template: 'prompts/architecture.md' },
-    '.safeword/prompts/quality-review.md': { template: 'prompts/quality-review.md' },
+    ".safeword/prompts/architecture.md": {
+      template: "prompts/architecture.md",
+    },
+    ".safeword/prompts/quality-review.md": {
+      template: "prompts/quality-review.md",
+    },
 
     // Scripts (3 files)
-    '.safeword/scripts/bisect-test-pollution.sh': { template: 'scripts/bisect-test-pollution.sh' },
-    '.safeword/scripts/bisect-zombie-processes.sh': {
-      template: 'scripts/bisect-zombie-processes.sh',
+    ".safeword/scripts/bisect-test-pollution.sh": {
+      template: "scripts/bisect-test-pollution.sh",
     },
-    '.safeword/scripts/cleanup-zombies.sh': { template: 'scripts/cleanup-zombies.sh' },
+    ".safeword/scripts/bisect-zombie-processes.sh": {
+      template: "scripts/bisect-zombie-processes.sh",
+    },
+    ".safeword/scripts/cleanup-zombies.sh": {
+      template: "scripts/cleanup-zombies.sh",
+    },
 
     // Claude skills (5) and commands (8)
-    '.claude/skills/safeword-debugging/SKILL.md': {
-      template: 'skills/safeword-debugging/SKILL.md',
+    ".claude/skills/safeword-debugging/SKILL.md": {
+      template: "skills/safeword-debugging/SKILL.md",
     },
-    '.claude/skills/safeword-quality-reviewing/SKILL.md': {
-      template: 'skills/safeword-quality-reviewing/SKILL.md',
+    ".claude/skills/safeword-quality-reviewing/SKILL.md": {
+      template: "skills/safeword-quality-reviewing/SKILL.md",
     },
-    '.claude/skills/safeword-refactoring/SKILL.md': {
-      template: 'skills/safeword-refactoring/SKILL.md',
+    ".claude/skills/safeword-refactoring/SKILL.md": {
+      template: "skills/safeword-refactoring/SKILL.md",
     },
-    '.claude/skills/safeword-bdd-orchestrating/SKILL.md': {
-      template: 'skills/safeword-bdd-orchestrating/SKILL.md',
+    ".claude/skills/safeword-bdd-orchestrating/SKILL.md": {
+      template: "skills/safeword-bdd-orchestrating/SKILL.md",
     },
-    '.claude/commands/bdd.md': { template: 'commands/bdd.md' },
-    '.claude/commands/done.md': { template: 'commands/done.md' },
-    '.claude/commands/audit.md': { template: 'commands/audit.md' },
-    '.claude/commands/cleanup-zombies.md': { template: 'commands/cleanup-zombies.md' },
-    '.claude/commands/lint.md': { template: 'commands/lint.md' },
-    '.claude/commands/quality-review.md': { template: 'commands/quality-review.md' },
-    '.claude/commands/refactor.md': { template: 'commands/refactor.md' },
+    ".claude/commands/bdd.md": { template: "commands/bdd.md" },
+    ".claude/commands/done.md": { template: "commands/done.md" },
+    ".claude/commands/audit.md": { template: "commands/audit.md" },
+    ".claude/commands/cleanup-zombies.md": {
+      template: "commands/cleanup-zombies.md",
+    },
+    ".claude/commands/lint.md": { template: "commands/lint.md" },
+    ".claude/commands/quality-review.md": {
+      template: "commands/quality-review.md",
+    },
+    ".claude/commands/refactor.md": { template: "commands/refactor.md" },
 
     // Cursor rules (6 files)
-    '.cursor/rules/safeword-core.mdc': { template: 'cursor/rules/safeword-core.mdc' },
-    '.cursor/rules/safeword-debugging.mdc': {
-      template: 'cursor/rules/safeword-debugging.mdc',
+    ".cursor/rules/safeword-core.mdc": {
+      template: "cursor/rules/safeword-core.mdc",
     },
-    '.cursor/rules/safeword-quality-reviewing.mdc': {
-      template: 'cursor/rules/safeword-quality-reviewing.mdc',
+    ".cursor/rules/safeword-debugging.mdc": {
+      template: "cursor/rules/safeword-debugging.mdc",
     },
-    '.cursor/rules/safeword-refactoring.mdc': {
-      template: 'cursor/rules/safeword-refactoring.mdc',
+    ".cursor/rules/safeword-quality-reviewing.mdc": {
+      template: "cursor/rules/safeword-quality-reviewing.mdc",
     },
-    '.cursor/rules/safeword-bdd-orchestrating.mdc': {
-      template: 'cursor/rules/safeword-bdd-orchestrating.mdc',
+    ".cursor/rules/safeword-refactoring.mdc": {
+      template: "cursor/rules/safeword-refactoring.mdc",
+    },
+    ".cursor/rules/safeword-bdd-orchestrating.mdc": {
+      template: "cursor/rules/safeword-bdd-orchestrating.mdc",
     },
 
     // Cursor commands (8 files - same as Claude)
-    '.cursor/commands/bdd.md': { template: 'commands/bdd.md' },
-    '.cursor/commands/done.md': { template: 'commands/done.md' },
-    '.cursor/commands/audit.md': { template: 'commands/audit.md' },
-    '.cursor/commands/cleanup-zombies.md': { template: 'commands/cleanup-zombies.md' },
-    '.cursor/commands/lint.md': { template: 'commands/lint.md' },
-    '.cursor/commands/quality-review.md': { template: 'commands/quality-review.md' },
-    '.cursor/commands/refactor.md': { template: 'commands/refactor.md' },
+    ".cursor/commands/bdd.md": { template: "commands/bdd.md" },
+    ".cursor/commands/done.md": { template: "commands/done.md" },
+    ".cursor/commands/audit.md": { template: "commands/audit.md" },
+    ".cursor/commands/cleanup-zombies.md": {
+      template: "commands/cleanup-zombies.md",
+    },
+    ".cursor/commands/lint.md": { template: "commands/lint.md" },
+    ".cursor/commands/quality-review.md": {
+      template: "commands/quality-review.md",
+    },
+    ".cursor/commands/refactor.md": { template: "commands/refactor.md" },
 
     // Cursor hooks adapters (2 files) - TypeScript with Bun runtime
-    '.safeword/hooks/cursor/after-file-edit.ts': { template: 'hooks/cursor/after-file-edit.ts' },
-    '.safeword/hooks/cursor/stop.ts': { template: 'hooks/cursor/stop.ts' },
+    ".safeword/hooks/cursor/after-file-edit.ts": {
+      template: "hooks/cursor/after-file-edit.ts",
+    },
+    ".safeword/hooks/cursor/stop.ts": { template: "hooks/cursor/stop.ts" },
   },
 
   // Files created if missing, updated only if content matches current template
@@ -350,11 +404,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     ...typescriptJsonMerges,
 
     // Language-agnostic JSON merges
-    '.claude/settings.json': {
-      keys: ['hooks'],
-      merge: existing => {
+    ".claude/settings.json": {
+      keys: ["hooks"],
+      merge: (existing) => {
         // Preserve non-safeword hooks while adding/updating safeword hooks
-        const existingHooks = (existing.hooks as Record<string, unknown[]>) ?? {};
+        const existingHooks =
+          (existing.hooks as Record<string, unknown[]>) ?? {};
         const mergedHooks: Record<string, unknown[]> = { ...existingHooks };
 
         for (const [event, newHooks] of Object.entries(SETTINGS_HOOKS)) {
@@ -365,9 +420,10 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
         return { ...existing, hooks: mergedHooks };
       },
-      unmerge: existing => {
+      unmerge: (existing) => {
         // Remove only safeword hooks, preserve custom hooks
-        const existingHooks = (existing.hooks as Record<string, unknown[]>) ?? {};
+        const existingHooks =
+          (existing.hooks as Record<string, unknown[]>) ?? {};
         const cleanedHooks: Record<string, unknown[]> = {};
 
         for (const [event, eventHooks] of Object.entries(existingHooks)) {
@@ -387,13 +443,13 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       },
     },
 
-    '.mcp.json': MCP_JSON_MERGE,
-    '.cursor/mcp.json': MCP_JSON_MERGE,
+    ".mcp.json": MCP_JSON_MERGE,
+    ".cursor/mcp.json": MCP_JSON_MERGE,
 
-    '.cursor/hooks.json': {
-      keys: ['version', 'hooks.afterFileEdit', 'hooks.stop'],
+    ".cursor/hooks.json": {
+      keys: ["version", "hooks.afterFileEdit", "hooks.stop"],
       removeFileIfEmpty: true,
-      merge: existing => {
+      merge: (existing) => {
         const hooks = (existing.hooks as Record<string, unknown[]>) ?? {};
         return {
           ...existing,
@@ -404,7 +460,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
           },
         };
       },
-      unmerge: existing => {
+      unmerge: (existing) => {
         const result = { ...existing };
         const hooks = { ...(existing.hooks as Record<string, unknown[]>) };
 
@@ -425,16 +481,16 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
 
   // Text files where we patch specific content
   textPatches: {
-    'AGENTS.md': {
-      operation: 'prepend',
+    "AGENTS.md": {
+      operation: "prepend",
       content: AGENTS_MD_LINK,
-      marker: '.safeword/SAFEWORD.md',
+      marker: ".safeword/SAFEWORD.md",
       createIfMissing: true,
     },
-    'CLAUDE.md': {
-      operation: 'prepend',
+    "CLAUDE.md": {
+      operation: "prepend",
       content: AGENTS_MD_LINK,
-      marker: '.safeword/SAFEWORD.md',
+      marker: ".safeword/SAFEWORD.md",
       createIfMissing: false, // Only patch if exists, don't create (AGENTS.md is primary)
     },
   },

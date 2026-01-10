@@ -2,12 +2,12 @@
 // Used by: stop-quality.ts, cursor/stop.ts
 
 export type BddPhase =
-  | 'intake'
-  | 'define-behavior'
-  | 'scenario-gate'
-  | 'decomposition'
-  | 'implement'
-  | 'done';
+  | "intake"
+  | "define-behavior"
+  | "scenario-gate"
+  | "decomposition"
+  | "implement"
+  | "done";
 
 const JSON_SUFFIX = `
 
@@ -27,7 +27,7 @@ Check your discovery work:
 
 Research before asking. Avoid bloat.${JSON_SUFFIX}`,
 
-  'define-behavior': `SAFEWORD Quality Review (Scenario Phase):
+  "define-behavior": `SAFEWORD Quality Review (Scenario Phase):
 
 Check your scenarios:
 - Is each scenario atomic (tests ONE behavior)?
@@ -37,7 +37,7 @@ Check your scenarios:
 
 Research before asking. Avoid bloat.${JSON_SUFFIX}`,
 
-  'scenario-gate': `SAFEWORD Quality Review (Scenario Gate):
+  "scenario-gate": `SAFEWORD Quality Review (Scenario Gate):
 
 **Validate each scenario - show evidence:**
 

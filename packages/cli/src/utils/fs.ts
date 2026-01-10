@@ -11,12 +11,11 @@ import {
   rmdirSync,
   rmSync,
   writeFileSync,
-} from 'node:fs';
-import nodePath from 'node:path';
-import { fileURLToPath } from 'node:url';
+} from "node:fs";
+import nodePath from "node:path";
 
 // Get the directory of this module (for locating templates)
-const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 
 /**
  * Get path to bundled templates directory.
@@ -29,14 +28,14 @@ const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
  * - From dist/chunk-*.js: __dirname = packages/cli/dist/ → ../templates
  */
 export function getTemplatesDirectory(): string {
-  const knownTemplateFile = 'SAFEWORD.md';
+  const knownTemplateFile = "SAFEWORD.md";
 
   // Try different relative paths - the bundled code ends up in dist/ directly (flat)
   // while source is in src/utils/
   const candidates = [
-    nodePath.join(__dirname, '..', 'templates'), // From dist/ (flat bundled)
-    nodePath.join(__dirname, '..', '..', 'templates'), // From src/utils/ or dist/utils/
-    nodePath.join(__dirname, 'templates'), // Direct sibling (unlikely but safe)
+    nodePath.join(__dirname, "..", "templates"), // From dist/ (flat bundled)
+    nodePath.join(__dirname, "..", "..", "templates"), // From src/utils/ or dist/utils/
+    nodePath.join(__dirname, "templates"), // Direct sibling (unlikely but safe)
   ];
 
   for (const candidate of candidates) {
@@ -45,7 +44,7 @@ export function getTemplatesDirectory(): string {
     }
   }
 
-  throw new Error('Templates directory not found');
+  throw new Error("Templates directory not found");
 }
 
 /**
@@ -71,7 +70,7 @@ export function ensureDirectory(path: string): void {
  * @param path
  */
 export function readFile(path: string): string {
-  return readFileSync(path, 'utf8');
+  return readFileSync(path, "utf8");
 }
 
 /**
@@ -80,7 +79,7 @@ export function readFile(path: string): string {
  */
 export function readFileSafe(path: string): string | undefined {
   if (!existsSync(path)) return undefined;
-  return readFileSync(path, 'utf8');
+  return readFileSync(path, "utf8");
 }
 
 /**
@@ -124,7 +123,7 @@ export function removeIfEmpty(path: string): boolean {
 export function makeScriptsExecutable(dirPath: string): void {
   if (!existsSync(dirPath)) return;
   for (const file of readdirSync(dirPath)) {
-    if (file.endsWith('.sh')) {
+    if (file.endsWith(".sh")) {
       chmodSync(nodePath.join(dirPath, file), 0o755);
     }
   }

@@ -1,12 +1,12 @@
 /* Safeword Theme - Oswald + IBM Plex Sans + Lilex */
 
 /* Import fonts */
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
 
 @font-face {
-  font-family: 'Monaspace Krypton';
-  src: url('https://cdn.jsdelivr.net/gh/githubnext/monaspace@v1.101/fonts/webfonts/MonaspaceKrypton-Regular.woff2')
-    format('woff2');
+  font-family: "Monaspace Krypton";
+  src: url("https://cdn.jsdelivr.net/gh/githubnext/monaspace@v1.101/fonts/webfonts/MonaspaceKrypton-Regular.woff2")
+    format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -15,7 +15,10 @@
 /* Red background theme */
 :root {
   /* Content inset: centers content, with minimum padding for small viewports */
-  --sw-content-inset: max(var(--sl-content-pad-x), calc((100vw - var(--sl-content-width)) / 2));
+  --sw-content-inset: max(
+    var(--sl-content-pad-x),
+    calc((100vw - var(--sl-content-width)) / 2)
+  );
   /* Vertical line offset from content edge */
   --sw-line-offset: calc(var(--sw-content-inset) - 1.5rem);
 
@@ -87,7 +90,7 @@ h6,
 .sl-markdown-content h4,
 .sl-markdown-content h5,
 .sl-markdown-content h6 {
-  font-family: 'Oswald', sans-serif !important;
+  font-family: "Oswald", sans-serif !important;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -106,7 +109,7 @@ label,
 .sl-markdown-content li,
 .sl-markdown-content td,
 .sl-markdown-content th {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: "IBM Plex Sans", sans-serif;
 }
 
 /* Lilex for code/monospace */
@@ -119,7 +122,7 @@ samp,
 figure.frame *,
 .ec-line,
 .ec-line * {
-  font-family: 'Monaspace Krypton', monospace !important;
+  font-family: "Monaspace Krypton", monospace !important;
 }
 
 /* Inline code styling */
@@ -154,7 +157,7 @@ figure.frame .ec-line .code * {
 
 /* Chevron prompt for terminal */
 figure.frame .ec-line .code::before {
-  content: '> ';
+  content: "> ";
   color: #fff;
   opacity: 0.5;
 }
@@ -187,23 +190,23 @@ figure.frame .copy button div,
 }
 
 /* Search bar styling */
-button[aria-label='Search'] {
+button[aria-label="Search"] {
   background: #000 !important;
   border: none !important;
 }
 
-button[aria-label='Search'] * {
+button[aria-label="Search"] * {
   color: #888 !important;
 }
 
-button[aria-label='Search'] kbd {
+button[aria-label="Search"] kbd {
   color: #888 !important;
   border-color: #666 !important;
   background: transparent !important;
   opacity: 1 !important;
 }
 
-button[aria-label='Search'] kbd kbd {
+button[aria-label="Search"] kbd kbd {
   color: #888 !important;
 }
 
@@ -211,7 +214,7 @@ button[aria-label='Search'] kbd kbd {
 .site-title {
   border: 3px solid #000 !important;
   padding: 0.2em 0.4em !important;
-  font-family: 'Oswald', sans-serif !important;
+  font-family: "Oswald", sans-serif !important;
   text-transform: uppercase !important;
   font-weight: 600 !important;
   text-decoration: none !important;
@@ -222,14 +225,14 @@ button[aria-label='Search'] kbd kbd {
 }
 
 /* Sidebar styling */
-nav[aria-label='Main'] a,
+nav[aria-label="Main"] a,
 .sidebar-content a {
   color: #000 !important;
   text-decoration: none !important;
 }
 
-nav[aria-label='Main'] a[aria-current='page'],
-.sidebar-content a[aria-current='page'] {
+nav[aria-label="Main"] a[aria-current="page"],
+.sidebar-content a[aria-current="page"] {
   background: transparent !important;
   font-weight: 600;
 }
@@ -265,16 +268,16 @@ a:hover {
 }
 
 /* Splash page: hide search, theme toggle, redundant H1, and edit link */
-[data-has-hero] button[aria-label='Search'],
+[data-has-hero] button[aria-label="Search"],
 [data-has-hero] starlight-theme-select,
 [data-has-hero] .hero h1,
-[data-has-hero] a[href*='edit/main'] {
+[data-has-hero] a[href*="edit/main"] {
   display: none !important;
 }
 
 /* Hero tagline - LOUD + left-aligned */
 [data-has-hero] .hero .tagline {
-  font-family: 'Oswald', sans-serif !important;
+  font-family: "Oswald", sans-serif !important;
   text-transform: uppercase;
   font-size: clamp(1.8rem, 4.5vw, 3rem) !important;
   font-weight: 700 !important;
@@ -292,7 +295,7 @@ a:hover {
 }
 
 /* Hide section anchor icons on splash page */
-[data-has-hero] .sl-markdown-content h2 a[href^='#'] {
+[data-has-hero] .sl-markdown-content h2 a[href^="#"] {
   display: none !important;
 }
 
@@ -305,7 +308,7 @@ a:hover {
 
 /* Hero subtitle - product definition, distinct from body */
 p.hero-subtitle {
-  font-family: 'IBM Plex Sans', sans-serif !important;
+  font-family: "IBM Plex Sans", sans-serif !important;
   font-size: 1.5rem !important;
   font-weight: 500 !important;
   letter-spacing: 0.01em !important;
@@ -334,7 +337,7 @@ p.hero-subtitle {
 }
 
 /* Double GitHub button size on splash page */
-[data-has-hero] header a[href*='github'] {
+[data-has-hero] header a[href*="github"] {
   transform: scale(1.5);
   transform-origin: center right;
 }
@@ -346,7 +349,7 @@ p.hero-subtitle {
   transform: translateY(-50%);
   right: 6rem;
   z-index: 9999;
-  font-family: 'Oswald', sans-serif !important;
+  font-family: "Oswald", sans-serif !important;
   text-transform: uppercase;
   font-weight: 600;
   font-size: 1.1rem;
@@ -362,13 +365,13 @@ p.hero-subtitle {
 }
 
 .splash-docs-link p {
-  font-family: 'Oswald', sans-serif !important;
+  font-family: "Oswald", sans-serif !important;
   text-transform: uppercase;
   margin: 0 !important;
 }
 
 /* Tab styling - segmented control */
-[role='tablist'] {
+[role="tablist"] {
   display: inline-flex !important;
   gap: 0 !important;
   background: rgba(0, 0, 0, 0.1) !important;
@@ -378,8 +381,8 @@ p.hero-subtitle {
   margin-bottom: 1.5rem !important;
 }
 
-[role='tab'] {
-  font-family: 'Oswald', sans-serif !important;
+[role="tab"] {
+  font-family: "Oswald", sans-serif !important;
   text-transform: uppercase !important;
   font-weight: 500 !important;
   letter-spacing: 0.02em !important;
@@ -398,8 +401,8 @@ p.hero-subtitle {
 }
 
 /* Kill any gray underline from Starlight tabs */
-[role='tablist']::after,
-[role='tablist']::before,
+[role="tablist"]::after,
+[role="tablist"]::before,
 .tablist-wrapper::after,
 .tablist-wrapper::before,
 starlight-tabs::after,
@@ -409,8 +412,8 @@ starlight-tabs::before {
 }
 
 /* Remove underline from tab links */
-[role='tab'] a,
-[role='tablist'] a,
+[role="tab"] a,
+[role="tablist"] a,
 .tab a {
   text-decoration: none !important;
 }
@@ -421,25 +424,25 @@ starlight-tabs {
   border: none !important;
 }
 
-[role='tab']:hover:not([aria-selected='true']) {
+[role="tab"]:hover:not([aria-selected="true"]) {
   background: rgba(0, 0, 0, 0.15) !important;
 }
 
-[role='tab'][aria-selected='true'] {
+[role="tab"][aria-selected="true"] {
   background: #000 !important;
   color: #ff0000 !important;
   border: none !important;
 }
 
 /* Tab panel - remove default borders */
-[role='tabpanel'] {
+[role="tabpanel"] {
   border: none !important;
   padding: 0 !important;
 }
 
 /* Soul statement - manifesto closer */
 .soul {
-  font-family: 'Oswald', sans-serif !important;
+  font-family: "Oswald", sans-serif !important;
   text-transform: uppercase;
   font-size: 1.5rem !important;
   font-weight: 600 !important;
@@ -470,7 +473,7 @@ starlight-tabs {
 }
 
 .ref-links a {
-  font-family: 'Oswald', sans-serif !important;
+  font-family: "Oswald", sans-serif !important;
   text-transform: uppercase;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -520,8 +523,8 @@ starlight-tabs {
 /* Remove vertical divider line near social links (but not logo) */
 header .sl-flex:not(.site-title),
 header .social-icons,
-header [class*='social'],
-header nav[aria-label='Social'] {
+header [class*="social"],
+header nav[aria-label="Social"] {
   border: none !important;
   border-left: none !important;
 }
@@ -535,7 +538,7 @@ header *::before {
 }
 
 /* Hide "On this page" TOC and right sidebar border */
-nav[aria-label='On this page'],
+nav[aria-label="On this page"],
 .right-sidebar-panel {
   display: none !important;
 }
@@ -550,10 +553,10 @@ starlight-theme-select {
 }
 
 /* Remove sidebar gridlines/borders */
-nav[aria-label='Main'],
-nav[aria-label='Main'] ul,
-nav[aria-label='Main'] li,
-nav[aria-label='Main'] a,
+nav[aria-label="Main"],
+nav[aria-label="Main"] ul,
+nav[aria-label="Main"] li,
+nav[aria-label="Main"] a,
 .sidebar-content,
 .sidebar-pane,
 .sl-sidebar,
@@ -564,7 +567,7 @@ nav[aria-label='Main'] a,
 }
 
 /* Increase GitHub icon size on docs pages */
-header a[href*='github'] {
+header a[href*="github"] {
   transform: scale(1.5);
   transform-origin: center;
 }
@@ -590,8 +593,8 @@ td {
 
 /* Nav footer pagination links */
 .sl-markdown-content ~ div a,
-a[rel='next'],
-a[rel='prev'],
+a[rel="next"],
+a[rel="prev"],
 .pagination-links a {
   border-color: #000 !important;
 }
@@ -615,7 +618,7 @@ details[open] summary {
 }
 
 /* Sidebar link borders */
-nav[aria-label='Main'] a {
+nav[aria-label="Main"] a {
   border-color: #000 !important;
 }
 
@@ -630,8 +633,8 @@ figcaption.header {
 }
 
 /* Footer nav pagination - square corners to match logo */
-a[rel='next'],
-a[rel='prev'],
+a[rel="next"],
+a[rel="prev"],
 .pagination-links a {
   border-radius: 0 !important;
 }

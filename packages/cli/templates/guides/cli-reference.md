@@ -28,7 +28,7 @@ Run `bunx safeword <command> --help` for command-specific options.
 
 Common flags:
 
-- `-y, --yes` - Skip confirmations (setup, reset)
+- `-y, --yes` - Skip confirmation (reset only)
 - `-v, --verbose` - Show detailed output (diff)
 - `--offline` - Skip remote version check (check)
 - `--full` - Also remove linting config + packages (reset)

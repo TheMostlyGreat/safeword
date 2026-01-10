@@ -1,11 +1,11 @@
 ---
-id: '013a'
+id: "013a"
 title: BDD skill compression and phase-based splitting
 type: feature
 status: ready
 priority: medium
 created: 2026-01-08
-parent: '013'
+parent: "013"
 ---
 
 # BDD Skill Compression

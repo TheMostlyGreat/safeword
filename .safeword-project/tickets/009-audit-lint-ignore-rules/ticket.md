@@ -38,10 +38,10 @@ audit:
   ignore:
     - rule: size-limit
       path: CLAUDE.md
-      reason: 'Complex project requires detailed instructions'
+      reason: "Complex project requires detailed instructions"
     - rule: staleness
       path: README.md
-      reason: 'Stable project, README rarely changes'
+      reason: "Stable project, README rarely changes"
 ```
 
 **Option C: Both (inline + config)**

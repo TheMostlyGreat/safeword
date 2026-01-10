@@ -35,8 +35,8 @@ Use JSON mode for predictable LLM responses. Define explicit schemas with valida
 ```typescript
 // ✅ GOOD - Cacheable system prompt
 systemPrompt: [
-  { text: STATIC_RULES, cache_control: { type: 'ephemeral' } },
-  { text: STATIC_EXAMPLES, cache_control: { type: 'ephemeral' } },
+  { text: STATIC_RULES, cache_control: { type: "ephemeral" } },
+  { text: STATIC_EXAMPLES, cache_control: { type: "ephemeral" } },
 ];
 userMessage: `Character: ${dynamicState}\nAction: ${userInput}`;
 

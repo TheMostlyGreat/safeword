@@ -1,7 +1,7 @@
 ---
 name: bdd-orchestrating
 description: BDD orchestrator for feature-level work requiring multiple scenarios. Use when user says 'add', 'implement', 'build', 'feature', 'iteration', 'story', 'phase', or references an iteration/story from a spec. Also use when work touches 3+ files with new state/flows, or when user runs /bdd. Do NOT use for bug fixes, typos, config changes, or 1-2 file tasks.
-allowed-tools: '*'
+allowed-tools: "*"
 ---
 
 # BDD Orchestrator
@@ -277,14 +277,14 @@ function calculateDiscount(amount, tier) {
 
 // ✅ GOOD - Actual logic
 function calculateDiscount(amount, tier) {
-  if (tier === 'VIP') return amount * 0.8;
+  if (tier === "VIP") return amount * 0.8;
   return amount;
 }
 ```
 
 Fix mocks immediately. The next test cycle will catch them, but they're technical debt.
 
-#### 6.3 REFACTOR - Clean Up
+### 6.3 REFACTOR - Clean Up
 
 **Iron Law:** TESTS MUST PASS BEFORE AND AFTER EVERY CHANGE
 
@@ -312,7 +312,7 @@ git checkout -- <changed-files>
 
 Then try a smaller change or skip refactoring.
 
-#### 6.4 Mark & Iterate
+### 6.4 Mark & Iterate
 
 1. Mark scenario `[x]` in test-definitions
 2. Return to 6.1 for next scenario, or proceed to Phase 7 if all done

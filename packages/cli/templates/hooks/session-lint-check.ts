@@ -2,7 +2,7 @@
 // Safeword: Lint configuration sync check (SessionStart)
 // Warns if ESLint or Prettier configs are missing or out of sync
 
-import { existsSync } from 'node:fs';
+import { existsSync } from "node:fs";
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const safewordDir = `${projectDir}/.safeword`;
@@ -15,9 +15,14 @@ if (!existsSync(safewordDir)) {
 const warnings: string[] = [];
 
 // Check for ESLint config
-const eslintConfigs = ['eslint.config.mjs', 'eslint.config.js', '.eslintrc.json', '.eslintrc.js'];
+const eslintConfigs = [
+  "eslint.config.mjs",
+  "eslint.config.js",
+  ".eslintrc.json",
+  ".eslintrc.js",
+];
 const hasEslint = await Promise.all(
-  eslintConfigs.map(f =>
+  eslintConfigs.map((f) =>
     Bun.file(`${projectDir}/${f}`)
       .exists()
       .catch(() => false),
@@ -28,16 +33,20 @@ if (!hasEslint.some(Boolean)) {
 }
 
 // Check for Prettier config
-const prettierConfigs = ['.prettierrc', '.prettierrc.json', 'prettier.config.js'];
+const prettierConfigs = [
+  ".prettierrc",
+  ".prettierrc.json",
+  "prettier.config.js",
+];
 const hasPrettier = await Promise.all(
-  prettierConfigs.map(f =>
+  prettierConfigs.map((f) =>
     Bun.file(`${projectDir}/${f}`)
       .exists()
       .catch(() => false),
   ),
 );
 if (!hasPrettier.some(Boolean)) {
-  warnings.push('Prettier config not found - formatting may be inconsistent');
+  warnings.push("Prettier config not found - formatting may be inconsistent");
 }
 
 // Check for required dependencies in package.json
@@ -52,13 +61,14 @@ if (await pkgJsonFile.exists()) {
       warnings.push("Prettier not in package.json - run 'bun add -D prettier'");
     }
   } catch (error) {
-    if (process.env.DEBUG) console.error('[session-lint-check] package.json parse error:', error);
+    if (process.env.DEBUG)
+      console.error("[session-lint-check] package.json parse error:", error);
   }
 }
 
 // Output warnings if any
 if (warnings.length > 0) {
-  console.log('SAFEWORD Lint Check:');
+  console.log("SAFEWORD Lint Check:");
   for (const warning of warnings) {
     console.log(`  ⚠️  ${warning}`);
   }
