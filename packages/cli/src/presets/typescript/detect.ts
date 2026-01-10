@@ -31,40 +31,20 @@ const TAILWIND_PACKAGES = ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/pos
 const PLAYWRIGHT_PACKAGES = ['@playwright/test', 'playwright'] as const;
 
 /**
- * Known formatter config files.
- * If any exist, user likely has their own formatter setup.
+ * Non-Prettier formatter config files (Biome, dprint, Rome).
+ * Used to detect if project uses an alternative formatter.
+ * Prettier is safeword's default, so its presence doesn't skip config creation.
  */
-const FORMATTER_CONFIG_FILES = [
-  // Biome
+const ALTERNATIVE_FORMATTER_FILES = [
+  // Biome (and legacy Rome)
   'biome.json',
   'biome.jsonc',
+  'rome.json',
   // dprint
   'dprint.json',
   '.dprint.json',
   'dprint.jsonc',
   '.dprint.jsonc',
-  // Rome (legacy, now Biome)
-  'rome.json',
-  // Prettier - all supported config formats
-  // See: https://prettier.io/docs/en/configuration.html
-  '.prettierrc',
-  '.prettierrc.json',
-  '.prettierrc.json5',
-  '.prettierrc.yaml',
-  '.prettierrc.yml',
-  '.prettierrc.toml',
-  '.prettierrc.js',
-  '.prettierrc.cjs',
-  '.prettierrc.mjs',
-  '.prettierrc.ts',
-  '.prettierrc.cts',
-  '.prettierrc.mts',
-  'prettier.config.js',
-  'prettier.config.cjs',
-  'prettier.config.mjs',
-  'prettier.config.ts',
-  'prettier.config.cts',
-  'prettier.config.mts',
 ] as const;
 
 type DepsRecord = Record<string, string | undefined>;
@@ -184,8 +164,8 @@ function detectFramework(
   deps: DepsRecord,
 ): 'next' | 'react' | 'astro' | 'typescript' | 'javascript' {
   if ('next' in deps) return 'next';
+  if ('astro' in deps) return 'astro'; // Check before React (Astro+React has both)
   if ('react' in deps) return 'react';
-  if ('astro' in deps) return 'astro';
   if ('typescript' in deps || 'typescript-eslint' in deps) return 'typescript';
   return 'javascript';
 }
@@ -209,37 +189,80 @@ function hasExistingLinter(scripts: ScriptsRecord): boolean {
 }
 
 /**
- * Non-Prettier formatter config files.
- * Used to detect Biome, dprint, Rome - formatters that replace Prettier.
- */
-const NON_PRETTIER_FORMATTER_FILES = [
-  // Biome
-  'biome.json',
-  'biome.jsonc',
-  // dprint
-  'dprint.json',
-  '.dprint.json',
-  'dprint.jsonc',
-  '.dprint.jsonc',
-  // Rome (legacy, now Biome)
-  'rome.json',
-];
-
-/**
- * Check if project has an existing NON-Prettier formatter setup.
- * Returns true only for Biome, dprint, or Rome - not for Prettier.
+ * Check if project uses an alternative formatter (Biome, dprint, Rome).
+ * Returns false for Prettier since it's safeword's default.
  *
- * This is used to decide whether to:
- * - Create .prettierrc (skip if non-Prettier formatter exists)
- * - Add Prettier dependencies (skip if non-Prettier formatter exists)
- * - Include eslint-config-prettier (skip if non-Prettier formatter exists)
- *
- * Note: We no longer check for "format" script because safeword adds one,
- * creating a chicken-and-egg problem on upgrade.
+ * We don't check for "format" script because safeword adds that itself.
  */
 function hasExistingFormatter(cwd: string, _scripts: ScriptsRecord): boolean {
-  // Only consider it an "existing formatter" if a non-Prettier config exists
-  return NON_PRETTIER_FORMATTER_FILES.some((file) => existsSync(path.join(cwd, file)));
+  return ALTERNATIVE_FORMATTER_FILES.some((file) => existsSync(path.join(cwd, file)));
+}
+
+/**
+ * Next.js config file names to look for.
+ */
+const NEXT_CONFIG_FILES = ['next.config.js', 'next.config.mjs', 'next.config.ts'] as const;
+
+/**
+ * Check if a directory contains a Next.js config file.
+ */
+function hasNextConfig(directory: string): boolean {
+  return NEXT_CONFIG_FILES.some((file) => existsSync(path.join(directory, file)));
+}
+
+/**
+ * Scan a workspace directory for Next.js config files.
+ * Returns relative glob patterns for directories containing Next.js configs.
+ */
+function scanDirectoryForNextConfigs(rootDirectory: string, workspacePattern: string): string[] {
+  if (!workspacePattern.endsWith('/*')) return [];
+
+  const baseDirectory = workspacePattern.slice(0, -2); // Remove '/*'
+  const fullBaseDirectory = path.join(rootDirectory, baseDirectory);
+
+  if (!existsSync(fullBaseDirectory)) return [];
+
+  const nextPaths: string[] = [];
+  try {
+    const entries = readdirSync(fullBaseDirectory, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const packageDirectory = path.join(fullBaseDirectory, entry.name);
+      if (hasNextConfig(packageDirectory)) {
+        nextPaths.push(`${baseDirectory}/${entry.name}/**/*.{ts,tsx}`);
+      }
+    }
+  } catch {
+    // Ignore read errors
+  }
+  return nextPaths;
+}
+
+/**
+ * Find Next.js config paths for ESLint rule scoping in monorepos.
+ *
+ * Returns:
+ * - `undefined` if Next.js config exists at root (single app, no scoping needed)
+ * - `string[]` of glob patterns for directories containing Next.js apps
+ * - Empty array if no Next.js configs found anywhere
+ *
+ * Used to scope Next.js-specific ESLint rules to only the packages that use Next.js,
+ * allowing other packages (React, Astro, etc.) to avoid irrelevant Next.js rules.
+ */
+function findNextConfigPaths(rootDirectory: string): string[] | undefined {
+  // Check for root Next.js config - means single app, no scoping needed
+  if (hasNextConfig(rootDirectory)) {
+    return undefined;
+  }
+
+  // Get workspace patterns from package.json + common monorepo directories
+  const rootPackagePath = path.join(rootDirectory, 'package.json');
+  const workspacePatterns = getWorkspacePatternsFromPackage(rootPackagePath);
+  const commonPatterns = ['apps/*', 'packages/*'];
+  const patterns = [...new Set([...workspacePatterns, ...commonPatterns])];
+
+  // Scan each workspace pattern for Next.js configs
+  return patterns.flatMap((pattern) => scanDirectoryForNextConfigs(rootDirectory, pattern));
 }
 
 /**
@@ -250,7 +273,8 @@ export const detect = {
   TAILWIND_PACKAGES,
   TANSTACK_QUERY_PACKAGES,
   PLAYWRIGHT_PACKAGES,
-  FORMATTER_CONFIG_FILES,
+  ALTERNATIVE_FORMATTER_FILES,
+  NEXT_CONFIG_FILES,
 
   // Core utilities
   collectAllDeps,
@@ -262,6 +286,9 @@ export const detect = {
   hasTanstackQuery,
   hasVitest,
   hasPlaywright,
+
+  // Monorepo detection
+  findNextConfigPaths,
 
   // Existing tooling detection
   hasExistingLinter,

@@ -9,7 +9,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { recommendedTypeScriptNext } from '../recommended-nextjs.js';
+import { nextOnlyRules, recommendedTypeScriptNext } from '../recommended-nextjs.js';
 import { getAllRules, getRuleConfig, getSeverityNumber } from './test-utilities.js';
 
 const ERROR = 2;
@@ -78,6 +78,69 @@ describe('Next.js critical rules at error severity', () => {
 describe('No warnings allowed (LLMs ignore warnings)', () => {
   it('no @next/next rules are at warn severity', () => {
     const allRules = getAllRules(recommendedTypeScriptNext);
+    const nextRulesAtWarn = Object.entries(allRules)
+      .filter(([ruleId]) => ruleId.startsWith('@next/next/'))
+      .filter(([, config]) => getSeverityNumber(config) === WARN);
+
+    expect(nextRulesAtWarn).toEqual([]);
+  });
+});
+
+/**
+ * Tests for nextOnlyRules - scoped Next.js config for monorepos
+ *
+ * This config contains ONLY Next.js-specific rules without React rules,
+ * allowing it to be file-scoped in monorepos where only some packages use Next.js.
+ */
+describe('nextOnlyRules for monorepo scoping', () => {
+  it('is a non-empty array', () => {
+    expect(Array.isArray(nextOnlyRules)).toBe(true);
+    expect(nextOnlyRules.length).toBeGreaterThan(0);
+  });
+
+  it('includes @next/next plugin', () => {
+    const hasNextPlugin = nextOnlyRules.some(
+      (config) =>
+        typeof config === 'object' &&
+        config !== null &&
+        'plugins' in config &&
+        config.plugins &&
+        '@next/next' in config.plugins,
+    );
+    expect(hasNextPlugin).toBe(true);
+  });
+
+  it('does NOT include react-hooks plugin (React rules are separate)', () => {
+    const hasReactHooks = nextOnlyRules.some(
+      (config) =>
+        typeof config === 'object' &&
+        config !== null &&
+        'plugins' in config &&
+        config.plugins &&
+        'react-hooks' in config.plugins,
+    );
+    expect(hasReactHooks).toBe(false);
+  });
+
+  it('does NOT include jsx-a11y plugin (React rules are separate)', () => {
+    const hasA11y = nextOnlyRules.some(
+      (config) =>
+        typeof config === 'object' &&
+        config !== null &&
+        'plugins' in config &&
+        config.plugins &&
+        'jsx-a11y' in config.plugins,
+    );
+    expect(hasA11y).toBe(false);
+  });
+
+  it('@next/next/no-img-element is at error severity', () => {
+    const config = getRuleConfig(nextOnlyRules, '@next/next/no-img-element');
+    expect(getSeverityNumber(config)).toBe(ERROR);
+  });
+
+  it('no @next/next rules are at warn severity', () => {
+    const allRules = getAllRules(nextOnlyRules);
     const nextRulesAtWarn = Object.entries(allRules)
       .filter(([ruleId]) => ruleId.startsWith('@next/next/'))
       .filter(([, config]) => getSeverityNumber(config) === WARN);
