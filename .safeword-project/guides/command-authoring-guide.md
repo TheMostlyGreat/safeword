@@ -135,11 +135,9 @@ Perform a comprehensive code review of the selected code.
 
 ## Best Practices
 
-### 1. Use Unique, Descriptive Names
+### 1. Use Descriptive Names
 
-**Uniqueness requirement:** No two skills, commands, subagents, guides, or hooks may share the same name. Duplicates cause ambiguous activation and unpredictable behavior.
-
-**Official Claude Code requirements:**
+**Naming requirements:**
 
 - Lowercase letters, numbers, and hyphens only
 - Filename becomes command name (e.g., `review-security.md` → `/review-security`)

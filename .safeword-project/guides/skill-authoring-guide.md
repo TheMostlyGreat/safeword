@@ -29,8 +29,6 @@ skill-name/
 
 ## Naming
 
-**Uniqueness requirement:** No two skills, commands, subagents, guides, or hooks may share the same name. Duplicates cause ambiguous activation and unpredictable behavior.
-
 Use **gerund form** (verb + -ing). This clearly describes the activity.
 
 | Form       | Examples                                      | Status     |
