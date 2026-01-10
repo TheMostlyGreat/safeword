@@ -7,28 +7,16 @@
  * TDD RED phase - these tests should FAIL until src/schema.ts is implemented.
  */
 
-import { readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import nodePath from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
 // Type guard for filtering out undefined values
 const isDefined = <T>(x: T | undefined): x is T => x !== undefined;
 
-const __filename = import.meta.filename;
-const __dirname = import.meta.dirname;
-
-// This import will fail until schema.ts is created (RED phase)
-// import { SAFEWORD_SCHEMA } from '../src/schema.js';
-
 describe('Schema - Single Source of Truth', () => {
-  // Helper to collect all files in templates/ directory
-  /**
-   *
-   * @param dir
-   * @param prefix
-   */
+  /** Recursively collect all files in templates/ directory (skips _ prefixed dirs) */
   function collectTemplateFiles(dir: string, prefix = ''): string[] {
     const files: string[] = [];
     const entries = readdirSync(dir, { withFileTypes: true });
@@ -49,7 +37,7 @@ describe('Schema - Single Source of Truth', () => {
     return files;
   }
 
-  const templatesDirectory = nodePath.join(__dirname, '../templates');
+  const templatesDirectory = nodePath.join(import.meta.dirname, '../templates');
 
   describe('ownedDirs', () => {
     it('should include all required .safeword subdirectories', async () => {
@@ -158,16 +146,7 @@ describe('Schema - Single Source of Truth', () => {
         // If it has a template reference, verify template exists
         if (definition.template) {
           const templatePath = nodePath.join(templatesDirectory, definition.template);
-          const exists = (() => {
-            try {
-              statSync(templatePath);
-              return true;
-            } catch {
-              return false;
-            }
-          })();
-
-          if (!exists) {
+          if (!existsSync(templatePath)) {
             expect.fail(
               `Schema entry '${path}' references template '${definition.template}' which does not exist`,
             );
