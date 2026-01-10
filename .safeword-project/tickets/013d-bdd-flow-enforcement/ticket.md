@@ -1,8 +1,8 @@
 ---
 id: 013d
 type: task
-phase: implement
-status: in_progress
+phase: done
+status: done
 parent: '013'
 created: 2026-01-08T05:00:00Z
 last_modified: 2026-01-08T05:00:00Z
@@ -266,15 +266,15 @@ Before marking scenario complete:
 
 ## Acceptance Criteria
 
-- [ ] BDD skill has explicit checkpoint steps at each phase exit
-- [ ] Checkpoint steps require: frontmatter update + work log entry
-- [ ] BDD skill Phase 6.4 requires refactor confirmation before marking
-- [ ] Stop hook checks cumulative artifact requirements
-- [ ] Stop hook soft-blocks when artifacts missing for claimed phase
-- [ ] Done gate: features require tests pass + scenarios complete
-- [ ] Done gate: tasks/patches require tests pass only
-- [ ] Debugging skill requires root cause doc before fix (skill update)
-- [ ] Bug-investigated tickets require regression test before done
+- [x] BDD skill has explicit checkpoint steps at each phase exit
+- [x] Checkpoint steps require: frontmatter update + work log entry
+- [x] BDD skill Phase 6.4 requires refactor confirmation before marking
+- [x] Stop hook checks cumulative artifact requirements
+- [x] Stop hook soft-blocks when artifacts missing for claimed phase
+- [x] Done gate: features require tests pass + scenarios complete
+- [x] Done gate: tasks/patches require tests pass only
+- [x] Debugging skill requires root cause doc before fix (skill update)
+- [x] Bug-investigated tickets require regression test before done (via debugging skill Phase 4)
 
 ## Implementation Order
 
