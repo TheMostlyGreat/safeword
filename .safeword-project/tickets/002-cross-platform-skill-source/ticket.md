@@ -5,7 +5,7 @@ phase: intake
 status: backlog
 created: 2026-01-05T00:44:00Z
 last_modified: 2026-01-05T00:44:00Z
-github_title: "Single source of truth for cross-platform skills (Claude + Cursor)"
+github_title: 'Single source of truth for cross-platform skills (Claude + Cursor)'
 ---
 
 # Single Source of Truth for Cross-Platform Skills

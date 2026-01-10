@@ -6,33 +6,29 @@
  * - CLI's project-detector at init time
  */
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import path from "node:path";
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 
 /**
  * TanStack Query package names across all supported frameworks.
  */
 const TANSTACK_QUERY_PACKAGES = [
-  "@tanstack/react-query",
-  "@tanstack/vue-query",
-  "@tanstack/solid-query",
-  "@tanstack/svelte-query",
-  "@tanstack/angular-query-experimental",
+  '@tanstack/react-query',
+  '@tanstack/vue-query',
+  '@tanstack/solid-query',
+  '@tanstack/svelte-query',
+  '@tanstack/angular-query-experimental',
 ] as const;
 
 /**
  * Tailwind CSS package names (v3 and v4 installation methods).
  */
-const TAILWIND_PACKAGES = [
-  "tailwindcss",
-  "@tailwindcss/vite",
-  "@tailwindcss/postcss",
-] as const;
+const TAILWIND_PACKAGES = ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/postcss'] as const;
 
 /**
  * Playwright test package names.
  */
-const PLAYWRIGHT_PACKAGES = ["@playwright/test", "playwright"] as const;
+const PLAYWRIGHT_PACKAGES = ['@playwright/test', 'playwright'] as const;
 
 /**
  * Known formatter config files.
@@ -40,35 +36,35 @@ const PLAYWRIGHT_PACKAGES = ["@playwright/test", "playwright"] as const;
  */
 const FORMATTER_CONFIG_FILES = [
   // Biome
-  "biome.json",
-  "biome.jsonc",
+  'biome.json',
+  'biome.jsonc',
   // dprint
-  "dprint.json",
-  ".dprint.json",
-  "dprint.jsonc",
-  ".dprint.jsonc",
+  'dprint.json',
+  '.dprint.json',
+  'dprint.jsonc',
+  '.dprint.jsonc',
   // Rome (legacy, now Biome)
-  "rome.json",
+  'rome.json',
   // Prettier - all supported config formats
   // See: https://prettier.io/docs/en/configuration.html
-  ".prettierrc",
-  ".prettierrc.json",
-  ".prettierrc.json5",
-  ".prettierrc.yaml",
-  ".prettierrc.yml",
-  ".prettierrc.toml",
-  ".prettierrc.js",
-  ".prettierrc.cjs",
-  ".prettierrc.mjs",
-  ".prettierrc.ts",
-  ".prettierrc.cts",
-  ".prettierrc.mts",
-  "prettier.config.js",
-  "prettier.config.cjs",
-  "prettier.config.mjs",
-  "prettier.config.ts",
-  "prettier.config.cts",
-  "prettier.config.mts",
+  '.prettierrc',
+  '.prettierrc.json',
+  '.prettierrc.json5',
+  '.prettierrc.yaml',
+  '.prettierrc.yml',
+  '.prettierrc.toml',
+  '.prettierrc.js',
+  '.prettierrc.cjs',
+  '.prettierrc.mjs',
+  '.prettierrc.ts',
+  '.prettierrc.cts',
+  '.prettierrc.mts',
+  'prettier.config.js',
+  'prettier.config.cjs',
+  'prettier.config.mjs',
+  'prettier.config.ts',
+  'prettier.config.cts',
+  'prettier.config.mts',
 ] as const;
 
 type DepsRecord = Record<string, string | undefined>;
@@ -80,7 +76,7 @@ type ScriptsRecord = Record<string, string | undefined>;
 function readPackageDeps(pkgPath: string): DepsRecord {
   try {
     if (!existsSync(pkgPath)) return {};
-    const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
     return { ...pkg.dependencies, ...pkg.devDependencies };
   } catch {
     return {};
@@ -92,7 +88,7 @@ function readPackageDeps(pkgPath: string): DepsRecord {
  */
 function getWorkspacePatternsFromPackage(rootPackagePath: string): string[] {
   try {
-    const rootPackage = JSON.parse(readFileSync(rootPackagePath, "utf8"));
+    const rootPackage = JSON.parse(readFileSync(rootPackagePath, 'utf8'));
     if (Array.isArray(rootPackage.workspaces)) {
       return rootPackage.workspaces;
     }
@@ -108,11 +104,8 @@ function getWorkspacePatternsFromPackage(rootPackagePath: string): string[] {
 /**
  * Scan a workspace directory for package.json files.
  */
-function scanWorkspaceDirectory(
-  rootDirectory: string,
-  pattern: string,
-): DepsRecord {
-  if (!pattern.endsWith("/*")) return {};
+function scanWorkspaceDirectory(rootDirectory: string, pattern: string): DepsRecord {
+  if (!pattern.endsWith('/*')) return {};
 
   const baseDirectory = path.join(rootDirectory, pattern.slice(0, -2));
   if (!existsSync(baseDirectory)) return {};
@@ -124,7 +117,7 @@ function scanWorkspaceDirectory(
       if (entry.isDirectory()) {
         Object.assign(
           allDeps,
-          readPackageDeps(path.join(baseDirectory, entry.name, "package.json")),
+          readPackageDeps(path.join(baseDirectory, entry.name, 'package.json')),
         );
       }
     }
@@ -139,12 +132,12 @@ function scanWorkspaceDirectory(
  * Supports npm/yarn workspaces and common monorepo patterns.
  */
 function collectAllDeps(rootDirectory: string): DepsRecord {
-  const rootPackagePath = path.join(rootDirectory, "package.json");
+  const rootPackagePath = path.join(rootDirectory, 'package.json');
   const allDeps = readPackageDeps(rootPackagePath);
 
   // Get patterns from workspaces config + common monorepo directories
   const workspacePatterns = getWorkspacePatternsFromPackage(rootPackagePath);
-  const commonPatterns = ["apps/*", "packages/*"];
+  const commonPatterns = ['apps/*', 'packages/*'];
   const patterns = [...new Set([...workspacePatterns, ...commonPatterns])];
 
   // Scan each workspace pattern
@@ -159,28 +152,28 @@ function collectAllDeps(rootDirectory: string): DepsRecord {
  * Check if Tailwind CSS is installed.
  */
 function hasTailwind(deps: DepsRecord): boolean {
-  return TAILWIND_PACKAGES.some((pkg) => pkg in deps);
+  return TAILWIND_PACKAGES.some(pkg => pkg in deps);
 }
 
 /**
  * Check if TanStack Query is installed.
  */
 function hasTanstackQuery(deps: DepsRecord): boolean {
-  return TANSTACK_QUERY_PACKAGES.some((pkg) => pkg in deps);
+  return TANSTACK_QUERY_PACKAGES.some(pkg => pkg in deps);
 }
 
 /**
  * Check if Vitest is installed.
  */
 function hasVitest(deps: DepsRecord): boolean {
-  return "vitest" in deps;
+  return 'vitest' in deps;
 }
 
 /**
  * Check if Playwright is installed.
  */
 function hasPlaywright(deps: DepsRecord): boolean {
-  return PLAYWRIGHT_PACKAGES.some((pkg) => pkg in deps);
+  return PLAYWRIGHT_PACKAGES.some(pkg => pkg in deps);
 }
 
 /**
@@ -189,21 +182,21 @@ function hasPlaywright(deps: DepsRecord): boolean {
  */
 function detectFramework(
   deps: DepsRecord,
-): "next" | "react" | "astro" | "typescript" | "javascript" {
-  if ("next" in deps) return "next";
-  if ("react" in deps) return "react";
-  if ("astro" in deps) return "astro";
-  if ("typescript" in deps || "typescript-eslint" in deps) return "typescript";
-  return "javascript";
+): 'next' | 'react' | 'astro' | 'typescript' | 'javascript' {
+  if ('next' in deps) return 'next';
+  if ('react' in deps) return 'react';
+  if ('astro' in deps) return 'astro';
+  if ('typescript' in deps || 'typescript-eslint' in deps) return 'typescript';
+  return 'javascript';
 }
 
 /**
  * Get dynamic ignores based on detected frameworks.
  */
 function getIgnores(deps: DepsRecord): string[] {
-  const ignores = ["**/node_modules/", "**/dist/", "**/build/", "**/coverage/"];
-  if ("next" in deps) ignores.push("**/.next/");
-  if ("astro" in deps) ignores.push("**/.astro/");
+  const ignores = ['**/node_modules/', '**/dist/', '**/build/', '**/coverage/'];
+  if ('next' in deps) ignores.push('**/.next/');
+  if ('astro' in deps) ignores.push('**/.astro/');
   return ignores;
 }
 
@@ -212,7 +205,7 @@ function getIgnores(deps: DepsRecord): string[] {
  * True if package.json has a "lint" script.
  */
 function hasExistingLinter(scripts: ScriptsRecord): boolean {
-  return "lint" in scripts;
+  return 'lint' in scripts;
 }
 
 /**
@@ -221,12 +214,10 @@ function hasExistingLinter(scripts: ScriptsRecord): boolean {
  */
 function hasExistingFormatter(cwd: string, scripts: ScriptsRecord): boolean {
   // Check for format script
-  if ("format" in scripts) return true;
+  if ('format' in scripts) return true;
 
   // Check for formatter config files
-  return FORMATTER_CONFIG_FILES.some((file) =>
-    existsSync(path.join(cwd, file)),
-  );
+  return FORMATTER_CONFIG_FILES.some(file => existsSync(path.join(cwd, file)));
 }
 
 /**

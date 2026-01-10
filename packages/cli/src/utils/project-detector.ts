@@ -5,10 +5,10 @@
  * appropriate linting rules.
  */
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import nodePath from "node:path";
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import nodePath from 'node:path';
 
-import { detect } from "../presets/typescript/detect.js";
+import { detect } from '../presets/typescript/detect.js';
 
 // Re-export detection constants from typescript preset (single source of truth)
 export const {
@@ -20,35 +20,35 @@ export const {
 } = detect;
 
 // Python project file markers
-const PYPROJECT_TOML = "pyproject.toml";
-const REQUIREMENTS_TXT = "requirements.txt";
-const UV_LOCK = "uv.lock";
+const PYPROJECT_TOML = 'pyproject.toml';
+const REQUIREMENTS_TXT = 'requirements.txt';
+const UV_LOCK = 'uv.lock';
 
 // Go project file markers
-const GO_MOD = "go.mod";
+const GO_MOD = 'go.mod';
 
 // ESLint config file markers (flat config and legacy)
 const ESLINT_CONFIG_FILES = [
-  "eslint.config.mjs",
-  "eslint.config.js",
-  "eslint.config.cjs",
-  ".eslintrc.js",
-  ".eslintrc.cjs",
-  ".eslintrc.json",
-  ".eslintrc.yml",
-  ".eslintrc.yaml",
+  'eslint.config.mjs',
+  'eslint.config.js',
+  'eslint.config.cjs',
+  '.eslintrc.js',
+  '.eslintrc.cjs',
+  '.eslintrc.json',
+  '.eslintrc.yml',
+  '.eslintrc.yaml',
 ] as const;
 
 // golangci-lint config file markers
 const GOLANGCI_CONFIG_FILES = [
-  ".golangci.yml",
-  ".golangci.yaml",
-  ".golangci.toml",
-  ".golangci.json",
+  '.golangci.yml',
+  '.golangci.yaml',
+  '.golangci.toml',
+  '.golangci.json',
 ];
 
 // Python frameworks to detect (order matters - first match wins)
-const PYTHON_FRAMEWORKS = ["django", "flask", "fastapi"] as const;
+const PYTHON_FRAMEWORKS = ['django', 'flask', 'fastapi'] as const;
 
 export interface PackageJson {
   name?: string;
@@ -106,8 +106,8 @@ export interface Languages {
  * @see ARCHITECTURE.md → Language Detection
  */
 export interface PythonProjectType {
-  framework: "django" | "flask" | "fastapi" | undefined;
-  packageManager: "poetry" | "uv" | "pip";
+  framework: 'django' | 'flask' | 'fastapi' | undefined;
+  packageManager: 'poetry' | 'uv' | 'pip';
 }
 
 /**
@@ -117,7 +117,7 @@ export interface PythonProjectType {
  * @see ARCHITECTURE.md → Language Detection
  */
 export function detectLanguages(cwd: string): Languages {
-  const hasPackageJson = existsSync(nodePath.join(cwd, "package.json"));
+  const hasPackageJson = existsSync(nodePath.join(cwd, 'package.json'));
   const hasPyproject = existsSync(nodePath.join(cwd, PYPROJECT_TOML));
   const hasRequirements = existsSync(nodePath.join(cwd, REQUIREMENTS_TXT));
   const hasGoModule = existsSync(nodePath.join(cwd, GO_MOD));
@@ -149,20 +149,20 @@ export function detectPythonType(cwd: string): PythonProjectType | undefined {
 
   // Read project file for dependency/tool detection
   const content = hasPyproject
-    ? readFileSync(pyprojectPath, "utf8")
-    : readFileSync(requirementsPath, "utf8");
+    ? readFileSync(pyprojectPath, 'utf8')
+    : readFileSync(requirementsPath, 'utf8');
 
   // Detect package manager (priority: poetry > uv > pip)
-  let packageManager: PythonProjectType["packageManager"] = "pip";
-  if (hasPyproject && content.includes("[tool.poetry]")) {
-    packageManager = "poetry";
+  let packageManager: PythonProjectType['packageManager'] = 'pip';
+  if (hasPyproject && content.includes('[tool.poetry]')) {
+    packageManager = 'poetry';
   } else if (existsSync(uvLockPath)) {
-    packageManager = "uv";
+    packageManager = 'uv';
   }
 
   // Detect framework (first match wins)
   const contentLower = content.toLowerCase();
-  const framework = PYTHON_FRAMEWORKS.find((fw) => contentLower.includes(fw));
+  const framework = PYTHON_FRAMEWORKS.find(fw => contentLower.includes(fw));
 
   return { framework, packageManager };
 }
@@ -174,7 +174,7 @@ export function detectPythonType(cwd: string): PythonProjectType | undefined {
  * @param maxDepth
  */
 function hasShellScripts(cwd: string, maxDepth = 4): boolean {
-  const excludeDirectories = new Set(["node_modules", ".git", ".safeword"]);
+  const excludeDirectories = new Set(['node_modules', '.git', '.safeword']);
 
   /**
    *
@@ -187,7 +187,7 @@ function hasShellScripts(cwd: string, maxDepth = 4): boolean {
     try {
       const entries = readdirSync(dir, { withFileTypes: true });
       for (const entry of entries) {
-        if (entry.isFile() && entry.name.endsWith(".sh")) {
+        if (entry.isFile() && entry.name.endsWith('.sh')) {
           return true;
         }
         if (
@@ -232,14 +232,14 @@ function findExistingEslintConfig(cwd: string): string | undefined {
  */
 function hasExistingRuffConfig(cwd: string): boolean {
   // Check for standalone ruff.toml
-  if (existsSync(nodePath.join(cwd, "ruff.toml"))) return true;
+  if (existsSync(nodePath.join(cwd, 'ruff.toml'))) return true;
 
   // Check for [tool.ruff] in pyproject.toml
   const pyprojectPath = nodePath.join(cwd, PYPROJECT_TOML);
   if (!existsSync(pyprojectPath)) return false;
   try {
-    const content = readFileSync(pyprojectPath, "utf8");
-    return content.includes("[tool.ruff]");
+    const content = readFileSync(pyprojectPath, 'utf8');
+    return content.includes('[tool.ruff]');
   } catch {
     return false;
   }
@@ -252,15 +252,15 @@ function hasExistingRuffConfig(cwd: string): boolean {
  */
 function hasExistingMypyConfig(cwd: string): boolean {
   // Check for standalone mypy config files
-  if (existsSync(nodePath.join(cwd, "mypy.ini"))) return true;
-  if (existsSync(nodePath.join(cwd, ".mypy.ini"))) return true;
+  if (existsSync(nodePath.join(cwd, 'mypy.ini'))) return true;
+  if (existsSync(nodePath.join(cwd, '.mypy.ini'))) return true;
 
   // Check for [tool.mypy] in pyproject.toml
   const pyprojectPath = nodePath.join(cwd, PYPROJECT_TOML);
   if (!existsSync(pyprojectPath)) return false;
   try {
-    const content = readFileSync(pyprojectPath, "utf8");
-    return content.includes("[tool.mypy]");
+    const content = readFileSync(pyprojectPath, 'utf8');
+    return content.includes('[tool.mypy]');
   } catch {
     return false;
   }
@@ -273,14 +273,14 @@ function hasExistingMypyConfig(cwd: string): boolean {
  */
 function hasExistingImportLinterConfig(cwd: string): boolean {
   // Check for standalone .importlinter file
-  if (existsSync(nodePath.join(cwd, ".importlinter"))) return true;
+  if (existsSync(nodePath.join(cwd, '.importlinter'))) return true;
 
   // Check for [tool.importlinter] in pyproject.toml
   const pyprojectPath = nodePath.join(cwd, PYPROJECT_TOML);
   if (!existsSync(pyprojectPath)) return false;
   try {
-    const content = readFileSync(pyprojectPath, "utf8");
-    return content.includes("[tool.importlinter]");
+    const content = readFileSync(pyprojectPath, 'utf8');
+    return content.includes('[tool.importlinter]');
   } catch {
     return false;
   }
@@ -309,25 +309,25 @@ function detectFrameworks(
   allDeps: Record<string, string>,
 ): Pick<
   ProjectType,
-  | "typescript"
-  | "react"
-  | "nextjs"
-  | "astro"
-  | "vitest"
-  | "playwright"
-  | "tailwind"
-  | "tanstackQuery"
+  | 'typescript'
+  | 'react'
+  | 'nextjs'
+  | 'astro'
+  | 'vitest'
+  | 'playwright'
+  | 'tailwind'
+  | 'tanstackQuery'
 > {
-  const hasNextJs = "next" in deps;
+  const hasNextJs = 'next' in deps;
   return {
-    typescript: "typescript" in allDeps,
-    react: "react" in deps || "react" in developmentDeps || hasNextJs,
+    typescript: 'typescript' in allDeps,
+    react: 'react' in deps || 'react' in developmentDeps || hasNextJs,
     nextjs: hasNextJs,
-    astro: "astro" in deps || "astro" in developmentDeps,
-    vitest: "vitest" in developmentDeps,
-    playwright: "@playwright/test" in developmentDeps,
-    tailwind: TAILWIND_PACKAGES.some((pkg) => pkg in allDeps),
-    tanstackQuery: TANSTACK_QUERY_PACKAGES.some((pkg) => pkg in allDeps),
+    astro: 'astro' in deps || 'astro' in developmentDeps,
+    vitest: 'vitest' in developmentDeps,
+    playwright: '@playwright/test' in developmentDeps,
+    tailwind: TAILWIND_PACKAGES.some(pkg => pkg in allDeps),
+    tanstackQuery: TANSTACK_QUERY_PACKAGES.some(pkg => pkg in allDeps),
   };
 }
 
@@ -335,11 +335,7 @@ function detectFrameworks(
  * Detect if package is publishable (has entry points and not private).
  */
 function detectPublishable(packageJson: PackageJsonWithScripts): boolean {
-  const hasEntryPoints = !!(
-    packageJson.main ||
-    packageJson.module ||
-    packageJson.exports
-  );
+  const hasEntryPoints = !!(packageJson.main || packageJson.module || packageJson.exports);
   return hasEntryPoints && packageJson.private !== true;
 }
 
@@ -351,28 +347,24 @@ function detectExistingTooling(
   scripts: Record<string, string>,
 ): Pick<
   ProjectType,
-  | "existingLinter"
-  | "existingFormatter"
-  | "existingEslintConfig"
-  | "legacyEslint"
-  | "existingRuffConfig"
-  | "existingMypyConfig"
-  | "existingImportLinterConfig"
-  | "existingGolangciConfig"
+  | 'existingLinter'
+  | 'existingFormatter'
+  | 'existingEslintConfig'
+  | 'legacyEslint'
+  | 'existingRuffConfig'
+  | 'existingMypyConfig'
+  | 'existingImportLinterConfig'
+  | 'existingGolangciConfig'
 > {
   const eslintConfig = cwd ? findExistingEslintConfig(cwd) : undefined;
   return {
     existingLinter: hasExistingLinter(scripts),
-    existingFormatter: cwd
-      ? hasExistingFormatter(cwd, scripts)
-      : "format" in scripts,
+    existingFormatter: cwd ? hasExistingFormatter(cwd, scripts) : 'format' in scripts,
     existingEslintConfig: eslintConfig,
-    legacyEslint: eslintConfig?.startsWith(".eslintrc") ?? false,
+    legacyEslint: eslintConfig?.startsWith('.eslintrc') ?? false,
     existingRuffConfig: cwd ? hasExistingRuffConfig(cwd) : false,
     existingMypyConfig: cwd ? hasExistingMypyConfig(cwd) : false,
-    existingImportLinterConfig: cwd
-      ? hasExistingImportLinterConfig(cwd)
-      : false,
+    existingImportLinterConfig: cwd ? hasExistingImportLinterConfig(cwd) : false,
     existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : undefined,
   };
 }
@@ -382,10 +374,7 @@ function detectExistingTooling(
  * @param packageJson - Package.json contents including scripts
  * @param cwd - Working directory for file-based detection
  */
-export function detectProjectType(
-  packageJson: PackageJsonWithScripts,
-  cwd?: string,
-): ProjectType {
+export function detectProjectType(packageJson: PackageJsonWithScripts, cwd?: string): ProjectType {
   const deps = packageJson.dependencies ?? {};
   const developmentDeps = packageJson.devDependencies ?? {};
   const allDeps = { ...deps, ...developmentDeps };

@@ -4,9 +4,9 @@
  * Install language packs and update config.
  */
 
-import { isGitRepo } from "../utils/git.js";
-import { addInstalledPack, isPackInstalled } from "./config.js";
-import { LANGUAGE_PACKS } from "./registry.js";
+import { isGitRepo } from '../utils/git.js';
+import { addInstalledPack, isPackInstalled } from './config.js';
+import { LANGUAGE_PACKS } from './registry.js';
 
 /**
  * Install a language pack.

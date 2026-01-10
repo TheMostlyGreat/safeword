@@ -1,20 +1,8 @@
-import {
-  exec,
-  execSync,
-  spawnSync,
-  type SpawnSyncReturns,
-} from "node:child_process";
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
-import nodePath from "node:path";
-import { promisify } from "node:util";
+import { exec, execSync, spawnSync, type SpawnSyncReturns } from 'node:child_process';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import nodePath from 'node:path';
+import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
 
@@ -36,12 +24,12 @@ const __dirname = import.meta.dirname;
 /**
  * Path to the CLI entry point (built)
  */
-const CLI_PATH = nodePath.join(__dirname, "../dist/cli.js");
+const CLI_PATH = nodePath.join(__dirname, '../dist/cli.js');
 
 /**
  * Path to the local safeword CLI package (for file: references in tests)
  */
-const SAFEWORD_PATH = nodePath.join(__dirname, "..");
+const SAFEWORD_PATH = nodePath.join(__dirname, '..');
 
 /**
  * safeword reference for test package.json files.
@@ -54,7 +42,7 @@ export const SAFEWORD_VERSION = `file:${SAFEWORD_PATH}`;
  * Creates a temporary directory for test isolation
  */
 export function createTemporaryDirectory(): string {
-  return mkdtempSync(nodePath.join(tmpdir(), "safeword-test-"));
+  return mkdtempSync(nodePath.join(tmpdir(), 'safeword-test-'));
 }
 
 /**
@@ -83,26 +71,19 @@ export function removeTemporaryDirectory(dir: string): void {
  * @param dir
  * @param overrides
  */
-export function createPackageJson(
-  dir: string,
-  overrides: Record<string, unknown> = {},
-): void {
+export function createPackageJson(dir: string, overrides: Record<string, unknown> = {}): void {
   // Merge devDependencies to ensure local safeword is always included
-  const existingDevelopmentDeps =
-    (overrides.devDependencies as Record<string, string>) ?? {};
+  const existingDevelopmentDeps = (overrides.devDependencies as Record<string, string>) ?? {};
   const pkg = {
-    name: "test-project",
-    version: "1.0.0",
+    name: 'test-project',
+    version: '1.0.0',
     ...overrides,
     devDependencies: {
       safeword: SAFEWORD_VERSION,
       ...existingDevelopmentDeps,
     },
   };
-  writeFileSync(
-    nodePath.join(dir, "package.json"),
-    JSON.stringify(pkg, undefined, 2),
-  );
+  writeFileSync(nodePath.join(dir, 'package.json'), JSON.stringify(pkg, undefined, 2));
 }
 
 /**
@@ -117,7 +98,7 @@ export function createTypeScriptPackageJson(
 ): void {
   createPackageJson(dir, {
     devDependencies: {
-      typescript: "^5.0.0",
+      typescript: '^5.0.0',
       safeword: SAFEWORD_VERSION,
     },
     ...overrides,
@@ -130,14 +111,11 @@ export function createTypeScriptPackageJson(
  * @param dir
  * @param overrides
  */
-export function createReactPackageJson(
-  dir: string,
-  overrides: Record<string, unknown> = {},
-): void {
+export function createReactPackageJson(dir: string, overrides: Record<string, unknown> = {}): void {
   createPackageJson(dir, {
     dependencies: {
-      react: "^18.0.0",
-      "react-dom": "^18.0.0",
+      react: '^18.0.0',
+      'react-dom': '^18.0.0',
     },
     devDependencies: {
       safeword: SAFEWORD_VERSION,
@@ -158,9 +136,9 @@ export function createNextJsPackageJson(
 ): void {
   createPackageJson(dir, {
     dependencies: {
-      next: "^14.0.0",
-      react: "^18.0.0",
-      "react-dom": "^18.0.0",
+      next: '^14.0.0',
+      react: '^18.0.0',
+      'react-dom': '^18.0.0',
     },
     devDependencies: {
       safeword: SAFEWORD_VERSION,
@@ -195,13 +173,9 @@ export async function runCli(
     timeout?: number;
   } = {},
 ): Promise<CliResult> {
-  const {
-    cwd = process.cwd(),
-    env = {},
-    timeout = TIMEOUT_BUN_INSTALL,
-  } = options;
+  const { cwd = process.cwd(), env = {}, timeout = TIMEOUT_BUN_INSTALL } = options;
 
-  const command = `node ${CLI_PATH} ${args.join(" ")}`;
+  const command = `node ${CLI_PATH} ${args.join(' ')}`;
 
   try {
     const { stdout, stderr } = await execAsync(command, {
@@ -219,8 +193,8 @@ export async function runCli(
     };
     const exitCode = execError.code ?? execError.status ?? 1;
     return {
-      stdout: execError.stdout ?? "",
-      stderr: execError.stderr ?? "",
+      stdout: execError.stdout ?? '',
+      stderr: execError.stderr ?? '',
       exitCode,
     };
   }
@@ -245,25 +219,25 @@ export function runCliSync(
 ): CliResult {
   const { cwd = process.cwd(), env = {}, timeout = TIMEOUT_SYNC } = options;
 
-  const command = `node ${CLI_PATH} ${args.join(" ")}`;
+  const command = `node ${CLI_PATH} ${args.join(' ')}`;
 
   try {
     const stdout = execSync(command, {
       cwd,
       env: { ...process.env, ...env },
       timeout,
-      encoding: "utf8",
-      stdio: ["pipe", "pipe", "pipe"],
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
-    return { stdout, stderr: "", exitCode: 0 };
+    return { stdout, stderr: '', exitCode: 0 };
   } catch (error: unknown) {
     const execError = error as {
       stdout?: string | Buffer;
       stderr?: string | Buffer;
       status?: number;
     };
-    const stdout = execError.stdout?.toString() ?? "";
-    const stderr = execError.stderr?.toString() ?? "";
+    const stdout = execError.stdout?.toString() ?? '';
+    const stderr = execError.stderr?.toString() ?? '';
     return { stdout, stderr, exitCode: execError.status ?? 1 };
   }
 }
@@ -274,7 +248,7 @@ export function runCliSync(
  * @param relativePath
  */
 export function readTestFile(dir: string, relativePath: string): string {
-  return readFileSync(nodePath.join(dir, relativePath), "utf8");
+  return readFileSync(nodePath.join(dir, relativePath), 'utf8');
 }
 
 /**
@@ -283,11 +257,7 @@ export function readTestFile(dir: string, relativePath: string): string {
  * @param relativePath
  * @param content
  */
-export function writeTestFile(
-  dir: string,
-  relativePath: string,
-  content: string,
-): void {
+export function writeTestFile(dir: string, relativePath: string, content: string): void {
   const fullPath = nodePath.join(dir, relativePath);
   const parentDirectory = nodePath.dirname(fullPath);
   if (!existsSync(parentDirectory)) {
@@ -310,12 +280,12 @@ export function fileExists(dir: string, relativePath: string): boolean {
  * @param dir
  */
 export function initGitRepo(dir: string): void {
-  execSync("git init", { cwd: dir, stdio: "pipe" });
+  execSync('git init', { cwd: dir, stdio: 'pipe' });
   execSync('git config user.email "test@test.com"', {
     cwd: dir,
-    stdio: "pipe",
+    stdio: 'pipe',
   });
-  execSync('git config user.name "Test User"', { cwd: dir, stdio: "pipe" });
+  execSync('git config user.name "Test User"', { cwd: dir, stdio: 'pipe' });
 }
 
 /**
@@ -326,26 +296,24 @@ export function initGitRepo(dir: string): void {
 export async function createConfiguredProject(dir: string): Promise<void> {
   createTypeScriptPackageJson(dir, {
     devDependencies: {
-      typescript: "^5.0.0",
+      typescript: '^5.0.0',
       // Include safeword base packages to prevent sync attempts during upgrade tests
-      eslint: "^9.0.0",
-      prettier: "^3.0.0",
-      "eslint-config-prettier": "^9.0.0",
+      eslint: '^9.0.0',
+      prettier: '^3.0.0',
+      'eslint-config-prettier': '^9.0.0',
       safeword: SAFEWORD_VERSION,
-      knip: "^5.0.0",
+      knip: '^5.0.0',
     },
   });
   initGitRepo(dir);
-  await runCli(["setup"], { cwd: dir });
+  await runCli(['setup'], { cwd: dir });
 }
 
 /**
  * Measures execution time of a function in milliseconds
  * @param fn
  */
-export async function measureTime<T>(
-  fn: () => Promise<T>,
-): Promise<{ result: T; timeMs: number }> {
+export async function measureTime<T>(fn: () => Promise<T>): Promise<{ result: T; timeMs: number }> {
   const start = performance.now();
   const result = await fn();
   const timeMs = performance.now() - start;
@@ -374,12 +342,8 @@ export function writeSafewordConfig(
   dir: string,
   config: { installedPacks?: string[]; version?: string } = {},
 ): void {
-  const { installedPacks = [], version = "0.15.0" } = config;
-  writeTestFile(
-    dir,
-    ".safeword/config.json",
-    JSON.stringify({ version, installedPacks }),
-  );
+  const { installedPacks = [], version = '0.15.0' } = config;
+  writeTestFile(dir, '.safeword/config.json', JSON.stringify({ version, installedPacks }));
 }
 
 /**
@@ -390,7 +354,7 @@ export function readSafewordConfig(dir: string): {
   version: string;
   installedPacks: string[];
 } {
-  return JSON.parse(readTestFile(dir, ".safeword/config.json"));
+  return JSON.parse(readTestFile(dir, '.safeword/config.json'));
 }
 
 /**
@@ -400,8 +364,8 @@ export function readSafewordConfig(dir: string): {
 function isCommandAvailable(command: string): boolean {
   try {
     const result = execSync(`${command} --version`, {
-      encoding: "utf8",
-      stdio: "pipe",
+      encoding: 'utf8',
+      stdio: 'pipe',
     });
     return result.length > 0;
   } catch {
@@ -411,27 +375,27 @@ function isCommandAvailable(command: string): boolean {
 
 /** Check if Ruff is installed (for Python linting tests) */
 export function isRuffInstalled(): boolean {
-  return isCommandAvailable("ruff");
+  return isCommandAvailable('ruff');
 }
 
 /** Check if uv is installed (for Python package manager tests) */
 export function isUvInstalled(): boolean {
-  return isCommandAvailable("uv");
+  return isCommandAvailable('uv');
 }
 
 /** Check if Poetry is installed (for Python package manager tests) */
 export function isPoetryInstalled(): boolean {
-  return isCommandAvailable("poetry");
+  return isCommandAvailable('poetry');
 }
 
 /** Check if mypy is installed (for Python type checking tests) */
 export function isMypyInstalled(): boolean {
-  return isCommandAvailable("mypy");
+  return isCommandAvailable('mypy');
 }
 
 /** Check if golangci-lint is installed (for Go linting tests) */
 export function isGolangciLintInstalled(): boolean {
-  return isCommandAvailable("golangci-lint");
+  return isCommandAvailable('golangci-lint');
 }
 
 /**
@@ -445,10 +409,10 @@ export function createPythonProject(
   dir: string,
   options: {
     framework?: string;
-    manager?: "poetry" | "uv" | "pip" | "pipenv";
+    manager?: 'poetry' | 'uv' | 'pip' | 'pipenv';
   } = {},
 ): void {
-  const { framework, manager = "pip" } = options;
+  const { framework, manager = 'pip' } = options;
 
   let content = `[project]
 name = "test-python-project"
@@ -462,7 +426,7 @@ version = "0.1.0"
   // Add manager-specific config and lockfiles for proper detection
   // Detection logic in python-setup.ts checks lockfiles first
   switch (manager) {
-    case "poetry": {
+    case 'poetry': {
       // Poetry requires name, version, and python constraint in [tool.poetry]
       // Without python constraint, poetry assumes Python 2.7+ which fails modern deps like ruff
       // Don't create poetry.lock - let poetry create it during `poetry add`
@@ -470,13 +434,13 @@ version = "0.1.0"
       content += `\n[tool.poetry]\nname = "test-python-project"\nversion = "0.1.0"\n\n[tool.poetry.dependencies]\npython = "^3.10"\n`;
       break;
     }
-    case "uv": {
+    case 'uv': {
       // uv requires requires-python in pyproject.toml
       content += `requires-python = ">=3.10"\n`;
       // Create valid minimal uv.lock for detection (must match pyproject.toml requires-python)
       writeTestFile(
         dir,
-        "uv.lock",
+        'uv.lock',
         `version = 1
 revision = 2
 requires-python = ">=3.10"
@@ -490,22 +454,18 @@ source = { virtual = "." }
 
       break;
     }
-    case "pipenv": {
+    case 'pipenv': {
       // Create Pipfile for detection
-      writeTestFile(
-        dir,
-        "Pipfile",
-        '[[source]]\nurl = "https://pypi.org/simple"\n',
-      );
+      writeTestFile(dir, 'Pipfile', '[[source]]\nurl = "https://pypi.org/simple"\n');
       break;
     }
-    case "pip": {
+    case 'pip': {
       // pip is the default - no special config or lockfiles needed
       break;
     }
   }
 
-  writeTestFile(dir, "pyproject.toml", content);
+  writeTestFile(dir, 'pyproject.toml', content);
 }
 
 /**
@@ -514,15 +474,12 @@ source = { virtual = "." }
  * @param options
  * @param options.module - Module name (defaults to 'example.com/test-project')
  */
-export function createGoProject(
-  dir: string,
-  options: { module?: string } = {},
-): void {
-  const module = options.module ?? "example.com/test-project";
+export function createGoProject(dir: string, options: { module?: string } = {}): void {
+  const module = options.module ?? 'example.com/test-project';
 
   writeTestFile(
     dir,
-    "go.mod",
+    'go.mod',
     `module ${module}
 
 go 1.22
@@ -531,7 +488,7 @@ go 1.22
 
   writeTestFile(
     dir,
-    "main.go",
+    'main.go',
     `// Package main is the entry point.
 package main
 
@@ -556,9 +513,9 @@ export function runEslint(
   file: string,
   extraArguments: string[] = [],
 ): SpawnSyncReturns<string> {
-  return spawnSync("bunx", ["eslint", file, ...extraArguments], {
+  return spawnSync('bunx', ['eslint', file, ...extraArguments], {
     cwd: dir,
-    encoding: "utf8",
+    encoding: 'utf8',
   });
 }
 
@@ -575,15 +532,12 @@ export async function getReconcileTestUtilities(
 ) {
   const { packageJson } = options;
 
-  const { reconcile } = await import("../src/reconcile.js");
-  const { SAFEWORD_SCHEMA } = await import("../src/schema.js");
-  const { createProjectContext } = await import("../src/utils/context.js");
+  const { reconcile } = await import('../src/reconcile.js');
+  const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
+  const { createProjectContext } = await import('../src/utils/context.js');
 
   if (packageJson) {
-    writeFileSync(
-      nodePath.join(dir, "package.json"),
-      JSON.stringify(packageJson, undefined, 2),
-    );
+    writeFileSync(nodePath.join(dir, 'package.json'), JSON.stringify(packageJson, undefined, 2));
   }
 
   return { reconcile, SAFEWORD_SCHEMA, createProjectContext };
@@ -601,17 +555,18 @@ export async function getReconcileTestUtilities(
 export async function setupReconcileTest(
   dir: string,
   options: {
-    mode?: "install" | "upgrade" | "uninstall";
+    mode?: 'install' | 'upgrade' | 'uninstall';
     packageJson?: Record<string, unknown>;
   } = {},
 ) {
-  const { mode = "install", packageJson = { name: "test", version: "1.0.0" } } =
-    options;
+  const { mode = 'install', packageJson = { name: 'test', version: '1.0.0' } } = options;
 
-  const { reconcile, SAFEWORD_SCHEMA, createProjectContext } =
-    await getReconcileTestUtilities(dir, {
+  const { reconcile, SAFEWORD_SCHEMA, createProjectContext } = await getReconcileTestUtilities(
+    dir,
+    {
       packageJson,
-    });
+    },
+  );
 
   const ctx = createProjectContext(dir);
   const result = await reconcile(SAFEWORD_SCHEMA, mode, ctx);
@@ -625,24 +580,17 @@ export async function setupReconcileTest(
  * @param projectDirectory - Project directory with safeword hooks installed
  * @param filePath - Absolute path to the file being linted
  */
-export function runLintHook(
-  projectDirectory: string,
-  filePath: string,
-): SpawnSyncReturns<string> {
+export function runLintHook(projectDirectory: string, filePath: string): SpawnSyncReturns<string> {
   const hookInput = JSON.stringify({
-    session_id: "test-session",
-    hook_event_name: "PostToolUse",
-    tool_name: "Write",
+    session_id: 'test-session',
+    hook_event_name: 'PostToolUse',
+    tool_name: 'Write',
     tool_input: { file_path: filePath },
   });
 
-  return spawnSync(
-    "bash",
-    ["-c", `echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`],
-    {
-      cwd: projectDirectory,
-      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
-      encoding: "utf8",
-    },
-  );
+  return spawnSync('bash', ['-c', `echo '${hookInput}' | bun .safeword/hooks/post-tool-lint.ts`], {
+    cwd: projectDirectory,
+    env: { ...process.env, CLAUDE_PROJECT_DIR: projectDirectory },
+    encoding: 'utf8',
+  });
 }

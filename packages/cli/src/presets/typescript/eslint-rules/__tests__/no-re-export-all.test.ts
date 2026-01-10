@@ -6,20 +6,20 @@
  * Use `export { specific, names }` or `export * as namespace` instead.
  */
 
-import { RuleTester } from "eslint";
+import { RuleTester } from 'eslint';
 
-import rule from "../no-re-export-all.js";
+import rule from '../no-re-export-all.js';
 
 const ruleTester = new RuleTester({
   languageOptions: {
     ecmaVersion: 2022,
-    sourceType: "module",
+    sourceType: 'module',
   },
 });
 
 // RuleTester.run creates its own describe/it blocks internally
 // so we call it at the top level, not inside an it() block
-ruleTester.run("no-re-export-all", rule, {
+ruleTester.run('no-re-export-all', rule, {
   valid: [
     // Named exports (preferred pattern)
     "export { foo, bar } from './utils'",
@@ -31,34 +31,34 @@ ruleTester.run("no-re-export-all", rule, {
     "export * as components from '@/components'",
 
     // Regular exports
-    "export const foo = 1",
-    "export function bar() {}",
-    "export default class Foo {}",
+    'export const foo = 1',
+    'export function bar() {}',
+    'export default class Foo {}',
   ],
 
   invalid: [
     // Wildcard re-export
     {
       code: "export * from './utils'",
-      errors: [{ messageId: "noReExportAll" }],
+      errors: [{ messageId: 'noReExportAll' }],
     },
 
     // From package
     {
       code: "export * from '@/components'",
-      errors: [{ messageId: "noReExportAll" }],
+      errors: [{ messageId: 'noReExportAll' }],
     },
 
     // From node_modules
     {
       code: "export * from 'lodash'",
-      errors: [{ messageId: "noReExportAll" }],
+      errors: [{ messageId: 'noReExportAll' }],
     },
 
     // Multiple wildcards
     {
       code: "export * from './a'; export * from './b'",
-      errors: [{ messageId: "noReExportAll" }, { messageId: "noReExportAll" }],
+      errors: [{ messageId: 'noReExportAll' }, { messageId: 'noReExportAll' }],
     },
   ],
 });

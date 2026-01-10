@@ -1,14 +1,14 @@
-import { defineConfig } from "vitest/config";
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
     globals: true,
-    environment: "node",
-    include: ["tests/**/*.test.ts", "src/**/*.test.ts"],
+    environment: 'node',
+    include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
     coverage: {
-      provider: "v8",
-      include: ["src/**/*.ts"],
-      exclude: ["src/**/*.test.ts", "src/index.ts"],
+      provider: 'v8',
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.test.ts', 'src/index.ts'],
     },
     // Increase timeout for integration tests that spawn processes
     // Default 30s isn't enough for bun installs in some tests
@@ -17,7 +17,7 @@ export default defineConfig({
     // Default 10s isn't enough when bun has locked files
     hookTimeout: 30_000,
     // Run tests sequentially to avoid temp directory conflicts
-    pool: "forks",
+    pool: 'forks',
     maxWorkers: 1,
   },
 });

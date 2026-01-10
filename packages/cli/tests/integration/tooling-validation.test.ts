@@ -9,9 +9,9 @@
  * These tests validate that configuration leads to working enforcement.
  */
 
-import { execSync, spawnSync } from "node:child_process";
+import { execSync, spawnSync } from 'node:child_process';
 
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   createPythonProject,
@@ -26,13 +26,13 @@ import {
   SAFEWORD_VERSION,
   TIMEOUT_SETUP,
   writeTestFile,
-} from "../helpers";
+} from '../helpers';
 
 // =============================================================================
 // Suite 1: Pure Python Project (No package.json)
 // =============================================================================
 
-describe("E2E: Pure Python Project", () => {
+describe('E2E: Pure Python Project', () => {
   let projectDirectory: string;
 
   beforeAll(async () => {
@@ -40,17 +40,17 @@ describe("E2E: Pure Python Project", () => {
     // Create Python project WITHOUT calling any JS helpers that create package.json
     writeTestFile(
       projectDirectory,
-      "pyproject.toml",
+      'pyproject.toml',
       `[project]
 name = "pure-python-app"
 version = "0.1.0"
 requires-python = ">=3.10"
 `,
     );
-    writeTestFile(projectDirectory, "src/__init__.py", "");
-    writeTestFile(projectDirectory, "src/main.py", 'print("hello")\n');
+    writeTestFile(projectDirectory, 'src/__init__.py', '');
+    writeTestFile(projectDirectory, 'src/main.py', 'print("hello")\n');
     initGitRepo(projectDirectory);
-    await runCli(["setup"], {
+    await runCli(['setup'], {
       cwd: projectDirectory,
       timeout: TIMEOUT_SETUP,
     });
@@ -62,31 +62,31 @@ requires-python = ">=3.10"
     }
   });
 
-  it("does NOT create package.json", () => {
-    expect(fileExists(projectDirectory, "package.json")).toBe(false);
+  it('does NOT create package.json', () => {
+    expect(fileExists(projectDirectory, 'package.json')).toBe(false);
   });
 
-  it("creates .safeword directory", () => {
-    expect(fileExists(projectDirectory, ".safeword")).toBe(true);
+  it('creates .safeword directory', () => {
+    expect(fileExists(projectDirectory, '.safeword')).toBe(true);
   });
 
-  it("adds Ruff config via extend pattern", () => {
-    const ruffToml = readTestFile(projectDirectory, "ruff.toml");
+  it('adds Ruff config via extend pattern', () => {
+    const ruffToml = readTestFile(projectDirectory, 'ruff.toml');
     expect(ruffToml).toContain('extend = ".safeword/ruff.toml"');
 
     // Actual strict rules in .safeword/ruff.toml
-    const safewordRuff = readTestFile(projectDirectory, ".safeword/ruff.toml");
-    expect(safewordRuff).toContain("[lint]");
+    const safewordRuff = readTestFile(projectDirectory, '.safeword/ruff.toml');
+    expect(safewordRuff).toContain('[lint]');
   });
 
-  it("adds mypy config file", () => {
-    const mypyConfig = readTestFile(projectDirectory, "mypy.ini");
-    expect(mypyConfig).toContain("[mypy]");
+  it('adds mypy config file', () => {
+    const mypyConfig = readTestFile(projectDirectory, 'mypy.ini');
+    expect(mypyConfig).toContain('[mypy]');
   });
 
-  it("does NOT create eslint.config.mjs (no JS tooling)", () => {
+  it('does NOT create eslint.config.mjs (no JS tooling)', () => {
     // Pure Python projects should not have JS linting configured
-    expect(fileExists(projectDirectory, "eslint.config.mjs")).toBe(false);
+    expect(fileExists(projectDirectory, 'eslint.config.mjs')).toBe(false);
   });
 });
 
@@ -96,14 +96,14 @@ requires-python = ">=3.10"
 
 const MYPY_AVAILABLE = isMypyInstalled();
 
-describe("E2E: mypy Type Error Detection", () => {
+describe('E2E: mypy Type Error Detection', () => {
   let projectDirectory: string;
 
   beforeAll(async () => {
     projectDirectory = createTemporaryDirectory();
     createPythonProject(projectDirectory);
     initGitRepo(projectDirectory);
-    await runCli(["setup"], {
+    await runCli(['setup'], {
       cwd: projectDirectory,
       timeout: TIMEOUT_SETUP,
     });
@@ -115,17 +115,17 @@ describe("E2E: mypy Type Error Detection", () => {
     }
   });
 
-  it("generates mypy config with correct settings", () => {
-    const config = readTestFile(projectDirectory, "mypy.ini");
-    expect(config).toContain("[mypy]");
-    expect(config).toContain("ignore_missing_imports = True");
-    expect(config).toContain("show_error_codes = True");
+  it('generates mypy config with correct settings', () => {
+    const config = readTestFile(projectDirectory, 'mypy.ini');
+    expect(config).toContain('[mypy]');
+    expect(config).toContain('ignore_missing_imports = True');
+    expect(config).toContain('show_error_codes = True');
   });
 
-  it.skipIf(!MYPY_AVAILABLE)("mypy runs without error on valid code", () => {
+  it.skipIf(!MYPY_AVAILABLE)('mypy runs without error on valid code', () => {
     writeTestFile(
       projectDirectory,
-      "src/valid_types.py",
+      'src/valid_types.py',
       `def greet(name: str) -> str:
     return f"Hello, {name}"
 
@@ -133,18 +133,18 @@ result: str = greet("world")
 `,
     );
 
-    const result = spawnSync("mypy", ["src/valid_types.py"], {
+    const result = spawnSync('mypy', ['src/valid_types.py'], {
       cwd: projectDirectory,
-      encoding: "utf8",
+      encoding: 'utf8',
     });
 
     expect(result.status).toBe(0);
   });
 
-  it.skipIf(!MYPY_AVAILABLE)("mypy catches type errors", () => {
+  it.skipIf(!MYPY_AVAILABLE)('mypy catches type errors', () => {
     writeTestFile(
       projectDirectory,
-      "src/bad_types.py",
+      'src/bad_types.py',
       `def add_numbers(a: int, b: int) -> int:
     return a + b
 
@@ -153,34 +153,34 @@ result: int = add_numbers("hello", 42)
 `,
     );
 
-    const result = spawnSync("mypy", ["src/bad_types.py"], {
+    const result = spawnSync('mypy', ['src/bad_types.py'], {
       cwd: projectDirectory,
-      encoding: "utf8",
+      encoding: 'utf8',
     });
 
     // Should fail with type error
     expect(result.status).not.toBe(0);
-    expect(result.stdout).toContain("error");
+    expect(result.stdout).toContain('error');
     // Should mention the incompatible type
     expect(result.stdout).toMatch(/str|incompatible/i);
   });
 
-  it.skipIf(!MYPY_AVAILABLE)("mypy catches return type errors", () => {
+  it.skipIf(!MYPY_AVAILABLE)('mypy catches return type errors', () => {
     writeTestFile(
       projectDirectory,
-      "src/bad_return.py",
+      'src/bad_return.py',
       `def get_count() -> int:
     return "not a number"  # Wrong return type
 `,
     );
 
-    const result = spawnSync("mypy", ["src/bad_return.py"], {
+    const result = spawnSync('mypy', ['src/bad_return.py'], {
       cwd: projectDirectory,
-      encoding: "utf8",
+      encoding: 'utf8',
     });
 
     expect(result.status).not.toBe(0);
-    expect(result.stdout).toContain("error");
+    expect(result.stdout).toContain('error');
   });
 });
 
@@ -188,7 +188,7 @@ result: int = add_numbers("hello", 42)
 // Suite 3: React ESLint Violation Detection
 // =============================================================================
 
-describe("E2E: React ESLint Violation Detection", () => {
+describe('E2E: React ESLint Violation Detection', () => {
   let projectDirectory: string;
 
   beforeAll(async () => {
@@ -197,19 +197,19 @@ describe("E2E: React ESLint Violation Detection", () => {
     // Include local safeword to ensure tests use the current build
     writeTestFile(
       projectDirectory,
-      "package.json",
+      'package.json',
       JSON.stringify(
         {
-          name: "test-react-project",
-          version: "1.0.0",
+          name: 'test-react-project',
+          version: '1.0.0',
           dependencies: {
-            react: "^18.0.0",
-            "react-dom": "^18.0.0",
+            react: '^18.0.0',
+            'react-dom': '^18.0.0',
           },
           devDependencies: {
-            "@types/react": "^18.0.0",
-            "@types/react-dom": "^18.0.0",
-            typescript: "^5.0.0",
+            '@types/react': '^18.0.0',
+            '@types/react-dom': '^18.0.0',
+            typescript: '^5.0.0',
             safeword: SAFEWORD_VERSION,
           },
         },
@@ -220,34 +220,34 @@ describe("E2E: React ESLint Violation Detection", () => {
     // Create tsconfig.json for TypeScript ESLint parsing
     writeTestFile(
       projectDirectory,
-      "tsconfig.json",
+      'tsconfig.json',
       JSON.stringify(
         {
           compilerOptions: {
-            target: "ES2020",
-            module: "ESNext",
-            moduleResolution: "bundler",
-            jsx: "react-jsx",
+            target: 'ES2020',
+            module: 'ESNext',
+            moduleResolution: 'bundler',
+            jsx: 'react-jsx',
             strict: true,
             esModuleInterop: true,
             skipLibCheck: true,
           },
-          include: ["src"],
+          include: ['src'],
         },
         undefined,
         2,
       ),
     );
     // Create src directory
-    writeTestFile(projectDirectory, "src/.gitkeep", "");
+    writeTestFile(projectDirectory, 'src/.gitkeep', '');
     initGitRepo(projectDirectory);
-    await runCli(["setup"], {
+    await runCli(['setup'], {
       cwd: projectDirectory,
       timeout: TIMEOUT_SETUP,
     });
 
     // Install dependencies so ESLint can run
-    execSync("bun install", { cwd: projectDirectory, stdio: "pipe" });
+    execSync('bun install', { cwd: projectDirectory, stdio: 'pipe' });
   }, 180_000);
 
   afterAll(() => {
@@ -256,16 +256,16 @@ describe("E2E: React ESLint Violation Detection", () => {
     }
   });
 
-  it("creates eslint.config.mjs with React plugins", () => {
-    const config = readTestFile(projectDirectory, "eslint.config.mjs");
-    expect(config).toContain("react");
+  it('creates eslint.config.mjs with React plugins', () => {
+    const config = readTestFile(projectDirectory, 'eslint.config.mjs');
+    expect(config).toContain('react');
   });
 
-  it("ESLint catches rules of hooks violation (conditional hook call)", () => {
+  it('ESLint catches rules of hooks violation (conditional hook call)', () => {
     // This is the key React-specific rule we want to verify works
     writeTestFile(
       projectDirectory,
-      "src/conditional-hook.tsx",
+      'src/conditional-hook.tsx',
       `import { useState } from 'react';
 
 export function ConditionalHook({ enabled }: { enabled: boolean }) {
@@ -277,8 +277,8 @@ export function ConditionalHook({ enabled }: { enabled: boolean }) {
 `,
     );
 
-    const result = runEslint(projectDirectory, "src/conditional-hook.tsx", [
-      "--rule",
+    const result = runEslint(projectDirectory, 'src/conditional-hook.tsx', [
+      '--rule',
       '{"react-hooks/rules-of-hooks": "error"}',
     ]);
 

@@ -2,7 +2,7 @@
 // Safeword: Config Guard (PreToolUse)
 // Requires user approval before modifying quality config files
 
-import { existsSync } from "node:fs";
+import { existsSync } from 'node:fs';
 
 interface HookInput {
   tool_name?: string;
@@ -14,8 +14,8 @@ interface HookInput {
 
 interface HookOutput {
   hookSpecificOutput: {
-    hookEventName: "PreToolUse";
-    permissionDecision: "ask" | "allow" | "deny";
+    hookEventName: 'PreToolUse';
+    permissionDecision: 'ask' | 'allow' | 'deny';
     permissionDecisionReason: string;
   };
 }
@@ -23,30 +23,30 @@ interface HookOutput {
 // Protected file patterns (glob-like matching)
 const PROTECTED_PATTERNS: Array<{ pattern: RegExp; category: string }> = [
   // ESLint configs
-  { pattern: /eslint\.config\.[mc]?[jt]s$/, category: "ESLint config" },
-  { pattern: /\.eslintrc(\.[jy]?[sm]?[ol]?n?)?$/, category: "ESLint config" },
-  { pattern: /eslint-configs\/.*\.[jt]s$/, category: "ESLint preset" },
+  { pattern: /eslint\.config\.[mc]?[jt]s$/, category: 'ESLint config' },
+  { pattern: /\.eslintrc(\.[jy]?[sm]?[ol]?n?)?$/, category: 'ESLint config' },
+  { pattern: /eslint-configs\/.*\.[jt]s$/, category: 'ESLint preset' },
 
   // TypeScript configs
-  { pattern: /tsconfig.*\.json$/, category: "TypeScript config" },
+  { pattern: /tsconfig.*\.json$/, category: 'TypeScript config' },
 
   // Vitest/Jest configs
-  { pattern: /vitest\.config\.[mc]?[jt]s$/, category: "Vitest config" },
-  { pattern: /jest\.config\.[mc]?[jt]s$/, category: "Jest config" },
+  { pattern: /vitest\.config\.[mc]?[jt]s$/, category: 'Vitest config' },
+  { pattern: /jest\.config\.[mc]?[jt]s$/, category: 'Jest config' },
 
   // Prettier configs
   {
     pattern: /\.prettierrc(\.[jy]?[sm]?[ol]?n?)?$/,
-    category: "Prettier config",
+    category: 'Prettier config',
   },
-  { pattern: /prettier\.config\.[mc]?[jt]s$/, category: "Prettier config" },
+  { pattern: /prettier\.config\.[mc]?[jt]s$/, category: 'Prettier config' },
 
   // Presets (affects all customers)
-  { pattern: /\/presets\/.*\.[jt]s$/, category: "Quality preset" },
+  { pattern: /\/presets\/.*\.[jt]s$/, category: 'Quality preset' },
 
   // CI workflows
-  { pattern: /\.github\/workflows\/.*\.ya?ml$/, category: "CI workflow" },
-  { pattern: /\.gitlab-ci\.ya?ml$/, category: "CI config" },
+  { pattern: /\.github\/workflows\/.*\.ya?ml$/, category: 'CI workflow' },
+  { pattern: /\.gitlab-ci\.ya?ml$/, category: 'CI config' },
 ];
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
@@ -77,8 +77,8 @@ for (const { pattern, category } of PROTECTED_PATTERNS) {
   if (pattern.test(filePath)) {
     const output: HookOutput = {
       hookSpecificOutput: {
-        hookEventName: "PreToolUse",
-        permissionDecision: "ask",
+        hookEventName: 'PreToolUse',
+        permissionDecision: 'ask',
         permissionDecisionReason: `⚠️ ${category} change requires approval.\n\nFile: ${filePath}\n\nPer SAFEWORD policy: Fix code, don't weaken configs.\nIf this is a justified change, explain the evidence.`,
       },
     };

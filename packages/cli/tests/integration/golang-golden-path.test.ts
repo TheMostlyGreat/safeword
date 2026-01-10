@@ -11,10 +11,10 @@
  * Uses a single project setup (expensive) shared across all tests.
  */
 
-import { execSync, spawnSync } from "node:child_process";
-import nodePath from "node:path";
+import { execSync, spawnSync } from 'node:child_process';
+import nodePath from 'node:path';
 
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   createGoProject,
@@ -27,18 +27,18 @@ import {
   runCli,
   runLintHook,
   writeTestFile,
-} from "../helpers";
+} from '../helpers';
 
 const GOLANGCI_LINT_AVAILABLE = isGolangciLintInstalled();
 
-describe("E2E: Go Golden Path", () => {
+describe('E2E: Go Golden Path', () => {
   let projectDirectory: string;
 
   beforeAll(async () => {
     projectDirectory = createTemporaryDirectory();
     createGoProject(projectDirectory);
     initGitRepo(projectDirectory);
-    await runCli(["setup", "--yes"], { cwd: projectDirectory });
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
   }, 180_000); // 3 min timeout for setup
 
   afterAll(() => {
@@ -47,50 +47,45 @@ describe("E2E: Go Golden Path", () => {
     }
   });
 
-  it("creates .golangci.yml config", () => {
-    expect(fileExists(projectDirectory, ".golangci.yml")).toBe(true);
+  it('creates .golangci.yml config', () => {
+    expect(fileExists(projectDirectory, '.golangci.yml')).toBe(true);
 
-    const config = readTestFile(projectDirectory, ".golangci.yml");
+    const config = readTestFile(projectDirectory, '.golangci.yml');
 
     // Check essential golangci-lint v2 settings
     expect(config).toContain('version: "2"');
-    expect(config).toContain("linters:");
-    expect(config).toContain("default: all"); // Use all linters for maximum strictness
-    expect(config).toContain("formatters:");
-    expect(config).toContain("gofumpt");
+    expect(config).toContain('linters:');
+    expect(config).toContain('default: all'); // Use all linters for maximum strictness
+    expect(config).toContain('formatters:');
+    expect(config).toContain('gofumpt');
   });
 
-  it.skipIf(!GOLANGCI_LINT_AVAILABLE)("golangci-lint config is valid", () => {
+  it.skipIf(!GOLANGCI_LINT_AVAILABLE)('golangci-lint config is valid', () => {
     // golangci-lint config verify checks if config is valid
-    const result = spawnSync("golangci-lint", ["config", "verify"], {
+    const result = spawnSync('golangci-lint', ['config', 'verify'], {
       cwd: projectDirectory,
-      encoding: "utf8",
+      encoding: 'utf8',
     });
 
     expect(result.status).toBe(0);
   });
 
-  it.skipIf(!GOLANGCI_LINT_AVAILABLE)(
-    "golangci-lint runs on valid code",
-    () => {
-      // main.go from createGoProject should be valid
-      const result = spawnSync("golangci-lint", ["run", "main.go"], {
-        cwd: projectDirectory,
-        encoding: "utf8",
-      });
+  it.skipIf(!GOLANGCI_LINT_AVAILABLE)('golangci-lint runs on valid code', () => {
+    // main.go from createGoProject should be valid
+    const result = spawnSync('golangci-lint', ['run', 'main.go'], {
+      cwd: projectDirectory,
+      encoding: 'utf8',
+    });
 
-      expect(result.status).toBe(0);
-    },
-  );
+    expect(result.status).toBe(0);
+  });
 
-  it.skipIf(!GOLANGCI_LINT_AVAILABLE)(
-    "golangci-lint detects violations",
-    () => {
-      // Create a file with an unused import (caught by 'unused' linter in standard set)
-      writeTestFile(
-        projectDirectory,
-        "bad.go",
-        `package main
+  it.skipIf(!GOLANGCI_LINT_AVAILABLE)('golangci-lint detects violations', () => {
+    // Create a file with an unused import (caught by 'unused' linter in standard set)
+    writeTestFile(
+      projectDirectory,
+      'bad.go',
+      `package main
 
 import "fmt" // unused import - will trigger unused linter
 
@@ -98,54 +93,50 @@ func bad() {
 	println("not using fmt")
 }
 `,
-      );
+    );
 
-      const result = spawnSync("golangci-lint", ["run", "bad.go"], {
-        cwd: projectDirectory,
-        encoding: "utf8",
-      });
+    const result = spawnSync('golangci-lint', ['run', 'bad.go'], {
+      cwd: projectDirectory,
+      encoding: 'utf8',
+    });
 
-      // Should fail due to unused import
-      expect(result.status).not.toBe(0);
-      expect(result.stdout + result.stderr).toMatch(/unused|import/i);
-    },
-  );
+    // Should fail due to unused import
+    expect(result.status).not.toBe(0);
+    expect(result.stdout + result.stderr).toMatch(/unused|import/i);
+  });
 
-  it.skipIf(!GOLANGCI_LINT_AVAILABLE)("golangci-lint fmt formats files", () => {
+  it.skipIf(!GOLANGCI_LINT_AVAILABLE)('golangci-lint fmt formats files', () => {
     // Create a badly formatted Go file
     writeTestFile(
       projectDirectory,
-      "ugly.go",
+      'ugly.go',
       `package main
 func main(){println("no spaces")}`,
     );
 
     // Run golangci-lint fmt
-    execSync("golangci-lint fmt ugly.go", { cwd: projectDirectory });
+    execSync('golangci-lint fmt ugly.go', { cwd: projectDirectory });
 
-    const formatted = readTestFile(projectDirectory, "ugly.go");
+    const formatted = readTestFile(projectDirectory, 'ugly.go');
     // gofumpt adds proper spacing
-    expect(formatted).toContain("func main() {");
+    expect(formatted).toContain('func main() {');
   });
 
-  it.skipIf(!GOLANGCI_LINT_AVAILABLE)(
-    "post-tool-lint hook processes Go files",
-    () => {
-      const filePath = nodePath.join(projectDirectory, "hook-test.go");
-      // Intentionally badly formatted
-      writeTestFile(
-        projectDirectory,
-        "hook-test.go",
-        `package main
+  it.skipIf(!GOLANGCI_LINT_AVAILABLE)('post-tool-lint hook processes Go files', () => {
+    const filePath = nodePath.join(projectDirectory, 'hook-test.go');
+    // Intentionally badly formatted
+    writeTestFile(
+      projectDirectory,
+      'hook-test.go',
+      `package main
 func hookTest(){println("test")}`,
-      );
+    );
 
-      // Run the lint hook
-      runLintHook(projectDirectory, filePath);
+    // Run the lint hook
+    runLintHook(projectDirectory, filePath);
 
-      // File should be formatted by golangci-lint fmt
-      const result = readTestFile(projectDirectory, "hook-test.go");
-      expect(result).toContain("func hookTest() {");
-    },
-  );
+    // File should be formatted by golangci-lint fmt
+    const result = readTestFile(projectDirectory, 'hook-test.go');
+    expect(result).toContain('func hookTest() {');
+  });
 });

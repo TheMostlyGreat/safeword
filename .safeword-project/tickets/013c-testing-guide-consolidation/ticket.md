@@ -1,11 +1,11 @@
 ---
-id: "013c"
+id: '013c'
 title: Consolidate TDD content between testing guide and BDD skill
 type: feature
 status: ready
 priority: medium
 created: 2026-01-08
-parent: "013"
+parent: '013'
 ---
 
 # Testing Guide Consolidation

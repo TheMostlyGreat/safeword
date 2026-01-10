@@ -384,9 +384,9 @@ The eval suite tests that LLMs correctly follow guide instructions:
 Edit `promptfoo.yaml` and add a test case:
 
 ```yaml
-- description: "test-id: Description"
+- description: 'test-id: Description'
   vars:
-    input: "User prompt to test"
+    input: 'User prompt to test'
     context: |
       Relevant excerpt from guide
   assert:

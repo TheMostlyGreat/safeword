@@ -4,18 +4,18 @@
  * Used by `/audit` slash command to refresh config before running checks.
  */
 
-import { writeFileSync } from "node:fs";
-import nodePath from "node:path";
+import { writeFileSync } from 'node:fs';
+import nodePath from 'node:path';
 
-import { detectArchitecture } from "../utils/boundaries.js";
+import { detectArchitecture } from '../utils/boundaries.js';
 import {
   type DepCruiseArchitecture,
   detectWorkspaces,
   generateDepCruiseConfigFile,
   generateDepCruiseMainConfig,
-} from "../utils/depcruise-config.js";
-import { exists } from "../utils/fs.js";
-import { error, info, success } from "../utils/output.js";
+} from '../utils/depcruise-config.js';
+import { exists } from '../utils/fs.js';
+import { error, info, success } from '../utils/output.js';
 
 interface SyncConfigResult {
   generatedConfig: boolean;
@@ -26,28 +26,22 @@ interface SyncConfigResult {
  * Core sync logic - writes depcruise configs to disk
  * Can be called from setup or as standalone command
  */
-export function syncConfigCore(
-  cwd: string,
-  arch: DepCruiseArchitecture,
-): SyncConfigResult {
-  const safewordDirectory = nodePath.join(cwd, ".safeword");
+export function syncConfigCore(cwd: string, arch: DepCruiseArchitecture): SyncConfigResult {
+  const safewordDirectory = nodePath.join(cwd, '.safeword');
   const result: SyncConfigResult = {
     generatedConfig: false,
     createdMainConfig: false,
   };
 
   // Generate and write .safeword/depcruise-config.cjs (CJS for compatibility)
-  const generatedConfigPath = nodePath.join(
-    safewordDirectory,
-    "depcruise-config.cjs",
-  );
+  const generatedConfigPath = nodePath.join(safewordDirectory, 'depcruise-config.cjs');
   const generatedConfig = generateDepCruiseConfigFile(arch);
   writeFileSync(generatedConfigPath, generatedConfig);
   result.generatedConfig = true;
 
   // Create main config if not exists (self-healing)
   // Use .cjs extension to work in ESM projects (type: "module")
-  const mainConfigPath = nodePath.join(cwd, ".dependency-cruiser.cjs");
+  const mainConfigPath = nodePath.join(cwd, '.dependency-cruiser.cjs');
   if (!exists(mainConfigPath)) {
     const mainConfig = generateDepCruiseMainConfig();
     writeFileSync(mainConfigPath, mainConfig);
@@ -70,11 +64,7 @@ export function buildArchitecture(cwd: string): DepCruiseArchitecture {
  * Check if architecture was detected (layers, monorepo structure, or workspaces)
  */
 export function hasArchitectureDetected(arch: DepCruiseArchitecture): boolean {
-  return (
-    arch.elements.length > 0 ||
-    arch.isMonorepo ||
-    (arch.workspaces?.length ?? 0) > 0
-  );
+  return arch.elements.length > 0 || arch.isMonorepo || (arch.workspaces?.length ?? 0) > 0;
 }
 
 /**
@@ -82,11 +72,11 @@ export function hasArchitectureDetected(arch: DepCruiseArchitecture): boolean {
  */
 export async function syncConfig(): Promise<void> {
   const cwd = process.cwd();
-  const safewordDirectory = nodePath.join(cwd, ".safeword");
+  const safewordDirectory = nodePath.join(cwd, '.safeword');
 
   // Check if .safeword exists
   if (!exists(safewordDirectory)) {
-    error("Not configured. Run `safeword setup` first.");
+    error('Not configured. Run `safeword setup` first.');
     process.exit(1);
   }
 
@@ -95,11 +85,11 @@ export async function syncConfig(): Promise<void> {
   const result = syncConfigCore(cwd, arch);
 
   if (result.generatedConfig) {
-    info("Generated .safeword/depcruise-config.cjs");
+    info('Generated .safeword/depcruise-config.cjs');
   }
   if (result.createdMainConfig) {
-    info("Created .dependency-cruiser.cjs");
+    info('Created .dependency-cruiser.cjs');
   }
 
-  success("Config synced");
+  success('Config synced');
 }

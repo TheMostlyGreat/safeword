@@ -2,7 +2,7 @@
 // Safeword: Bypass Pattern Warning (PostToolUse)
 // Warns when bypass patterns are added to code
 
-import { existsSync } from "node:fs";
+import { existsSync } from 'node:fs';
 
 interface HookInput {
   tool_name?: string;
@@ -23,34 +23,34 @@ const BYPASS_PATTERNS: Array<{
   // ESLint disables
   {
     pattern: /eslint-disable(?:-next-line|-line)?/,
-    category: "ESLint disable",
-    example: "eslint-disable-next-line",
+    category: 'ESLint disable',
+    example: 'eslint-disable-next-line',
   },
 
   // TypeScript bypasses
   {
     pattern: /@ts-ignore/,
-    category: "TypeScript bypass",
-    example: "@ts-ignore",
+    category: 'TypeScript bypass',
+    example: '@ts-ignore',
   },
   {
     pattern: /@ts-expect-error/,
-    category: "TypeScript bypass",
-    example: "@ts-expect-error",
+    category: 'TypeScript bypass',
+    example: '@ts-expect-error',
   },
   {
     pattern: /@ts-nocheck/,
-    category: "TypeScript bypass",
-    example: "@ts-nocheck",
+    category: 'TypeScript bypass',
+    example: '@ts-nocheck',
   },
-  { pattern: /\bas\s+any\b/, category: "Type assertion", example: "as any" },
+  { pattern: /\bas\s+any\b/, category: 'Type assertion', example: 'as any' },
   // Note: `as unknown` is NOT flagged - it's the safe alternative to `as any`
 
   // Test skips
   {
     pattern: /\b(it|test|describe)\.(skip|only)\s*\(/,
-    category: "Test skip/only",
-    example: "it.skip(",
+    category: 'Test skip/only',
+    example: 'it.skip(',
   },
 ];
 
@@ -88,12 +88,11 @@ for (const { pattern, category, example } of BYPASS_PATTERNS) {
 
 // If bypass patterns found, output warning
 if (foundPatterns.length > 0) {
-  const filePath =
-    input.tool_input?.file_path ?? input.tool_input?.notebook_path ?? "unknown";
+  const filePath = input.tool_input?.file_path ?? input.tool_input?.notebook_path ?? 'unknown';
   console.log(`⚠️ SAFEWORD: Bypass pattern detected in ${filePath}
 
 Found:
-${foundPatterns.join("\n")}
+${foundPatterns.join('\n')}
 
 Per SAFEWORD policy: Fix code, don't weaken enforcement.
 If this is justified, document the evidence in a comment.`);

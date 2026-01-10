@@ -1,11 +1,11 @@
 ---
-id: "013b"
+id: '013b'
 title: Phase-aware quality review skill with web research
 type: feature
 status: ready
 priority: medium
 created: 2026-01-08
-parent: "013"
+parent: '013'
 ---
 
 # Phase-Aware Quality Review Skill

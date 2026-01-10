@@ -11,9 +11,9 @@
  * Note: Tests requiring golangci-lint are skipped if not installed.
  */
 
-import { spawnSync } from "node:child_process";
+import { spawnSync } from 'node:child_process';
 
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   createTemporaryDirectory,
@@ -26,11 +26,11 @@ import {
   removeTemporaryDirectory,
   runCli,
   writeTestFile,
-} from "../helpers";
+} from '../helpers';
 
 const GOLANGCI_LINT_AVAILABLE = isGolangciLintInstalled();
 
-describe("E2E: Add Go to Existing TypeScript Project", () => {
+describe('E2E: Add Go to Existing TypeScript Project', () => {
   let projectDirectory: string;
 
   beforeAll(async () => {
@@ -38,7 +38,7 @@ describe("E2E: Add Go to Existing TypeScript Project", () => {
     createTypeScriptPackageJson(projectDirectory);
     initGitRepo(projectDirectory);
     // Initial setup with TypeScript only
-    await runCli(["setup"], { cwd: projectDirectory });
+    await runCli(['setup'], { cwd: projectDirectory });
   }, 180_000);
 
   afterAll(() => {
@@ -47,26 +47,26 @@ describe("E2E: Add Go to Existing TypeScript Project", () => {
     }
   });
 
-  it("starts with only TypeScript pack installed", () => {
+  it('starts with only TypeScript pack installed', () => {
     const config = readSafewordConfig(projectDirectory);
-    expect(config.installedPacks).toContain("typescript");
-    expect(config.installedPacks).not.toContain("golang");
+    expect(config.installedPacks).toContain('typescript');
+    expect(config.installedPacks).not.toContain('golang');
   });
 
-  it("does not have go.mod initially", () => {
-    expect(fileExists(projectDirectory, "go.mod")).toBe(false);
+  it('does not have go.mod initially', () => {
+    expect(fileExists(projectDirectory, 'go.mod')).toBe(false);
   });
 
-  it("does not have .golangci.yml initially", () => {
-    expect(fileExists(projectDirectory, ".golangci.yml")).toBe(false);
+  it('does not have .golangci.yml initially', () => {
+    expect(fileExists(projectDirectory, '.golangci.yml')).toBe(false);
   });
 
-  describe("after adding Go and running upgrade", () => {
+  describe('after adding Go and running upgrade', () => {
     beforeAll(async () => {
       // Add Go to the project
       writeTestFile(
         projectDirectory,
-        "go.mod",
+        'go.mod',
         `module example.com/test-project
 
 go 1.22
@@ -75,7 +75,7 @@ go 1.22
 
       writeTestFile(
         projectDirectory,
-        "main.go",
+        'main.go',
         `// Package main is the entry point.
 package main
 
@@ -88,41 +88,38 @@ func main() {
       );
 
       // Run upgrade to detect and install Go pack
-      await runCli(["upgrade"], { cwd: projectDirectory });
+      await runCli(['upgrade'], { cwd: projectDirectory });
     }, 60_000);
 
-    it("installs Go pack", () => {
+    it('installs Go pack', () => {
       const config = readSafewordConfig(projectDirectory);
-      expect(config.installedPacks).toContain("typescript");
-      expect(config.installedPacks).toContain("golang");
+      expect(config.installedPacks).toContain('typescript');
+      expect(config.installedPacks).toContain('golang');
     });
 
-    it("creates .golangci.yml config", () => {
-      expect(fileExists(projectDirectory, ".golangci.yml")).toBe(true);
+    it('creates .golangci.yml config', () => {
+      expect(fileExists(projectDirectory, '.golangci.yml')).toBe(true);
 
-      const goConfig = readTestFile(projectDirectory, ".golangci.yml");
+      const goConfig = readTestFile(projectDirectory, '.golangci.yml');
       expect(goConfig).toContain('version: "2"');
-      expect(goConfig).toContain("linters:");
+      expect(goConfig).toContain('linters:');
     });
 
-    it.skipIf(!GOLANGCI_LINT_AVAILABLE)(
-      "golangci-lint works on Go files",
-      () => {
-        const result = spawnSync("golangci-lint", ["run", "main.go"], {
-          cwd: projectDirectory,
-          encoding: "utf8",
-        });
-
-        expect(result.status).toBe(0);
-      },
-    );
-
-    it("ESLint still works on TypeScript files", () => {
-      writeTestFile(projectDirectory, "test.ts", "export const x = 1;\n");
-
-      const result = spawnSync("bunx", ["eslint", "test.ts"], {
+    it.skipIf(!GOLANGCI_LINT_AVAILABLE)('golangci-lint works on Go files', () => {
+      const result = spawnSync('golangci-lint', ['run', 'main.go'], {
         cwd: projectDirectory,
-        encoding: "utf8",
+        encoding: 'utf8',
+      });
+
+      expect(result.status).toBe(0);
+    });
+
+    it('ESLint still works on TypeScript files', () => {
+      writeTestFile(projectDirectory, 'test.ts', 'export const x = 1;\n');
+
+      const result = spawnSync('bunx', ['eslint', 'test.ts'], {
+        cwd: projectDirectory,
+        encoding: 'utf8',
       });
 
       expect(result.status).toBe(0);

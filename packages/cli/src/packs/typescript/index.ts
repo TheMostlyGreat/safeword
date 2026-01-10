@@ -5,19 +5,19 @@
  * Config files (ESLint, Prettier) are created by schema.
  */
 
-import nodePath from "node:path";
+import nodePath from 'node:path';
 
-import { exists } from "../../utils/fs.js";
-import type { LanguagePack, SetupContext, SetupResult } from "../types.js";
-import { setupTypescriptTooling } from "./setup.js";
+import { exists } from '../../utils/fs.js';
+import type { LanguagePack, SetupContext, SetupResult } from '../types.js';
+import { setupTypescriptTooling } from './setup.js';
 
 export const typescriptPack: LanguagePack = {
-  id: "typescript",
-  name: "TypeScript",
-  extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
+  id: 'typescript',
+  name: 'TypeScript',
+  extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'],
 
   detect(cwd: string): boolean {
-    return exists(nodePath.join(cwd, "package.json"));
+    return exists(nodePath.join(cwd, 'package.json'));
   },
 
   setup(_cwd: string, _ctx: SetupContext): SetupResult {

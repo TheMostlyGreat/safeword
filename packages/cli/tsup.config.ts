@@ -1,12 +1,12 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ["src/cli.ts", "src/index.ts", "src/presets/typescript/index.ts"],
-  format: ["esm"],
+  entry: ['src/cli.ts', 'src/index.ts', 'src/presets/typescript/index.ts'],
+  format: ['esm'],
   dts: true,
   sourcemap: true,
   clean: true,
-  target: "node18",
+  target: 'node18',
   shims: false,
   // Exclude devDependencies that have native bindings from bundling
   noExternal: [],

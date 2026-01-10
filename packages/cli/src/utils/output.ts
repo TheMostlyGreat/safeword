@@ -40,7 +40,7 @@ export function error(message: string): void {
  */
 export function header(title: string): void {
   console.log(`\n${title}`);
-  console.log("─".repeat(title.length));
+  console.log('─'.repeat(title.length));
 }
 
 /**
@@ -49,7 +49,7 @@ export function header(title: string): void {
  * @param indent
  */
 export function listItem(item: string, indent = 2): void {
-  console.log(`${" ".repeat(indent)}• ${item}`);
+  console.log(`${' '.repeat(indent)}• ${item}`);
 }
 
 /**

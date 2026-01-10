@@ -152,7 +152,7 @@ function calculateDiscount(amount, tier) {
 
 // ✅ GOOD - Actual logic
 function calculateDiscount(amount, tier) {
-  if (tier === "VIP") return amount * 0.8;
+  if (tier === 'VIP') return amount * 0.8;
   return amount;
 }
 ```
@@ -174,12 +174,12 @@ function calculateDiscount(amount, tier) {
 
 ```typescript
 // ✅ GOOD - Pure function
-it("applies 20% discount for VIP users", () => {
-  expect(calculateDiscount(100, { tier: "VIP" })).toBe(80);
+it('applies 20% discount for VIP users', () => {
+  expect(calculateDiscount(100, { tier: 'VIP' })).toBe(80);
 });
 
 // ❌ BAD - Testing implementation details
-it("calls setState with correct value", () => {
+it('calls setState with correct value', () => {
   expect(setState).toHaveBeenCalledWith({ count: 1 });
 });
 ```
@@ -187,12 +187,12 @@ it("calls setState with correct value", () => {
 ### Integration Tests
 
 ```typescript
-describe("Agent + State Integration", () => {
-  it("updates character state after agent processes action", async () => {
+describe('Agent + State Integration', () => {
+  it('updates character state after agent processes action', async () => {
     const agent = new GameAgent();
     const store = useGameStore.getState();
 
-    await agent.processAction("attack guard");
+    await agent.processAction('attack guard');
 
     expect(store.character.stress).toBeGreaterThan(0);
     expect(store.messages).toHaveLength(2);
@@ -203,26 +203,26 @@ describe("Agent + State Integration", () => {
 ### E2E Tests
 
 ```typescript
-test("user creates account and first item", async ({ page }) => {
-  await page.goto("/signup");
-  await page.fill('[name="email"]', "test@example.com");
-  await page.fill('[name="password"]', "secure123");
+test('user creates account and first item', async ({ page }) => {
+  await page.goto('/signup');
+  await page.fill('[name="email"]', 'test@example.com');
+  await page.fill('[name="password"]', 'secure123');
   await page.click('button:has-text("Sign Up")');
-  await expect(page).toHaveURL("/dashboard");
+  await expect(page).toHaveURL('/dashboard');
 
-  await page.click("text=New Item");
-  await page.fill('[name="title"]', "My First Item");
-  await page.click("text=Save");
-  await expect(page.getByText("My First Item")).toBeVisible();
+  await page.click('text=New Item');
+  await page.fill('[name="title"]', 'My First Item');
+  await page.click('text=Save');
+  await expect(page.getByText('My First Item')).toBeVisible();
 });
 ```
 
 ### LLM Evaluations
 
 ```yaml
-- description: "Infer user intent from casual input"
+- description: 'Infer user intent from casual input'
   vars:
-    input: "I want to order a large pepperoni"
+    input: 'I want to order a large pepperoni'
   assert:
     - type: javascript
       value: JSON.parse(output).intent === 'order_pizza'
@@ -249,13 +249,13 @@ Isolate persistent dev instances from test instances to avoid port conflicts.
 // playwright.config.ts
 export default defineConfig({
   webServer: {
-    command: "bun run dev:test",
+    command: 'bun run dev:test',
     port: 4000,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
   use: {
-    baseURL: "http://localhost:4000",
+    baseURL: 'http://localhost:4000',
   },
 });
 ```
@@ -281,8 +281,8 @@ export default defineConfig({
 ### AAA Pattern (Arrange-Act-Assert)
 
 ```typescript
-it("applies discount to VIP users", () => {
-  const user = { tier: "VIP" },
+it('applies discount to VIP users', () => {
+  const user = { tier: 'VIP' },
     cart = { total: 100 }; // Arrange
   const result = applyDiscount(user, cart); // Act
   expect(result.total).toBe(80); // Assert
@@ -295,12 +295,12 @@ Be descriptive and specific:
 
 ```typescript
 // ✅ GOOD
-it("returns 401 when API key is missing");
-it("preserves user input after validation error");
+it('returns 401 when API key is missing');
+it('preserves user input after validation error');
 
 // ❌ BAD
-it("works correctly");
-it("should call setState");
+it('works correctly');
+it('should call setState');
 ```
 
 ### Test Independence
@@ -320,11 +320,11 @@ beforeEach(() => {
 
 // ❌ BAD - Shared state
 let sharedUser = createUser();
-it("test A", () => {
-  sharedUser.name = "Alice";
+it('test A', () => {
+  sharedUser.name = 'Alice';
 });
-it("test B", () => {
-  expect(sharedUser.name).toBe("Alice"); // Depends on A!
+it('test B', () => {
+  expect(sharedUser.name).toBe('Alice'); // Depends on A!
 });
 ```
 
@@ -335,15 +335,15 @@ Use builders for complex test data:
 ```typescript
 function buildCharacter(overrides = {}) {
   return {
-    id: "test-char-1",
-    name: "Cutter",
-    playbook: "Cutter",
+    id: 'test-char-1',
+    name: 'Cutter',
+    playbook: 'Cutter',
     stress: 0,
     ...overrides,
   };
 }
 
-it("should increase stress when resisting", () => {
+it('should increase stress when resisting', () => {
   const character = buildCharacter({ stress: 3 });
   // Test uses character with stress=3
 });
@@ -359,9 +359,9 @@ await page.waitForTimeout(3000);
 await sleep(500);
 
 // ✅ GOOD - Poll until condition
-await expect.poll(() => getStatus()).toBe("ready");
+await expect.poll(() => getStatus()).toBe('ready');
 await page.waitForSelector('[data-testid="loaded"]');
-await waitFor(() => expect(screen.getByText("Success")).toBeVisible());
+await waitFor(() => expect(screen.getByText('Success')).toBeVisible());
 ```
 
 ---

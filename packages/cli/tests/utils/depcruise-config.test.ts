@@ -5,22 +5,22 @@
  * See: .safeword/planning/test-definitions/feature-architecture-audit.md
  */
 
-import { mkdirSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import nodePath from "node:path";
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import nodePath from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   detectWorkspaces,
   generateDepCruiseConfigFile,
   generateDepCruiseMainConfig,
-} from "../../src/utils/depcruise-config.js";
-import { removeTemporaryDirectory } from "../helpers.js";
+} from '../../src/utils/depcruise-config.js';
+import { removeTemporaryDirectory } from '../helpers.js';
 
-describe("DepCruise Config Generator", () => {
-  describe("generateDepCruiseConfigFile", () => {
-    it("generates circular dependency rule", () => {
+describe('DepCruise Config Generator', () => {
+  describe('generateDepCruiseConfigFile', () => {
+    it('generates circular dependency rule', () => {
       // Test 1.1: Config always includes no-circular rule regardless of architecture
       const config = generateDepCruiseConfigFile({
         elements: [],
@@ -28,21 +28,21 @@ describe("DepCruise Config Generator", () => {
       });
 
       // Should contain module.exports with forbidden array
-      expect(config).toContain("module.exports");
-      expect(config).toContain("forbidden");
+      expect(config).toContain('module.exports');
+      expect(config).toContain('forbidden');
 
       // Should contain no-circular rule
       expect(config).toContain("name: 'no-circular'");
       expect(config).toContain("severity: 'error'");
-      expect(config).toContain("circular: true");
+      expect(config).toContain('circular: true');
     });
 
-    it("generates monorepo layer rules from workspaces", () => {
+    it('generates monorepo layer rules from workspaces', () => {
       // Test 1.2: Detects workspaces and generates hierarchy rules
       const config = generateDepCruiseConfigFile({
         elements: [],
         isMonorepo: true,
-        workspaces: ["packages/*", "apps/*", "libs/*"],
+        workspaces: ['packages/*', 'apps/*', 'libs/*'],
       });
 
       // libs cannot import packages or apps
@@ -56,7 +56,7 @@ describe("DepCruise Config Generator", () => {
       expect(config).toContain("to: { path: '^apps/' }");
     });
 
-    it("generates orphan detection rule with comprehensive exclusions", () => {
+    it('generates orphan detection rule with comprehensive exclusions', () => {
       const config = generateDepCruiseConfigFile({
         elements: [],
         isMonorepo: false,
@@ -64,17 +64,17 @@ describe("DepCruise Config Generator", () => {
 
       expect(config).toContain("name: 'no-orphans'");
       expect(config).toContain("severity: 'warn'");
-      expect(config).toContain("orphan: true");
+      expect(config).toContain('orphan: true');
 
       // Should exclude common entry points and framework patterns
       expect(config).toContain(String.raw`index\\.[tj]sx?$`);
       expect(config).toContain(String.raw`cli\\.[tj]s$`);
-      expect(config).toContain("/src/pages/");
-      expect(config).toContain("/src/content/");
-      expect(config).toContain("/__tests__/");
+      expect(config).toContain('/src/pages/');
+      expect(config).toContain('/src/content/');
+      expect(config).toContain('/__tests__/');
     });
 
-    it("generates no-deprecated-deps rule", () => {
+    it('generates no-deprecated-deps rule', () => {
       const config = generateDepCruiseConfigFile({
         elements: [],
         isMonorepo: false,
@@ -85,7 +85,7 @@ describe("DepCruise Config Generator", () => {
       expect(config).toContain("dependencyTypes: ['deprecated']");
     });
 
-    it("generates no-dev-deps-in-src rule as warning", () => {
+    it('generates no-dev-deps-in-src rule as warning', () => {
       const config = generateDepCruiseConfigFile({
         elements: [],
         isMonorepo: false,
@@ -95,83 +95,80 @@ describe("DepCruise Config Generator", () => {
       expect(config).toContain("severity: 'warn'");
       expect(config).toContain("dependencyTypes: ['npm-dev']");
       // Should exclude test files
-      expect(config).toContain("pathNot");
+      expect(config).toContain('pathNot');
       expect(config).toContain(String.raw`.test\\.[tj]sx?$`);
     });
 
-    it("includes doNotFollow for node_modules and .safeword", () => {
+    it('includes doNotFollow for node_modules and .safeword', () => {
       const config = generateDepCruiseConfigFile({
         elements: [],
         isMonorepo: false,
       });
 
-      expect(config).toContain("doNotFollow");
-      expect(config).toContain("node_modules");
-      expect(config).toContain(".safeword");
+      expect(config).toContain('doNotFollow');
+      expect(config).toContain('node_modules');
+      expect(config).toContain('.safeword');
     });
 
-    it("includes exclude patterns for build artifacts", () => {
+    it('includes exclude patterns for build artifacts', () => {
       const config = generateDepCruiseConfigFile({
         elements: [],
         isMonorepo: false,
       });
 
-      expect(config).toContain("exclude");
-      expect(config).toContain("dist");
-      expect(config).toContain("build");
-      expect(config).toContain("coverage");
+      expect(config).toContain('exclude');
+      expect(config).toContain('dist');
+      expect(config).toContain('build');
+      expect(config).toContain('coverage');
       // Also excludes TypeScript declaration files (regex pattern)
-      expect(config).toContain("ts$");
+      expect(config).toContain('ts$');
     });
 
-    it("enables TypeScript pre-compilation deps analysis", () => {
+    it('enables TypeScript pre-compilation deps analysis', () => {
       const config = generateDepCruiseConfigFile({
         elements: [],
         isMonorepo: false,
       });
 
-      expect(config).toContain("tsPreCompilationDeps: true");
+      expect(config).toContain('tsPreCompilationDeps: true');
     });
 
-    it("configures modern module resolution options", () => {
+    it('configures modern module resolution options', () => {
       const config = generateDepCruiseConfigFile({
         elements: [],
         isMonorepo: false,
       });
 
-      expect(config).toContain("exportsFields");
-      expect(config).toContain("conditionNames");
-      expect(config).toContain("import");
-      expect(config).toContain("require");
+      expect(config).toContain('exportsFields');
+      expect(config).toContain('conditionNames');
+      expect(config).toContain('import');
+      expect(config).toContain('require');
     });
   });
 
-  describe("generateDepCruiseMainConfig", () => {
-    it("generates main config that imports generated", () => {
+  describe('generateDepCruiseMainConfig', () => {
+    it('generates main config that imports generated', () => {
       // Test 1.4: Main config imports and spreads generated rules
       const config = generateDepCruiseMainConfig();
 
       // Imports from .safeword
-      expect(config).toContain("./.safeword/depcruise-config.cjs");
+      expect(config).toContain('./.safeword/depcruise-config.cjs');
 
       // Spreads generated
-      expect(config).toContain("...generated.forbidden");
-      expect(config).toContain("...generated.options");
+      expect(config).toContain('...generated.forbidden');
+      expect(config).toContain('...generated.options');
 
       // Has comment for customization
-      expect(config).toContain("ADD YOUR CUSTOM RULES");
+      expect(config).toContain('ADD YOUR CUSTOM RULES');
     });
   });
 });
 
-describe("detectWorkspaces", () => {
+describe('detectWorkspaces', () => {
   let temporaryDirectory: string;
 
   beforeEach(() => {
-    temporaryDirectory = nodePath.join(
-      tmpdir(),
-      `depcruise-test-${Date.now()}`,
-    );
+    temporaryDirectory = nodePath.join(tmpdir(), `depcruise-test-${Date.now()}`);
     mkdirSync(temporaryDirectory, { recursive: true });
   });
 
@@ -179,51 +176,51 @@ describe("detectWorkspaces", () => {
     removeTemporaryDirectory(temporaryDirectory);
   });
 
-  it("returns undefined when no package.json exists", () => {
+  it('returns undefined when no package.json exists', () => {
     const workspaces = detectWorkspaces(temporaryDirectory);
     expect(workspaces).toBeUndefined();
   });
 
-  it("returns undefined when package.json has no workspaces", () => {
+  it('returns undefined when package.json has no workspaces', () => {
     writeFileSync(
-      nodePath.join(temporaryDirectory, "package.json"),
-      JSON.stringify({ name: "test", version: "1.0.0" }),
+      nodePath.join(temporaryDirectory, 'package.json'),
+      JSON.stringify({ name: 'test', version: '1.0.0' }),
     );
 
     const workspaces = detectWorkspaces(temporaryDirectory);
     expect(workspaces).toBeUndefined();
   });
 
-  it("detects workspaces from array format", () => {
+  it('detects workspaces from array format', () => {
     writeFileSync(
-      nodePath.join(temporaryDirectory, "package.json"),
+      nodePath.join(temporaryDirectory, 'package.json'),
       JSON.stringify({
-        name: "test",
-        workspaces: ["packages/*", "apps/*", "libs/*"],
+        name: 'test',
+        workspaces: ['packages/*', 'apps/*', 'libs/*'],
       }),
     );
 
     const workspaces = detectWorkspaces(temporaryDirectory);
-    expect(workspaces).toEqual(["packages/*", "apps/*", "libs/*"]);
+    expect(workspaces).toEqual(['packages/*', 'apps/*', 'libs/*']);
   });
 
-  it("detects workspaces from object format (yarn)", () => {
+  it('detects workspaces from object format (yarn)', () => {
     writeFileSync(
-      nodePath.join(temporaryDirectory, "package.json"),
+      nodePath.join(temporaryDirectory, 'package.json'),
       JSON.stringify({
-        name: "test",
-        workspaces: { packages: ["packages/*", "tools/*"] },
+        name: 'test',
+        workspaces: { packages: ['packages/*', 'tools/*'] },
       }),
     );
 
     const workspaces = detectWorkspaces(temporaryDirectory);
-    expect(workspaces).toEqual(["packages/*", "tools/*"]);
+    expect(workspaces).toEqual(['packages/*', 'tools/*']);
   });
 
-  it("returns undefined for empty workspaces array", () => {
+  it('returns undefined for empty workspaces array', () => {
     writeFileSync(
-      nodePath.join(temporaryDirectory, "package.json"),
-      JSON.stringify({ name: "test", workspaces: [] }),
+      nodePath.join(temporaryDirectory, 'package.json'),
+      JSON.stringify({ name: 'test', workspaces: [] }),
     );
 
     const workspaces = detectWorkspaces(temporaryDirectory);

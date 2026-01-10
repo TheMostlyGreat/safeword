@@ -11,15 +11,15 @@ interface HookInput {
 }
 
 // Patterns for files that need guide compliance checks
-const SKILL_PATTERNS = ["/skills/", "/rules/safeword-", "AGENTS.md"];
-const TEMPLATE_PATTERNS = ["packages/cli/templates/"];
+const SKILL_PATTERNS = ['/skills/', '/rules/safeword-', 'AGENTS.md'];
+const TEMPLATE_PATTERNS = ['packages/cli/templates/'];
 
 function isSkillFile(filePath: string): boolean {
-  return SKILL_PATTERNS.some((pattern) => filePath.includes(pattern));
+  return SKILL_PATTERNS.some(pattern => filePath.includes(pattern));
 }
 
 function isTemplateFile(filePath: string): boolean {
-  return TEMPLATE_PATTERNS.some((pattern) => filePath.includes(pattern));
+  return TEMPLATE_PATTERNS.some(pattern => filePath.includes(pattern));
 }
 
 // Read hook input from stdin
@@ -47,18 +47,14 @@ if (!isTemplate) {
 // Build compliance message
 const checks: string[] = [];
 
-checks.push(
-  "- Verify against `.safeword/guides/llm-writing-guide.md` (MECE, explicit, examples)",
-);
+checks.push('- Verify against `.safeword/guides/llm-writing-guide.md` (MECE, explicit, examples)');
 
 if (isSkill) {
-  checks.push(
-    "- Verify against `.safeword/guides/context-files-guide.md` (triggers, scope, size)",
-  );
+  checks.push('- Verify against `.safeword/guides/context-files-guide.md` (triggers, scope, size)');
 }
 
-const message = `Guide compliance check for: ${file.split("/").slice(-2).join("/")}
+const message = `Guide compliance check for: ${file.split('/').slice(-2).join('/')}
 
-${checks.join("\n")}`;
+${checks.join('\n')}`;
 
 console.log(JSON.stringify({ message }));
