@@ -25,7 +25,7 @@ Skills are duplicated with different formats:
 .cursor/rules/safeword-debugging.mdc          # Cursor format
 ```
 
-Content is ~95% identical, but frontmatter differs:
+### Frontmatter Differs
 
 **Claude:**
 
@@ -45,6 +45,26 @@ description: Four-phase debugging...
 alwaysApply: false
 ---
 ```
+
+### Content Has Drifted
+
+Diff analysis reveals content is NOT identical - significant drift has occurred:
+
+| Skill             | Drift Type                              | Severity |
+| ----------------- | --------------------------------------- | -------- |
+| debugging         | Formatting (`####` vs `**bold**`)       | Low      |
+| bdd-orchestrating | Section headers (`###` vs `####`)       | Low      |
+| quality-reviewing | Missing sections, different wording     | **High** |
+| refactoring       | Missing code examples, missing sections | **High** |
+| core              | Cursor-only (includes SAFEWORD.md)      | N/A      |
+
+**Key findings:**
+
+- `quality-reviewing`: Cursor has extra guide reference, different version check wording
+- `refactoring`: Claude has code examples and "Edge Cases" section that Cursor lacks
+- `core`: Only exists in Cursor (`alwaysApply: true`, includes SAFEWORD.md) - Claude uses CLAUDE.md reference instead
+
+**Decision needed:** When unifying, which version is canonical? Recommend using Claude versions as source (more complete), then review/merge any Cursor-only additions.
 
 ## Solution
 
@@ -122,15 +142,19 @@ Run sync as part of:
 
 ## Skills to Migrate
 
-1. `debugging` → `.safeword/skills/debugging.md`
-2. `bdd-orchestrating` → `.safeword/skills/bdd-orchestrating.md`
-3. `quality-reviewing` → `.safeword/skills/quality-reviewing.md`
-4. `refactoring` → `.safeword/skills/refactoring.md`
+| Skill             | Source                              | Notes                                           |
+| ----------------- | ----------------------------------- | ----------------------------------------------- |
+| debugging         | Claude (more consistent formatting) | Merge any Cursor additions                      |
+| bdd-orchestrating | Claude                              | Merge any Cursor additions                      |
+| quality-reviewing | **Review both**                     | High drift - manual reconciliation              |
+| refactoring       | **Claude**                          | Has code examples Cursor lacks                  |
+| core              | **Special**                         | Cursor-only - decide if Claude needs equivalent |
 
 ## Work Log
 
 ---
 
+- 2026-01-10T21:13:00Z Added: Content drift analysis - quality-reviewing and refactoring have high drift
 - 2026-01-10T20:42:00Z Created: Skill sync from single source
 
 ---
