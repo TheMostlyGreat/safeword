@@ -427,6 +427,12 @@ describe('E2E: Phase-Aware Quality Review', () => {
           lastModified: '2026-01-06T10:00:00Z',
         },
       ]);
+      // Create test-definitions.md (required artifact for features at implement phase)
+      writeTestFile(
+        projectDirectory,
+        '.safeword-project/tickets/001/test-definitions.md',
+        '# Test Definitions\n\n- [x] Scenario 1',
+      );
 
       const result = runStopHookForPhase(projectDirectory);
 
@@ -444,13 +450,19 @@ describe('E2E: Phase-Aware Quality Review', () => {
           lastModified: '2026-01-06T10:00:00Z',
         },
       ]);
+      // Create test-definitions.md (required artifact for done phase)
+      writeTestFile(
+        projectDirectory,
+        '.safeword-project/tickets/001/test-definitions.md',
+        '# Test Definitions\n\n- [x] Scenario 1',
+      );
 
       const result = runStopHookForPhase(projectDirectory);
 
       // Done phase uses hard block (exit 2) with stderr message
       expect(result.exitCode).toBe(2);
       expect(result.reason).toContain('SAFEWORD');
-      expect(result.reason).toContain('Done phase requires evidence');
+      expect(result.reason).toContain('requires evidence');
       expect(result.reason).toContain('/done');
     });
 
@@ -464,6 +476,12 @@ describe('E2E: Phase-Aware Quality Review', () => {
           lastModified: '2026-01-06T10:00:00Z',
         },
       ]);
+      // Create test-definitions.md (required artifact for done phase)
+      writeTestFile(
+        projectDirectory,
+        '.safeword-project/tickets/001/test-definitions.md',
+        '# Test Definitions\n\n- [x] Scenario 1',
+      );
 
       // Transcript contains evidence patterns
       const evidenceText =
@@ -595,6 +613,147 @@ describe('E2E: Phase-Aware Quality Review', () => {
 
       // Default implementation review (fallback)
       expect(result.reason).toContain('Is it correct?');
+    });
+  });
+
+  describe('Cumulative Artifact Checks', () => {
+    it('Scenario 11: Soft blocks feature at scenario-gate without test-definitions.md', () => {
+      setupIssuesDirectory(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'scenario-gate',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+      // No test-definitions.md file exists
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      // Should soft block with artifact requirement message
+      expect(result.exitCode).toBe(0); // Soft block uses exit 0
+      expect(result.reason).toContain('test-definitions.md');
+    });
+
+    it('Scenario 12: Allows feature at scenario-gate with test-definitions.md', () => {
+      setupIssuesDirectory(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'scenario-gate',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+      // Create test-definitions.md
+      writeTestFile(
+        projectDirectory,
+        '.safeword-project/tickets/001/test-definitions.md',
+        '# Test Definitions\n\n- [ ] Scenario 1',
+      );
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      // Should show normal phase review, not artifact block
+      expect(result.reason).toContain('Scenario Gate');
+      expect(result.reason).not.toContain('test-definitions.md');
+    });
+
+    it('Scenario 13: Tasks skip artifact checks (no test-definitions required)', () => {
+      setupIssuesDirectory(projectDirectory, [
+        {
+          id: '001',
+          type: 'task',
+          phase: 'implement',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+      // No test-definitions.md - should be fine for tasks
+
+      const result = runStopHookForPhase(projectDirectory);
+
+      // Should show normal implementation review, not artifact block
+      expect(result.reason).toContain('Is it correct?');
+      expect(result.reason).not.toContain('test-definitions.md');
+    });
+  });
+
+  describe('Type-Aware Done Gate', () => {
+    it('Scenario 14: Feature done requires scenario evidence', () => {
+      setupIssuesDirectory(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'done',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+      // Create test-definitions.md (required artifact for done phase)
+      writeTestFile(
+        projectDirectory,
+        '.safeword-project/tickets/001/test-definitions.md',
+        '# Test Definitions\n\n- [x] Scenario 1',
+      );
+
+      // Only test evidence, missing scenario evidence
+      const evidenceText =
+        '## Done Checklist\n\n**Test Suite:** ✓ 42/42 tests pass\n\n{"proposedChanges": false, "madeChanges": true}';
+      const result = runStopHookForPhase(projectDirectory, evidenceText);
+
+      // Feature should require scenario evidence
+      expect(result.exitCode).toBe(2);
+      expect(result.reason).toContain('scenarios');
+    });
+
+    it('Scenario 15: Task done does not require scenario evidence', () => {
+      setupIssuesDirectory(projectDirectory, [
+        {
+          id: '001',
+          type: 'task',
+          phase: 'done',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+
+      // Only test evidence, no scenario evidence
+      const evidenceText =
+        '## Done Checklist\n\n**Test Suite:** ✓ 42/42 tests pass\n\n{"proposedChanges": false, "madeChanges": true}';
+      const result = runStopHookForPhase(projectDirectory, evidenceText);
+
+      // Task should allow with just test evidence
+      expect(result.exitCode).toBe(0);
+      expect(result.reason).toBe('');
+    });
+
+    it('Scenario 16: Feature done with both test and scenario evidence passes', () => {
+      setupIssuesDirectory(projectDirectory, [
+        {
+          id: '001',
+          type: 'feature',
+          phase: 'done',
+          status: 'in_progress',
+          lastModified: '2026-01-06T10:00:00Z',
+        },
+      ]);
+      // Create test-definitions.md (required artifact for done phase)
+      writeTestFile(
+        projectDirectory,
+        '.safeword-project/tickets/001/test-definitions.md',
+        '# Test Definitions\n\n- [x] Scenario 1',
+      );
+
+      // Both test and scenario evidence
+      const evidenceText =
+        '## Done Checklist\n\n**Test Suite:** ✓ 42/42 tests pass\n**Scenarios:** All 5 scenarios marked complete\n\n{"proposedChanges": false, "madeChanges": true}';
+      const result = runStopHookForPhase(projectDirectory, evidenceText);
+
+      // Should allow
+      expect(result.exitCode).toBe(0);
+      expect(result.reason).toBe('');
     });
   });
 

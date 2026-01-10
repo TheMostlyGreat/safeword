@@ -1,8 +1,8 @@
 ---
 id: 013d
 type: task
-phase: backlog
-status: pending
+phase: implement
+status: in_progress
 parent: '013'
 created: 2026-01-08T05:00:00Z
 last_modified: 2026-01-08T05:00:00Z

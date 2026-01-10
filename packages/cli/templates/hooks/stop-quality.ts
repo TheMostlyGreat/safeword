@@ -37,15 +37,22 @@ const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const safewordDir = `${projectDir}/.safeword`;
 const ticketsDir = `${projectDir}/.safeword-project/tickets`;
 
+interface TicketInfo {
+  phase: BddPhase | undefined;
+  type: string | undefined;
+  folder: string | undefined;
+}
+
 /**
- * Read phase from the most recently modified ticket in .safeword-project/tickets/
+ * Read ticket info from the most recently modified in_progress ticket.
  * Only considers tickets with status: in_progress (ignores backlog, done, etc.)
  * Skips type: epic tickets (work happens in child features/tasks)
- * Returns undefined if no matching tickets or no phase found.
  */
-function getCurrentPhase(): BddPhase | undefined {
+function getCurrentTicketInfo(): TicketInfo {
+  const empty: TicketInfo = { phase: undefined, type: undefined, folder: undefined };
+
   if (!existsSync(ticketsDir)) {
-    return undefined;
+    return empty;
   }
 
   try {
@@ -55,7 +62,7 @@ function getCurrentPhase(): BddPhase | undefined {
       const ticketPath = `${ticketsDir}/${f}/ticket.md`;
       return existsSync(ticketPath);
     });
-    if (folders.length === 0) return undefined;
+    if (folders.length === 0) return empty;
 
     // Find most recently modified in_progress ticket (excluding epics)
     let latestFolder = '';
@@ -79,16 +86,42 @@ function getCurrentPhase(): BddPhase | undefined {
       }
     }
 
-    if (!latestFolder) return undefined;
+    if (!latestFolder) return empty;
 
     const content = readFileSync(`${ticketsDir}/${latestFolder}/ticket.md`, 'utf-8');
     const phaseMatch = content.match(/^phase:\s*(\S+)/m);
-    if (phaseMatch) {
-      return phaseMatch[1] as BddPhase;
-    }
+    const typeMatch = content.match(/^type:\s*(\S+)/m);
+
+    return {
+      phase: phaseMatch?.[1] as BddPhase | undefined,
+      type: typeMatch?.[1],
+      folder: latestFolder,
+    };
   } catch {
     // Silent fail - use default message
   }
+  return empty;
+}
+
+/**
+ * Check cumulative artifact requirements for features.
+ * Features at scenario-gate+ phases require test-definitions.md to exist.
+ */
+function checkCumulativeArtifacts(ticketInfo: TicketInfo): string | undefined {
+  // Only enforce for features
+  if (ticketInfo.type !== 'feature') return undefined;
+  if (!ticketInfo.folder || !ticketInfo.phase) return undefined;
+
+  // Phases that require test-definitions.md
+  const phasesRequiringTestDefs = ['scenario-gate', 'decomposition', 'implement', 'done'];
+  if (!phasesRequiringTestDefs.includes(ticketInfo.phase)) return undefined;
+
+  // Check if test-definitions.md exists
+  const testDefsPath = `${ticketsDir}/${ticketInfo.folder}/test-definitions.md`;
+  if (!existsSync(testDefsPath)) {
+    return `Feature at ${ticketInfo.phase} phase requires test-definitions.md. Create it before proceeding.`;
+  }
+
   return undefined;
 }
 
@@ -230,36 +263,51 @@ for (const candidate of candidates) {
   }
 }
 
-// Get phase-aware quality message
-const currentPhase = getCurrentPhase();
+// Get ticket info and phase-aware quality message
+const ticketInfo = getCurrentTicketInfo();
+const currentPhase = ticketInfo.phase;
 const qualityMessage = getQualityMessage(currentPhase);
 
 /**
  * Evidence patterns for done phase validation.
- * Agent must show these patterns to prove completion.
  */
-const DONE_EVIDENCE_PATTERNS = [
-  /✓\s*\d+\/\d+\s*tests?\s*pass/i, // "✓ 156/156 tests pass"
-  /\d+\/\d+\s*tests?\s*pass/i, // "156/156 tests pass"
-  /all\s+\d+\s+scenarios?\s+marked/i, // "All 10 scenarios marked complete"
-];
+const TEST_EVIDENCE_PATTERN = /✓\s*\d+\/\d+\s*tests?\s*pass/i; // "✓ 156/156 tests pass"
+const TEST_EVIDENCE_ALT_PATTERN = /\d+\/\d+\s*tests?\s*pass/i; // "156/156 tests pass"
+const SCENARIO_EVIDENCE_PATTERN = /all\s+\d+\s+scenarios?\s+marked/i; // "All 10 scenarios marked complete"
 
 /**
- * Message shown when done phase blocks due to missing evidence.
+ * Check if transcript contains test evidence.
  */
-const DONE_HARD_BLOCK_MESSAGE = `SAFEWORD: Done phase requires evidence. Run /done and show results.
+function hasTestEvidence(text: string): boolean {
+  return TEST_EVIDENCE_PATTERN.test(text) || TEST_EVIDENCE_ALT_PATTERN.test(text);
+}
+
+/**
+ * Check if transcript contains scenario evidence.
+ */
+function hasScenarioEvidence(text: string): boolean {
+  return SCENARIO_EVIDENCE_PATTERN.test(text);
+}
+
+/**
+ * Get done gate message based on ticket type.
+ */
+function getDoneHardBlockMessage(ticketType: string | undefined): string {
+  if (ticketType === 'feature') {
+    return `SAFEWORD: Feature done requires evidence. Run /done and show results.
+
+Expected evidence formats:
+- "✓ X/X tests pass" (required)
+- "All N scenarios marked complete" (required for features)
+
+Run tests, show output, then try again.`;
+  }
+  return `SAFEWORD: Done phase requires evidence. Run /done and show results.
 
 Expected evidence formats:
 - "✓ X/X tests pass"
-- "All N scenarios marked complete"
 
 Run tests, show output, then try again.`;
-
-/**
- * Check if transcript contains evidence of completion.
- */
-function hasCompletionEvidence(text: string): boolean {
-  return DONE_EVIDENCE_PATTERNS.some(pattern => pattern.test(text));
 }
 
 /**
@@ -280,18 +328,33 @@ function softBlock(reason: string): never {
 }
 
 // Decision logic:
-// 1. Done phase with missing evidence → hard block (exit 2)
-// 2. Done phase with evidence → allow (exit 0)
-// 3. Other phases → soft block with quality review
+// 1. Cumulative artifact missing → soft block
+// 2. Done phase with missing evidence → hard block (exit 2)
+// 3. Done phase with evidence → allow (exit 0)
+// 4. Other phases → soft block with quality review
+
+// Check cumulative artifacts (features at scenario-gate+ need test-definitions.md)
+const artifactError = checkCumulativeArtifacts(ticketInfo);
+if (artifactError) {
+  softBlock(artifactError);
+}
 
 if (currentPhase === 'done') {
   // Done phase: require evidence before allowing stop
-  if (hasCompletionEvidence(combinedText)) {
-    // Evidence found - allow stop
-    process.exit(0);
+  // Features need both test and scenario evidence
+  // Tasks/patches just need test evidence
+  if (ticketInfo.type === 'feature') {
+    if (hasTestEvidence(combinedText) && hasScenarioEvidence(combinedText)) {
+      process.exit(0);
+    }
+    hardBlockDone(getDoneHardBlockMessage('feature'));
+  } else {
+    // Tasks and patches just need test evidence
+    if (hasTestEvidence(combinedText)) {
+      process.exit(0);
+    }
+    hardBlockDone(getDoneHardBlockMessage(ticketInfo.type));
   }
-  // No evidence - hard block, force Claude to run /done
-  hardBlockDone(DONE_HARD_BLOCK_MESSAGE);
 }
 
 // Other phases: use summary-based soft blocking
