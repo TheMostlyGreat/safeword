@@ -1,5 +1,5 @@
 {
-  "ignore": [".safeword/**"],
+  "ignore": [".safeword/**", ".safeword-project/**"],
   "ignoreFiles": ["packages/cli/templates/hooks/**"],
   "ignoreDependencies": [],
   "ignoreBinaries": ["shfmt", "dot", "publint"]

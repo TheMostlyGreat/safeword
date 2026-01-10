@@ -106,5 +106,16 @@ module.exports = {
   ],
   options: {
     ...generated.options,
+    exclude: {
+      path: [
+        ...generated.options.exclude.path,
+        // Templates are copied to target projects, not imported
+        'packages/cli/templates/',
+        // Build/dev scripts, not production code
+        'scripts/',
+        // Astro generates this directory
+        '\\.astro/',
+      ],
+    },
   },
 };
