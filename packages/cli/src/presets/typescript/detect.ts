@@ -31,55 +31,20 @@ const TAILWIND_PACKAGES = ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/pos
 const PLAYWRIGHT_PACKAGES = ['@playwright/test', 'playwright'] as const;
 
 /**
- * All known formatter config files (for documentation/reference).
- * Includes Biome, dprint, Rome, and Prettier.
+ * Non-Prettier formatter config files (Biome, dprint, Rome).
+ * Used to detect if project uses an alternative formatter.
+ * Prettier is safeword's default, so its presence doesn't skip config creation.
  */
-const FORMATTER_CONFIG_FILES = [
-  // Biome
+const ALTERNATIVE_FORMATTER_FILES = [
+  // Biome (and legacy Rome)
   'biome.json',
   'biome.jsonc',
+  'rome.json',
   // dprint
   'dprint.json',
   '.dprint.json',
   'dprint.jsonc',
   '.dprint.jsonc',
-  // Rome (legacy, now Biome)
-  'rome.json',
-  // Prettier - all supported config formats
-  // See: https://prettier.io/docs/en/configuration.html
-  '.prettierrc',
-  '.prettierrc.json',
-  '.prettierrc.json5',
-  '.prettierrc.yaml',
-  '.prettierrc.yml',
-  '.prettierrc.toml',
-  '.prettierrc.js',
-  '.prettierrc.cjs',
-  '.prettierrc.mjs',
-  '.prettierrc.ts',
-  '.prettierrc.cts',
-  '.prettierrc.mts',
-  'prettier.config.js',
-  'prettier.config.cjs',
-  'prettier.config.mjs',
-  'prettier.config.ts',
-  'prettier.config.cts',
-  'prettier.config.mts',
-] as const;
-
-/**
- * Non-Prettier formatter config files.
- * Used to detect if project uses an alternative formatter (Biome, dprint, Rome).
- * Prettier is safeword's default, so we don't skip config creation when Prettier exists.
- */
-const NON_PRETTIER_FORMATTER_FILES = [
-  'biome.json',
-  'biome.jsonc',
-  'dprint.json',
-  '.dprint.json',
-  'dprint.jsonc',
-  '.dprint.jsonc',
-  'rome.json',
 ] as const;
 
 type DepsRecord = Record<string, string | undefined>;
@@ -232,7 +197,7 @@ function hasExistingLinter(scripts: ScriptsRecord): boolean {
  */
 function hasExistingFormatter(cwd: string, _scripts: ScriptsRecord): boolean {
   // Only check for non-Prettier formatter config files
-  return NON_PRETTIER_FORMATTER_FILES.some(file => existsSync(path.join(cwd, file)));
+  return ALTERNATIVE_FORMATTER_FILES.some(file => existsSync(path.join(cwd, file)));
 }
 
 /**
@@ -243,8 +208,7 @@ export const detect = {
   TAILWIND_PACKAGES,
   TANSTACK_QUERY_PACKAGES,
   PLAYWRIGHT_PACKAGES,
-  FORMATTER_CONFIG_FILES,
-  NON_PRETTIER_FORMATTER_FILES,
+  ALTERNATIVE_FORMATTER_FILES,
 
   // Core utilities
   collectAllDeps,
