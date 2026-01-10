@@ -12,11 +12,6 @@
 // ============================================================================
 
 /**
- * Full strict rules for safeword ESLint configs that extend existing project configs.
- * These rules are applied after project rules (safeword wins on conflict).
- * Used by: getSafewordEslintConfigExtending, getSafewordEslintConfigLegacy
- */
-/**
  * Get Prettier-related imports and config entries based on whether project has existing formatter.
  * Avoids repetition across ESLint config generators.
  */
@@ -65,6 +60,11 @@ const scopedNextConfigs = nextPaths?.flatMap((filePath) =>
 ) ?? [];`;
 }
 
+/**
+ * Full strict rules for safeword ESLint configs that extend existing project configs.
+ * These rules are applied after project rules (safeword wins on conflict).
+ * Used by: getSafewordEslintConfigExtending, getSafewordEslintConfigLegacy
+ */
 const SAFEWORD_STRICT_RULES_FULL = `// Safeword strict rules - applied after project rules (win on conflict)
 const safewordStrictRules = {
   rules: {
