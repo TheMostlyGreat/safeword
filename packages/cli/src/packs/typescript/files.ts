@@ -322,13 +322,6 @@ export const typescriptJsonMerges: Record<string, JsonMergeDefinition> = {
         }
       }
 
-      // Ensure tailwind plugin is always last (required for proper class sorting)
-      const tailwindIndex = allPlugins.indexOf('prettier-plugin-tailwindcss');
-      if (tailwindIndex !== -1 && tailwindIndex !== allPlugins.length - 1) {
-        allPlugins.splice(tailwindIndex, 1);
-        allPlugins.push('prettier-plugin-tailwindcss');
-      }
-
       if (allPlugins.length > 0) {
         result.plugins = allPlugins;
       } else {
