@@ -30,29 +30,6 @@
 
 ---
 
-## Quality Config Changes
-
-**Policy:** Fix code, don't weaken configs. Never disable rules to silence errors.
-
-| Protected Files | Examples                                          |
-| --------------- | ------------------------------------------------- |
-| ESLint          | `eslint.config.*`, `.eslintrc.*`, eslint-configs/ |
-| TypeScript      | `tsconfig*.json`                                  |
-| Vitest/Test     | `vitest.config.*`, jest.config.\*                 |
-| Prettier        | `.prettierrc*`, `prettier.config.*`               |
-| Presets         | `**/presets/**/*.ts`                              |
-| CI              | `.github/workflows/*.yml`                         |
-
-**Escalation path** (before modifying any protected file):
-
-1. Research: Confirm this is a false positive or inappropriate rule
-2. Evidence: Find docs, issues, or examples proving the rule is wrong for this context
-3. Ask: Present evidence to user, get explicit approval
-
-**Forbidden without approval:** `eslint-disable`, `@ts-ignore`, `as any`, `.skip(`, rule overrides
-
----
-
 ## Before Using Any Library API
 
 Training data is stale. Follow this sequence:
@@ -210,6 +187,9 @@ status: in_progress
 
 **⚠️ MANDATORY: Run this decision tree on EVERY request BEFORE doing any work.**
 
+**Resuming existing work?** If user references a ticket ID/slug or says "resume"/"continue":
+→ Read ticket, use its `type:` field (feature/task/patch) instead of this tree.
+
 Stop at first match:
 
 ```text
@@ -236,7 +216,7 @@ Fallback: task. User can /bdd to override.
 
 - **patch:** "Patch. Fixing directly."
 - **task:** "Task. Writing tests first. `/bdd` to override." → TDD (RED → GREEN → REFACTOR)
-- **feature:** "Feature. Defining behaviors first. `/tdd` to override." → BDD phases (0-7), TDD inline at Phase 6
+- **feature:** "Feature. `/tdd` to override." → Run `/bdd`
 
 **Examples:**
 
@@ -256,34 +236,6 @@ Fallback: task. User can /bdd to override.
 - "Add a comment to function X" → patch (not behavior change)
 - "Implement the fix for bug #123" → task (bug fix despite "implement")
 - "Build the Docker image" → patch (infrastructure, not product)
-
----
-
-## Feature Development
-
-| Level       | Artifacts                    |
-| ----------- | ---------------------------- |
-| **feature** | Spec + Test Defs (+ Design)  |
-| **task**    | Spec with inline tests       |
-| **patch**   | Minimal spec, existing tests |
-
-**Then follow this order:**
-
-1. **Check/create ticket folder** if context-loss risk exists (`.safeword-project/tickets/{id}-{slug}/`)
-2. **Read/create ticket.md** in the folder
-3. **Read/create test-definitions.md** (feature only, in same folder)
-4. **Read/create design.md** if complex (3+ components, in same folder)
-5. **TDD: RED → GREEN → REFACTOR**
-6. **Update ticket** with progress, ask user to confirm completion
-
-**Edge cases:**
-
-| Situation                 | Action                     |
-| ------------------------- | -------------------------- |
-| Spec exists, no test defs | Create test defs (feature) |
-| Test defs exist, no spec  | Create spec first          |
-| Neither exist             | Create spec, then tests    |
-| patch/task                | Inline tests in spec       |
 
 ---
 

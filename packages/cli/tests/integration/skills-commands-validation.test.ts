@@ -618,12 +618,22 @@ describe('Cursor Rules Validation (.mdc Format)', () => {
 });
 
 describe('Skills-Cursor Parity', () => {
-  it('each safeword skill should have corresponding cursor rule', () => {
+  it('each safeword skill should have corresponding cursor rule (or split rules for BDD)', () => {
     const skillDirectoryectories = getSkillDirectories().filter(d => d.startsWith('safeword-'));
     const ruleFiles = new Set(getCursorRuleFiles().map(f => nodePath.basename(f, '.mdc')));
 
+    // BDD skill is split into multiple Cursor rules (bdd-*.mdc)
+    const bddRuleExists = [...ruleFiles].some(f => f.startsWith('bdd-'));
+
     const missingRules: string[] = [];
     for (const skillDirectory of skillDirectoryectories) {
+      // BDD skill is covered by split rules
+      if (skillDirectory === 'safeword-bdd-orchestrating') {
+        if (!bddRuleExists) {
+          missingRules.push(skillDirectory);
+        }
+        continue;
+      }
       if (!ruleFiles.has(skillDirectory)) {
         missingRules.push(skillDirectory);
       }

@@ -152,6 +152,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.cursor/rules/safeword-tdd-enforcing.mdc',
     '.claude/commands/tdd.md',
     '.cursor/commands/tdd.md',
+    // BDD skill split into phase files (v0.16.0)
+    '.cursor/rules/safeword-bdd-orchestrating.mdc',
     '.safeword/commands/tdd.md',
     // Brainstorming skill removed - never used, BDD discovery phase covers this (v0.16.0)
     '.claude/skills/safeword-brainstorming/SKILL.md',
@@ -331,6 +333,24 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.claude/skills/safeword-bdd-orchestrating/SKILL.md': {
       template: 'skills/safeword-bdd-orchestrating/SKILL.md',
     },
+    '.claude/skills/safeword-bdd-orchestrating/DISCOVERY.md': {
+      template: 'skills/safeword-bdd-orchestrating/DISCOVERY.md',
+    },
+    '.claude/skills/safeword-bdd-orchestrating/SCENARIOS.md': {
+      template: 'skills/safeword-bdd-orchestrating/SCENARIOS.md',
+    },
+    '.claude/skills/safeword-bdd-orchestrating/DECOMPOSITION.md': {
+      template: 'skills/safeword-bdd-orchestrating/DECOMPOSITION.md',
+    },
+    '.claude/skills/safeword-bdd-orchestrating/TDD.md': {
+      template: 'skills/safeword-bdd-orchestrating/TDD.md',
+    },
+    '.claude/skills/safeword-bdd-orchestrating/DONE.md': {
+      template: 'skills/safeword-bdd-orchestrating/DONE.md',
+    },
+    '.claude/skills/safeword-bdd-orchestrating/SPLITTING.md': {
+      template: 'skills/safeword-bdd-orchestrating/SPLITTING.md',
+    },
     '.claude/commands/bdd.md': { template: 'commands/bdd.md' },
     '.claude/commands/done.md': { template: 'commands/done.md' },
     '.claude/commands/audit.md': { template: 'commands/audit.md' },
@@ -356,8 +376,26 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     '.cursor/rules/safeword-refactoring.mdc': {
       template: 'cursor/rules/safeword-refactoring.mdc',
     },
-    '.cursor/rules/safeword-bdd-orchestrating.mdc': {
-      template: 'cursor/rules/safeword-bdd-orchestrating.mdc',
+    '.cursor/rules/bdd-core.mdc': {
+      template: 'cursor/rules/bdd-core.mdc',
+    },
+    '.cursor/rules/bdd-discovery.mdc': {
+      template: 'cursor/rules/bdd-discovery.mdc',
+    },
+    '.cursor/rules/bdd-scenarios.mdc': {
+      template: 'cursor/rules/bdd-scenarios.mdc',
+    },
+    '.cursor/rules/bdd-decomposition.mdc': {
+      template: 'cursor/rules/bdd-decomposition.mdc',
+    },
+    '.cursor/rules/bdd-tdd.mdc': {
+      template: 'cursor/rules/bdd-tdd.mdc',
+    },
+    '.cursor/rules/bdd-done.mdc': {
+      template: 'cursor/rules/bdd-done.mdc',
+    },
+    '.cursor/rules/bdd-splitting.mdc': {
+      template: 'cursor/rules/bdd-splitting.mdc',
     },
 
     // Cursor commands (8 files - same as Claude)

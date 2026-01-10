@@ -77,24 +77,7 @@ Out of Scope:
 
 ### Given-When-Then Format (Behavior-Focused)
 
-```text
-Given [initial context/state]
-When [action/event occurs]
-Then [expected outcome]
-
-And [additional context/outcome]
-But [exception/edge case]
-```
-
-**Example:**
-
-```text
-Given I am an authenticated API user
-When I POST to /api/campaigns with valid JSON
-Then I receive a 201 Created response with campaign ID
-And the campaign appears in my GET /api/campaigns list
-But invalid JSON returns 400 with descriptive error messages
-```
+For feature-level work, run `/bdd` — the BDD skill guides you through drafting scenarios with proper Given/When/Then structure in Phase 3.
 
 ### Job Story Format (Outcome-Focused)
 

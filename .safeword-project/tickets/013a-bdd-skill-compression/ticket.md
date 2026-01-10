@@ -2,10 +2,12 @@
 id: '013a'
 title: BDD skill compression and phase-based splitting
 type: feature
-status: ready
+status: in_progress
+phase: implement
 priority: medium
 created: 2026-01-08
 parent: '013'
+last_modified: 2026-01-10
 ---
 
 # BDD Skill Compression
