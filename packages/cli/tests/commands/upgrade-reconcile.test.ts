@@ -14,6 +14,8 @@ import nodePath from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+const __dirname = import.meta.dirname;
+
 describe('Upgrade Command - Reconcile Integration', () => {
   let temporaryDirectory: string;
 
@@ -287,7 +289,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
     it('should run upgrade successfully via CLI', async () => {
       createConfiguredProject('0.5.0');
 
-      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.resolve(__dirname, '../../src/cli.ts');
       try {
         const result = execSync(`bunx tsx ${cliPath} upgrade`, {
           cwd: temporaryDirectory,
@@ -313,7 +315,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
     it('should refuse downgrade when project is newer', async () => {
       createConfiguredProject('99.99.99');
 
-      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.resolve(__dirname, '../../src/cli.ts');
       try {
         execSync(`bunx tsx ${cliPath} upgrade`, {
           cwd: temporaryDirectory,
@@ -335,7 +337,7 @@ describe('Upgrade Command - Reconcile Integration', () => {
         JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.resolve(__dirname, '../../src/cli.ts');
       try {
         execSync(`bunx tsx ${cliPath} upgrade`, {
           cwd: temporaryDirectory,

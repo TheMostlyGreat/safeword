@@ -19,6 +19,8 @@ import {
   removeTemporaryDirectory,
 } from '../helpers';
 
+const __dirname = import.meta.dirname;
+
 describe('Reset Command - Reconcile Integration', () => {
   let temporaryDirectory: string;
 
@@ -308,7 +310,7 @@ describe('Reset Command - Reconcile Integration', () => {
     it('should run reset successfully via CLI', async () => {
       createConfiguredProject();
 
-      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.resolve(__dirname, '../../src/cli.ts');
       try {
         const result = execSync(`bunx tsx ${cliPath} reset --yes`, {
           cwd: temporaryDirectory,
@@ -338,7 +340,7 @@ describe('Reset Command - Reconcile Integration', () => {
         JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.resolve(__dirname, '../../src/cli.ts');
       const result = execSync(`bunx tsx ${cliPath} reset --yes`, {
         cwd: temporaryDirectory,
         encoding: 'utf8',

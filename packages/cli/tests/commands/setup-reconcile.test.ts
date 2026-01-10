@@ -20,6 +20,8 @@ import {
   setupReconcileTest,
 } from '../helpers';
 
+const __dirname = import.meta.dirname;
+
 describe('Setup Command - Reconcile Integration', () => {
   let temporaryDirectory: string;
 
@@ -236,7 +238,7 @@ describe('Setup Command - Reconcile Integration', () => {
         JSON.stringify({ name: 'test', version: '1.0.0' }, undefined, 2),
       );
 
-      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.resolve(__dirname, '../../src/cli.ts');
       try {
         const result = execSync(`bunx tsx ${cliPath} setup`, {
           cwd: temporaryDirectory,
@@ -272,7 +274,7 @@ describe('Setup Command - Reconcile Integration', () => {
         recursive: true,
       });
 
-      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.resolve(__dirname, '../../src/cli.ts');
       try {
         execSync(`bunx tsx ${cliPath} setup`, {
           cwd: temporaryDirectory,

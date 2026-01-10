@@ -13,6 +13,8 @@ import nodePath from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+const __dirname = import.meta.dirname;
+
 describe('Check Command - Reconcile Integration', () => {
   let temporaryDirectory: string;
 
@@ -99,7 +101,7 @@ describe('Check Command - Reconcile Integration', () => {
       );
 
       // Run actual setup (this is an integration test)
-      const cliPath = nodePath.join(process.cwd(), 'src/cli.ts');
+      const cliPath = nodePath.resolve(__dirname, '../../src/cli.ts');
       try {
         execSync(`bunx tsx ${cliPath} setup`, {
           cwd: temporaryDirectory,
