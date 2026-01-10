@@ -27,7 +27,7 @@ Users shouldn't have to "learn" safeword. It should feel automatic—like workin
 
 - **Default behavior is invisible**: Agent detects work type (patch/task/feature) and applies the right process automatically
 - **No teaching required**: User says "build X" and gets a quality process without asking for it
-- **Power users can override**: Explicit commands exist (`/bdd`, `/tdd-only`, etc.) but 90% of users never need them
+- **Power users can override**: Explicit commands exist (`/bdd`, `/refactor`, etc.) but 90% of users never need them
 
 ### Teammate Voice, Not System Logs
 

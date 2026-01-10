@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-// Safeword: Guide compliance check for template files (PostToolUse)
+// Safeword project-specific: Guide compliance check for template files (PostToolUse)
+// This hook is ONLY for the safeword repo itself, not distributed to end users.
 // Prompts for LLM guide + context-files guide compliance when editing templates
 
 interface HookInput {

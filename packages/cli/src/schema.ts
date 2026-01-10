@@ -247,9 +247,6 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     ".safeword/hooks/post-tool-lint.ts": {
       template: "hooks/post-tool-lint.ts",
     },
-    ".safeword/hooks/post-tool-guide-check.ts": {
-      template: "hooks/post-tool-guide-check.ts",
-    },
     ".safeword/hooks/stop-quality.ts": { template: "hooks/stop-quality.ts" },
 
     // Guides (11 files)

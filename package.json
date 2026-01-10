@@ -61,5 +61,8 @@
   "dependencies": {
     "eslint-plugin-jsdoc": "^61.7.1",
     "typescript-eslint": "^8.52.0"
+  },
+  "overrides": {
+    "zod-validation-error": "^4.0.0"
   }
 }

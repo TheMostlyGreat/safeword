@@ -15,6 +15,7 @@ const ignores = [
   "**/build/",
   "**/coverage/",
   ".safeword/", // Generated hooks - linted separately by installed safeword config
+  ".safeword-project/", // Project-specific hooks - not part of distributed package
   "examples/",
   "eslint.config.mjs", // Self - JS file can't use typed rules
   "packages/cli/templates/", // Template files copied to customer projects - not part of CLI build

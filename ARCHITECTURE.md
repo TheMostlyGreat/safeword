@@ -1,7 +1,7 @@
 # Safeword Architecture
 
-**Version:** 1.4
-**Last Updated:** 2026-01-07
+**Version:** 1.5
+**Last Updated:** 2026-01-10
 **Status:** Production
 
 ---
@@ -74,14 +74,14 @@ packages/cli/
 ├── templates/
 │   ├── SAFEWORD.md     # Core instructions (installed to .safeword/)
 │   ├── AGENTS.md       # Project context template
-│   ├── commands/       # Slash commands (/lint, /audit, /done, /bdd, /tdd)
+│   ├── commands/       # Slash commands (/audit, /bdd, /cleanup-zombies, /done, /lint, /quality-review, /refactor)
 │   ├── cursor/         # Cursor IDE rules (.mdc files)
 │   ├── doc-templates/  # Feature specs, design docs, tickets
 │   ├── guides/         # Methodology guides (TDD, planning, etc.)
 │   ├── hooks/          # Claude Code hooks (lint, quality review)
 │   ├── prompts/        # Prompt templates for commands
 │   ├── scripts/        # Shell scripts (cleanup, bisect)
-│   └── skills/         # Claude Code skills (BDD orchestration, TDD, debugging, etc.)
+│   └── skills/         # Claude Code skills (BDD orchestration, debugging, quality review, refactoring)
 ```
 
 ---
@@ -265,9 +265,23 @@ interface ProjectContext {
 | -------------- | ---------------------------------------------------------------------------------------------------------- |
 | What           | TDD (RED→GREEN→REFACTOR) is inline in BDD skill Phase 6, not a separate handoff                            |
 | Why            | Skill-to-skill handoffs are unreliable; agent memory doesn't guarantee the delegated skill will be invoked |
-| Trade-off      | BDD skill is larger; TDD skill remains for direct `/tdd` invocation                                        |
+| Trade-off      | BDD skill is larger; standalone TDD skill and `/tdd` command removed                                       |
 | Alternatives   | Separate TDD skill with handoff (rejected: soft enforcement), subagent delegation (rejected: no nesting)   |
 | Implementation | `packages/cli/templates/skills/safeword-bdd-orchestrating/SKILL.md` Phase 6-7                              |
+
+### Skill Consolidation (Removed Redundant Skills)
+
+**Status:** Accepted
+**Date:** 2026-01-09
+
+| Field          | Value                                                                                                              |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| What           | Removed standalone TDD, brainstorming, and writing-plans skills; consolidated into BDD orchestration               |
+| Why            | BDD skill's discovery phase covers brainstorming; Phase 6 includes full TDD; Claude Code has native plan mode      |
+| Trade-off      | Less granular skill invocation; users must use `/bdd` for structured workflows                                     |
+| Removed        | `safeword-tdd-enforcing`, `safeword-brainstorming`, `safeword-writing-plans` skills; `/tdd` command                |
+| Remaining      | 4 skills: `safeword-bdd-orchestrating`, `safeword-debugging`, `safeword-quality-reviewing`, `safeword-refactoring` |
+| Implementation | Deprecated files listed in `packages/cli/src/schema.ts` deprecatedFiles/deprecatedDirs                             |
 
 ### Hard Block for Done Phase (Exit Code 2)
 
@@ -334,9 +348,6 @@ const GO_EXTENSIONS = new Set(['go']);
 
 ## References
 
-- Feature Spec (Python): `.safeword/planning/specs/feature-python-support.md`
-- Feature Spec (Language Packs): `.safeword/planning/specs/feature-language-packs.md`
-- Design Doc (Language Packs): `.safeword/planning/design/language-packs.md`
 - Language Pack Spec: `packages/cli/src/packs/LANGUAGE_PACK_SPEC.md`
 - Ruff docs: https://docs.astral.sh/ruff/
 - golangci-lint docs: https://golangci-lint.run/

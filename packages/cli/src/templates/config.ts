@@ -384,15 +384,5 @@ export const SETTINGS_HOOKS = {
         },
       ],
     },
-    {
-      matcher: "Write|Edit|MultiEdit|NotebookEdit",
-      hooks: [
-        {
-          type: "command",
-          command:
-            'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/post-tool-guide-check.ts',
-        },
-      ],
-    },
   ],
 };
