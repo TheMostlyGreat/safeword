@@ -60,11 +60,11 @@ Diff analysis reveals content is NOT identical - significant drift has occurred:
 
 **Key findings:**
 
-- `quality-reviewing`: Cursor has extra guide reference, different version check wording
+- `quality-reviewing`: **Bidirectional drift** - Cursor has extra guide reference (`code-philosophy.md`), Claude has different structure/wording. Neither is superset.
 - `refactoring`: Claude has code examples and "Edge Cases" section that Cursor lacks
-- `core`: Only exists in Cursor (`alwaysApply: true`, includes SAFEWORD.md) - Claude uses CLAUDE.md reference instead
+- `core`: Only exists in Cursor (`alwaysApply: true`, includes SAFEWORD.md) - Claude achieves same via CLAUDE.md → SAFEWORD.md reference chain
 
-**Decision needed:** When unifying, which version is canonical? Recommend using Claude versions as source (more complete), then review/merge any Cursor-only additions.
+**Decision needed:** When unifying, which version is canonical? For most skills, Claude is more complete. For `quality-reviewing`, must manually reconcile both versions.
 
 ## Solution
 
@@ -154,6 +154,7 @@ Run sync as part of:
 
 ---
 
+- 2026-01-11T01:28:00Z Clarified: quality-reviewing has bidirectional drift, core uses different mechanism
 - 2026-01-10T21:13:00Z Added: Content drift analysis - quality-reviewing and refactoring have high drift
 - 2026-01-10T20:42:00Z Created: Skill sync from single source
 
