@@ -1,11 +1,11 @@
 ---
 id: 018b
 type: feature
-phase: intake
-status: ready
+phase: refactor
+status: in-progress
 parent: 018
 created: 2026-01-10T20:42:00Z
-last_modified: 2026-01-10T20:42:00Z
+last_modified: 2026-01-11T01:30:00Z
 ---
 
 # Skill Sync from Single Source
@@ -118,42 +118,43 @@ ${content}`,
 
 ### Integration
 
-Run sync as part of:
+Run sync via:
 
-- `safeword upgrade` (if that becomes a thing)
-- Pre-commit hook
-- CI check (fail if generated files differ from source)
+- **Pre-commit hook** - Auto-sync on commit (primary)
+- **CI check** - Fail if generated files are stale (safety net)
 
 ## Implementation
 
-1. Create `.safeword/skills/` with source files
-2. Migrate existing skill content to source format
+1. Create `.safeword/skills/` directory
+2. Migrate skills to source format (reconcile drift per table below)
 3. Create `sync-skills.ts` script
-4. Add to pre-commit or CI
-5. Delete manual skill files (now generated)
+4. Add pre-commit hook + CI check
+5. Run sync → generated files replace manual ones
+6. Verify both IDEs work correctly
 
 ## Acceptance Criteria
 
-- [ ] `.safeword/skills/` contains source files
-- [ ] Sync script generates Claude and Cursor formats
-- [ ] Generated files match current behavior
-- [ ] CI fails if generated files are stale
-- [ ] Adding new skill = edit 1 file + run sync
+- [ ] `.safeword/skills/` contains 4 source files (debugging, bdd-orchestrating, quality-reviewing, refactoring)
+- [ ] Sync script generates Claude (`SKILL.md`) and Cursor (`.mdc`) formats
+- [ ] Skills work identically in both IDEs after sync
+- [ ] CI fails if generated files don't match source
+- [ ] Adding new skill = create 1 source file + run sync
 
 ## Skills to Migrate
 
-| Skill             | Source                              | Notes                                           |
-| ----------------- | ----------------------------------- | ----------------------------------------------- |
-| debugging         | Claude (more consistent formatting) | Merge any Cursor additions                      |
-| bdd-orchestrating | Claude                              | Merge any Cursor additions                      |
-| quality-reviewing | **Review both**                     | High drift - manual reconciliation              |
-| refactoring       | **Claude**                          | Has code examples Cursor lacks                  |
-| core              | **Special**                         | Cursor-only - decide if Claude needs equivalent |
+| Skill             | Source                              | Notes                                     |
+| ----------------- | ----------------------------------- | ----------------------------------------- |
+| debugging         | Claude (more consistent formatting) | Merge any Cursor additions                |
+| bdd-orchestrating | Claude                              | Merge any Cursor additions                |
+| quality-reviewing | **Review both**                     | High drift - manual reconciliation        |
+| refactoring       | **Claude**                          | Has code examples Cursor lacks            |
+| core              | **N/A - skip**                      | Claude has equivalent via CLAUDE.md chain |
 
 ## Work Log
 
 ---
 
+- 2026-01-11T01:30:00Z Refactored: Removed vagueness, explicit core skip, tightened criteria
 - 2026-01-11T01:28:00Z Clarified: quality-reviewing has bidirectional drift, core uses different mechanism
 - 2026-01-10T21:13:00Z Added: Content drift analysis - quality-reviewing and refactoring have high drift
 - 2026-01-10T20:42:00Z Created: Skill sync from single source
