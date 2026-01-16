@@ -1,10 +1,10 @@
 ---
-id: 016d
+id: 019
 type: task
 phase: implement
 status: ready
 created: 2026-01-10T19:15:00Z
-last_modified: 2026-01-10T19:51:00Z
+last_modified: 2026-01-11T05:46:00Z
 ---
 
 # Allow customers to override LLM-specific checker rules
@@ -46,6 +46,7 @@ ESLint flat config supports array composition. Modify `.safeword/eslint.config.m
 
 ```javascript
 // .safeword/eslint.config.mjs (generated)
+import { defineConfig } from 'eslint/config';
 import projectConfig from '../eslint.config.mjs';
 import safewordRules from './rules.mjs';
 
@@ -58,12 +59,14 @@ try {
   if (error.code !== 'ERR_MODULE_NOT_FOUND') throw error;
 }
 
-export default [
+export default defineConfig([
   ...projectConfig, // 1. Customer's project rules
   ...safewordRules, // 2. Safeword LLM enforcement
   ...customerOverrides, // 3. Customer overrides (wins)
-];
+]);
 ```
+
+**Note:** `defineConfig()` is available in ESLint v9+ and provides better TypeScript support and validation. The spread approach remains correct for array composition.
 
 Customer creates `.safeword-project/eslint-overrides.mjs`:
 
@@ -197,7 +200,7 @@ Other tools don't need override files:
 
 ```typescript
 // typescriptJsonMerges['knip.json']
-merge: (existing) => {
+merge: existing => {
   const ignore = [...(existing.ignore || [])];
   if (!ignore.includes('.safeword/**')) ignore.push('.safeword/**');
   return { ...existing, ignore };
@@ -260,7 +263,8 @@ safeword override --rule no-incomplete-error-handling=warn
 
 ---
 
-- 2026-01-10T19:51:00Z Renumbered: 016e → 016d (execution priority - before process docs)
+- 2026-01-11T05:46:00Z Renumbered: 016d → 019 (standalone ticket)
+- 2026-01-11T03:36:00Z Updated: Added defineConfig() wrapper for ESLint v9+ best practices
 - 2026-01-10T19:46:00Z Added: "Why Separate Files?" design rationale (Biome comparison, native format benefits)
 - 2026-01-10T19:45:00Z Refactored: Made standalone (configuration architecture doesn't fit IDE/Claude Code epic)
 - 2026-01-10T19:35:00Z Added: "Why Only Three Tools?" section with future-proofing for knip/depcruiser via JSON merge

@@ -133,6 +133,25 @@ Be specific:
 | Not fixed       | NEW hypothesis (return to 3.1)          |
 | Partially fixed | Found one issue, continue investigating |
 
+### Root Cause Checkpoint (REQUIRED)
+
+Before proceeding to Phase 4:
+
+1. **Document root cause** in ticket (under "## Root Cause" section):
+   - What is the actual cause (not symptom)?
+   - Why did this happen?
+   - How was it confirmed?
+2. **If using tickets:** Update frontmatter to `subtype: bug-investigated`
+
+**Example:**
+
+```markdown
+## Root Cause
+
+Connection pool exhausted because connections aren't released in error path.
+Confirmed by adding pool logging - saw connections increment without decrement on errors.
+```
+
 ### Phase 4: Implementation
 
 #### 1. Create Failing Test

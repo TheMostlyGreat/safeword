@@ -1,11 +1,11 @@
 ---
 id: 015
 type: task
-phase: implement
-status: ready
+phase: done
+status: done
 parent: '016'
 created: 2026-01-10T16:08:00Z
-last_modified: 2026-01-10T18:40:00Z
+last_modified: 2026-01-11T05:47:00Z
 ---
 
 # Format and lint on save for safeword contributors
@@ -14,7 +14,7 @@ last_modified: 2026-01-10T18:40:00Z
 
 **Why:** Safeword developers editing the monorepo should get format-on-save and ESLint auto-fix without manual IDE configuration.
 
-**Scope:** Monorepo only. Customer template is separate ticket (016a).
+**Scope:** Monorepo only. Customer template is separate ticket (016b).
 
 ## Implementation Plan
 
@@ -46,15 +46,16 @@ Create `.vscode/settings.json` with modern syntax (VS Code 1.83+):
 
 ## Acceptance Criteria
 
-- [ ] `.vscode/settings.json` created with minimal settings
-- [ ] Uses `"explicit"` string (not deprecated `true` boolean)
-- [ ] No `eslint.useFlatConfig` (auto-detected)
-- [ ] No `editor.defaultFormatter` (avoids conflicts)
+- [x] `.vscode/settings.json` created with minimal settings
+- [x] Uses `"explicit"` string (not deprecated `true` boolean)
+- [x] No `eslint.useFlatConfig` (auto-detected)
+- [x] No `editor.defaultFormatter` (avoids conflicts)
 
 ## Work Log
 
 ---
 
+- 2026-01-11T05:47:00Z Done: Created .vscode/settings.json with formatOnSave and ESLint auto-fix
 - 2026-01-10T18:40:00Z Restructured: Moved audit findings to epic 016, narrowed to monorepo scope, fixed deprecated syntax
 - 2026-01-10T16:53:00Z Quality Review: Recommendation to not set defaultFormatter (avoid conflicts)
 - 2026-01-10T16:08:00Z Started: Created ticket after linting audit

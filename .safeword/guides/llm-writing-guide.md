@@ -2,8 +2,6 @@
 
 How to write documentation that LLMs will read and follow: CLAUDE.md, SAFEWORD.md, guides, skills, commands, hooks.
 
-**Related:** For calling LLM APIs, see [LLM Integration Guide](../../.safeword-project/guides/llm-integration-guide.md)
-
 ---
 
 ## Core Principles

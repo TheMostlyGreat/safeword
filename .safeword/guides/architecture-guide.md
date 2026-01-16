@@ -244,11 +244,12 @@ Answer **IN ORDER**:
 
 ```plaintext
 project/
-├── ARCHITECTURE.md              # Single comprehensive doc
-├── .safeword/planning/
-│   ├── specs/
-│   ├── test-definitions/
-│   └── design/                  # Feature-specific design docs
+├── ARCHITECTURE.md                    # Single comprehensive doc
+├── .safeword-project/tickets/
+│   └── {id}-{slug}/
+│       ├── ticket.md
+│       ├── test-definitions.md
+│       └── design.md                  # Feature-specific design docs
 └── src/
 ```
 

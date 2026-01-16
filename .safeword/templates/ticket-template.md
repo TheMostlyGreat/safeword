@@ -57,13 +57,13 @@ phase: intake | define-behavior | scenario-gate | decomposition | implement | do
 
 ## Optional Sections (Add When Needed)
 
-### Planning Docs
+### Related Files
 
-{Only for complex features that need feature specs, test definitions, design docs}
+{All artifacts colocate in this ticket folder}
 
-- .safeword/planning/specs/feature-XXX-name.md
-- .safeword/planning/test-definitions/XXX-feature-name.md
-- .safeword/planning/design/XXX-feature-name.md
+- ./test-definitions.md (BDD scenarios - features only)
+- ./spec.md (feature spec - epics only)
+- ./design.md (design doc - complex features only)
 
 ### Scope
 

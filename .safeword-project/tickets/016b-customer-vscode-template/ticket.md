@@ -5,7 +5,7 @@ phase: implement
 status: ready
 parent: '016'
 created: 2026-01-10T18:40:00Z
-last_modified: 2026-01-10T19:51:00Z
+last_modified: 2026-01-11T03:35:00Z
 ---
 
 # Format and lint on save for customer projects
@@ -39,7 +39,8 @@ export function generateVscodeSettings(ctx: ProjectContext): string {
   const settings: Record<string, unknown> = {
     'editor.formatOnSave': true,
     'editor.codeActionsOnSave': {
-      'source.fixAll.eslint': 'explicit',
+      'source.fixAll.eslint': 'explicit', // "explicit" = only on manual save (Ctrl+S), not auto-save
+      'source.organizeImports': 'explicit',
     },
   };
 
@@ -87,6 +88,7 @@ If `ctx.projectType.existingFormatter` is set (Biome, dprint), skip setting `edi
 
 ---
 
+- 2026-01-11T03:35:00Z Updated: Changed codeActionsOnSave to use "explicit" (VSCode v1.41+ best practice), added source.organizeImports
 - 2026-01-10T19:51:00Z Renumbered: 016a → 016b (execution priority - after monorepo validation)
 - 2026-01-10T18:40:00Z Created: Split from ticket 015 as customer-facing scope
 

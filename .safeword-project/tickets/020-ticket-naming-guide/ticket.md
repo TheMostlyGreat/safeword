@@ -1,10 +1,10 @@
 ---
-id: 016e
+id: 020
 type: task
-phase: implement
-status: ready
+phase: done
+status: done
 created: 2026-01-10T18:47:00Z
-last_modified: 2026-01-10T19:51:00Z
+last_modified: 2026-01-11T05:47:00Z
 ---
 
 # Document user-focused ticket naming conventions
@@ -46,15 +46,16 @@ Write ticket names that describe **user value**, not implementation:
 
 ## Acceptance Criteria
 
-- [ ] Ticket naming guidance added to planning guide or AGENTS.md
-- [ ] Includes before/after examples
-- [ ] "User value test" included
+- [x] Ticket naming guidance added to planning guide or AGENTS.md
+- [x] Includes before/after examples
+- [x] "User value test" included
 
 ## Work Log
 
 ---
 
-- 2026-01-10T19:51:00Z Renumbered: 016d → 016e (execution priority - lowest urgency, process doc)
+- 2026-01-11T05:49:00Z Done: Added Ticket Naming section to AGENTS.md with examples by type
+- 2026-01-11T05:46:00Z Renumbered: 016e → 020 (standalone ticket)
 - 2026-01-10T19:45:00Z Refactored: Made standalone (removed from epic 016 - process improvement doesn't fit technical epic)
 - 2026-01-10T18:47:00Z Created: Document ticket naming conventions
 

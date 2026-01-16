@@ -2,19 +2,22 @@
 id: 017
 type: epic
 phase: intake
-status: ready
+status: superseded
+superseded_by: 022
 created: 2026-01-10T20:00:00Z
-last_modified: 2026-01-10T20:31:00Z
-children: ['017a', '017b', '017c', '017d']
+last_modified: 2026-01-11T22:00:00Z
+children: ['017a', '017b']
 ---
 
 # Continuous Quality Monitoring for Long-Running Agent Sessions
 
+> **Superseded by [022 - Hierarchical Work State Machine](../022-hierarchical-work-state/ticket.md)**
+>
+> This epic identified the problem and initial flat-state solution. Epic 022 provides the full solution with hierarchical state, unified context injection, and enforcement.
+
 **User Story:** When I run `/bdd` for a complex feature, the agent may implement for 30+ minutes without stopping. I want quality checks to happen during that time so I don't discover a pile of compounding errors at the end.
 
 **Goal:** Ensure quality checks happen at appropriate intervals during long BDD runs, not just when the agent stops for user input.
-
-**Why:** As BDD automation matures, agents run longer without human intervention. The Stop hook (which triggers quality review) fires only when waiting for user input. In a 30-minute implement phase, quality issues can accumulate unchecked.
 
 ## The Problem
 
@@ -40,91 +43,140 @@ children: ['017a', '017b', '017c', '017d']
 
 - Accumulate technical debt
 - Drift from spec/scenarios
+- Skip TDD commits (RED/GREEN/REFACTOR)
 - Make compounding errors
-- Miss better approaches
 
-## Research Summary
+## Solution: Flat State (017a/017b)
 
-### Claude Code Hook Capabilities
+Two mechanisms using PostToolUse -> state -> PreToolUse pattern:
 
-1. **SubagentStop**: Fires when subagents complete (could use for phase transitions)
-2. **Prompt-based hooks**: LLM (Haiku) evaluates context for decisions
-3. **PostToolUse**: Already fires on every edit (currently only lints)
-4. **No periodic hook**: No built-in timer or "every N calls" trigger
+| Layer | Ticket | What It Does                 | Trigger                   |
+| ----- | ------ | ---------------------------- | ------------------------- |
+| 1     | 017a   | LOC-based commit enforcement | 400 LOC uncommitted       |
+| 2     | 017b   | Phase transition gates       | Phase change in ticket.md |
 
-### Cursor Capabilities
+> **Note:** These remain valid for simple flat-state enforcement. For hierarchical work tracking (nested epics/tickets/scenarios), see [022](../022-hierarchical-work-state/ticket.md).
 
-1. **stop hook**: Has `followup_message` for auto-continuation (up to 5x)
-2. **afterFileEdit**: Equivalent to PostToolUse
-3. **No periodic hook**: Same limitation as Claude Code
+### The Hook Timing Problem (Key Insight)
 
-### Industry Patterns
+| Hook        | When        | Can Block? | Knows Changes? |
+| ----------- | ----------- | ---------- | -------------- |
+| PostToolUse | After edit  | **No**     | Yes            |
+| PreToolUse  | Before edit | **Yes**    | No             |
 
-1. **Code review research**: 200-400 LOC per review session is optimal
-2. **Beyond 400 LOC**: Reviewers skim instead of understanding
-3. **Teams with <400 LOC reviews**: 40% fewer production defects
-4. **Checkpoint systems**: Save state for rollback (Claude Code `/rewind`)
-5. **Context rot**: Quality degrades as context grows longer
+**Solution:** State file bridges observation (PostToolUse) -> enforcement (PreToolUse).
 
-Sources:
+### Single "Proceed" Action
 
-- [Code Review Best Practices - 200-400 LOC optimal](https://www.qodo.ai/blog/code-review-best-practices/)
-- [QA trends for 2026: AI, agents, and the future of testing](https://www.tricentis.com/blog/qa-trends-ai-agentic-testing)
-- [Validating multi-agent AI systems](https://www.pwc.com/us/en/services/audit-assurance/library/validating-multi-agent-ai-systems.html)
+Both gates clear on **commit**:
 
-## Solution: Multi-Layer Quality Monitoring
+- Aligns with AGENTS.md: "commit after each GREEN phase"
+- No new mechanisms - enforces existing best practice
+- Git commits ARE the checkpoints
 
-Four complementary mechanisms, each a separate ticket:
+## TDD Cycle Enforcement
 
-| Layer | Ticket | What It Does                          | Priority |
-| ----- | ------ | ------------------------------------- | -------- |
-| 1     | 017a   | LOC-based thresholds in PostToolUse   | High     |
-| 2     | 017b   | Phase transition quality gates        | Medium   |
-| 3     | 017c   | Git-anchored checkpoints for rollback | Medium   |
-| 4     | 017d   | Prompt-based smart review (opt-in)    | Low      |
+LOC gating (017a) naturally enforces TDD discipline:
 
-### Why This Layering
+| TDD Phase | Expected LOC | Commit             |
+| --------- | ------------ | ------------------ |
+| RED       | 20-50        | `test: [scenario]` |
+| GREEN     | 50-150       | `feat: [scenario]` |
+| REFACTOR  | 20-100       | Cleanup commit     |
 
-- **Layer 1 is the core solution** - Deterministic, no LLM cost, works in both IDEs
-- **Layer 2 catches phase boundaries** - Natural review points in BDD workflow
-- **Layer 3 enables recovery** - When quality issues are found, easy rollback
-- **Layer 4 is optional intelligence** - For teams wanting deeper analysis
+Each cycle is ~100-300 LOC total. 400 LOC threshold catches agents not committing at GREEN.
 
-## Design Decisions
+### TDD Substate Tracking
 
-| Decision          | Choice               | Rationale                                |
-| ----------------- | -------------------- | ---------------------------------------- |
-| Primary metric    | Lines of code        | Industry-validated (200-400 LOC optimal) |
-| Primary mechanism | Threshold-based      | Deterministic, no LLM cost, predictable  |
-| Threshold trigger | PostToolUse          | Already fires on every edit              |
-| State location    | `.safeword-project/` | Survives `safeword upgrade`              |
-| Checkpoint format | Git-anchored summary | Don't duplicate what git does            |
-| Smart review      | Opt-in               | Cost negligible but adds latency         |
+017b tracks TDD progress during `implement` phase (tracking only, no blocking):
 
-## Existing Infrastructure
+| State Field          | Source                             | Purpose                    |
+| -------------------- | ---------------------------------- | -------------------------- |
+| `lastCommitType`     | Parsed from commit message         | Infer expected next action |
+| `scenariosCompleted` | `[x]` count in test-definitions.md | Progress tracking          |
+| `scenariosTotal`     | Total `[ ]` + `[x]` count          | Progress tracking          |
 
-Already implemented (can be leveraged):
+Quality review displays: "TDD Progress: 2/5 scenarios. Last: test:, Expected: feat:"
 
-- `post-tool-lint.ts` - PostToolUse hook for linting
-- `stop-quality.ts` - Phase-aware quality review (Claude Code)
-- `cursor/stop.ts` - Quality review (Cursor) - **needs phase-awareness fix**
-- `lib/quality.ts` - Phase-specific quality messages
+## Phase-Specific Context Injection
 
-## Success Criteria
+Skills are soft enforcement—agents _may_ read phase files, but it's not guaranteed. 017b solves this by reading phase files at runtime and injecting them into gate messages:
 
-- [ ] Quality gaps in 30+ minute implement phases eliminated
-- [ ] Works in both Claude Code and Cursor
-- [ ] No noticeable latency impact (<100ms per hook)
-- [ ] Recovery possible when quality issues found
-- [ ] All subtickets completed
+| Phase             | Source File Read |
+| ----------------- | ---------------- |
+| `intake`          | DISCOVERY.md     |
+| `define-behavior` | SCENARIOS.md     |
+| `scenario-gate`   | SCENARIOS.md     |
+| `decomposition`   | DECOMPOSITION.md |
+| `implement`       | TDD.md           |
+| `done`            | DONE.md          |
+
+**Why read full files:** No drift (source IS the message), no "click through" needed, single source of truth. Phase files are small (~45-70 lines each).
+
+## What We Removed / Moved
+
+| Original                   | Decision             | Rationale                                              |
+| -------------------------- | -------------------- | ------------------------------------------------------ |
+| 017c: Hierarchical state   | **Extracted to 022** | Became its own epic with full scope                    |
+| 017d: Smart quality review | **Moved to 021**     | Adds latency/cost. Core problem solved by 017a/017b.   |
+| Time-based thresholds      | **Dropped**          | No timer hooks exist. LOC is the direct measure.       |
+| Rich checkpoint metadata   | **Dropped**          | Not needed for rollback. Git log provides history.     |
+| 200 LOC soft reminder      | **Dropped**          | Adds context without blocking. Just use 400 hard gate. |
+
+## State File
+
+**Flat state (017a/017b):**
+
+```json
+// .safeword-project/quality-state.json
+{
+  "locSinceCommit": 234,
+  "lastCommitHash": "a1b2c3d",
+  "lastKnownPhase": "implement",
+  "phaseGate": null,
+  "tdd": {
+    "lastCommitType": "test",
+    "scenariosCompleted": 2,
+    "scenariosTotal": 5
+  }
+}
+```
+
+**Evolution:** See [022 - Hierarchical Work State](../022-hierarchical-work-state/ticket.md) for stack-based state with nested work items and history.
+
+## Cursor Parity
+
+| Mechanism       | Claude Code        | Cursor                       |
+| --------------- | ------------------ | ---------------------------- |
+| LOC enforcement | PreToolUse exit(2) | stop hook `followup_message` |
+| Phase gates     | PreToolUse exit(2) | stop hook `followup_message` |
+
+Cursor's `afterFileEdit` is fire-and-forget (can't block). Use stop hook for soft enforcement.
+
+## Success Criteria (Flat State)
+
+- [ ] PreToolUse blocks at 400 LOC since last commit
+- [ ] PreToolUse blocks at phase transitions until commit
+- [ ] Implement phase message includes TDD prompts (RED/GREEN/REFACTOR)
+- [ ] Works during 30+ minute continuous execution
+- [ ] Cursor gets soft enforcement via `followup_message`
+- [ ] State persists in `.safeword-project/quality-state.json`
+
+> **For hierarchical state criteria**, see [022](../022-hierarchical-work-state/ticket.md).
 
 ## Work Log
 
 ---
 
-- 2026-01-10T20:31:00Z Added: User stories to epic and all subtickets for /bdd context
+- 2026-01-11T22:00:00Z Superseded: Hierarchical state extracted to 022 as full solution
+- 2026-01-11T21:27:00Z Added: TDD substate tracking (Option A - tracking only)
+- 2026-01-11T21:15:00Z Revised: Read phase files at runtime (no hardcoded excerpts, no drift)
+- 2026-01-11T17:15:00Z Added: Phase-specific context injection
+- 2026-01-11T16:35:00Z Revised: Simplified to 2-layer architecture after deep research
+- 2026-01-11T16:00:00Z Research: PostToolUse can't block, need PreToolUse for enforcement
+- 2026-01-11T06:00:00Z Research: Context rot, checkpoint patterns, SubagentStop analysis
+- 2026-01-10T20:31:00Z Added: User stories to epic and all subtickets
 - 2026-01-10T20:23:00Z Refactored: Converted to epic with 4 focused subtickets
-- 2026-01-10T20:08:00Z Refined: LOC-based thresholds (200/400), git-anchored checkpoints, Haiku cost analysis
-- 2026-01-10T20:00:00Z Created: Research complete, multi-layer solution designed
+- 2026-01-10T20:00:00Z Created: Research complete, initial multi-layer solution designed
 
 ---

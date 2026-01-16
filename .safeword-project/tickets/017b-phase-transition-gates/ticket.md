@@ -5,7 +5,7 @@ phase: intake
 status: ready
 parent: 017
 created: 2026-01-10T20:23:00Z
-last_modified: 2026-01-10T20:23:00Z
+last_modified: 2026-01-11T16:45:00Z
 ---
 
 # Phase Transition Quality Gates
@@ -16,148 +16,299 @@ last_modified: 2026-01-10T20:23:00Z
 
 **Parent:** [017 - Continuous Quality Monitoring](../017-continuous-quality-monitoring/ticket.md)
 
-## The Problem
+## The Solution
 
-Phase transitions are natural review points, but currently:
+Use PostToolUse -> state -> PreToolUse pattern (same as 017a).
 
-1. **No phase change detection** - PostToolUse doesn't know when phase changes
-2. **No explicit gate** - Agent can flow from `decomposition` → `implement` without pause
-3. **Cursor not phase-aware** - `cursor/stop.ts` uses generic message, not phase-specific
+```text
+Agent edits ticket.md to change phase
+    ↓
+PostToolUse: Detect phase change, set gate in state
+    ↓
+Next Edit attempted
+    ↓
+PreToolUse: Check gate, block with phase-appropriate message
+    ↓
+Agent commits
+    ↓
+Next PreToolUse: HEAD changed, gate clears
+```
 
-## Solution
+## State File
 
-### 1. Detect Phase Changes in PostToolUse
+Extends 017a's state with phase and TDD tracking:
 
-Track last known phase in `quality-state.json`:
-
-```typescript
-interface QualityMetrics {
-  // ... existing fields from 017a
-  lastKnownPhase: BddPhase | null;
-}
-
-function detectPhaseChange(currentPhase: BddPhase | undefined, state: QualityMetrics): boolean {
-  if (!currentPhase) return false;
-  if (state.lastKnownPhase === currentPhase) return false;
-
-  // Phase changed
-  state.lastKnownPhase = currentPhase;
-  saveState(stateFile, state);
-  return true;
+```json
+// .safeword-project/quality-state.json
+{
+  "locSinceCommit": 234,
+  "lastCommitHash": "a1b2c3d",
+  "lastKnownPhase": "implement",
+  "phaseGate": null,
+  "tdd": {
+    "lastCommitType": "test",
+    "scenariosCompleted": 2,
+    "scenariosTotal": 5
+  }
 }
 ```
 
-### 2. Key Transitions That Require Gates
+## TDD Substate Tracking (Option A: Tracking Only)
 
-| From            | To        | Why Gate Here                      |
-| --------------- | --------- | ---------------------------------- |
-| define-behavior | scenario  | Scenarios ready for review         |
-| decomposition   | implement | Plan ready, last chance to adjust  |
-| implement       | done      | Code complete, verify before close |
+During `implement` phase, track TDD cycle position and scenario progress. No blocking - just surface in quality reviews.
 
-### 3. Inject Phase-Appropriate Gate Message
+### Detection: Commit Message Parsing
+
+PostToolUse after commit parses message to update `lastCommitType`:
 
 ```typescript
-const PHASE_GATE_MESSAGES: Partial<Record<BddPhase, string>> = {
-  'scenario-gate': `SAFEWORD: Entering scenario gate.
+function updateTddState(projectDir: string): void {
+  const state = loadQualityState(projectDir);
+  if (state.lastKnownPhase !== 'implement') return;
 
-Validate each scenario before proceeding:
-- Atomic: Tests ONE behavior?
-- Observable: Externally visible outcome?
-- Deterministic: Same result on repeat?
+  const commitMsg = execSync('git log -1 --format=%s', { encoding: 'utf-8' }).trim();
 
-Type "scenarios validated" to proceed.`,
+  if (commitMsg.match(/^test:/i)) {
+    state.tdd.lastCommitType = 'test';
+  } else if (commitMsg.match(/^feat:/i)) {
+    state.tdd.lastCommitType = 'feat';
+  } else if (commitMsg.match(/^refactor:/i)) {
+    state.tdd.lastCommitType = 'refactor';
+  }
 
-  implement: `SAFEWORD: Entering implement phase.
+  saveQualityState(projectDir, state);
+}
+```
 
-Review your decomposition:
-- All components identified?
-- Test layers assigned (unit/integration/E2E)?
-- Task order by dependency?
+### Detection: Scenario Progress
 
-Type "ready to implement" to proceed.`,
+Parse test-definitions.md to count completed scenarios:
 
-  done: `SAFEWORD: Entering done phase.
+```typescript
+function updateScenarioProgress(projectDir: string, ticketDir: string): void {
+  const testDefsPath = `${ticketDir}/test-definitions.md`;
+  if (!existsSync(testDefsPath)) return;
 
-Before closing, verify:
-- All scenarios marked [x]?
-- Tests passing?
-- Build passing?
-- Lint clean?
+  const content = readFileSync(testDefsPath, 'utf-8');
+  const unchecked = (content.match(/- \[ \]/g) || []).length;
+  const checked = (content.match(/- \[x\]/gi) || []).length;
 
-Run /done for verification checklist.`,
+  state.tdd.scenariosTotal = unchecked + checked;
+  state.tdd.scenariosCompleted = checked;
+}
+```
+
+### Quality Review: TDD Progress Display
+
+When in `implement` phase, quality review shows:
+
+```text
+TDD Progress: 2/5 scenarios complete
+Last commit: test: User can log in
+Expected next: feat: User can log in (GREEN)
+
+[TDD.md content]
+```
+
+Infer expected next from `lastCommitType`:
+
+| lastCommitType | Expected Next                          |
+| -------------- | -------------------------------------- |
+| `test`         | `feat:` (GREEN)                        |
+| `feat`         | `refactor:` or `test:` (next scenario) |
+| `refactor`     | `test:` (next scenario RED)            |
+| `null`         | `test:` (start first scenario)         |
+
+### Initialize on Phase Enter
+
+When entering `implement` phase:
+
+```typescript
+if (currentPhase === 'implement' && state.lastKnownPhase !== 'implement') {
+  state.tdd = {
+    lastCommitType: null,
+    scenariosCompleted: 0,
+    scenariosTotal: 0,
+  };
+  updateScenarioProgress(projectDir, ticketDir);
+}
+```
+
+## Phase-Specific Context Injection
+
+**Problem:** Skills are soft enforcement—the agent _may_ read phase files, but it's not guaranteed.
+
+**Solution:** Read the actual phase file at runtime and inject it into the gate message. No excerpts, no drift, no "click through" needed.
+
+| Phase             | Source File      |
+| ----------------- | ---------------- |
+| `intake`          | DISCOVERY.md     |
+| `define-behavior` | SCENARIOS.md     |
+| `scenario-gate`   | SCENARIOS.md     |
+| `decomposition`   | DECOMPOSITION.md |
+| `implement`       | TDD.md           |
+| `done`            | DONE.md          |
+
+**Why read full files:**
+
+- Phase files are small (~45-70 lines each)
+- No drift - source IS the message
+- No "click through" needed - agent has full context
+- Single source of truth
+
+**Gate all phase transitions:**
+
+```typescript
+if (currentPhase && currentPhase !== state.lastKnownPhase) {
+  state.phaseGate = { pending: true, toPhase: currentPhase };
+  state.lastKnownPhase = currentPhase;
+  saveQualityState(projectDir, state);
+}
+```
+
+## Implementation
+
+### PostToolUse: Detect Phase Change
+
+```typescript
+// In post-tool-lint.ts
+
+function detectPhaseChange(projectDir: string, editedFile: string): void {
+  // Only check when ticket.md is edited
+  if (!editedFile.endsWith('ticket.md')) return;
+  if (!editedFile.includes('.safeword-project/tickets/')) return;
+
+  const content = readFileSync(editedFile, 'utf-8');
+  const phaseMatch = content.match(/^phase:\s*(\S+)/m);
+  const currentPhase = phaseMatch?.[1];
+
+  const state = loadQualityState(projectDir);
+
+  if (currentPhase && currentPhase !== state.lastKnownPhase) {
+    // Phase changed - set gate for key transitions
+    if (currentPhase === 'implement' || currentPhase === 'done') {
+      state.phaseGate = { pending: true, toPhase: currentPhase };
+    }
+    state.lastKnownPhase = currentPhase;
+    saveQualityState(projectDir, state);
+  }
+}
+```
+
+### PreToolUse: Enforce Gate
+
+```typescript
+// In pre-tool-quality.ts
+
+function checkPhaseGate(state: QualityState, currentHead: string): void {
+  if (!state.phaseGate?.pending) return;
+
+  // Gate clears on commit
+  if (state.lastCommitHash !== currentHead) return;
+
+  const message = getGateMessage(state.phaseGate.toPhase);
+  console.error(message);
+  process.exit(2);
+}
+```
+
+### Phase-Specific Messages (Read at Runtime)
+
+```typescript
+// In lib/quality.ts
+
+const PHASE_FILES: Record<BddPhase, string> = {
+  intake: 'DISCOVERY.md',
+  'define-behavior': 'SCENARIOS.md',
+  'scenario-gate': 'SCENARIOS.md',
+  decomposition: 'DECOMPOSITION.md',
+  implement: 'TDD.md',
+  done: 'DONE.md',
 };
 
-function getPhaseGateMessage(phase: BddPhase): string | null {
-  return PHASE_GATE_MESSAGES[phase] ?? null;
+function getGateMessage(projectDir: string, phase: BddPhase): string {
+  const skillDir = `${projectDir}/.claude/skills/safeword-bdd-orchestrating`;
+  const phaseFile = PHASE_FILES[phase];
+  const content = readFileSync(`${skillDir}/${phaseFile}`, 'utf-8');
+
+  return `SAFEWORD: Entering ${phase} phase.
+
+${content}
+
+Commit to proceed.`;
 }
 ```
 
-### 4. Fix Cursor Stop Hook Phase-Awareness
+**Benefits:**
 
-Current bug: `cursor/stop.ts` uses `QUALITY_REVIEW_MESSAGE` directly.
+- Source file IS the message (no drift)
+- Single source of truth for phase instructions
+- Agent gets full context without needing to "click through"
 
-Fix:
+## Fix Cursor Phase-Awareness
+
+Current bug: `cursor/stop.ts` uses generic `QUALITY_REVIEW_MESSAGE`.
 
 ```typescript
 // cursor/stop.ts - BEFORE
 import { QUALITY_REVIEW_MESSAGE } from '../lib/quality.ts';
-// ...
 followup_message: QUALITY_REVIEW_MESSAGE;
 
 // cursor/stop.ts - AFTER
-import { getQualityMessage } from '../lib/quality.ts';
-// ...
-const currentPhase = getCurrentPhase(); // same function as stop-quality.ts
-followup_message: getQualityMessage(currentPhase);
+import { getQualityMessage, getCurrentPhase } from '../lib/quality.ts';
+const phase = getCurrentPhase(projectDir);
+followup_message: getQualityMessage(phase);
 ```
 
-This requires extracting `getCurrentPhase()` to `lib/quality.ts` for reuse.
+Extract `getCurrentPhase()` to `lib/quality.ts` for reuse.
 
-## Implementation Steps
+## Cursor Parity
 
-1. **Extract `getCurrentPhase()` to lib/quality.ts**
-   - Move from `stop-quality.ts`
-   - Export for use by both Claude Code and Cursor hooks
+Cursor's `afterFileEdit` can't block phase gates. Use stop hook:
 
-2. **Add phase tracking to quality-state.json**
-   - Add `lastKnownPhase` field
-   - Update on each PostToolUse
+```typescript
+// cursor/stop.ts
+const state = loadQualityState();
+if (state.phaseGate?.pending) {
+  return {
+    followup_message: getGateMessage(state.phaseGate.toPhase),
+  };
+}
+```
 
-3. **Add phase gate messages**
-   - Create `PHASE_GATE_MESSAGES` in `lib/quality.ts`
-   - Add `getPhaseGateMessage()` function
-
-4. **Wire phase detection into PostToolUse**
-   - Detect phase changes
-   - Inject gate message when entering key phases
-
-5. **Fix Cursor stop.ts**
-   - Use `getCurrentPhase()` and `getQualityMessage()`
-   - Test phase-awareness in Cursor
+Soft enforcement, but effective.
 
 ## Acceptance Criteria
 
-- [ ] Phase changes detected in PostToolUse
-- [ ] Gate message injected when entering scenario-gate, implement, done
+- [ ] PostToolUse detects phase change in ticket.md
+- [ ] PreToolUse blocks at ALL phase transitions
+- [ ] Gate clears on commit (HEAD changes)
+- [ ] `getGateMessage(phase)` reads phase file at runtime (no hardcoded excerpts)
+- [ ] Phase file mapping: intake→DISCOVERY.md, implement→TDD.md, etc.
 - [ ] `getCurrentPhase()` extracted to lib/quality.ts
-- [ ] Cursor stop.ts uses phase-aware quality messages
-- [ ] Phase tracked in quality-state.json
-- [ ] No latency impact (phase read is fast)
+- [ ] Cursor stop.ts uses phase-aware messages
+- [ ] State tracks `lastKnownPhase` and `phaseGate`
+- [ ] TDD tracking: `lastCommitType` parsed from commit messages
+- [ ] TDD tracking: `scenariosCompleted`/`scenariosTotal` from test-definitions.md
+- [ ] Quality review shows TDD progress during implement phase
 
 ## Testing
 
-1. Create ticket in define-behavior phase
-2. Change phase to scenario-gate → gate message appears
-3. Change phase to decomposition → no gate (not a key transition)
-4. Change phase to implement → gate message appears
-5. Change phase to done → gate message appears
-6. In Cursor: trigger stop hook → phase-appropriate message shown
+1. Edit ticket.md to change phase to `define-behavior` → gate set
+2. Attempt next edit → PreToolUse blocks with scenario drafting context
+3. Commit → next edit allowed
+4. Edit ticket.md to change phase to `implement` → gate set with TDD context
+5. Edit ticket.md to change phase to `done` → gate set with completion checklist
+6. In Cursor: phase change → stop hook shows phase-specific message
 
 ## Work Log
 
 ---
 
-- 2026-01-10T20:23:00Z Created: Phase transition gates and Cursor parity fix
+- 2026-01-11T21:27:00Z Added: TDD substate tracking (Option A - tracking only, no blocking)
+- 2026-01-11T21:15:00Z Revised: Read phase files at runtime instead of hardcoded excerpts (no drift)
+- 2026-01-11T17:15:00Z Added: Phase-specific context injection design
+- 2026-01-11T16:45:00Z Revised: PostToolUse→state→PreToolUse pattern, TDD-aware messages
+- 2026-01-10T20:23:00Z Created: Phase transition gates design
 
 ---

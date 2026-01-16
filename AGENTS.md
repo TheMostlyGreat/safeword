@@ -164,6 +164,30 @@ Use for project-specific guides that shouldn't be overwritten by framework updat
 | Adding files to CLI templates (schema) | `.safeword-project/guides/schema-registration-guide.md` |
 | Calling LLMs from code (APIs, caching) | `.safeword-project/guides/llm-integration-guide.md`     |
 
+## Ticket Naming
+
+Write ticket names that describe **user value**, not implementation.
+
+**Pattern:** `<Action verb> <benefit> for <beneficiary>`
+
+| Instead of...             | Write...                                     |
+| ------------------------- | -------------------------------------------- |
+| Add .vscode/settings.json | Format and lint on save for developers       |
+| Wire PreToolUse hooks     | Protect config files from accidental changes |
+| Customer template vscode  | Auto-configure IDE for customer projects     |
+| Fix bug #123              | Prevent login timeout for slow connections   |
+
+**Test:** Can a non-technical stakeholder understand what the ticket delivers?
+
+**Examples by ticket type:**
+
+| Type    | Bad                       | Good                                        |
+| ------- | ------------------------- | ------------------------------------------- |
+| Feature | "Add OAuth"               | "Let users sign in with Google"             |
+| Task    | "Refactor AuthService"    | "Speed up login by caching tokens"          |
+| Patch   | "Fix typo in README"      | "Fix typo in README" (patches can be brief) |
+| Epic    | "Authentication overhaul" | "Secure and simplify user authentication"   |
+
 ## Common Gotchas
 
 1. **templates/ vs .safeword/**: Edit `packages/cli/templates/` first, then `bunx safeword upgrade` to sync. Never edit `.safeword/` directly for framework changes.

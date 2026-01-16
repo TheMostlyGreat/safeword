@@ -4,8 +4,8 @@ type: epic
 phase: planning
 status: ready
 created: 2026-01-10T18:38:00Z
-last_modified: 2026-01-10T19:51:00Z
-children: ['015', '016a', '016b', '016c']
+last_modified: 2026-01-11T05:34:00Z
+children: ['015', '016b', '016c']
 ---
 
 # IDE and Claude Code Integration
@@ -22,9 +22,8 @@ children: ['015', '016a', '016b', '016c']
 - Format-on-save with auto-detected formatter (Prettier, Biome, Ruff, gofumpt)
 - Lint-on-save with ESLint, Ruff, golangci-lint based on detected languages
 
-### Claude Code Safeguards (016a, 016c)
+### Claude Code Safeguards (016c)
 
-- Add permissions.deny for unsafe git operations (016a)
 - Wire protective hooks for config file changes (016c)
 
 ## Children
@@ -32,14 +31,13 @@ children: ['015', '016a', '016b', '016c']
 | Ticket | Title                                             | Status |
 | ------ | ------------------------------------------------- | ------ |
 | 015    | Format and lint on save for safeword contributors | ready  |
-| 016a   | Block unsafe git operations from LLMs             | ready  |
 | 016b   | Format and lint on save for customer projects     | ready  |
 | 016c   | Protect config files from accidental LLM changes  | ready  |
 
 **Related standalone tickets:**
 
-- 016d: Allow customers to override LLM-specific checker rules (configuration architecture)
-- 016e: Document user-focused ticket naming conventions (process improvement)
+- 019: Allow customers to override LLM-specific checker rules (configuration architecture)
+- 020: Document user-focused ticket naming conventions (process improvement)
 
 ## Audit Findings (from ticket 015)
 
@@ -69,7 +67,6 @@ children: ['015', '016a', '016b', '016c']
 | Gap                                                                   | Ticket |
 | --------------------------------------------------------------------- | ------ |
 | Missing `.vscode/settings.json` in monorepo                           | 015    |
-| No `permissions.deny` for `git commit --no-verify`                    | 016a   |
 | Customers don't get `.vscode/settings.json`                           | 016b   |
 | Unwired hooks: `pre-tool-config-guard.ts`, `post-tool-bypass-warn.ts` | 016c   |
 
@@ -84,6 +81,7 @@ children: ['015', '016a', '016b', '016c']
 
 ---
 
+- 2026-01-11T05:34:00Z Deleted 016a: permissions.deny has bypass limitations, approach needs redesign
 - 2026-01-10T19:51:00Z Renumbered: Tickets reordered by execution priority (permissions quick win first, then IDE, then hooks)
 - 2026-01-10T19:45:00Z Refactored: Removed 016d and 016e (standalone tickets), clarified scope, renamed epic
 - 2026-01-10T18:38:00Z Created: Epic created from ticket 015 audit findings, split into focused subtickets

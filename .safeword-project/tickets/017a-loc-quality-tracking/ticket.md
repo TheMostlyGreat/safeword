@@ -5,184 +5,184 @@ phase: intake
 status: ready
 parent: 017
 created: 2026-01-10T20:23:00Z
-last_modified: 2026-01-10T20:23:00Z
+last_modified: 2026-01-11T16:40:00Z
 ---
 
-# LOC-Based Quality Tracking in PostToolUse
+# LOC-Based Commit Enforcement
 
 **User Story:** When I run `/bdd` and the agent implements for 30+ minutes straight, I want quality checks to happen automatically so I don't discover compounding errors at the end.
 
-**Goal:** Trigger quality reviews based on cumulative lines of code changed, catching issues before they compound.
+**Goal:** Block edits when 400+ LOC uncommitted, enforcing TDD commit discipline.
 
 **Parent:** [017 - Continuous Quality Monitoring](../017-continuous-quality-monitoring/ticket.md)
 
 ## The Solution
 
-Enhance `post-tool-lint.ts` to track cumulative LOC changed and inject quality reminders at thresholds.
+Use PostToolUse -> state -> PreToolUse pattern to enforce commits.
 
-```typescript
+```text
+Edit happens
+    ↓
+PostToolUse: Calculate LOC since last commit, store in state
+    ↓
+Next Edit attempted
+    ↓
+PreToolUse: Check state, block if LOC > 400
+    ↓
+Agent commits
+    ↓
+Next PreToolUse: HEAD changed, gate clears
+```
+
+## State File
+
+```json
 // .safeword-project/quality-state.json
-interface QualityMetrics {
-  linesAdded: number;
-  linesRemoved: number;
-  totalLinesChanged: number; // linesAdded + linesRemoved
-  lintWarnings: number;
-  lastQualityReview: string; // ISO timestamp
-  lastCommitHash: string;
-  sessionStart: string; // ISO timestamp
+{
+  "locSinceCommit": 234,
+  "lastCommitHash": "a1b2c3d"
 }
 ```
 
-## Thresholds
-
-| Trigger       | Threshold            | Action                                             |
-| ------------- | -------------------- | -------------------------------------------------- |
-| LOC soft      | 200 lines changed    | Inject reminder: "Consider quality checkpoint"     |
-| LOC hard      | 400 lines changed    | Block: "Quality review required before continuing" |
-| Time soft     | 20 min (if LOC > 50) | Inject reminder                                    |
-| Time hard     | 45 min (regardless)  | Block until acknowledged                           |
-| Lint warnings | 3+ warnings          | Accelerate to hard threshold                       |
-| Test failure  | Any failure          | Immediate block                                    |
-
-**Why these numbers:**
-
-- Industry research shows 200-400 LOC per review session is optimal
-- Beyond 400 LOC, reviewers skim instead of understanding
-- Teams with <400 LOC reviews see 40% fewer production defects
+Simple. Git is the source of truth for LOC count.
 
 ## Implementation
 
-### 1. Calculate LOC on Each Edit
+### PostToolUse: Track LOC
 
 ```typescript
 // In post-tool-lint.ts, after linting
-import { execSync } from 'node:child_process';
 
-function getLOCChanged(file: string): { added: number; removed: number } {
-  try {
-    // Get diff stats for this file (staged + unstaged)
-    const diff = execSync(`git diff --numstat HEAD -- "${file}"`, {
-      encoding: 'utf-8',
-    });
-    const [added, removed] = diff.trim().split('\t').map(Number);
-    return { added: added || 0, removed: removed || 0 };
-  } catch {
-    return { added: 0, removed: 0 };
-  }
+function updateQualityState(projectDir: string): void {
+  const stateFile = `${projectDir}/.safeword-project/quality-state.json`;
+
+  // Get current HEAD
+  const currentHead = execSync('git rev-parse --short HEAD', { encoding: 'utf-8' }).trim();
+
+  // Get LOC since last commit (all uncommitted changes)
+  const diffStat = execSync('git diff --stat HEAD', { encoding: 'utf-8' });
+  const locMatch = diffStat.match(/(\d+) insertions?.*?(\d+) deletions?/);
+  const locSinceCommit = locMatch ? parseInt(locMatch[1]) + parseInt(locMatch[2]) : 0;
+
+  const state = { locSinceCommit, lastCommitHash: currentHead };
+  writeFileSync(stateFile, JSON.stringify(state, null, 2));
 }
 ```
 
-### 2. Update Quality State
+### PreToolUse: Enforce Threshold
 
 ```typescript
-const stateFile = `${projectDir}/.safeword-project/quality-state.json`;
+// New hook: pre-tool-quality.ts
 
-function updateQualityState(loc: { added: number; removed: number }) {
-  let state: QualityMetrics = loadState(stateFile);
+const LOC_THRESHOLD = 400;
 
-  state.linesAdded += loc.added;
-  state.linesRemoved += loc.removed;
-  state.totalLinesChanged = state.linesAdded + state.linesRemoved;
+async function main() {
+  const input = await Bun.stdin.json();
+  const tool = input.tool_name;
 
-  saveState(stateFile, state);
-  return state;
+  // Only gate Edit/Write operations
+  if (!['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(tool)) {
+    process.exit(0);
+  }
+
+  const stateFile = `${projectDir}/.safeword-project/quality-state.json`;
+  if (!existsSync(stateFile)) {
+    process.exit(0); // No state yet, allow
+  }
+
+  const state = JSON.parse(readFileSync(stateFile, 'utf-8'));
+  const currentHead = execSync('git rev-parse --short HEAD', { encoding: 'utf-8' }).trim();
+
+  // If commit happened, gate clears
+  if (state.lastCommitHash !== currentHead) {
+    process.exit(0);
+  }
+
+  // Check threshold
+  if (state.locSinceCommit >= LOC_THRESHOLD) {
+    console.error(`SAFEWORD: ${state.locSinceCommit} LOC since last commit.
+
+Commit your progress before continuing.
+
+TDD reminder:
+- RED: commit test ("test: [scenario]")
+- GREEN: commit implementation ("feat: [scenario]")
+- REFACTOR: commit cleanup
+
+Run: git add -A && git commit -m "your message"`);
+    process.exit(2);
+  }
+
+  process.exit(0);
 }
 ```
 
-### 3. Check Thresholds and Inject Message
+## Why 400 LOC?
 
-```typescript
-function checkThresholds(state: QualityMetrics): string | null {
-  const minutesSinceReview = getMinutesSince(state.lastQualityReview);
+| Research Finding                               | Source                     |
+| ---------------------------------------------- | -------------------------- |
+| 200-400 LOC per review is optimal              | Code review best practices |
+| Beyond 400 LOC, reviewers skim                 | Industry studies           |
+| Teams with <400 LOC reviews: 40% fewer defects | Production data            |
 
-  // Hard blocks
-  if (state.totalLinesChanged >= 400) {
-    return 'SAFEWORD: 400+ LOC changed. Quality review required before continuing.';
-  }
-  if (minutesSinceReview >= 45) {
-    return 'SAFEWORD: 45+ minutes since last review. Quality checkpoint required.';
-  }
-
-  // Soft reminders
-  if (state.totalLinesChanged >= 200) {
-    return 'SAFEWORD: 200+ LOC changed. Consider a quality checkpoint.';
-  }
-  if (minutesSinceReview >= 20 && state.totalLinesChanged > 50) {
-    return 'SAFEWORD: 20+ minutes since last review. Consider a quality checkpoint.';
-  }
-
-  return null;
-}
-```
-
-### 4. Reset After Quality Review
-
-When the Stop hook fires (quality review happens), reset the counters:
-
-```typescript
-// In stop-quality.ts, after quality review triggers
-function resetQualityState() {
-  const state: QualityMetrics = {
-    linesAdded: 0,
-    linesRemoved: 0,
-    totalLinesChanged: 0,
-    lintWarnings: 0,
-    lastQualityReview: new Date().toISOString(),
-    lastCommitHash: getCurrentCommitHash(),
-    sessionStart: new Date().toISOString(),
-  };
-  saveState(stateFile, state);
-}
-```
-
-## Cursor Parity
-
-The same logic works in Cursor's `after-file-edit.ts`:
-
-1. Calculate LOC changed
-2. Update `.safeword-project/quality-state.json`
-3. Check thresholds
-4. Output message if threshold exceeded (Cursor will display to user)
+**TDD alignment:** Each RED-GREEN-REFACTOR cycle is ~100-300 LOC. 400 threshold catches agents skipping commits.
 
 ## Edge Cases
 
-| Case                        | Handling                                     |
-| --------------------------- | -------------------------------------------- |
-| New file (no git diff)      | Count entire file as added                   |
-| New repo (no commits yet)   | Skip LOC tracking until first commit         |
-| Binary file                 | Skip LOC tracking                            |
-| File outside git repo       | Skip LOC tracking                            |
-| State file missing          | Initialize with zeros                        |
-| Commit happens mid-session  | Reset counters (new baseline)                |
-| Agent acknowledges reminder | Reset counters (manual checkpoint)           |
-| Multiple files in one edit  | Sum all LOC changes                          |
-| Revert (negative net LOC)   | Still count total (added + removed, not net) |
+| Case                  | Handling                            |
+| --------------------- | ----------------------------------- |
+| New repo (no commits) | Skip enforcement until first commit |
+| Binary file           | Excluded from git diff --stat       |
+| State file missing    | Initialize on first PostToolUse     |
+| Commit mid-session    | HEAD changes, gate clears           |
+| `git reset --hard`    | LOC drops, agent can continue       |
+
+## Cursor Parity
+
+Cursor's `afterFileEdit` can't block. Use stop hook instead:
+
+```typescript
+// cursor/stop.ts
+const state = loadQualityState();
+if (state.locSinceCommit >= 400) {
+  return {
+    followup_message: `You have ${state.locSinceCommit} LOC uncommitted. Please commit before continuing.`,
+  };
+}
+```
+
+This is softer enforcement (nudge vs block) but still effective.
 
 ## Acceptance Criteria
 
-- [ ] `quality-state.json` tracks cumulative LOC per session
-- [ ] Soft reminder at 200 LOC changed
-- [ ] Hard block at 400 LOC changed
-- [ ] Time-based fallback at 45 min
-- [ ] Counters reset after quality review fires
-- [ ] Counters reset after commit
-- [ ] Works in both Claude Code and Cursor
-- [ ] No noticeable latency (<50ms per edit)
-- [ ] State file in `.safeword-project/` (survives upgrade)
+- [ ] PostToolUse updates `quality-state.json` with LOC count
+- [ ] PreToolUse blocks Edit/Write at 400+ LOC
+- [ ] Gate clears when commit happens (HEAD changes)
+- [ ] Message includes TDD reminder
+- [ ] Cursor gets soft enforcement via stop hook
+- [ ] No noticeable latency (<50ms per hook)
+
+## What We Removed
+
+| Original Design           | Decision | Rationale                                  |
+| ------------------------- | -------- | ------------------------------------------ |
+| 200 LOC soft reminder     | Dropped  | Adds context without blocking              |
+| Time-based thresholds     | Dropped  | No timer hooks exist                       |
+| Session tracking          | Dropped  | Git HEAD is the only baseline that matters |
+| Lint warning acceleration | Dropped  | Separate concern, keep simple              |
 
 ## Testing
 
-1. Make 10 small edits (< 200 LOC total) → no reminder
-2. Make edits totaling 200 LOC → soft reminder
-3. Make edits totaling 400 LOC → hard block
-4. Trigger quality review → counters reset
-5. Make a commit → counters reset
-6. Wait 45 min with any edits → hard block
+1. Make edits totaling < 400 LOC → no block
+2. Make edits totaling 400+ LOC → PreToolUse blocks
+3. Commit → next edit allowed
+4. In Cursor: stop hook nudges at 400+ LOC
 
 ## Work Log
 
 ---
 
-- 2026-01-10T20:23:00Z Created: Core solution for LOC-based quality tracking
+- 2026-01-11T16:40:00Z Revised: Simplified to PostToolUse→state→PreToolUse pattern
+- 2026-01-10T20:23:00Z Created: Initial LOC-based quality tracking design
 
 ---
