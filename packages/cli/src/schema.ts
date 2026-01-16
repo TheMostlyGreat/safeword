@@ -16,7 +16,12 @@ import {
   typescriptPackages,
 } from './packs/typescript/files.js';
 // Re-export shared types from packs/types.ts (breaks circular dependency)
-export type { FileDefinition, JsonMergeDefinition, ProjectContext } from './packs/types.js';
+export type {
+  FileDefinition,
+  JsonMergeDefinition,
+  ManagedFileDefinition,
+  ProjectContext,
+} from './packs/types.js';
 import type { FileDefinition, JsonMergeDefinition, ManagedFileDefinition } from './packs/types.js';
 import { CURSOR_HOOKS, SETTINGS_HOOKS } from './templates/config.js';
 import { AGENTS_MD_LINK } from './templates/content.js';
@@ -218,11 +223,11 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     ...pythonOwnedFiles,
     ...golangOwnedFiles,
 
-    // Hooks shared library (2 files) - TypeScript with Bun runtime
+    // Hooks shared library - TypeScript with Bun runtime
     '.safeword/hooks/lib/lint.ts': { template: 'hooks/lib/lint.ts' },
     '.safeword/hooks/lib/quality.ts': { template: 'hooks/lib/quality.ts' },
 
-    // Hooks (8 files) - TypeScript with Bun runtime
+    // Hooks - TypeScript with Bun runtime
     '.safeword/hooks/session-verify-agents.ts': {
       template: 'hooks/session-verify-agents.ts',
     },
@@ -243,7 +248,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.safeword/hooks/stop-quality.ts': { template: 'hooks/stop-quality.ts' },
 
-    // Guides (10 files)
+    // Guides
     '.safeword/guides/architecture-guide.md': {
       template: 'guides/architecture-guide.md',
     },
@@ -275,7 +280,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       template: 'guides/zombie-process-cleanup.md',
     },
 
-    // Templates (7 files)
+    // Templates
     '.safeword/templates/architecture-template.md': {
       template: 'doc-templates/architecture-template.md',
     },
@@ -298,12 +303,12 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       template: 'doc-templates/work-log-template.md',
     },
 
-    // Prompts (1 file)
+    // Prompts
     '.safeword/prompts/architecture.md': {
       template: 'prompts/architecture.md',
     },
 
-    // Scripts (3 files)
+    // Scripts
     '.safeword/scripts/bisect-test-pollution.sh': {
       template: 'scripts/bisect-test-pollution.sh',
     },
@@ -314,7 +319,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
       template: 'scripts/cleanup-zombies.sh',
     },
 
-    // Claude skills (5) and commands (8)
+    // Claude skills and commands
     '.claude/skills/safeword-debugging/SKILL.md': {
       template: 'skills/safeword-debugging/SKILL.md',
     },
@@ -357,7 +362,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.claude/commands/refactor.md': { template: 'commands/refactor.md' },
 
-    // Cursor rules (6 files)
+    // Cursor rules
     '.cursor/rules/safeword-core.mdc': {
       template: 'cursor/rules/safeword-core.mdc',
     },
@@ -405,7 +410,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     },
     '.cursor/commands/refactor.md': { template: 'commands/refactor.md' },
 
-    // Cursor hooks adapters (2 files) - TypeScript with Bun runtime
+    // Cursor hooks adapters - TypeScript with Bun runtime
     '.safeword/hooks/cursor/after-file-edit.ts': {
       template: 'hooks/cursor/after-file-edit.ts',
     },
