@@ -1,6 +1,8 @@
 // Safeword ESLint config - extends project config with stricter rules
 // Used by hooks for LLM enforcement. Human pre-commits use project config.
 // Re-run `safeword upgrade` to regenerate after project config changes.
+import safeword from 'safeword/eslint';
+const eslintConfigPrettier = safeword.prettierConfig;
 
 let projectConfig = [];
 try {
@@ -42,4 +44,4 @@ const safewordStrictRules = {
   },
 };
 
-export default [...projectConfig, safewordStrictRules];
+export default [...projectConfig, safewordStrictRules, eslintConfigPrettier];
