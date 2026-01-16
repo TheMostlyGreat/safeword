@@ -2,5 +2,5 @@
   "ignore": [".safeword/**", ".safeword-project/**"],
   "ignoreFiles": ["packages/cli/templates/hooks/**"],
   "ignoreDependencies": ["eslint-plugin-*", "@eslint/*", "eslint-import-resolver-*", "estree"],
-  "ignoreBinaries": ["shfmt", "dot", "publint"]
+  "ignoreBinaries": ["shfmt", "dot"]
 }
