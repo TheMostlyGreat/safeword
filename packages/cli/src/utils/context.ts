@@ -24,6 +24,7 @@ export function createProjectContext(cwd: string): ProjectContext {
     cwd,
     projectType: detectProjectType(packageJson ?? {}, cwd),
     developmentDeps: packageJson?.devDependencies ?? {},
+    productionDeps: packageJson?.dependencies ?? {},
     isGitRepo: isGitRepo(cwd),
     languages: detectLanguages(cwd),
   };

@@ -35,6 +35,7 @@ export interface ProjectContext {
   cwd: string;
   projectType: ProjectType;
   developmentDeps: Record<string, string>;
+  productionDeps: Record<string, string>;
   isGitRepo: boolean;
   /** Languages detected in project (for conditional file generation) */
   languages?: Languages;

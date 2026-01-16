@@ -61,6 +61,23 @@ const scopedNextConfigs = nextPaths?.flatMap((filePath) =>
 }
 
 /**
+ * Shared optional configs snippet for ESLint templates.
+ * Testing, Storybook, and conditional framework configs.
+ * Used by all 3 ESLint config generators.
+ */
+const OPTIONAL_CONFIGS_SNIPPET = `  // Testing configs - always included (file-scoped to *.test.* and *.e2e.*)
+  ...configs.vitest,
+  ...configs.playwright,
+  // Storybook - always included (file-scoped to *.stories.*)
+  ...configs.storybook,
+  // TanStack Query - always included (rules only match useQuery/useMutation patterns)
+  ...configs.tanstackQuery,
+  // Tailwind - only if detected (plugin needs tailwind config to validate classes)
+  ...(detect.hasTailwind(deps) ? configs.tailwind : []),
+  // Turborepo - only if detected (validates env vars are declared in turbo.json)
+  ...(detect.hasTurbo(deps) ? configs.turbo : []),`;
+
+/**
  * Full strict rules for safeword ESLint configs that extend existing project configs.
  * These rules are applied after project rules (safeword wins on conflict).
  * Used by: getSafewordEslintConfigExtending, getSafewordEslintConfigLegacy
@@ -131,17 +148,7 @@ export default [
   { ignores: detect.getIgnores(deps) },
   ...baseConfigs[framework],
   ...scopedNextConfigs,
-  // Testing configs - always included (file-scoped to *.test.* and *.e2e.*)
-  ...configs.vitest,
-  ...configs.playwright,
-  // Storybook - always included (file-scoped to *.stories.*)
-  ...configs.storybook,
-  // TanStack Query - always included (rules only match useQuery/useMutation patterns)
-  ...configs.tanstackQuery,
-  // Tailwind - only if detected (plugin needs tailwind config to validate classes)
-  ...(detect.hasTailwind(deps) ? configs.tailwind : []),
-  // Turborepo - only if detected (validates env vars are declared in turbo.json)
-  ...(detect.hasTurbo(deps) ? configs.turbo : []),
+${OPTIONAL_CONFIGS_SNIPPET}
   eslintConfigPrettier,
 ];
 `;
@@ -168,17 +175,7 @@ export default [
   { ignores: detect.getIgnores(deps) },
   ...baseConfigs[framework],
   ...scopedNextConfigs,
-  // Testing configs - always included (file-scoped to *.test.* and *.e2e.*)
-  ...configs.vitest,
-  ...configs.playwright,
-  // Storybook - always included (file-scoped to *.stories.*)
-  ...configs.storybook,
-  // TanStack Query - always included (rules only match useQuery/useMutation patterns)
-  ...configs.tanstackQuery,
-  // Tailwind - only if detected (plugin needs tailwind config to validate classes)
-  ...(detect.hasTailwind(deps) ? configs.tailwind : []),
-  // Turborepo - only if detected (validates env vars are declared in turbo.json)
-  ...(detect.hasTurbo(deps) ? configs.turbo : []),
+${OPTIONAL_CONFIGS_SNIPPET}
 ];
 `;
 }
@@ -314,17 +311,7 @@ export default [
   { ignores: detect.getIgnores(deps) },
   ...baseConfigs[framework],
   ...scopedNextConfigs,
-  // Testing configs - always included (file-scoped to *.test.* and *.e2e.*)
-  ...configs.vitest,
-  ...configs.playwright,
-  // Storybook - always included (file-scoped to *.stories.*)
-  ...configs.storybook,
-  // TanStack Query - always included (rules only match useQuery/useMutation patterns)
-  ...configs.tanstackQuery,
-  // Tailwind - only if detected (plugin needs tailwind config to validate classes)
-  ...(detect.hasTailwind(deps) ? configs.tailwind : []),
-  // Turborepo - only if detected (validates env vars are declared in turbo.json)
-  ...(detect.hasTurbo(deps) ? configs.turbo : []),
+${OPTIONAL_CONFIGS_SNIPPET}
   safewordStrictRules,
 ${prettier.configEntry}
 ];

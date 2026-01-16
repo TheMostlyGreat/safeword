@@ -84,6 +84,7 @@ describe('Reconcile - Reconciliation Engine', () => {
         ...(overrides.projectType as Record<string, unknown>),
       },
       developmentDeps: (overrides.developmentDeps as Record<string, string>) ?? {},
+      productionDeps: (overrides.productionDeps as Record<string, string>) ?? {},
       isGitRepo: (overrides.isGitRepo as boolean) ?? true,
       // Default to JavaScript project for existing tests
       languages: (overrides.languages as {
