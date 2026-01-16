@@ -162,6 +162,13 @@ function hasPlaywright(deps: DepsRecord): boolean {
 }
 
 /**
+ * Check if Turborepo is installed.
+ */
+function hasTurbo(deps: DepsRecord): boolean {
+  return 'turbo' in deps;
+}
+
+/**
  * Detect base framework for config selection.
  * Returns the most specific framework detected.
  */
@@ -287,6 +294,7 @@ export const detect = {
   hasTanstackQuery,
   hasVitest,
   hasPlaywright,
+  hasTurbo,
 
   // Monorepo detection
   findNextConfigPaths,

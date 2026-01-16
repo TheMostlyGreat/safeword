@@ -137,8 +137,10 @@ describe('E2E: Conditional Setup - Project Type Detection', () => {
       // Check ESLint config uses safeword plugin with dynamic framework detection
       const eslintConfig = readTestFile(projectDirectory, 'eslint.config.mjs');
       expect(eslintConfig).toContain('safeword/eslint"');
-      // Config is now dynamic - detects framework at runtime
-      expect(eslintConfig).toContain('next: configs.recommendedTypeScriptNext');
+      // Config is now dynamic - detects framework at runtime with monorepo support
+      expect(eslintConfig).toContain(
+        'nextPaths ? configs.recommendedTypeScriptReact : configs.recommendedTypeScriptNext',
+      );
       expect(eslintConfig).toContain('baseConfigs[framework]');
 
       // Check dynamic ignores (detect.getIgnores adds .next/ for Next.js projects)

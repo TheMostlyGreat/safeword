@@ -1,5 +1,5 @@
 /**
- * Tests for Test Linting configs - Story 10: Vitest + Playwright
+ * Tests for Test Linting configs - Story 10: Vitest + Playwright + Storybook + Turbo
  *
  * Verifies that test configs:
  * - Include appropriate plugins
@@ -10,6 +10,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { playwrightConfig } from '../playwright.js';
+import { storybookConfig } from '../storybook.js';
+import { turboConfig } from '../turbo.js';
 import { vitestConfig } from '../vitest.js';
 import { getAllRules, getRuleConfig, getSeverityNumber } from './test-utilities.js';
 
@@ -151,6 +153,116 @@ describe('Playwright no other warnings (except no-skipped-test)', () => {
         ([ruleId, config]) =>
           ruleId !== 'playwright/no-skipped-test' && getSeverityNumber(config) === WARN,
       );
+
+    expect(rulesAtWarn).toEqual([]);
+  });
+});
+
+// ============ STORYBOOK CONFIG ============
+
+describe('storybookConfig', () => {
+  it('is a non-empty array', () => {
+    expect(Array.isArray(storybookConfig)).toBe(true);
+    expect(storybookConfig.length).toBeGreaterThan(0);
+  });
+
+  it('includes storybook plugin', () => {
+    const hasStorybook = storybookConfig.some(
+      config =>
+        typeof config === 'object' &&
+        config !== null &&
+        'plugins' in config &&
+        config.plugins &&
+        'storybook' in config.plugins,
+    );
+    expect(hasStorybook).toBe(true);
+  });
+
+  it('targets story files', () => {
+    const hasStoryFilePattern = storybookConfig.some(
+      config =>
+        typeof config === 'object' &&
+        config !== null &&
+        'files' in config &&
+        Array.isArray(config.files) &&
+        config.files.some((f: string) => f.includes('.stories.') || f.includes('.story.')),
+    );
+    expect(hasStoryFilePattern).toBe(true);
+  });
+});
+
+describe('Storybook critical rules at error', () => {
+  it('storybook/default-exports is at error', () => {
+    expect(getSeverityNumber(getRuleConfig(storybookConfig, 'storybook/default-exports'))).toBe(
+      ERROR,
+    );
+  });
+
+  it('storybook/story-exports is at error', () => {
+    expect(getSeverityNumber(getRuleConfig(storybookConfig, 'storybook/story-exports'))).toBe(
+      ERROR,
+    );
+  });
+
+  it('storybook/await-interactions is at error', () => {
+    expect(getSeverityNumber(getRuleConfig(storybookConfig, 'storybook/await-interactions'))).toBe(
+      ERROR,
+    );
+  });
+
+  it('storybook/csf-component is at error', () => {
+    expect(getSeverityNumber(getRuleConfig(storybookConfig, 'storybook/csf-component'))).toBe(
+      ERROR,
+    );
+  });
+});
+
+describe('Storybook no warnings (LLMs ignore warnings)', () => {
+  it('no storybook rules at warn', () => {
+    const allRules = getAllRules(storybookConfig);
+    const rulesAtWarn = Object.entries(allRules)
+      .filter(([ruleId]) => ruleId.startsWith('storybook/'))
+      .filter(([, config]) => getSeverityNumber(config) === WARN);
+
+    expect(rulesAtWarn).toEqual([]);
+  });
+});
+
+// ============ TURBO CONFIG ============
+
+describe('turboConfig', () => {
+  it('is a non-empty array', () => {
+    expect(Array.isArray(turboConfig)).toBe(true);
+    expect(turboConfig.length).toBeGreaterThan(0);
+  });
+
+  it('includes turbo plugin', () => {
+    const hasTurbo = turboConfig.some(
+      config =>
+        typeof config === 'object' &&
+        config !== null &&
+        'plugins' in config &&
+        config.plugins &&
+        'turbo' in config.plugins,
+    );
+    expect(hasTurbo).toBe(true);
+  });
+});
+
+describe('Turbo critical rules at error', () => {
+  it('turbo/no-undeclared-env-vars is at error', () => {
+    expect(getSeverityNumber(getRuleConfig(turboConfig, 'turbo/no-undeclared-env-vars'))).toBe(
+      ERROR,
+    );
+  });
+});
+
+describe('Turbo no warnings (LLMs ignore warnings)', () => {
+  it('no turbo rules at warn', () => {
+    const allRules = getAllRules(turboConfig);
+    const rulesAtWarn = Object.entries(allRules)
+      .filter(([ruleId]) => ruleId.startsWith('turbo/'))
+      .filter(([, config]) => getSeverityNumber(config) === WARN);
 
     expect(rulesAtWarn).toEqual([]);
   });

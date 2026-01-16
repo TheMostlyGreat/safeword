@@ -29,8 +29,10 @@ import { recommended } from './eslint-configs/recommended.js';
 import { nextOnlyRules, recommendedTypeScriptNext } from './eslint-configs/recommended-nextjs.js';
 import { recommendedTypeScriptReact } from './eslint-configs/recommended-react.js';
 import { recommendedTypeScript } from './eslint-configs/recommended-typescript.js';
+import { storybookConfig } from './eslint-configs/storybook.js';
 import { tailwindConfig } from './eslint-configs/tailwind.js';
 import { tanstackQueryConfig } from './eslint-configs/tanstack-query.js';
+import { turboConfig } from './eslint-configs/turbo.js';
 import { vitestConfig } from './eslint-configs/vitest.js';
 import { rules } from './eslint-rules/index.js';
 
@@ -51,6 +53,8 @@ interface SafewordEslint {
     tanstackQuery: any[];
     vitest: any[];
     playwright: any[];
+    storybook: any[];
+    turbo: any[];
   };
   detect: typeof detect;
   rules: Record<string, Rule.RuleModule>;
@@ -78,6 +82,8 @@ export const eslintPlugin: SafewordEslint = {
     tanstackQuery: tanstackQueryConfig,
     vitest: vitestConfig,
     playwright: playwrightConfig,
+    storybook: storybookConfig,
+    turbo: turboConfig,
   },
   detect,
   rules,
@@ -93,8 +99,10 @@ export { recommended } from './eslint-configs/recommended.js';
 export { nextOnlyRules, recommendedTypeScriptNext } from './eslint-configs/recommended-nextjs.js';
 export { recommendedTypeScriptReact } from './eslint-configs/recommended-react.js';
 export { recommendedTypeScript } from './eslint-configs/recommended-typescript.js';
+export { storybookConfig } from './eslint-configs/storybook.js';
 export { tailwindConfig } from './eslint-configs/tailwind.js';
 export { tanstackQueryConfig } from './eslint-configs/tanstack-query.js';
+export { turboConfig } from './eslint-configs/turbo.js';
 export { vitestConfig } from './eslint-configs/vitest.js';
 export { rules } from './eslint-rules/index.js';
 

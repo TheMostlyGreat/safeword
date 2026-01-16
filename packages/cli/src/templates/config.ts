@@ -134,10 +134,14 @@ export default [
   // Testing configs - always included (file-scoped to *.test.* and *.e2e.*)
   ...configs.vitest,
   ...configs.playwright,
+  // Storybook - always included (file-scoped to *.stories.*)
+  ...configs.storybook,
   // TanStack Query - always included (rules only match useQuery/useMutation patterns)
   ...configs.tanstackQuery,
   // Tailwind - only if detected (plugin needs tailwind config to validate classes)
   ...(detect.hasTailwind(deps) ? configs.tailwind : []),
+  // Turborepo - only if detected (validates env vars are declared in turbo.json)
+  ...(detect.hasTurbo(deps) ? configs.turbo : []),
   eslintConfigPrettier,
 ];
 `;
@@ -167,10 +171,14 @@ export default [
   // Testing configs - always included (file-scoped to *.test.* and *.e2e.*)
   ...configs.vitest,
   ...configs.playwright,
+  // Storybook - always included (file-scoped to *.stories.*)
+  ...configs.storybook,
   // TanStack Query - always included (rules only match useQuery/useMutation patterns)
   ...configs.tanstackQuery,
   // Tailwind - only if detected (plugin needs tailwind config to validate classes)
   ...(detect.hasTailwind(deps) ? configs.tailwind : []),
+  // Turborepo - only if detected (validates env vars are declared in turbo.json)
+  ...(detect.hasTurbo(deps) ? configs.turbo : []),
 ];
 `;
 }
@@ -207,11 +215,13 @@ function getSafewordEslintConfigExtending(
   hasExistingFormatter: boolean,
 ): string {
   const prettier = getPrettierConfig(hasExistingFormatter);
+  // Need safeword import only when using prettier (for safeword.prettierConfig)
+  const safewordImport = hasExistingFormatter ? '' : 'import safeword from "safeword/eslint";\n';
 
   return `// Safeword ESLint config - extends project config with stricter rules
 // Used by hooks for LLM enforcement. Human pre-commits use project config.
 // Re-run \`safeword upgrade\` to regenerate after project config changes.
-${prettier.import}
+${safewordImport}${prettier.import}
 
 let projectConfig = [];
 try {
@@ -242,6 +252,8 @@ function getSafewordEslintConfigLegacy(
   hasExistingFormatter: boolean,
 ): string {
   const prettier = getPrettierConfig(hasExistingFormatter);
+  // Need safeword import only when using prettier (for safeword.prettierConfig)
+  const safewordImport = hasExistingFormatter ? '' : 'import safeword from "safeword/eslint";\n';
 
   return `// Safeword ESLint config - extends legacy project config with stricter rules
 // Used by hooks for LLM enforcement. Human pre-commits use project config.
@@ -249,7 +261,7 @@ function getSafewordEslintConfigLegacy(
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { FlatCompat } from "@eslint/eslintrc";
-${prettier.import}
+${safewordImport}${prettier.import}
 
 console.warn("Safeword: Legacy .eslintrc.* detected. Consider migrating to eslint.config.mjs");
 
@@ -305,10 +317,14 @@ export default [
   // Testing configs - always included (file-scoped to *.test.* and *.e2e.*)
   ...configs.vitest,
   ...configs.playwright,
+  // Storybook - always included (file-scoped to *.stories.*)
+  ...configs.storybook,
   // TanStack Query - always included (rules only match useQuery/useMutation patterns)
   ...configs.tanstackQuery,
   // Tailwind - only if detected (plugin needs tailwind config to validate classes)
   ...(detect.hasTailwind(deps) ? configs.tailwind : []),
+  // Turborepo - only if detected (validates env vars are declared in turbo.json)
+  ...(detect.hasTurbo(deps) ? configs.turbo : []),
   safewordStrictRules,
 ${prettier.configEntry}
 ];

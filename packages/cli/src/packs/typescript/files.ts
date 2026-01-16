@@ -6,11 +6,86 @@
  */
 
 import { getEslintConfig, getSafewordEslintConfig } from '../../templates/config.js';
-import type { FileDefinition, JsonMergeDefinition, ManagedFileDefinition } from '../types.js';
+import type {
+  FileDefinition,
+  JsonMergeDefinition,
+  ManagedFileDefinition,
+  ProjectContext,
+} from '../types.js';
 
 // ============================================================================
 // Shared Definitions
 // ============================================================================
+
+/**
+ * Add framework-specific ignores to Knip config.
+ */
+function addKnipIgnores(
+  config: { ignore: string[]; ignoreDependencies: string[] },
+  ctx: ProjectContext,
+): void {
+  const allDeps = ctx.developmentDeps;
+
+  // Framework build/cache directories
+  if (ctx.projectType.nextjs) config.ignore.push('.next/**');
+  if (ctx.projectType.astro) config.ignore.push('.astro/**');
+  if ('storybook' in allDeps || '@storybook/react' in allDeps) {
+    config.ignore.push('.storybook/**', 'storybook-static/**');
+  }
+  if ('turbo' in allDeps) config.ignore.push('.turbo/**');
+
+  // Electron - Knip has no Electron plugin
+  if ('electron' in allDeps || 'electron' in ctx.productionDeps) {
+    config.ignore.push('electron/**', 'dist-electron/**', 'out/**');
+  }
+}
+
+/**
+ * Add framework-specific ignoreDependencies to Knip config.
+ */
+function addKnipIgnoreDependencies(
+  config: { ignore: string[]; ignoreDependencies: string[] },
+  ctx: ProjectContext,
+): void {
+  const allDeps = ctx.developmentDeps;
+
+  // Dependencies used via config files, not imports
+  if (ctx.projectType.tailwind) {
+    config.ignoreDependencies.push('tailwindcss', '@tailwindcss/typography', '@tailwindcss/forms');
+  }
+  if (ctx.projectType.playwright) config.ignoreDependencies.push('@playwright/test');
+  if ('husky' in allDeps) config.ignoreDependencies.push('husky');
+  if ('lint-staged' in allDeps) config.ignoreDependencies.push('lint-staged');
+
+  // Electron ecosystem packages
+  if ('electron' in allDeps || 'electron' in ctx.productionDeps) {
+    config.ignoreDependencies.push(
+      'electron',
+      'electron-builder',
+      'electron-updater',
+      'electron-devtools-installer',
+      'electron-is-dev',
+      'electron-store',
+    );
+  }
+}
+
+/**
+ * Generate Knip config based on project type.
+ * Adds framework-specific ignores and ignoreDependencies.
+ * Knip plugins auto-enable based on deps, so we just configure ignore patterns.
+ */
+function getKnipConfig(ctx: ProjectContext): object {
+  const config = {
+    ignore: ['.safeword/**'],
+    ignoreDependencies: ['safeword', 'dependency-cruiser'],
+  };
+
+  addKnipIgnores(config, ctx);
+  addKnipIgnoreDependencies(config, ctx);
+
+  return config;
+}
 
 /**
  * Prettier styling defaults - shared between .safeword/.prettierrc and root .prettierrc
@@ -181,18 +256,10 @@ export const typescriptManagedFiles: Record<string, ManagedFileDefinition> = {
     },
   },
   // Knip config for dead code detection (used by /audit)
+  // Plugins auto-enable based on deps, we just configure ignore patterns
   'knip.json': {
     generator: ctx =>
-      ctx.languages?.javascript
-        ? JSON.stringify(
-            {
-              ignore: ['.safeword/**'],
-              ignoreDependencies: ['safeword'],
-            },
-            undefined,
-            2,
-          )
-        : undefined,
+      ctx.languages?.javascript ? JSON.stringify(getKnipConfig(ctx), undefined, 2) : undefined,
   },
   // Project-level Prettier config (created only if no existing formatter)
   '.prettierrc': {
