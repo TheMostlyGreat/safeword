@@ -1,25 +1,5 @@
 {
-  "ignore": [
-    ".claude/**",
-    ".cursor/**",
-    ".safeword/SAFEWORD.md",
-    ".safeword/AGENTS.md",
-    ".safeword/guides/**",
-    ".safeword/scripts/**",
-    ".safeword/hooks/**",
-    ".safeword/templates/**",
-    ".safeword/prompts/**",
-    "packages/cli/templates/commands/**",
-    "packages/cli/templates/skills/**",
-    "packages/cli/templates/cursor/**",
-    "packages/cli/templates/guides/**",
-    "packages/cli/templates/scripts/**",
-    "packages/cli/templates/hooks/**",
-    "packages/cli/templates/doc-templates/**",
-    "packages/cli/templates/prompts/**",
-    "packages/cli/templates/SAFEWORD.md",
-    "packages/cli/templates/AGENTS.md"
-  ],
+  "ignore": [".claude/**", ".cursor/**", ".safeword/**"],
   "minLines": 10,
   "reporters": ["console"]
 }
