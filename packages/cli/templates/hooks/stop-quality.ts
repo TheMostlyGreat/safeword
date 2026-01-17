@@ -152,6 +152,31 @@ if (!(await transcriptFile.exists())) {
 const transcriptText = await transcriptFile.text();
 const lines = transcriptText.trim().split('\n');
 
+// Check last message for usage limit (avoids false positives from conversation content)
+// Claude shows blocking messages when quota exceeded - these are short, standalone messages
+// Patterns: "5-hour limit reached", "Usage limit reached", {"type":"exceeded_limit"}
+const USAGE_LIMIT_PATTERN =
+  /\b(usage limit reached|5-hour limit reached|"type"\s*:\s*"exceeded_limit")\b/i;
+try {
+  const lastLine = lines[lines.length - 1] ?? '';
+  const lastMessage: TranscriptMessage = JSON.parse(lastLine);
+  // Extract text content from message
+  const textContent =
+    lastMessage.message?.content
+      ?.filter(
+        (item): item is ContentItem & { text: string } => item.type === 'text' && !!item.text,
+      )
+      .map(item => item.text)
+      .join('') ?? '';
+  // Only trigger if text content is short (< 200 chars) - limit messages are brief
+  if (textContent.length > 0 && textContent.length < 200 && USAGE_LIMIT_PATTERN.test(textContent)) {
+    console.error('SAFEWORD: Claude usage limit reached. Try again after reset.');
+    process.exit(1);
+  }
+} catch {
+  // Not valid JSON or missing structure - continue with normal processing
+}
+
 // Only look at the LAST assistant message for JSON summary
 // Scan up to 5 recent assistant messages for edit tool detection
 const recentTexts: string[] = [];

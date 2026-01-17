@@ -985,6 +985,37 @@ describe('E2E: Stop Hook', () => {
       expect(output.decision).toBe('block');
       expect(output.reason).toContain('edit tools were detected');
     });
+
+    it('exits with error when usage limit reached in last message', () => {
+      // Short message indicating Claude hit usage limit
+      const text = '5-hour limit reached - resets in 2 hours';
+      const transcriptPath = createMockTranscript(projectDirectory, text);
+
+      const result = runStopHook(projectDirectory, transcriptPath);
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('usage limit reached');
+    });
+
+    it('does not false-positive on discussion of rate limits in normal response', () => {
+      // Long assistant response discussing rate limits in user's code
+      const text =
+        'Here is how to implement rate limiting in your API:\n\n' +
+        '```typescript\n' +
+        'const USAGE_LIMIT_REACHED = "You have exceeded your quota";\n' +
+        'if (requests > maxRequests) {\n' +
+        '  throw new Error("5-hour limit reached");\n' +
+        '}\n' +
+        '```\n\n' +
+        '{"proposedChanges": true, "madeChanges": false}';
+      const transcriptPath = createMockTranscript(projectDirectory, text);
+
+      const result = runStopHook(projectDirectory, transcriptPath);
+
+      // Should trigger quality review, NOT usage limit error
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).not.toContain('usage limit reached');
+    });
   });
 });
 
