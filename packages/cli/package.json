@@ -1,6 +1,6 @@
 {
   "name": "safeword",
-  "version": "0.15.10",
+  "version": "0.15.11",
   "description": "CLI for setting up and managing safeword development environments",
   "type": "module",
   "bin": {
@@ -49,15 +49,17 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/coverage-v8": "^4.0.17",
+    "dependency-cruiser": "^17.3.6",
     "eslint": "^9.39.2",
     "knip": "^5.79.0",
     "prettier": "^3.7.4",
     "prettier-plugin-sh": "^0.18.0",
     "publint": "^0.3.16",
+    "safeword": "^0.15.11",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.17"
   },
   "keywords": [
     "cli",
