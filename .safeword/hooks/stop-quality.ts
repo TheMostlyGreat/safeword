@@ -391,9 +391,6 @@ if (summary) {
 } else if (editToolsUsed) {
   // Fallback: edit tools detected but no summary - trigger review anyway
   softBlock(`${qualityMessage}\n\n(Note: JSON summary was missing but edit tools were detected)`);
-} else {
-  // No summary and no edit tools - remind about required format
-  softBlock(
-    'SAFEWORD: Response missing required JSON summary. Add to end of response:\n{"proposedChanges": boolean, "madeChanges": boolean}',
-  );
 }
+// No summary and no edit tools - nothing to review, exit silently
+// (Removed JSON requirement to prevent infinite loops when AI doesn't include summary)

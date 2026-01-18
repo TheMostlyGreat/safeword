@@ -887,29 +887,26 @@ describe('E2E: Stop Hook', () => {
       expect(output.reason).toContain('Quality Review');
     });
 
-    it('blocks when JSON blob is missing', () => {
-      const text = 'I made some changes but forgot the JSON summary.';
+    it('exits silently when JSON blob is missing and no edit tools used', () => {
+      // No JSON summary, but also no edit tools - nothing to review
+      const text = 'I answered a question without making any changes.';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
-      const output = parseStopOutput(result);
 
       expect(result.exitCode).toBe(0);
-      expect(output.decision).toBe('block');
-      expect(output.reason).toContain('missing required JSON summary');
+      expect(result.stdout.trim()).toBe('');
     });
 
-    it('blocks when JSON blob has missing field', () => {
-      // Only has proposedChanges, missing madeChanges
+    it('exits silently when JSON blob has missing field and no edit tools used', () => {
+      // Incomplete JSON (missing madeChanges), but no edit tools - nothing to review
       const text = 'Partial JSON.\n\n{"proposedChanges": true}';
       const transcriptPath = createMockTranscript(projectDirectory, text);
 
       const result = runStopHook(projectDirectory, transcriptPath);
-      const output = parseStopOutput(result);
 
       expect(result.exitCode).toBe(0);
-      expect(output.decision).toBe('block');
-      expect(output.reason).toContain('missing required JSON summary');
+      expect(result.stdout.trim()).toBe('');
     });
 
     it('exits silently when no changes made or proposed', () => {
