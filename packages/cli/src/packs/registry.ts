@@ -7,6 +7,7 @@
 import { getInstalledPacks } from './config.js';
 import { golangPack } from './golang/index.js';
 import { pythonPack } from './python/index.js';
+import { rustPack } from './rust/index.js';
 import type { LanguagePack } from './types.js';
 import { typescriptPack } from './typescript/index.js';
 
@@ -16,6 +17,7 @@ import { typescriptPack } from './typescript/index.js';
 export const LANGUAGE_PACKS: Record<string, LanguagePack> = {
   golang: golangPack,
   python: pythonPack,
+  rust: rustPack,
   typescript: typescriptPack,
 };
 

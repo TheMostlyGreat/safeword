@@ -26,6 +26,7 @@ const JS_EXTENSIONS = new Set([
 ]);
 const PYTHON_EXTENSIONS = new Set(['py', 'pyi']);
 const GO_EXTENSIONS = new Set(['go']);
+const RUST_EXTENSIONS = new Set(['rs']);
 const SHELL_EXTENSIONS = new Set(['sh']);
 const PRETTIER_EXTENSIONS = new Set([
   'md',
@@ -43,6 +44,8 @@ const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const SAFEWORD_ESLINT = `${projectDir}/.safeword/eslint.config.mjs`;
 const SAFEWORD_RUFF = `${projectDir}/.safeword/ruff.toml`;
 const SAFEWORD_GOLANGCI = `${projectDir}/.safeword/.golangci.yml`;
+const SAFEWORD_CLIPPY = `${projectDir}/.safeword`; // Directory for CLIPPY_CONF_DIR
+const SAFEWORD_RUSTFMT = `${projectDir}/.safeword/rustfmt.toml`;
 const SAFEWORD_PRETTIER = `${projectDir}/.safeword/.prettierrc`;
 
 // Track if we've already tried upgrading (avoid repeated attempts in same process)
@@ -157,6 +160,20 @@ export async function lintFile(file: string, _projectDir: string): Promise<void>
       // Fallback: run without safeword config
       await $`golangci-lint run --fix ${file}`.nothrow().quiet();
       await $`golangci-lint fmt ${file}`.nothrow().quiet();
+    }
+    return;
+  }
+
+  // Rust files - rustfmt for formatting (clippy doesn't support file-level fixes)
+  // Auto-upgrades safeword if Rust pack is missing
+  // Note: clippy runs at package level via `cargo clippy --fix`, not per-file
+  if (RUST_EXTENSIONS.has(extension)) {
+    const hasRustfmt = await ensurePackInstalled('Rust', SAFEWORD_RUSTFMT);
+    if (hasRustfmt) {
+      await $`rustfmt --config-path ${SAFEWORD_RUSTFMT} ${file}`.nothrow().quiet();
+    } else {
+      // Fallback: run without safeword config
+      await $`rustfmt ${file}`.nothrow().quiet();
     }
     return;
   }

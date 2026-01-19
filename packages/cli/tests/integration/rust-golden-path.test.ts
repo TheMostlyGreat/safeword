@@ -116,12 +116,14 @@ describe('E2E: Rust Golden Path', () => {
   });
 
   it.skipIf(!CLIPPY_AVAILABLE)('clippy detects unwrap_used violation', () => {
+    // Modify main.rs to include an unwrap call (files must be in module tree to be checked)
     writeTestFile(
       projectDirectory,
-      'src/bad.rs',
-      `fn bad() {
+      'src/main.rs',
+      `fn main() {
     let x: Option<i32> = Some(5);
     let _y = x.unwrap(); // clippy::unwrap_used should trigger
+    println!("Hello, world!");
 }
 `,
     );

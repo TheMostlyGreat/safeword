@@ -7,8 +7,8 @@
 import { readdirSync } from 'node:fs';
 import nodePath from 'node:path';
 
-import { addInstalledPack } from '../packs/config.js';
 import { setupGoTooling } from '../packs/golang/setup.js';
+import { installPack } from '../packs/install.js';
 import {
   detectPythonLayers,
   detectPythonPackageManager,
@@ -149,7 +149,7 @@ function ensurePackageJson(cwd: string): boolean {
 
   // Skip for non-JS-only projects (no JS tooling needed)
   const languages = detectLanguages(cwd);
-  const hasNonJs = languages.python || languages.golang;
+  const hasNonJs = languages.python || languages.golang || languages.rust;
   if (hasNonJs && !languages.javascript) return false;
 
   const dirName = nodePath.basename(cwd) || 'project';
@@ -373,15 +373,18 @@ function logDetectedLanguage(languages: Languages): void {
   if (languages.golang && !languages.javascript) {
     info('Go project detected (skipping JS tooling)');
   }
+  if (languages.rust && !languages.javascript) {
+    info('Rust project detected (skipping JS tooling)');
+  }
 }
 
 /**
- * Register detected language packs
+ * Register and setup detected language packs
  */
 function registerLanguagePacks(cwd: string): void {
   const detectedPacks = detectLanguagePacks(cwd);
   for (const packId of detectedPacks) {
-    addInstalledPack(cwd, packId);
+    installPack(packId, cwd);
   }
 }
 
@@ -428,8 +431,10 @@ export async function setup(): Promise<void> {
       javascript: false,
       python: false,
       golang: false,
+      rust: false,
     };
-    const isNonJsOnly = (languages.python || languages.golang) && !languages.javascript;
+    const isNonJsOnly =
+      (languages.python || languages.golang || languages.rust) && !languages.javascript;
 
     logDetectedLanguage(languages);
 

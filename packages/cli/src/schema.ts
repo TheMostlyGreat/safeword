@@ -9,6 +9,7 @@
 
 import { golangManagedFiles, golangOwnedFiles } from './packs/golang/files.js';
 import { pythonManagedFiles, pythonOwnedFiles } from './packs/python/files.js';
+import { rustManagedFiles, rustOwnedFiles } from './packs/rust/files.js';
 import {
   typescriptJsonMerges,
   typescriptManagedFiles,
@@ -222,6 +223,7 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     ...typescriptOwnedFiles,
     ...pythonOwnedFiles,
     ...golangOwnedFiles,
+    ...rustOwnedFiles,
 
     // Hooks shared library - TypeScript with Bun runtime
     '.safeword/hooks/lib/lint.ts': { template: 'hooks/lib/lint.ts' },
@@ -425,6 +427,8 @@ export const SAFEWORD_SCHEMA: SafewordSchema = {
     ...pythonManagedFiles,
     // Go managed files (.golangci.yml)
     ...golangManagedFiles,
+    // Rust managed files (clippy.toml, rustfmt.toml)
+    ...rustManagedFiles,
   },
 
   // JSON files where we merge specific keys

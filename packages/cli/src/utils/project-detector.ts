@@ -27,6 +27,13 @@ const UV_LOCK = 'uv.lock';
 // Go project file markers
 const GO_MOD = 'go.mod';
 
+// Rust project file markers
+const CARGO_TOML = 'Cargo.toml';
+
+// Rust config file markers
+const CLIPPY_CONFIG_FILES = ['clippy.toml', '.clippy.toml'];
+const RUSTFMT_CONFIG_FILES = ['rustfmt.toml', '.rustfmt.toml'];
+
 // ESLint config file markers (flat config and legacy)
 const ESLINT_CONFIG_FILES = [
   'eslint.config.mjs',
@@ -89,6 +96,10 @@ export interface ProjectType {
   existingImportLinterConfig: boolean;
   /** Path to existing golangci-lint config if present (e.g., '.golangci.yml') */
   existingGolangciConfig: string | undefined;
+  /** Path to existing clippy config if present (e.g., 'clippy.toml') */
+  existingClippyConfig: string | undefined;
+  /** Path to existing rustfmt config if present (e.g., 'rustfmt.toml') */
+  existingRustfmtConfig: string | undefined;
 }
 
 /**
@@ -99,6 +110,7 @@ export interface Languages {
   javascript: boolean; // package.json exists
   python: boolean; // pyproject.toml OR requirements.txt exists
   golang: boolean; // go.mod exists
+  rust: boolean; // Cargo.toml exists
 }
 
 /**
@@ -121,11 +133,13 @@ export function detectLanguages(cwd: string): Languages {
   const hasPyproject = existsSync(nodePath.join(cwd, PYPROJECT_TOML));
   const hasRequirements = existsSync(nodePath.join(cwd, REQUIREMENTS_TXT));
   const hasGoModule = existsSync(nodePath.join(cwd, GO_MOD));
+  const hasCargoToml = existsSync(nodePath.join(cwd, CARGO_TOML));
 
   return {
     javascript: hasPackageJson,
     python: hasPyproject || hasRequirements,
     golang: hasGoModule,
+    rust: hasCargoToml,
   };
 }
 
@@ -301,6 +315,34 @@ function findExistingGolangciConfig(cwd: string): string | undefined {
 }
 
 /**
+ * Check if project has existing clippy config.
+ * @param cwd - Working directory to scan
+ * @returns The config file path if found, undefined otherwise.
+ */
+function findExistingClippyConfig(cwd: string): string | undefined {
+  for (const config of CLIPPY_CONFIG_FILES) {
+    if (existsSync(nodePath.join(cwd, config))) {
+      return config;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Check if project has existing rustfmt config.
+ * @param cwd - Working directory to scan
+ * @returns The config file path if found, undefined otherwise.
+ */
+function findExistingRustfmtConfig(cwd: string): string | undefined {
+  for (const config of RUSTFMT_CONFIG_FILES) {
+    if (existsSync(nodePath.join(cwd, config))) {
+      return config;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Detect JavaScript framework dependencies from package.json.
  */
 function detectFrameworks(
@@ -340,6 +382,47 @@ function detectPublishable(packageJson: PackageJsonWithScripts): boolean {
 }
 
 /**
+ * Detect existing JS/TS/Python tooling configuration.
+ */
+function detectCoreTooling(
+  cwd: string | undefined,
+  scripts: Record<string, string>,
+): Pick<
+  ProjectType,
+  | 'existingLinter'
+  | 'existingFormatter'
+  | 'existingEslintConfig'
+  | 'legacyEslint'
+  | 'existingRuffConfig'
+  | 'existingMypyConfig'
+  | 'existingImportLinterConfig'
+> {
+  const eslintConfig = cwd ? findExistingEslintConfig(cwd) : undefined;
+  return {
+    existingLinter: hasExistingLinter(scripts),
+    existingFormatter: cwd ? hasExistingFormatter(cwd, scripts) : 'format' in scripts,
+    existingEslintConfig: eslintConfig,
+    legacyEslint: eslintConfig?.startsWith('.eslintrc') ?? false,
+    existingRuffConfig: cwd ? findExistingRuffConfig(cwd) : undefined,
+    existingMypyConfig: cwd ? hasExistingMypyConfig(cwd) : false,
+    existingImportLinterConfig: cwd ? hasExistingImportLinterConfig(cwd) : false,
+  };
+}
+
+/**
+ * Detect existing Go/Rust tooling configuration.
+ */
+function detectSystemsTooling(
+  cwd: string | undefined,
+): Pick<ProjectType, 'existingGolangciConfig' | 'existingClippyConfig' | 'existingRustfmtConfig'> {
+  return {
+    existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : undefined,
+    existingClippyConfig: cwd ? findExistingClippyConfig(cwd) : undefined,
+    existingRustfmtConfig: cwd ? findExistingRustfmtConfig(cwd) : undefined,
+  };
+}
+
+/**
  * Detect existing tooling configuration from file system.
  */
 function detectExistingTooling(
@@ -355,17 +438,12 @@ function detectExistingTooling(
   | 'existingMypyConfig'
   | 'existingImportLinterConfig'
   | 'existingGolangciConfig'
+  | 'existingClippyConfig'
+  | 'existingRustfmtConfig'
 > {
-  const eslintConfig = cwd ? findExistingEslintConfig(cwd) : undefined;
   return {
-    existingLinter: hasExistingLinter(scripts),
-    existingFormatter: cwd ? hasExistingFormatter(cwd, scripts) : 'format' in scripts,
-    existingEslintConfig: eslintConfig,
-    legacyEslint: eslintConfig?.startsWith('.eslintrc') ?? false,
-    existingRuffConfig: cwd ? findExistingRuffConfig(cwd) : undefined,
-    existingMypyConfig: cwd ? hasExistingMypyConfig(cwd) : false,
-    existingImportLinterConfig: cwd ? hasExistingImportLinterConfig(cwd) : false,
-    existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : undefined,
+    ...detectCoreTooling(cwd, scripts),
+    ...detectSystemsTooling(cwd),
   };
 }
 
