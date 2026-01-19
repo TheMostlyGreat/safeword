@@ -70,31 +70,73 @@ function hasExistingLints(cargoContent: string): boolean {
   return (
     cargoContent.includes('[lints.clippy]') ||
     cargoContent.includes('[lints.rust]') ||
+    cargoContent.includes('[lints]') ||
     cargoContent.includes('[workspace.lints.clippy]') ||
     cargoContent.includes('[workspace.lints.rust]')
   );
 }
 
 /**
- * Merge lint configuration into Cargo.toml
+ * Parse workspace members from Cargo.toml
+ * Supports both inline array and multi-line formats:
+ * - members = ["crates/a", "crates/b"]
+ * - members = [\n  "crates/a",\n  "crates/b"\n]
  */
-function mergeCargoLints(cwd: string): void {
-  const cargoPath = nodePath.join(cwd, 'Cargo.toml');
-  if (!existsSync(cargoPath)) return;
+function parseWorkspaceMembers(cargoContent: string): string[] {
+  // Match members = [...] with potential multi-line content
+  const membersMatch = /\[workspace\][^[]*members\s*=\s*\[([\s\S]*?)\]/.exec(cargoContent);
+  if (!membersMatch) return [];
 
-  const content = readFileSync(cargoPath, 'utf8');
+  const membersBlock = membersMatch[1];
+  // Extract quoted strings
+  const members: string[] = [];
+  const stringRegex = /"([^"]+)"/g;
+  let match: RegExpExecArray | null;
+  while ((match = stringRegex.exec(membersBlock)) !== null) {
+    members.push(match[1]);
+  }
+  return members;
+}
 
-  // Don't modify if lints already exist
+/**
+ * Add [lints] workspace = true to a member crate's Cargo.toml
+ */
+function addWorkspaceLints(memberCargoPath: string): void {
+  if (!existsSync(memberCargoPath)) return;
+
+  const content = readFileSync(memberCargoPath, 'utf8');
+
+  // Skip if already has any lints configuration
   if (hasExistingLints(content)) return;
 
-  const workspaceType = detectWorkspaceType(content);
+  const lintsSection = `[lints]
+workspace = true
+`;
 
-  // Add appropriate lint section
-  const lintsToAdd =
-    workspaceType === 'single-crate' ? SAFEWORD_CLIPPY_LINTS : SAFEWORD_WORKSPACE_LINTS;
+  const newContent = `${content.trimEnd()}\n\n${lintsSection}`;
+  writeFileSync(memberCargoPath, newContent, 'utf8');
+}
 
+/**
+ * Add lint configuration to root Cargo.toml if not present
+ */
+function addRootLints(cargoPath: string, content: string, isWorkspace: boolean): void {
+  if (hasExistingLints(content)) return;
+
+  const lintsToAdd = isWorkspace ? SAFEWORD_WORKSPACE_LINTS : SAFEWORD_CLIPPY_LINTS;
   const newContent = `${content.trimEnd()}\n\n${lintsToAdd}`;
   writeFileSync(cargoPath, newContent, 'utf8');
+}
+
+/**
+ * Add lints.workspace = true to all workspace member crates
+ */
+function addMemberLints(cwd: string, content: string): void {
+  const members = parseWorkspaceMembers(content);
+  for (const member of members) {
+    const memberCargoPath = nodePath.join(cwd, member, 'Cargo.toml');
+    addWorkspaceLints(memberCargoPath);
+  }
 }
 
 /**
@@ -104,8 +146,21 @@ function mergeCargoLints(cwd: string): void {
  * @returns Setup result
  */
 export function setupRustTooling(cwd: string): SetupResult {
-  // Merge lint configuration into Cargo.toml
-  mergeCargoLints(cwd);
+  const cargoPath = nodePath.join(cwd, 'Cargo.toml');
+  if (!existsSync(cargoPath)) return { files: [] };
+
+  // Read Cargo.toml once
+  const content = readFileSync(cargoPath, 'utf8');
+  const workspaceType = detectWorkspaceType(content);
+  const isWorkspace = workspaceType !== 'single-crate';
+
+  // Add lint configuration to root
+  addRootLints(cargoPath, content, isWorkspace);
+
+  // For workspaces, add lints.workspace = true to member crates
+  if (isWorkspace) {
+    addMemberLints(cwd, content);
+  }
 
   return { files: [] };
 }
