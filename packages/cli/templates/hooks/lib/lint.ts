@@ -44,7 +44,6 @@ const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const SAFEWORD_ESLINT = `${projectDir}/.safeword/eslint.config.mjs`;
 const SAFEWORD_RUFF = `${projectDir}/.safeword/ruff.toml`;
 const SAFEWORD_GOLANGCI = `${projectDir}/.safeword/.golangci.yml`;
-const SAFEWORD_CLIPPY = `${projectDir}/.safeword`; // Directory for CLIPPY_CONF_DIR
 const SAFEWORD_RUSTFMT = `${projectDir}/.safeword/rustfmt.toml`;
 const SAFEWORD_PRETTIER = `${projectDir}/.safeword/.prettierrc`;
 
