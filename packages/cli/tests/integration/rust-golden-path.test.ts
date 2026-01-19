@@ -13,6 +13,7 @@
  */
 
 import { spawnSync } from 'node:child_process';
+import { unlinkSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -196,6 +197,55 @@ cognitive-complexity-threshold = 25
     expect(fileExists(projectDirectory, '.safeword/clippy.toml')).toBe(true);
     const config = readTestFile(projectDirectory, '.safeword/clippy.toml');
     // Safeword config has strict defaults
+    expect(config).toContain('cognitive-complexity-threshold = 10');
+  });
+});
+
+// Scenario 5: Existing Cargo.toml lints are skipped entirely (user owns)
+describe('E2E: Rust Existing Lints Preserved', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustProject(projectDirectory);
+    // Add [lints.clippy] section BEFORE setup (simulates user's existing config)
+    const cargoPath = 'Cargo.toml';
+    const existingContent = readTestFile(projectDirectory, cargoPath);
+    writeTestFile(
+      projectDirectory,
+      cargoPath,
+      `${existingContent}
+[lints.clippy]
+# User's custom lint config
+unwrap_used = "allow"
+`,
+    );
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('preserves user lints config (does NOT add safeword lints)', () => {
+    const cargoToml = readTestFile(projectDirectory, 'Cargo.toml');
+    // User's setting preserved
+    expect(cargoToml).toContain('unwrap_used = "allow"');
+    // Safeword's pedantic NOT added (we skip entirely)
+    expect(cargoToml).not.toContain('pedantic');
+    // Should only have one [lints.clippy] section
+    const lintClippyCount = (cargoToml.match(/\[lints\.clippy\]/g) || []).length;
+    expect(lintClippyCount).toBe(1);
+  });
+
+  it('still creates .safeword/ configs for hooks', () => {
+    expect(fileExists(projectDirectory, '.safeword/clippy.toml')).toBe(true);
+    expect(fileExists(projectDirectory, '.safeword/rustfmt.toml')).toBe(true);
+    // Safeword strict config still available for hooks
+    const config = readTestFile(projectDirectory, '.safeword/clippy.toml');
     expect(config).toContain('cognitive-complexity-threshold = 10');
   });
 });
@@ -439,5 +489,41 @@ describe('E2E: Rust Workspace Glob Pattern', () => {
       expect(cargoToml).toContain('[lints]');
       expect(cargoToml).toContain('workspace = true');
     }
+  });
+});
+
+// Test lint hook fallback: rustfmt works without .safeword/rustfmt.toml
+describe('E2E: Rust Lint Hook Fallback', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustProject(projectDirectory);
+    initGitRepo(projectDirectory);
+    // Run setup to get the hook infrastructure
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+    // Delete .safeword/rustfmt.toml to test fallback path
+    const rustfmtConfig = nodePath.join(projectDirectory, '.safeword/rustfmt.toml');
+    if (fileExists(projectDirectory, '.safeword/rustfmt.toml')) {
+      unlinkSync(rustfmtConfig);
+    }
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it.skipIf(!CLIPPY_AVAILABLE)('lint hook formats .rs files without safeword config', () => {
+    const filePath = nodePath.join(projectDirectory, 'src/fallback-test.rs');
+    writeTestFile(projectDirectory, 'src/fallback-test.rs', `fn fallback_test(){println!("test")}`);
+
+    // Run lint hook - should use plain rustfmt (no --config-path)
+    runLintHook(projectDirectory, filePath);
+
+    // File should still be formatted (rustfmt works without config)
+    const result = readTestFile(projectDirectory, 'src/fallback-test.rs');
+    expect(result).toContain('fn fallback_test() {');
   });
 });
