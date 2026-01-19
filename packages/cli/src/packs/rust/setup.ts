@@ -5,7 +5,7 @@
  * - Cargo.toml [lints.clippy] merge
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import type { SetupResult } from '../types.js';
@@ -77,25 +77,68 @@ function hasExistingLints(cargoContent: string): boolean {
 }
 
 /**
+ * Expand a single member pattern (handles glob patterns like "crates/*")
+ */
+function expandMemberPattern(cwd: string, pattern: string): string[] {
+  // Simple glob: only handle trailing /* (most common Cargo workspace pattern)
+  if (pattern.endsWith('/*')) {
+    const baseDirectory = pattern.slice(0, -2); // Remove /*
+    const fullPath = nodePath.join(cwd, baseDirectory);
+
+    if (!existsSync(fullPath)) return [];
+
+    try {
+      const entries = readdirSync(fullPath, { withFileTypes: true });
+      return entries
+        .filter(entry => {
+          if (!entry.isDirectory()) return false;
+          // Only include directories that have Cargo.toml (are crates)
+          const cargoPath = nodePath.join(fullPath, entry.name, 'Cargo.toml');
+          return existsSync(cargoPath);
+        })
+        .map(entry => nodePath.join(baseDirectory, entry.name));
+    } catch {
+      return [];
+    }
+  }
+
+  // Not a glob pattern, return as-is
+  return [pattern];
+}
+
+/**
  * Parse workspace members from Cargo.toml
  * Supports both inline array and multi-line formats:
  * - members = ["crates/a", "crates/b"]
  * - members = [\n  "crates/a",\n  "crates/b"\n]
+ *
+ * Also expands simple glob patterns like "crates/*"
+ *
+ * @param cargoContent - Content of root Cargo.toml
+ * @param cwd - Project root directory (needed for glob expansion)
+ * @returns Array of expanded member paths
  */
-function parseWorkspaceMembers(cargoContent: string): string[] {
+export function parseWorkspaceMembers(cargoContent: string, cwd: string): string[] {
   // Match members = [...] with potential multi-line content
   const membersMatch = /\[workspace\][^[]*members\s*=\s*\[([\s\S]*?)\]/.exec(cargoContent);
   if (!membersMatch) return [];
 
   const membersBlock = membersMatch[1];
   // Extract quoted strings
-  const members: string[] = [];
+  const rawMembers: string[] = [];
   const stringRegex = /"([^"]+)"/g;
   let match: RegExpExecArray | null;
   while ((match = stringRegex.exec(membersBlock)) !== null) {
-    members.push(match[1]);
+    rawMembers.push(match[1]);
   }
-  return members;
+
+  // Expand glob patterns
+  const expandedMembers: string[] = [];
+  for (const member of rawMembers) {
+    expandedMembers.push(...expandMemberPattern(cwd, member));
+  }
+
+  return expandedMembers;
 }
 
 /**
@@ -132,7 +175,7 @@ function addRootLints(cargoPath: string, content: string, isWorkspace: boolean):
  * Add lints.workspace = true to all workspace member crates
  */
 function addMemberLints(cwd: string, content: string): void {
-  const members = parseWorkspaceMembers(content);
+  const members = parseWorkspaceMembers(content, cwd);
   for (const member of members) {
     const memberCargoPath = nodePath.join(cwd, member, 'Cargo.toml');
     addWorkspaceLints(memberCargoPath);

@@ -19,6 +19,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   createRustProject,
+  createRustWorkspace,
+  createRustWorkspaceWithGlob,
   createTemporaryDirectory,
   fileExists,
   initGitRepo,
@@ -277,5 +279,165 @@ describe('E2E: Pure Rust Project', () => {
     expect(fileExists(projectDirectory, '.safeword/rustfmt.toml')).toBe(true);
     expect(fileExists(projectDirectory, 'clippy.toml')).toBe(true);
     expect(fileExists(projectDirectory, 'rustfmt.toml')).toBe(true);
+  });
+});
+
+// Scenario 2: Workspace setup with member crates
+describe('E2E: Rust Workspace Setup', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustWorkspace(projectDirectory, { members: ['core', 'cli'] });
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('adds [workspace.lints.clippy] to root Cargo.toml', () => {
+    const cargoToml = readTestFile(projectDirectory, 'Cargo.toml');
+    expect(cargoToml).toContain('[workspace.lints.clippy]');
+    expect(cargoToml).toContain('pedantic');
+  });
+
+  it('adds [workspace.lints.rust] to root Cargo.toml', () => {
+    const cargoToml = readTestFile(projectDirectory, 'Cargo.toml');
+    expect(cargoToml).toContain('[workspace.lints.rust]');
+    expect(cargoToml).toContain('unsafe_code');
+  });
+
+  it('adds [lints] workspace = true to crates/core/Cargo.toml', () => {
+    const cargoToml = readTestFile(projectDirectory, 'crates/core/Cargo.toml');
+    expect(cargoToml).toContain('[lints]');
+    expect(cargoToml).toContain('workspace = true');
+  });
+
+  it('adds [lints] workspace = true to crates/cli/Cargo.toml', () => {
+    const cargoToml = readTestFile(projectDirectory, 'crates/cli/Cargo.toml');
+    expect(cargoToml).toContain('[lints]');
+    expect(cargoToml).toContain('workspace = true');
+  });
+});
+
+// Scenario 3: Virtual workspace setup (no root package)
+describe('E2E: Rust Virtual Workspace', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    // createRustWorkspace creates a virtual workspace by default (no [package])
+    createRustWorkspace(projectDirectory, { members: ['lib-a', 'lib-b'] });
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('adds [workspace.lints.clippy] to virtual workspace', () => {
+    const cargoToml = readTestFile(projectDirectory, 'Cargo.toml');
+    // Should NOT have [lints.clippy] (that's for single-crate)
+    expect(cargoToml).not.toContain('[lints.clippy]');
+    // Should have [workspace.lints.clippy]
+    expect(cargoToml).toContain('[workspace.lints.clippy]');
+  });
+
+  it('member crates inherit via workspace = true', () => {
+    const libraryA = readTestFile(projectDirectory, 'crates/lib-a/Cargo.toml');
+    const libraryB = readTestFile(projectDirectory, 'crates/lib-b/Cargo.toml');
+
+    expect(libraryA).toContain('[lints]');
+    expect(libraryA).toContain('workspace = true');
+    expect(libraryB).toContain('[lints]');
+    expect(libraryB).toContain('workspace = true');
+  });
+});
+
+// Scenario 6: Member with explicit [lints] section is skipped
+describe('E2E: Rust Workspace Skip Explicit Lints', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustWorkspace(projectDirectory, { members: ['modified', 'pristine'] });
+
+    // Add explicit [lints] section to 'modified' crate BEFORE setup
+    const modifiedCargoPath = 'crates/modified/Cargo.toml';
+    const existingContent = readTestFile(projectDirectory, modifiedCargoPath);
+    writeTestFile(
+      projectDirectory,
+      modifiedCargoPath,
+      `${existingContent}
+[lints.clippy]
+unwrap_used = "allow"
+`,
+    );
+
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('preserves explicit [lints] in modified crate', () => {
+    const cargoToml = readTestFile(projectDirectory, 'crates/modified/Cargo.toml');
+    // Should keep user's setting
+    expect(cargoToml).toContain('unwrap_used = "allow"');
+    // Should NOT add workspace = true (already has explicit lints)
+    expect(cargoToml).not.toMatch(/\[lints\]\s*\nworkspace = true/);
+  });
+
+  it('adds workspace = true to pristine crate', () => {
+    const cargoToml = readTestFile(projectDirectory, 'crates/pristine/Cargo.toml');
+    expect(cargoToml).toContain('[lints]');
+    expect(cargoToml).toContain('workspace = true');
+  });
+});
+
+// Test glob pattern expansion in workspace members (members = ["crates/*"])
+describe('E2E: Rust Workspace Glob Pattern', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    // Creates workspace with members = ["crates/*"] and crates/alpha, crates/beta
+    createRustWorkspaceWithGlob(projectDirectory, { members: ['alpha', 'beta', 'gamma'] });
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('uses glob pattern in root Cargo.toml', () => {
+    const cargoToml = readTestFile(projectDirectory, 'Cargo.toml');
+    // Verify the glob pattern is preserved (we don't expand it in the file)
+    expect(cargoToml).toContain('members = ["crates/*"]');
+    // Workspace lints should still be added
+    expect(cargoToml).toContain('[workspace.lints.clippy]');
+  });
+
+  it('adds [lints] workspace = true to all discovered crates', () => {
+    // All three crates should have lints.workspace = true
+    for (const crate of ['alpha', 'beta', 'gamma']) {
+      const cargoToml = readTestFile(projectDirectory, `crates/${crate}/Cargo.toml`);
+      expect(cargoToml).toContain('[lints]');
+      expect(cargoToml).toContain('workspace = true');
+    }
   });
 });

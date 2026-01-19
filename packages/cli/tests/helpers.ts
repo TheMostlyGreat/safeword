@@ -469,6 +469,60 @@ source = { virtual = "." }
 }
 
 /**
+ * Creates a Rust workspace using glob pattern (members = ["crates/*"])
+ * Tests the glob expansion feature in parseWorkspaceMembers
+ *
+ * @param dir - Directory to create workspace in
+ * @param options - Workspace options
+ * @param options.members - Crate names (default: ['alpha', 'beta'])
+ * @param options.edition - Rust edition (default: '2021')
+ */
+export function createRustWorkspaceWithGlob(
+  dir: string,
+  options: { members?: string[]; edition?: string } = {},
+): void {
+  const members = options.members ?? ['alpha', 'beta'];
+  const edition = options.edition ?? '2021';
+
+  // Root workspace Cargo.toml with glob pattern
+  writeTestFile(
+    dir,
+    'Cargo.toml',
+    `[workspace]
+members = ["crates/*"]
+resolver = "2"
+`,
+  );
+
+  // Create each member crate
+  for (const member of members) {
+    const cratePath = nodePath.join('crates', member);
+    mkdirSync(nodePath.join(dir, cratePath, 'src'), { recursive: true });
+
+    writeTestFile(
+      dir,
+      nodePath.join(cratePath, 'Cargo.toml'),
+      `[package]
+name = "${member}"
+version = "0.1.0"
+edition = "${edition}"
+
+[dependencies]
+`,
+    );
+
+    writeTestFile(
+      dir,
+      nodePath.join(cratePath, 'src', 'lib.rs'),
+      `pub fn hello() -> &'static str {
+    "Hello from ${member}!"
+}
+`,
+    );
+  }
+}
+
+/**
  * Creates a Go project with go.mod and main.go
  * @param dir
  * @param options
