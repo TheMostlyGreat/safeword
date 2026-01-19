@@ -2,16 +2,18 @@
  * E2E Test: Python Golden Path
  *
  * Verifies that a Python project with safeword works correctly:
- * - Ruff config is created in pyproject.toml
+ * - Ruff config is created via extend pattern (ruff.toml → .safeword/ruff.toml)
  * - Ruff runs and catches issues (when installed)
  * - Ruff formats Python files (when installed)
  * - Post-tool lint hook processes Python files (when Ruff installed)
+ * - Lint hook handles edge cases gracefully (syntax errors, missing files)
  *
+ * Also includes idempotency and fallback tests (separate project setups).
  * Note: Tests requiring Ruff are skipped if Ruff is not installed.
- * Uses a single project setup (expensive) shared across all tests.
  */
 
 import { execSync, spawnSync } from 'node:child_process';
+import { unlinkSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -19,6 +21,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   createPythonProject,
   createTemporaryDirectory,
+  fileExists,
   initGitRepo,
   isRuffInstalled,
   readTestFile,
@@ -110,5 +113,108 @@ describe('E2E: Python Golden Path', () => {
     const result = readTestFile(projectDirectory, 'src/hook-test.py');
     expect(result).toContain('x = 1');
     expect(result).toContain('y = 2');
+  });
+
+  describe('Lint Hook Graceful Handling', () => {
+    it('hook completes without crashing on syntax error file', () => {
+      writeTestFile(projectDirectory, 'src/syntax-error.py', 'def broken( invalid syntax');
+      const filePath = nodePath.join(projectDirectory, 'src/syntax-error.py');
+
+      // Should not throw - hook uses .nothrow()
+      expect(() => runLintHook(projectDirectory, filePath)).not.toThrow();
+    });
+
+    it('hook completes without crashing on non-existent file', () => {
+      const filePath = nodePath.join(projectDirectory, 'src/does-not-exist.py');
+
+      // Should not throw - hook uses .nothrow()
+      expect(() => runLintHook(projectDirectory, filePath)).not.toThrow();
+    });
+  });
+});
+
+// =============================================================================
+// Idempotency Test - Setup twice should be safe
+// =============================================================================
+
+describe('E2E: Python Setup Idempotency', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createPythonProject(projectDirectory);
+    initGitRepo(projectDirectory);
+    // Run setup TWICE
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('ruff.toml is valid after running setup twice', () => {
+    const ruffToml = readTestFile(projectDirectory, 'ruff.toml');
+    expect(ruffToml).toContain('extend = ".safeword/ruff.toml"');
+  });
+
+  it.skipIf(!RUFF_AVAILABLE)('Ruff still works after running setup twice', () => {
+    writeTestFile(projectDirectory, 'src/idempotent.py', 'x = 1\n');
+
+    const result = spawnSync('ruff', ['check', 'src/idempotent.py'], {
+      cwd: projectDirectory,
+      encoding: 'utf8',
+    });
+    expect(result.status).toBe(0);
+  });
+
+  it('config files remain valid', () => {
+    expect(fileExists(projectDirectory, 'ruff.toml')).toBe(true);
+    expect(fileExists(projectDirectory, '.safeword/ruff.toml')).toBe(true);
+  });
+});
+
+// =============================================================================
+// Fallback Test - Hook works without .safeword/ config
+// =============================================================================
+
+describe('E2E: Python Lint Hook Fallback', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createPythonProject(projectDirectory);
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+
+    // Delete BOTH configs to test fallback path
+    // Python uses extend pattern (ruff.toml → .safeword/ruff.toml), so we must delete both
+    // Otherwise ruff fails trying to load the missing extended config
+    if (fileExists(projectDirectory, '.safeword/ruff.toml')) {
+      unlinkSync(nodePath.join(projectDirectory, '.safeword/ruff.toml'));
+    }
+    if (fileExists(projectDirectory, 'ruff.toml')) {
+      unlinkSync(nodePath.join(projectDirectory, 'ruff.toml'));
+    }
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it.skipIf(!RUFF_AVAILABLE)('lint hook formats files without safeword Ruff config', () => {
+    writeTestFile(projectDirectory, 'src/fallback.py', 'x=1;y=2');
+    const filePath = nodePath.join(projectDirectory, 'src/fallback.py');
+
+    // Hook should use fallback path (Ruff without --config)
+    runLintHook(projectDirectory, filePath);
+
+    // File should still be formatted by Ruff
+    const result = readTestFile(projectDirectory, 'src/fallback.py');
+    expect(result).toContain('x = 1');
   });
 });
