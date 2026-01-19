@@ -20,31 +20,33 @@ interface LanguagePack {
 
 **Strictness:** Enable ALL rules by default, then selectively disable noisy/conflicting ones.
 
-| Language   | Strictness Setting              | Exclusions                                     |
-| ---------- | ------------------------------- | ---------------------------------------------- |
-| TypeScript | ESLint: multiple strict plugins | Minimal (Prettier conflicts)                   |
-| Python     | `select = ["ALL"]`              | `D`, `ANN`, formatter conflicts                |
-| Go         | `default: all`                  | `std-error-handling`, `common-false-positives` |
+| Language   | Strictness Setting              | Exclusions                                      |
+| ---------- | ------------------------------- | ----------------------------------------------- |
+| TypeScript | ESLint: multiple strict plugins | Minimal (Prettier conflicts)                    |
+| Python     | `select = ["ALL"]`              | `D`, `ANN`, formatter conflicts                 |
+| Go         | `default: all`                  | `std-error-handling`, `common-false-positives`  |
+| Rust       | `pedantic = "warn"`             | `missing_errors_doc`, `module_name_repetitions` |
 
 **Design Constraints (Required):** Every language pack MUST enforce:
 
-| Constraint                | ESLint                    | Ruff                       | golangci-lint               |
-| ------------------------- | ------------------------- | -------------------------- | --------------------------- |
-| Cyclomatic complexity ≤10 | `complexity: 10`          | `C901` (max-complexity=10) | `cyclop` (default: 10)      |
-| Max nesting depth ≤4      | `max-depth: 4`            | N/A                        | `nestif` (min-complexity=4) |
-| Max function params ≤5    | `max-params: 5`           | `PLR0913` (default: 5)     | N/A                         |
-| Max callback nesting ≤3   | `max-nested-callbacks: 3` | N/A                        | N/A                         |
+| Constraint                | ESLint                    | Ruff                       | golangci-lint               | Clippy                              |
+| ------------------------- | ------------------------- | -------------------------- | --------------------------- | ----------------------------------- |
+| Cyclomatic complexity ≤10 | `complexity: 10`          | `C901` (max-complexity=10) | `cyclop` (default: 10)      | `cognitive-complexity-threshold=10` |
+| Max nesting depth ≤4      | `max-depth: 4`            | N/A                        | `nestif` (min-complexity=4) | N/A                                 |
+| Max function params ≤5    | `max-params: 5`           | `PLR0913` (default: 5)     | N/A                         | `too-many-arguments-threshold=5`    |
+| Max callback nesting ≤3   | `max-nested-callbacks: 3` | N/A                        | N/A                         | N/A                                 |
 
 **Why:** LLMs write dense, complex code. These constraints force decomposition and improve maintainability.
 
 **Rule Categories (Required):** Every language pack SHOULD enable rules for:
 
-| Category      | ESLint                   | Ruff         | golangci-lint |
-| ------------- | ------------------------ | ------------ | ------------- |
-| Security      | `eslint-plugin-security` | `S` (bandit) | `gosec`       |
-| Import cycles | `import-x/no-cycle`      | -            | `depguard`    |
-| Async/Promise | `eslint-plugin-promise`  | `ASYNC`      | N/A           |
-| Regex safety  | `eslint-plugin-regexp`   | -            | -             |
+| Category       | ESLint                   | Ruff         | golangci-lint | Clippy                 |
+| -------------- | ------------------------ | ------------ | ------------- | ---------------------- |
+| Security       | `eslint-plugin-security` | `S` (bandit) | `gosec`       | `unsafe_code = "deny"` |
+| Import cycles  | `import-x/no-cycle`      | -            | `depguard`    | N/A                    |
+| Async/Promise  | `eslint-plugin-promise`  | `ASYNC`      | N/A           | N/A                    |
+| Regex safety   | `eslint-plugin-regexp`   | -            | -             | N/A                    |
+| Error handling | N/A                      | N/A          | `errcheck`    | `unwrap_used = "warn"` |
 
 **Severity:** Use `error` not `warn`. LLMs ignore warnings—only errors stop code generation.
 
@@ -202,6 +204,22 @@ if (SHELL_EXTENSIONS.has(extension)) {
   }
 }
 ```
+
+**Tool Granularity:** Not all tools support file-level targeting. Design accordingly:
+
+| Tool          | Granularity | Lint Hook Strategy                                                  |
+| ------------- | ----------- | ------------------------------------------------------------------- |
+| ESLint        | File        | `eslint --fix ${file}`                                              |
+| Ruff          | File        | `ruff check --fix ${file}`                                          |
+| rustfmt       | File        | `rustfmt ${file}`                                                   |
+| Clippy        | Package     | Format only in hook; clippy at package level (deferred or separate) |
+| golangci-lint | Directory   | `golangci-lint run --fix ${file}` (works but runs on directory)     |
+
+If a linter can't target files, the lint hook should run only the formatter. Package-level linting can be:
+
+1. Deferred to manual `cargo clippy --fix` / `golangci-lint run --fix`
+2. Run on the whole project (expensive for large monorepos)
+3. Triggered separately via pre-commit hooks
 
 ### 5. Project Detector (`src/utils/project-detector.ts`)
 
@@ -477,6 +495,123 @@ export function setup{Lang}Tooling(): SetupResult {
 **Note:** Config generators (`generate{Tool}Config()`) should be in `files.ts`, not `setup.ts`.
 The setup function should NOT write files directly—reconciliation handles that.
 
+## Workspace/Monorepo Handling (When Applicable)
+
+Languages with native workspace support require special handling:
+
+| Language   | Workspace Mechanism         | Root Marker           | Member Discovery             |
+| ---------- | --------------------------- | --------------------- | ---------------------------- |
+| Rust       | `[workspace]` in Cargo.toml | `[workspace]` section | `members = ["crates/*"]`     |
+| Go         | `go.work` file              | `go.work` exists      | `use ./module1` directives   |
+| TypeScript | package.json workspaces     | `workspaces` field    | `workspaces: ["packages/*"]` |
+
+### Workspace Detection
+
+```typescript
+// In setup.ts
+export function detectWorkspaceType(
+  manifestContent: string,
+): 'virtual' | 'root-package' | 'single' {
+  // virtual = workspace without root package (Rust: [workspace] but no [package])
+  // root-package = workspace WITH root package (Rust: both [workspace] and [package])
+  // single = no workspace
+}
+```
+
+**Detection Edge Cases:** Document false positives. Example:
+
+- `[workspace.dependencies]` contains "workspace" but is NOT a workspace marker
+- Use section header matching (`[workspace]`) not substring matching
+
+### Config Propagation
+
+Workspaces often need config in TWO places:
+
+1. **Root config** - defines the rules (`[workspace.lints.clippy]`)
+2. **Member inheritance** - tells members to use root rules (`lints.workspace = true`)
+
+```typescript
+// Rust example: setup.ts
+function addRootLints(cargoPath: string, content: string, isWorkspace: boolean): void {
+  const lintsToAdd = isWorkspace ? WORKSPACE_LINTS : SINGLE_CRATE_LINTS;
+  // Append to manifest
+}
+
+function addMemberLints(cwd: string, content: string): void {
+  const members = parseWorkspaceMembers(content);
+  for (const member of members) {
+    // Add inheritance directive to each member
+  }
+}
+```
+
+### Member Parsing Limitations
+
+Glob patterns (`members = ["crates/*"]`) require filesystem expansion. Simple regex extraction only works for explicit paths:
+
+```typescript
+// Works: members = ["crates/core", "crates/cli"]
+// Fails: members = ["crates/*"]  ← requires glob expansion
+```
+
+Document this limitation or implement glob expansion.
+
+### User Config Preservation
+
+When modifying existing manifests (not creating new files):
+
+- **Check before modifying** - skip if user already has the section
+- **Append, don't replace** - add new sections at end of file
+- **User wins** - never overwrite user's explicit settings
+
+```typescript
+function hasExistingLints(content: string): boolean {
+  return content.includes('[lints.clippy]') || content.includes('[lints]');
+}
+
+// In setup:
+if (hasExistingLints(content)) return; // User config preserved
+```
+
+## Config File Merging (Non-JSON)
+
+The reconciliation system handles JSON merges via `jsonMerges`. For non-JSON formats (TOML, YAML, INI), use the setup function:
+
+| Format | Merge Strategy              | Example              |
+| ------ | --------------------------- | -------------------- |
+| JSON   | `jsonMerges` in schema.ts   | package.json scripts |
+| TOML   | Append sections in setup.ts | Cargo.toml `[lints]` |
+| YAML   | Not yet supported           | -                    |
+
+```typescript
+// TOML section append pattern (Rust Cargo.toml)
+export function setupRustTooling(cwd: string): SetupResult {
+  const cargoPath = join(cwd, 'Cargo.toml');
+  const content = readFileSync(cargoPath, 'utf8');
+
+  if (!hasExistingLints(content)) {
+    const lintsSection = `[lints.clippy]\npedantic = "warn"\n`;
+    writeFileSync(cargoPath, `${content.trimEnd()}\n\n${lintsSection}`);
+  }
+
+  return { files: [] }; // Let reconciliation handle other files
+}
+```
+
+**Key difference from managed files:** Merging modifies an existing user file, while managed files create new files if missing.
+
+## Tool Version Compatibility
+
+Some tools have unstable/nightly-only options that **fail silently** on stable versions:
+
+| Tool    | Gotcha                                  | Recommendation                              |
+| ------- | --------------------------------------- | ------------------------------------------- |
+| rustfmt | Unstable options ignored on stable Rust | Use only stable options                     |
+| ESLint  | Flat config (v9+) vs legacy config      | Detect version, generate appropriate format |
+| Ruff    | Rapid iteration, options renamed        | Pin to known-good version in docs           |
+
+**Research before implementation:** Test your config with the stable/default tool version, not just nightly.
+
 ## Architecture Validation (Optional)
 
 If the language ecosystem has import/layer enforcement tools:
@@ -604,14 +739,16 @@ Before shipping a new language pack, verify:
 - [ ] Hook lints files with correct extension
 - [ ] Hook skips gracefully if tools not installed
 
-**Testing (6 test areas):**
+**Testing (8 test areas):**
 
 - [ ] Golden path: config created, tool runs, violations detected, formatting works, hook works
 - [ ] Tooling validation: type checker catches errors (if applicable)
-- [ ] Unit tests: detection functions, dependency checks
+- [ ] Unit tests: detection functions, workspace detection, config parsing
 - [ ] Conditional setup: pure {lang} skips irrelevant tooling
 - [ ] Mixed project: both languages work together, hook routes correctly
 - [ ] Add language: upgrade path installs pack when manifest added
+- [ ] Workspace setup: root config + member inheritance (if applicable)
+- [ ] Config preservation: existing user config not overwritten
 
 **Test Helpers:**
 
@@ -624,6 +761,8 @@ Before shipping a new language pack, verify:
 - [ ] Pure {lang} project (no package.json) works end-to-end
 - [ ] Mixed project (JS + {lang}) works correctly
 - [ ] Existing tool configs are preserved (not clobbered)
+- [ ] Workspace/monorepo projects (if language supports workspaces)
+- [ ] Virtual workspace (no root package, if applicable)
 
 **Optional Integrations:**
 
@@ -639,3 +778,6 @@ Before shipping a new language pack, verify:
 - [ ] Test violation detection manually (don't assume what gets caught)
 - [ ] Check config format version (e.g., golangci-lint v1 vs v2 syntax)
 - [ ] Confirm formatter integration (separate tool or linter flag?)
+- [ ] Test config with stable toolchain (not just nightly/beta)
+- [ ] Document lint hook granularity (file vs package vs directory targeting)
+- [ ] Identify workspace/monorepo patterns (if applicable)
