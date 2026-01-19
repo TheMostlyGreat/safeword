@@ -13,6 +13,7 @@ import { detectLanguages, findPackForExtension } from '../../src/packs/registry.
 import {
   createPackageJson,
   createPythonProject,
+  createRustProject,
   createTemporaryDirectory,
   initGitRepo,
   readSafewordConfig,
@@ -55,6 +56,11 @@ describe('Pack Registry', () => {
     const jsPack = findPackForExtension('.js');
     expect(jsPack?.id).toBe('typescript');
 
+    // Rust extensions → rust pack
+    const rsPack = findPackForExtension('.rs');
+    expect(rsPack).toBeDefined();
+    expect(rsPack?.id).toBe('rust');
+
     // Unknown extensions → undefined
     const unknownPack = findPackForExtension('.xyz');
     expect(unknownPack).toBeUndefined();
@@ -72,6 +78,29 @@ describe('Pack Registry', () => {
     // Should detect both (order doesn't matter)
     expect(detected).toContain('python');
     expect(detected).toContain('typescript');
+    expect(detected).toHaveLength(2);
+  });
+
+  it('Test 1.6: Detects Rust from Cargo.toml', () => {
+    createRustProject(testDirectory);
+
+    const detected = detectLanguages(testDirectory);
+
+    expect(detected).toContain('rust');
+    expect(detected).toHaveLength(1);
+  });
+
+  it('Test 1.7: Detects multiple languages including Rust', () => {
+    // Create project with TypeScript AND Rust
+    createPackageJson(testDirectory, {
+      devDependencies: { typescript: '^5.0.0' },
+    });
+    createRustProject(testDirectory);
+
+    const detected = detectLanguages(testDirectory);
+
+    expect(detected).toContain('typescript');
+    expect(detected).toContain('rust');
     expect(detected).toHaveLength(2);
   });
 });

@@ -157,3 +157,125 @@ describe('E2E: Rust Golden Path', () => {
     expect(result).toContain('fn hook_test() {');
   });
 });
+
+// Scenario 4: Existing clippy.toml is preserved
+describe('E2E: Rust Config Preservation', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustProject(projectDirectory);
+    // Create existing clippy.toml BEFORE setup
+    writeTestFile(
+      projectDirectory,
+      'clippy.toml',
+      `# My custom clippy config
+cognitive-complexity-threshold = 25
+`,
+    );
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('preserves existing clippy.toml at project root', () => {
+    const config = readTestFile(projectDirectory, 'clippy.toml');
+    // Should keep user's custom threshold
+    expect(config).toContain('cognitive-complexity-threshold = 25');
+    expect(config).toContain('My custom clippy config');
+  });
+
+  it('creates .safeword/clippy.toml for hooks', () => {
+    expect(fileExists(projectDirectory, '.safeword/clippy.toml')).toBe(true);
+    const config = readTestFile(projectDirectory, '.safeword/clippy.toml');
+    // Safeword config has strict defaults
+    expect(config).toContain('cognitive-complexity-threshold = 10');
+  });
+});
+
+// Scenario 7: TypeScript + Rust polyglot project
+describe('E2E: TypeScript + Rust Mixed Project', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    // Create both package.json AND Cargo.toml
+    writeTestFile(
+      projectDirectory,
+      'package.json',
+      JSON.stringify({
+        name: 'mixed-project',
+        version: '0.1.0',
+        devDependencies: { typescript: '^5.0.0' },
+      }),
+    );
+    createRustProject(projectDirectory);
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('creates TypeScript config (eslint.config.mjs)', () => {
+    expect(fileExists(projectDirectory, 'eslint.config.mjs')).toBe(true);
+  });
+
+  it('creates Rust config (clippy.toml)', () => {
+    expect(fileExists(projectDirectory, 'clippy.toml')).toBe(true);
+  });
+
+  it('creates Rust config (rustfmt.toml)', () => {
+    expect(fileExists(projectDirectory, 'rustfmt.toml')).toBe(true);
+  });
+
+  it('both packs coexist in .safeword/', () => {
+    // TypeScript pack
+    expect(fileExists(projectDirectory, '.safeword/eslint.config.mjs')).toBe(true);
+    // Rust pack
+    expect(fileExists(projectDirectory, '.safeword/clippy.toml')).toBe(true);
+    expect(fileExists(projectDirectory, '.safeword/rustfmt.toml')).toBe(true);
+  });
+});
+
+// Scenario 12: Pure Rust project (no package.json)
+describe('E2E: Pure Rust Project', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustProject(projectDirectory);
+    // Ensure NO package.json exists
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('does NOT create package.json', () => {
+    expect(fileExists(projectDirectory, 'package.json')).toBe(false);
+  });
+
+  it('does NOT create eslint.config.mjs', () => {
+    expect(fileExists(projectDirectory, 'eslint.config.mjs')).toBe(false);
+  });
+
+  it('creates Rust configs', () => {
+    expect(fileExists(projectDirectory, '.safeword/clippy.toml')).toBe(true);
+    expect(fileExists(projectDirectory, '.safeword/rustfmt.toml')).toBe(true);
+    expect(fileExists(projectDirectory, 'clippy.toml')).toBe(true);
+    expect(fileExists(projectDirectory, 'rustfmt.toml')).toBe(true);
+  });
+});
