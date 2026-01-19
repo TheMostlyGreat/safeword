@@ -594,3 +594,115 @@ export function runLintHook(projectDirectory: string, filePath: string): SpawnSy
     encoding: 'utf8',
   });
 }
+
+// ============================================================================
+// Rust Test Helpers
+// ============================================================================
+
+/**
+ * Check if cargo is installed
+ */
+export function isCargoInstalled(): boolean {
+  return isCommandAvailable('cargo');
+}
+
+/**
+ * Check if clippy component is installed
+ */
+export function isClippyInstalled(): boolean {
+  if (!isCargoInstalled()) return false;
+  const result = spawnSync('rustup', ['component', 'list', '--installed'], {
+    encoding: 'utf8',
+  });
+  return result.stdout?.includes('clippy') ?? false;
+}
+
+/**
+ * Creates a single-crate Rust project with Cargo.toml
+ * @param dir - Directory to create project in
+ * @param options - Project options
+ * @param options.name - Package name (default: 'test-project')
+ * @param options.edition - Rust edition (default: '2021')
+ */
+export function createRustProject(
+  dir: string,
+  options: { name?: string; edition?: string } = {},
+): void {
+  const name = options.name ?? 'test-project';
+  const edition = options.edition ?? '2021';
+
+  writeTestFile(
+    dir,
+    'Cargo.toml',
+    `[package]
+name = "${name}"
+version = "0.1.0"
+edition = "${edition}"
+
+[dependencies]
+`,
+  );
+
+  // Create src directory with main.rs
+  mkdirSync(nodePath.join(dir, 'src'), { recursive: true });
+  writeTestFile(
+    dir,
+    'src/main.rs',
+    `fn main() {
+    println!("Hello, world!");
+}
+`,
+  );
+}
+
+/**
+ * Creates a Rust workspace with multiple crates
+ * @param dir - Directory to create workspace in
+ * @param options - Workspace options
+ * @param options.members - Crate names (default: ['crate-a', 'crate-b'])
+ * @param options.edition - Rust edition (default: '2021')
+ */
+export function createRustWorkspace(
+  dir: string,
+  options: { members?: string[]; edition?: string } = {},
+): void {
+  const members = options.members ?? ['crate-a', 'crate-b'];
+  const edition = options.edition ?? '2021';
+
+  // Root workspace Cargo.toml
+  writeTestFile(
+    dir,
+    'Cargo.toml',
+    `[workspace]
+members = [${members.map(m => `"crates/${m}"`).join(', ')}]
+resolver = "2"
+`,
+  );
+
+  // Create each member crate
+  for (const member of members) {
+    const cratePath = nodePath.join('crates', member);
+    mkdirSync(nodePath.join(dir, cratePath, 'src'), { recursive: true });
+
+    writeTestFile(
+      dir,
+      nodePath.join(cratePath, 'Cargo.toml'),
+      `[package]
+name = "${member}"
+version = "0.1.0"
+edition = "${edition}"
+
+[dependencies]
+`,
+    );
+
+    writeTestFile(
+      dir,
+      nodePath.join(cratePath, 'src', 'lib.rs'),
+      `pub fn hello() -> &'static str {
+    "Hello from ${member}!"
+}
+`,
+    );
+  }
+}
