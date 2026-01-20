@@ -184,18 +184,18 @@ describe('Schema - Single Source of Truth', () => {
   describe('textPatches', () => {
     it('should include AGENTS.md patch (creates if missing)', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      // Note: toHaveProperty interprets "." as nested path, use `in` operator instead
-      expect('AGENTS.md' in SAFEWORD_SCHEMA.textPatches).toBe(true);
-      expect(SAFEWORD_SCHEMA.textPatches['AGENTS.md'].operation).toBe('prepend');
-      expect(SAFEWORD_SCHEMA.textPatches['AGENTS.md'].createIfMissing).toBe(true);
+      const agentsPatch = SAFEWORD_SCHEMA.textPatches['AGENTS.md'];
+      expect(agentsPatch).toBeDefined();
+      expect(agentsPatch?.operation).toBe('prepend');
+      expect(agentsPatch?.createIfMissing).toBe(true);
     });
 
     it('should include CLAUDE.md patch (only if exists)', async () => {
       const { SAFEWORD_SCHEMA } = await import('../src/schema.js');
-      // Note: toHaveProperty interprets "." as nested path, use `in` operator instead
-      expect('CLAUDE.md' in SAFEWORD_SCHEMA.textPatches).toBe(true);
-      expect(SAFEWORD_SCHEMA.textPatches['CLAUDE.md'].operation).toBe('prepend');
-      expect(SAFEWORD_SCHEMA.textPatches['CLAUDE.md'].createIfMissing).toBe(false);
+      const claudePatch = SAFEWORD_SCHEMA.textPatches['CLAUDE.md'];
+      expect(claudePatch).toBeDefined();
+      expect(claudePatch?.operation).toBe('prepend');
+      expect(claudePatch?.createIfMissing).toBe(false);
     });
   });
 

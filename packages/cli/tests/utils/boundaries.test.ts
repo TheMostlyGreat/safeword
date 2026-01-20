@@ -63,8 +63,8 @@ describe('boundaries.ts', () => {
         const result = detectArchitecture(temporaryDirectory);
 
         expect(result.elements).toHaveLength(1);
-        expect(result.elements[0].layer).toBe('components');
-        expect(result.elements[0].pattern).toBe('src/components/**');
+        expect(result.elements[0]?.layer).toBe('components');
+        expect(result.elements[0]?.pattern).toBe('src/components/**');
       });
 
       it('detects multiple architecture layers', () => {
@@ -119,7 +119,7 @@ describe('boundaries.ts', () => {
         // Should only have one utils entry (src/utils scanned first)
         const utilitiesElements = result.elements.filter(element => element.layer === 'utils');
         expect(utilitiesElements).toHaveLength(1);
-        expect(utilitiesElements[0].pattern).toBe('src/utils/**');
+        expect(utilitiesElements[0]?.pattern).toBe('src/utils/**');
       });
     });
 

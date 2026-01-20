@@ -154,10 +154,11 @@ function extractMarkdownLinks(content: string): { text: string; path: string }[]
   // eslint-disable-next-line security/detect-non-literal-regexp -- pattern.source is a constant defined above
   const pattern = new RegExp(MARKDOWN_LINK_PATTERN.source, 'g');
   while ((match = pattern.exec(content)) !== null) {
+    const text = match[1];
     const path = match[2];
     // Skip external URLs and anchor links
-    if (path && !path.startsWith('http') && !path.startsWith('#')) {
-      links.push({ text: match[1], path });
+    if (text && path && !path.startsWith('http') && !path.startsWith('#')) {
+      links.push({ text, path });
     }
   }
   return links;

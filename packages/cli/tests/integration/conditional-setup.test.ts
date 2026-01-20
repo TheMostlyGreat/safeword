@@ -398,11 +398,11 @@ describe('E2E: Conditional Setup - Existing Config Preservation', () => {
       expect(sessionStartHooks.length).toBeGreaterThanOrEqual(4);
 
       // Custom hook should be first (preserved)
-      expect(sessionStartHooks[0].hooks[0].command).toBe('echo "My custom hook"');
+      expect(sessionStartHooks[0]?.hooks[0]?.command).toBe('echo "My custom hook"');
 
       // Safeword hooks should be present
       const commands = sessionStartHooks.map(
-        (h: { hooks: { command: string }[] }) => h.hooks[0].command,
+        (h: { hooks: { command: string }[] }) => h.hooks[0]?.command,
       );
       expect(commands).toContain(
         'bun "$CLAUDE_PROJECT_DIR"/.safeword/hooks/session-verify-agents.ts',
