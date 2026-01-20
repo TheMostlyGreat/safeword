@@ -320,10 +320,10 @@ ${prettier.configEntry}
 
 // Cursor hooks configuration (.cursor/hooks.json format)
 // See: https://cursor.com/docs/agent/hooks
-// Note: Paths are relative to .cursor/hooks.json, so use ../ to reach project root
+// Note: Cursor runs hooks from the workspace root, so use ./ prefix
 export const CURSOR_HOOKS = {
-  afterFileEdit: [{ command: 'bun ../.safeword/hooks/cursor/after-file-edit.ts' }],
-  stop: [{ command: 'bun ../.safeword/hooks/cursor/stop.ts' }],
+  afterFileEdit: [{ command: 'bun ./.safeword/hooks/cursor/after-file-edit.ts' }],
+  stop: [{ command: 'bun ./.safeword/hooks/cursor/stop.ts' }],
 };
 
 // Claude Code hooks configuration (.claude/settings.json format)
