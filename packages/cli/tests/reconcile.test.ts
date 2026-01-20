@@ -40,6 +40,8 @@ const DEFAULT_PROJECT_TYPE = {
   existingMypyConfig: false,
   existingImportLinterConfig: false,
   existingGolangciConfig: undefined,
+  existingClippyConfig: undefined,
+  existingRustfmtConfig: undefined,
 };
 
 describe('Reconcile - Reconciliation Engine', () => {
@@ -91,10 +93,12 @@ describe('Reconcile - Reconciliation Engine', () => {
         javascript: boolean;
         python: boolean;
         golang: boolean;
+        rust: boolean;
       }) ?? {
         javascript: true,
         python: false,
         golang: false,
+        rust: false,
       },
     };
   }

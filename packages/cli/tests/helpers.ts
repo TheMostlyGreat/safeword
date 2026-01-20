@@ -656,7 +656,7 @@ export function runLintHook(projectDirectory: string, filePath: string): SpawnSy
 /**
  * Check if cargo is installed
  */
-export function isCargoInstalled(): boolean {
+function isCargoInstalled(): boolean {
   return isCommandAvailable('cargo');
 }
 
@@ -669,6 +669,17 @@ export function isClippyInstalled(): boolean {
     encoding: 'utf8',
   });
   return result.stdout?.includes('clippy') ?? false;
+}
+
+/**
+ * Check if rustfmt component is installed
+ */
+export function isRustfmtInstalled(): boolean {
+  if (!isCargoInstalled()) return false;
+  const result = spawnSync('rustup', ['component', 'list', '--installed'], {
+    encoding: 'utf8',
+  });
+  return result.stdout?.includes('rustfmt') ?? false;
 }
 
 /**

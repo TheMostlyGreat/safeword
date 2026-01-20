@@ -50,6 +50,35 @@ interface LanguagePack {
 
 **Severity:** Use `error` not `warn`. LLMs ignore warnings—only errors stop code generation.
 
+## Dual Config Architecture
+
+Safeword uses a **two-layer config strategy** to enforce strict rules on LLM-generated code while respecting human preferences:
+
+| Location                | Purpose            | Used By          | Strictness                           |
+| ----------------------- | ------------------ | ---------------- | ------------------------------------ |
+| `.safeword/{tool}.toml` | LLM enforcement    | Lint hook        | Strict (pedantic, complexity limits) |
+| `{tool}.toml` (root)    | Human/IDE defaults | Manual runs, IDE | Sensible defaults or user-customized |
+
+**How it works:**
+
+1. **Setup creates both:** `.safeword/` configs (strict) AND project root configs (sensible defaults)
+2. **Lint hook uses `.safeword/`:** `--config-path .safeword/{tool}.toml` enforces strict rules
+3. **Humans use root configs:** Manual `cargo clippy`, IDE integration, CI pipelines
+
+**Why this matters:**
+
+- LLM writes code → hook runs → strict rules catch issues ✓
+- Human runs linter manually → their preferences apply (not forced into pedantic mode)
+- User can customize root config without breaking LLM enforcement
+
+**User config preservation:** When users already have lint config (e.g., `[lints.clippy]` in Cargo.toml), skip entirely rather than merge:
+
+- TOML/YAML merging is complex and error-prone
+- Users who configure lints know what they want
+- `.safeword/` configs still enforce strict rules via the hook
+
+This separation means **hook enforcement is independent of project-wide config**. Even if a user has lax rules in their project config, the lint hook still applies strict rules to LLM-generated code.
+
 ## Pack File Structure
 
 Every language pack has three files in `src/packs/{lang}/`:
@@ -182,6 +211,14 @@ if ({LANG}_EXTENSIONS.has(extension)) {
 ```
 
 **Pattern:** `linter --fix` then `formatter`. Use `.nothrow().quiet()` to skip gracefully if tools not installed.
+
+**Graceful degradation:** The hook must NEVER crash, even on:
+
+- Syntax errors in source files (linter/formatter can't parse)
+- Non-existent files passed to the hook
+- Missing tools (not installed)
+
+All tool invocations use `.nothrow()` to ensure the hook completes regardless of tool exit codes.
 
 **Error output:** For tools that should show errors (ESLint, shellcheck), print stderr on failure:
 
@@ -327,7 +364,89 @@ describe('E2E: {Lang} Golden Path', () => {
   it.skipIf(!TOOL_AVAILABLE)('{tool} formats files', () => {...});
   it.skipIf(!TOOL_AVAILABLE)('post-tool-lint hook processes {lang} files', () => {...});
 });
+
+// Idempotency test - setup twice should be safe
+describe('E2E: {Lang} Setup Idempotency', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    create{Lang}Project(projectDirectory);
+    initGitRepo(projectDirectory);
+    // Run setup TWICE
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => removeTemporaryDirectory(projectDirectory));
+
+  it('does not duplicate config sections', () => {
+    const manifest = readTestFile(projectDirectory, '{manifest}');
+    const sectionCount = (manifest.match(/\[{config-section}\]/g) || []).length;
+    expect(sectionCount).toBe(1);
+  });
+});
+
+// Graceful hook degradation tests - add to golden path suite or create separate suite
+describe('E2E: {Lang} Lint Hook Graceful Handling', () => {
+  // ... standard beforeAll/afterAll with project setup ...
+
+  it('hook completes without crashing on syntax error file', () => {
+    writeTestFile(projectDirectory, 'src/bad.{ext}', 'invalid {lang} syntax {{{{');
+    const filePath = nodePath.join(projectDirectory, 'src/bad.{ext}');
+    expect(() => runLintHook(projectDirectory, filePath)).not.toThrow();
+  });
+
+  it('hook completes without crashing on non-existent file', () => {
+    const filePath = nodePath.join(projectDirectory, 'src/missing.{ext}');
+    expect(() => runLintHook(projectDirectory, filePath)).not.toThrow();
+  });
+});
+
+// Fallback test - hook works even without .safeword/ config
+describe('E2E: {Lang} Lint Hook Fallback', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    create{Lang}Project(projectDirectory);
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+    // Delete .safeword config AFTER setup to test fallback path
+    unlinkSync(nodePath.join(projectDirectory, '.safeword/{tool}.config'));
+  }, 180_000);
+
+  afterAll(() => removeTemporaryDirectory(projectDirectory));
+
+  it.skipIf(!TOOL_AVAILABLE)('formats files without safeword config', () => {
+    writeTestFile(projectDirectory, 'src/test.{ext}', 'unformatted code');
+    const filePath = nodePath.join(projectDirectory, 'src/test.{ext}');
+    runLintHook(projectDirectory, filePath);
+
+    // File should still be formatted (tool uses defaults)
+    const result = readTestFile(projectDirectory, 'src/test.{ext}');
+    expect(result).toContain('formatted output');
+  });
+});
 ```
+
+**Tip: Match Skip Conditions to What You're Testing**
+
+Use the correct availability check for the tool being tested:
+
+```typescript
+// ❌ Wrong: skips on clippy but test only uses rustfmt
+it.skipIf(!CLIPPY_AVAILABLE)('rustfmt formats files', () => {
+  spawnSync('rustfmt', [file]); // Only uses rustfmt!
+});
+
+// ✅ Correct: skip condition matches the tool being tested
+it.skipIf(!RUSTFMT_AVAILABLE)('rustfmt formats files', () => {
+  spawnSync('rustfmt', [file]);
+});
+```
+
+This matters when tools can be installed independently. Create separate `is{Tool}Installed()` helpers for each tool (linter vs formatter).
 
 **Tip: Violation Tests Must Use Actual Caught Violations**
 
@@ -738,8 +857,9 @@ Before shipping a new language pack, verify:
 - [ ] `setup()` creates valid tool config
 - [ ] Hook lints files with correct extension
 - [ ] Hook skips gracefully if tools not installed
+- [ ] Hook handles edge cases without crashing (syntax errors, missing files)
 
-**Testing (8 test areas):**
+**Testing (10 test areas):**
 
 - [ ] Golden path: config created, tool runs, violations detected, formatting works, hook works
 - [ ] Tooling validation: type checker catches errors (if applicable)
@@ -749,10 +869,12 @@ Before shipping a new language pack, verify:
 - [ ] Add language: upgrade path installs pack when manifest added
 - [ ] Workspace setup: root config + member inheritance (if applicable)
 - [ ] Config preservation: existing user config not overwritten
+- [ ] Idempotency: running setup twice doesn't duplicate config sections
+- [ ] Fallback: hook works when .safeword/ config is missing
 
 **Test Helpers:**
 
-- [ ] `is{Tool}Installed()` for each tool
+- [ ] `is{Tool}Installed()` for each tool separately (e.g., `isClippyInstalled()` AND `isRustfmtInstalled()`)
 - [ ] `create{Lang}Project(dir, options?)` with package manager variants
 - [ ] `run{Linter}(dir, file)` for linter execution (if applicable)
 

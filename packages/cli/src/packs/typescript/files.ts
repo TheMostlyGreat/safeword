@@ -77,7 +77,7 @@ function addKnipIgnoreDependencies(
  */
 function getKnipConfig(ctx: ProjectContext): object {
   const config = {
-    ignore: ['.safeword/**'],
+    ignore: ['.safeword/**', '.safeword-project/**'],
     ignoreDependencies: ['safeword', 'dependency-cruiser'],
   };
 

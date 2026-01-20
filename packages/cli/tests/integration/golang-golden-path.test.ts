@@ -6,12 +6,14 @@
  * - golangci-lint runs and catches issues (when installed)
  * - golangci-lint fmt formats Go files (when installed)
  * - Post-tool lint hook processes Go files (when golangci-lint installed)
+ * - Lint hook handles edge cases gracefully (syntax errors, missing files)
  *
+ * Also includes idempotency and fallback tests (separate project setups).
  * Note: Tests requiring golangci-lint are skipped if not installed.
- * Uses a single project setup (expensive) shared across all tests.
  */
 
 import { execSync, spawnSync } from 'node:child_process';
+import { unlinkSync } from 'node:fs';
 import nodePath from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -138,5 +140,109 @@ func hookTest(){println("test")}`,
     // File should be formatted by golangci-lint fmt
     const result = readTestFile(projectDirectory, 'hook-test.go');
     expect(result).toContain('func hookTest() {');
+  });
+
+  describe('Lint Hook Graceful Handling', () => {
+    it('hook completes without crashing on syntax error file', () => {
+      writeTestFile(projectDirectory, 'syntax-error.go', 'package main\nfunc broken({{{{ invalid');
+      const filePath = nodePath.join(projectDirectory, 'syntax-error.go');
+
+      // Should not throw - hook uses .nothrow()
+      expect(() => runLintHook(projectDirectory, filePath)).not.toThrow();
+    });
+
+    it('hook completes without crashing on non-existent file', () => {
+      const filePath = nodePath.join(projectDirectory, 'does-not-exist.go');
+
+      // Should not throw - hook uses .nothrow()
+      expect(() => runLintHook(projectDirectory, filePath)).not.toThrow();
+    });
+  });
+});
+
+// =============================================================================
+// Idempotency Test - Setup twice should be safe
+// =============================================================================
+
+describe('E2E: Go Setup Idempotency', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createGoProject(projectDirectory);
+    initGitRepo(projectDirectory);
+    // Run setup TWICE
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('.golangci.yml is valid after running setup twice', () => {
+    const config = readTestFile(projectDirectory, '.golangci.yml');
+    expect(config).toContain('version: "2"');
+    expect(config).toContain('linters:');
+  });
+
+  it.skipIf(!GOLANGCI_LINT_AVAILABLE)('golangci-lint still works after running setup twice', () => {
+    // main.go from createGoProject should still be valid
+    const result = spawnSync('golangci-lint', ['run', 'main.go'], {
+      cwd: projectDirectory,
+      encoding: 'utf8',
+    });
+    expect(result.status).toBe(0);
+  });
+
+  it('config files remain valid', () => {
+    expect(fileExists(projectDirectory, '.golangci.yml')).toBe(true);
+    expect(fileExists(projectDirectory, '.safeword/.golangci.yml')).toBe(true);
+  });
+});
+
+// =============================================================================
+// Fallback Test - Hook works without .safeword/ config
+// =============================================================================
+
+describe('E2E: Go Lint Hook Fallback', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createGoProject(projectDirectory);
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+
+    // Delete .safeword/.golangci.yml AFTER setup to test fallback path
+    const golangciConfig = nodePath.join(projectDirectory, '.safeword/.golangci.yml');
+    if (fileExists(projectDirectory, '.safeword/.golangci.yml')) {
+      unlinkSync(golangciConfig);
+    }
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it.skipIf(!GOLANGCI_LINT_AVAILABLE)('lint hook formats files without safeword config', () => {
+    writeTestFile(
+      projectDirectory,
+      'fallback.go',
+      `package main
+func fallback(){println("test")}`,
+    );
+    const filePath = nodePath.join(projectDirectory, 'fallback.go');
+
+    // Hook should use fallback path (golangci-lint without --config)
+    runLintHook(projectDirectory, filePath);
+
+    // File should still be formatted by golangci-lint fmt
+    const result = readTestFile(projectDirectory, 'fallback.go');
+    expect(result).toContain('func fallback() {');
   });
 });

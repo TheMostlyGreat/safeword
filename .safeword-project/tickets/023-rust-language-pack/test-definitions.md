@@ -43,13 +43,22 @@ And member crates inherit via lints.workspace = true
 
 ## Preservation Scenarios
 
-### [x] Scenario 4: Existing clippy.toml is preserved
+### [x] Scenario 4a: Existing clippy.toml is preserved
 
 ```gherkin
 Given a Rust project with existing clippy.toml at project root
 When I run `safeword setup`
 Then project-root clippy.toml is NOT overwritten
 And .safeword/clippy.toml IS created (for hooks)
+```
+
+### [x] Scenario 4b: Existing rustfmt.toml is preserved
+
+```gherkin
+Given a Rust project with existing rustfmt.toml at project root
+When I run `safeword setup`
+Then project-root rustfmt.toml is NOT overwritten
+And .safeword/rustfmt.toml IS created (for hooks)
 ```
 
 ### [x] Scenario 5: Existing Cargo.toml lints are skipped entirely (user owns)
@@ -91,7 +100,7 @@ And rustfmt.toml is created (Rust pack)
 And both packs coexist without conflict
 ```
 
-### [ ] Scenario 8: Add Rust to existing TypeScript project
+### [x] Scenario 8: Add Rust to existing TypeScript project
 
 ```gherkin
 Given an existing safeword TypeScript project
@@ -110,11 +119,12 @@ And TypeScript configuration remains intact
 
 ```gherkin
 Given a Rust project with safeword setup complete
-And clippy and rustfmt are installed
+And rustfmt is installed
 When the lint hook is triggered for a .rs file
-Then cargo clippy --fix runs on the file's package
-And rustfmt formats the file using .safeword/rustfmt.toml
+Then rustfmt formats the file using .safeword/rustfmt.toml
 ```
+
+**Note:** Clippy package targeting is deferred (see Scenario 10). The hook only runs rustfmt for now.
 
 ### [ ] Scenario 10: Lint hook uses package targeting in workspaces
 
@@ -126,14 +136,25 @@ Then cargo clippy runs with -p core (not entire workspace)
 And rustfmt formats only the changed file
 ```
 
-### [ ] Scenario 11: Lint hook gracefully skips when tools missing
+### [x] Scenario 11: Lint hook gracefully handles edge cases
 
 ```gherkin
 Given a Rust project with safeword setup complete
-And clippy is NOT installed (rustup component not added)
+When the lint hook is triggered for a .rs file with syntax errors
+Then hook completes without crashing (uses .nothrow())
+And no blocking error thrown
+```
+
+**Note:** Tests verify graceful handling of syntax errors and missing files. The hook uses `.nothrow()` internally.
+
+### [x] Scenario 11b: Lint hook fallback when .safeword config missing
+
+```gherkin
+Given a Rust project with safeword setup complete
+And .safeword/rustfmt.toml is deleted
 When the lint hook is triggered for a .rs file
-Then hook completes without error (nothrow)
-And no crash or blocking error shown
+Then rustfmt runs without --config-path (uses defaults)
+And file is still formatted correctly
 ```
 
 ---
@@ -149,6 +170,20 @@ Then Rust pack is installed
 And NO package.json is created
 And NO eslint.config.mjs is created
 And .safeword directory is created with Rust configs
+```
+
+---
+
+## Idempotency Scenarios
+
+### [x] Scenario 16: Setup is idempotent (running twice is safe)
+
+```gherkin
+Given a Rust project with safeword setup complete
+When I run `safeword setup` again
+Then Cargo.toml has exactly ONE [lints.clippy] section (not duplicated)
+And Cargo.toml has exactly ONE [lints.rust] section (not duplicated)
+And config files remain valid
 ```
 
 ---

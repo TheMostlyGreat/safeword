@@ -121,7 +121,7 @@ function expandMemberPattern(cwd: string, pattern: string): string[] {
 export function parseWorkspaceMembers(cargoContent: string, cwd: string): string[] {
   // Match members = [...] with potential multi-line content
   const membersMatch = /\[workspace\][^[]*members\s*=\s*\[([\s\S]*?)\]/.exec(cargoContent);
-  if (!membersMatch) return [];
+  if (!membersMatch?.[1]) return [];
 
   const membersBlock = membersMatch[1];
   // Extract quoted strings
@@ -129,7 +129,9 @@ export function parseWorkspaceMembers(cargoContent: string, cwd: string): string
   const stringRegex = /"([^"]+)"/g;
   let match: RegExpExecArray | null;
   while ((match = stringRegex.exec(membersBlock)) !== null) {
-    rawMembers.push(match[1]);
+    if (match[1]) {
+      rawMembers.push(match[1]);
+    }
   }
 
   // Expand glob patterns

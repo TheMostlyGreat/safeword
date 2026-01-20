@@ -26,6 +26,7 @@ import {
   fileExists,
   initGitRepo,
   isClippyInstalled,
+  isRustfmtInstalled,
   readTestFile,
   removeTemporaryDirectory,
   runCli,
@@ -34,6 +35,7 @@ import {
 } from '../helpers';
 
 const CLIPPY_AVAILABLE = isClippyInstalled();
+const RUSTFMT_AVAILABLE = isRustfmtInstalled();
 
 describe('E2E: Rust Golden Path', () => {
   let projectDirectory: string;
@@ -141,7 +143,7 @@ describe('E2E: Rust Golden Path', () => {
     expect(result.stdout + result.stderr).toMatch(/unwrap_used|unwrap/i);
   });
 
-  it.skipIf(!CLIPPY_AVAILABLE)('rustfmt formats files', () => {
+  it.skipIf(!RUSTFMT_AVAILABLE)('rustfmt formats files', () => {
     writeTestFile(projectDirectory, 'src/ugly.rs', `fn main(){println!("no spaces")}`);
 
     spawnSync('rustfmt', ['src/ugly.rs'], { cwd: projectDirectory });
@@ -150,7 +152,7 @@ describe('E2E: Rust Golden Path', () => {
     expect(formatted).toContain('fn main() {');
   });
 
-  it.skipIf(!CLIPPY_AVAILABLE)('lint hook processes .rs files', () => {
+  it.skipIf(!RUSTFMT_AVAILABLE)('lint hook processes .rs files', () => {
     const filePath = nodePath.join(projectDirectory, 'src/hook-test.rs');
     writeTestFile(projectDirectory, 'src/hook-test.rs', `fn hook_test(){println!("test")}`);
 
@@ -198,6 +200,48 @@ cognitive-complexity-threshold = 25
     const config = readTestFile(projectDirectory, '.safeword/clippy.toml');
     // Safeword config has strict defaults
     expect(config).toContain('cognitive-complexity-threshold = 10');
+  });
+});
+
+// Scenario 4b: Existing rustfmt.toml is preserved
+describe('E2E: Rust Rustfmt Config Preservation', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustProject(projectDirectory);
+    // Create existing rustfmt.toml BEFORE setup
+    writeTestFile(
+      projectDirectory,
+      'rustfmt.toml',
+      `# My custom rustfmt config
+max_width = 120
+tab_spaces = 4
+`,
+    );
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('preserves existing rustfmt.toml at project root', () => {
+    const config = readTestFile(projectDirectory, 'rustfmt.toml');
+    // Should keep user's custom settings
+    expect(config).toContain('max_width = 120');
+    expect(config).toContain('tab_spaces = 4');
+    expect(config).toContain('My custom rustfmt config');
+  });
+
+  it('creates .safeword/rustfmt.toml for hooks', () => {
+    expect(fileExists(projectDirectory, '.safeword/rustfmt.toml')).toBe(true);
+    const config = readTestFile(projectDirectory, '.safeword/rustfmt.toml');
+    // Safeword config has strict defaults
+    expect(config).toContain('max_width = 100');
   });
 });
 
@@ -515,7 +559,7 @@ describe('E2E: Rust Lint Hook Fallback', () => {
     }
   });
 
-  it.skipIf(!CLIPPY_AVAILABLE)('lint hook formats .rs files without safeword config', () => {
+  it.skipIf(!RUSTFMT_AVAILABLE)('lint hook formats .rs files without safeword config', () => {
     const filePath = nodePath.join(projectDirectory, 'src/fallback-test.rs');
     writeTestFile(projectDirectory, 'src/fallback-test.rs', `fn fallback_test(){println!("test")}`);
 
@@ -525,5 +569,156 @@ describe('E2E: Rust Lint Hook Fallback', () => {
     // File should still be formatted (rustfmt works without config)
     const result = readTestFile(projectDirectory, 'src/fallback-test.rs');
     expect(result).toContain('fn fallback_test() {');
+  });
+});
+
+// Scenario 11: Lint hook gracefully handles edge cases (doesn't crash)
+describe('E2E: Rust Lint Hook Graceful Handling', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustProject(projectDirectory);
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('lint hook completes without crashing on syntax error file', () => {
+    // Create a file with invalid Rust syntax
+    writeTestFile(projectDirectory, 'src/bad-syntax.rs', `fn broken({{{{ not valid rust`);
+
+    const filePath = nodePath.join(projectDirectory, 'src/bad-syntax.rs');
+
+    // Hook should complete without throwing (uses .nothrow())
+    // This verifies graceful degradation - even if rustfmt fails to parse, hook doesn't crash
+    expect(() => runLintHook(projectDirectory, filePath)).not.toThrow();
+  });
+
+  it('lint hook completes without crashing on non-existent file', () => {
+    const filePath = nodePath.join(projectDirectory, 'src/does-not-exist.rs');
+
+    // Hook should complete without throwing
+    expect(() => runLintHook(projectDirectory, filePath)).not.toThrow();
+  });
+});
+
+// Scenario 8: Add Rust to existing TypeScript project
+describe('E2E: Add Rust to Existing TypeScript Project', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    // Create TypeScript-only project first
+    writeTestFile(
+      projectDirectory,
+      'package.json',
+      JSON.stringify({
+        name: 'ts-only-project',
+        version: '0.1.0',
+        devDependencies: { typescript: '^5.0.0' },
+      }),
+    );
+    initGitRepo(projectDirectory);
+    // Initial setup with TypeScript only
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('starts with only TypeScript pack installed', () => {
+    expect(fileExists(projectDirectory, 'eslint.config.mjs')).toBe(true);
+    expect(fileExists(projectDirectory, 'Cargo.toml')).toBe(false);
+    expect(fileExists(projectDirectory, 'clippy.toml')).toBe(false);
+  });
+
+  describe('after adding Cargo.toml and running upgrade', () => {
+    beforeAll(async () => {
+      // Add Rust to the project
+      createRustProject(projectDirectory);
+
+      // Run upgrade to detect and install Rust pack
+      // Note: upgrade command doesn't have --yes flag
+      await runCli(['upgrade'], { cwd: projectDirectory });
+    }, 60_000);
+
+    it('installs Rust pack configs', () => {
+      expect(fileExists(projectDirectory, 'clippy.toml')).toBe(true);
+      expect(fileExists(projectDirectory, 'rustfmt.toml')).toBe(true);
+      expect(fileExists(projectDirectory, '.safeword/clippy.toml')).toBe(true);
+      expect(fileExists(projectDirectory, '.safeword/rustfmt.toml')).toBe(true);
+    });
+
+    it('adds lints to Cargo.toml', () => {
+      const cargoToml = readTestFile(projectDirectory, 'Cargo.toml');
+      expect(cargoToml).toContain('[lints.clippy]');
+      expect(cargoToml).toContain('pedantic');
+    });
+
+    it('ESLint config remains intact', () => {
+      expect(fileExists(projectDirectory, 'eslint.config.mjs')).toBe(true);
+      expect(fileExists(projectDirectory, '.safeword/eslint.config.mjs')).toBe(true);
+    });
+
+    it.skipIf(!RUSTFMT_AVAILABLE)('rustfmt works on Rust files', () => {
+      writeTestFile(projectDirectory, 'src/test.rs', `fn test(){println!("test")}`);
+
+      const filePath = nodePath.join(projectDirectory, 'src/test.rs');
+      runLintHook(projectDirectory, filePath);
+
+      const result = readTestFile(projectDirectory, 'src/test.rs');
+      expect(result).toContain('fn test() {');
+    });
+  });
+});
+
+// Test idempotency: running setup twice should be safe
+describe('E2E: Rust Setup Idempotency', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustProject(projectDirectory);
+    initGitRepo(projectDirectory);
+    // Run setup TWICE
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it('does not duplicate [lints.clippy] section', () => {
+    const cargoToml = readTestFile(projectDirectory, 'Cargo.toml');
+    // Count occurrences of [lints.clippy]
+    const lintClippyCount = (cargoToml.match(/\[lints\.clippy\]/g) || []).length;
+    expect(lintClippyCount).toBe(1);
+  });
+
+  it('does not duplicate [lints.rust] section', () => {
+    const cargoToml = readTestFile(projectDirectory, 'Cargo.toml');
+    // Count occurrences of [lints.rust]
+    const lintRustCount = (cargoToml.match(/\[lints\.rust\]/g) || []).length;
+    expect(lintRustCount).toBe(1);
+  });
+
+  it('config files remain valid', () => {
+    // Configs should still exist and be valid
+    expect(fileExists(projectDirectory, 'clippy.toml')).toBe(true);
+    expect(fileExists(projectDirectory, 'rustfmt.toml')).toBe(true);
+    expect(fileExists(projectDirectory, '.safeword/clippy.toml')).toBe(true);
+    expect(fileExists(projectDirectory, '.safeword/rustfmt.toml')).toBe(true);
   });
 });
