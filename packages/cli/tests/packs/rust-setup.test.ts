@@ -7,7 +7,11 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { detectWorkspaceType, parseWorkspaceMembers } from '../../src/packs/rust/setup.js';
+import {
+  detectRustPackage,
+  detectWorkspaceType,
+  parseWorkspaceMembers,
+} from '../../src/packs/rust/setup.js';
 import { createTemporaryDirectory, removeTemporaryDirectory, writeTestFile } from '../helpers.js';
 
 describe('detectWorkspaceType', () => {
@@ -210,5 +214,145 @@ members = ["nonexistent/*"]
     const members = parseWorkspaceMembers(cargoContent, testDirectory);
 
     expect(members).toEqual([]);
+  });
+});
+
+describe('detectRustPackage', () => {
+  let testDirectory: string;
+
+  beforeEach(() => {
+    testDirectory = createTemporaryDirectory();
+  });
+
+  afterEach(() => {
+    if (testDirectory) {
+      removeTemporaryDirectory(testDirectory);
+    }
+  });
+
+  it('returns package name for file in workspace member crate (Scenario 14)', () => {
+    // Given a workspace with crates/core/src/lib.rs
+    writeTestFile(
+      testDirectory,
+      'Cargo.toml',
+      `[workspace]
+members = ["crates/core", "crates/cli"]
+`,
+    );
+    writeTestFile(
+      testDirectory,
+      'crates/core/Cargo.toml',
+      `[package]
+name = "my-core"
+version = "0.1.0"
+`,
+    );
+    writeTestFile(testDirectory, 'crates/core/src/lib.rs', '// Rust code');
+
+    // When detectRustPackage is called for the file
+    const filePath = `${testDirectory}/crates/core/src/lib.rs`;
+    const packageName = detectRustPackage(filePath, testDirectory);
+
+    // Then it returns "my-core" (the package name)
+    expect(packageName).toBe('my-core');
+  });
+
+  it('returns undefined for file at workspace root without [package] (Scenario 15)', () => {
+    // Given a workspace with build.rs at root (no [package] section)
+    writeTestFile(
+      testDirectory,
+      'Cargo.toml',
+      `[workspace]
+members = ["crates/core"]
+`,
+    );
+    writeTestFile(testDirectory, 'build.rs', '// Build script');
+
+    // When detectRustPackage is called for the root file
+    const filePath = `${testDirectory}/build.rs`;
+    const packageName = detectRustPackage(filePath, testDirectory);
+
+    // Then it returns undefined (triggers whole-project clippy)
+    expect(packageName).toBeUndefined();
+  });
+
+  it('returns package name for single-crate project', () => {
+    // Given a single-crate project
+    writeTestFile(
+      testDirectory,
+      'Cargo.toml',
+      `[package]
+name = "my-app"
+version = "0.1.0"
+`,
+    );
+    writeTestFile(testDirectory, 'src/main.rs', '// Main');
+
+    // When detectRustPackage is called
+    const filePath = `${testDirectory}/src/main.rs`;
+    const packageName = detectRustPackage(filePath, testDirectory);
+
+    // Then it returns the package name
+    expect(packageName).toBe('my-app');
+  });
+
+  it('returns package name for root-package workspace (has both [workspace] and [package])', () => {
+    // Given a root-package workspace
+    writeTestFile(
+      testDirectory,
+      'Cargo.toml',
+      `[package]
+name = "workspace-root"
+version = "0.1.0"
+
+[workspace]
+members = ["crates/lib"]
+`,
+    );
+    writeTestFile(testDirectory, 'src/lib.rs', '// Root lib');
+
+    // When detectRustPackage is called for root src file
+    const filePath = `${testDirectory}/src/lib.rs`;
+    const packageName = detectRustPackage(filePath, testDirectory);
+
+    // Then it returns the root package name
+    expect(packageName).toBe('workspace-root');
+  });
+
+  it('handles deeply nested file paths', () => {
+    // Given a crate with deeply nested source file
+    writeTestFile(
+      testDirectory,
+      'Cargo.toml',
+      `[package]
+name = "deep-crate"
+version = "0.1.0"
+`,
+    );
+    writeTestFile(testDirectory, 'src/utils/helpers/mod.rs', '// Helpers');
+
+    // When detectRustPackage is called for deeply nested file
+    const filePath = `${testDirectory}/src/utils/helpers/mod.rs`;
+    const packageName = detectRustPackage(filePath, testDirectory);
+
+    // Then it finds the package
+    expect(packageName).toBe('deep-crate');
+  });
+
+  it('returns undefined when Cargo.toml has no name field', () => {
+    // Given a malformed Cargo.toml without name
+    writeTestFile(
+      testDirectory,
+      'Cargo.toml',
+      `[package]
+version = "0.1.0"
+`,
+    );
+    writeTestFile(testDirectory, 'src/lib.rs', '// Lib');
+
+    const filePath = `${testDirectory}/src/lib.rs`;
+    const packageName = detectRustPackage(filePath, testDirectory);
+
+    expect(packageName).toBeUndefined();
   });
 });

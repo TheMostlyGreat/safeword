@@ -50,6 +50,46 @@ unsafe_code = "deny"
 `;
 
 /**
+ * Detect the Rust package name for a given file path.
+ *
+ * Walks up from the file's directory to find the nearest Cargo.toml
+ * with a [package] section, then extracts the package name.
+ *
+ * @param filePath - Absolute path to a .rs file
+ * @param cwd - Project root directory (to stop walking)
+ * @returns Package name, or undefined if not found
+ */
+export function detectRustPackage(filePath: string, cwd: string): string | undefined {
+  // Start from the file's directory and walk up
+  let currentDirectory = nodePath.dirname(filePath);
+
+  // Normalize paths for comparison
+  const normalizedCwd = nodePath.resolve(cwd);
+
+  while (currentDirectory.startsWith(normalizedCwd)) {
+    const cargoPath = nodePath.join(currentDirectory, 'Cargo.toml');
+
+    if (existsSync(cargoPath)) {
+      const content = readFileSync(cargoPath, 'utf8');
+
+      // Check if this Cargo.toml has a [package] section
+      if (content.includes('[package]')) {
+        // Extract package name
+        const nameMatch = /\[package\][^[]*name\s*=\s*"([^"]+)"/.exec(content);
+        return nameMatch?.[1];
+      }
+    }
+
+    // Move up one directory
+    const parentDirectory = nodePath.dirname(currentDirectory);
+    if (parentDirectory === currentDirectory) break; // Reached filesystem root
+    currentDirectory = parentDirectory;
+  }
+
+  return undefined;
+}
+
+/**
  * Detect workspace type from Cargo.toml content
  */
 export function detectWorkspaceType(
