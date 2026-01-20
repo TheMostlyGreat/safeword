@@ -22,6 +22,7 @@ const ignores = [
   'packages/cli/templates/', // Template files copied to customer projects - not part of CLI build
   '**/.dependency-cruiser.cjs', // CommonJS config file
   'packages/cli/scripts/*.js', // Node.js scripts with CommonJS globals
+  'scripts/', // Monorepo dev scripts - standalone Bun scripts not in any tsconfig
 ];
 
 // Start with ignores + safeword TypeScript config
