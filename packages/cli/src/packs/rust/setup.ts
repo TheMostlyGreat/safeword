@@ -34,6 +34,9 @@ unsafe_code = "deny"
  * Regex to extract package name from Cargo.toml.
  * Matches: [package] ... name = "package-name"
  * Captures the package name in group 1.
+ *
+ * Note: This regex is also defined in templates/hooks/lib/lint.ts because
+ * template files must be self-contained (they're copied to user projects).
  */
 const CARGO_PACKAGE_NAME_REGEX = /\[package\][^[]*name\s*=\s*"([^"]+)"/;
 
