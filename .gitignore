@@ -14,8 +14,16 @@ eval-results.json
 # Safeword - Local cache and nested installs
 .safeword/.update-cache.json
 packages/*/.safeword/
+packages/*/.safeword-project/
 packages/*/.claude/
 packages/*/.cursor/
+packages/*/.dependency-cruiser*
+packages/*/.jscpd.json
+packages/*/.mcp.json
+packages/*/.prettierrc
+packages/*/CLAUDE.md
+packages/*/AGENTS.md
+packages/*/ARCHITECTURE.md
 
 # Claude Code - Personal settings
 .claude/settings.local.json
