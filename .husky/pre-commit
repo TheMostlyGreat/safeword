@@ -1,1 +1,9 @@
+# Fail if nested .safeword/ directories exist (indicates setup ran from wrong directory)
+if find packages -type d -name ".safeword" 2> /dev/null | grep -q .; then
+  echo "ERROR: Found nested .safeword/ directory in packages/"
+  echo "This happens when 'safeword setup' runs from the wrong directory."
+  echo "Fix: rm -rf packages/*/.safeword"
+  exit 1
+fi
+
 lint-staged
