@@ -11,8 +11,11 @@ examples/
 # Test artifacts
 eval-results.json
 
-# Safeword - Local cache
+# Safeword - Local cache and nested installs
 .safeword/.update-cache.json
+packages/*/.safeword/
+packages/*/.claude/
+packages/*/.cursor/
 
 # Claude Code - Personal settings
 .claude/settings.local.json
