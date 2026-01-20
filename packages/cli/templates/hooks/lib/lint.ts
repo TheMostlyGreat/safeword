@@ -58,6 +58,16 @@ function hasConfig(path: string): boolean {
 }
 
 /**
+ * Regex to extract package name from Cargo.toml.
+ * Matches: [package] ... name = "package-name"
+ * Captures the package name in group 1.
+ *
+ * Note: This is intentionally duplicated from src/packs/rust/setup.ts because
+ * this lint.ts template is copied to user projects and cannot import from safeword.
+ */
+const CARGO_PACKAGE_NAME_REGEX = /\[package\][^[]*name\s*=\s*"([^"]+)"/;
+
+/**
  * Detect the Rust package name for a file by walking up directories.
  * Finds the nearest Cargo.toml with a [package] section and extracts the name.
  * Returns undefined for virtual workspace roots or files outside any package.
@@ -72,7 +82,7 @@ function detectRustPackage(filePath: string): string | undefined {
       const content = readFileSync(cargoPath, 'utf8');
       // Only return package name if this Cargo.toml has a [package] section
       if (content.includes('[package]')) {
-        const nameMatch = /\[package\][^[]*name\s*=\s*"([^"]+)"/.exec(content);
+        const nameMatch = CARGO_PACKAGE_NAME_REGEX.exec(content);
         return nameMatch?.[1];
       }
     }
