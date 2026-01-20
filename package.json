@@ -29,7 +29,7 @@
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
-    "knip": "5.81.0",
+    "knip": "^5.82.1",
     "lint-staged": "16",
     "markdownlint-cli2": "^0.20.0",
     "prettier": "3.8.0",
@@ -58,8 +58,8 @@
     ]
   },
   "dependencies": {
-    "eslint-plugin-jsdoc": "62",
-    "typescript-eslint": "8.53.0"
+    "eslint-plugin-jsdoc": "^62.2.0",
+    "typescript-eslint": "^8.53.1"
   },
   "overrides": {
     "zod-validation-error": "^4.0.0"
