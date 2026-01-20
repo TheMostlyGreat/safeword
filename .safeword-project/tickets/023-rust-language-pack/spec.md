@@ -1,0 +1,1159 @@
+# Rust Language Pack Specification
+
+Implementation spec for adding Rust support to safeword.
+
+## Rust Tooling Overview
+
+| Tool        | Purpose                        | Config                                    |
+| ----------- | ------------------------------ | ----------------------------------------- |
+| **Clippy**  | Linter (500+ lints)            | `clippy.toml` + `[lints.clippy]` in Cargo |
+| **rustfmt** | Formatter (strict gofmt-style) | `rustfmt.toml`                            |
+
+**Key insight:** Rust differs from Go in configuration:
+
+- Two separate tools: Clippy (linting) and rustfmt (formatting)
+- Two config files for linting: `clippy.toml` (thresholds) + `Cargo.toml` (lint levels)
+- Tools bundled with Rust toolchain (`rustup component add clippy rustfmt`)
+
+---
+
+## Clippy Philosophy
+
+Clippy has four lint categories:
+
+| Category              | Default  | Safeword Approach                   |
+| --------------------- | -------- | ----------------------------------- |
+| `clippy::correctness` | **deny** | Keep as-is (aborts on wrong code)   |
+| `clippy::all`         | warn     | Keep as-is (default warnings)       |
+| `clippy::pedantic`    | allow    | **Enable as warn** (stricter rules) |
+| `clippy::restriction` | allow    | Cherry-pick useful lints            |
+
+**Why pedantic?** Per the spec philosophy: "Enable ALL rules by default, then selectively disable noisy ones." Pedantic gives us strictness without the contradictory lints in `restriction`.
+
+**Why cherry-pick restriction?** The restriction category explicitly warns against enabling as a whole. We pick lints that prevent LLM-generated antipatterns:
+
+- `clippy::unwrap_used` - Force explicit error handling
+- `clippy::expect_used` - Same as above
+- `clippy::todo` - No incomplete code
+- `clippy::panic` - No panic in library code (enable per-project)
+
+---
+
+## Integration Points
+
+### 1. Pack File (`src/packs/rust/index.ts`)
+
+```typescript
+import nodePath from 'node:path';
+
+import { exists } from '../../utils/fs.js';
+import type { LanguagePack, SetupContext, SetupResult } from '../types.js';
+import { setupRustTooling } from './setup.js';
+
+export const rustPack: LanguagePack = {
+  id: 'rust',
+  name: 'Rust',
+  extensions: ['.rs'],
+
+  detect(cwd: string): boolean {
+    return exists(nodePath.join(cwd, 'Cargo.toml'));
+  },
+
+  setup(_cwd: string, _ctx: SetupContext): SetupResult {
+    // Config files created by schema.ts (managedFiles/ownedFiles)
+    return setupRustTooling();
+  },
+};
+```
+
+### 2. Registry (`src/packs/registry.ts`)
+
+```typescript
+import { rustPack } from './rust/index.js';
+
+export const LANGUAGE_PACKS: Record<string, LanguagePack> = {
+  // ...existing
+  rust: rustPack,
+};
+```
+
+### 3. Lint Hook (`templates/hooks/lib/lint.ts`)
+
+```typescript
+const RUST_EXTENSIONS = new Set(['rs']);
+const SAFEWORD_CLIPPY_DIR = `${projectDir}/.safeword`;
+const SAFEWORD_RUSTFMT = `${projectDir}/.safeword/rustfmt.toml`;
+
+// In lintFile():
+if (RUST_EXTENSIONS.has(extension)) {
+  const hasRustConfig = await ensurePackInstalled('Rust', `${SAFEWORD_CLIPPY_DIR}/clippy.toml`);
+
+  // Detect package for workspace support
+  const pkg = detectRustPackage(file);
+  const clippyArgs = pkg ? ['-p', pkg] : [];
+
+  // Clippy: Package-level (no file targeting available)
+  // Uses CLIPPY_CONF_DIR env var to point to .safeword/clippy.toml
+  // See: https://doc.rust-lang.org/clippy/configuration.html
+  if (hasRustConfig) {
+    await $`CLIPPY_CONF_DIR=${SAFEWORD_CLIPPY_DIR} cargo clippy ${clippyArgs} --fix --allow-dirty --allow-staged`
+      .nothrow()
+      .quiet();
+  } else {
+    // Fallback: uses project-level clippy.toml (if exists) or defaults
+    await $`cargo clippy ${clippyArgs} --fix --allow-dirty --allow-staged`.nothrow().quiet();
+  }
+
+  // rustfmt: File-level (fast and precise)
+  // Uses --config-path to point to .safeword/rustfmt.toml
+  if (hasConfig(SAFEWORD_RUSTFMT)) {
+    await $`rustfmt --config-path ${SAFEWORD_RUSTFMT} ${file}`.nothrow().quiet();
+  } else {
+    await $`rustfmt ${file}`.nothrow().quiet();
+  }
+  return;
+}
+```
+
+**Key differences from other languages:**
+
+- **Clippy:** Package-level, not file-level (uses `-p <pkg>` for workspace targeting)
+- **Clippy config:** Uses `CLIPPY_CONF_DIR` env var (no `--config` flag exists)
+- **rustfmt:** File-level via `rustfmt --config-path <config> <file>`
+- **Config:** clippy.toml for thresholds + Cargo.toml for lint levels (dual config)
+
+### 4. Setup File (`src/packs/rust/setup.ts`)
+
+```typescript
+import type { SetupResult } from '../types.js';
+
+/**
+ * Set up Rust tooling configuration.
+ *
+ * Note: clippy.toml and rustfmt.toml are created by schema.ts managedFiles.
+ * This function exists for future Rust-specific setup logic.
+ *
+ * @returns Empty result (schema handles file creation)
+ */
+export function setupRustTooling(): SetupResult {
+  // Config files created by schema.ts managedFiles/ownedFiles
+  return { files: [] };
+}
+```
+
+---
+
+## Config Generation
+
+### `clippy.toml` Template
+
+```toml
+# Generated by safeword - DO NOT EDIT
+# Configure lint levels in Cargo.toml [lints.clippy] section
+
+# Complexity constraints (match ESLint/ruff philosophy)
+cognitive-complexity-threshold = 10
+too-many-arguments-threshold = 5
+
+# Stricter thresholds for LLM code
+too-many-lines-threshold = 100
+type-complexity-threshold = 250
+```
+
+**Intentionally stricter than Clippy defaults:**
+
+| Option                           | Clippy Default | Safeword | Rationale                     |
+| -------------------------------- | -------------- | -------- | ----------------------------- |
+| `cognitive-complexity-threshold` | 25             | **10**   | Match ESLint `complexity: 10` |
+| `too-many-arguments-threshold`   | 7              | **5**    | Match ESLint `max-params: 5`  |
+| `too-many-lines-threshold`       | 100            | 100      | Same as default               |
+| `type-complexity-threshold`      | 250            | 250      | Same as default               |
+
+LLM-generated code tends toward complexity. Stricter thresholds catch this early.
+
+### `rustfmt.toml` Template
+
+```toml
+# Generated by safeword - DO NOT EDIT
+# Uses only stable options (works on all Rust toolchains)
+
+edition = "2021"
+max_width = 100
+tab_spaces = 4
+newline_style = "Unix"
+reorder_imports = true
+use_field_init_shorthand = true
+```
+
+**Why stable-only?**
+
+- Major frameworks (Axum, Tokio, Actix) use no rustfmt.toml at all
+- Unstable options (`imports_granularity`, `group_imports`) have [known idempotency bugs](https://github.com/rust-lang/rustfmt/issues/6195)
+- Our value-add is **strict clippy**, not rustfmt customization
+- Works on stable Rust (most users)
+
+### `Cargo.toml` `[lints.clippy]` Section (Managed)
+
+The CLI should add/merge this section to `Cargo.toml` if not present:
+
+```toml
+[lints.clippy]
+# Enable pedantic for stricter linting (priority -1 allows individual overrides)
+pedantic = { level = "warn", priority = -1 }
+
+# Cherry-picked restriction lints for LLM enforcement
+unwrap_used = "warn"
+expect_used = "warn"
+todo = "warn"
+
+# Allow common pedantic noise
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+
+[lints.rust]
+# Deny unsafe code by default (LLMs shouldn't write unsafe)
+unsafe_code = "deny"
+```
+
+**Note:** This differs from other packs - we need to modify `Cargo.toml` rather than create a separate config file for lint levels.
+
+---
+
+## Cargo.toml Merge Rules
+
+### Merge Precedence
+
+When merging `[lints.clippy]` into existing Cargo.toml:
+
+1. **User settings always win** - If user has `unwrap_used = "allow"`, we don't override to `"warn"`
+2. **Add missing keys only** - We add our defaults for keys the user hasn't set
+3. **Never remove user keys** - If user has custom lints, preserve them
+
+**Algorithm:**
+
+```typescript
+function mergeCargoLints(existing: TomlSection | undefined, safeword: TomlSection): TomlSection {
+  if (!existing) return safeword;
+
+  const merged = { ...safeword };
+  for (const [key, value] of Object.entries(existing)) {
+    // User settings take precedence
+    merged[key] = value;
+  }
+  return merged;
+}
+```
+
+### Workspace Detection
+
+**Virtual workspace** = Has `[workspace]` but NO `[package]` section.
+
+```typescript
+function detectWorkspaceType(cargoContent: string): 'virtual' | 'root-package' | 'single-crate' {
+  const hasWorkspace = cargoContent.includes('[workspace]');
+  const hasPackage = cargoContent.includes('[package]');
+
+  if (hasWorkspace && !hasPackage) return 'virtual';
+  if (hasWorkspace && hasPackage) return 'root-package';
+  return 'single-crate';
+}
+```
+
+**Behavior by type:**
+
+| Type           | Lint config location               | Member handling                                                  |
+| -------------- | ---------------------------------- | ---------------------------------------------------------------- |
+| `virtual`      | `[workspace.lints.clippy]` in root | Add `lints.workspace = true` to members                          |
+| `root-package` | `[workspace.lints.clippy]` in root | Add `lints.workspace = true` to members (including root package) |
+| `single-crate` | `[lints.clippy]` in Cargo.toml     | N/A                                                              |
+
+### Member Crate Handling
+
+When adding `lints.workspace = true` to member crates:
+
+1. **Skip if member has explicit `[lints]` section** - Respect user's choice to opt out
+2. **Skip if member has `lints.workspace = false`** - Explicit opt-out
+3. **Add only if no lint config exists** - Don't interfere with existing setup
+
+```typescript
+function shouldAddWorkspaceLints(memberCargoContent: string): boolean {
+  // Skip if any lint config exists
+  if (memberCargoContent.includes('[lints]')) return false;
+  if (memberCargoContent.includes('lints.workspace')) return false;
+  return true;
+}
+```
+
+---
+
+## Files Definition (`src/packs/rust/files.ts`)
+
+**Why both owned and managed files?**
+
+| File                     | Location | Used By                       | Purpose                             |
+| ------------------------ | -------- | ----------------------------- | ----------------------------------- |
+| `.safeword/clippy.toml`  | Owned    | Hooks (via `CLIPPY_CONF_DIR`) | LLM enforcement - always strict     |
+| `clippy.toml`            | Managed  | Humans/IDEs                   | Project config - created if missing |
+| `.safeword/rustfmt.toml` | Owned    | Hooks (via `--config-path`)   | LLM enforcement - always strict     |
+| `rustfmt.toml`           | Managed  | Humans/IDEs                   | Project config - created if missing |
+
+This mirrors Go's pattern where `.safeword/.golangci.yml` can be stricter than project config. Currently both configs are identical, but the separation allows future divergence (e.g., stricter LLM thresholds).
+
+```typescript
+import type { FileDefinition, ManagedFileDefinition } from '../types.js';
+
+// ============================================================================
+// Config Generators
+// ============================================================================
+
+function generateClippyConfig(): string {
+  return `# Generated by safeword - DO NOT EDIT
+# Configure lint levels in Cargo.toml [lints.clippy] section
+
+# Complexity constraints (match ESLint/ruff philosophy)
+cognitive-complexity-threshold = 10
+too-many-arguments-threshold = 5
+
+# Stricter thresholds for LLM code
+too-many-lines-threshold = 100
+type-complexity-threshold = 250
+`;
+}
+
+function generateRustfmtConfig(): string {
+  return `# Generated by safeword - DO NOT EDIT
+# Uses only stable options (works on all Rust toolchains)
+
+edition = "2021"
+max_width = 100
+tab_spaces = 4
+newline_style = "Unix"
+reorder_imports = true
+use_field_init_shorthand = true
+`;
+}
+
+function generateSafewordClippyConfig(existingConfig: string | undefined, cwd: string): string {
+  // Similar to Go - merge with existing if present
+  // For now, just use standalone
+  return generateClippyConfig();
+}
+
+// ============================================================================
+// Owned Files (.safeword/ - overwritten on upgrade)
+// ============================================================================
+
+export const rustOwnedFiles: Record<string, FileDefinition> = {
+  '.safeword/clippy.toml': {
+    generator: ctx =>
+      ctx.languages?.rust ? generateSafewordClippyConfig(undefined, ctx.cwd) : undefined,
+  },
+  '.safeword/rustfmt.toml': {
+    generator: ctx => (ctx.languages?.rust ? generateRustfmtConfig() : undefined),
+  },
+};
+
+// ============================================================================
+// Managed Files (project root - create if missing)
+// ============================================================================
+
+export const rustManagedFiles: Record<string, ManagedFileDefinition> = {
+  'clippy.toml': {
+    generator: ctx => {
+      if (!ctx.languages?.rust) return undefined;
+      if (ctx.projectType.existingClippyConfig) return undefined;
+      return generateClippyConfig();
+    },
+  },
+  'rustfmt.toml': {
+    generator: ctx => {
+      if (!ctx.languages?.rust) return undefined;
+      if (ctx.projectType.existingRustfmtConfig) return undefined;
+      return generateRustfmtConfig();
+    },
+  },
+};
+```
+
+---
+
+## Project Detector Updates (`src/utils/project-detector.ts`)
+
+```typescript
+// Add Rust manifest constant
+const CARGO_TOML = 'Cargo.toml';
+
+// Add Rust config file markers
+const CLIPPY_CONFIG_FILES = ['clippy.toml', '.clippy.toml'];
+const RUSTFMT_CONFIG_FILES = ['rustfmt.toml', '.rustfmt.toml'];
+
+// Update Languages interface
+export interface Languages {
+  javascript: boolean;
+  python: boolean;
+  golang: boolean;
+  rust: boolean; // Add new language
+}
+
+// Update ProjectType interface
+export interface ProjectType {
+  // ...existing fields...
+  /** Path to existing clippy config if present */
+  existingClippyConfig: string | undefined;
+  /** Path to existing rustfmt config if present */
+  existingRustfmtConfig: string | undefined;
+}
+
+// Update detectLanguages() - full implementation
+export function detectLanguages(cwd: string): Languages {
+  const hasPackageJson = existsSync(nodePath.join(cwd, 'package.json'));
+  const hasPyproject = existsSync(nodePath.join(cwd, PYPROJECT_TOML));
+  const hasRequirements = existsSync(nodePath.join(cwd, REQUIREMENTS_TXT));
+  const hasGoModule = existsSync(nodePath.join(cwd, GO_MOD));
+  const hasCargoManifest = existsSync(nodePath.join(cwd, CARGO_TOML));
+
+  return {
+    javascript: hasPackageJson,
+    python: hasPyproject || hasRequirements,
+    golang: hasGoModule,
+    rust: hasCargoManifest,
+  };
+}
+
+// Add detection functions
+function findExistingClippyConfig(cwd: string): string | undefined {
+  for (const config of CLIPPY_CONFIG_FILES) {
+    if (existsSync(nodePath.join(cwd, config))) {
+      return config;
+    }
+  }
+  return undefined;
+}
+
+function findExistingRustfmtConfig(cwd: string): string | undefined {
+  for (const config of RUSTFMT_CONFIG_FILES) {
+    if (existsSync(nodePath.join(cwd, config))) {
+      return config;
+    }
+  }
+  return undefined;
+}
+
+// Update detectExistingTooling() return type and body
+function detectExistingTooling(
+  cwd: string | undefined,
+  scripts: Record<string, string>,
+): Pick<
+  ProjectType,
+  | 'existingLinter'
+  | 'existingFormatter'
+  | 'existingEslintConfig'
+  | 'legacyEslint'
+  | 'existingRuffConfig'
+  | 'existingMypyConfig'
+  | 'existingImportLinterConfig'
+  | 'existingGolangciConfig'
+  | 'existingClippyConfig' // ADD
+  | 'existingRustfmtConfig' // ADD
+> {
+  const eslintConfig = cwd ? findExistingEslintConfig(cwd) : undefined;
+  return {
+    existingLinter: hasExistingLinter(scripts),
+    existingFormatter: cwd ? hasExistingFormatter(cwd, scripts) : 'format' in scripts,
+    existingEslintConfig: eslintConfig,
+    legacyEslint: eslintConfig?.startsWith('.eslintrc') ?? false,
+    existingRuffConfig: cwd ? findExistingRuffConfig(cwd) : undefined,
+    existingMypyConfig: cwd ? hasExistingMypyConfig(cwd) : false,
+    existingImportLinterConfig: cwd ? hasExistingImportLinterConfig(cwd) : false,
+    existingGolangciConfig: cwd ? findExistingGolangciConfig(cwd) : undefined,
+    existingClippyConfig: cwd ? findExistingClippyConfig(cwd) : undefined, // ADD
+    existingRustfmtConfig: cwd ? findExistingRustfmtConfig(cwd) : undefined, // ADD
+  };
+}
+```
+
+---
+
+## Schema Integration (`src/schema.ts`)
+
+```typescript
+// Add import
+import { rustManagedFiles, rustOwnedFiles } from './packs/rust/files.js';
+
+// In SAFEWORD_SCHEMA.ownedFiles, add:
+export const SAFEWORD_SCHEMA: SafewordSchema = {
+  // ...
+  ownedFiles: {
+    // ... existing owned files ...
+    ...golangOwnedFiles,
+    ...pythonOwnedFiles,
+    ...rustOwnedFiles, // ADD
+  },
+  managedFiles: {
+    ...typescriptManagedFiles,
+    ...pythonManagedFiles,
+    ...golangManagedFiles,
+    ...rustManagedFiles, // ADD
+  },
+  // ...
+};
+```
+
+---
+
+## Test Helpers (`tests/helpers.ts`)
+
+```typescript
+/** Check if cargo/clippy is installed */
+export function isCargoInstalled(): boolean {
+  return isCommandAvailable('cargo');
+}
+
+/** Check if clippy component is installed */
+export function isClippyInstalled(): boolean {
+  if (!isCargoInstalled()) return false;
+  const result = spawnSync('rustup', ['component', 'list', '--installed'], {
+    encoding: 'utf8',
+  });
+  return result.stdout?.includes('clippy') ?? false;
+}
+
+/** Create a single-crate Rust project with Cargo.toml */
+export function createRustProject(
+  dir: string,
+  options?: { name?: string; edition?: string },
+): void {
+  const name = options?.name ?? 'test-project';
+  const edition = options?.edition ?? '2021';
+
+  writeTestFile(
+    dir,
+    'Cargo.toml',
+    `[package]
+name = "${name}"
+version = "0.1.0"
+edition = "${edition}"
+
+[dependencies]
+`,
+  );
+
+  // Create src directory with main.rs
+  mkdirSync(nodePath.join(dir, 'src'), { recursive: true });
+  writeTestFile(
+    dir,
+    'src/main.rs',
+    `fn main() {
+    println!("Hello, world!");
+}
+`,
+  );
+}
+
+/** Create a Rust workspace with multiple crates */
+export function createRustWorkspace(
+  dir: string,
+  options?: { members?: string[]; edition?: string },
+): void {
+  const members = options?.members ?? ['crate-a', 'crate-b'];
+  const edition = options?.edition ?? '2021';
+
+  // Root workspace Cargo.toml
+  writeTestFile(
+    dir,
+    'Cargo.toml',
+    `[workspace]
+members = [${members.map(m => `"crates/${m}"`).join(', ')}]
+resolver = "2"
+`,
+  );
+
+  // Create each member crate
+  for (const member of members) {
+    const cratePath = nodePath.join('crates', member);
+    mkdirSync(nodePath.join(dir, cratePath, 'src'), { recursive: true });
+
+    writeTestFile(
+      dir,
+      nodePath.join(cratePath, 'Cargo.toml'),
+      `[package]
+name = "${member}"
+version = "0.1.0"
+edition = "${edition}"
+
+[dependencies]
+`,
+    );
+
+    writeTestFile(
+      dir,
+      nodePath.join(cratePath, 'src', 'lib.rs'),
+      `pub fn hello() -> &'static str {
+    "Hello from ${member}!"
+}
+`,
+    );
+  }
+}
+```
+
+---
+
+## Test Plan
+
+### Golden Path Test (`tests/integration/rust-golden-path.test.ts`)
+
+```typescript
+const CLIPPY_AVAILABLE = isClippyInstalled();
+
+describe('E2E: Rust Golden Path', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustProject(projectDirectory);
+    initGitRepo(projectDirectory);
+    await runCli(['setup'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) removeTemporaryDirectory(projectDirectory);
+  });
+
+  it('creates clippy config', () => {
+    expect(fileExists(projectDirectory, 'clippy.toml')).toBe(true);
+    expect(fileExists(projectDirectory, '.safeword/clippy.toml')).toBe(true);
+  });
+
+  it('creates rustfmt config', () => {
+    expect(fileExists(projectDirectory, 'rustfmt.toml')).toBe(true);
+    expect(fileExists(projectDirectory, '.safeword/rustfmt.toml')).toBe(true);
+  });
+
+  it.skipIf(!CLIPPY_AVAILABLE)('clippy detects violations', () => {
+    writeTestFile(
+      projectDirectory,
+      'src/bad.rs',
+      `fn main() {
+    let x = Some(5);
+    // clippy::unwrap_used should trigger with our config
+    let y = x.unwrap();
+    println!("{}", y);
+}
+`,
+    );
+    const result = spawnSync('cargo', ['clippy', '--', '-D', 'clippy::unwrap_used'], {
+      cwd: projectDirectory,
+      encoding: 'utf8',
+    });
+    expect(result.status).not.toBe(0);
+  });
+
+  it.skipIf(!CLIPPY_AVAILABLE)('cargo fmt formats files', () => {
+    writeTestFile(projectDirectory, 'src/fmt.rs', `fn main(){println!("no spaces")}`);
+    spawnSync('cargo', ['fmt'], { cwd: projectDirectory });
+    const content = readTestFile(projectDirectory, 'src/fmt.rs');
+    expect(content).toContain('fn main() {');
+  });
+
+  it.skipIf(!CLIPPY_AVAILABLE)('lint hook processes .rs files', () => {
+    // Test that the hook routes .rs files correctly
+  });
+});
+```
+
+### Conditional Setup Tests (`tests/commands/setup-rust.test.ts`)
+
+```typescript
+describe('Conditional Setup for Rust Projects', () => {
+  it('skips JS tooling for Rust-only projects', async () => {
+    const dir = createTemporaryDirectory();
+    createRustProject(dir);
+    initGitRepo(dir);
+    await runCli(['setup'], { cwd: dir });
+
+    expect(fileExists(dir, 'package.json')).toBe(false);
+    expect(fileExists(dir, 'eslint.config.mjs')).toBe(false);
+    expect(fileExists(dir, 'clippy.toml')).toBe(true);
+    expect(fileExists(dir, 'rustfmt.toml')).toBe(true);
+  });
+
+  it('does NOT create package.json for pure Rust', () => {
+    // ...
+  });
+
+  it('shows Rust-appropriate next steps', () => {
+    // Output should mention: rustup component add clippy rustfmt
+  });
+
+  it('still creates .safeword directory', () => {
+    // ...
+  });
+
+  it('installs both toolchains for polyglot projects', () => {
+    // ...
+  });
+});
+```
+
+### Mixed Project Tests (`tests/integration/mixed-project-rust.test.ts`)
+
+```typescript
+describe('E2E: Mixed Project (TypeScript + Rust)', () => {
+  beforeAll(async () => {
+    // Create project with both package.json and Cargo.toml
+  });
+
+  it('detects both language packs', () => {
+    // ...
+  });
+
+  it('creates eslint.config.mjs AND clippy.toml', () => {
+    // ...
+  });
+
+  it.skipIf(!CLIPPY_AVAILABLE)('lint hook routes .rs to cargo clippy', () => {
+    // ...
+  });
+
+  it('lint hook routes .ts to ESLint', () => {
+    // ...
+  });
+});
+```
+
+### Add Language Test (`tests/integration/add-language-rust.test.ts`)
+
+```typescript
+describe('E2E: Add Rust to Existing TypeScript Project', () => {
+  it('starts with only TypeScript pack installed', () => {
+    // ...
+  });
+
+  describe('after adding Cargo.toml and running upgrade', () => {
+    it('installs rust pack', () => {
+      // ...
+    });
+
+    it('creates clippy.toml', () => {
+      // ...
+    });
+
+    it.skipIf(!CLIPPY_AVAILABLE)('clippy works on .rs files', () => {
+      // ...
+    });
+
+    it('ESLint still works on TypeScript files', () => {
+      // ...
+    });
+  });
+});
+```
+
+### Unit Tests: Cargo.toml Merge (`tests/unit/rust-cargo-merge.test.ts`)
+
+```typescript
+describe('Cargo.toml Merge Logic', () => {
+  describe('mergeCargoLints', () => {
+    it('returns safeword config when no existing lints', () => {
+      const result = mergeCargoLints(undefined, SAFEWORD_LINTS);
+      expect(result.pedantic).toEqual({ level: 'warn', priority: -1 });
+      expect(result.unwrap_used).toBe('warn');
+    });
+
+    it('preserves user lint settings over safeword defaults', () => {
+      const existing = { unwrap_used: 'allow', custom_lint: 'deny' };
+      const result = mergeCargoLints(existing, SAFEWORD_LINTS);
+      expect(result.unwrap_used).toBe('allow'); // User wins
+      expect(result.custom_lint).toBe('deny'); // User preserved
+      expect(result.pedantic).toBeDefined(); // Safeword added
+    });
+
+    it('adds missing safeword lints to existing config', () => {
+      const existing = { some_lint: 'warn' };
+      const result = mergeCargoLints(existing, SAFEWORD_LINTS);
+      expect(result.some_lint).toBe('warn');
+      expect(result.pedantic).toBeDefined();
+      expect(result.unwrap_used).toBe('warn');
+    });
+  });
+
+  describe('detectWorkspaceType', () => {
+    it('returns virtual for workspace without package', () => {
+      const content = '[workspace]\nmembers = ["crates/*"]';
+      expect(detectWorkspaceType(content)).toBe('virtual');
+    });
+
+    it('returns root-package for workspace with package', () => {
+      const content = '[workspace]\nmembers = ["crates/*"]\n\n[package]\nname = "root"';
+      expect(detectWorkspaceType(content)).toBe('root-package');
+    });
+
+    it('returns single-crate for package without workspace', () => {
+      const content = '[package]\nname = "my-crate"';
+      expect(detectWorkspaceType(content)).toBe('single-crate');
+    });
+  });
+
+  describe('shouldAddWorkspaceLints', () => {
+    it('returns true when no lints config exists', () => {
+      const content = '[package]\nname = "member"';
+      expect(shouldAddWorkspaceLints(content)).toBe(true);
+    });
+
+    it('returns false when [lints] section exists', () => {
+      const content = '[package]\nname = "member"\n\n[lints]\nworkspace = false';
+      expect(shouldAddWorkspaceLints(content)).toBe(false);
+    });
+
+    it('returns false when lints.workspace already set', () => {
+      const content = '[package]\nname = "member"\nlints.workspace = true';
+      expect(shouldAddWorkspaceLints(content)).toBe(false);
+    });
+  });
+
+  describe('detectRustPackage', () => {
+    it('finds package name from Cargo.toml', () => {
+      // Setup: create temp dir with Cargo.toml
+      const pkg = detectRustPackage('/project/src/lib.rs');
+      expect(pkg).toBe('my-package');
+    });
+
+    it('returns undefined for workspace root files', () => {
+      // build.rs at workspace root has no [package] section
+      const pkg = detectRustPackage('/workspace/build.rs');
+      expect(pkg).toBeUndefined();
+    });
+
+    it('finds nested package in workspace', () => {
+      const pkg = detectRustPackage('/workspace/crates/core/src/lib.rs');
+      expect(pkg).toBe('core');
+    });
+  });
+});
+```
+
+### Workspace Test (`tests/integration/rust-workspace.test.ts`)
+
+```typescript
+describe('E2E: Rust Workspace Support', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustWorkspace(projectDirectory, { members: ['core', 'cli', 'api'] });
+    initGitRepo(projectDirectory);
+    await runCli(['setup'], { cwd: projectDirectory, timeout: TIMEOUT_SETUP });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) removeTemporaryDirectory(projectDirectory);
+  });
+
+  it('detects workspace root', () => {
+    // Should add [workspace.lints.clippy] to root Cargo.toml
+    const rootCargo = readTestFile(projectDirectory, 'Cargo.toml');
+    expect(rootCargo).toContain('[workspace.lints.clippy]');
+    expect(rootCargo).toContain('pedantic');
+  });
+
+  it('adds lint inheritance to member crates', () => {
+    // Each member should have lints.workspace = true
+    const coreCargo = readTestFile(projectDirectory, 'crates/core/Cargo.toml');
+    expect(coreCargo).toContain('[lints]');
+    expect(coreCargo).toContain('workspace = true');
+  });
+
+  it.skipIf(!CLIPPY_AVAILABLE)('clippy runs on specific package', () => {
+    // Modify a file in core crate
+    writeTestFile(
+      projectDirectory,
+      'crates/core/src/bad.rs',
+      `pub fn bad() { let x = Some(5); x.unwrap(); }`,
+    );
+
+    // Should only lint core, not cli or api
+    const result = spawnSync('cargo', ['clippy', '-p', 'core', '--', '-D', 'clippy::unwrap_used'], {
+      cwd: projectDirectory,
+      encoding: 'utf8',
+    });
+    expect(result.status).not.toBe(0);
+  });
+
+  it.skipIf(!CLIPPY_AVAILABLE)('lint hook targets correct package', () => {
+    // Hook should detect package from file path and run cargo clippy -p <pkg>
+  });
+});
+```
+
+---
+
+## Install Guidance
+
+Since Rust tools are managed via `rustup`, show install command in output:
+
+```
+Next steps for Rust:
+  rustup component add clippy rustfmt
+```
+
+---
+
+## Parity Checklist
+
+Before shipping the Rust language pack:
+
+**Core Integration:**
+
+- [ ] `detect()` returns true when `Cargo.toml` exists
+- [ ] `setup()` creates `clippy.toml` and `rustfmt.toml`
+- [ ] `setup()` merges `[lints.clippy]` into Cargo.toml
+- [ ] Hook routes `.rs` files to cargo clippy + rustfmt
+- [ ] Hook detects package for workspace targeting
+- [ ] Hook skips gracefully if tools not installed
+
+**Workspace Support:**
+
+- [ ] Detects `[workspace]` in root Cargo.toml
+- [ ] Adds `[workspace.lints.clippy]` to root (not per-crate)
+- [ ] Adds `lints.workspace = true` to member crates
+- [ ] Hook uses `cargo clippy -p <pkg>` for targeted linting
+- [ ] File→package mapping works for nested crates
+
+**Testing (7 test areas):**
+
+- [ ] Golden path: configs created, valid, detects violations, formats
+- [ ] Tooling validation: N/A (Rust is statically typed by compiler)
+- [ ] Unit tests: config generation, Cargo.toml merge, workspace detection, package mapping
+- [ ] Conditional setup: pure Rust skips JS tooling
+- [ ] Mixed project: Rust + TypeScript work together
+- [ ] Add language: can add Rust to existing project
+- [ ] Workspace: lint inheritance, package targeting
+
+**Test Helpers:**
+
+- [ ] `isCargoInstalled()`
+- [ ] `isClippyInstalled()`
+- [ ] `createRustProject(dir, options?)`
+- [ ] `createRustWorkspace(dir, options?)`
+
+**Project Types:**
+
+- [ ] Pure Rust project (no package.json) works end-to-end
+- [ ] Rust workspace with multiple crates works correctly
+- [ ] Mixed project (JS + Rust) works correctly
+- [ ] Existing `clippy.toml` is preserved (not clobbered)
+- [ ] Existing `rustfmt.toml` is preserved (not clobbered)
+- [ ] Existing `[lints.clippy]` in Cargo.toml is merged (not clobbered)
+
+---
+
+## Implementation Order
+
+1. **Phase 1: Core** (MVP)
+   - Pack files (`rust/index.ts`, `rust/files.ts`, `rust/setup.ts`)
+   - Registry registration
+   - Project detector updates (Cargo.toml, clippy.toml, rustfmt.toml detection)
+   - Schema integration (spread rustOwnedFiles, rustManagedFiles)
+
+2. **Phase 2: Cargo.toml Merge**
+   - TOML parsing for Cargo.toml
+   - Detect workspace vs single crate
+   - Merge `[lints.clippy]` section (workspace-aware)
+   - Add `lints.workspace = true` to member crates
+
+3. **Phase 3: Lint Hook**
+   - Add RUST_EXTENSIONS to lint.ts
+   - Add `detectRustPackage()` for file→package mapping
+   - Implement hybrid approach (package-level clippy + file-level rustfmt)
+
+4. **Phase 4: Tests**
+   - Test helpers (`createRustProject`, `createRustWorkspace`)
+   - Golden path test (single crate)
+   - Workspace test
+   - Conditional setup test
+
+5. **Phase 5: Integration**
+   - Mixed-project test (TypeScript + Rust)
+   - Add-language test (add Rust to existing project)
+
+---
+
+## Design Decisions (Resolved)
+
+### Decision 1: Cargo.toml Modification → JSON Merge
+
+**Research findings:**
+
+- `Cargo.toml [lints.clippy]` sets lint **LEVELS** (allow/warn/deny)
+- `clippy.toml` sets lint **PARAMETERS** (thresholds only)
+- They serve different purposes - **both are required** for full configuration
+- Without Cargo.toml modification, we **cannot enable pedantic lints**
+
+**Decision:** Use TOML merge to add `[lints.clippy]` section to Cargo.toml.
+
+**Rationale:** This is the **only way** to achieve our "all lints by default" philosophy. It matches how we handle TypeScript's `package.json` scripts merge. The alternative (clippy.toml only) would leave pedantic disabled, defeating the purpose of strict LLM enforcement.
+
+**Implementation:**
+
+- Detect existing `[lints.clippy]` section before modifying
+- If exists, merge our settings (preserving user overrides)
+- If workspace, add to `[workspace.lints.clippy]` instead
+
+### Decision 2: Hook Behavior → Hybrid Approach
+
+**Research findings:**
+
+- Cargo clippy has **NO file-level targeting** - operates on crates/packages only
+- Cargo clippy has **NO `--config` flag** - uses `CLIPPY_CONF_DIR` env var instead
+- `cargo clippy -p <package>` targets specific package
+- `rustfmt` CAN format individual files: `rustfmt --config-path <config> path/to/file.rs`
+- Running whole-project clippy on every file edit is slow and redundant
+
+**Decision:** Hybrid approach - package-level clippy + file-level rustfmt.
+
+**Implementation:**
+
+```typescript
+const RUST_EXTENSIONS = new Set(['rs']);
+const SAFEWORD_CLIPPY_DIR = `${projectDir}/.safeword`;
+const SAFEWORD_RUSTFMT = `${projectDir}/.safeword/rustfmt.toml`;
+
+// In lintFile():
+if (RUST_EXTENSIONS.has(extension)) {
+  // Detect which package the file belongs to
+  const pkg = detectRustPackage(file);
+  const clippyArgs = pkg ? ['-p', pkg] : [];
+
+  // Clippy: Run on specific package (not whole workspace)
+  // Uses CLIPPY_CONF_DIR env var to point to safeword config
+  // --fix applies auto-fixes, --allow-dirty/staged for uncommitted changes
+  await $`CLIPPY_CONF_DIR=${SAFEWORD_CLIPPY_DIR} cargo clippy ${clippyArgs} --fix --allow-dirty --allow-staged`
+    .nothrow()
+    .quiet();
+
+  // rustfmt: Can target individual files directly (faster)
+  // Uses --config-path to point to safeword config
+  await $`rustfmt --config-path ${SAFEWORD_RUSTFMT} ${file}`.nothrow().quiet();
+  return;
+}
+```
+
+**Rationale:**
+
+- Package-level clippy avoids re-checking entire workspace
+- `CLIPPY_CONF_DIR` allows using `.safeword/clippy.toml` without modifying project
+- File-level rustfmt with `--config-path` is fast and uses safeword config
+- Matches the granularity of other hooks (ESLint, Ruff operate on files)
+
+### Decision 3: Workspace Support → Include from Start
+
+**User decision:** Include workspace support in initial implementation.
+
+**Implementation:**
+
+1. **Detection:** Check for `[workspace]` section in root Cargo.toml
+2. **Lint config:** Use `[workspace.lints.clippy]` for shared config
+3. **Member crates:** Add `lints.workspace = true` to inherit
+4. **Hook:** Map file path to package for targeted clippy runs
+
+**Workspace-aware Cargo.toml:**
+
+```toml
+# Root Cargo.toml with workspace
+[workspace]
+members = ["crates/*"]
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"
+todo = "warn"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+```
+
+```toml
+# Member crate Cargo.toml
+[package]
+name = "my-crate"
+
+[lints]
+workspace = true
+```
+
+**File → Package mapping:**
+
+```typescript
+/**
+ * Detect which Cargo package a .rs file belongs to.
+ * Walks up from file path looking for Cargo.toml with [package].
+ */
+function detectRustPackage(filePath: string): string | undefined {
+  let dir = nodePath.dirname(filePath);
+
+  while (dir !== nodePath.dirname(dir)) {
+    const cargoPath = nodePath.join(dir, 'Cargo.toml');
+    if (existsSync(cargoPath)) {
+      const content = readFileSync(cargoPath, 'utf8');
+      // Check for [package] section (not just [workspace])
+      const nameMatch = content.match(/\[package\][\s\S]*?name\s*=\s*"([^"]+)"/);
+      if (nameMatch) {
+        return nameMatch[1];
+      }
+    }
+    dir = nodePath.dirname(dir);
+  }
+
+  return undefined;
+}
+```
+
+---
+
+## Edge Cases
+
+### Handled
+
+| Case                                     | Behavior                                                                     |
+| ---------------------------------------- | ---------------------------------------------------------------------------- |
+| Virtual workspace (no root package)      | Detect via `[workspace]` without `[package]`, add `[workspace.lints.clippy]` |
+| Member with explicit `[lints]` section   | Skip - respect user's custom config                                          |
+| Member with `lints.workspace = false`    | Skip - respect explicit opt-out                                              |
+| `build.rs` at workspace root             | `detectRustPackage()` returns undefined → whole-project clippy               |
+| Missing clippy/rustfmt                   | Hook skips gracefully (nothrow)                                              |
+| Existing `[lints.clippy]` with conflicts | User settings win, we only add missing keys                                  |
+
+### Known Limitations (Acceptable)
+
+| Case                               | Behavior              | Rationale                                                               |
+| ---------------------------------- | --------------------- | ----------------------------------------------------------------------- |
+| Multiple .rs files in same package | Redundant clippy runs | Acceptable overhead; deduplication adds complexity                      |
+| Proc-macro crates                  | Same pedantic lints   | Users can add `#![allow(...)]` in lib.rs if needed                      |
+| Test code (`#[cfg(test)]`)         | `unwrap_used` warns   | Users can allow in test modules; matches "strict by default" philosophy |
+
+---
+
+## Deferred to v2
+
+| Feature                       | Reason                                                                 |
+| ----------------------------- | ---------------------------------------------------------------------- |
+| **Edition auto-detection**    | rustfmt.toml hardcodes `edition = "2021"`; could read from Cargo.toml  |
+| **MSRV propagation**          | clippy.toml supports `msrv`; could read `rust-version` from Cargo.toml |
+| **Clippy run deduplication**  | Track packages already linted in current batch                         |
+| **Test-specific lint config** | Allow looser lints in `#[cfg(test)]` code                              |
+
+---
+
+## References
+
+- [Clippy Documentation](https://doc.rust-lang.org/stable/clippy/lints.html)
+- [Clippy Configuration](https://doc.rust-lang.org/clippy/configuration.html)
+- [Lint Configuration](https://doc.rust-lang.org/clippy/lint_configuration.html)
+- [rustfmt Configuration](https://github.com/rust-lang/rustfmt/blob/main/Configurations.md)
+- [Cargo lints](https://doc.rust-lang.org/cargo/reference/manifest.html#the-lints-section)

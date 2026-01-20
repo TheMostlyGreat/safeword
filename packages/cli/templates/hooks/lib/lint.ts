@@ -6,7 +6,8 @@
 //
 // Auto-upgrades safeword if a language pack is missing.
 
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import nodePath from 'node:path';
 
 import { $ } from 'bun';
 
@@ -44,6 +45,7 @@ const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const SAFEWORD_ESLINT = `${projectDir}/.safeword/eslint.config.mjs`;
 const SAFEWORD_RUFF = `${projectDir}/.safeword/ruff.toml`;
 const SAFEWORD_GOLANGCI = `${projectDir}/.safeword/.golangci.yml`;
+const SAFEWORD_CLIPPY = `${projectDir}/.safeword/clippy.toml`;
 const SAFEWORD_RUSTFMT = `${projectDir}/.safeword/rustfmt.toml`;
 const SAFEWORD_PRETTIER = `${projectDir}/.safeword/.prettierrc`;
 
@@ -53,6 +55,32 @@ let upgradeAttempted = false;
 /** Check config exists, dynamically (not cached) */
 function hasConfig(path: string): boolean {
   return existsSync(path);
+}
+
+/**
+ * Detect the Rust package name for a file by walking up directories.
+ * Finds the nearest Cargo.toml with a [package] section and extracts the name.
+ * Returns undefined for virtual workspace roots or files outside any package.
+ */
+function detectRustPackage(filePath: string): string | undefined {
+  let currentDirectory = nodePath.dirname(filePath);
+  const normalizedProjectDir = nodePath.resolve(projectDir);
+
+  while (currentDirectory.startsWith(normalizedProjectDir)) {
+    const cargoPath = nodePath.join(currentDirectory, 'Cargo.toml');
+    if (existsSync(cargoPath)) {
+      const content = readFileSync(cargoPath, 'utf8');
+      // Only return package name if this Cargo.toml has a [package] section
+      if (content.includes('[package]')) {
+        const nameMatch = /\[package\][^[]*name\s*=\s*"([^"]+)"/.exec(content);
+        return nameMatch?.[1];
+      }
+    }
+    const parentDirectory = nodePath.dirname(currentDirectory);
+    if (parentDirectory === currentDirectory) break;
+    currentDirectory = parentDirectory;
+  }
+  return undefined;
 }
 
 /**
@@ -163,12 +191,28 @@ export async function lintFile(file: string, _projectDir: string): Promise<void>
     return;
   }
 
-  // Rust files - rustfmt for formatting (clippy doesn't support file-level fixes)
+  // Rust files - clippy for linting (package-level), rustfmt for formatting (file-level)
   // Auto-upgrades safeword if Rust pack is missing
-  // Note: clippy runs at package level via `cargo clippy --fix`, not per-file
   if (RUST_EXTENSIONS.has(extension)) {
-    const hasRustfmt = await ensurePackInstalled('Rust', SAFEWORD_RUSTFMT);
-    if (hasRustfmt) {
+    const hasRustConfig = await ensurePackInstalled('Rust', SAFEWORD_RUSTFMT);
+
+    // Run clippy with package targeting for workspaces
+    // Detect which package this file belongs to
+    const packageName = detectRustPackage(file);
+    if (packageName) {
+      // Use CLIPPY_CONF_DIR to point clippy to safeword config
+      const clippyEnv = hasConfig(SAFEWORD_CLIPPY)
+        ? { CLIPPY_CONF_DIR: nodePath.dirname(SAFEWORD_CLIPPY) }
+        : {};
+
+      await $`cargo clippy -p ${packageName} --fix --allow-dirty --allow-staged`
+        .env(clippyEnv)
+        .nothrow()
+        .quiet();
+    }
+
+    // Run rustfmt for file-level formatting
+    if (hasRustConfig) {
       await $`rustfmt --config-path ${SAFEWORD_RUSTFMT} ${file}`.nothrow().quiet();
     } else {
       // Fallback: run without safeword config

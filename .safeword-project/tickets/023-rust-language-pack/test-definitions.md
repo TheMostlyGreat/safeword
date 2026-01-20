@@ -115,18 +115,17 @@ And TypeScript configuration remains intact
 
 ## Lint Hook Scenarios
 
-### [x] Scenario 9: Lint hook processes .rs files (rustfmt only)
+### [x] Scenario 9: Lint hook processes .rs files
 
 ```gherkin
 Given a Rust project with safeword setup complete
 And rustfmt is installed
 When the lint hook is triggered for a .rs file
-Then rustfmt formats the file using .safeword/rustfmt.toml
+Then cargo clippy runs with package targeting (when package detected)
+And rustfmt formats the file using .safeword/rustfmt.toml
 ```
 
-**Note:** Clippy package targeting is deferred (see Scenario 10). The hook only runs rustfmt for now.
-
-### [ ] Scenario 10: Lint hook uses package targeting in workspaces
+### [x] Scenario 10: Lint hook uses package targeting in workspaces
 
 ```gherkin
 Given a Rust workspace with crates/core and crates/cli
@@ -198,7 +197,7 @@ When detectLanguages() is called
 Then languages.rust is true
 ```
 
-### [ ] Scenario 14: Package detection for file mapping
+### [x] Scenario 14: Package detection for file mapping
 
 ```gherkin
 Given a workspace with crates/core/src/lib.rs
@@ -206,7 +205,7 @@ When detectRustPackage('/workspace/crates/core/src/lib.rs') is called
 Then it returns "core" (the package name)
 ```
 
-### [ ] Scenario 15: Workspace root file detection
+### [x] Scenario 15: Workspace root file detection
 
 ```gherkin
 Given a workspace with build.rs at root (no [package] section)

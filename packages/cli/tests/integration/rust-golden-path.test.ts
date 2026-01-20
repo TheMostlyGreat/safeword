@@ -722,3 +722,72 @@ describe('E2E: Rust Setup Idempotency', () => {
     expect(fileExists(projectDirectory, '.safeword/rustfmt.toml')).toBe(true);
   });
 });
+
+// Scenario 10: Lint hook uses package targeting in workspaces
+describe('E2E: Rust Lint Hook Package Targeting', () => {
+  let projectDirectory: string;
+
+  beforeAll(async () => {
+    projectDirectory = createTemporaryDirectory();
+    createRustWorkspace(projectDirectory, { members: ['core', 'cli'] });
+    initGitRepo(projectDirectory);
+    await runCli(['setup', '--yes'], { cwd: projectDirectory });
+  }, 180_000);
+
+  afterAll(() => {
+    if (projectDirectory) {
+      removeTemporaryDirectory(projectDirectory);
+    }
+  });
+
+  it.skipIf(!CLIPPY_AVAILABLE)(
+    'lint hook runs cargo clippy with -p <package> for workspace member (Scenario 10)',
+    () => {
+      // Create a file with a clippy-fixable issue: single_char_pattern
+      // clippy suggests 'l' (char) instead of "l" (string) for contains()
+      // This CANNOT be fixed by rustfmt, only by clippy --fix
+      writeTestFile(
+        projectDirectory,
+        'crates/core/src/lib.rs',
+        `pub fn test_function() -> bool {
+    let s = "hello";
+    s.contains("l")
+}
+`,
+      );
+
+      const filePath = nodePath.join(projectDirectory, 'crates/core/src/lib.rs');
+      const result = runLintHook(projectDirectory, filePath);
+
+      // Hook should complete successfully
+      expect(result.status).toBe(0);
+
+      // Verify clippy ran and fixed the single_char_pattern issue
+      // If clippy ran with --fix, it changes "l" to 'l'
+      const fixed = readTestFile(projectDirectory, 'crates/core/src/lib.rs');
+      expect(fixed).toContain("s.contains('l')"); // Clippy fix: char instead of &str
+    },
+  );
+
+  it.skipIf(!CLIPPY_AVAILABLE)(
+    'lint hook skips clippy for virtual workspace root files (no package)',
+    () => {
+      // Create a build.rs at workspace root (no [package] section in root Cargo.toml)
+      writeTestFile(
+        projectDirectory,
+        'build.rs',
+        `fn main(){println!("cargo:rerun-if-changed=build.rs");}`,
+      );
+
+      const filePath = nodePath.join(projectDirectory, 'build.rs');
+      const result = runLintHook(projectDirectory, filePath);
+
+      // Hook should complete without error (rustfmt only, no clippy)
+      expect(result.status).toBe(0);
+
+      // File should still be formatted
+      const formatted = readTestFile(projectDirectory, 'build.rs');
+      expect(formatted).toContain('fn main() {');
+    },
+  );
+});
