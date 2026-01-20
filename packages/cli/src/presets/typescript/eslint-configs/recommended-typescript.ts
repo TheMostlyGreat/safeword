@@ -113,6 +113,18 @@ export const recommendedTypeScript: any[] = [
       '@typescript-eslint/no-shadow': 'error', // Variable shadows outer scope
       '@typescript-eslint/require-array-sort-compare': 'error', // [].sort() needs compareFn
       '@typescript-eslint/no-unused-private-class-members': 'error', // Catch dead code in classes
+
+      // Allow numbers in template literals - common for logging/debugging.
+      // Integers stringify predictably; floats should use toFixed() for precision.
+      '@typescript-eslint/restrict-template-expressions': [
+        'error',
+        {
+          allowNumber: true,
+          allowBoolean: true,
+          allowNullish: false, // Avoid "undefined" or "null" in strings
+          allowRegExp: false,
+        },
+      ],
     },
   },
 

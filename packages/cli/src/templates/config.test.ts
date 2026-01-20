@@ -111,7 +111,11 @@ describe('SETTINGS_HOOKS', () => {
   });
 
   it('should have valid PostToolUse matcher that targets edit tools', () => {
-    const matcher = SETTINGS_HOOKS.PostToolUse[0].matcher;
+    const hook = SETTINGS_HOOKS.PostToolUse.at(0);
+    if (!hook) {
+      throw new Error('PostToolUse hook not found');
+    }
+    const matcher = hook.matcher;
 
     // Must be valid regex
     // eslint-disable-next-line security/detect-non-literal-regexp -- Testing user-defined matcher pattern

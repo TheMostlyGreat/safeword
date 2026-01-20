@@ -77,6 +77,16 @@ export const playwrightConfig: any[] = [
       // Test fixtures are developer-controlled, not user input.
       'security/detect-non-literal-fs-filename': 'off',
       //
+      // no-unsafe-* rules: Tests legitimately use partial mocks, fixtures, and stubs.
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      //
+      // no-nested-functions: Test organization uses nested describe/it patterns.
+      'sonarjs/no-nested-functions': 'off',
+      //
       // no-null: Playwright API explicitly uses null in signatures:
       //   await page.waitForFunction(() => window.loaded, null, { timeout: 5000 });
       // See: https://playwright.dev/docs/api/class-page#page-wait-for-function

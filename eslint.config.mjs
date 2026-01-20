@@ -15,12 +15,12 @@ const ignores = [
   '**/build/',
   '**/coverage/',
   '**/.astro/', // Astro generated types - not our code
-  '.safeword/', // Generated hooks - linted separately by installed safeword config
+  '**/.safeword/', // Generated hooks - linted separately by installed safeword config
   '.safeword-project/', // Project-specific hooks - not part of distributed package
   'examples/',
   'eslint.config.mjs', // Self - JS file can't use typed rules
   'packages/cli/templates/', // Template files copied to customer projects - not part of CLI build
-  '.dependency-cruiser.cjs', // CommonJS config file
+  '**/.dependency-cruiser.cjs', // CommonJS config file
   'packages/cli/scripts/*.js', // Node.js scripts with CommonJS globals
 ];
 
@@ -52,7 +52,7 @@ const configs = [
   // CLI package overrides - disable false positives for CLI tools
   {
     name: 'cli-package-override',
-    files: ['packages/cli/**/*.ts'],
+    files: ['packages/cli/**/*.ts', 'packages/cli/**/*.mjs'],
     rules: {
       // Security false positives - CLI tools work with user-provided paths by design
       'security/detect-non-literal-fs-filename': 'off',

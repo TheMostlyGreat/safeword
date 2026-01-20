@@ -201,3 +201,5 @@ Write ticket names that describe **user value**, not implementation.
 5. **Hook paths**: Always use `"$CLAUDE_PROJECT_DIR"/.safeword/hooks/...` format (quoted variable) for Claude Code hooks.
 
 6. **Monorepo publishing**: `workspace:^` resolves at `bun install` time, not publish time. For 0.x packages, `^0.6.0` excludes 0.7.0. Run `bun install` after version bumps, or use explicit versions for cross-package deps.
+
+7. **Preset vs Project config**: When fixing lint errors in THIS repo, modify `/eslint.config.mjs` (project config), NOT `packages/cli/src/presets/` (preset). Preset changes affect ALL safeword users. Project config only affects this repo. Rule of thumb: if a rule is a false positive for CLI tools specifically, add an override to the root eslint.config.mjs with the `cli-package-override` block.

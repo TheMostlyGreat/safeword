@@ -49,6 +49,22 @@ export const vitestConfig: any[] = [
       //   const fixture = readFileSync(join(__dirname, 'fixtures', testCase.input));
       // Test fixtures are developer-controlled, not user input.
       'security/detect-non-literal-fs-filename': 'off',
+      //
+      // no-unsafe-* rules: Tests legitimately use partial mocks, fixtures, and stubs
+      // that trigger these rules. The typescript-eslint team acknowledges this:
+      // "If your project frequently stubs objects in test files, consider disabling."
+      // See: https://typescript-eslint.io/rules/no-unsafe-member-access/
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      //
+      // no-nested-functions: describe/it nesting is standard test organization:
+      //   describe("Foo", () => { describe("bar", () => { it("works", () => {}) }) })
+      // This triggers at level 4+, which is normal for BDD-style tests.
+      'sonarjs/no-nested-functions': 'off',
+      //
       // Keep max-nested-callbacks at reasonable threshold for tests.
       // Default is 10; we use 6 to catch excessive nesting early while allowing
       // typical patterns like: describe → it → array.filter → callback.

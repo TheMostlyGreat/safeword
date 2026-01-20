@@ -25,6 +25,16 @@ function lintJs(code: string, ruleId: string) {
   return results.filter(r => r.ruleId === ruleId);
 }
 
+/**
+ * Assert lint errors exist and first error has expected severity.
+ * @param errors - Lint messages from lintJs
+ * @param severity - Expected severity (default: ERROR)
+ */
+function expectLintError(errors: Linter.LintMessage[], severity: number = ERROR) {
+  expect(errors.length).toBeGreaterThan(0);
+  expect(errors.at(0)?.severity).toBe(severity);
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types vary across plugins */
 
 /**
@@ -92,8 +102,7 @@ describe('Story 4: Errors on Bugs', () => {
 eval(userInput);
 `;
       const errors = lintJs(code, 'security/detect-eval-with-expression');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('security/detect-non-literal-regexp errors on dynamic regex', () => {
@@ -101,8 +110,7 @@ eval(userInput);
 const regex = new RegExp(pattern);
 `;
       const errors = lintJs(code, 'security/detect-non-literal-regexp');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('security/detect-non-literal-fs-filename errors on dynamic file path', () => {
@@ -111,8 +119,7 @@ const filePath = userInput;
 fs.readFile(filePath, () => {});
 `;
       const errors = lintJs(code, 'security/detect-non-literal-fs-filename');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('security/detect-child-process errors on require child_process', () => {
@@ -121,8 +128,7 @@ fs.readFile(filePath, () => {});
 exec(cmd);
 `;
       const errors = lintJs(code, 'security/detect-child-process');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
   });
 
@@ -134,8 +140,7 @@ const cmd = 'rm -rf /';
 exec(cmd);
 `;
       const errors = lintJs(code, 'sonarjs/os-command');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
   });
 
@@ -147,8 +152,7 @@ exec(cmd);
 });
 `;
       const errors = lintJs(code, 'promise/no-multiple-resolved');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('promise/no-nesting errors on nested promise', () => {
@@ -159,16 +163,14 @@ exec(cmd);
 });
 `;
       const errors = lintJs(code, 'promise/no-nesting');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('promise/valid-params errors on invalid Promise.all usage', () => {
       const code = `Promise.all(promise1, promise2);
 `;
       const errors = lintJs(code, 'promise/valid-params');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
   });
 
@@ -181,8 +183,7 @@ exec(cmd);
 }
 `;
       const errors = lintJs(code, 'safeword/no-incomplete-error-handling');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
   });
 
@@ -200,8 +201,7 @@ exec(cmd);
 export { grouped };
 `;
       const errors = lintJs(code, 'unicorn/no-array-reduce');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('unicorn/prevent-abbreviations errors on non-standard abbreviations', () => {
@@ -212,8 +212,7 @@ export { grouped };
 export { process };
 `;
       const errors = lintJs(code, 'unicorn/prevent-abbreviations');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('unicorn/no-null errors on null usage', () => {
@@ -221,8 +220,7 @@ export { process };
 export { value };
 `;
       const errors = lintJs(code, 'unicorn/no-null');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('unicorn/no-array-for-each errors on forEach', () => {
@@ -230,8 +228,7 @@ export { value };
 items.forEach(item => console.log(item));
 `;
       const errors = lintJs(code, 'unicorn/no-array-for-each');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('unicorn/no-negated-condition errors on negated conditions', () => {
@@ -245,8 +242,7 @@ items.forEach(item => console.log(item));
 export { check };
 `;
       const errors = lintJs(code, 'unicorn/no-negated-condition');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
   });
 
@@ -256,8 +252,7 @@ export { check };
 export { result };
 `;
       const errors = lintJs(code, 'sonarjs/no-identical-expressions');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
   });
 
@@ -281,8 +276,7 @@ export { result };
 export { deep };
 `;
       const errors = lintJs(code, 'max-depth');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('max-params errors on functions with too many parameters', () => {
@@ -293,8 +287,7 @@ export { deep };
 export { tooMany };
 `;
       const errors = lintJs(code, 'max-params');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('eqeqeq errors on == (except null check)', () => {
@@ -304,8 +297,8 @@ const ok = x == null;  // allowed (checks null and undefined)
 export { bad, ok };
 `;
       const errors = lintJs(code, 'eqeqeq');
-      expect(errors.length).toBe(1); // Only the first == errors
-      expect(errors[0].severity).toBe(ERROR);
+      expect(errors).toHaveLength(1); // Only the first == errors, null check is allowed
+      expectLintError(errors);
     });
   });
 

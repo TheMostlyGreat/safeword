@@ -24,6 +24,16 @@ function lintJs(code: string, ruleId: string) {
   return results.filter(r => r.ruleId === ruleId);
 }
 
+/**
+ * Assert lint errors exist and first error has expected severity.
+ * @param errors - Lint messages from lintJs
+ * @param severity - Expected severity (default: ERROR)
+ */
+function expectLintError(errors: Linter.LintMessage[], severity: number = ERROR) {
+  expect(errors.length).toBeGreaterThan(0);
+  expect(errors.at(0)?.severity).toBe(severity);
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any -- ESLint config types vary across plugins */
 /**
  * Get the final rule config from a flat config array.
@@ -63,8 +73,7 @@ const value = obj[key];
 export { value };
 `;
       const errors = lintJs(code, 'security/detect-object-injection');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
 
     it('security/detect-possible-timing-attacks is configured at error severity', () => {
@@ -90,8 +99,7 @@ export { value };
 eval(userInput);
 `;
       const errors = lintJs(code, 'security/detect-eval-with-expression');
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].severity).toBe(ERROR);
+      expectLintError(errors);
     });
   });
 });

@@ -17,13 +17,25 @@ const baseConfigs = {
   javascript: configs.recommended,
 };
 
+// Project-specific rule overrides for CLI tools
+const cliToolOverrides = {
+  name: 'safeword-cli/overrides',
+  rules: {
+    // CLI tools intentionally execute commands from PATH - this is expected behavior.
+    // The rule is for web apps where PATH manipulation is an attack vector.
+    // Using absolute paths breaks cross-platform compatibility.
+    'sonarjs/no-os-command-from-path': 'off',
+  },
+};
+
 export default [
   { ignores: detect.getIgnores(deps) },
-  // eslint-disable-next-line security/detect-object-injection -- framework is from detect.detectFramework(), not user input
+
   ...baseConfigs[framework],
   ...(detect.hasVitest(deps) ? configs.vitest : []),
   ...(detect.hasPlaywright(deps) ? configs.playwright : []),
   ...(detect.hasTailwind(deps) ? configs.tailwind : []),
   ...(detect.hasTanstackQuery(deps) ? configs.tanstackQuery : []),
+  cliToolOverrides,
   eslintConfigPrettier,
 ];
