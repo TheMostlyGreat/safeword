@@ -30,6 +30,13 @@ module_name_repetitions = "allow"
 unsafe_code = "deny"
 `;
 
+/**
+ * Regex to extract package name from Cargo.toml.
+ * Matches: [package] ... name = "package-name"
+ * Captures the package name in group 1.
+ */
+const CARGO_PACKAGE_NAME_REGEX = /\[package\][^[]*name\s*=\s*"([^"]+)"/;
+
 const SAFEWORD_WORKSPACE_LINTS = `[workspace.lints.clippy]
 # Enable pedantic for stricter linting (priority -1 allows individual overrides)
 pedantic = { level = "warn", priority = -1 }
@@ -74,8 +81,7 @@ export function detectRustPackage(filePath: string, cwd: string): string | undef
 
       // Check if this Cargo.toml has a [package] section
       if (content.includes('[package]')) {
-        // Extract package name
-        const nameMatch = /\[package\][^[]*name\s*=\s*"([^"]+)"/.exec(content);
+        const nameMatch = CARGO_PACKAGE_NAME_REGEX.exec(content);
         return nameMatch?.[1];
       }
     }
