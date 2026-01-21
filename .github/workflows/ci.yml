@@ -75,3 +75,9 @@ jobs:
 
       - name: Lint
         run: bun run lint
+
+      - name: Type check
+        run: bun run --cwd packages/cli typecheck
+
+      - name: Architecture check
+        run: bun run deps
