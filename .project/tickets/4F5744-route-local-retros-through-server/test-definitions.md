@@ -92,6 +92,12 @@ This file is the RED / GREEN / REFACTOR ledger for automated scenarios. Producti
 - [x] GREEN
 - [x] REFACTOR
 
+### Scenario: Legacy collector rows are never leased to the worker
+
+- [x] RED
+- [x] GREEN
+- [x] REFACTOR
+
 ### Scenario: A typed intake rejection preserves local diagnosis
 
 - [x] RED
@@ -176,6 +182,18 @@ This file is the RED / GREEN / REFACTOR ledger for automated scenarios. Producti
 - [x] GREEN
 - [x] REFACTOR
 
+### Scenario: Relay acceptance anchors one retry deadline that remains stable
+
+- [x] RED
+- [x] GREEN
+- [x] REFACTOR
+
+### Scenario: Retry deadline exhaustion produces a durable alert
+
+- [x] RED
+- [x] GREEN
+- [x] REFACTOR
+
 ## Rule: local-retro-cutover.TBU1.R6 — Routine operations do not expose findings
 
 ### Scenario: Lifecycle inspection returns metadata without payload
@@ -224,10 +242,22 @@ This file is the RED / GREEN / REFACTOR ledger for automated scenarios. Producti
 
 ## Rule: local-retro-cutover.SWM1.R1 — Real harness canaries precede global cutover
 
-### Scenario: A real harness canary proves terminal production filing
+### Scenario: A real Claude Code session proves terminal production filing
 
-- [ ] CAPTURED
-- [ ] VERIFIED
+- [x] CAPTURED
+- [x] VERIFIED
+- [ ] LINKED IN READINESS MANIFEST
+
+### Scenario: A real Codex session proves terminal production filing
+
+- [x] CAPTURED
+- [x] VERIFIED
+- [ ] LINKED IN READINESS MANIFEST
+
+### Scenario: A real Cursor session proves terminal production filing
+
+- [x] CAPTURED
+- [x] VERIFIED
 - [ ] LINKED IN READINESS MANIFEST
 
 ## Rule: local-retro-cutover.SWM1.R2 — Readiness proves truthful runtime provenance
@@ -293,6 +323,12 @@ This file is the RED / GREEN / REFACTOR ledger for automated scenarios. Producti
 - [ ] REFACTOR
 
 ### Scenario: Missing harness evidence keeps the global cutover disabled
+
+- [ ] RED
+- [ ] GREEN
+- [ ] REFACTOR
+
+### Scenario: Socket presence without a real harness session cannot satisfy readiness
 
 - [ ] RED
 - [ ] GREEN
